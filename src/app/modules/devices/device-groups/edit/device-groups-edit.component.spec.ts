@@ -38,7 +38,6 @@ import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../me
 import { AspectsPermSearchModel } from '../../../metadata/aspects/shared/aspects-perm-search.model';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
-import {FlexLayoutModule} from '@ngbracket/ngx-layout';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
@@ -526,8 +525,7 @@ describe('DeviceGroupsEditComponent', () => {
         MatChipsModule,
         MatCardModule,
         MatTooltipModule,
-        CommonModule,
-        FlexLayoutModule],
+        CommonModule],
     providers: [
         {
             provide: ActivatedRoute,

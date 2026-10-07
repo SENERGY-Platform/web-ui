@@ -158,12 +158,11 @@
                         </mat-form-field>
                       </td>
                       <td colspan="2" formGroupName="elementDetails">
-                        <mat-radio-group formControlName="elementType" fxLayout="row">
-                          <mat-radio-button [value]="elementTypes.DEVICE" fxFlex>Device</mat-radio-button>
-                          <mat-radio-button [value]="elementTypes.PIPELINE"
-                          fxFlex>Pipeline</mat-radio-button>
-                          <mat-radio-button [value]="elementTypes.IMPORT" fxFlex>Import</mat-radio-button>
-                          <mat-radio-button [value]="elementTypes.DEVICE_GROUP" fxFlex>Device
+                        <mat-radio-group formControlName="elementType" class="ly-row">
+                          <mat-radio-button [value]="elementTypes.DEVICE" class="ly-flex">Device</mat-radio-button>
+                          <mat-radio-button [value]="elementTypes.PIPELINE" class="ly-flex">Pipeline</mat-radio-button>
+                          <mat-radio-button [value]="elementTypes.IMPORT" class="ly-flex">Import</mat-radio-button>
+                          <mat-radio-button [value]="elementTypes.DEVICE_GROUP" class="ly-flex">Device
                           Group</mat-radio-button>
                         </mat-radio-group>
                       </td>
@@ -479,7 +478,7 @@
 </mat-dialog-content>
 
 @if (ready && !saving) {
-  <mat-dialog-actions fxLayoutAlign="end center">
+  <mat-dialog-actions class="ly-row ly-align-end-center">
     @if (!formGroup.valid) {
       <span class="color-warn actions-warn">Widget not configured correctly</span>
     }

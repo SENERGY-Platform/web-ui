@@ -37,7 +37,7 @@
     <h4></h4>
     <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeClone"
       formGroupName="clone">
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>New Name</mat-label>
         <input matInput formControlName="name"
           [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeClone">
@@ -46,7 +46,7 @@
     </div>
     <div [hidden]="form.get('mode')?.value !== DeviceInstancesReplaceDialogComponent.modeExisting"
       formGroupName="existing">
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Device Type</mat-label>
         <mtx-select
           [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
@@ -54,7 +54,7 @@
         formControlName="deviceType"></mtx-select>
         <mat-error senergyError label="Device Type"></mat-error>
       </mat-form-field>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Device</mat-label>
         <mtx-select
           [required]="form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting"
@@ -69,7 +69,7 @@
     </div>
   </form>
 </mat-dialog-content>
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

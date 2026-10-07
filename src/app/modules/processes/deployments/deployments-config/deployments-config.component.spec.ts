@@ -32,7 +32,6 @@ import { DeploymentsService } from '../shared/deployments.service';
 import { of } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MatInputModule } from '@angular/material/input';
 import { ProcessesModule } from '../../processes.module';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
@@ -65,7 +64,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 DevicesModule,
                 MatFormFieldModule,
                 ReactiveFormsModule,
-                FlexLayoutModule,
                 MatInputModule,
                 NoopAnimationsModule,
                 ProcessesModule],

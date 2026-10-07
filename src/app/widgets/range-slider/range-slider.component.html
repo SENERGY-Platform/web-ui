@@ -19,8 +19,7 @@
   <mat-card-content class="content-size drag-handler">
 
     @if (widget.properties.selectedMinValue === undefined) {
-      <div fxFill fxLayout="column"
-        fxLayoutAlign="center center">
+      <div class="ly-fill ly-column ly-align-center-center">
         <div>Please configure widget!</div>
       </div>
     }
@@ -35,7 +34,7 @@
     }
 
     @if (this.widget.properties.selectedMinValue !== undefined) {
-      <div>
+      <div class="ly-row">
         <mat-slider showTickMarks [min]="widget.properties.selectedMinValue || 0"
           [max]="widget.properties.selectedMaxValue || 100" step="1" #ngSlider color="accent">
           <input [ngModel]="this.widget.properties.rangeSliderValue2" matSliderThumb
@@ -43,7 +42,7 @@
             #ngSliderThumb="matSliderThumb"
             (input)="sliderRange2({source: ngSliderThumb, parent: ngSlider, value: ngSliderThumb.value})" />
         </mat-slider>
-        <div fxFlex class="drag-handler"></div>
+        <div class="drag-handler ly-flex"></div>
       </div>
     }
 

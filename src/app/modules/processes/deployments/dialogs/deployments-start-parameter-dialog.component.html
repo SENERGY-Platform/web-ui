@@ -21,7 +21,7 @@
     <mat-error>{{err}}</mat-error>
   }
   @for (recipient of parameter | keyvalue; track recipient) {
-    <mat-form-field fxFill color="accent" appearance="outline">
+    <mat-form-field class="ly-fill" color="accent" appearance="outline">
       <mat-label>{{recipient.key}}: {{recipient.value.type}}</mat-label>
       @if (recipient.value.type === 'String') {
         <input type="text" matInput [(ngModel)]="recipient.value.value">
@@ -41,7 +41,7 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button [disabled]="starting" mat-raised-button color="accent" (click)="start()">Start</button>
 </mat-dialog-actions>

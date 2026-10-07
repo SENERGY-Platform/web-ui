@@ -16,7 +16,6 @@
 
 import { NgModule } from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { CommonModule } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { DeviceTypesOverviewComponent } from './device-types-overview/device-types-overview.component';
@@ -90,7 +89,6 @@ const deviceClasses: Route = {
     imports: [
         MatGridListModule,
         MatCardModule,
-        FlexLayoutModule,
         MatIconModule,
         MatButtonModule,
         CommonModule,

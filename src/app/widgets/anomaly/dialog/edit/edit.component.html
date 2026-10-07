@@ -20,18 +20,18 @@
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
   @if (ready) {
     <div>
-      <form fxLayout="column" [formGroup]="form">
+      <form class="ly-column" [formGroup]="form">
         @if (userHasUpdateNameAuthorization) {
-          <mat-form-field color="accent" appearance="outline" fxFlex="47">
+          <mat-form-field color="accent" appearance="outline" class="ly-flex-47">
             <mat-label>Widget Name</mat-label>
             <input type="text" matInput formControlName="name" required>
             <mat-error senergyError [label]="'Widget name'"></mat-error>
           </mat-form-field>
         }
         @if (exports.length > 0 && userHasUpdatePropertiesAuthorization) {
-          <div fxLayout="column">
+          <div class="ly-column">
             <h2>Anomaly Export</h2>
-            <mat-form-field color="accent" appearance="outline" fxFlex="47">
+            <mat-form-field color="accent" appearance="outline" class="ly-flex-47">
               <mat-label>Choose Export</mat-label>
               <mat-error senergyError [label]="'Export'"></mat-error>
               <mtx-select formControlName="export" required [items]="exports" bindLabel="name"
@@ -44,7 +44,7 @@
               [showSource]="false">
             </data-source-selector>
             <h2>Type of Visualization</h2>
-            <mat-form-field color="accent" appearance="outline" fxFlex="47">
+            <mat-form-field color="accent" appearance="outline" class="ly-flex-47">
               <mat-label>Choose Visualization</mat-label>
               <mtx-select formControlName="visualizationType" appendTo=".ng-select-anchor">
                 @for (visOption of visualizationTypes; track visOption) {
@@ -86,7 +86,7 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

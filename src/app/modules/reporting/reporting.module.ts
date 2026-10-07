@@ -18,7 +18,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {Route, RouterModule} from '@angular/router';
 import {TemplatesComponent} from './templates/templates.component';
-import {FlexModule} from '@ngbracket/ngx-layout';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatIconModule} from '@angular/material/icon';
@@ -60,7 +59,6 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
     imports: [
         RouterModule.forChild([templateList, reportsList, newReport, editReport, reportFilesList]),
         CommonModule,
-        FlexModule,
         MatButtonModule,
         MatCheckboxModule,
         MatIconModule,

@@ -21,7 +21,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 
 
 
@@ -35,7 +34,6 @@ import { FlexLayoutModule } from '@ngbracket/ngx-layout';
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
-        FlexLayoutModule
     ]
 })
 export class InfoModule { }

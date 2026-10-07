@@ -15,7 +15,7 @@
   -->
 
 <mat-dialog-content>
-    <div [formGroup]="form" fxLayout="column" >
+    <div [formGroup]="form" class="ly-column" >
         <mat-form-field color="accent" appearance="outline">
             <mat-label>From</mat-label>
             <input matInput type="text" formControlName="from" required>
@@ -42,7 +42,7 @@
     </div>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="accent" type="submit" (click)="cancel()">Cancel</button>
     <button mat-raised-button color="accent" type="submit" [disabled]="!form.valid" (click)="add()" >Add</button>
 

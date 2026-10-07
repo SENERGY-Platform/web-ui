@@ -14,8 +14,8 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>
-  <span fxFlex>Notification settings</span>
+<h2 class="ly-row" mat-dialog-title>
+  <span class="ly-flex">Notification settings</span>
 </h2>
 <mat-dialog-content>
   <mat-tab-group color="accent" animationDuration="0ms">
@@ -100,8 +100,8 @@
               Publish on platform broker
             </mat-checkbox>
           </div>
-          <div fxLayout="row" fxLayoutAlign="start center" class="broker-list-header">
-            <span fxFlex>Custom brokers</span>
+          <div class="broker-list-header ly-row ly-align-start-center">
+            <span class="ly-flex">Custom brokers</span>
             <button mat-icon-button color="accent" matTooltip="Add custom broker" (click)="addBroker()">
               <mat-icon>add</mat-icon>
             </button>
@@ -168,22 +168,22 @@
       @if (mode === modes.BROKER_EDIT) {
         <div>
           <form [formGroup]="brokerEditGroup">
-            <mat-form-field color="accent" appearance="outline" fxFill>
+            <mat-form-field color="accent" appearance="outline" class="ly-fill">
               <mat-label>Address</mat-label>
               <input matInput formControlName="address" placeholder="Host:Port" required>
               <mat-error senergyError label="Address"></mat-error>
             </mat-form-field>
-            <mat-form-field color="accent" appearance="outline" fxFill>
+            <mat-form-field color="accent" appearance="outline" class="ly-fill">
               <mat-label>Topic</mat-label>
               <input matInput formControlName="topic">
               <mat-error senergyError label="Topic"></mat-error>
             </mat-form-field>
-            <mat-form-field color="accent" appearance="outline" fxFill>
+            <mat-form-field color="accent" appearance="outline" class="ly-fill">
               <mat-label>User</mat-label>
               <input matInput formControlName="user">
               <mat-error senergyError label="User"></mat-error>
             </mat-form-field>
-            <mat-form-field color="accent" appearance="outline" fxFill>
+            <mat-form-field color="accent" appearance="outline" class="ly-fill">
               <mat-label>Password</mat-label>
               <input matInput type="password" formControlName="password">
               <mat-error senergyError label="Password"></mat-error>
@@ -209,8 +209,8 @@
   </mat-tab-group>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="start center">
-  <span class="save-state" fxFlex>
+<mat-dialog-actions class="ly-row ly-align-start-center">
+  <span class="save-state ly-flex">
     @switch (saveState) {
       @case ('saving') {
         <span class="save-state-saving">

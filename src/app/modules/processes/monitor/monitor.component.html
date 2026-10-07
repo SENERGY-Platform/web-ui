@@ -18,8 +18,8 @@
     (selectedIndexChange)="setTabIndex($event)" (animationDone)="animationDone()" [(selectedIndex)]="activeIndex">
     <mat-tab label="Running">
       <div class="layout-margin">
-        <div fxLayout="row" class="search-button-container">
-          <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
+        <div class="search-button-container ly-row">
+          <senergy-searchbar class="ly-flex" [disable]="selectedDeployment !== null"></senergy-searchbar>
           <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment"
             matTooltip="Deployment Environment" color="accent">
             <mat-icon>device_hub</mat-icon>
@@ -110,8 +110,8 @@
                 </ng-container>
                 <ng-container matColumnDef="header-delete-all">
                   <th mat-header-cell *matHeaderCellDef colspan="8">
-                    <div fxLayout="row">
-                      <div fxLayoutAlign="center center">You have
+                    <div class="ly-row">
+                      <div class="ly-row ly-align-center-center">You have
                         selected {{selectionRunning.selected.length}} items
                       </div>
                       <button matTooltip="Stop" mat-icon-button color="accent"
@@ -139,8 +139,8 @@
     </mat-tab>
     <mat-tab label="Finished">
       <div class="layout-margin">
-        <div fxLayout="row" class="search-button-container">
-          <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
+        <div class="search-button-container ly-row">
+          <senergy-searchbar class="ly-flex" [disable]="selectedDeployment !== null"></senergy-searchbar>
           <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment"
             matTooltip="Deployment Environment" color="accent">
             <mat-icon>device_hub</mat-icon>
@@ -262,8 +262,8 @@
 
                 <ng-container matColumnDef="header-delete-all">
                   <th mat-header-cell *matHeaderCellDef colspan="8">
-                    <div fxLayout="row">
-                      <div fxLayoutAlign="center center">You have
+                    <div class="ly-row">
+                      <div class="ly-row ly-align-center-center">You have
                         selected {{selection.selected.length}} items
                       </div>
                       <button matTooltip="Delete" mat-icon-button color="accent"

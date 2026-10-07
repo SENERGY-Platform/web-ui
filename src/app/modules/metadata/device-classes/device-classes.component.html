@@ -84,8 +84,8 @@
             </ng-container>
             <ng-container matColumnDef="header-delete-all">
               <th mat-header-cell *matHeaderCellDef colspan="10">
-                <div fxLayout="row">
-                  <div fxLayoutAlign="center center">You have
+                <div class="ly-row">
+                  <div class="ly-row ly-align-center-center">You have
                     selected {{selection.selected.length}} items
                   </div>
                   <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">

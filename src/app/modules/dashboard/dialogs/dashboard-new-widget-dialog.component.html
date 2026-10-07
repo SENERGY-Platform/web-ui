@@ -22,8 +22,8 @@
       <mtx-select #select (change)="activateCategory()" [(ngModel)]="selectedType" name="type"
         appendTo=".ng-select-anchor">
         @for (type of types; track type) {
-          <mtx-option [value]="type" [disabled]="type.disabled">
-            <span fxFlex>{{type.viewValue}}</span>
+          <mtx-option class="ly-row" [value]="type" [disabled]="type.disabled">
+            <span class="ly-flex">{{type.viewValue}}</span>
             @if (type.disabled && type.tooltip !== '') {
               <mat-icon matTooltip="{{type.tooltip}}"
               inline>help_outlined</mat-icon>
@@ -39,8 +39,8 @@
       <mat-label>Category</mat-label>
       <mtx-select [(ngModel)]="selectedCategory" name="category" appendTo=".ng-select-anchor">
         @for (category of categories; track category) {
-          <mtx-option [value]="category" [disabled]="category.disabled">
-            <span fxFlex>{{category.viewValue}}</span>
+          <mtx-option class="ly-row" [value]="category" [disabled]="category.disabled">
+            <span class="ly-flex">{{category.viewValue}}</span>
             @if (category.disabled && category.tooltip !== '') {
               <mat-icon matTooltip="{{category.tooltip}}"
               inline>help_outlined</mat-icon>
@@ -57,7 +57,7 @@
     </mat-form-field>
   </form>
 </mat-dialog-content>
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent"
     [disabled]="selectedType.value === '' || (categoryDisabled === false && selectedCategory === null)"

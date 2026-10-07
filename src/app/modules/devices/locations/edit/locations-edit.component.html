@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="location-edit-container" fxLayout="column">
+<div class="location-edit-container ly-column">
   <h2>Location</h2>
 
   @if (locationForm) {
@@ -41,8 +41,7 @@
     @if (deviceGroupsForm.value.length > 0) {
       <div>
         @for (item of deviceGroupsForm.value; track item) {
-          <mat-card appearance="outlined" fxLayout="row"
-            fxLayoutAlign="space-between center" class="device-card">
+          <mat-card appearance="outlined" class="device-card ly-row ly-align-between-center">
             <mat-card-title>
               <div class="device-info">
                 <div matTooltip="{{item.name}}" class="device-name">
@@ -69,8 +68,7 @@
     @if (devicesForm.value.length > 0) {
       <div>
         @for (item of devicesForm.value; track item) {
-          <mat-card appearance="outlined" fxLayout="row"
-            fxLayoutAlign="space-between center" class="device-card">
+          <mat-card appearance="outlined" class="device-card ly-row ly-align-between-center">
             <mat-card-title>
               <div class="device-info">
                 <div matTooltip="{{item.name}}" class="device-name">
@@ -92,7 +90,7 @@
     <button mat-raised-button color="accent" (click)="selectAndAddDevices()">Add Devices</button>
   </div>
 
-  <div class="controls" fxLayoutAlign="end center">
+  <div class="controls ly-row ly-align-end-center">
     <button mat-raised-button color="accent"
       [class.spinner]="isSaving"
       [disabled]="isSaving"

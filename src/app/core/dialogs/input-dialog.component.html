@@ -18,8 +18,8 @@
 
 <mat-dialog-content>
   @for (key of Object.keys(fields); track key) {
-    <div>
-      <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+    <div class="ly-row">
+      <mat-form-field class="full-width ly-flex" appearance="outline" color="accent">
         <mat-label>{{key | titlecase}}</mat-label>
         <input matInput placeholder="{{key | titlecase}}" [(ngModel)]="fields[key]" [required]="isRequired(key)">
       </mat-form-field>
@@ -27,7 +27,7 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
   <button mat-raised-button color="accent" (click)="ok()">OK</button>
 </mat-dialog-actions>

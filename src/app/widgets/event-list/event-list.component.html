@@ -19,7 +19,7 @@
   <mat-card-content class="mat-card-image content-size drag-handler">
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     @if (ready) {
-      <div fxLayout="column" fxFill>
+      <div class="ly-column ly-fill">
         <mat-list>
           @for (event of events; track event) {
             <mat-list-item>

@@ -15,7 +15,7 @@
   -->
 
 @if (!zoom) {
-  <mat-card-actions>
+  <mat-card-actions class="ly-row">
     @for (icon of optionCustomIcon; track icon; let i = $index) {
       <div>
         <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]" [matTooltip]="optionCustomTooltip[i]">
@@ -30,7 +30,7 @@
         </button>
       </div>
     }
-    <div fxFlex class="drag-handler"></div>
+    <div class="drag-handler ly-flex"></div>
     <div>
       <button mat-icon-button color="accent" (click)="refresh()" matTooltip="Refresh" [disabled]="refreshing">
         @if (!refreshing) {

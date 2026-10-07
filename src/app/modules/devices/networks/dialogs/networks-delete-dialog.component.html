@@ -63,9 +63,9 @@
 </mat-dialog-content>
 
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close(false)">Abort</button>
-  <span fxFlex class="button-spacer"></span>
+  <span class="button-spacer ly-flex"></span>
   <button mat-raised-button color="accent" (click)="save()" [disabled]="!this.ready">
     Delete Hub{{data.devices.length > 0 ? ' and selected Devices' : ''}}
   </button>

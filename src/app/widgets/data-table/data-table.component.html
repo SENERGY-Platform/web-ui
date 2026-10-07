@@ -18,13 +18,13 @@
   <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
   <mat-card-content class="drag-handler">
     @if (!configured) {
-      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+      <div class="ly-fill ly-column ly-align-center-center">
         <div>Please configure widget!</div>
       </div>
     }
     <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
     @if (configured && dataReady && items.length > 0) {
-      <div fxLayout="column" fxFill>
+      <div class="ly-column ly-fill">
         <table mat-table [matSortActive]="matSortActive" [matSortDirection]="matSortDirection" matSortDisableClear
           [dataSource]="items" matSort (matSortChange)="matSortChange($event)">
           <ng-container matColumnDef="name">

@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 <div class="releases-container layout-margin">
-  <div fxLayout="column">
+  <div class="ly-column">
     <div class="search-button-container">
       <senergy-searchbar></senergy-searchbar>
       @if (this.latest) {
@@ -46,14 +46,14 @@
     <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
       [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>
       @if (animationDone) {
-        <div fxLayout="column" [formGroup]="formGroup">
+        <div class="ly-column" [formGroup]="formGroup">
           @if (repoItems.length > 0) {
             <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
               formArrayName="repoItems">
               @for (item of repoItems.controls; track item; let i = $index) {
                 <mat-grid-tile class="mat-elevation-z1"
                   [formGroupName]="i">
-                  <div fxFill>
+                  <div class="ly-fill">
                     @if (item.value.metadataWarning) {
                       <mat-icon
                         matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
@@ -64,14 +64,14 @@
                     <img class="widget-image" [src]="item.value.image">
                   </div>
                   <mat-grid-tile-footer>
-                    <div fxLayout="column" fxFill>
+                    <div class="ly-column ly-fill">
                       <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
                         {{item.value.name}}
                       </div>
                       <div class="truncate footer-item-subtitle" matTooltip="{{item.value.description}}">
                         {{item.value.description}}
                       </div>
-                      <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                      <div class="footer-buttons ly-row ly-align-center-center">
                         <div class="footer-meta">
                           @if (item.value.shared) {
                             <mat-icon matTooltip="Release is shared"
@@ -88,7 +88,7 @@
                             </mat-icon>
                           }
                         </div>
-                        <div fxFlex></div>
+                        <div class="ly-flex"></div>
                         <button mat-icon-button matTooltip="Launch a new instance of this release"
                           color="accent" (click)="launchRelease(item.value)"
                           [disabled]="item.value.permissions.x === false">

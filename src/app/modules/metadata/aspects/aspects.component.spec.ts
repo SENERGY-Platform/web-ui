@@ -25,7 +25,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
 import { MatDialog } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
@@ -110,7 +109,6 @@ describe('AspectsComponent', () => {
                 MatTooltipModule,
                 DragDropModule,
                 FormsModule,
-                FlexLayoutModule,
                 MtxSelectModule,
             ],
             declarations: [AspectsComponent],

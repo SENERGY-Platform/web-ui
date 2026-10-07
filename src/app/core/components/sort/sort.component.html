@@ -21,7 +21,7 @@
   <mat-menu #menu="matMenu" [overlapTrigger]="false">
     @for (item of sortAttributes; track item; let i = $index) {
       <button mat-menu-item (click)="sendMessage(item, i) ">
-        <div fxLayout="row" fxLayoutAlign="start center">
+        <div class="ly-row ly-align-start-center">
           <div [ngClass]="{'color-accent': i === selected}">{{item.label}}</div>
           @if (item.order === 'asc' && i === selected) {
             <mat-icon [ngClass]="{'color-accent': i === selected}">

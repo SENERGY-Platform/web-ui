@@ -42,9 +42,11 @@
     margin: 8px 8px 8px 8px;
 }
 
-.selectables-large {
-    height: 100%;
-    overflow: auto;
+@media screen and (min-width: 600px) {
+    .selectables {
+        height: 100%;
+        overflow: auto;
+    }
 }
 
 .selectable-devices {
@@ -61,9 +63,11 @@
     margin: 8px 8px 8px 8px;
 }
 
-.device-group-state-large {
-    height: 100%;
-    overflow-y: auto;
+@media screen and (min-width: 600px) {
+    .device-group-state {
+        height: 100%;
+        overflow-y: auto;
+    }
 }
 
 .selected-devices-container {

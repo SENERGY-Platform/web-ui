@@ -15,7 +15,7 @@
   -->
 
 <div class="container layout-margin">
-  <div class="header-actions" fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+  <div class="header-actions ly-row ly-align-end-center ly-gap-8">
     <input hidden type="file" accept=".json" #importInput (change)="importEnvironment($event)">
     @if (userIsAdmin) {
       <mat-slide-toggle [checked]="showAllEnvironments" (change)="toggleAllEnvironments($event.checked)">

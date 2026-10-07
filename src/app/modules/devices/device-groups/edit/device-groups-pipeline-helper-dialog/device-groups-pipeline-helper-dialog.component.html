@@ -66,9 +66,9 @@
 </mat-dialog-content>
 
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="primary" (click)="close()">Don't update pipelines</button>
-    <span fxFlex></span>
+    <span class="ly-flex"></span>
     <span  [matTooltip]="pipelineSelection.selected.length > 1 ? 'You can select a maximum of 40 pipelines' : ''">
         <button mat-raised-button color="accent" (click)="save()"
                 [disabled]="pipelineSelection.selected.length > 39 || pipelineSelection.selected.length === 0">

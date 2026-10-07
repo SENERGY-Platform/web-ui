@@ -15,7 +15,7 @@
   -->
 
 <div class="process-designer-container">
-    <div fxLayout="column" fxFill>
+    <div class="ly-column ly-fill">
         <div class="button-header background-color-accent">
             <input hidden type="file" #uploader (change)="importBPMN($event)" [accept]="'.bpmn'"/>
             <button mat-icon-button matTooltip="Upload BPMN" (click)="uploader.click()">
@@ -25,8 +25,8 @@
                 <mat-icon>save</mat-icon>
             </button>
         </div>
-        <div fxLayout="row" fxFlex [fxShow]="ready">
-            <div class="canvas" id="js-canvas" fxFlex></div>
+        <div class="ly-row ly-flex" [class.ly-hidden]="!(ready)">
+            <div class="canvas ly-flex" id="js-canvas"></div>
             <div id="js-properties-panel"></div>
         </div>
     </div>

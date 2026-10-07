@@ -16,32 +16,32 @@
 <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
 @if (ready) {
-  <div class="container" fxLayout="column">
+  <div class="container ly-column">
     <form [formGroup]="form">
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-form-field color="accent" appearance="outline" class="ly-fill">
           <mat-label>Name</mat-label>
           <input matInput formControlName="name" required>
           <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-form-field color="accent" appearance="outline" class="ly-fill">
           <mat-label>Description</mat-label>
           <input matInput formControlName="description">
           <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
       </div>
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-form-field color="accent" appearance="outline" class="ly-fill">
           <mat-label>Image</mat-label>
           <input matInput formControlName="image" required>
           <mat-error senergyError label="Image"></mat-error>
         </mat-form-field>
       </div>
       <mat-divider></mat-divider>
-      <div>
-        <h4 fxFlex>Configs</h4>
+      <div class="ly-row">
+        <h4 class="ly-flex">Configs</h4>
         @if (!detailsMode) {
           <button mat-icon-button color="accent" (click)="addConfig(undefined)">
             <mat-icon>add</mat-icon>
@@ -52,21 +52,21 @@
         @for (conf of getConfigsFormArrayGroups(); track conf; let index = $index) {
           <div [formGroup]="conf">
             <mat-divider></mat-divider>
-            <div fxLayout="row" fxLayoutGap="8px">
-              <mat-form-field color="accent" appearance="outline" fxFlex="30">
+            <div class="ly-row ly-gap-8">
+              <mat-form-field color="accent" appearance="outline" class="ly-flex-30">
                 <mat-label>Name</mat-label>
                 <input matInput formControlName="name" required>
                 <mat-error senergyError label="Name"></mat-error>
               </mat-form-field>
-              <mat-form-field color="accent" appearance="outline" fxFlex>
+              <mat-form-field color="accent" appearance="outline" class="ly-flex">
                 <mat-label>Description</mat-label>
                 <input matInput formControlName="description">
                 <mat-error senergyError label="Description"></mat-error>
               </mat-form-field>
               <span class="spacer40"></span>
             </div>
-            <div fxLayout="row" fxLayoutGap="8px">
-              <mat-form-field color="accent" appearance="outline" fxFlex="30">
+            <div class="ly-row ly-gap-8">
+              <mat-form-field color="accent" appearance="outline" class="ly-flex-30">
                 <mat-label>Type</mat-label>
                 <mtx-select formControlName="type" required appendTo=".ng-select-anchor">
                   @for (type of types; track type) {
@@ -75,7 +75,7 @@
                 </mtx-select>
                 <mat-error senergyError label="Type"></mat-error>
               </mat-form-field>
-              <mat-form-field color="accent" appearance="outline" fxFlex>
+              <mat-form-field color="accent" appearance="outline" class="ly-flex">
                 <mat-label>Default Value</mat-label>
                 <input matInput formControlName="default_value">
                 <mat-error senergyError label="Default Value"></mat-error>
@@ -92,15 +92,15 @@
       </div>
       <mat-divider></mat-divider>
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-form-field color="accent" appearance="outline" class="ly-fill">
           <mat-label>Time Aspect</mat-label>
           <mtx-select [items]="aspects" bindValue="id" bindLabel="name" [formControl]="timeAspect"
           appendTo=".ng-select-anchor"></mtx-select>
           <mat-error senergyError label="Time Aspect"></mat-error>
         </mat-form-field>
       </div>
-      <div>
-        <h4 fxFlex>Output</h4>
+      <div class="ly-row">
+        <h4 class="ly-flex">Output</h4>
         @if (!detailsMode) {
           <button mat-icon-button color="accent" (click)="addOutput()">
             <mat-icon>add</mat-icon>
@@ -109,9 +109,9 @@
       </div>
       <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree mat-elevation-z1">
         <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-          <li class="mat-tree-node" fxLayout="row">
+          <li class="mat-tree-node ly-row">
             <button mat-icon-button disabled></button>
-            <span fxFlex>{{node.name}}</span>
+            <span class="ly-flex">{{node.name}}</span>
             @if (!detailsMode) {
               <span>
                 <button mat-icon-button (click)="deleteContentVariable(node)" color="warn">
@@ -137,13 +137,13 @@
         </mat-tree-node>
         <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
           <li>
-            <div class="mat-tree-node" fxLayout="row">
+            <div class="mat-tree-node ly-row">
               <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
                 <mat-icon class="mat-icon-rtl-mirror">
                   {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                 </mat-icon>
               </button>
-              <span fxFlex>{{node.name}}</span>
+              <span class="ly-flex">{{node.name}}</span>
               @if (!detailsMode) {
                 <span>
                   <button mat-icon-button (click)="deleteContentVariable(node)" color="warn">
@@ -180,18 +180,18 @@
         </mat-checkbox>
       </div>
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-form-field color="accent" appearance="outline" class="ly-fill">
           <mat-label>Cost</mat-label>
           <input matInput type="number" formControlName="cost" required>
           <mat-error senergyError label="Cost"></mat-error>
         </mat-form-field>
       </div>
     </form>
-    <div fxLayout="row" style="margin-top: 30px">
+    <div class="ly-row" style="margin-top: 30px">
       <button mat-raised-button color="primary" (click)="navigateToList()">
         Back
       </button>
-      <span fxFlex></span>
+      <span class="ly-flex"></span>
       @if (!detailsMode) {
         <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">
           Save

@@ -18,14 +18,14 @@
   <senergy-widget-header [widget]="widget"></senergy-widget-header>
   <mat-card-content class="content-size drag-handler">
     @if (!configured) {
-      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+      <div class="ly-fill ly-column ly-align-center-center">
         <div>Widget not configured correctly!</div>
         <div>Check if exports, columns and types are set.</div>
       </div>
     }
     <senergy-widget-spinner [show]="configured && !dataReady"></senergy-widget-spinner>
     @if (configured && dataReady) {
-      <div class="table-container" fxLayout="column" fxFill>
+      <div class="table-container ly-column ly-fill">
         <table mat-table [dataSource]="items" matSort>
           <ng-container matColumnDef="name">
             <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>

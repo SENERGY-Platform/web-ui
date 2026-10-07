@@ -18,8 +18,8 @@
 
 
 <div class="container">
-  <span fxLayout="row" class="search-button-container">
-    <span fxFlex></span>
+  <span class="search-button-container ly-row">
+    <span class="ly-flex"></span>
     <button mat-icon-button (click)="reload()" color="accent" class="refresh">
       <mat-icon>refresh</mat-icon>
     </button>
@@ -27,7 +27,7 @@
   <senergy-spinner [show]="!dataReady"></senergy-spinner>
 
   @if (dataReady) {
-    <div class="mat-elevation-z1" fxLayout="column"
+    <div class="mat-elevation-z1 ly-column"
       infiniteScroll
       [infiniteScrollDistance]="1"
       [infiniteScrollThrottle]="50"

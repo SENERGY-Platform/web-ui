@@ -19,7 +19,7 @@
 <mat-dialog-content>
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
   @if (ready) {
-    <form [formGroup]="form" fxLayout="column">
+    <form [formGroup]="form" class="ly-column">
       @if (userHasUpdateNameAuthorization) {
         <mat-form-field color="accent" appearance="outline">
           <mat-label>Widget Name</mat-label>
@@ -28,7 +28,7 @@
         </mat-form-field>
       }
       @if (userHasUpdatePropertiesAuthorization) {
-        <div fxLayout="column">
+        <div class="ly-column">
           <mat-form-field color="accent" appearance="outline">
             <mat-label>Device/group</mat-label>
             <mtx-select ngDefaultControl formControlName="selectable" required appendTo=".ng-select-anchor">
@@ -56,7 +56,7 @@
 </mat-dialog-content>
 
 @if (ready) {
-  <mat-dialog-actions fxLayoutAlign="end center">
+  <mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
   </mat-dialog-actions>

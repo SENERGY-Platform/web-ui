@@ -19,7 +19,7 @@
   <mat-card-content>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     @if (ready && processes.length !== 0) {
-      <div fxLayout="column" fxFill>
+      <div class="ly-column ly-fill">
         <mat-list>
           @for (process of processes; track process) {
             <mat-list-item>

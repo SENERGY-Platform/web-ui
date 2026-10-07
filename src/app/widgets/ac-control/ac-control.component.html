@@ -19,15 +19,13 @@
   <mat-card-content>
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     @if (ready && widget.properties.acControl === undefined) {
-      <div fxFill fxLayout="column"
-        fxLayoutAlign="center center">
+      <div class="ly-fill ly-column ly-align-center-center">
         <div>Please configure widget!</div>
       </div>
     }
     @if (ready && widget.properties.acControl !== undefined) {
-      <div fxLayout="column" fxFill class="container"
-        fxLayoutAlign="space-evenly">
-        <div fxLayout="row" fxLayoutAlign="center center">
+      <div class="container ly-column ly-fill ly-align-evenly-stretch">
+        <div class="ly-row ly-align-center-center">
           @if (widget.properties.acControl?.getCleaningRequired?.value === true) {
             <mat-icon color="warn"
               matTooltip="Cleaning Required!">warning
@@ -60,7 +58,7 @@
             </div>
           }
         </div>
-        <div fxLayout="row" fxLayoutAlign="space-between">
+        <div class="ly-row ly-align-between-stretch">
           @if ($safeNavigationMigration(widget.properties.acControl?.getOnOff) !== undefined) {
             <button mat-icon-button color="accent"
               (click)="togglePower()">
@@ -120,8 +118,7 @@
           }
         </div>
         @if ($safeNavigationMigration(widget.properties.acControl?.getFanSpeedLevel) !== undefined && $safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevel) !== undefined) {
-          <div
-            fxLayout="row" fxLayoutAlign="space-between center">
+          <div class="ly-row ly-align-between-center">
             <mat-icon inline>air</mat-icon>
             <mat-slider [min]="0" [max]=100 [step]="1" color="accent" discrete>
               <input matSliderThumb [value]="widget.properties.acControl?.getFanSpeedLevel?.value || 0"
@@ -131,8 +128,7 @@
           </div>
         }
         @if ($safeNavigationMigration(widget.properties.acControl?.getFanSpeedLevelAutomatic) !== undefined && $safeNavigationMigration(widget.properties.acControl?.setFanSpeedLevelAutomatic) !== undefined) {
-          <div
-            fxLayout="row" fxLayoutAlign="space-between center">
+          <div class="ly-row ly-align-between-center">
             <mat-icon inline>air</mat-icon>
             @if (widget.properties.acControl?.getFanSpeedLevelAutomatic?.value !== 'AUTO') {
               <button
@@ -181,8 +177,7 @@
           </div>
         }
         @if ($safeNavigationMigration(widget.properties.acControl?.getTargetTemperature) !== undefined && $safeNavigationMigration(widget.properties.acControl?.setTargetTemperature) !== undefined) {
-          <div
-            fxLayout="row" fxLayoutAlign="space-between center">
+          <div class="ly-row ly-align-between-center">
             <mat-icon inline>device_thermostat</mat-icon>
             <mat-slider [min]="widget.properties.acControl?.minTarget || 15"
               [max]="widget.properties.acControl?.maxTarget || 30"

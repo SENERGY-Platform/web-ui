@@ -17,7 +17,7 @@
 <mat-card appearance="outlined">
   <senergy-widget-header [refreshing]="refreshing" [widget]="widget" [zoom]="zoom"></senergy-widget-header>
   <mat-card-content class="drag-handler">
-    <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
+    <div id="{{widget.id}}" class="ly-fill ly-row ly-align-center-center">
       <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
       @if (ready && chart !== undefined) {
         <div class="framed-chart" [style.width.px]="chart.frame.width" [style.height.px]="chart.frame.height">

@@ -18,7 +18,7 @@
 
 @if (ready) {
   <mat-dialog-content >
-    <form class="form" fxLayout="column">
+    <form class="form ly-column">
       <mat-form-field class="full-width" appearance="outline" color="accent">
         <mat-label>ID</mat-label>
         <input matInput [formControl]="idFormControl">
@@ -29,7 +29,7 @@
         <input matInput [formControl]="nameFormControl" required>
         <mat-error senergyError label="Name"></mat-error>
       </mat-form-field>
-      <mat-form-field fxFlex color="accent" appearance="outline">
+      <mat-form-field class="ly-flex" color="accent" appearance="outline">
         <mat-label>Characteristics</mat-label>
         <mtx-select [items]="characteristics" bindLabel="name" [formControl]="characteristicsControl" multiple
           [compareWith]="compareIds" appendTo=".ng-select-anchor">
@@ -137,7 +137,7 @@
 }
 
 @if (!disabled) {
-  <mat-dialog-actions fxLayoutAlign="end center">
+  <mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="save()"
     [disabled]="nameFormControl.invalid || baseCharacteristicControl.invalid">Save</button>
@@ -145,7 +145,7 @@
 }
 
 @if (disabled) {
-  <mat-dialog-actions fxLayoutAlign="end center">
+  <mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="primary" (click)="close()">Close</button>
   </mat-dialog-actions>
 }

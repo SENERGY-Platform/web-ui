@@ -18,7 +18,6 @@
 
 import { CommonModule } from '@angular/common';
 import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -68,7 +67,6 @@ const routes: Routes = [
         MatFormFieldModule,
         MatInputModule,
         MatProgressSpinnerModule,
-        FlexLayoutModule,
         MatIconModule,
     ],
     declarations: [

@@ -17,7 +17,7 @@
 <h2 mat-dialog-title>Edit Device Downtime Gateway</h2>
 
 <mat-dialog-content>
-  <div fxLayout="column">
+  <div class="ly-column">
     @if (userHasUpdateNameAuthorization) {
       <mat-form-field color="accent" appearance="outline">
         <mat-label>Widget Name</mat-label>
@@ -33,7 +33,7 @@
   </div>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="save()">Save</button>
 </mat-dialog-actions>

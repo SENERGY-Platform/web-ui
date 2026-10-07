@@ -16,8 +16,8 @@
 
 <div class="main-panel">
   <div class="main-panel">
-    <div fxLayout="column" class="layout-margin">
-      <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
+    <div class="layout-margin ly-column">
+      <div class="ly-row ly-align-start-center" style="margin-bottom:8px;">
         <button mat-raised-button color="accent" (click)="back()">back</button>
       </div>
       <mat-card appearance="outlined" style="margin-bottom:10px;">
@@ -31,7 +31,7 @@
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
-        <div fxLayout="column">
+        <div class="ly-column">
           {{pipe.description}}
         </div>
       </mat-card-content>
@@ -39,7 +39,7 @@
     <mat-card appearance="outlined" class="config">
       <mat-card-content>
         @for (operator of pipe.operators; track operator) {
-          <div fxLayout="column">
+          <div class="ly-column">
             <h3>
               <mat-icon class="v-align-middle">poll</mat-icon>
             {{ operator.name }} - {{ operator.id }} - {{ operator.imageId }}</h3>

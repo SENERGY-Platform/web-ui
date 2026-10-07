@@ -13,9 +13,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-group-edit-container" fxLayout="column" fxLayout.gt-xs="row">
+<div class="device-group-edit-container ly-column ly-row-gt-xs">
 
-  <div fxLayout="column" fxFlex class="device-group-state" [ngClass.gt-xs]="'device-group-state-large'">
+  <div class="device-group-state ly-column ly-flex">
     <h2>Device-Group</h2>
 
     @if (deviceGroupForm) {
@@ -50,8 +50,7 @@
       @if (selectedForm.value.length > 0) {
         <div>
           @for (item of selectedForm.value; track item) {
-            <mat-card appearance="outlined" fxLayout="row"
-              fxLayoutAlign="space-between center" class="selected-device-card">
+            <mat-card appearance="outlined" class="selected-device-card ly-row ly-align-between-center">
               <mat-card-title>
                 <div class="selected-device-info">
                   <div class="selected-device-name">
@@ -80,8 +79,8 @@
         <mat-divider></mat-divider>
       </div>
       @for (attr of attributes; track attr; let i = $index) {
-        <div class="attribute">
-          <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+        <div class="attribute ly-row">
+          <mat-form-field appearance="outline" class="third-width ly-flex" color="accent">
             <mat-label>Key</mat-label>
             <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
               [disabled]="!editableAttribute(attr)" appendTo=".ng-select-anchor" [items]="knownAttributes"
@@ -89,7 +88,7 @@
             <mat-error senergyError label="Key"></mat-error>
           </mat-form-field>
           <span style="width: 2em"></span>
-          <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+          <mat-form-field appearance="outline" class="third-width ly-flex" color="accent">
             <mat-label>Value</mat-label>
             <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
               [disabled]="!editableAttribute(attr)">
@@ -103,13 +102,13 @@
       <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
     </div>
 
-    <div class="controls" fxLayoutAlign="end center">
+    <div class="controls ly-row ly-align-end-center">
       <button mat-raised-button color="accent" [class.spinner]="isSaving" [disabled]="isSaving"
         (click)="save()">Save
       </button>
     </div>
   </div>
-  <div fxLayout="column" Class="selectables" [ngClass.gt-xs]="'selectables-large'">
+  <div Class="selectables ly-column">
     <h2>Selectable-Devices</h2>
     <mat-form-field appearance="outline" class="full-width" color="accent">
       <mat-label>Search</mat-label>
@@ -125,8 +124,8 @@
     </mat-form-field>
     <div class="selectable-devices">
       @for (option of selectableForm.value; track option) {
-        <mat-card appearance="outlined" fxLayout="row" fxLayoutAlign="space-between center"
-          class="selectable-card">
+        <mat-card appearance="outlined"
+          class="selectable-card ly-row ly-align-between-center">
           <mat-card-title>
             <div class="selectable-device-info">
               <div matTooltip="{{option.device.display_name || option.device.name || option.device.id}}"

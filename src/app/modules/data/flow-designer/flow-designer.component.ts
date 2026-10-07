@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, AfterViewInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, AfterViewInit, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
 import {IOModel, OperatorModel} from '../operator-repo/shared/operator.model';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -39,6 +39,8 @@ export class FlowDesignerComponent implements AfterViewInit {
 
     operators: OperatorModel[] = [];
     ready = false;
+    // The diagram editor measures its wrapper in its own ngAfterViewInit, so the page may only be hidden after that.
+    viewInitialized = false;
     flow = {} as FlowModel;
     listHeight = 600;
 
@@ -48,7 +50,8 @@ export class FlowDesignerComponent implements AfterViewInit {
         private operatorRepoService: OperatorRepoService,
         private flowRepoService: FlowRepoService,
         public snackBar: MatSnackBar,
-        public dialog: MatDialog
+        public dialog: MatDialog,
+        private changeDetectorRef: ChangeDetectorRef
     ) {
     }
 
@@ -117,6 +120,8 @@ export class FlowDesignerComponent implements AfterViewInit {
             this.ready = true;
         });
         this.listHeight = this.diagram.paperHeight;
+        this.viewInitialized = true;
+        this.changeDetectorRef.detectChanges();
     }
 
     private addNodeToElements(cell: any, elements: any[]) {

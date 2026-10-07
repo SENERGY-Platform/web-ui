@@ -19,7 +19,6 @@ import { NgModule } from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -53,7 +52,6 @@ const designerEdit: Route = { path: 'data/designer/:id', pathMatch: 'full', comp
         MatTooltipModule,
         MatDividerModule,
         MatListModule,
-        FlexLayoutModule,
         MatButtonModule,
         MatFormFieldModule,
         MatDialogModule,

@@ -18,7 +18,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Route, RouterModule } from '@angular/router';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -120,7 +119,6 @@ const formFieldDefaults = {
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        FlexLayoutModule,
         CoreModule,
         RouterModule.forChild(ENVIRONMENTS_ROUTES),
         MatTableModule,

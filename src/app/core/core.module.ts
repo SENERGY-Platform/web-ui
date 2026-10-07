@@ -18,7 +18,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { provideAppCharts } from './charts/provide-app-charts';
 import { SidenavComponent } from './components/sidenav/sidenav.component';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { RouterModule } from '@angular/router';
 import { SearchbarComponent } from './components/searchbar/searchbar.component';
@@ -83,7 +82,6 @@ export { keycloakServiceToken };
         MatToolbarModule,
         MatMenuModule,
         MatDividerModule,
-        FlexLayoutModule,
         RouterModule,
         MatFormFieldModule,
         MatInputModule,

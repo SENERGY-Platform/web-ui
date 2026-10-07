@@ -690,14 +690,14 @@
               <mat-divider></mat-divider>
             </div>
             <div *ngFor="let inp of watcherWorkerInfo.maintenance_procedure_inputs; let i = index"
-              class="maintenanceInput">
-              <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+              class="maintenanceInput ly-row">
+              <mat-form-field appearance="outline" class="third-width ly-flex" color="accent">
                 <mat-label>Key</mat-label>
                 <input matInput [(ngModel)]="inp.key" [ngModelOptions]="{standalone: true}">
                 <mat-error senergyError label="Key"></mat-error>
               </mat-form-field>
               <span style="width: 2em"></span>
-              <mat-form-field appearance="outline" class="third-width" color="accent" fxFlex>
+              <mat-form-field appearance="outline" class="third-width ly-flex" color="accent">
                 <mat-label>Value</mat-label>
                 <input matInput [(ngModel)]="inp.value" [ngModelOptions]="{standalone: true}"
                   matTooltip="preferred as json value">
@@ -869,7 +869,7 @@
     </mat-accordion>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <span *ngIf="aspectClassCollisionHint() as hint" style="color: var(--app-status-error); margin-right: 16px">{{hint}}</span>
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="ok()" [disabled]="isInvalid()">Save</button>

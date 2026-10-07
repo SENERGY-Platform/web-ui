@@ -20,7 +20,7 @@
   <senergy-spinner [show]="!ready"></senergy-spinner>
 
   @if (ready) {
-    <div [formGroup]="form" fxLayout="column" class="filter-container">
+    <div [formGroup]="form" class="filter-container ly-column">
       @for (section of sections; track section) {
         @if (section.title) {
           <div class="section-title">{{section.title}}</div>
@@ -57,7 +57,7 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="space-between center">
+<mat-dialog-actions class="ly-row ly-align-between-center">
   <button mat-button (click)="resetAllFilters()" [disabled]="!ready || !hasActiveFilter()">Reset All</button>
   <span>
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>

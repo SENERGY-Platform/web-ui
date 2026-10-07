@@ -18,10 +18,10 @@
   <senergy-widget-header [widget]="widget"></senergy-widget-header>
   <mat-card-content class="content-size drag-handler">
     <img mat-card-image class="drag-handler" src="{{widget.properties.imgUrl}}" alt="">
-    <div>
+    <div class="ly-row">
       <mat-slide-toggle [(ngModel)]="widget.properties.active" (change)="toggle()" class="padding" mat-button
         color="accent"></mat-slide-toggle>
-      <div fxFlex class="drag-handler"></div>
+      <div class="drag-handler ly-flex"></div>
     </div>
   </mat-card-content>
 

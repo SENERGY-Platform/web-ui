@@ -125,7 +125,6 @@ import { EditVentilationWidgetComponent } from './bad-ventilation/dialog/edit/ed
 import { MatTreeModule } from '@angular/material/tree';
 import { AxisConfigComponent } from './charts/export/dialog/axis-config/axis-config.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { BaseChartDirective } from 'ng2-charts';
 import { provideAppCharts } from '../core/charts/provide-app-charts';
@@ -150,7 +149,6 @@ registerLocaleData(localeDe, 'de');
         MatDividerModule,
         MatSlideToggleModule,
         MatButtonModule,
-        FlexLayoutModule,
         MatDialogModule,
         MatFormFieldModule,
         ReactiveFormsModule,

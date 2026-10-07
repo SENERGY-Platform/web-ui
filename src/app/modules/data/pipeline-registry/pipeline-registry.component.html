@@ -15,7 +15,7 @@
   -->
 
 <div class="layout-margin">
-  <span fxLayout="row" class="search-button-container">
+  <span class="search-button-container ly-row">
     <senergy-searchbar></senergy-searchbar>
     <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
       <mat-icon>filter_alt</mat-icon>
@@ -209,8 +209,8 @@
             </ng-container>
             <ng-container matColumnDef="header-delete-all">
               <th mat-header-cell *matHeaderCellDef colspan="10">
-                <div fxLayout="row">
-                  <div fxLayoutAlign="center center">You have
+                <div class="ly-row">
+                  <div class="ly-row ly-align-center-center">You have
                     selected {{selection.selected.length}} items
                   </div>
                   <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">

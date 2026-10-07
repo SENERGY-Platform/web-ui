@@ -22,11 +22,10 @@
       <div style="height: 100%">
         @if (!inDetailView) {
           <div (click)="clicked()" matTooltip="Click to view details!"
-            [matTooltipShowDelay]="500"
-            fxLayout="column" fxLayoutAlign="space-evenly center">
+            [matTooltipShowDelay]="500" class="ly-column ly-align-evenly-center">
             @if (pros.length === 0) {
               <div style="width: 100%">
-                <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                <div class="ly-fill ly-row ly-align-center-center">
                   <button mat-icon-button class="color-accent" (click)="clicked()">
                     <mat-icon fontIcon="sentiment_very_satisfied"></mat-icon>
                   </button>
@@ -38,7 +37,7 @@
             }
             @if (pros.length > 0 && cons.length > 0) {
               <div style="width: 100%">
-                <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                <div class="ly-fill ly-row ly-align-center-center">
                   <button mat-icon-button class="color-accent" (click)="clicked()">
                     <mat-icon fontIcon="sentiment_dissatisfied"></mat-icon>
                   </button>
@@ -56,7 +55,7 @@
             }
             @if (pros.length > 0 && cons.length === 0) {
               <div style="width: 100%">
-                <div fxFlexFill fxLayout="row" fxLayoutAlign="center center">
+                <div class="ly-fill ly-row ly-align-center-center">
                   <button mat-icon-button class="color-accent" (click)="clicked()">
                     <mat-icon fontIcon="sentiment_very_dissatisfied"></mat-icon>
                   </button>
@@ -69,7 +68,7 @@
           </div>
         }
         @if (inDetailView) {
-          <div (click)="clicked()" style="height: 100%" fxLayout="column" fxFill>
+          <div (click)="clicked()" style="height: 100%" class="ly-column ly-fill">
             <mat-list style="overflow: auto; max-height: 100%">
               @if (pros.length > 0) {
                 <div mat-subheader>Reasons for opening a window</div>
@@ -89,7 +88,7 @@
               }
             </mat-list>
             @if (pros.length === 0 && cons.length === 0) {
-              <div fxFill fxLayout="row" fxLayoutAlign="center center">
+              <div class="ly-fill ly-row ly-align-center-center">
                 No reasons for or against opening a window
               </div>
             }
@@ -98,7 +97,7 @@
       </div>
     }
     @if (!isWidgetConfigured()) {
-      <div fxFill fxLayout="row" fxLayoutAlign="center center">
+      <div class="ly-fill ly-row ly-align-center-center">
         Please configure widget!
       </div>
     }

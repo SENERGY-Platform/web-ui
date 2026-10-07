@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div [formGroup]="form" fxLayout="column">
+<div [formGroup]="form" class="ly-column">
   <div class="object-header">
     <div class="object-path">{{node.path}}</div>
     <div class="object-type">{{node.data.valueType}}</div>
@@ -29,9 +29,9 @@
   }
 
   @if (inputType === 'value') {
-    <div fxLayout="column">
+    <div class="ly-column">
       @if (hasValueInput) {
-        <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-form-field class="ly-flex" color="accent" appearance="outline">
           <mat-label>{{ node.key }}</mat-label>
           <input matInput formControlName="value">
           <mat-error senergyError label="{{ node.key }}"></mat-error>
@@ -63,8 +63,8 @@
   }
 
   @if (inputType === 'devices') {
-    <div formGroupName="deviceQuery" fxLayout="column">
-      <mat-form-field fxFill color="accent" appearance="outline">
+    <div formGroupName="deviceQuery" class="ly-column">
+      <mat-form-field class="ly-fill" color="accent" appearance="outline">
         <mat-label>Last Days</mat-label>
         <mtx-select formControlName="last" placeholder="Choose or write yourself"
           [addTag]="addDeviceQueryLastValue()" [items]="deviceQueryLastValues"

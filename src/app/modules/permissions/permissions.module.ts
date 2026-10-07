@@ -19,7 +19,6 @@ import { NgModule } from '@angular/core';
 import { PermissionDialogComponent } from './dialogs/permission/permission-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -46,7 +45,6 @@ import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-m
         MatIconModule,
         MatButtonModule,
         MatInputModule,
-        FlexLayoutModule,
         CoreModule,
         MatTooltipModule,
         MatDividerModule,

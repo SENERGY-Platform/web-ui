@@ -199,8 +199,8 @@
                     </td>
                   </tr>
                 </table>
-                <div>
-                  <div fxFlex></div>
+                <div class="ly-row">
+                  <div class="ly-flex"></div>
                   <button mat-icon-button [disabled]="elementsControl.length === 1"
                     (click)="deleteElement(elementIndex)">
                     <mat-icon>delete</mat-icon>
@@ -218,7 +218,7 @@
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   @if (!formGroup.valid) {
     <span class="color-warn actions-warn">Widget not configured correctly</span>
   }

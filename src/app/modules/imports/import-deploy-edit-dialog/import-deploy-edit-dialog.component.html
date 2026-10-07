@@ -16,10 +16,10 @@
 <h2 mat-dialog-title>Deploy Import</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="form" fxLayout="column">
+  <form [formGroup]="form" class="ly-column">
     @if (editMode) {
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-form-field color="accent" appearance="outline" class="ly-fill">
           <mat-label>ID</mat-label>
           <input matInput formControlName="id">
           <mat-error senergyError label="ID"></mat-error>
@@ -28,7 +28,7 @@
     }
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Image</mat-label>
         <input matInput formControlName="image" required>
         <mat-error senergyError label="Image"></mat-error>
@@ -37,7 +37,7 @@
 
     @if (editMode) {
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill>
+        <mat-form-field color="accent" appearance="outline" class="ly-fill">
           <mat-label>Topic</mat-label>
           <input matInput formControlName="kafka_topic">
           <mat-error senergyError label="Topic"></mat-error>
@@ -46,14 +46,14 @@
     }
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Name</mat-label>
         <input matInput formControlName="name" required>
         <mat-error senergyError label="Name"></mat-error>
       </mat-form-field>
     </div>
 
-    <h4 fxFlex>Configs</h4>
+    <h4 class="ly-flex">Configs</h4>
     <table mat-table
       [dataSource]="configs" matSort>
       <ng-container matColumnDef="name">
@@ -76,8 +76,8 @@
       </ng-container>
       <ng-container matColumnDef="value">
         <th mat-header-cell *matHeaderCellDef>Value</th>
-        <td mat-cell *matCellDef="let m" [formGroup]="m">
-          <mat-form-field fxFlex class="inline" color="accent" appearance="outline">
+        <td class="ly-row" mat-cell *matCellDef="let m" [formGroup]="m">
+          <mat-form-field class="inline ly-flex" color="accent" appearance="outline">
             <mat-label>Value</mat-label>
             <input matInput required formControlName="value">
             <mat-error senergyError label="Value"></mat-error>
@@ -101,7 +101,7 @@
 </mat-dialog-content>
 
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

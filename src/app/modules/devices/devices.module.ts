@@ -16,7 +16,6 @@
 
 import { NgModule } from '@angular/core';
 import { Route, RouterModule } from '@angular/router';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { CommonModule, DatePipe } from '@angular/common';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
@@ -132,7 +131,6 @@ const locationsEdit: Route = {
     imports: [
     MatGridListModule,
     MatCardModule,
-    FlexLayoutModule,
     MatIconModule,
     MatButtonModule,
     CommonModule,

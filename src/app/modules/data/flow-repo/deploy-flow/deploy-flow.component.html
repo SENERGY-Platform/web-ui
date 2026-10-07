@@ -20,27 +20,27 @@
     </button>
   }
   @if (ready === true) {
-    <div class="layout-margin" fxLayout="column" [formGroup]="form">
+    <div class="layout-margin ly-column" [formGroup]="form">
       <mat-accordion class="example-headers-align" multi>
         <mat-expansion-panel expanded>
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <div fxLayout="row" fxLayoutAlign="none center">
+              <div class="ly-row ly-align-start-center">
                 <mat-icon>folder</mat-icon>
-                <div fxFlexOffset="5px">General</div>
+                <div class="ly-offset-5">General</div>
               </div>
             </mat-panel-title>
             <mat-panel-description>
             </mat-panel-description>
           </mat-expansion-panel-header>
           <ng-template matExpansionPanelContent>
-            <div class="panel_content" fxLayout="column">
-              <mat-form-field fxFlex color="accent" appearance="outline">
+            <div class="panel_content ly-column">
+              <mat-form-field class="ly-flex" color="accent" appearance="outline">
                 <mat-label>Name</mat-label>
                 <input matInput formControlName="name" required="true" />
                 <mat-error senergyError label="Name"></mat-error>
               </mat-form-field>
-              <mat-form-field fxFlex color="accent" appearance="outline">
+              <mat-form-field class="ly-flex" color="accent" appearance="outline">
                 <mat-label>Description</mat-label>
                 <input matInput formControlName="description">
                 <mat-error senergyError label="Description"></mat-error>
@@ -53,9 +53,9 @@
             [formGroup]="node">
             <mat-expansion-panel-header>
               <mat-panel-title>
-                <div fxLayout="row" fxLayoutAlign="none center">
+                <div class="ly-row ly-align-start-center">
                   <mat-icon>poll</mat-icon>
-                  <div fxFlexOffset="5px">{{node.get('name')?.value}}</div>
+                  <div class="ly-offset-5">{{node.get('name')?.value}}</div>
                 </div>
               </mat-panel-title>
               <mat-panel-description>
@@ -64,7 +64,7 @@
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
               @for (input of getSubElementAsGroupArray(node, 'inputs'); track input; let inputIndex = $index) {
-                <div class="panel_content" fxLayout="column"
+                <div class="panel_content ly-column"
                   [formGroup]="input">
                   <h4>{{ input.get('name')?.value }}</h4>
                   <button mat-stroked-button color="accent" class="add-pipeline-button"
@@ -72,19 +72,19 @@
                     Add pipeline as input
                   </button>
                   @for (pipeline of getSubElementAsGroupArray(input, 'pipelines'); track pipeline; let pipelineIndex = $index) {
-                    <div fxFlex fxLayout="column"
+                    <div class="ly-flex ly-column"
                       [formGroup]="pipeline">
-                      <mat-form-field fxFlex color="accent" appearance="outline">
+                      <mat-form-field class="ly-flex" color="accent" appearance="outline">
                         <mat-label>Pipeline</mat-label>
                         <mtx-select [items]="pipelines" formControlName="pipelineId" bindValue="id"
                           bindLabel="name" appendTo=".ng-select-anchor">
                         </mtx-select>
                         <mat-error senergyError label="Pipeline"></mat-error>
                       </mat-form-field>
-                      <mat-accordion class="operator-accordion">
-                        <mat-expansion-panel style="margin-bottom: 10px;" fxFlex
+                      <mat-accordion class="operator-accordion ly-row">
+                        <mat-expansion-panel style="margin-bottom: 10px;"
                           [disabled]="pipeline.get('pipelineId')?.value === ''"
-                          class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
+                          class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick ly-flex">
                           <mat-expansion-panel-header>
                             <mat-panel-title>Operator</mat-panel-title>
                             <mat-panel-description>
@@ -101,7 +101,7 @@
                           </span>
                         </mat-expansion-panel>
                       </mat-accordion>
-                      <mat-form-field fxFlex color="accent" appearance="outline">
+                      <mat-form-field class="ly-flex" color="accent" appearance="outline">
                         <mat-label>Path</mat-label>
                         <mtx-select
                           [items]="getOperatorPaths($safeNavigationMigration(pipeline.get('pipelineId')?.value), $safeNavigationMigration(pipeline.get('operatorId')?.value))"
@@ -109,7 +109,7 @@
                         </mtx-select>
                         <mat-error senergyError label="Path"></mat-error>
                       </mat-form-field>
-                      <div fxLayout="row">
+                      <div class="ly-row">
                         <span class="fill-delete"></span>
                         <button mat-icon-button color="warn" (click)="removePipeline(input, pipelineIndex)">
                           <mat-icon>delete</mat-icon>
@@ -121,14 +121,14 @@
                   <senergy-aspect-select formControlName="aspectIds" [aspects]="aspects"
                     [aspectClasses]="aspectClasses" label="Aspects">
                   </senergy-aspect-select>
-                  <mat-form-field fxFlex color="accent" appearance="outline">
+                  <mat-form-field class="ly-flex" color="accent" appearance="outline">
                     <mat-label>Function</mat-label>
                     <mtx-select [items]="getAspectFunctions($safeNavigationMigration(input.get('aspectIds')?.value))" bindLabel="name"
                       bindValue="id" formControlName="functionId" appendTo=".ng-select-anchor">
                     </mtx-select>
                     <mat-error senergyError label="Function"></mat-error>
                   </mat-form-field>
-                  <mat-form-field fxFlex color="accent" appearance="outline">
+                  <mat-form-field class="ly-flex" color="accent" appearance="outline">
                     <mat-label>Characteristics</mat-label>
                     <mtx-select [items]="getFunctionCharacteristics($safeNavigationMigration(input.get('functionId')?.value))"
                       bindLabel="name" bindValue="id" formControlName="characteristics" multiple
@@ -136,7 +136,7 @@
                     </mtx-select>
                     <mat-error senergyError label="Characteristics"></mat-error>
                   </mat-form-field>
-                  <mat-form-field fxFlex color="accent" appearance="outline">
+                  <mat-form-field class="ly-flex" color="accent" appearance="outline">
                     <mat-label>Device/group/import</mat-label>
                     <mtx-select
                       [items]="getSelectables($safeNavigationMigration(input.get('aspectIds')?.value), $safeNavigationMigration(input.get('functionId')?.value), $safeNavigationMigration(input.get('characteristics')?.value))"
@@ -146,9 +146,9 @@
                     <mat-error senergyError label="Device/group/import"></mat-error>
                   </mat-form-field>
                   @for (deviceType of getSubElementAsGroupArray(input, 'deviceTypes'); track deviceType) {
-                    <div fxFlex fxLayout="row"
+                    <div class="ly-flex ly-row"
                       [formGroup]="deviceType">
-                      <mat-form-field fxFlex color="accent" appearance="outline">
+                      <mat-form-field class="ly-flex" color="accent" appearance="outline">
                         <mat-label
                           [ngClass]="{'device-type-not-used-label': getServiceOptions(input, $safeNavigationMigration(deviceType.get('id')?.value)).length === 0}">
                           {{getServiceOptions(input, $safeNavigationMigration(deviceType.get('id')?.value)).length > 0 ? 'Service/Path:
@@ -175,9 +175,9 @@
                 </mat-checkbox>
               </section>
               @for (config of getSubElementAsGroupArray(node, 'configs'); track config) {
-                <div fxLayout="column"
+                <div class="ly-column"
                   [formGroup]="config">
-                  <mat-form-field fxFill color="accent" appearance="outline">
+                  <mat-form-field class="ly-fill" color="accent" appearance="outline">
                     <mat-label></mat-label>
                     <mat-label></mat-label>
                     <mat-label>{{ config.get('name')?.value }}</mat-label>
@@ -195,9 +195,9 @@
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>
-              <div fxLayout="row" fxLayoutAlign="none center">
+              <div class="ly-row ly-align-start-center">
                 <mat-icon>settings</mat-icon>
-                <div fxFlexOffset="5px">Global Settings</div>
+                <div class="ly-offset-5">Global Settings</div>
               </div>
             </mat-panel-title>
             <mat-panel-description>

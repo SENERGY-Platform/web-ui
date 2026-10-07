@@ -14,8 +14,8 @@
   ~ limitations under the License.
   -->
 
-<div mat-dialog-title>
-  <span fxFlex>Data</span>
+<div class="ly-row" mat-dialog-title>
+  <span class="ly-flex">Data</span>
   <button mat-icon-button color="accent" (click)="refresh()">
     <mat-icon>refresh</mat-icon>
   </button>
@@ -97,7 +97,7 @@
     @if (userCanLoadConnectionHistory) {
       <mat-expansion-panel id="connectionHistoryPanel" #connectionHistoryPanel>
         <mat-expansion-panel-header>
-          <mat-panel-title fxFlex>Connection History</mat-panel-title>
+          <mat-panel-title class="ly-flex">Connection History</mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
           @if (connectionHistory !== null) {
@@ -112,7 +112,7 @@
     @for (service of services; track service; let i = $index) {
       <mat-expansion-panel>
         <mat-expansion-panel-header>
-          <mat-panel-title fxFlex>{{service.name}}</mat-panel-title>
+          <mat-panel-title class="ly-flex">{{service.name}}</mat-panel-title>
           <mat-panel-description>
             {{service.description}}
             @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
@@ -165,11 +165,11 @@
                 <div>
                   <mat-expansion-panel>
                     <mat-expansion-panel-header>
-                      <mat-panel-title fxFlex>Download Data</mat-panel-title>
+                      <mat-panel-title class="ly-flex">Download Data</mat-panel-title>
                     </mat-expansion-panel-header>
                     <ng-template matExpansionPanelContent>
-                      <div fxLayout="column">
-                        <mat-form-field fxFlex color="accent" appearance="outline">
+                      <div class="ly-column">
+                        <mat-form-field class="ly-flex" color="accent" appearance="outline">
                           <mat-label>Data Format</mat-label>
                           <mtx-select appendTo=".ng-select-anchor" [formControl]="availabilityControl"
                             [compareWith]="compareAvailabilityValue" placeholder="Device">
@@ -180,7 +180,7 @@
                           </mtx-select>
                           <mat-error senergyError label="Data Format"></mat-error>
                         </mat-form-field>
-                        <mat-form-field appearance="outline" fxFlex color="accent" (click)="picker.open()">
+                        <mat-form-field appearance="outline" class="ly-flex" color="accent" (click)="picker.open()">
                           <mat-label>Enter a Date Range</mat-label>
                           <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker"
                             [min]="getMin(i)" [max]="getMax(i)">
@@ -225,6 +225,6 @@
   </mat-accordion>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="accent" (click)="close()">Close</button>
 </mat-dialog-actions>

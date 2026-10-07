@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 <div class="deployments-config-container">
-  <div class="layout-margin" fxLayout="column">
+  <div class="layout-margin ly-column">
     @if (ready) {
       <div>
         @if (hubList && hubList.length) {
@@ -114,8 +114,7 @@
                               <mat-error senergyError label="Service"></mat-error>
                             </mat-form-field>
                           }
-                          <mat-form-field appearance="outline" class="full-width" color="accent"
-                            [fxShow]="getPathOptions(elementIndex, 'conditional_event').length > 1">
+                          <mat-form-field appearance="outline" class="full-width" color="accent" [class.ly-hidden]="!(getPathOptions(elementIndex, 'conditional_event').length > 1)">
                             <mat-label>Path</mat-label>
                             <mtx-select required
                               (change)="setSelectedPathOptionByElementIndex('conditional_event', elementIndex, $event)"
@@ -166,8 +165,7 @@
                                   <mat-error senergyError label="Service"></mat-error>
                                 </mat-form-field>
                               }
-                              <mat-form-field appearance="outline" class="full-width" color="accent"
-                                [fxShow]="getPathOptions(elementIndex, 'task').length > 1">
+                              <mat-form-field appearance="outline" class="full-width" color="accent" [class.ly-hidden]="!(getPathOptions(elementIndex, 'task').length > 1)">
                                 <mat-label>Path</mat-label>
                                 <mtx-select required
                                   (change)="setSelectedPathOptionByElementIndex('task', elementIndex, $event)"
@@ -261,8 +259,7 @@
                                   <mat-error senergyError label="Service"></mat-error>
                                 </mat-form-field>
                               }
-                              <mat-form-field appearance="outline" class="full-width" color="accent"
-                                [fxShow]="getPathOptions(elementIndex, 'message_event').length > 1">
+                              <mat-form-field appearance="outline" class="full-width" color="accent" [class.ly-hidden]="!(getPathOptions(elementIndex, 'message_event').length > 1)">
                                 <mat-label>Path</mat-label>
                                 <mtx-select required
                                   (change)="setSelectedPathOptionByElementIndex('message_event', elementIndex, $event)"

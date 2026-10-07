@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<mat-dialog-content fxFill>
+<mat-dialog-content class="ly-fill">
   @if (ready) {
     <div>
       @if (chart !== undefined) {
@@ -31,6 +31,6 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Close</button>
 </mat-dialog-actions>

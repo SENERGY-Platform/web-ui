@@ -31,7 +31,7 @@
     <ng-container matColumnDef="read">
       <th mat-header-cell *matHeaderCellDef> Read</th>
       <td mat-cell *matCellDef="let element">
-        <mat-checkbox fxLayoutAlign="center center" (change)="setR(element, $event)" [checked]="element.read" [disabled]="!canEdit(element)"
+        <mat-checkbox class="ly-row ly-align-center-center" (change)="setR(element, $event)" [checked]="element.read" [disabled]="!canEdit(element)"
         [matTooltip]="descriptions.read"></mat-checkbox>
       </td>
     </ng-container>
@@ -39,7 +39,7 @@
     <ng-container matColumnDef="write">
       <th mat-header-cell *matHeaderCellDef> Write</th>
       <td mat-cell *matCellDef="let element">
-        <mat-checkbox fxLayoutAlign="center center"  (change)="setW(element, $event)" [checked]="element.write" [disabled]="!canEdit(element)"
+        <mat-checkbox class="ly-row ly-align-center-center"  (change)="setW(element, $event)" [checked]="element.write" [disabled]="!canEdit(element)"
         [matTooltip]="descriptions.write"></mat-checkbox>
       </td>
     </ng-container>
@@ -47,7 +47,7 @@
     <ng-container matColumnDef="execute">
       <th mat-header-cell *matHeaderCellDef> Execute</th>
       <td mat-cell *matCellDef="let element">
-        <mat-checkbox fxLayoutAlign="center center"  (change)="setX(element, $event)" [checked]="element.execute" [disabled]="!canEdit(element)"
+        <mat-checkbox class="ly-row ly-align-center-center"  (change)="setX(element, $event)" [checked]="element.execute" [disabled]="!canEdit(element)"
         [matTooltip]="descriptions.execute"></mat-checkbox>
       </td>
     </ng-container>
@@ -55,7 +55,7 @@
     <ng-container matColumnDef="administrate">
       <th mat-header-cell *matHeaderCellDef> Administrate</th>
       <td mat-cell *matCellDef="let element">
-        <mat-checkbox fxLayoutAlign="center center"  (change)="setA(element, $event)" [checked]="element.administrate"
+        <mat-checkbox class="ly-row ly-align-center-center"  (change)="setA(element, $event)" [checked]="element.administrate"
         [disabled]="!canEdit(element)" [matTooltip]="descriptions.administrate"></mat-checkbox>
       </td>
     </ng-container>

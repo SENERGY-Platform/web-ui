@@ -20,7 +20,6 @@ import { Route, RouterModule } from '@angular/router';
 import { OperatorRepoComponent } from './operator-repo/operator-repo.component';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { OperatorRepoModule } from './operator-repo/operator-repo.module';
 import { FormsModule } from '@angular/forms';
 import { FlowRepoComponent } from './flow-repo/flow-repo.component';
@@ -66,7 +65,6 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         MatDividerModule,
         MatListModule,
         MatPaginatorModule,
-        FlexLayoutModule,
         MatButtonModule,
         MatSnackBarModule,
         FormsModule,

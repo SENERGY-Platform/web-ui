@@ -17,7 +17,7 @@
 <mat-card appearance="outlined">
   <senergy-widget-header [widget]="widget"></senergy-widget-header>
   <mat-card-content>
-    <div id="{{widget.id}}" fxFill fxLayout="row" fxLayoutAlign="center center">
+    <div id="{{widget.id}}" class="ly-fill ly-row ly-align-center-center">
       @if (errorMessage !== '') {
         <div class="text-container">
           <h2>{{errorMessage}}</h2>

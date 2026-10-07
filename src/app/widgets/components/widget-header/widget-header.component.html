@@ -14,11 +14,11 @@
   ~ limitations under the License.
   -->
 
-<mat-card-header class="header-container drag-handler">
+<mat-card-header class="header-container drag-handler ly-row">
   <mat-card-title [matTooltip]="widget.name">
     {{widget.name}}
   </mat-card-title>
-  <div fxFlex></div>
+  <div class="ly-flex"></div>
   @if (warnText !== '') {
     <mat-icon
       color="warn"

@@ -68,13 +68,13 @@
               <mat-error senergyError label="Endpoint"></mat-error>
             </mat-form-field>
           </div>
-          <div>
-            <mat-checkbox [checked]="testResult.GET" disabled fxFlex>GET</mat-checkbox>
-            <mat-checkbox [checked]="testResult.POST" disabled fxFlex>POST</mat-checkbox>
-            <mat-checkbox [checked]="testResult.PUT" disabled fxFlex>PUT</mat-checkbox>
-            <mat-checkbox [checked]="testResult.PATCH" disabled fxFlex>PATCH</mat-checkbox>
-            <mat-checkbox [checked]="testResult.DELETE" disabled fxFlex>DELETE</mat-checkbox>
-            <mat-checkbox [checked]="testResult.HEAD" disabled fxFlex>HEAD</mat-checkbox>
+          <div class="ly-row">
+            <mat-checkbox [checked]="testResult.GET" disabled class="ly-flex">GET</mat-checkbox>
+            <mat-checkbox [checked]="testResult.POST" disabled class="ly-flex">POST</mat-checkbox>
+            <mat-checkbox [checked]="testResult.PUT" disabled class="ly-flex">PUT</mat-checkbox>
+            <mat-checkbox [checked]="testResult.PATCH" disabled class="ly-flex">PATCH</mat-checkbox>
+            <mat-checkbox [checked]="testResult.DELETE" disabled class="ly-flex">DELETE</mat-checkbox>
+            <mat-checkbox [checked]="testResult.HEAD" disabled class="ly-flex">HEAD</mat-checkbox>
           </div>
         </mat-card-content>
       </mat-card>
@@ -148,7 +148,7 @@
         </mat-card-content>
       </mat-card>
     }
-    <mat-card appearance="outlined" [fxHide]="!ready" class="table-card">
+    <mat-card appearance="outlined" [class.ly-hidden]="!ready" class="table-card">
       <mat-card-content>
         <div>
           <mat-table #table (matSortChange)="sortData($event)" [dataSource]="sortedData" [hidden]="!ready"
@@ -249,8 +249,8 @@
             </ng-container>
             <ng-container matColumnDef="header-delete-all">
               <th mat-header-cell *matHeaderCellDef colspan="10">
-                <div fxLayout="row">
-                  <div fxLayoutAlign="center center">You have
+                <div class="ly-row">
+                  <div class="ly-row ly-align-center-center">You have
                     selected {{selection.selected.length}} items
                   </div>
                   <button matTooltip="Delete" mat-icon-button color="accent"
@@ -271,7 +271,7 @@
       </mat-card-content>
     </mat-card>
     @if (!ready) {
-      <div fxLayout="row" fxLayoutAlign="center center">
+      <div class="ly-row ly-align-center-center">
         <senergy-spinner [show]="!ready"></senergy-spinner>
       </div>
     }

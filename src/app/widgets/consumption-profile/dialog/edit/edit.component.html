@@ -20,16 +20,16 @@
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
   @if (ready) {
     <div>
-      <form fxLayout="column" [formGroup]="form">
+      <form class="ly-column" [formGroup]="form">
         @if (userHasUpdateNameAuthorization) {
-          <mat-form-field appearance="outline" color="accent" fxFlex="47">
+          <mat-form-field appearance="outline" color="accent" class="ly-flex-47">
             <mat-label>Widget Name</mat-label>
             <input type="text" matInput formControlName="name" required>
             <mat-error senergyError label="Widget Name"></mat-error>
           </mat-form-field>
         }
         @if (userHasUpdatePropertiesAuthorization) {
-          <mat-form-field appearance="outline" color="accent" fxFlex="47"
+          <mat-form-field appearance="outline" color="accent" class="ly-flex-47"
             >
             <mat-label>Export</mat-label>
             <mtx-select placeholder="Choose Export" formControlName="export" required [items]="exports"
@@ -43,7 +43,7 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
 </mat-dialog-actions>

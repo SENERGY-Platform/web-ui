@@ -14,21 +14,21 @@
   ~ limitations under the License.
   -->
 <div class="designs-container layout-margin">
-  <span class="search-button-container">
-    <senergy-searchbar fxFlex></senergy-searchbar>
+  <span class="search-button-container ly-row">
+    <senergy-searchbar class="ly-flex"></senergy-searchbar>
   </span>
 
   <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
     [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>
     @if (animationDone) {
-      <div fxLayout="column" [formGroup]="formGroup">
+      <div class="ly-column" [formGroup]="formGroup">
         @if (repoItems.length > 0) {
           <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
             formArrayName="repoItems">
             @for (item of repoItems.controls; track item; let i = $index) {
               <mat-grid-tile class="mat-elevation-z1"
                 [formGroupName]="i">
-                <div fxFill>
+                <div class="ly-fill">
                   @if (item.value.metadataWarning) {
                     <mat-icon
                       matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
@@ -39,15 +39,15 @@
                   <img class="widget-image" [src]="item.value.image">
                 </div>
                 <mat-grid-tile-footer>
-                  <div fxLayout="column" fxFill>
+                  <div class="ly-column ly-fill">
                     <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
                       {{item.value.name}}
                     </div>
                     <div class="truncate footer-item-subtitle" matTooltip="{{item.value.description}}">
                       {{item.value.description}}
                     </div>
-                    <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
-                      <div fxFlex></div>
+                    <div class="footer-buttons ly-row ly-align-center-center">
+                      <div class="ly-flex"></div>
                       @if (userHasUpdateAuthorization) {
                         <button mat-icon-button color="accent" matTooltip="Edit"
                           routerLink="/smart-services/designer/{{item.value.id}}">

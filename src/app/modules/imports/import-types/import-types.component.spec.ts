@@ -22,7 +22,6 @@ import {ReactiveFormsModule} from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {FlexModule} from '@ngbracket/ngx-layout';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -91,7 +90,6 @@ describe('ImportTypesComponent', () => {
         RouterModule.forRoot([], {}),
         MatDialogModule,
         MatSnackBarModule,
-        FlexModule,
         MatTooltipModule,
         MatButtonModule,
         MatPaginatorModule,

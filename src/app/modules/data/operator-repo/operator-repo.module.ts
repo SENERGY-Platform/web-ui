@@ -19,7 +19,6 @@ import { NgModule } from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { OperatorComponent } from './operator/operator.component';
 import { FormsModule } from '@angular/forms';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -50,7 +49,6 @@ const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'ful
         MatTooltipModule,
         MatDividerModule,
         MatListModule,
-        FlexLayoutModule,
         MatButtonModule,
         MatFormFieldModule,
         MatDialogModule,

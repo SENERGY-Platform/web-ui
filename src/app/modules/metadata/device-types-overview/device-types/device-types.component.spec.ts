@@ -34,7 +34,6 @@ import {DeviceTypeModel, DeviceTypeProtocolModel, DeviceTypeServiceModel} from '
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import {v4 as uuid} from 'uuid';
 import {MatTreeModule} from '@angular/material/tree';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
@@ -164,7 +163,6 @@ describe('DeviceTypesComponent', () => {
         MatExpansionModule,
         MatTabsModule,
         MatTooltipModule,
-        FlexLayoutModule,
         NoopAnimationsModule,
         MatTreeModule],
     providers: [

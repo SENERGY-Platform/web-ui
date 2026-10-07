@@ -13,8 +13,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div [formGroup]="form" fxLayout="column">
-  <div fxLayout="row" fxLayoutAlign="end center">
+<div [formGroup]="form" class="ly-column">
+  <div class="ly-row ly-align-end-center">
     <button mat-icon-button matTooltip="Preview Query" [disabled]="previewRunning || form.invalid"
       (click)="previewQuery()">
       <mat-icon>preview</mat-icon>
@@ -27,20 +27,20 @@
   </mat-button-toggle-group>
 
   @if (source === 'device') {
-    <div fxLayout="column">
-      <mat-form-field fxFlex color="accent" appearance="outline">
+    <div class="ly-column">
+      <mat-form-field class="ly-flex" color="accent" appearance="outline">
         <mat-label>Device</mat-label>
         <mtx-select formControlName="device" [items]="allDevices" bindLabel="display_name" bindValue="id"
         virtualScroll="true" placeholder="Type to search" appendTo=".ng-select-anchor"></mtx-select>
         <mat-error senergyError label="Device"></mat-error>
       </mat-form-field>
-      <mat-form-field fxFlex color="accent" appearance="outline">
+      <mat-form-field class="ly-flex" color="accent" appearance="outline">
         <mat-label>Service</mat-label>
         <mtx-select formControlName="service" [items]="deviceType.services" bindLabel="name" bindValue="id"
         placeholder="Type to search" appendTo=".ng-select-anchor" hideSelected="false"></mtx-select>
         <mat-error senergyError label="Service"></mat-error>
       </mat-form-field>
-      <mat-form-field fxFill color="accent" appearance="outline">
+      <mat-form-field class="ly-fill" color="accent" appearance="outline">
         <mat-label>Path</mat-label>
         <mtx-select formControlName="path" [items]="servicePaths" [addTag]="true"
         placeholder="Choose or write yourself" appendTo=".ng-select-anchor"></mtx-select>
@@ -50,8 +50,8 @@
   }
 
   @if (source === 'group') {
-    <div fxLayout="column">
-      <mat-form-field fxFlex color="accent" appearance="outline">
+    <div class="ly-column">
+      <mat-form-field class="ly-flex" color="accent" appearance="outline">
         <mat-label>Device Group</mat-label>
         <mtx-select formControlName="deviceGroupId" [items]="deviceGroupOptions" bindLabel="name" bindValue="id"
         virtualScroll="true" placeholder="Type to search" appendTo=".ng-select-anchor"></mtx-select>
@@ -59,7 +59,7 @@
       </mat-form-field>
       <mat-checkbox class="generated-groups" [checked]="showGeneratedGroups"
       (change)="setShowGeneratedGroups($event.checked)">Include groups generated for single devices</mat-checkbox>
-      <mat-form-field fxFill color="accent" appearance="outline">
+      <mat-form-field class="ly-fill" color="accent" appearance="outline">
         <mat-label>Criteria</mat-label>
         <mtx-select formControlName="criteria" [compareWith]="compareCriteria" appendTo=".ng-select-anchor">
           @for (c of groupCriteria; track c) {
@@ -68,9 +68,9 @@
         </mtx-select>
         <mat-error senergyError label="Criteria"></mat-error>
       </mat-form-field>
-      <div role="group" class="form-grouping">
+      <div role="group" class="form-grouping ly-row">
         @if (supportsPerDevice) {
-          <mat-form-field fxFlex color="accent" appearance="outline">
+          <mat-form-field class="ly-flex" color="accent" appearance="outline">
             <mat-label>Mode</mat-label>
             <mtx-select formControlName="deviceGroupMode" appendTo=".ng-select-anchor">
               @for (mode of deviceGroupModes; track mode) {
@@ -81,7 +81,7 @@
           </mat-form-field>
         }
         @if (control('deviceGroupMode').value === 'aggregate') {
-          <mat-form-field fxFlex color="accent" appearance="outline">
+          <mat-form-field class="ly-flex" color="accent" appearance="outline">
             <mat-label>Aggregation</mat-label>
             <mtx-select formControlName="aggregation" appendTo=".ng-select-anchor">
               @for (agg of aggregationTypes; track agg) {
@@ -95,8 +95,8 @@
     </div>
   }
 
-  <div role="group" class="form-grouping">
-    <mat-form-field fxFlex color="accent" appearance="outline">
+  <div role="group" class="form-grouping ly-row">
+    <mat-form-field class="ly-flex" color="accent" appearance="outline">
       <mat-label>Field Group Type</mat-label>
       <mtx-select formControlName="groupType" appendTo=".ng-select-anchor">
         @for (type of fieldGroupTypes; track type) {
@@ -106,13 +106,13 @@
       <mat-hint>Aggregation of the values</mat-hint>
       <mat-error senergyError label="Field Group Type"></mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex color="accent" appearance="outline">
+    <mat-form-field class="ly-flex" color="accent" appearance="outline">
       <mat-label>Time Frame</mat-label>
       <input matInput formControlName="timeframeNumber">
       <mat-hint>Relative to the report creation</mat-hint>
       <mat-error senergyError label="Time Frame"></mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex color="accent" appearance="outline">
+    <mat-form-field class="ly-flex" color="accent" appearance="outline">
       <mat-label>Time Frame Unit</mat-label>
       <mtx-select formControlName="timeframeUnit" appendTo=".ng-select-anchor">
         @for (units of timeUnits; track units) {
@@ -123,8 +123,8 @@
     </mat-form-field>
   </div>
 
-  <div role="group" class="form-grouping">
-    <mat-form-field fxFlex color="accent" appearance="outline">
+  <div role="group" class="form-grouping ly-row">
+    <mat-form-field class="ly-flex" color="accent" appearance="outline">
       <mat-label>Start Date</mat-label>
       <input matInput [matDatepicker]="picker_start" formControlName="start">
       <mat-hint>DD/MM/YYYY</mat-hint>
@@ -132,7 +132,7 @@
       <mat-datepicker #picker_start></mat-datepicker>
       <mat-error senergyError label="Start Date"></mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex color="accent" appearance="outline">
+    <mat-form-field class="ly-flex" color="accent" appearance="outline">
       <mat-label>Rolling Start Date</mat-label>
       <mtx-select formControlName="rollingStartDate" appendTo=".ng-select-anchor">
         <mtx-option [value]="''"></mtx-option>
@@ -142,7 +142,7 @@
       <mat-hint>Moves the start date on every run</mat-hint>
       <mat-error senergyError label="Rolling Start Date"></mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex color="accent" appearance="outline">
+    <mat-form-field class="ly-flex" color="accent" appearance="outline">
       <mat-label>End Date</mat-label>
       <input matInput [matDatepicker]="picker_end" formControlName="end">
       <mat-hint>DD/MM/YYYY</mat-hint>
@@ -150,7 +150,7 @@
       <mat-datepicker #picker_end></mat-datepicker>
       <mat-error senergyError label="End Date"></mat-error>
     </mat-form-field>
-    <mat-form-field fxFlex color="accent" appearance="outline">
+    <mat-form-field class="ly-flex" color="accent" appearance="outline">
       <mat-label>Rolling End Date</mat-label>
       <mtx-select formControlName="rollingEndDate" appendTo=".ng-select-anchor">
         <mtx-option [value]="''"></mtx-option>
@@ -162,7 +162,7 @@
     </mat-form-field>
   </div>
 
-  <div fxLayout="row" fxLayoutAlign="start center">
+  <div class="ly-row ly-align-start-center">
     <button type="button" mat-button color="accent" (click)="showAdvanced = !showAdvanced">
       <mat-icon>{{showAdvanced ? 'expand_less' : 'expand_more'}}</mat-icon>
       Advanced{{advancedCount > 0 ? ' (' + advancedCount + ' in use)' : ''}}
@@ -170,15 +170,15 @@
   </div>
 
   @if (showAdvanced) {
-    <div fxLayout="column">
-      <div role="group" class="form-grouping">
-        <mat-form-field fxFlex color="accent" appearance="outline">
+    <div class="ly-column">
+      <div role="group" class="form-grouping ly-row">
+        <mat-form-field class="ly-flex" color="accent" appearance="outline">
           <mat-label>Grouping Time</mat-label>
           <input matInput formControlName="groupingTimeNumber">
           <mat-hint>One value per interval</mat-hint>
           <mat-error senergyError label="Grouping Time"></mat-error>
         </mat-form-field>
-        <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-form-field class="ly-flex" color="accent" appearance="outline">
           <mat-label>Grouping Time Unit</mat-label>
           <mtx-select formControlName="groupingTimeUnit" appendTo=".ng-select-anchor">
             @for (units of timeUnits; track units) {
@@ -187,24 +187,23 @@
           </mtx-select>
           <mat-error senergyError label="Grouping Time Unit"></mat-error>
         </mat-form-field>
-        <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-form-field class="ly-flex" color="accent" appearance="outline">
           <mat-label>Limit</mat-label>
           <input matInput type="number" formControlName="limit">
           <mat-hint>Number of rows; 1 for the latest value</mat-hint>
           <mat-error senergyError label="Limit"></mat-error>
         </mat-form-field>
       </div>
-      <div role="group" class="form-grouping">
+      <div role="group" class="form-grouping ly-row">
         @if (!orderColumnIndexHidden) {
-          <mat-form-field
-            fxFlex color="accent" appearance="outline">
+          <mat-form-field class="ly-flex" color="accent" appearance="outline">
             <mat-label>Sorting Index</mat-label>
             <input matInput type="number" formControlName="orderColumnIndex">
             <mat-hint>Column to sort by</mat-hint>
             <mat-error senergyError label="Sorting Index"></mat-error>
           </mat-form-field>
         }
-        <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-form-field class="ly-flex" color="accent" appearance="outline">
           <mat-label>Sorting</mat-label>
           <mtx-select formControlName="orderDirection" appendTo=".ng-select-anchor">
             @for (type of sortTypes; track type) {
@@ -214,8 +213,8 @@
           <mat-error senergyError label="Sorting"></mat-error>
         </mat-form-field>
       </div>
-      <div role="group" class="form-grouping">
-        <mat-form-field fxFlex color="accent" appearance="outline">
+      <div role="group" class="form-grouping ly-row">
+        <mat-form-field class="ly-flex" color="accent" appearance="outline">
           <mat-label>ResultObject</mat-label>
           <mtx-select formControlName="resultObject" appendTo=".ng-select-anchor">
             @for (type of resultObjectTypes; track type) {
@@ -225,7 +224,7 @@
           <mat-hint>Shape of the result in the template</mat-hint>
           <mat-error senergyError label="ResultObject"></mat-error>
         </mat-form-field>
-        <mat-form-field fxFlex color="accent" appearance="outline">
+        <mat-form-field class="ly-flex" color="accent" appearance="outline">
           <mat-label>ResultKey</mat-label>
           <input matInput type="number" min="0" formControlName="resultKey">
           <mat-hint>Index of the used column</mat-hint>

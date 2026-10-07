@@ -244,7 +244,7 @@
                                         @for (inOut of inputOutputArray(serviceAndIndex.service, tab.formArrayName); track trackById(i, inOut); let i = $index) {
                                           <div [formGroupName]="i"
                                             >
-                                            <div fxLayout="row" fxLayoutAlign="start center">
+                                            <div class="ly-row ly-align-start-center">
                                               <button mat-icon-button class="mat-accent"
                                                 (click)="expand(serviceAndIndex.service, tab.formArrayName, i)">
                                                 <mat-icon>{{inOut.show ? 'expand_less' :
@@ -252,8 +252,8 @@
                                               </button>
                                               <div>{{inOut.name}}</div>
                                             </div>
-                                            <div fxLayout="row" [fxShow]="inOut.show === true">
-                                              <div fxFlex>
+                                            <div class="ly-row" [class.ly-hidden]="!(inOut.show === true)">
+                                              <div class="ly-flex">
                                                 <mat-form-field appearance="outline"
                                                   class="full-width" color="accent">
                                                   <mat-label>Serialization</mat-label>
@@ -368,7 +368,7 @@
                                       </mat-tab>
                                     }
                                   </mat-tab-group>
-                                  <div fxLayoutAlign="end center" cdkDragHandle>
+                                  <div class="ly-row ly-align-end-center" cdkDragHandle>
                                     <button (click)="cloneService(serviceAndIndex.index)"
                                       mat-icon-button class="mat-accent"
                                       matTooltip="clone service" [disabled]="!editable">
@@ -385,13 +385,13 @@
                             }
                           </mat-accordion>
                           @if (editable) {
-                            <div class="button-margin" fxLayoutAlign="center center">
+                            <div class="button-margin ly-row ly-align-center-center">
                               <button mat-raised-button color="accent" (click)="addService(group.key)">ADD
                               Service</button>
                             </div>
                           }
                           @if (group.isGroup) {
-                            <div fxLayoutAlign="end center">
+                            <div class="ly-row ly-align-end-center">
                               <button (click)="cloneServiceGroup(group)" mat-icon-button
                                 class="mat-accent" matTooltip="clone service group"
                                 [disabled]="!editable">
@@ -409,7 +409,7 @@
                     }
                   </mat-accordion>
                   @if (editable) {
-                    <div class="button-margin" fxLayoutAlign="center center">
+                    <div class="button-margin ly-row ly-align-center-center">
                       <button mat-raised-button color="accent" (click)="addServiceGroup()">ADD Service
                       Group</button>
                     </div>

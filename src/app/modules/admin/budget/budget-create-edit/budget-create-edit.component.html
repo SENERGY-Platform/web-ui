@@ -19,9 +19,9 @@
 <h2 mat-dialog-title>Timescale Rule</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="form" fxLayout="column">
+  <form [formGroup]="form" class="ly-column">
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Budget</mat-label>
         <input matInput formControlName="budget_identifier" required>
         <mat-error senergyError label="Budget"></mat-error>
@@ -29,7 +29,7 @@
     </div>
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Value</mat-label>
         <input matInput formControlName="value" type="number" required>
         <mat-error senergyError label="Value"></mat-error>
@@ -37,7 +37,7 @@
     </div>
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Users</mat-label>
         <mtx-select formControlName="user_id" bindLabel="username" bindValue="id" [items]="users"
         appendTo=".ng-select-anchor"></mtx-select>
@@ -45,7 +45,7 @@
     </div>
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Role</mat-label>
         <mtx-select [items]="roles" formControlName="role" appendTo=".ng-select-anchor"></mtx-select>
       </mat-form-field>
@@ -54,7 +54,7 @@
 </mat-dialog-content>
 
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   @if (editable) {
     <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>

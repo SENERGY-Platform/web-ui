@@ -19,21 +19,21 @@
   <mat-card-content class="content-size drag-handler">
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     @if (ready) {
-      <div fxLayout="column" fxFill>
-        <div fxFlex>
-          <div class="widget-icon-blue" fxFill fxFlex="30" fxLayoutAlign="center center">
+      <div class="ly-column ly-fill">
+        <div class="ly-row ly-flex">
+          <div class="widget-icon-blue ly-row ly-fill-flex ly-flex-30 ly-align-center-center">
             <mat-icon class="white mat-40">storage</mat-icon>
           </div>
-          <div fxFill fxFlex="70" fxLayout="column">
+          <div class="ly-fill-flex ly-flex-70 ly-column">
             <div class="kpi-header">AVAILABLE</div>
             <div class="mat-h2 kpi">{{processStatus.available}}</div>
           </div>
         </div>
-        <div fxFlex class="margin-last-element">
-          <div class="widget-icon-orange" fxFill fxFlex="30" fxLayoutAlign="center center">
+        <div class="margin-last-element ly-row ly-flex">
+          <div class="widget-icon-orange ly-row ly-fill-flex ly-flex-30 ly-align-center-center">
             <mat-icon class="white mat-40">publish</mat-icon>
           </div>
-          <div fxFill fxFlex="70" fxLayout="column">
+          <div class="ly-fill-flex ly-flex-70 ly-column">
             <div class="kpi-header">EXECUTABLE</div>
             <div class="mat-h2 kpi">{{processStatus.executable}}</div>
           </div>

@@ -18,7 +18,7 @@
   <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
   <mat-card-content>
     @if (!configured) {
-      <div fxFill fxLayout="column" fxLayoutAlign="center center">
+      <div class="ly-fill ly-column ly-align-center-center">
         <div>Please configure widget!</div>
       </div>
     }
@@ -27,7 +27,7 @@
       <span>
         <senergy-widget-spinner [show]="configured && !ready"></senergy-widget-spinner>
         @if (ready) {
-          <div fxLayoutAlign="center center">
+          <div class="ly-row ly-align-center-center">
             <!-- e.g. network problem or 500 from timescale -->
             @if (error === true) {
               <div>
@@ -45,7 +45,7 @@
                 @if (operatorIsInitPhase === false) {
                   <div>
                     <p>{{message}}: <b>{{timeWindow}}</b></p>
-                    <div fxLayoutAlign="center center">
+                    <div class="ly-row ly-align-center-center">
                       @if (chart) {
                         <div class="chart-box">
                           <canvas baseChart type="scatter" [data]="chart.data" [options]="chart.options" [plugins]="chartPlugins"></canvas>

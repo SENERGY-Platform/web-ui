@@ -24,7 +24,6 @@ import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -282,7 +281,6 @@ describe('EnvironmentDetailComponent', () => {
             imports: [
                 CommonModule,
                 FormsModule,
-                FlexLayoutModule,
                 CoreModule,
                 NoopAnimationsModule,
                 MatTableModule,

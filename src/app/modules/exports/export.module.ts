@@ -19,7 +19,6 @@ import { NgModule } from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NewExportComponent } from './new-export/new-export.component';
 import { ExportDetailsComponent } from './export-details/export-details.component';
@@ -64,7 +63,6 @@ const brokerDataExport: Route = { path: 'exports/broker', pathMatch: 'full', com
         MatSortModule,
         MatDividerModule,
         MatListModule,
-        FlexLayoutModule,
         MatButtonModule,
         MatFormFieldModule,
         MatDialogModule,

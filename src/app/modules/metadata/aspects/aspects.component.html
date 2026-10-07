@@ -15,10 +15,10 @@
   -->
 
 
-<div class="aspects-container layout-margin" fxLayout="column" cdkDropListGroup>
+<div class="aspects-container layout-margin ly-column" cdkDropListGroup>
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="tree">
     <mat-tree-node *matTreeNodeDef="let node" cdkDropList (cdkDropListDropped)="dropped($event, node)">
-      <li class="mat-tree-node" fxLayout="row" matTreeNodeToggle cdkDrag
+      <li class="mat-tree-node ly-row" matTreeNodeToggle cdkDrag
         cdkDragDisabled="{{!userIsAdmin || !nodeValid(node)}}"
         [cdkDragData]="node" (cdkDragStarted)="dragStart()" (cdkDragEnded)="dragEnd()">
         <button mat-icon-button disabled></button>
@@ -41,7 +41,7 @@
             appendTo=".ng-select-anchor"></mtx-select>
           </mat-form-field>
         }
-        <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex
+        <mat-form-field class="full-width ly-flex" appearance="outline" color="accent"
           [ngClass]="{'deprecated-name': deprecated(node)}">
           <mat-label>Name</mat-label>
           <input matInput [(ngModel)]="node.name" required [disabled]="!userIsAdmin">
@@ -78,8 +78,8 @@
     </mat-tree-node>
     <mat-nested-tree-node *matTreeNodeDef="let node; when: isGroupRow">
       <li>
-        <div class="mat-tree-node" fxLayout="row" cdkDropList (cdkDropListDropped)="dropped($event, node)">
-          <span fxFlex>
+        <div class="mat-tree-node ly-row" cdkDropList (cdkDropListDropped)="dropped($event, node)">
+          <span class="ly-row ly-flex">
             <button mat-icon-button matTreeNodeToggle class="nested-tree-inline"
               [disabled]="!aspectClassInUse(node)"
               [attr.aria-label]="'Toggle ' + node.name">
@@ -91,7 +91,7 @@
               matTooltip="Aspect class. The hierarchies below it carry this class.">
               <mat-icon color="accent">sell</mat-icon>
             </button>
-            <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex>
+            <mat-form-field class="full-width ly-flex" appearance="outline" color="accent">
               <mat-label>Aspect Class</mat-label>
               <input matInput [(ngModel)]="node.name" required
                 [disabled]="!userHasAspectClassUpdateAuthorization">
@@ -148,8 +148,8 @@
     </mat-nested-tree-node>
     <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
       <li>
-        <div class="mat-tree-node" fxLayout="row" cdkDropList (cdkDropListDropped)="dropped($event, node)">
-          <span fxFlex cdkDrag cdkDragDisabled="{{!userIsAdmin || !nodeValid(node)}}" [cdkDragData]="node"
+        <div class="mat-tree-node ly-row" cdkDropList (cdkDropListDropped)="dropped($event, node)">
+          <span class="ly-row ly-flex" cdkDrag cdkDragDisabled="{{!userIsAdmin || !nodeValid(node)}}" [cdkDragData]="node"
             (cdkDragStarted)="dragStart()" (cdkDragEnded)="dragEnd()">
             <button mat-icon-button matTreeNodeToggle class="nested-tree-inline"
               [attr.aria-label]="'Toggle ' + node.name">
@@ -176,7 +176,7 @@
                 appendTo=".ng-select-anchor"></mtx-select>
               </mat-form-field>
             }
-            <mat-form-field class="full-width" appearance="outline" color="accent" fxFlex
+            <mat-form-field class="full-width ly-flex" appearance="outline" color="accent"
               [ngClass]="{'deprecated-name': deprecated(node)}">
               <mat-label>Name</mat-label>
               <input matInput [(ngModel)]="node.name" [disabled]="!userIsAdmin">
@@ -221,7 +221,7 @@
       </li>
     </mat-nested-tree-node>
   </mat-tree>
-  <h3 class="root-drop-zone color-accent" [fxShow]="dragging" cdkDropList (cdkDropListDropped)="dropped($event)">As
+  <h3 class="root-drop-zone color-accent" [class.ly-hidden]="!(dragging)" cdkDropList (cdkDropListDropped)="dropped($event)">As
   New Aspect Without Class</h3>
 </div>
 @if (userIsAdmin) {

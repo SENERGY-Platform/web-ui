@@ -14,8 +14,8 @@
   ~ limitations under the License.
   -->
 <div class="deployments-container layout-margin">
-  <div class="search-button-container">
-    <senergy-searchbar fxFlex></senergy-searchbar>
+  <div class="search-button-container ly-row">
+    <senergy-searchbar class="ly-flex"></senergy-searchbar>
 
     @if (selectedItems.length > 0 && ready) {
       <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()"
@@ -72,14 +72,14 @@
   <div class="deployments-scroll" #mainPanel [ngClass]="{'with-filter': deploymentIdFilter}">
     <div infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
       [infiniteScrollContainer]="'.deployments-scroll'" [fromRoot]="true" (scrolled)="onScroll()">
-      <div fxLayout="column" [formGroup]="formGroup">
+      <div class="ly-column" [formGroup]="formGroup">
         @if (repoItems.length > 0) {
           <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
             formArrayName="repoItems">
             @for (item of repoItems.controls; track item; let i = $index) {
               <mat-grid-tile class="mat-elevation-z1"
                 [formGroupName]="i">
-                <div fxFill>
+                <div class="ly-fill">
                   @if (item.value.metadataWarning) {
                     <mat-icon
                       matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
@@ -90,7 +90,7 @@
                   <img class="widget-image" [src]="item.value.image">
                 </div>
                 <mat-grid-tile-footer>
-                  <div fxLayout="column" fxFill>
+                  <div class="ly-column ly-fill">
                     <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
                       {{item.value.name}}
                     </div>
@@ -98,7 +98,7 @@
                       matTooltip="{{item.value.deploymentTime | date:'medium'}}">
                       {{item.value.deploymentTime | date:"medium"}}
                     </div>
-                    <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
+                    <div class="footer-buttons ly-row ly-align-center-center">
                       <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
                       </mat-checkbox>
                       @if (!item.value.online) {
@@ -107,7 +107,7 @@
                           <mat-icon>warning</mat-icon>
                         </button>
                       }
-                      <div fxFlex></div>
+                      <div class="ly-flex"></div>
                       @if (item.value.sync) {
                         <mat-icon color="warn" class="icon-spin"
                         matTooltip="waiting for sync with hub">sync</mat-icon>

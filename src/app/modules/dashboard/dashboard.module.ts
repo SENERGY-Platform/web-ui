@@ -17,7 +17,6 @@
 import { NgModule } from '@angular/core';
 import { DashboardComponent } from './dashboard.component';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { DashboardNewDialogComponent } from './dialogs/dashboard-new-dialog.component';
 import { WidgetModule } from '../../widgets/widget.module';
 import { DashboardNewWidgetDialogComponent } from './dialogs/dashboard-new-widget-dialog.component';
@@ -54,7 +53,6 @@ const routes: Route[] = [
         MatButtonModule,
         CommonModule,
         MatGridListModule,
-        FlexLayoutModule,
         MatDividerModule,
         MatMenuModule,
         MatButtonModule,

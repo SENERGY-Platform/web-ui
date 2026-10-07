@@ -23,7 +23,7 @@
 </mat-dialog-content>
 
 @if (!disabled) {
-  <mat-dialog-actions fxLayoutAlign="end center">
+  <mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="!this.characteristicElementComponent.isValid()"
       (click)="save()">Save
@@ -32,7 +32,7 @@
 }
 
 @if (disabled) {
-  <mat-dialog-actions fxLayoutAlign="end center">
+  <mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="primary" (click)="close()">Close</button>
   </mat-dialog-actions>
 }

@@ -28,9 +28,9 @@
           </span>
         </ng-template>
         @if (dashboard === dashboards[activeTabIndex]) {
-          <div fxFill fxLayout="column">
+          <div class="ly-fill ly-column">
             @if (zoomedWidgetIndex === null) {
-              <div fxLayout="row" fxLayoutAlign="end center">
+              <div class="ly-row ly-align-end-center">
                 @if (userHasUpdateDashboardAuthorization) {
                   <button mat-icon-button [matMenuTriggerFor]="refresh"
                     color="accent" matTooltip="set widget refresh time">

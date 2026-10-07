@@ -19,7 +19,6 @@ import { NgModule } from '@angular/core';
 import {Route, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DeployFlowComponent } from './deploy-flow/deploy-flow.component';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -58,7 +57,6 @@ const deployClassic: Route = {
         MatTooltipModule,
         MatDividerModule,
         MatListModule,
-        FlexLayoutModule,
         MatButtonModule,
         MatFormFieldModule,
         MatDialogModule,

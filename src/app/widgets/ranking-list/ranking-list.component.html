@@ -19,8 +19,8 @@
   <mat-card-content class="content-size drag-handler">
     <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
     @if (ready) {
-      <div fxLayout="column" fxFlexFill>
-        <mat-list fxFlexFill>
+      <div class="ly-column ly-fill">
+        <mat-list class="ly-fill">
           @for (ranking of rankings; track ranking) {
             <mat-list-item class="item-height">
               <div matListItemIcon>{{ranking.rank}}</div>

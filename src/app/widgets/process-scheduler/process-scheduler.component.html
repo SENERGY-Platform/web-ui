@@ -20,7 +20,7 @@
     <senergy-widget-spinner [show]="!ready()"></senergy-widget-spinner>
 
     @if (ready() && schedules.length !== 0) {
-      <div fxLayout="column" fxFill>
+      <div class="ly-column ly-fill">
         <mat-list>
           @for (schedule of schedules; track schedule) {
             <mat-list-item

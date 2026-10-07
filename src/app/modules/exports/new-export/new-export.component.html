@@ -22,8 +22,8 @@
   <div class="main-panel">
     @if (ready) {
       <mat-card appearance="outlined" class="layout-margin">
-        <div fxLayout="column">
-          <div fxLayout="row" class="source-container">
+        <div class="ly-column">
+          <div class="source-container ly-row">
             <div class="source-label">Source:</div>
             <mat-radio-group formControlName="selector" class="radio-group">
               <mat-radio-button class="radio-button" value="device">Device</mat-radio-button>
@@ -31,7 +31,7 @@
               <mat-radio-button class="radio-button" value="import">Import</mat-radio-button>
             </mat-radio-group>
           </div>
-          <div fxLayout="row" class="source-container">
+          <div class="source-container ly-row">
             <div class="source-label">Target:</div>
             <mat-radio-group formControlName="targetSelector" class="radio-group">
               <mat-radio-button class="radio-button" [value]="targetDb">Database</mat-radio-button>
@@ -39,7 +39,7 @@
             </mat-radio-group>
           </div>
           @if (exportForm.getRawValue().targetSelector === targetDb) {
-            <mat-form-field fxFlex color="accent" appearance="outline"
+            <mat-form-field class="ly-flex" color="accent" appearance="outline"
               >
               <mat-label>Database</mat-label>
               <mtx-select formControlName="exportDatabaseId" required appendTo=".ng-select-anchor">
@@ -51,47 +51,47 @@
             </mat-form-field>
           }
           @if (exportForm.controls.targetSelector.value === targetBroker) {
-            <div fxLayout="row" class="source-container"
+            <div class="source-container ly-row"
               >
               <mat-slide-toggle formControlName="customBrokerEnabled">Custom Broker</mat-slide-toggle>
             </div>
           }
           @if (exportForm.controls.customBrokerEnabled.value) {
-            <div fxLayout="column" class="source-container">
-              <mat-form-field fxFill color="accent" appearance="outline">
+            <div class="source-container ly-column">
+              <mat-form-field class="ly-fill" color="accent" appearance="outline">
                 <mat-label>Mqtt Broker Address</mat-label>
                 <input matInput formControlName="customMqttBroker" placeholder="Broker" />
                 <mat-error senergyError label="Mqtt Broker Address"></mat-error>
               </mat-form-field>
-              <mat-form-field fxFill color="accent" appearance="outline">
+              <mat-form-field class="ly-fill" color="accent" appearance="outline">
                 <mat-label>Mqtt User</mat-label>
                 <input matInput formControlName="customMqttUser" placeholder="User" />
                 <mat-error senergyError label="Mqtt User"></mat-error>
               </mat-form-field>
-              <mat-form-field fxFill color="accent" appearance="outline">
+              <mat-form-field class="ly-fill" color="accent" appearance="outline">
                 <mat-label>Mqtt Password</mat-label>
                 <input matInput formControlName="customMqttPassword" placeholder="Password" />
                 <mat-error senergyError label="Mqtt Password"></mat-error>
               </mat-form-field>
-              <mat-form-field fxFill color="accent" appearance="outline">
+              <mat-form-field class="ly-fill" color="accent" appearance="outline">
                 <mat-label>Mqtt Base Topic</mat-label>
                 <input matInput formControlName="customMqttBaseTopic" placeholder="Base Topic" />
                 <mat-error senergyError label="Mqtt Base Topic"></mat-error>
               </mat-form-field>
             </div>
           }
-          <mat-form-field fxFill color="accent" appearance="outline">
+          <mat-form-field class="ly-fill" color="accent" appearance="outline">
             <mat-label>Name</mat-label>
             <input matInput formControlName="name" required="true" />
             <mat-error senergyError label="Name"></mat-error>
           </mat-form-field>
-          <mat-form-field fxFill color="accent" appearance="outline">
+          <mat-form-field class="ly-fill" color="accent" appearance="outline">
             <mat-label>Description</mat-label>
             <input matInput formControlName="description" />
             <mat-error senergyError label="Description"></mat-error>
           </mat-form-field>
           @if (exportForm.getRawValue().selector ==='device') {
-            <mat-form-field fxFlex color="accent" appearance="outline"
+            <mat-form-field class="ly-flex" color="accent" appearance="outline"
               >
               <mat-label>Device</mat-label>
               <mtx-select formControlName="device" [items]="devices" bindLabel="display_name" required
@@ -101,7 +101,7 @@
             </mat-form-field>
           }
           @if (exportForm.getRawValue().selector ==='pipe') {
-            <mat-form-field fxFlex color="accent" appearance="outline"
+            <mat-form-field class="ly-flex" color="accent" appearance="outline"
               >
               <mat-label>Pipeline</mat-label>
               <mtx-select formControlName="pipeline" [items]="pipelines" bindLabel="name" required
@@ -111,7 +111,7 @@
             </mat-form-field>
           }
           @if (exportForm.getRawValue().selector ==='import') {
-            <mat-form-field fxFlex color="accent" appearance="outline"
+            <mat-form-field class="ly-flex" color="accent" appearance="outline"
               >
               <mat-label>Import</mat-label>
               <mtx-select formControlName="import" [items]="imports" bindLabel="name" required
@@ -121,7 +121,7 @@
             </mat-form-field>
           }
           @if (exportForm.getRawValue().selector === 'device') {
-            <mat-form-field fxFlex color="accent" appearance="outline"
+            <mat-form-field class="ly-flex" color="accent" appearance="outline"
               >
               <mat-label>Service</mat-label>
               <mtx-select formControlName="service" [items]="deviceType.services" bindLabel="name" required
@@ -131,10 +131,9 @@
             </mat-form-field>
           }
           @if (exportForm.getRawValue().selector ==='pipe') {
-            <mat-accordion fxFlex class="operator-accordion"
+            <mat-accordion class="operator-accordion ly-row ly-flex"
               [ngClass]="{'operator-accordion-error': exportForm.controls.operator.invalid}">
-              <mat-expansion-panel [disabled]="exportForm.value.pipeline === null" style="margin-bottom: 10px;"
-                fxFlex class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick">
+              <mat-expansion-panel [disabled]="exportForm.value.pipeline === null" style="margin-bottom: 10px;" class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick ly-flex">
                 <mat-expansion-panel-header>
                   <mat-panel-title class="operator-titel"
                     [ngClass]="{'operator-titel-error': exportForm.controls.operator.invalid}">
@@ -160,7 +159,7 @@
             </div>
           }
           @if (exportForm.getRawValue().targetSelector === targetDb) {
-            <mat-form-field fxFill color="accent" appearance="outline"
+            <mat-form-field class="ly-fill" color="accent" appearance="outline"
               >
               <mat-label>Time Path</mat-label>
               <mtx-select formControlName="timePath" [items]="getPathsKeyOptions()" appendTo=".ng-select-anchor">
@@ -169,7 +168,7 @@
             </mat-form-field>
           }
           @if (isTimescaleSelected()) {
-            <mat-form-field fxFill color="accent" appearance="outline">
+            <mat-form-field class="ly-fill" color="accent" appearance="outline">
               <mat-label>Timestamp Format</mat-label>
               <mtx-select formControlName="timestampFormat" placeholder="Choose or write yourself"
                 [formControl]="formatControl" [addTag]="addTimestampFormat()" [items]="timestamp_formats"
@@ -180,23 +179,22 @@
           }
           <mat-checkbox formControlName="allMessages">Consume all messages</mat-checkbox>
           @for (group of getExportValuesControls(); track group; let key = $index) {
-            <div formArrayName="exportValues"
-              fxLayout="row" class="layout-value">
-              <div [formGroupName]="key+offset" fxFlex fxLayoutAlign="center center">
-                <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
+            <div formArrayName="exportValues" class="layout-value ly-row">
+              <div [formGroupName]="key+offset" class="ly-row ly-flex ly-align-center-center">
+                <mat-form-field color="accent" appearance="outline" class="layout-value ly-flex">
                   <mat-label>{{exportForm.get('targetSelector')?.value === targetDb ? 'Name' :
                   'Topic'}}</mat-label>
                   <input #input matInput formControlName="Name" />
                   <mat-error senergyError label="Name"></mat-error>
                 </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
+                <mat-form-field color="accent" appearance="outline" class="layout-value ly-flex">
                   <mat-label>Path</mat-label>
                   <mtx-select formControlName="Path" (ngModelChange)="pathChanged(key+offset)"
                     [items]="getPathsKeyOptions()" appendTo=".ng-select-anchor">
                   </mtx-select>
                   <mat-error senergyError label="Path"></mat-error>
                 </mat-form-field>
-                <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
+                <mat-form-field color="accent" appearance="outline" class="layout-value ly-flex">
                   <mat-label>Type</mat-label>
                   <mtx-select formControlName="Type" appendTo=".ng-select-anchor">
                     @for (option of dropdown | keyvalue; track option) {
@@ -225,14 +223,14 @@
             [pageSizeOptions]="[20, 50, 75, 100]" (page)="movePage($event)" showFirstLastButtons
             aria-label="Select page">
           </mat-paginator>
-          <div fxLayout="row" class="button-footer">
-            <div fxLayout="column" fxFlex fxLayoutAlign="center start">
+          <div class="button-footer ly-row">
+            <div class="ly-column ly-flex ly-align-center-start">
               <button type="button" mat-raised-button color="accent" (click)="autofillValues()"
                 disabled="{{paths.size === 0}}">
                 Autofill Export Values
               </button>
             </div>
-            <div fxLayout="column" fxFlex fxLayoutAlign="center end">
+            <div class="ly-column ly-flex ly-align-center-end">
               <button type="button" mat-raised-button color="accent" (click)="addValue()">Add Export Value
               </button>
             </div>

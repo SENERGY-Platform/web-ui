@@ -18,7 +18,6 @@ import { NgModule } from '@angular/core';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { SettingsChangeDialogComponent } from './dialogs/settings-change-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
@@ -41,7 +40,6 @@ import {CoreModule} from '../../core/core.module';
 		MatIconModule,
 		MatButtonModule,
 		MatInputModule,
-		FlexLayoutModule,
 		CoreModule,
 	],
     declarations: [SettingsChangeDialogComponent],

@@ -19,7 +19,7 @@
 <mat-dialog-content>
   <form [formGroup]="formGroup">
     @if (userHasUpdateNameAuthorization) {
-      <div fxLayout="column">
+      <div class="ly-column">
         <mat-form-field appearance="outline" color="accent">
           <mat-label>Widget Name</mat-label>
           <label>
@@ -77,7 +77,7 @@
 
 
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()" cdkFocusInitial>Cancel</button>
   <button mat-raised-button color="accent" (click)="save()" [disabled]="formGroup.invalid">Save</button>
 </mat-dialog-actions>

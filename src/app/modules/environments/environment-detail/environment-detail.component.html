@@ -17,15 +17,15 @@
 <senergy-spinner [show]="!dataReady"></senergy-spinner>
 
 @if (dataReady && environment) {
-  <div class="environment-detail-container layout-margin" fxLayout="column">
-    <div class="title-bar" fxLayout="row" fxLayoutAlign="space-between center">
-      <div fxLayout="column">
+  <div class="environment-detail-container layout-margin ly-column">
+    <div class="title-bar ly-row ly-align-between-center">
+      <div class="ly-column">
         <h2>{{environment.name || 'Environment'}}</h2>
         @if (environment.owner) {
           <span class="owner-line">Owner: {{ownerName(environment.owner)}}</span>
         }
       </div>
-      <div fxLayout="row" fxLayoutGap="8px">
+      <div class="ly-row ly-gap-8">
         <button mat-stroked-button [disabled]="isSaving" (click)="discard()">
           <mat-icon>undo</mat-icon> Discard
         </button>
@@ -46,8 +46,8 @@
     }
     <mat-tab-group backgroundColor="accent" color="primary" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
       <mat-tab label="Editor">
-        <div class="editor-body" fxLayout="column" fxLayout.gt-xs="row">
-          <div class="tree-panel" [ngClass.gt-xs]="'tree-panel-large'">
+        <div class="editor-body ly-column ly-row-gt-xs">
+          <div class="tree-panel">
             <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="env-tree">
               <mat-nested-tree-node *matTreeNodeDef="let node">
                 <li>
@@ -109,7 +109,7 @@
             </mat-tree>
           </div>
           @if (selectedNode) {
-            <div class="node-editor-panel" [ngClass.gt-xs]="'node-editor-panel-large'" fxFlex>
+            <div class="node-editor-panel ly-flex">
               @if (selectedNodeProblems.length > 0) {
                 <div class="node-problems">
                   @for (p of selectedNodeProblems; track p) {

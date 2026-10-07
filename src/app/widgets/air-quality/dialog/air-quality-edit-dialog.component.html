@@ -171,7 +171,7 @@
                           <table>
                             <tr>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" fxFlexFill>
+                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
                                   <mat-label>Export</mat-label>
                                   <mtx-select [(ngModel)]="option.export"
                                     (ngModelChange)="insideExportChanged(option)"
@@ -183,7 +183,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" fxFlexFill>
+                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
                                   <mat-label>Value</mat-label>
                                   <mtx-select [(ngModel)]="option.data.column"
                                     [compareWith]="compareExportValueModels"
@@ -195,7 +195,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" fxFlexFill>
+                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
                                   <mat-label>Math</mat-label>
                                   <input matInput [(ngModel)]="option.math">
                                   <mat-error senergyError label="Math"></mat-error>
@@ -204,7 +204,7 @@
                             </tr>
                             <tr>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" fxFlexFill>
+                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
                                   <mat-label>Device</mat-label>
                                   <mtx-select [(ngModel)]="option.insideDeviceId"
                                     (ngModelChange)="insideDeviceChanged(option)" [items]="devices"
@@ -215,7 +215,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" fxFlexFill>
+                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
                                   <mat-label>Service</mat-label>
                                   <mtx-select [(ngModel)]="option.insideServiceId"
                                     [items]="(getServices(option.insideDeviceId) | async) || []"
@@ -226,7 +226,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" fxFlexFill>
+                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
                                   <mat-label>Value</mat-label>
                                   <mtx-select [(ngModel)]="option.insideDeviceValuePath"
                                     [items]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
@@ -486,7 +486,7 @@
 </mat-dialog-content>
 
 @if (ready) {
-  <mat-dialog-actions fxLayoutAlign="end center">
+  <mat-dialog-actions class="ly-row ly-align-end-center">
     <button class="nav-button" mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button class="nav-button" mat-raised-button color="accent" (click)="save()" [disabled]="disableSave">Save</button>
   </mat-dialog-actions>

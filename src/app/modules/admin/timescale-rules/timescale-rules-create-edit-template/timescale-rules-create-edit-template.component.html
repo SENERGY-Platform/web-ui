@@ -18,16 +18,16 @@
 <h2 mat-dialog-title>Timescale Rule</h2>
 
 <mat-dialog-content>
-  <form [formGroup]="form" fxLayout="column">
+  <form [formGroup]="form" class="ly-column">
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>ID</mat-label>
         <input matInput formControlName="id">
         <mat-error senergyError label="ID"></mat-error>
       </mat-form-field>
     </div>
 
-    <mat-form-field color="accent" appearance="outline" fxFill>
+    <mat-form-field color="accent" appearance="outline" class="ly-fill">
       <mat-label>Template</mat-label>
       <mtx-select formControlName="template" required bindLabel="name" bindValue="name" [items]="templates"
       appendTo=".ng-select-anchor"></mtx-select>
@@ -35,7 +35,7 @@
     </mat-form-field>
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Description</mat-label>
         <input matInput formControlName="description" required>
         <mat-error senergyError label="Description"></mat-error>
@@ -43,7 +43,7 @@
     </div>
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Target</mat-label>
         <mtx-select formControlName="target" required appendTo=".ng-select-anchor">
           <mtx-option [value]="'device'">
@@ -58,7 +58,7 @@
     </div>
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Users</mat-label>
         <mtx-select formControlName="users" multiple closeOnSelect="false" bindLabel="username" bindValue="id"
         [items]="users" appendTo=".ng-select-anchor"></mtx-select>
@@ -67,7 +67,7 @@
     </div>
 
     <div>
-      <mat-form-field color="accent" appearance="outline" fxFill>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
         <mat-label>Roles</mat-label>
         <mtx-select [items]="roles" multiple formControlName="roles" closeOnSelect="false"
         appendTo=".ng-select-anchor"></mtx-select>
@@ -77,7 +77,7 @@
 
     @if ($safeNavigationMigration(rule?.errors) !== null && $safeNavigationMigration(rule?.errors) !== undefined && (rule?.errors?.length || 0) > 0) {
       <div>
-        <mat-form-field color="accent" appearance="outline" fxFill disabled="">
+        <mat-form-field color="accent" appearance="outline" class="ly-fill" disabled="">
           <mat-label>Errors</mat-label>
           <textarea matInput [value]="(rule?.errors || []).join('\n')" cdkTextareaAutosize cdkAutosizeMinRows="1"
           disabled></textarea>
@@ -87,12 +87,12 @@
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
-        <mat-panel-title fxFlex>Details</mat-panel-title>
+        <mat-panel-title class="ly-flex">Details</mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
 
         <div>
-          <mat-form-field color="accent" appearance="outline" fxFill>
+          <mat-form-field color="accent" appearance="outline" class="ly-fill">
             <mat-label>Group</mat-label>
             <input matInput formControlName="group" required>
             <mat-error senergyError label="Group"></mat-error>
@@ -100,7 +100,7 @@
         </div>
 
         <div>
-          <mat-form-field color="accent" appearance="outline" fxFill>
+          <mat-form-field color="accent" appearance="outline" class="ly-fill">
             <mat-label>Priority</mat-label>
             <input matInput formControlName="priority" required type="number">
             <mat-error senergyError label="Priority"></mat-error>
@@ -108,7 +108,7 @@
         </div>
 
         <div>
-          <mat-form-field color="accent" appearance="outline" fxFill>
+          <mat-form-field color="accent" appearance="outline" class="ly-fill">
             <mat-label>Command Template</mat-label>
             <textarea matInput formControlName="command_template" required cdkTextareaAutosize
             cdkAutosizeMinRows="5"></textarea>
@@ -117,7 +117,7 @@
         </div>
 
         <div>
-          <mat-form-field color="accent" appearance="outline" fxFill>
+          <mat-form-field color="accent" appearance="outline" class="ly-fill">
             <mat-label>Delete Template</mat-label>
             <textarea matInput formControlName="delete_template" cdkTextareaAutosize
             cdkAutosizeMinRows="1"></textarea>
@@ -130,7 +130,7 @@
 </mat-dialog-content>
 
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
   @if (editable) {
     <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>

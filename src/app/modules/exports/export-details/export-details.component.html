@@ -18,7 +18,7 @@
   <div class="button-header background-color-accent">
     <button mat-icon-button (click)="goBack()" matTooltip="Back"><mat-icon>arrow_back</mat-icon></button>
   </div>
-  <div fxLayout="column" class="layout-margin">
+  <div class="layout-margin ly-column">
     @if (ready) {
       <mat-card appearance="outlined" style="margin-bottom:8px;">
         <mat-card-header>
@@ -122,8 +122,8 @@
         </mat-card-header>
         <mat-card-content>
           @if (lastValuesReady) {
-            <div fxLayout="column">
-              <div fxLayout="row">
+            <div class="ly-column">
+              <div class="ly-row">
                 <table mat-table [dataSource]="export.Values">
                   <ng-container matColumnDef="Name">
                     <th mat-header-cell *matHeaderCellDef> {{brokerMode ? 'Subtopic' : 'Name'}}</th>

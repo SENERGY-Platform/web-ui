@@ -17,7 +17,7 @@
 <h2 mat-dialog-title>Schedule</h2>
 
 <mat-dialog-content>
-    <div fxLayout="column" [formGroup]="form">
+    <div class="ly-column" [formGroup]="form">
         <mat-slide-toggle color="accent" class="toggle-padding" formControlName="enable">Enable</mat-slide-toggle>
 
         <mat-form-field class="full-width" appearance="outline" color="accent">
@@ -52,7 +52,7 @@
     </div>
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end center">
+<mat-dialog-actions class="ly-row ly-align-end-center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" [disabled]="this.form.invalid || !daySelected()"
         (click)="save()">Save</button>

@@ -46,10 +46,12 @@
     padding-right: 8px;
 }
 
-.tree-panel-large {
-    width: 340px;
-    min-width: 340px;
-    height: calc(100vh - 260px);
+@media screen and (min-width: 600px) {
+    .tree-panel {
+        width: 340px;
+        min-width: 340px;
+        height: calc(100vh - 260px);
+    }
 }
 
 .tree-invisible {
@@ -104,9 +106,11 @@
 
 /* Side-by-side layout only: without a bound, overflow:auto never scrolls -- the
    panel grows past the app shell and the shell cuts the bottom off instead.
-   Same bound as .tree-panel-large, so both columns end on one line. */
-.node-editor-panel-large {
-    max-height: calc(100vh - 260px);
+   Same bound as the tree panel, so both columns end on one line. */
+@media screen and (min-width: 600px) {
+    .node-editor-panel {
+        max-height: calc(100vh - 260px);
+    }
 }
 
 .node-problems {

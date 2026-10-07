@@ -18,7 +18,7 @@
   <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
   <mat-card-content class="content-size drag-handler">
     @if (!configured) {
-      <div fxFill fxLayout="row" fxLayoutAlign="center center">
+      <div class="ly-fill ly-row ly-align-center-center">
         Please configure widget!
       </div>
     }
@@ -28,13 +28,12 @@
       </senergy-fit-text>
     }
     @if (configured && ready && !error && zoom) {
-      <div class="content-box" fxLayout="row"
+      <div class="content-box ly-row"
         [@animate]="{value: animationState, params: {marginLeft: marginLeft}}">
         @for (sv of svList; track sv; let i = $index) {
-          <div fxLayout="column"
+          <div class="ly-column ly-align-center-center"
             [ngClass]="{'side-value': i !== svListIndex}"
-            [class]="timestampAgeClass"
-            fxLayoutAlign="center center" (wheel)="wheel($event)">
+            [class]="timestampAgeClass" (wheel)="wheel($event)">
             @if (zoom) {
               <senergy-single-value-value [color]="highlightColor" [sv]="sv" [widget]="widget"></senergy-single-value-value>
             }
@@ -68,8 +67,8 @@
       </div>
     }
     @if (zoom) {
-      <div class="datepick">
-        <mat-form-field appearance="outline" fxFlex color="accent">
+      <div class="datepick ly-row">
+        <mat-form-field appearance="outline" class="ly-flex" color="accent">
           <mat-label>Date</mat-label>
           <input placeholder="Select a Date" type="datetime-local" matInput [formControl]="dateControl">
           <mat-error senergyError label="Date"></mat-error>

@@ -15,24 +15,24 @@
   -->
 <div class="main-panel">
   <senergy-spinner [show]="!ready"></senergy-spinner>
-  <div [hidden]="!ready" class="layout-margin" fxLayout="column" [fxShow]="ready">
+  <div [hidden]="!ready" class="layout-margin ly-column" [class.ly-hidden]="viewInitialized && !ready">
     @if (flow.dateCreated !== undefined) {
-      <div fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
+      <div class="ly-row ly-align-end-center" style="margin-bottom: 10px;">
         <mat-icon>calendar_today</mat-icon>{{flow.dateCreated| date:"medium"}}
         <mat-icon style="margin-left: 6px;">update</mat-icon>{{flow.dateUpdated| date:"medium"}}
       </div>
     }
-    <mat-form-field fxFill color="accent" appearance="outline">
+    <mat-form-field class="ly-fill" color="accent" appearance="outline">
       <mat-label>Name</mat-label>
       <input matInput [(ngModel)]="flow.name">
       <mat-error senergyError label="Name"></mat-error>
     </mat-form-field>
-    <mat-form-field fxFill color="accent" appearance="outline">
+    <mat-form-field class="ly-fill" color="accent" appearance="outline">
       <mat-label>Description</mat-label>
       <input matInput [(ngModel)]="flow.description">
       <mat-error senergyError label="Description"></mat-error>
     </mat-form-field>
-    <div fxLayout="row">
+    <div class="ly-row">
       <div id="senergy-diagram-editor" style="width: 70%">
         <senergy-diagram-editor></senergy-diagram-editor>
       </div>
