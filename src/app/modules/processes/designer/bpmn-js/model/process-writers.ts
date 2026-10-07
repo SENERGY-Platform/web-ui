@@ -204,16 +204,17 @@ export function getPayload(connectorInfo: any, input: boolean): string {
     );
 }
 
+// a controlling task may name a device class, aspects, or both; the name carries whatever it names
 export function getTaskName(connectorInfo: any, currentName: string): string {
-    let name = currentName;
-    if (connectorInfo.device_class !== null) {
-        name = connectorInfo.device_class.name;
-    } else {
-        const label = aspectsLabel(connectorInfo);
-        if (label !== undefined) {
-            name = label;
-        }
+    const parts: string[] = [];
+    if (connectorInfo.device_class) {
+        parts.push(connectorInfo.device_class.name);
     }
+    const label = aspectsLabel(connectorInfo);
+    if (label !== undefined) {
+        parts.push(label);
+    }
+    const name = parts.length > 0 ? parts.join(' ') : currentName;
     return name + ' ' + connectorInfo.function.name;
 }
 

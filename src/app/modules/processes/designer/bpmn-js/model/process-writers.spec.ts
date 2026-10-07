@@ -127,6 +127,16 @@ describe('process writers: task name', () => {
         expect(getTaskName(connectorInfo({ function: controlling, device_class: deviceClass }), 'Task')).toBe('Lamp Set On');
     });
 
+    it('names device class and aspects of a controlling task', () => {
+        expect(getTaskName(connectorInfo({ function: controlling, device_class: deviceClass, aspect: air, aspects: [air] }), 'Task')).toBe(
+            'Lamp Air Set On',
+        );
+    });
+
+    it('names the aspects of a controlling task without device class', () => {
+        expect(getTaskName(connectorInfo({ function: controlling, aspect: air, aspects: [air] }), 'Task')).toBe('Air Set On');
+    });
+
     it('names a single aspect as before', () => {
         expect(getTaskName(connectorInfo({ aspect: air, aspects: [air] }), 'Task')).toBe('Air Get Temperature');
     });

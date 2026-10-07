@@ -170,3 +170,40 @@ describe('DeviceTypeService import-type criteria', () => {
         expect(listImportTypes).not.toHaveBeenCalled();
     });
 });
+
+describe('DeviceTypeService aspect-nodes of both function types', () => {
+    let service: DeviceTypeService;
+    let httpMock: HttpTestingController;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule, MatSnackBarModule],
+            providers: [
+                DeviceTypeService,
+                { provide: LadonService, useClass: MockLadonService },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
+        service = TestBed.inject(DeviceTypeService);
+        httpMock = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+        httpMock.verify();
+    });
+
+    it('offers the aspects of measuring and of controlling functions once each', () => {
+        let ids: string[] = [];
+        service.getAspectNodesWithFunctionOfDevicesOnly().subscribe((nodes) => (ids = nodes.map((node) => node.id)));
+        httpMock.expectOne(environment.deviceRepoUrl + '/aspect-nodes?function=measuring-function').flush([{ id: 'air' }, { id: 'water' }]);
+        httpMock.expectOne(environment.deviceRepoUrl + '/aspect-nodes?function=controlling-function').flush([{ id: 'air' }, { id: 'light' }]);
+        expect(ids).toEqual(['air', 'water', 'light']);
+    });
+
+    it('asks for the controlling functions of an aspect', () => {
+        service.getAspectsControllingFunctions('air').subscribe();
+        httpMock.expectOne(environment.deviceRepoUrl + '/aspects/air/controlling-functions').flush([]);
+    });
+});

@@ -38,7 +38,7 @@ describe('process element aspects', () => {
             expect(selectedAspectNodes({ aspect: air, aspects: [inside, air] })).toEqual([air, inside]);
         });
 
-        it('is empty for a controlling task, which has no aspect', () => {
+        it('is empty for a task without aspect', () => {
             expect(selectedAspectNodes({ aspect: null })).toEqual([]);
             expect(selectedAspectNodes({ aspect: null, aspects: [] })).toEqual([]);
             expect(selectedAspectNodes(undefined)).toEqual([]);

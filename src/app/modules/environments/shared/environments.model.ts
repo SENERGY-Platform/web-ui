@@ -311,7 +311,32 @@ export interface Environment {
      * PATCH .../state (an unchanged value is still accepted, so the GET->PATCH round trip works).
      */
     timeline?: DatedChange[];
+    /**
+     * Quantities known only as the sum of their members (e.g. all outgoing feeders supplied jointly
+     * by grid, PV, battery and CHP) in the meter graph. An asset is a member by naming the group's
+     * id in its meter_parents; a group id must not equal an asset or zone id.
+     */
+    meter_groups?: MeterGroup[];
+    /** Read-only, assigned by the server: the mirrored meter graph, next to the one for the location tree. */
+    external_meter_graph_ref?: string;
     zones?: Zone[];
+}
+
+/** An edge of the meter graph from a meter group or an asset to the parent meter that supplies it. */
+export interface MeterParent {
+    /** An asset id or a meter group id. */
+    id: string;
+    /** 1..100. Either every parent of a node carries one (and they sum to 100) or none does, which splits equally. */
+    weight?: number;
+    /** Marks a medium change along this edge (gas to heat, gas to electricity, heat to water). */
+    conversion?: boolean;
+}
+
+export interface MeterGroup {
+    id: string;
+    name: string;
+    /** At least one; the group's members and these assets must lie in one top level zone. */
+    parents: MeterParent[];
 }
 
 /** One entry of Environment.timeline. target is drawn from a closed, server-validated grammar. */
@@ -355,6 +380,8 @@ export interface Asset {
     channels?: Channel[];
     /** Id of the asset whose meter also captures this one. Empty means this asset attaches to its zone directly (docs/submetering.md). */
     submetered_by?: string;
+    /** Parent meters in the meter graph. Empty means the meter graph follows submetered_by. */
+    meter_parents?: MeterParent[];
 }
 
 export interface Channel {
@@ -850,12 +877,13 @@ export interface ShareTargets {
 /**
  * The device-sharing set of an environment: GET/PUT .../shares. graph_writers is the part of
  * users/groups that also gets write on the graph; sent, it replaces the stored writers, omitted it
- * keeps them. devices and graph are response-only.
+ * keeps them. devices, graph and meter_graph are response-only; graph_writers applies to both graphs.
  */
 export interface EnvironmentShares extends ShareTargets {
     graph_writers?: ShareTargets;
     devices?: number;
     graph?: boolean;
+    meter_graph?: boolean;
 }
 
 /** One device permissions-v2 could not update, from a 502 PUT .../shares response. */

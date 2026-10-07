@@ -290,6 +290,16 @@ const completer = {
         } else {
             callback(null, [
                 {
+    caption: 'console.dump',
+    value: 'console.dump()',
+    meta: 'static'
+},
+{
+    caption: 'console.log',
+    value: 'console.log(args_as_any)',
+    meta: 'static'
+},
+{
     caption: 'outputs.set',
     value: 'outputs.set(name_as_string, value_as_any)',
     meta: 'static'

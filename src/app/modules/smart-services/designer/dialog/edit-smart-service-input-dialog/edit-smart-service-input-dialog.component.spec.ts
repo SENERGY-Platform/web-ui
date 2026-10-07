@@ -106,7 +106,7 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
     ): EditSmartServiceInputDialogComponent {
         dialogRef = createSpyFromClass<MatDialogRef<EditSmartServiceInputDialogComponent>>(MatDialogRef);
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
-        deviceTypeService.getAspectNodesWithMeasuringFunctionOfDevicesOnly.and.returnValue(of(listing));
+        deviceTypeService.getAspectNodesWithFunctionOfDevicesOnly.and.returnValue(of(listing));
         const functionsService = createSpyFromClass(FunctionsService);
         functionsService.getFunctions.and.returnValue(of({ result: [], total: 0 }));
         const deviceClassesService = createSpyFromClass(DeviceClassesService);

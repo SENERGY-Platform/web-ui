@@ -396,3 +396,25 @@
     align-self: flex-start;
     margin-bottom: 16px;
 }
+
+.meter-group {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.meter-group-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.meter-group-name-field {
+    flex: 1 1 auto;
+}
+
+.add-meter-group-button {
+    align-self: flex-start;
+    margin-bottom: 16px;
+}

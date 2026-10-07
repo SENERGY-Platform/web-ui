@@ -16,6 +16,44 @@
 
 import { Environment, Zone } from './environments.model';
 
+/** Every set weight of a meter parent in the document, groups first, with the path the server would report it under. */
+function meterWeights(env: Environment): { path: string; weight: number }[] {
+    const weights: { path: string; weight: number }[] = [];
+    (env.meter_groups || []).forEach((group, groupIndex) => {
+        (group.parents || []).forEach((parent, parentIndex) => {
+            if (parent.weight !== undefined) {
+                weights.push({ path: 'meter_groups[' + groupIndex + '].parents[' + parentIndex + '].weight', weight: parent.weight });
+            }
+        });
+    });
+    const walk = (zones: Zone[] | undefined, prefix: string): void => {
+        (zones || []).forEach((zone, zoneIndex) => {
+            const zonePath = prefix + 'zones[' + zoneIndex + ']';
+            (zone.assets || []).forEach((asset, assetIndex) => {
+                (asset.meter_parents || []).forEach((parent, parentIndex) => {
+                    if (parent.weight !== undefined) {
+                        weights.push({ path: zonePath + '.assets[' + assetIndex + '].meter_parents[' + parentIndex + '].weight', weight: parent.weight });
+                    }
+                });
+            });
+            walk(zone.zones, zonePath + '.');
+        });
+    };
+    walk(env.zones, '');
+    return weights;
+}
+
+/**
+ * Meter parent weights outside 1..100, as document paths. The server reads a weight of 0 as
+ * "not set" and silently splits equally, so the entered value would vanish on reload; a
+ * negative or larger one is refused. NaN counts as outside.
+ */
+export function findOutOfRangeMeterWeights(env: Environment): string[] {
+    return meterWeights(env)
+        .filter(({ weight }) => !(weight >= 1 && weight <= 100))
+        .map(({ path }) => path);
+}
+
 /**
  * Fields the server stores as an int64 and rejects outright on a non-integer value, with
  * an opaque json.Unmarshal error (e.g. "cannot unmarshal number 900.5 into ... int64")
@@ -34,6 +72,12 @@ export function findNonIntegerFields(env: Environment): string[] {
     Object.entries(env.context_sources || {}).forEach(([key, source]) => {
         if (source.interval_seconds !== undefined && !Number.isInteger(source.interval_seconds)) {
             problems.push('context_sources.' + key + '.interval_seconds');
+        }
+    });
+
+    meterWeights(env).forEach(({ path, weight }) => {
+        if (!Number.isInteger(weight)) {
+            problems.push(path);
         }
     });
 

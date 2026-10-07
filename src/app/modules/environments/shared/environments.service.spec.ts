@@ -447,7 +447,7 @@ describe('EnvironmentsService', () => {
     });
 
     it('should serve the graph writers of a share set as the server sent them', (done) => {
-        const shares: EnvironmentShares = { users: ['u1'], groups: ['/demo'], graph_writers: { users: ['u1'], groups: [] }, devices: 3, graph: true };
+        const shares: EnvironmentShares = { users: ['u1'], groups: ['/demo'], graph_writers: { users: ['u1'], groups: [] }, devices: 3, graph: true, meter_graph: true };
         service.getShares('e1').subscribe(resp => {
             expect(resp).toEqual(shares);
             done();
@@ -460,13 +460,13 @@ describe('EnvironmentsService', () => {
     it('should PUT the share set with its graph writers unchanged', (done) => {
         const shares: EnvironmentShares = { users: ['u1'], groups: ['/demo'], graph_writers: { users: ['u1'], groups: ['/demo'] } };
         service.setShares('e1', shares).subscribe(resp => {
-            expect(resp).toEqual({ ...shares, devices: 3, graph: true });
+            expect(resp).toEqual({ ...shares, devices: 3, graph: true, meter_graph: true });
             done();
         });
         const req = httpMock.expectOne(environmentsUrl + '/e1/shares');
         expect(req.request.method).toBe('PUT');
         expect(req.request.body).toEqual(shares);
-        req.flush({ ...shares, devices: 3, graph: true });
+        req.flush({ ...shares, devices: 3, graph: true, meter_graph: true });
     });
 
     it('should list datasets with a GET on /datasets', (done) => {

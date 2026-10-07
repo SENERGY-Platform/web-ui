@@ -224,7 +224,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.deviceClasses = value.result;
         });
-        this.deviceTypesService.getAspectNodesWithMeasuringFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
+        this.deviceTypesService.getAspectNodesWithFunctionOfDevicesOnly().subscribe((nodes: DeviceTypeAspectNodeModel[]) => {
             this.aspectNodes = nodes;
             this.aspectNames = new Map(nodes.map((node) => [node.id, node.name]));
             // offered under its id rather than dropped: the watcher criteria are written back whole on save

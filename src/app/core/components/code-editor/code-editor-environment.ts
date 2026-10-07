@@ -61,13 +61,14 @@ export interface CodeEditorScriptEnvironment {
  * TypeScript but absent from goja. Per-version granularity is the price of having
  * TypeScript maintain the list instead of us.
  *
- * Note the host registers nothing beyond the injected namespaces: no console, no
- * require, no setTimeout. Scripts also get interrupted after 2 seconds.
+ * Note the host registers nothing beyond the injected namespaces: no require, no
+ * setTimeout, and console only where the host injects one itself, as the
+ * smart-service workers do. Scripts also get interrupted after 2 seconds.
  */
 export const gojaScriptEnvironment: CodeEditorScriptEnvironment = {
     libs: ['es2020'],
     // the injected namespaces are the entire global surface and are declared in full,
-    // so an unknown name here really is a mistake -- console.log being the common one
+    // so an unknown name here really is a mistake -- setTimeout being a common one
     diagnostics: true,
 };
 

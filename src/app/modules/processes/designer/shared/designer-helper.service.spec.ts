@@ -215,6 +215,30 @@ describe('DesignerHelperService.checkConstraints device-type filter', () => {
         ]);
     });
 
+    it('asks for the device class and the aspects of a controlling task', () => {
+        expect(filterFor(externalTask({ function: on, device_class: lamp, aspect: air, aspects: [air, water] }))).toEqual([
+            { function_id: on.id, device_class_id: lamp.id, aspect_id: air.id, aspect_ids: [air.id, water.id] },
+        ]);
+    });
+
+    it('asks for the aspects of a controlling task without device class', () => {
+        expect(filterFor(externalTask({ function: on, device_class: null, aspect: air, aspects: [air] }))).toEqual([
+            { function_id: on.id, device_class_id: '', aspect_id: air.id, aspect_ids: [air.id] },
+        ]);
+    });
+
+    it('holds only controlling tasks naming a device class to the device class of the lane', () => {
+        expect(
+            filterFor(
+                externalTask({ function: on, device_class: null, aspect: air, aspects: [air] }),
+                externalTask({ function: on, device_class: lamp, aspect: null }),
+            ),
+        ).toEqual([
+            { function_id: on.id, device_class_id: '', aspect_id: air.id, aspect_ids: [air.id] },
+            { function_id: on.id, device_class_id: lamp.id, aspect_id: '' },
+        ]);
+    });
+
     it('reports a missing device type for a measuring task', () => {
         const deviceTypeService = jasmine.createSpyObj('DeviceTypeService', ['getDeviceTypeFiltered']);
         deviceTypeService.getDeviceTypeFiltered.and.returnValue(of([]));

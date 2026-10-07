@@ -352,6 +352,17 @@ describe('EnvironmentsShareDialogComponent graph writer checkbox', () => {
         expect(environmentsService.setCalls[0].shares.graph_writers).toEqual({ users: [], groups: ['/demo'] });
     });
 
+    it('should say the sharing covers the location graph and the meter graph, and that the writer checkbox applies to both', () => {
+        const fixture = render({ users: ['u1'], groups: ['/demo'], meter_graph: true, graph: true });
+        const element: HTMLElement = fixture.nativeElement;
+        const hint = element.querySelector('.hint')!.textContent ?? '';
+        expect(hint).toContain('location graph and the meter graph');
+        expect(hint).toContain('write on both graphs');
+        expect(hint).toContain('The checkbox "may edit the graphs"');
+        const labels = Array.from(element.querySelectorAll('mat-checkbox.graph-writer')).map(box => box.textContent?.trim());
+        expect(labels).toEqual(['may edit the graphs', 'may edit the graphs']);
+    });
+
     it('should show the load error instead of an empty set and disable Save', () => {
         const fixture = render(null);
         const element: HTMLElement = fixture.nativeElement;

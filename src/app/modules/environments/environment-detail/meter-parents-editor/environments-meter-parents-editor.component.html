@@ -1,0 +1,118 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+@for (msg of listProblemMessages(); track msg) {
+  <p class="list-problem"><mat-icon color="warn">error</mat-icon> {{ msg }}</p>
+}
+
+@for (parent of parents; track trackByParent(i, parent); let i = $index) {
+  <div
+    class="meter-parent-row"
+    [class.problem-row]="rowProblems(i).length > 0 || !!weightProblem(parent)"
+  >
+    <div class="meter-parent-row-fields">
+      <mat-form-field
+        appearance="outline"
+        color="accent"
+        class="meter-parent-target-field"
+      >
+        <mat-label>Parent</mat-label>
+        <mtx-select
+          [items]="displayOptions"
+          bindValue="id"
+          bindLabel="label"
+          [clearable]="false"
+          [ngModel]="parent.id || null"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="setTarget(parent, $event)"
+          appendTo=".ng-select-anchor"
+        >
+        </mtx-select>
+        @if (!parent.id) {
+          <mat-hint
+            >Pick the meter or meter group that supplies this one.</mat-hint
+          >
+        }
+      </mat-form-field>
+      <mat-form-field
+        appearance="outline"
+        color="accent"
+        class="meter-parent-weight-field"
+      >
+        <mat-label>Weight</mat-label>
+        <input
+          matInput
+          type="number"
+          step="1"
+          min="1"
+          max="100"
+          [ngModel]="parent.weight"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="setWeight(parent, $event)"
+        />
+        <mat-icon
+          matSuffix
+          class="inline-help-icon"
+          matTooltip="Share of this node that this parent carries, 1 to 100. Leave empty on every parent to split equally; otherwise set all of them, adding up to 100."
+          >help_outline</mat-icon
+        >
+      </mat-form-field>
+      <mat-checkbox
+        class="meter-parent-conversion"
+        [checked]="!!parent.conversion"
+        (change)="setConversion(parent, $event.checked)"
+        matTooltip="The parent supplies another medium than this node uses, e.g. gas to heat, gas to electricity or heat to water."
+      >
+        Medium change
+      </mat-checkbox>
+      <span class="meter-parent-row-actions">
+        <button
+          mat-icon-button
+          type="button"
+          color="warn"
+          matTooltip="Remove parent"
+          (click)="remove(i)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </span>
+    </div>
+    @if (rowProblems(i).length > 0 || weightProblem(parent)) {
+      <div class="meter-parent-row-problems">
+        @if (weightProblem(parent); as msg) {
+          <div class="meter-parent-row-problem">
+            <mat-icon color="warn">error</mat-icon>
+            <span>weight: {{ msg }}</span>
+          </div>
+        }
+        @for (p of rowProblems(i); track p) {
+          <div class="meter-parent-row-problem">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{ p.field ? p.field + ": " : "" }}{{ p.message }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}
+
+@if (weightHint(); as hint) {
+  <p class="weight-hint"><mat-icon>info</mat-icon> {{ hint }}</p>
+}
+
+<button mat-stroked-button color="accent" type="button" (click)="add()">
+  <mat-icon>add</mat-icon> Add parent
+</button>

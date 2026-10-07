@@ -23,6 +23,7 @@ import { MatExpansionPanel } from '@angular/material/expansion';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
 import { Subscription, timer } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 import { switchMap } from 'rxjs/operators';
 import { EnvironmentsService } from '../shared/environments.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
@@ -54,6 +55,8 @@ import {
     Fault,
     isApiError,
     isValidationError,
+    MeterGroup,
+    MeterParent,
     Problem,
     Source,
     SourceKind,
@@ -68,7 +71,7 @@ import {
 import { buildEffectsLocationIndex, EnvTreeNode, buildEnvironmentTree, findNodeByKey, locationKey, pathToKey, topLevelZoneNames } from '../shared/environments-tree';
 import { locationContains, NodeProblem, ProblemPath, problemPath, sameLocation } from '../shared/environments-path';
 import { applySourceKind } from '../shared/environments-source';
-import { findNonIntegerFields } from '../shared/environments-integrity';
+import { findNonIntegerFields, findOutOfRangeMeterWeights } from '../shared/environments-integrity';
 import { countPendingPlatformDevices } from '../shared/environments-count';
 import { ownerDisplay } from '../shared/environments-format';
 import { assetFromDeviceType } from '../shared/environments-device';
@@ -92,6 +95,12 @@ import {
 import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
 import { submeteredChildren, SubmeteredChild, submeteringTargets, SubmeteringOption } from '../shared/environments-submetering';
+import {
+    countMeterReferences,
+    meterGroupParentTargets,
+    meterParentTargets,
+    removeMeterReferences,
+} from '../shared/environments-meter-graph';
 import { TIMELINE_DEFAULT_PAGE_SIZE } from './timeline-editor/environments-timeline-editor.component';
 
 /** One zone or asset row in the Live state tab: the suggested defaults, the working draft and which keys the user actually touched. */
@@ -177,6 +186,11 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
      * its panel was still open.
      */
     submeteringOptions: SubmeteringOption[] = [];
+    /** What the selected asset's meter_parents can name: submeteringOptions plus every meter group. Same recompute discipline as submeteringOptions. */
+    meterParentOptions: SubmeteringOption[] = [];
+    /** What each meter group's parents can name, by group id; computed together with meterParentOptions, for the same ng-select reason. */
+    meterGroupParentOptions = new Map<string, SubmeteringOption[]>();
+    readonly noOptions: SubmeteringOption[] = [];
     /** For an aggregate channel: every asset that sums into it. Same recompute discipline as submeteringOptions. */
     selectedAggregateChildren: SubmeteredChild[] = [];
     /**
@@ -492,6 +506,11 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             this.snackBar.open('These fields must be whole numbers: ' + nonIntegerFields.join(', '), 'close', { panelClass: 'snack-bar-error' });
             return;
         }
+        const badWeights = findOutOfRangeMeterWeights(this.environment);
+        if (badWeights.length > 0) {
+            this.snackBar.open('These meter parent weights must be whole numbers from 1 to 100: ' + badWeights.join(', '), 'close', { panelClass: 'snack-bar-error' });
+            return;
+        }
         // Counted from the document as it is about to be sent, not from the server's answer:
         // that answer arrives already updated with the new external_refs, so by then there
         // is nothing left to compare against.
@@ -682,6 +701,69 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.markDirty();
     }
 
+    /** parentsChange handler for the asset's Meter parents editor: an empty list deletes the field, since empty means the meter graph follows submetered_by. */
+    setMeterParents(asset: Asset, parents: MeterParent[]): void {
+        if (parents.length === 0) {
+            delete asset.meter_parents;
+        } else {
+            asset.meter_parents = parents;
+        }
+        this.markDirty();
+    }
+
+    /** parentsRestructured handler of either parents editor: a row added or removed shifts the server's index-based problems, see afterStructuralChange. */
+    onMeterParentsRestructured(): void {
+        this.afterStructuralChange();
+    }
+
+    addMeterGroup(env: Environment): void {
+        if (!env.meter_groups) {
+            env.meter_groups = [];
+        }
+        env.meter_groups.push({ id: uuid(), name: 'New meter group', parents: [] });
+        this.afterStructuralChange();
+    }
+
+    /** ngModelChange handler for a meter group's Name field: its name is part of the option label an asset's Meter parents select shows. */
+    onMeterGroupNameChange(): void {
+        this.markDirty();
+        this.refreshSubmeteringData();
+    }
+
+    setMeterGroupParents(group: MeterGroup, parents: MeterParent[]): void {
+        group.parents = parents;
+        this.markDirty();
+    }
+
+    trackByMeterGroup(_index: number, group: MeterGroup): MeterGroup {
+        return group;
+    }
+
+    /** Removes the group and, after confirming, every meter_parents entry anywhere that names it. */
+    removeMeterGroup(env: Environment, group: MeterGroup): void {
+        const referenceCount = countMeterReferences(env, [group.id]);
+        const note =
+            referenceCount === 0
+                ? undefined
+                : (referenceCount === 1 ? '1 asset or meter group lists' : referenceCount + ' assets or meter groups list') +
+                  ' this group as a meter parent. Deleting it removes those entries.';
+        this.dialogsService
+            .openDeleteDialog('meter group "' + (group.name || group.id) + '"', note ? { note } : undefined)
+            .afterClosed()
+            .subscribe((result: boolean | DeleteDialogResponse) => {
+                const confirmed = typeof result === 'boolean' ? result : result?.confirmed;
+                if (!confirmed) {
+                    return;
+                }
+                removeMeterReferences(env, [group.id]);
+                env.meter_groups = (env.meter_groups || []).filter((g) => g !== group);
+                if (env.meter_groups.length === 0) {
+                    delete env.meter_groups;
+                }
+                this.afterStructuralChange();
+            });
+    }
+
     /** ngModelChange handler for a zone's Name field: its name can appear in another asset's submeteringOptions label. */
     onZoneNameChange(): void {
         this.markDirty();
@@ -746,6 +828,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         // Assets elsewhere in the document naming one of those ids as their meter, so the
         // dialog can warn before those references go stale.
         const submeteredCount = this.countExternalSubmeteredReferences(deletedAssetIds);
+        // Same for the meter graph: assets and meter groups elsewhere listing one of them as a meter parent.
+        const meterReferenceCount = countMeterReferences(this.environment, deletedAssetIds, deletedAssetIds);
         // Honest about what the checkbox would actually do: a device the simulation created
         // itself is safe to remove along with the asset, but one the user linked is a real
         // platform device that happens to still exist after the asset is gone -- offering the
@@ -763,12 +847,19 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                   }
             : undefined;
         const countPhrase = submeteredCount === 1 ? '1 asset is' : submeteredCount + ' assets are';
-        const note =
+        const submeteredNote =
             submeteredCount === 0
                 ? undefined
                 : node.kind === 'zone'
                     ? countPhrase + ' sub-metered by assets in this zone; ' + (submeteredCount === 1 ? 'its' : 'their') + ' reference is cleared.'
                     : countPhrase + ' sub-metered by this asset. Deleting it clears their Sub-metered by field.';
+        const meterNote =
+            meterReferenceCount === 0
+                ? undefined
+                : (meterReferenceCount === 1 ? '1 asset or meter group lists' : meterReferenceCount + ' assets or meter groups list') +
+                  (node.kind === 'zone' ? ' assets in this zone' : ' this asset') +
+                  ' as a meter parent. Deleting removes those entries.';
+        const note = [submeteredNote, meterNote].filter((part) => !!part).join(' ') || undefined;
         const options: DeleteDialogOptions | undefined = checkboxOptions || note ? { ...checkboxOptions, note } : undefined;
         this.dialogsService
             .openDeleteDialog(node.kind + ' "' + name + '"', options)
@@ -785,6 +876,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                 // was deleted (its removal shifts every later sibling's index/key).
                 this.selectedKey = this.parentKeyOf(node);
                 this.clearSubmeteredBy(deletedAssetIds);
+                removeMeterReferences(this.environment, deletedAssetIds);
                 this.removeNode(node);
                 this.afterStructuralChange();
                 if (alsoDeleteDevice && deviceId) {
@@ -1310,14 +1402,19 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.formulaEntries = Object.entries(inputs).map(([name, ref]) => ({ name, ref }));
     }
 
-    /** (Re)computes submeteringOptions/selectedAggregateChildren for the current selection -- see their field comments for why these are stored fields, not getters. */
+    /** (Re)computes submeteringOptions/selectedAggregateChildren and the meter graph's target lists for the current selection -- see their field comments for why these are stored fields, not getters. */
     private refreshSubmeteringData(): void {
+        this.meterGroupParentOptions = new Map(
+            (this.environment?.meter_groups || []).map((group) => [group.id, meterGroupParentTargets(this.environment!, group.id)]),
+        );
         if (!this.environment || !this.selectedNode) {
             this.submeteringOptions = [];
+            this.meterParentOptions = [];
             this.selectedAggregateChildren = [];
             return;
         }
         this.submeteringOptions = submeteringTargets(this.environment, this.selectedNode.location);
+        this.meterParentOptions = meterParentTargets(this.environment, this.selectedNode.location);
         const asset = this.assetAt(this.selectedNode.location);
         this.selectedAggregateChildren = asset ? submeteredChildren(this.environment, asset, this.selectedChannel?.characteristic_id) : [];
     }
