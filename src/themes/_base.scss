@@ -72,8 +72,37 @@
       outlined-label-text-color: var(--mat-sys-on-surface),
       outlined-state-layer-color: var(--mat-sys-on-surface),
     ));
+    // The layouts were built around the M2 sizes: 36px buttons, 48px icon buttons, 48px toggles and tree rows, flush menu dividers.
+    @include mat.button-overrides((
+      filled-container-height: 36px,
+      outlined-container-height: 36px,
+      protected-container-height: 36px,
+      text-container-height: 36px,
+      tonal-container-height: 36px,
+      filled-horizontal-padding: 16px,
+      outlined-horizontal-padding: 15px,
+      protected-horizontal-padding: 16px,
+      tonal-horizontal-padding: 16px,
+      text-horizontal-padding: 8px,
+      text-with-icon-horizontal-padding: 8px,
+      filled-label-text-tracking: 0.0892857143em,
+      outlined-label-text-tracking: 0.0892857143em,
+      protected-label-text-tracking: 0.0892857143em,
+      text-label-text-tracking: 0.0892857143em,
+      tonal-label-text-tracking: 0.0892857143em,
+    ));
     // Icon buttons took the surrounding text colour, e.g. white on the designer toolbars.
-    @include mat.icon-button-overrides((icon-color: currentColor));
+    @include mat.icon-button-overrides((icon-color: currentColor, state-layer-size: 48px));
+    @include mat.button-toggle-overrides((height: 48px));
+    @include mat.tree-overrides((node-min-height: 48px));
+    @include mat.menu-overrides((
+      divider-top-spacing: 0,
+      divider-bottom-spacing: 0,
+      item-leading-spacing: 16px,
+      item-trailing-spacing: 16px,
+      item-with-icon-leading-spacing: 16px,
+      item-with-icon-trailing-spacing: 16px,
+    ));
 
     // mat.theme() omits the app-level shadow tokens that the mat-elevation-z* classes read.
     @for $z from 0 through 24 {
