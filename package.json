@@ -29,7 +29,7 @@
     "@asyncapi/web-component": "^2.6.3",
     "@bpmn-io/properties-panel": "^3.56.0",
     "@joint/core": "^4.3.3",
-    "@ng-matero/extensions": "^21.3.1",
+    "@ng-matero/extensions": "^22.1.1",
     "@ngbracket/ngx-layout": "^22.0.1",
     "@scalar/api-client": "^2.39.1",
     "@types/lodash": "^4.14.149",

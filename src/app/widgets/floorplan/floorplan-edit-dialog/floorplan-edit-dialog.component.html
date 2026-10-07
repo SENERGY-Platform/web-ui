@@ -177,7 +177,7 @@
                           <mat-label>Icon</mat-label>
                           <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo=".ng-select-anchor"
                             virtualScroll>
-                            <ng-template ng-label-tmp ng-option-tmp let-item="item" let-index="index" let-search="searchTerm">
+                            <ng-template ngSelectLabel ngSelectOption let-item="item" let-index="index" let-search="searchTerm">
                               <mat-icon [style.color]="c.value.color">{{item}}</mat-icon>
                             </ng-template>
                           </mtx-select>

@@ -97,7 +97,7 @@
                     <mat-label>Icon</mat-label>
                     <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input"
                       appendTo=".ng-select-anchor">
-                      <ng-template ng-label-tmp>
+                      <ng-template ngSelectLabel>
                         <mat-icon
                         [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
                       </ng-template>

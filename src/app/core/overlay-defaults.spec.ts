@@ -18,6 +18,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
 import { provideOverlayDefaults } from './overlay-defaults';
 
 @Component({
@@ -25,6 +26,15 @@ import { provideOverlayDefaults } from './overlay-defaults';
     changeDetection: ChangeDetectionStrategy.Eager,
 })
 class DialogContentComponent {}
+
+@Component({
+    template: '<mtx-select [items]="items"></mtx-select>',
+    imports: [MtxSelectModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+})
+class SelectHostComponent {
+    items = ['a', 'b'];
+}
 
 describe('provideOverlayDefaults', () => {
     it('opens dialogs outside the top layer, so body-anchored select panels can stack above them', () => {
@@ -35,5 +45,15 @@ describe('provideOverlayDefaults', () => {
         expect(pane).toBeTruthy();
         expect(pane.closest('[popover]')).toBeNull();
         ref.close();
+    });
+
+    it('keeps mtx-select panels out of the top layer and appends them to the body by default', () => {
+        TestBed.configureTestingModule({ imports: [SelectHostComponent, NoopAnimationsModule], providers: [provideOverlayDefaults()] });
+        const fixture = TestBed.createComponent(SelectHostComponent);
+        fixture.detectChanges();
+
+        const select = fixture.debugElement.query((el) => el.componentInstance instanceof MtxSelect).componentInstance as MtxSelect;
+        expect(select.usePopover).toBeFalse();
+        expect(select.appendTo).toBe('body');
     });
 });

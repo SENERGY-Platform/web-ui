@@ -16,11 +16,15 @@
 
 import { Provider } from '@angular/core';
 import { OVERLAY_DEFAULT_CONFIG } from '@angular/cdk/overlay';
+import { MTX_SELECT_DEFAULT_OPTIONS } from '@ng-matero/extensions/select';
 
 /**
- * Keeps CDK overlays (dialogs, menus) out of the browser's top layer. The mtx-select panels are
- * appended to .ng-select-anchor in the body, and nothing outside the top layer can stack above a popover.
+ * Keeps CDK overlays (dialogs, menus) and mtx-select panels out of the browser's top layer. The select
+ * panels are appended to .ng-select-anchor in the body, and nothing outside the top layer can stack above a popover.
  */
-export function provideOverlayDefaults(): Provider {
-    return { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } };
+export function provideOverlayDefaults(): Provider[] {
+    return [
+        { provide: OVERLAY_DEFAULT_CONFIG, useValue: { usePopover: false } },
+        { provide: MTX_SELECT_DEFAULT_OPTIONS, useValue: { usePopover: false, appendTo: 'body' } },
+    ];
 }

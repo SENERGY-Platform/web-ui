@@ -307,7 +307,7 @@ describe('TaskConfigDialogComponent', () => {
 
     describe('selection stored before functions and device classes were renamed', () => {
         const selectLabel = (index: number): string | undefined =>
-            fixture.nativeElement.querySelectorAll('mtx-select')[index]?.querySelector('.ng-value-label')?.textContent?.trim();
+            fixture.nativeElement.querySelectorAll('mtx-select')[index]?.querySelector('.ng-select-value-label')?.textContent?.trim();
 
         it('opens with the function selected by id and saves the current one', async () => {
             const stored = { ...temperature, name: 'Old Name' };
@@ -347,7 +347,7 @@ describe('TaskConfigDialogComponent', () => {
         const setColor = { ...fn('urn:infai:ses:controlling-function:set-color', 'Set-Color'), rdf_type: CONTROLLING };
 
         const label = (index: number): string | undefined =>
-            fixture.nativeElement.querySelectorAll('mtx-select')[index]?.querySelector('.ng-value-label')?.textContent?.trim();
+            fixture.nativeElement.querySelectorAll('mtx-select')[index]?.querySelector('.ng-select-value-label')?.textContent?.trim();
         const hints = (): string[] => Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('mat-hint')).map((h) => h.textContent?.trim() ?? '');
         async function settle() {
             fixture.detectChanges();

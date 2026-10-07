@@ -30,13 +30,13 @@
         <mat-label>Device Class</mat-label>
         <mtx-select [compareWith]="compare" [formControl]="deviceClassFormControl" [items]="deviceClasses"
           bindLabel="name" appendTo=".ng-select-anchor" [clearable]="true">
-          <ng-template ng-label-tmp let-item="item">
-            <span class="ng-value-label">{{item.name}}@if (item.id === unlistedDeviceClass?.id) {
+          <ng-template ngSelectLabel let-item="item">
+            <span class="ng-select-value-label">{{item.name}}@if (item.id === unlistedDeviceClass?.id) {
               <span class="not-offered"
               > (no longer offered)</span>
             }</span>
           </ng-template>
-          <ng-template ng-option-tmp let-item="item">
+          <ng-template ngSelectOption let-item="item">
             {{item.name}}@if (item.id === unlistedDeviceClass?.id) {
             <span class="not-offered"> (no longer offered)</span>
           }
@@ -61,13 +61,13 @@
       <mat-label>Function</mat-label>
       <mtx-select [compareWith]="compare" [formControl]="functionFormControl" required [items]="functions"
         bindLabel="name" appendTo=".ng-select-anchor">
-        <ng-template ng-label-tmp let-item="item">
-          <span class="ng-value-label">{{item.name}}@if (item.id === unlistedFunction?.id) {
+        <ng-template ngSelectLabel let-item="item">
+          <span class="ng-select-value-label">{{item.name}}@if (item.id === unlistedFunction?.id) {
             <span class="not-offered"
             > (no longer offered for this {{unlistedFor}})</span>
           }</span>
         </ng-template>
-        <ng-template ng-option-tmp let-item="item">
+        <ng-template ngSelectOption let-item="item">
           {{item.name}}@if (item.id === unlistedFunction?.id) {
           <span class="not-offered"
           > (no longer offered for this {{unlistedFor}})</span>
