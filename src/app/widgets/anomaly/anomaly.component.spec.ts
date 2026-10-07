@@ -78,5 +78,6 @@ describe('AnomalyComponent init phase', () => {
 
         expect(states.map((s) => s[0])).toEqual([true, false, true, false]);
         expect(states[0][1]).toBe('learning, 3 of 10 days');
+        expect(component.lastAnomaly).toBeUndefined();
     });
 });

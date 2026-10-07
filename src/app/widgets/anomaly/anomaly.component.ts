@@ -229,9 +229,9 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
     private loadLastAnomaly(exportID: string) {
         return this.anomalyService.getAnomaly(exportID).pipe(
             map(anomaly => {
-                if(anomaly != null) {
-                    this.lastAnomaly = anomaly;
-                } else {
+                // a reload without a last anomaly must not keep showing the previous one
+                this.lastAnomaly = anomaly ?? undefined;
+                if(anomaly == null) {
                     // without a last anomaly there is no init phase to report
                     this.operatorIsInitPhase = false;
                 }
