@@ -19,7 +19,7 @@ import {lastValueFrom, mergeMap, Observable} from 'rxjs';
 import {KeycloakProfile} from 'keycloak-js';
 import {environment} from '../../../environments/environment';
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import {catchError, map} from 'rxjs/operators';
+import {catchError, finalize, map, shareReplay} from 'rxjs/operators';
 import {AuthClient, keycloakConfig} from './auth-client';
 
 
@@ -128,7 +128,7 @@ export class KeycloakConfidentialService implements AuthClient, OnDestroy {
         this.url = keycloakConfig().url;
         const now = new Date().valueOf();
 
-        if (this.isUserToken && this.tokenResponse?.access_token !== undefined && this.tokenResponse.access_token.length > 0 && this.tokenExpires > now - 10000) {
+        if (this.isUserToken && this.tokenResponse?.access_token !== undefined && this.tokenResponse.access_token.length > 0 && this.tokenExpires > now + 10000) {
             clearTimeout(this.timeout);
             this.timeout = setTimeout(() => this.refreshToken().subscribe(), this.tokenExpires - now - 10000);
             const p = Promise<boolean>;
@@ -290,11 +290,17 @@ export class KeycloakConfidentialService implements AuthClient, OnDestroy {
 
         const body = 'grant_type=refresh_token&client_id=' + environment.keyCloakClientId + '&client_secret=' + this.clientSecret + '&refresh_token=' + this.tokenResponse?.refresh_token;
 
-        this.refreshing = this.requestToken(body, {headers}, true).pipe(map((v) => {
-            this.refreshing = undefined;
-            return v;
-        }));
-        return this.refreshing;
+        // one request for all callers while it runs; cleared on success and on failure, so the next refresh sends the current refresh token
+        const refreshing: Observable<boolean> = this.requestToken(body, {headers}, true).pipe(
+            finalize(() => {
+                if (this.refreshing === refreshing) {
+                    this.refreshing = undefined;
+                }
+            }),
+            shareReplay({bufferSize: 1, refCount: false}),
+        );
+        this.refreshing = refreshing;
+        return refreshing;
     }
 
     private decodeToken(): DecodedToken | undefined {
