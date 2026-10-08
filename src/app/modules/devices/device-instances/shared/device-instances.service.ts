@@ -475,7 +475,7 @@ export class DeviceInstancesService {
     shortIdToUUID(shortId: string): Observable<string> {
         return this.http.get<string>(environment.deviceRepoUrl + '/helper/id?short_id=' + encodeURIComponent(shortId) + '&prefix=' + encodeURIComponent('urn:infai:ses:device:')).pipe(
             map((resp) => resp || ''),
-            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'shortIdToUUID', '')),
+            catchError(this.errorHandlerService.handleErrorQuietly(DeviceInstancesService.name, 'shortIdToUUID', '')),
         );
     }
 

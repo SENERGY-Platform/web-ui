@@ -214,7 +214,7 @@ export class SidenavService implements OnDestroy {
         const waitingRoom = new SidenavPageModel('Waiting Room', 'link', 'chair', '/devices/waiting-room', '');
 
         const refreshWaitingRoom = () => {
-            this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false).subscribe((value) => {
+            this.waitingRoomService.searchDevices('', 1, 0, 'name', 'asc', false, true).subscribe((value) => {
                 if (value && value.total > 0) {
                     waitingRoom.badge = String(value.total);
                 }

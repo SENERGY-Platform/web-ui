@@ -47,7 +47,7 @@ export class ConceptsService {
     tryConverterExtension(extensionTryRequest: ConverterExtensionTryRequest): Observable<ConverterExtensionTryResult | null> {
         return this.http
             .post<ConverterExtensionTryResult>(environment.marshallerUrl + '/converter/extension-call', extensionTryRequest)
-            .pipe(catchError(this.errorHandlerService.handleError(ConceptsService.name, 'tryConverterExtension', null)));
+            .pipe(catchError(this.errorHandlerService.handleErrorQuietly(ConceptsService.name, 'tryConverterExtension', null)));
     }
 
     createConcept(concept: DeviceTypeConceptModel): Observable<DeviceTypeConceptModel | null> {

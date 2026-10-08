@@ -339,7 +339,7 @@ export class DeploymentsService {
                     return timer(retryAttempt * intervalInMs);
                 }),
             ),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'checkForProcessModelWithRetries', true)),
+            catchError(this.errorHandlerService.handleErrorQuietly(DeploymentsService.name, 'checkForProcessModelWithRetries', true)),
         );
     }
 

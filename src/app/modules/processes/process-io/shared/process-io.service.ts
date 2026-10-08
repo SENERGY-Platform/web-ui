@@ -96,7 +96,7 @@ export class ProcessIoService {
     get(key: string): Observable<ProcessIoVariable | null> {
         return this.http
             .get<ProcessIoVariable>(environment.processIoUrl + '/variables/'+encodeURIComponent(key))
-            .pipe(catchError(this.errorHandlerService.handleError(ProcessIoService.name, 'get', null)));
+            .pipe(catchError(this.errorHandlerService.handleErrorQuietly(ProcessIoService.name, 'get', null)));
     }
     userHasDeleteAuthorization(): boolean {
         return this.authorizations['DELETE'];

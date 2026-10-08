@@ -75,7 +75,7 @@ export class DeviceInstancesDefaultAttributesDialogComponent implements OnInit {
 
     save(): void {
         this.deviceInstancesService.setDefaultAttributes(this.attributes.filter(attr => attr.value.trim() !== ''))
-            .pipe(catchError(this.errorHandlerService.handleErrorWithSnackBar(DeviceInstancesDefaultAttributesDialogComponent.name, 'save', 'Error saving default attributes')))
+            .pipe(catchError(this.errorHandlerService.handleErrorWithSnackBar('Error saving default attributes', DeviceInstancesDefaultAttributesDialogComponent.name, 'save')))
             .subscribe(_ => {
                 this.dialogRef.close(true);
 

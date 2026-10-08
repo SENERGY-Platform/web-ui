@@ -106,7 +106,6 @@ export class LadonService {
             environment.processRepoUrl,
             environment.processIncidentApiUrl,
             environment.processSchedulerUrl,
-            environment.operatorRepoUrl,
             environment.exportService,
             environment.brokerExportServiceUrl,
             environment.pipelineRegistryUrl,

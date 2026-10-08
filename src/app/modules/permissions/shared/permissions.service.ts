@@ -129,7 +129,7 @@ export class PermissionsService {
     getUserById(userId: string): Observable<PermissionsUserModel> {
         return this.http
             .get<PermissionsUserModel>(environment.usersServiceUrl + '/user/id/' + userId)
-            .pipe(catchError(this.errorHandlerService.handleError(PermissionsService.name, 'getUserById', {} as PermissionsUserModel)));
+            .pipe(catchError(this.errorHandlerService.handleErrorQuietly(PermissionsService.name, 'getUserById', {} as PermissionsUserModel)));
     }
 
     getSharableUsers(): Observable<PermissionsUserModel[] | null> {

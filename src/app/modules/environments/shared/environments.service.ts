@@ -242,7 +242,7 @@ export class EnvironmentsService {
      */
     getEnvironmentState(id: string): Observable<EnvironmentState | null> {
         return this.http.get<EnvironmentState>(this.environmentsUrl + '/' + encodeURIComponent(id) + '/state').pipe(
-            catchError(this.errorHandlerService.handleError(EnvironmentsService.name, 'getEnvironmentState', null)),
+            catchError(this.errorHandlerService.handleErrorQuietly(EnvironmentsService.name, 'getEnvironmentState', null)),
         );
     }
 

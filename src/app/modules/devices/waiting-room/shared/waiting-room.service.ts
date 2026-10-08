@@ -109,6 +109,7 @@ export class WaitingRoomService {
         sort?: string,
         order?: string,
         showHidden?: boolean,
+        quiet = false,
     ): Observable<WaitingDeviceListModel | null> {
         const params = ['limit=' + limit, 'offset=' + offset, 'sort=' + sort + '.' + order];
         if (search) {
@@ -132,7 +133,9 @@ export class WaitingRoomService {
                 resp.result = resp.result ? resp.result : [];
                 return resp;
             }),
-            catchError(this.errorHandlerService.handleError(WaitingRoomService.name, 'searchDevices: Error', null)),
+            catchError(quiet
+                ? this.errorHandlerService.handleErrorQuietly(WaitingRoomService.name, 'searchDevices: Error', null)
+                : this.errorHandlerService.handleError(WaitingRoomService.name, 'searchDevices: Error', null)),
         );
     }
 
