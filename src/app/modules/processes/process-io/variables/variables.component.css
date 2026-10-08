@@ -31,10 +31,6 @@ table {
     width: 100%;
 }
 
-.variables-container ::ng-deep .mat-mdc-tab-header {
-    min-height: 54px;
-}
-
 .fab {
     position: fixed;
     bottom: 15px;

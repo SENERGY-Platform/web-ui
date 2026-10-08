@@ -42,11 +42,11 @@ tr.second th, tr.second td {
     margin-left: 0.5em;
 }
 
-.mat-mdc-cell {
+[mat-cell] {
     padding: 0 8px;
 }
 
-th.mat-mdc-header-cell {
+th[mat-header-cell] {
     padding: 0 8px;
     position: sticky;
     top: 0;

@@ -26,7 +26,7 @@
     min-height: 32px;
 }
 
-.mat-mdc-card-title {
+mat-card-title {
     height: 24px;
     padding-bottom: 16px;
     white-space: nowrap;

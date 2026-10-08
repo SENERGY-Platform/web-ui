@@ -29,13 +29,6 @@
 }
 
 
-.mat-mdc-radio-button {
-    margin-top: 8px;
-}
-.mat-mdc-radio-button ~ .mat-radio-button {
-    margin-left: 16px;
-}
-
 .device-type-content-variable-json-dialog-content{
     min-width: 50vw;
 }

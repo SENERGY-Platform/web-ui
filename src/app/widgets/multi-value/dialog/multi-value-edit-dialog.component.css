@@ -29,7 +29,3 @@ mat-dialog-actions button:not(:last-child) {
     margin-right: 8px;
 }
 
-::ng-deep .mat-mdc-select-panel {
-    min-width: fit-content !important;
-}
-

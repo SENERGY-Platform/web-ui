@@ -15,11 +15,6 @@
  */
 
 
-mat-grid-tile-footer {
-    background-color: var(--mat-sys-surface) !important;
-    height: 68px !important;
-    color: var(--mat-sys-on-surface) !important;
-}
 
 mat-grid-list {
     margin-bottom: 100px;
@@ -41,11 +36,11 @@ mat-grid-list {
     z-index: 100;
 }
 
-.mat-mdc-cell {
+[mat-cell] {
     padding: 0 8px;
 }
 
-.mat-mdc-header-cell {
+[mat-header-cell] {
     padding: 0 8px;
 }
 

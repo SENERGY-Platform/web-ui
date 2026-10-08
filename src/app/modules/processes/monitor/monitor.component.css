@@ -18,8 +18,8 @@ table {
     width: 100%;
 }
 
-:host ::ng-deep .mdc-tab {
-    height: 54px!important;
+:host {
+    --mat-tab-container-height: 54px;
 }
 
 .table-container {

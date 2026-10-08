@@ -35,14 +35,6 @@
   margin: 0px;
 }
 
-.mat-mdc-tab-labels .mat-mdc-tab {
-  height: 54px;
-}
-
-.mdc-tab {
-  height: 54px !important;
-}
-
 .fab {
   position: fixed;
   bottom: 15px;

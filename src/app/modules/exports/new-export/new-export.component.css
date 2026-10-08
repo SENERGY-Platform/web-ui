@@ -63,15 +63,15 @@
 }
 
 .operator-titel {
-    font-size: 14px !important;
+    font-size: 14px;
 }
 
 .operator-titel-error {
     color: var(--mat-sys-error);
 }
 
-.operator-accordion .mat-expansion-panel {
-    margin-bottom: 0 !important;
+.operator-accordion mat-expansion-panel {
+    margin-bottom: 0;
     background-color: transparent;
 }
 
@@ -110,7 +110,7 @@
     margin-top: 8px;
 }
 
-.mat-mdc-form-field {
+:host mat-form-field {
     padding-bottom: 5pt;
     padding-top: 2pt;
 }

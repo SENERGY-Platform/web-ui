@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-.mat-mdc-card {
+mat-card {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
 }
 
-.mat-mdc-card-content {
+mat-card-content {
     height: calc(100% - 72px);
     margin: 0;
     overflow-y: auto;
@@ -42,11 +42,11 @@
     color: red;
 }
 
-tr.mat-mdc-header-row {
+tr[mat-header-row] {
     height: 32px;
 }
 
-tr.mat-mdc-row {
+tr[mat-row] {
     height: 32px;
 }
 
@@ -54,6 +54,6 @@ table {
     width: 100%;
 }
 
-.mat-mdc-cell, th.mat-mdc-header-cell {
+[mat-cell], th[mat-header-cell] {
     padding: 0px 8px;
 }

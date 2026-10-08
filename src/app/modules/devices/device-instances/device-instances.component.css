@@ -84,5 +84,5 @@ button.attribute-chip:hover {
 }
 
 .inactive:hover {
-    background-color: var(--mat-sys-surface-container-highest) !important;
+    background-color: var(--mat-sys-surface-container-highest);
 }

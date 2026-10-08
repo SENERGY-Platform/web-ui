@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-.mat-mdc-dialog-content {
+mat-dialog-content {
     overflow: hidden;
 }

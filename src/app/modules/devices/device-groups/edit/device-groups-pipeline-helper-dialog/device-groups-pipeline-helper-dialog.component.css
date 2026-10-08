@@ -23,15 +23,15 @@ tr.second th, tr.second td {
     padding: 0 8px;
 }
 
-.master-checkbox {
-    padding: 0 24px !important;;
+th[mat-header-cell].master-checkbox {
+    padding: 0 24px;
 }
 
-.mat-mdc-cell {
+[mat-cell] {
     padding: 0 8px;
 }
 
-th.mat-mdc-header-cell {
+th[mat-header-cell] {
     padding: 0 8px;
     position: sticky;
     top: 0;

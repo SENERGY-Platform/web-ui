@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-.mat-mdc-card {
+mat-card {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
 }
 
-.mat-mdc-card-content {
+mat-card-content {
     height: calc(100% - 72px);
     margin: 0;
     overflow: hidden;
 }
 
-.mat-mdc-icon-button {
+[mat-icon-button] {
     width: 100px;
     height: 100px;
     padding: 12px;
@@ -48,17 +48,12 @@
     margin-top: 18px;
 }
 
-.mat-mdc-icon-button__ripple { display: none; }
-
-.mat-mdc-list-base .mat-mdc-list-item {
-    height: 32px;
+mat-list {
+    --mat-list-list-item-one-line-container-height: 32px;
 }
 
-.mat-mdc-subheader {
+[mat-subheader] {
+    height: 32px;
     padding-bottom: 0px;
     padding-top: 0px;
-}
-
-.mat-mdc-list-base .mat-mdc-subheader {
-    height: 32px;
 }

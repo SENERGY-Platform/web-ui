@@ -52,11 +52,11 @@ table td {
     border-left: 1px solid var(--mat-sys-outline-variant);
 }
 
-.mat-mdc-cell {
+[mat-cell] {
     padding: 0 8px;
 }
 
-th.mat-mdc-header-cell {
+th[mat-header-cell] {
     border-left: 1px solid var(--mat-sys-outline-variant);
     padding: 0 8px;
     position: sticky;

@@ -34,16 +34,16 @@
 }
 
 mat-grid-tile {
-    background: var(--mat-sys-surface-container-low) !important;
+    background: var(--mat-sys-surface-container-low);
     transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
     border-radius: 4px;
 }
 
-mat-grid-tile-footer {
-    height: 110px !important;
-    background-color: var(--mat-sys-surface) !important;
-    color: var(--mat-sys-on-surface) !important;
-    padding: 8px !important;
+mat-grid-tile mat-grid-tile-footer {
+    height: 110px;
+    background-color: var(--mat-sys-surface);
+    color: var(--mat-sys-on-surface);
+    padding: 8px;
 }
 
 .footer-item-header {

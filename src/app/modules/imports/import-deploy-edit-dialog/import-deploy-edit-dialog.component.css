@@ -21,11 +21,11 @@
     overflow: hidden;
 }
 
-.mat-mdc-cell {
+[mat-cell] {
     padding: 0 8px;
 }
 
-.mat-mdc-header-cell {
+[mat-header-cell] {
     padding: 0 8px;
 }
 
@@ -33,6 +33,6 @@
     min-width: 400px;
 }
 
-.mat-mdc-dialog-content {
+:host mat-dialog-content {
     padding-top: 8px;
 }

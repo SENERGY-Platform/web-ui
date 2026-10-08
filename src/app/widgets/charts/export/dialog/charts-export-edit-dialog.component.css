@@ -34,10 +34,6 @@ th, td {
     white-space: nowrap;
 }
 
-.mat-mdc-cell {
-    padding: 0 8px 0 0;
-}
-
 mat-form-field {
     width: 100%;
     min-width: 80px;

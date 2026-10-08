@@ -37,8 +37,8 @@
     max-width: 100%;
 }
 
-.process-start-input-delete {
-    margin-top: 0px !important;
+.edit-smart-service-task-dialog .process-start-input-delete {
+    margin-top: 0px;
 }
 
 .input-with-overwrite {

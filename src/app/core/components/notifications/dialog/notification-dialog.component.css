@@ -157,7 +157,7 @@ table {
     overflow-x: auto;
 }
 
-::ng-deep td.mat-mdc-cell {
+td[mat-cell] {
     word-wrap: break-word;
     white-space: pre-wrap;
 }

@@ -32,7 +32,7 @@ mat-form-field {
     margin-right: 5%;
 }
 
-.mat-mdc-dialog-actions {
+[mat-dialog-actions] {
     margin: auto;
 }
 

@@ -26,10 +26,6 @@ table {
     height: 32px
 }
 
-::ng-deep .mat-mdc-select-panel {
-   min-width: fit-content !important;
-}
-
 .order-select {
     min-height: 65px;
 }

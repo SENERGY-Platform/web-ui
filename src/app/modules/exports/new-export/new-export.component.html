@@ -133,7 +133,7 @@
           @if (exportForm.getRawValue().selector ==='pipe') {
             <mat-accordion class="operator-accordion ly-row ly-flex"
               [ngClass]="{'operator-accordion-error': exportForm.controls.operator.invalid}">
-              <mat-expansion-panel [disabled]="exportForm.value.pipeline === null" style="margin-bottom: 10px;" class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick ly-flex">
+              <mat-expansion-panel [disabled]="exportForm.value.pipeline === null" class="mat-elevation-z0 mat-form-field-outline mat-form-field-outline-thick ly-flex">
                 <mat-expansion-panel-header>
                   <mat-panel-title class="operator-titel"
                     [ngClass]="{'operator-titel-error': exportForm.controls.operator.invalid}">

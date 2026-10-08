@@ -25,14 +25,7 @@ mat-sidenav {
     margin-top: 0;
 }
 
-.side-menu .menu-toggle-list a.mat-mdc-button {
-    display: block;
-    padding: 0 16px 0 32px;
-    text-transform: none;
-    text-rendering: optimizeLegibility;
-}
-
-.side-menu .menu-toggle-list .mat-mdc-button {
+.side-menu .menu-toggle-list [mat-button] {
     display: block;
     padding: 0 16px 0 32px;
     text-transform: none;
@@ -66,7 +59,7 @@ mat-sidenav {
     max-height: 1000px;
 }
 
-.side-menu .mat-mdc-button {
+.side-menu [mat-button] {
     border-radius: 0;
     cursor: pointer;
     margin: 0;
@@ -81,7 +74,7 @@ mat-sidenav {
     display: block;
 }
 
-.mat-mdc-button>.mat-icon {
+[mat-button]>.mat-icon {
     font-size: 1.5em;
 }
 

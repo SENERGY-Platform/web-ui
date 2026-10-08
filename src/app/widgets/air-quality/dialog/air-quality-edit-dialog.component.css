@@ -20,7 +20,7 @@
 }
 
 .step-content {
-    margin-top: 0.5em !important;
+    margin-top: 0.5em;
 }
 
 .center {
@@ -52,7 +52,7 @@
     padding: 0 1.55rem 0.7rem;
 }
 
-.mat-mdc-form-field {
+mat-form-field {
     padding-bottom: 0;
 }
 

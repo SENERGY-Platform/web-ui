@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-.mat-mdc-card {
+mat-card {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
 }
 
-.mat-mdc-card-content {
+mat-card-content {
     height: calc(100% - 72px);
     margin: 0;
     overflow: hidden;
@@ -32,8 +32,8 @@
 }
 
 .maximized {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100%;
+    height: 100%;
 }
 
 #chartjs-tooltip {
@@ -48,10 +48,8 @@
 }
 
 .small-icon-button {
-    width: 24px !important;
-    height: 24px !important;
-    padding: 0px !important;
-    display: inline-flex !important;
+    --mat-icon-button-state-layer-size: 24px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 
@@ -64,11 +62,6 @@
             width: 16px;
             height: 16px;
         }
-    }
-
-    .mat-mdc-button-touch-target {
-        width: 24px !important;
-        height: 24px !important;
     }
 }
 

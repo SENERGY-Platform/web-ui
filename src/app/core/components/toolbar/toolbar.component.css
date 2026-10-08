@@ -36,9 +36,3 @@
     position: relative;
 }
 
-.header-text {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    margin: 0 !important;
-}

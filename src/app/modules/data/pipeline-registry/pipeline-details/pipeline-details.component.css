@@ -38,12 +38,6 @@ table {
     padding-left: 90px;
 }
 
-mat-grid-tile-footer {
-    background-color: var(--mat-sys-surface) !important;
-    height: 68px !important;
-    color: var(--mat-sys-on-surface) !important;
-}
-
 mat-grid-list {
     margin-bottom: 100px;
 }

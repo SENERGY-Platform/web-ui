@@ -28,6 +28,6 @@
     min-height: 200px;
 }
 
-.mat-mdc-dialog-content {
+:host mat-dialog-content {
     padding-top: 8px;
 }
