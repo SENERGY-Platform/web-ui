@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessSchedulerService } from './shared/process-scheduler.service';
 import { ProcessSchedulerModel } from './shared/process-scheduler.model';
-import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { ProcessSchedulerWidgetModel } from './shared/process-scheduler-widget.model';
@@ -45,7 +45,7 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, NgClass, MatListItemTitle, MatIcon, MatListItemIcon, MatListItemLine, MatListItemMeta, MatIconButton, MatTooltip, WidgetNoDataComponent, WidgetFooterComponent]
 })
-export class ProcessSchedulerComponent implements OnInit, OnDestroy {
+export class ProcessSchedulerComponent implements OnInit {
     private processSchedulerService = inject(ProcessSchedulerService);
     private dashboardService = inject(DashboardService);
     private deploymentsService = inject(DeploymentsService);
@@ -53,11 +53,11 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
     private cronConverterService = inject(CronConverterService);
+    private destroyRef = inject(DestroyRef);
 
     schedules: ProcessSchedulerWidgetModel[] = [];
     numReady = -1;
     numReadyNeeded = 0;
-    destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -68,10 +68,6 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.getSchedules();
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     edit() {
@@ -130,7 +126,7 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     }
 
     private getSchedules() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.reload();
             }

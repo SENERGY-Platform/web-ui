@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { DeviceTotalDowntimeService } from './shared/device-total-downtime.service';
 import { FailureRatioInterval } from './shared/device-total-downtime-chart';
 import { totalDowntimeChart } from './shared/device-total-downtime-chartjs';
@@ -45,13 +45,13 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterVie
     private dashboardService = inject(DashboardService);
     private el = inject(ElementRef);
     private zone = inject(NgZone);
+    private destroyRef = inject(DestroyRef);
 
     /** undefined when no device has a history or loading failed */
     chart?: FramedChartConfig<'line'>;
     readonly plugins = googlePlugins;
     ready = false;
     refeshing = false;
-    destroy = new Subscription();
 
     private intervals?: FailureRatioInterval[];
     private resizeTimeout: any;
@@ -79,7 +79,6 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterVie
     }
 
     ngOnDestroy() {
-        this.destroy.unsubscribe();
         this.resizeObserver?.disconnect();
         clearTimeout(this.resizeTimeout);
     }
@@ -95,7 +94,7 @@ export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterVie
     }
 
     private getProcessInstances() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refeshing = true;
                 this.deviceDowntimeGatewayService.getTotalDowntime().subscribe({

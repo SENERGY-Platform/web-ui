@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -52,6 +53,7 @@ export class MultiValueEditDialogComponent implements OnInit {
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
     private fb = inject(FormBuilder);
+    private destroyRef = inject(DestroyRef);
 
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
@@ -207,7 +209,7 @@ export class MultiValueEditDialogComponent implements OnInit {
             ),
         });
 
-        (newGroup.get('column') as FormControl).valueChanges.subscribe(() => {
+        (newGroup.get('column') as FormControl).valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             if (!(newGroup.get('name') as FormControl).valid && (newGroup.get('column') as FormControl).valid) {
                 newGroup.patchValue({
                     name:
@@ -218,7 +220,7 @@ export class MultiValueEditDialogComponent implements OnInit {
             }
         });
 
-        (newGroup.get('type') as FormControl).valueChanges.subscribe(() => {
+        (newGroup.get('type') as FormControl).valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             const type = (newGroup.get('type') as FormControl).value;
             const disableNumberOperationsChange = type === 'String' || type === '' || type === 'Boolean';
             const disableUnitChange = type === 'Boolean';
@@ -244,7 +246,7 @@ export class MultiValueEditDialogComponent implements OnInit {
             }
         });
 
-        ((newGroup.get('warnings') as FormGroup).get('warning_enabled') as FormControl).valueChanges.subscribe(() => {
+        ((newGroup.get('warnings') as FormGroup).get('warning_enabled') as FormControl).valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             const warnGroup = newGroup.get('warnings');
             if (warnGroup === null) {
                 return;

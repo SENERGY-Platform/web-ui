@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
 import { ChartsExportChart } from './shared/charts-export-table';
 import { ChartsExportService } from './shared/charts-export.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { removeWidgetStorage } from '../shared/widget-storage';
@@ -79,6 +79,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     private cd = inject(ChangeDetectorRef);
     private el = inject(ElementRef);
     private zone = inject(NgZone);
+    private destroyRef = inject(DestroyRef);
 
     chartExportData = {} as ChartsExportChart;
     /** Line, Scatter and Pie in the widget */
@@ -94,7 +95,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     ready = false;
     refreshing = false;
     disableBreaking = false;
-    destroy = new Subscription();
     configureWidget = false;
     errorHasOccured = false;
     errorMessage = '';
@@ -181,7 +181,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() initialWidgetData: any;
 
     ngOnDestroy() {
-        this.destroy.unsubscribe();
         this.resizeObserver?.disconnect();
         clearTimeout(this.resizeTimeout);
     }
@@ -226,7 +225,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private scheduleRefresh() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refresh();
             }

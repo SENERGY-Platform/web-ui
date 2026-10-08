@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, NgZone, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { Subscription, map, Observable, concatMap, of, forkJoin, throwError } from 'rxjs';
+import { map, Observable, concatMap, of, forkJoin, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
@@ -52,11 +53,11 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
     private dialog = inject(MatDialog);
     private el = inject(ElementRef);
     private zone = inject(NgZone);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
     init = false;
     refreshing = false;
-    destroy = new Subscription();
     error?: string;
     timelineChartData: any;
     notConfigured = false;
@@ -166,7 +167,7 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
     }
 
     private scheduleRefresh() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.widgetIsConfigured();
                 if (!this.notConfigured) {

@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { concatMap, of, Subscription, map } from 'rxjs';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { concatMap, of, map } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { PvPredictionService } from './shared/pv-load.service';
@@ -39,13 +40,13 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, ValueComponent, BaseChartDirective, WidgetFooterComponent]
 })
-export class PvPredictionComponent implements OnInit, OnDestroy {
+export class PvPredictionComponent implements OnInit {
     private dashboardService = inject(DashboardService);
     private pvService = inject(PvPredictionService);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
     error?: string;
     chart?: FramedChartConfig<'line'>;
     readonly plugins = googlePlugins;
@@ -59,17 +60,13 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
     configured = false;
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     ngOnInit(): void {
         this.update();
         this.configured = this.widget.properties.pvPrediction !== undefined;
     }
 
     private update() {
-        this.destroy = this.dashboardService.initWidgetObservable.pipe(
+        this.dashboardService.initWidgetObservable.pipe(
             concatMap((event: string) => {
                 if (event === 'reloadAll' || event === this.widget.id) {
                     this.configured = this.widget.properties.pvPrediction !== undefined;
@@ -90,7 +87,7 @@ export class PvPredictionComponent implements OnInit, OnDestroy {
                     this.calcNextPVPrediction(data, nextValueConfig.level, nextValueConfig.time);
                 }
                 return data;
-            })).subscribe({
+            }), takeUntilDestroyed(this.destroyRef)).subscribe({
                 next: (_) => {
                     this.ready = true;
                     this.refreshing = false;

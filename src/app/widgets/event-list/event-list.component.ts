@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { EventListService } from './shared/event-list.service';
 import { EventListModel } from './shared/event-list.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
 import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
@@ -35,14 +35,14 @@ import { DatePipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatIcon, MatListItemIcon, MatListItemTitle, MatListItemLine, WidgetFooterComponent, DatePipe]
 })
-export class EventListComponent implements OnInit, OnDestroy {
+export class EventListComponent implements OnInit {
     private eventListService = inject(EventListService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     events: EventListModel[] = [];
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -55,16 +55,12 @@ export class EventListComponent implements OnInit, OnDestroy {
         this.initMockup();
     }
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     edit() {
         this.eventListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization);
     }
 
     private initMockup() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 const date = new Date().getTime();

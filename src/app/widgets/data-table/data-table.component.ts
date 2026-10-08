@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { forkJoin, Observable, of, Subscription } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DataTableEditDialogComponent } from './dialog/data-table-edit-dialog.component';
@@ -63,19 +64,19 @@ interface DataTableComponentItem {
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatIcon, MatTooltip, NgStyle, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
-export class DataTableComponent implements OnInit, OnDestroy {
+export class DataTableComponent implements OnInit {
     private dashboardService = inject(DashboardService);
     private dialog = inject(MatDialog);
     private exportDataService = inject(ExportDataService);
     private decimalPipe = inject(DecimalPipe);
     private datePipe = inject(DatePipe);
     private deviceInstancesServcie = inject(DeviceInstancesService);
+    private destroyRef = inject(DestroyRef);
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
-    destroy = new Subscription();
     configured = false;
     dataReady = false;
     refreshing = false;
@@ -126,10 +127,6 @@ export class DataTableComponent implements OnInit, OnDestroy {
         }
         this.update();
         this.checkConfigured();
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     edit() {
@@ -229,7 +226,7 @@ export class DataTableComponent implements OnInit, OnDestroy {
     }
 
     private update() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.checkConfigured();
                 this.refreshing = true;

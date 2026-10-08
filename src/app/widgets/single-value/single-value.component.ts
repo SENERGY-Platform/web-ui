@@ -15,13 +15,14 @@
  */
 
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {DomSanitizer} from '@angular/platform-browser';
 import {SingleValueService} from './shared/single-value.service';
 import {SingleValueAggregations, SingleValueModel} from './shared/single-value.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
-import {Observable, Subscription, map} from 'rxjs';
+import {Observable, map} from 'rxjs';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
@@ -115,11 +116,12 @@ const dateDiff = {
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, FitTextComponent, NgClass, ValueComponent, MatIconButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, WidgetFooterComponent, DatePipe]
 })
-export class SingleValueComponent implements OnInit, OnDestroy {
+export class SingleValueComponent implements OnInit {
     private iconRegistry = inject(MatIconRegistry);
     private sanitizer = inject(DomSanitizer);
     private singleValueService = inject(SingleValueService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     svList: SingleValueModel[] = [];
     sv?: SingleValueModel;
@@ -130,7 +132,6 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     timestamp?: string;
     timestampAgeClass = '';
     error = false;
-    destroy = new Subscription();
     marginLeft = '0';
     private _svListIndex = 0;
     animationState = false;
@@ -161,16 +162,12 @@ export class SingleValueComponent implements OnInit, OnDestroy {
         this.scheduleRefresh();
         this.registerIcons();
         this.setConfigured();
-        this.dateControl.valueChanges.pipe(debounceTime(1000)).subscribe((localDateString) => {
+        this.dateControl.valueChanges.pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef)).subscribe((localDateString) => {
             if (localDateString === null) {
                 return;
             }
             this.refreshView();
         });
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     registerIcons() {
@@ -190,7 +187,7 @@ export class SingleValueComponent implements OnInit, OnDestroy {
 
     private scheduleRefresh() {
         this.setConfigured();
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.setConfigured();
                 this.refreshView();

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, LOCALE_ID, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, LOCALE_ID, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceDowntimeListService } from './shared/device-downtime-list.service';
-import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { duration } from '../../core/time/iso-duration';
 import { humanizeDuration } from '../../core/time/humanize-duration';
@@ -45,7 +45,7 @@ function minutesSince(d: Date): number {
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatIcon, NgClass, MatListItemTitle, MatTooltip, MatListItemLine, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
-export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
+export class DeviceDowntimeListComponent implements OnInit {
     private deviceDowntimeListService = inject(DeviceDowntimeListService);
     private dashboardService = inject(DashboardService);
     private dialog = inject(MatDialog);
@@ -53,7 +53,6 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     offlineSinceList: OfflineSinceModel[] = [];
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -63,9 +62,10 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     private localeId = inject(LOCALE_ID);
+    private destroyRef = inject(DestroyRef);
 
     ngOnInit() {
-         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+         this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 this.deviceDowntimeListService.getDevicesDowntime(this.widget.properties).subscribe((devices: OfflineSinceModel[]) => {
@@ -75,10 +75,6 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
                 }, () => {}, () => this.ready = true);
             }
         });
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     edit() {

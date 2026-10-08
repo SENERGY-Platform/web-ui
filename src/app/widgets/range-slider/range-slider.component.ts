@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { RangeSliderService } from './shared/range-slider.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { MatSliderChange, MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { CamundaVariable } from '../../modules/processes/deployments/shared/deployments-definition.model';
@@ -35,14 +35,14 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, FitTextComponent, MatSlider, MatSliderThumb, FormsModule, WidgetFooterComponent]
 })
-export class RangeSliderComponent implements OnInit, OnDestroy {
+export class RangeSliderComponent implements OnInit {
     private rangeSliderService = inject(RangeSliderService);
     private dashboardService = inject(DashboardService);
     private deploymentService = inject(DeploymentsService);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
 
-    private destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
@@ -52,15 +52,11 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     ngOnInit() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 // nop
             }
         });
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     edit() {

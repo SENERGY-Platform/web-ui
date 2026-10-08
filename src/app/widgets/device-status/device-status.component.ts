@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel } from './shared/device-status-properties.model';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
@@ -44,16 +44,16 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIcon, NgStyle, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetFooterComponent, DatePipe]
 })
-export class DeviceStatusComponent implements OnInit, OnDestroy {
+export class DeviceStatusComponent implements OnInit {
     private iconRegistry = inject(MatIconRegistry);
     private sanitizer = inject(DomSanitizer);
     private deviceStatusDialogService = inject(DeviceStatusDialogService);
     private dashboardService = inject(DashboardService);
     private deploymentsService = inject(DeploymentsService);
     private exportDataService = inject(ExportDataService);
+    private destroyRef = inject(DestroyRef);
 
     configured = false;
-    destroy = new Subscription();
     dataReady = false;
     items: DeviceStatusItemModel[] = [];
 
@@ -71,17 +71,13 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
         this.setConfigured();
     }
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     edit() {
         this.deviceStatusDialogService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private update() {
         this.setConfigured();
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.dataReady = false;
 

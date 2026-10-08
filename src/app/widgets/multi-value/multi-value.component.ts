@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MultiValueService } from './shared/multi-value.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { MultiValueMeasurement, MultiValueOrderEnum } from './shared/multi-value.model';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -37,14 +37,14 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetFooterComponent, DecimalPipe, PercentPipe, CurrencyPipe, DatePipe]
 })
-export class MultiValueComponent implements OnInit, OnDestroy {
+export class MultiValueComponent implements OnInit {
     private iconRegistry = inject(MatIconRegistry);
     private sanitizer = inject(DomSanitizer);
     private multiValueService = inject(MultiValueService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     configured = false;
-    destroy = new Subscription();
     dataReady = false;
     orderedValues: MultiValueMeasurement[] = [];
 
@@ -61,10 +61,6 @@ export class MultiValueComponent implements OnInit, OnDestroy {
         this.update();
         this.registerIcons();
         this.setConfigured();
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     registerIcons() {
@@ -87,7 +83,7 @@ export class MultiValueComponent implements OnInit, OnDestroy {
 
     private update() {
         this.setConfigured();
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.dataReady = false;
                 this.multiValueService.getValues(this.widget).subscribe((result) => {

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
-import { map, Observable, Subscription, of, forkJoin, concatMap, delay } from 'rxjs';
+import { map, Observable, of, forkJoin, concatMap, delay } from 'rxjs';
 import {
   aspectDistance,
   controlIcon,
@@ -81,7 +82,7 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, NgClass, NgStyle, MatIconButton, MatIcon, MatTooltip, CapabilityControlComponent, WidgetFooterComponent]
 })
-export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
+export class FloorplanComponent implements OnInit, AfterViewInit {
   private dialog = inject(MatDialog);
   private dashboardService = inject(DashboardService);
   private deviceCommandService = inject(DeviceCommandService);
@@ -91,6 +92,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   private deviceClassService = inject(DeviceClassesService);
   private deviceInstancesService = inject(DeviceInstancesService);
   private el = inject(ElementRef);
+  private destroyRef = inject(DestroyRef);
 
   @Input() dashboardId = '';
   @Input() widget: WidgetModel = {} as WidgetModel;
@@ -103,7 +105,6 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ready = true;
   refreshing = false;
-  destroy: Subscription | undefined;
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   img: HTMLImageElement | undefined;
   draws = 0;
@@ -386,7 +387,7 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       this.draw();
       this.ready = true;
     });
-    this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+    this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
       if (event === 'reloadAll' || event === this.widget.id) {
         this.refresh().subscribe();
       }
@@ -404,10 +405,6 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       }, 30);
     }));
     ro.observe(this.el.nativeElement);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy?.unsubscribe();
   }
 
 

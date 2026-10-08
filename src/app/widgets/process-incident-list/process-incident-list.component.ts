@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessIncidentListService } from './shared/process-incident-list.service';
-import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { ProcessIncidentsModel } from '../../modules/processes/incidents/shared/process-incidents.model';
 import { ProcessIncidentsService } from '../../modules/processes/incidents/shared/process-incidents.service';
@@ -41,16 +41,16 @@ import { DatePipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatIconButton, MatTooltip, MatIcon, MatListItemTitle, MatListItemLine, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
-export class ProcessIncidentListComponent implements OnInit, OnDestroy {
+export class ProcessIncidentListComponent implements OnInit {
     private processIncidentListService = inject(ProcessIncidentListService);
     private processIncidentsService = inject(ProcessIncidentsService);
     private dashboardService = inject(DashboardService);
     private router = inject(Router);
+    private destroyRef = inject(DestroyRef);
 
     incidents: ProcessIncidentsModel[] = [];
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -61,10 +61,6 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.getIncidents();
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     edit() {
@@ -84,7 +80,7 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     }
 
     private getIncidents() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 this.processIncidentsService

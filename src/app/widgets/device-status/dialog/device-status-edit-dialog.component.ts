@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -70,6 +71,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     private deviceStatusService = inject(DeviceStatusService);
     private processSchedulerService = inject(ProcessSchedulerService);
     private deviceInstanceService = inject(DeviceInstancesService);
+    private destroyRef = inject(DestroyRef);
 
     aspects:  DeviceTypeAspectNodeModel[] = [];
     icons: string[] = [
@@ -276,19 +278,19 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.loadFunctions(index);
         this.loadDevices(index);
         this.loadDeviceType(index);
-        this.getAspectId(index).valueChanges.subscribe((aspectId) => {
+        this.getAspectId(index).valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((aspectId) => {
             this.getFunctionControl(index).reset();
             if (aspectId !== null) {
                 this.loadFunctions(index);
             }
         });
-        this.getFunctionControl(index).valueChanges.subscribe((func) => {
+        this.getFunctionControl(index).valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func) => {
             this.getSelectable(index).reset();
             if (func !== null) {
                 this.loadDevices(index);
             }
         });
-        this.getSelectable(index).valueChanges.subscribe((selectable) => {
+        this.getSelectable(index).valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selectable) => {
             this.getServiceControl(index).reset();
             this.getExportValuesControl(index).reset();
             if (selectable !== null) {

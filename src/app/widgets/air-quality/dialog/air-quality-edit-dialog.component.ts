@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, NgZone, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, NgZone, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -83,6 +84,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     private importTypesService = inject(ImportTypesService);
     private deviceInstancesService = inject(DeviceInstancesService);
     private deviceTypeService = inject(DeviceTypeService);
+    private destroyRef = inject(DestroyRef);
 
     constructor() {
         const dwdPollenService = this.dwdPollenService;
@@ -456,6 +458,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             .pipe(
                 debounceTime(300),
                 map((value) => this.geonamesService.searchPlaces(value)),
+                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((res) => (this.geonamesSearchResults = res));
     }

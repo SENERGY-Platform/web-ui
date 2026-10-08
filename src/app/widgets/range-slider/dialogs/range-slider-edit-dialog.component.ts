@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
@@ -46,6 +47,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     private dashboardService = inject(DashboardService);
     private deploymentsService = inject(DeploymentsService);
     private formBuilder = inject(UntypedFormBuilder);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
@@ -87,7 +89,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.formGroup.get('deployment')?.valueChanges.subscribe((deployment: DeploymentsModel) => {
+        this.formGroup.get('deployment')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deployment: DeploymentsModel) => {
             if (deployment) {
                 this.deploymentsService.getDeploymentInputParameters(deployment.id).subscribe((pars) => {
                     if (pars !== null) {
@@ -100,7 +102,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
                 });
             }
         });
-        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+        this.formGroup.controls['name'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
             this.widget.name = val;
         });
         this.getWidgetData();

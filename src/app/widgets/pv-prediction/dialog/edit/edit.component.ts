@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
@@ -47,6 +48,7 @@ export class PVPredictionEditComponent implements OnInit {
     private exportService = inject(ExportService);
     private dashboardService = inject(DashboardService);
     private formBuilder = inject(UntypedFormBuilder);
+    private destroyRef = inject(DestroyRef);
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
@@ -111,14 +113,14 @@ export class PVPredictionEditComponent implements OnInit {
     }
 
     setupToggle() {
-        this.form.controls.displayTimeline.valueChanges.subscribe({
+        this.form.controls.displayTimeline.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: (value) => {
                 if(value) {
                     this.form.controls.displayNextValue.patchValue(false);
                 }
             }
         });
-        this.form.controls.displayNextValue.valueChanges.subscribe({
+        this.form.controls.displayNextValue.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: (value) => {
                 if(value) {
                     this.form.controls.displayTimeline.patchValue(false);

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -94,6 +95,7 @@ export class DataTableEditDialogComponent implements OnInit {
     private cdref = inject(ChangeDetectorRef);
     private deviceGroupsService = inject(DeviceGroupsService);
     private conceptsService = inject(ConceptsService);
+    private destroyRef = inject(DestroyRef);
 
     dashboardId: string;
     widgetId: string;
@@ -186,7 +188,7 @@ export class DataTableEditDialogComponent implements OnInit {
         });
         this.getWidgetData();
         this.initDeviceGroups();
-        this.formGroup.get('valuesPerElement')?.valueChanges.subscribe(v => {
+        this.formGroup.get('valuesPerElement')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v => {
             (this.formGroup.get('elements') as FormArray).controls.forEach(c => {
                 const dg = c.get('elementDetails.deviceGroup');
                 if (dg === undefined) {
@@ -337,13 +339,13 @@ export class DataTableEditDialogComponent implements OnInit {
         newGroup
             .get('elementDetails')
             ?.get('elementType')
-            ?.valueChanges.subscribe((elementType) => this.enableDisableElementDetailsFields(newGroup, elementType));
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((elementType) => this.enableDisableElementDetailsFields(newGroup, elementType));
 
         newGroup
             .get('elementDetails')
             ?.get('device')
             ?.get('aspectId')
-            ?.valueChanges.subscribe((aspectId) => {
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((aspectId) => {
                 if (aspectId !== null) {
                     if (init) {
                         this.numReadyNeeded++;
@@ -361,7 +363,7 @@ export class DataTableEditDialogComponent implements OnInit {
             .get('elementDetails')
             ?.get('device')
             ?.get('functionId')
-            ?.valueChanges.subscribe(() => {
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
                 if (init) {
                     this.numReadyNeeded++;
                 }
@@ -377,7 +379,7 @@ export class DataTableEditDialogComponent implements OnInit {
             .get('elementDetails')
             ?.get('device')
             ?.get('serviceId')
-            ?.valueChanges.subscribe(() => {
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
                 this.onServiceSelected(newGroup);
                 this.onExportValueSelected(newGroup);
             }
@@ -387,7 +389,7 @@ export class DataTableEditDialogComponent implements OnInit {
             .get('elementDetails')
             ?.get('device')
             ?.get('deviceId')
-            ?.valueChanges.subscribe(() => {
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
                 this.onExportValueSelected(newGroup);
                 this.runChangeDetection();  // avoids changedAfterChecked error
             });
@@ -396,15 +398,15 @@ export class DataTableEditDialogComponent implements OnInit {
             .get('elementDetails')
             ?.get('pipeline')
             ?.get('operatorId')
-            ?.valueChanges.subscribe(() => this.onOperatorSelected(newGroup));
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.onOperatorSelected(newGroup));
 
         newGroup
             .get('elementDetails.import.typeId')
-            ?.valueChanges.subscribe((id) => this.dataTableHelperService.preloadFullImportType(id).subscribe());
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id) => this.dataTableHelperService.preloadFullImportType(id).subscribe());
 
-        newGroup.get('exportValuePath')?.valueChanges.subscribe(() => this.onExportValueSelected(newGroup));
+        newGroup.get('exportValuePath')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.onExportValueSelected(newGroup));
 
-        newGroup.get('valueType')?.valueChanges.subscribe((value) => {
+        newGroup.get('valueType')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
             if (value === this.exportTypes.INTEGER || value === this.exportTypes.FLOAT) {
                 this.getWarningGroup(newGroup).get('enabled')?.enable();
                 newGroup.get('format')?.enable();
@@ -418,7 +420,7 @@ export class DataTableEditDialogComponent implements OnInit {
         newGroup
             .get('warning')
             ?.get('enabled')
-            ?.valueChanges.subscribe((enabled) => {
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((enabled) => {
                 const warnGroup = this.getWarningGroup(newGroup);
                 if (!enabled) {
                     warnGroup.patchValue({
@@ -433,12 +435,12 @@ export class DataTableEditDialogComponent implements OnInit {
                 }
             });
 
-        newGroup.get('exportId')?.valueChanges.subscribe((exportId) => {
+        newGroup.get('exportId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((exportId) => {
             this.dataTableHelperService.preloadExportTags(exportId).subscribe();
             newGroup.get('exportDbId')?.setValue(this.dataTableHelperService.getPreloadedExportById(exportId)?.ExportDatabaseID);
         });
 
-        newGroup.get('elementDetails.deviceGroup.deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
+        newGroup.get('elementDetails.deviceGroup.deviceGroupCriteria')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(criteria => {
             if (criteria == null) {
                 return;
             }
@@ -454,7 +456,7 @@ export class DataTableEditDialogComponent implements OnInit {
             };
             update(this);
         });
-        newGroup.get('unit')?.valueChanges.subscribe(unit => {
+        newGroup.get('unit')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(unit => {
             const functionId = newGroup.get('elementDetails')?.get('deviceGroup')?.get('deviceGroupCriteria')?.value?.function_id;
             const f = this.functions.find(f2 => f2.id === functionId);
             if (f === undefined) {

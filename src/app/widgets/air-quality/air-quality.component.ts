@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AirQualityService } from './shared/air-quality.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { UBAService } from './shared/uba.service';
 import { DWDPollenService } from './shared/dwd-pollen.service';
 import { map } from 'rxjs/operators';
@@ -39,17 +40,17 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTooltip, MatIconButton, MatIcon, MatList, MatListSubheaderCssMatStyler, MatListItem, MatListItemLine, WidgetFooterComponent]
 })
-export class AirQualityComponent implements OnInit, OnDestroy {
+export class AirQualityComponent implements OnInit {
     private iconRegistry = inject(MatIconRegistry);
     private sanitizer = inject(DomSanitizer);
     private airRecommendationService = inject(AirQualityService);
     private ubaService = inject(UBAService);
     private dwdPollenService = inject(DWDPollenService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
     pollenWarnings = 0;
     pollenCriticals = 0;
     inDetailView = false;
@@ -68,10 +69,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
         this.registerIcons();
     }
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     registerIcons() {
         this.iconRegistry.addSvgIcon('yr', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/yr.svg'));
         this.iconRegistry.addSvgIcon('uba', this.sanitizer.bypassSecurityTrustResourceUrl('src/img/uba.svg'));
@@ -84,7 +81,7 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     }
 
     private update() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe(async (event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 this.updateMeasurements().subscribe((_) => {

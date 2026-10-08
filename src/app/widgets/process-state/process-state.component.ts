@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ProcessStateService } from './shared/process-state.service';
 import { ProcessStateModel } from './shared/process-state.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
@@ -36,16 +36,16 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, WidgetFooterComponent]
 })
-export class ProcessStateComponent implements OnInit, OnDestroy {
+export class ProcessStateComponent implements OnInit {
     private iconRegistry = inject(MatIconRegistry);
     private sanitizer = inject(DomSanitizer);
     private processStateService = inject(ProcessStateService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     processStatus: ProcessStateModel = { available: 0, executable: 0 };
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -58,16 +58,12 @@ export class ProcessStateComponent implements OnInit, OnDestroy {
         this.setDeviceStatus();
     }
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     edit() {
         this.processStateService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization);
     }
 
     private setDeviceStatus() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 this.processStateService.getProcessStatus().subscribe((processStatus: ProcessStateModel) => {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
@@ -61,6 +62,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
     private _formBuilder = inject(UntypedFormBuilder);
+    private destroyRef = inject(DestroyRef);
 
     typeString = 'https://schema.org/Text';
     typeInteger = 'https://schema.org/Integer';
@@ -267,7 +269,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             }),
         });
         this.groupTypeIsDifference = widget.properties.group?.type?.startsWith ? (widget.properties.group?.type?.startsWith('difference') || false) : false;
-        this.formGroupController.get('properties.group.type')?.valueChanges.subscribe((val) => {
+        this.formGroupController.get('properties.group.type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val) => {
             this.groupTypeIsDifference = val.startsWith ? val.startsWith('difference') : false;
             if (this.groupTypeIsDifference) {
                 this.dataSource.data.forEach((element) => (element.math = ''));
@@ -279,7 +281,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 this.preloadExportTags(exp.id || '').subscribe();
             }
         });
-        this.formGroupController.get('properties.exports')?.valueChanges.subscribe((exports: (ChartsExportMeasurementModel | DeviceInstanceModel)[]) => {
+        this.formGroupController.get('properties.exports')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((exports: (ChartsExportMeasurementModel | DeviceInstanceModel)[]) => {
             exports.forEach((exp) => {
                 if ((exp as DeviceInstanceModel).device_type_id === undefined &&
                     ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
@@ -288,7 +290,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
             });
         });
 
-        this.formGroupController.get('properties.vAxes')?.valueChanges.subscribe((vAxes: ChartsExportVAxesModel[]) => {
+        this.formGroupController.get('properties.vAxes')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((vAxes: ChartsExportVAxesModel[]) => {
             // Remove no longer existing
             for (let i = this.dataSource.data.length - 1; i >= 0; i--) {
                 const axis = this.dataSource.data[i] as ChartsExportVAxesModel;

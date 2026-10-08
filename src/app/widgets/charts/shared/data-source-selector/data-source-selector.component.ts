@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, Subject, throwError } from 'rxjs';
 import { DeviceGroupCriteriaModel, DeviceGroupDisplayModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
@@ -81,6 +82,7 @@ export class DataSourceSelectorComponent implements OnInit {
     private deviceGroupsService = inject(DeviceGroupsService);
     private locationsService = inject(LocationsService);
     private functionsService = inject(FunctionsService);
+    private destroyRef = inject(DestroyRef);
 
     form: UntypedFormGroup = new UntypedFormGroup({});
     dataSourceClasses = ['Devices', 'Device Groups', 'Exports', 'Locations'];
@@ -251,14 +253,14 @@ export class DataSourceSelectorComponent implements OnInit {
     private subscribeToFormUpdates() {
         this.exportsControlBySource.controls.forEach(fieldControl => {
             const selectionControl = (fieldControl as FormGroup).controls['sourceExports'];
-            selectionControl.valueChanges.subscribe(
+            selectionControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(
                 (val: any) => {
                     this.updateExportSelections(fieldControl, val);
                     this.updateErrorMessage();
                     this.updateCriteriaAndAspects(fieldControl);
                     this.updateFieldOptions();
                 });
-            selectionControl.events.subscribe(
+            selectionControl.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(
                 (event: ControlEvent) => {
                     if (event instanceof TouchedChangeEvent) {
                         this.updateErrorMessage();
@@ -266,7 +268,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 });
         });
 
-        this.form.controls['dataSourceClasses'].valueChanges.subscribe(chosenClasses => { // delete exports of class when class gets unselected
+        this.form.controls['dataSourceClasses'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(chosenClasses => { // delete exports of class when class gets unselected
             const notChosen = this.dataSourceClasses.filter(x => !chosenClasses.includes(x));
             this.exportsControlBySource.controls.forEach(control => {
                 const sourceClass = this.getSourceClass(control);
@@ -278,7 +280,7 @@ export class DataSourceSelectorComponent implements OnInit {
             });
         });
 
-        this.form.valueChanges.subscribe({
+        this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: () => {
                 if (!this.ready) {
                     return;
@@ -295,7 +297,7 @@ export class DataSourceSelectorComponent implements OnInit {
             }
         };
         timeRangTypeChanges(this.form.get('timeRange.type')?.value);
-        this.form.get('timeRange.type')?.valueChanges.subscribe(value => {
+        this.form.get('timeRange.type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
             timeRangTypeChanges(value);
         });
 
@@ -305,7 +307,7 @@ export class DataSourceSelectorComponent implements OnInit {
             }
         };
         timeRangeLevelChanges(this.form.get('timeRange.level')?.value);
-        this.form.get('timeRange.level')?.valueChanges.subscribe(value => {
+        this.form.get('timeRange.level')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
             timeRangeLevelChanges(value);
         });
     }
@@ -1105,7 +1107,8 @@ export class DataSourceSelectorComponent implements OnInit {
 
     initOnSelectSearch() {
         this.searchSubject.pipe(
-            debounceTime(250)
+            debounceTime(250),
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe(({ term, sourceForm }) => {
             this.resetDataSourceOptions(sourceForm, term);
         });

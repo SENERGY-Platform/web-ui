@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DevicesStateService } from './shared/devices-state.service';
 import { DevicesStateModel } from './shared/devices-state.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { DeviceInstancesRouterStateTabEnum } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -35,15 +35,15 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, WidgetFooterComponent]
 })
-export class DevicesStateComponent implements OnInit, OnDestroy {
+export class DevicesStateComponent implements OnInit {
     private devicesStateService = inject(DevicesStateService);
     private dashboardService = inject(DashboardService);
     private router = inject(Router);
+    private destroyRef = inject(DestroyRef);
 
     devicesStatus: DevicesStateModel = { count: 0, connected: 0, disconnected: 0, unknown: 0 };
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -56,16 +56,12 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
         this.setDeviceStatus();
     }
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     edit() {
         this.devicesStateService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization, this.userHasUpdatePropertiesAuthorization);
     }
 
     private setDeviceStatus() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 this.devicesStateService.getDevicesStatus(this.widget.properties).subscribe((devicesStatus: DevicesStateModel) => {

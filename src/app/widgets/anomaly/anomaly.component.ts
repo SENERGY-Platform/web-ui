@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { AfterContentChecked, Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentChecked, Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { subMinutes } from 'date-fns';
-import { Subscription, concatMap, map, of, throwError } from 'rxjs';
+import { concatMap, map, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
@@ -37,14 +38,14 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, AnomalyPhasesComponent, LastAnomalyComponent, LineComponent, WidgetFooterComponent]
 })
-export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
+export class AnomalyComponent implements OnInit, AfterContentChecked {
     private dashboardService = inject(DashboardService);
     private anomalyService = inject(AnomalyService);
     private elementSizeService = inject(ElementSizeService);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
     lastAnomaly?: AnomalyResultModel;
     anomalies: AnomaliesPerDevice = {};
     error = false;
@@ -74,10 +75,6 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
         this.update();
         this.configured = this.widget.properties.anomalyDetection !== undefined;
         this.showDebug = this.widget.properties.anomalyDetection?.showDebug || false;
-    }
-
-    ngOnDestroy(): void {
-        this.destroy.unsubscribe();
     }
 
     private createMockAnomalies(): AnomaliesPerDevice {
@@ -248,7 +245,7 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
     }
 
     private update() {
-        this.destroy = this.dashboardService.initWidgetObservable.pipe(
+        this.dashboardService.initWidgetObservable.pipe(
             // TODO refresh in child components
             concatMap((event: string) => {
                 if(this.widget.properties.anomalyDetection?.export == null) {
@@ -277,7 +274,8 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
                     return this.loadAnomalies(exportID);
                 }
                 return of(null);
-            })
+            }),
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe({
             next: (_) => {
                 this.ready = true;

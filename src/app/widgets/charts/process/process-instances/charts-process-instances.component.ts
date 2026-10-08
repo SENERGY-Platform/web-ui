@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { ChartsProcessInstancesService } from './shared/charts-process-instances.service';
 import { ProcessStatusCount } from './shared/charts-process-instances-chart';
 import { processStatusChart } from './shared/charts-process-instances-chartjs';
@@ -44,13 +44,13 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, After
     private dashboardService = inject(DashboardService);
     private el = inject(ElementRef);
     private zone = inject(NgZone);
+    private destroyRef = inject(DestroyRef);
 
     /** undefined without data */
     chart?: ReturnType<typeof processStatusChart>;
     readonly plugins = [...googlePlugins, googlePiePlugin];
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     private chartData?: ProcessStatusCount[];
     private resizeObserver?: ResizeObserver;
@@ -80,7 +80,6 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, After
     }
 
     ngOnDestroy() {
-        this.destroy.unsubscribe();
         this.resizeObserver?.disconnect();
         clearTimeout(this.resizeTimeout);
     }
@@ -90,7 +89,7 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, After
     }
 
     private getProcessInstances() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 this.chartsProcessInstancesService

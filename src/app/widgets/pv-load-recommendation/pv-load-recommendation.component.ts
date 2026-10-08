@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { concatMap, Subscription, of } from 'rxjs';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { concatMap, of } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { PvLoadService } from './shared/pv-load.service';
@@ -32,13 +33,13 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, WidgetFooterComponent]
 })
-export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
+export class PvLoadRecommendationComponent implements OnInit {
     private dashboardService = inject(DashboardService);
     private pvLoadService = inject(PvLoadService);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
     recommendation?: PVLoadRecommendationResult;
     error?: string;
 
@@ -55,14 +56,10 @@ export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
         this.configured = this.widget.properties.pvLoadRecommendation !== undefined;
     }
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     private update() {
 
 
-        this.destroy = this.dashboardService.initWidgetObservable.pipe(
+        this.dashboardService.initWidgetObservable.pipe(
             concatMap((event: string) => {
                 if (event === 'reloadAll' || event === this.widget.id) {
                     this.configured = this.widget.properties.pvLoadRecommendation !== undefined;
@@ -74,7 +71,7 @@ export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
                     return this.pvLoadService.getPVLoadRecommendation(exportID);
                 }
                 return of();
-            })).subscribe({
+            }), takeUntilDestroyed(this.destroyRef)).subscribe({
                 next: (recommendation) => {
                     if (recommendation != null) {
                         this.recommendation = recommendation;

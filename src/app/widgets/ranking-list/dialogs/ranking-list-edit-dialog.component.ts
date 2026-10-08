@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -42,6 +43,7 @@ export class RankingListEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<RankingListEditDialogComponent>>(MatDialogRef);
     private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
@@ -75,7 +77,7 @@ export class RankingListEditDialogComponent implements OnInit {
     }
 
     onChanges(): void {
-        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+        this.formGroup.controls['name'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
             this.widget.name = val;
         });
     }

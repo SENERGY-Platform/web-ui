@@ -15,7 +15,8 @@
  */
 
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
@@ -78,6 +79,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   private conceptsService = inject(ConceptsService);
   private cd = inject(ChangeDetectorRef);
   private el = inject(ElementRef);
+  private destroyRef = inject(DestroyRef);
 
   dashboardId = '';
   widgetId = '';
@@ -184,7 +186,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       this.form.controls.placements.controls.forEach(p =>
         controllingFunctionIds.push(...this.getControllingCriteria(p.value.deviceGroupId || '').map(c => c.function_id)));
       this.loadCharacteristics(controllingFunctionIds).subscribe();
-      this.form.controls.image.valueChanges.subscribe(() => this.draw());
+      this.form.controls.image.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.draw());
       for (let i = 0; i < 5; i++) {
         setTimeout(() => { // needs to draw ready=true first
           this.draw();
@@ -322,9 +324,9 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       colorLow: new FormControl<string>('#808080'),
       colorHigh: new FormControl<string>('#808080'),
     });
-    fg.controls.criteria.valueChanges.pipe(concatMap(c => this.loadCharacteristics(c?.function_id === undefined ? [] : [c.function_id]))).subscribe();
+    fg.controls.criteria.valueChanges.pipe(concatMap(c => this.loadCharacteristics(c?.function_id === undefined ? [] : [c.function_id])), takeUntilDestroyed(this.destroyRef)).subscribe();
     // the controlling criteria of the group are offered as controls, annotated with the input they get
-    fg.controls.deviceGroupId.valueChanges.pipe(concatMap(id => this.loadCharacteristics(this.getControllingCriteria(id || '').map(c => c.function_id)))).subscribe();
+    fg.controls.deviceGroupId.valueChanges.pipe(concatMap(id => this.loadCharacteristics(this.getControllingCriteria(id || '').map(c => c.function_id))), takeUntilDestroyed(this.destroyRef)).subscribe();
     if (value !== undefined) {
       fg.patchValue(value);
     }

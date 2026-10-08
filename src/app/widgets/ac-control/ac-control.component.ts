@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { DeviceCommandModel, DeviceCommandService } from '../../core/services/device-command.service';
 import { AcControlElementModel } from './shared/ac-control.model';
@@ -40,10 +40,11 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, MatTooltip, MatIconButton, MatSlider, MatSliderThumb, MatButton, WidgetFooterComponent]
 })
-export class AcControlComponent implements OnInit, OnDestroy {
+export class AcControlComponent implements OnInit {
     private dashboardService = inject(DashboardService);
     private deviceCommandService = inject(DeviceCommandService);
     private dialog = inject(MatDialog);
+    private destroyRef = inject(DestroyRef);
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -54,15 +55,10 @@ export class AcControlComponent implements OnInit, OnDestroy {
 
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     ngOnInit(): void {
         this.update();
         this.refresh();
-    }
-
-    ngOnDestroy(): void {
-        this.destroy.unsubscribe();
     }
 
 
@@ -87,7 +83,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
     }
 
     private update() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe(async (event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(async (event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refresh();
             }

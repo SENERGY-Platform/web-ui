@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { map, Subscription } from 'rxjs';
+import { Component, ElementRef, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ConsumptionProfileProperties, ConsumptionProfileResponse } from './shared/consumption-profile.model';
 import { ConsumptionProfileService } from './shared/consumption-profile.service';
@@ -36,9 +37,10 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetFooterComponent]
 })
-export class ConsumptionProfileComponent implements OnInit, OnDestroy {
+export class ConsumptionProfileComponent implements OnInit {
     private consumptionService = inject(ConsumptionProfileService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -58,7 +60,6 @@ export class ConsumptionProfileComponent implements OnInit, OnDestroy {
     readonly chartPlugins = [crosshairPlugin];
     operatorIsInitPhase = false;
     initialPhaseMsg = '';
-    destroy: Subscription | undefined;
 
     private checkForInit(data: ConsumptionProfileResponse) {
         if (data.initial_phase !== '' && data.initial_phase !== null) {
@@ -80,15 +81,11 @@ export class ConsumptionProfileComponent implements OnInit, OnDestroy {
 
         this.refresh();
 
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refresh();
             }
         });
-    }
-
-    ngOnDestroy(): void {
-        this.destroy?.unsubscribe();
     }
 
     refresh() {

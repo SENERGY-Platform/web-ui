@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { RankingListModel } from './shared/ranking-list.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { Subscription } from 'rxjs';
 import { RankingListService } from './shared/ranking-list.service';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
@@ -33,14 +33,14 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, WidgetFooterComponent]
 })
-export class RankingListComponent implements OnInit, OnDestroy {
+export class RankingListComponent implements OnInit {
     private rankingListService = inject(RankingListService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     rankings: RankingListModel[] = [];
     ready = false;
 
-    private destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -50,17 +50,13 @@ export class RankingListComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     ngOnInit() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
                 this.initMockup();
                 this.ready = true;
             }
         });
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     edit() {

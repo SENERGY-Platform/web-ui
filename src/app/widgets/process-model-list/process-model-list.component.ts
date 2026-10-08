@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessModelListService } from './shared/process-model-list.service';
 import { ProcessModelListModel } from './shared/process-model-list.model';
-import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { ProcessRepoService } from 'src/app/modules/processes/process-repo/shared/process-repo.service';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -40,15 +40,15 @@ import { DatePipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemTitle, MatListItemLine, MatListItemMeta, MatIconButton, MatTooltip, RouterLink, MatIcon, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
-export class ProcessModelListComponent implements OnInit, OnDestroy {
+export class ProcessModelListComponent implements OnInit {
     private processModelListService = inject(ProcessModelListService);
     private dashboardService = inject(DashboardService);
     private processRepoService = inject(ProcessRepoService);
+    private destroyRef = inject(DestroyRef);
 
     processes: ProcessModelListModel[] = [];
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -64,16 +64,12 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
         this.userHasProcessRepoUpdateAuthorization = this.processRepoService.userHasUpdateAuthorization();
     }
 
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
-    }
-
     edit() {
         this.processModelListService.openEditDialog(this.dashboardId, this.widget.id, this.userHasUpdateNameAuthorization);
     }
 
     private getProcesses() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refreshing = true;
                 this.processModelListService.getProcesses().subscribe((processes: ProcessModelListModel[]) => {

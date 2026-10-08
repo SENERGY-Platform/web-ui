@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
@@ -55,6 +56,7 @@ export class SwitchEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<SwitchEditDialogComponent>>(MatDialogRef);
     private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
     deployments: DeploymentsModel[] = [];
@@ -97,10 +99,10 @@ export class SwitchEditDialogComponent implements OnInit {
     }
 
     onChanges(): void {
-        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+        this.formGroup.controls['name'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
             this.widget.name = val;
         });
-        this.formGroup.controls['imgUrl'].valueChanges.subscribe(val => {
+        this.formGroup.controls['imgUrl'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
             this.widget.properties.imgUrl = val;
         });
     }

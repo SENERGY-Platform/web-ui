@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { SwitchService } from './shared/switch.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel } from './shared/switch-properties.model';
-import { Subscription } from 'rxjs';
 import { MatCard, MatCardContent, MatCardImage } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
@@ -33,13 +33,13 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, MatCardImage, MatSlideToggle, FormsModule, WidgetFooterComponent]
 })
-export class SwitchComponent implements OnInit, OnDestroy {
+export class SwitchComponent implements OnInit {
     private switchService = inject(SwitchService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
 
-    private destroy = new Subscription();
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = { properties: {} as WidgetPropertiesModels } as WidgetModel;
@@ -49,16 +49,12 @@ export class SwitchComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     ngOnInit() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
+        this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.ready = false;
                 this.ready = true;
             }
         });
-    }
-
-    ngOnDestroy() {
-        this.destroy.unsubscribe();
     }
 
     edit() {

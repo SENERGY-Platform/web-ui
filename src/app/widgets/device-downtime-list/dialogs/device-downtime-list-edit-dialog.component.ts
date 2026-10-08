@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -42,6 +43,7 @@ export class DeviceDowntimeListEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DeviceDowntimeListEditDialogComponent>>(MatDialogRef);
     private dashboardService = inject(DashboardService);
     private locationService = inject(LocationsService);
+    private destroyRef = inject(DestroyRef);
 
     dashboardId: string;
     widgetId: string;
@@ -81,10 +83,10 @@ export class DeviceDowntimeListEditDialogComponent implements OnInit {
     }
 
     onChanges(): void {
-        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+        this.formGroup.controls['name'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
             this.widget.name = val;
         });
-         this.formGroup.controls.location.valueChanges.subscribe(val => {
+         this.formGroup.controls.location.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
             if (val !== null && val !== undefined) {
                 this.formGroup.controls.location.setValue({
                     name: val.name,

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -39,6 +40,7 @@ export class ProcessModelListEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<ProcessModelListEditDialogComponent>>(MatDialogRef);
     private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     dashboardId: string;
     widgetId: string;
@@ -67,7 +69,7 @@ export class ProcessModelListEditDialogComponent implements OnInit {
     }
 
     onChanges(): void {
-        this.formGroup.controls['name'].valueChanges.subscribe(val => {
+        this.formGroup.controls['name'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
             this.widget.name = val;
         });
     }

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, ChangeDetectionStrategy, ViewChild, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, ViewChild, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { subMinutes } from 'date-fns';
-import { concatMap, filter, map, Subscription, throwError } from 'rxjs';
+import { concatMap, filter, map, throwError } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { BadVentilationService } from './shared/bad-ventilation.service';
@@ -42,10 +43,10 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
 export class BadVentilationComponent implements OnInit {
     private ventilationService = inject(BadVentilationService);
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
 
     ready = false;
     refreshing = false;
-    destroy = new Subscription();
     error = false;
     operatorIsInitPhase = false;
     initialPhaseMsg = '';
@@ -73,7 +74,7 @@ export class BadVentilationComponent implements OnInit {
     }
 
     private update() {
-        this.destroy = this.dashboardService.initWidgetObservable.pipe(
+        this.dashboardService.initWidgetObservable.pipe(
             // other widgets' reloads used to refetch and redraw the curve of this one, too
             filter((event: string) => event === 'reloadAll' || event === this.widget.id),
             concatMap(() => {
@@ -86,7 +87,8 @@ export class BadVentilationComponent implements OnInit {
                 return this.loadVentilationResult(exportConfig?.exports[0].id);
             }),
             concatMap(_ => this.addDeviceCurve()),
-            map(_ => this.addRangeAnnotations())
+            map(_ => this.addRangeAnnotations()),
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe({
             next: (_) => {
                 this.ready = true;

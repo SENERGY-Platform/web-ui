@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -63,6 +64,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     private deviceInstancesService = inject(DeviceInstancesService);
     private deviceGroupsService = inject(DeviceGroupsService);
     private conceptsService = inject(ConceptsService);
+    private destroyRef = inject(DestroyRef);
 
     formIsReady = false;
     dataSourceFieldsReady = true;
@@ -205,7 +207,8 @@ export class SingleValueEditDialogComponent implements OnInit {
             }),
             map((_) => {
                 this.dataSourceFieldsReady = true;
-            })
+            }),
+            takeUntilDestroyed(this.destroyRef)
         ).subscribe();
     }
 
@@ -218,7 +221,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     listenForServiceSelectionChange() {
-        this.form.get('service')?.valueChanges.subscribe((service: DeviceTypeServiceModel) => {
+        this.form.get('service')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((service: DeviceTypeServiceModel) => {
             this.paths = [];
             this.form.get('vAxis')?.patchValue('');
             if (service === undefined || service == null) {
@@ -233,7 +236,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     listenForDeviceGroupCriteriaSelectionChange() {
-        this.form.get('deviceGroupCriteria')?.valueChanges.subscribe(criteria => {
+        this.form.get('deviceGroupCriteria')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(criteria => {
             this.dataSourceFieldsReady = false;
             const conceptId = this.functions.find(f => f.id === criteria.function_id)?.concept_id;
             if (conceptId !== undefined) {
@@ -253,19 +256,19 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     listenForExportSelection() {
-        this.form.get('measurement')?.valueChanges.subscribe(exp => {
+        this.form.get('measurement')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(exp => {
             this.vAxisValues = exp?.values;
         });
     }
 
     listenForDeviceGroupSelectionChange() {
-        this.form.get('deviceGroupId')?.valueChanges.subscribe(_ => {
+        this.form.get('deviceGroupId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
             this.form.get('vAxisLabel')?.patchValue('');
         });
     }
 
     listenForDataSourceTypeChange() {
-        this.form.get('sourceType')?.valueChanges.subscribe(sourceType => {
+        this.form.get('sourceType')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(sourceType => {
             this.loadDataSourceOptions(sourceType).subscribe();
         });
     }
@@ -273,7 +276,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     listenForFormChanges() {
         this.listenForDataSourceTypeChange();
 
-        this.form.get('type')?.valueChanges.subscribe(v => {
+        this.form.get('type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v => {
             if (v === 'String') {
                 this.form.patchValue({ format: '' });
                 this.form.get('format')?.disable();
@@ -288,7 +291,7 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.listenForDeviceGroupCriteriaSelectionChange();
         this.listenForDeviceGroupSelectionChange();
 
-        this.form.get('vAxisLabel')?.valueChanges.subscribe(unit => {
+        this.form.get('vAxisLabel')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(unit => {
             this.form.patchValue({targetCharacteristic: this.concept?.characteristics.find(c => this.getDisplay(c) === unit)?.id});
         });
     }
