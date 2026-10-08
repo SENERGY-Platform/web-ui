@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable, Subscription } from 'rxjs';
@@ -62,6 +62,15 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatFormField, MatLabel, MtxSelect, MtxSelectLabelTemplate, MtxSelectOptionTemplate, MatHint, MatError, MatErrorMessagesDirective, AspectSelectComponent, MatInput, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class TaskConfigDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<TaskConfigDialogComponent>>(MatDialogRef);
+    private dtService = inject(DeviceTypeService);
+    private _formBuilder = inject(UntypedFormBuilder);
+    private deviceTypeService = inject(DeviceTypeService);
+    private conceptsService = inject(ConceptsService);
+    private data = inject<{
+        selection: DeviceTypeSelectionRefModel | null;
+    }>(MAT_DIALOG_DATA);
+
     optionsFormControl = new UntypedFormControl('');
     deviceClassFormControl = new UntypedFormControl('');
     aspectFormControl = new UntypedFormControl([]);
@@ -96,14 +105,7 @@ export class TaskConfigDialogComponent implements OnInit {
     private classified = new Map<string, AspectClassification>();
     private functionsSubscription?: Subscription;
 
-    constructor(
-        private dialogRef: MatDialogRef<TaskConfigDialogComponent>,
-        private dtService: DeviceTypeService,
-        private _formBuilder: UntypedFormBuilder,
-        private deviceTypeService: DeviceTypeService,
-        private conceptsService: ConceptsService,
-        @Inject(MAT_DIALOG_DATA) private data: { selection: DeviceTypeSelectionRefModel | null },
-    ) {
+    constructor() {
         this.selection = this.data.selection;
     }
 

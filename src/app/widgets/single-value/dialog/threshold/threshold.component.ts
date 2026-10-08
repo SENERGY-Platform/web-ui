@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ValueHighlightConfig } from '../../shared/single-value.model';
@@ -30,14 +30,12 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton]
 })
 export class ThresholdComponent implements OnInit {
+    dialog = inject(MatDialog);
+
     displayedColumns = ['threshold', 'direction', 'color', 'edit', 'delete'];
     dataSource = new MatTableDataSource<ValueHighlightConfig>();
     @Output() threshholdConfigUpdated = new EventEmitter<ValueHighlightConfig[]>();
     @Input() oldConfigs: ValueHighlightConfig[] = [];
-
-    constructor(
-        public dialog: MatDialog
-    ) {}
 
     ngOnInit(): void {
         this.dataSource = new MatTableDataSource(this.oldConfigs);

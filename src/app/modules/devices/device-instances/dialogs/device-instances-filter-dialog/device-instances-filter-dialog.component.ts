@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { SortDirection } from '@angular/material/sort';
 import { concatMap, map, shareReplay } from 'rxjs';
@@ -34,6 +34,12 @@ import { FilterDialogComponent } from '../../../../../core/components/filter-dia
     imports: [FilterDialogComponent]
 })
 export class DeviceInstancesFilterDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DeviceInstancesFilterDialogComponent>>(MatDialogRef);
+    private locationsService = inject(LocationsService);
+    private networksService = inject(NetworksService);
+    private deviceTypesService = inject(DeviceTypeService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
     sortDirection: SortDirection = 'asc';
     connectionOptions: DeviceConnectionState[] = [
         {name: 'Online', value: DeviceInstancesRouterStateTabEnum.ONLINE},
@@ -44,14 +50,9 @@ export class DeviceInstancesFilterDialogComponent implements OnInit {
 
     savedFilterSelection!: FilterSelection | undefined;
 
-    constructor(
-    private dialogRef: MatDialogRef<DeviceInstancesFilterDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: FilterSelection | undefined,
-    private locationsService: LocationsService,
-    private networksService: NetworksService,
-    private deviceTypesService: DeviceTypeService,
-    private deviceInstancesService: DeviceInstancesService,
-    ) {
+    constructor() {
+        const data = inject<FilterSelection | undefined>(MAT_DIALOG_DATA);
+
         this.savedFilterSelection = data;
     }
 

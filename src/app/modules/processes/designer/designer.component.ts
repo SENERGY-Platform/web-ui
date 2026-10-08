@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { createProcessModeler, exportDiagram } from './bpmn-js/bpmn-js';
 import { HttpClient } from '@angular/common/http';
@@ -53,22 +53,22 @@ const escapeHtml = (text: string): string =>
     imports: [MatIconButton, MatTooltip, MatIcon, SpinnerComponent]
 })
 export class ProcessDesignerComponent implements OnInit, OnDestroy {
+    private http = inject(HttpClient);
+    private route = inject(ActivatedRoute);
+    protected auth = inject(AuthorizationService);
+    protected designerDialogService = inject(DesignerDialogService);
+    protected designerService = inject(DesignerHelperService);
+    protected processRepoService = inject(ProcessRepoService);
+    private snackBar = inject(MatSnackBar);
+    private metadataExistenceService = inject(MetadataExistenceService);
+
     modeler: any;
     id = '';
     ready = false;
 
     private missingMetadataOverlays: MissingMetadataOverlays;
 
-    constructor(
-        private http: HttpClient,
-        private route: ActivatedRoute,
-        protected auth: AuthorizationService,
-        protected designerDialogService: DesignerDialogService,
-        protected designerService: DesignerHelperService,
-        protected processRepoService: ProcessRepoService,
-        private snackBar: MatSnackBar,
-        private metadataExistenceService: MetadataExistenceService,
-    ) {
+    constructor() {
         this.missingMetadataOverlays = new MissingMetadataOverlays(this.metadataExistenceService);
     }
 

@@ -16,7 +16,7 @@
 
 import { map, startWith, switchMap } from 'rxjs/operators';
 
-import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { merge, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MonitorService } from './shared/monitor.service';
@@ -53,6 +53,16 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     imports: [MatTabGroup, MatTab, SearchbarComponent, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, NgClass, MatChipListbox, MatChipOption, MatChipRemove, MatChipSet, MatChipRow, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
 export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
+    private searchbarService = inject(SearchbarService);
+    private plattformMonitorService = inject(MonitorService);
+    private dialogsService = inject(DialogsService);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private hubsService = inject(NetworksService);
+    private fogMonitorFactory = inject(MonitorFogFactory);
+    utilsService = inject(UtilService);
+    preferencesService = inject(PreferencesService);
+
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
     displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
@@ -106,17 +116,9 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         openDetailsDialog(id: string): void;
     };
 
-    constructor(
-        private searchbarService: SearchbarService,
-        private plattformMonitorService: MonitorService,
-        private dialogsService: DialogsService,
-        private router: Router,
-        private route: ActivatedRoute,
-        private hubsService: NetworksService,
-        private fogMonitorFactory: MonitorFogFactory,
-        public utilsService: UtilService,
-        public preferencesService: PreferencesService,
-    ) {
+    constructor() {
+        const plattformMonitorService = this.plattformMonitorService;
+
         this.monitorService = plattformMonitorService;
         this.getRouterParams();
     }

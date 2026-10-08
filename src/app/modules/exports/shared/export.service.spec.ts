@@ -15,6 +15,7 @@
  */
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
 import { throwError } from 'rxjs';
 import { ExportService } from './export.service';
 import { BrokerExportService } from './broker-export.service';
@@ -29,7 +30,15 @@ describe('stopPipelines', () => {
 
     // The component tells a gateway timeout from a failure by this status; it used to be 404 for every error.
     it('should hand the real error status of the export service to the caller', (done) => {
-        const service = new ExportService(failingHttp(504), errorHandler, ladon, {} as DeviceInstancesService);
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: HttpClient, useValue: failingHttp(504) },
+                { provide: ErrorHandlerService, useValue: errorHandler },
+                { provide: LadonService, useValue: ladon },
+                { provide: DeviceInstancesService, useValue: {} },
+            ],
+        });
+        const service = TestBed.runInInjectionContext(() => new ExportService());
         service.stopPipelines(['e1', 'e2']).subscribe(result => {
             expect(result).toEqual({ status: 504 });
             done();
@@ -37,7 +46,14 @@ describe('stopPipelines', () => {
     });
 
     it('should hand the real error status of the broker export service to the caller', (done) => {
-        const service = new BrokerExportService(failingHttp(504), errorHandler, ladon);
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: HttpClient, useValue: failingHttp(504) },
+                { provide: ErrorHandlerService, useValue: errorHandler },
+                { provide: LadonService, useValue: ladon },
+            ],
+        });
+        const service = TestBed.runInInjectionContext(() => new BrokerExportService());
         service.stopPipelines(['e1', 'e2']).subscribe(result => {
             expect(result).toEqual({ status: 504 });
             done();

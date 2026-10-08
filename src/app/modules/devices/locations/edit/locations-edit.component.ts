@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LocationsService } from '../shared/locations.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -44,6 +44,16 @@ import { MatDivider } from '@angular/material/divider';
     imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCard, MatCardTitle, MatTooltip, MatCardActions, MatIconButton, MatIcon, MatButton, MatDivider]
 })
 export class LocationsEditComponent implements OnInit {
+    private _formBuilder = inject(FormBuilder);
+    private locationService = inject(LocationsService);
+    private deviceService = inject(DeviceInstancesService);
+    private deviceDialogService = inject(DeviceInstancesDialogService);
+    private deviceGroupService = inject(DeviceGroupsService);
+    private deviceGroupDialogService = inject(DeviceGroupsDialogService);
+    private snackBar = inject(MatSnackBar);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+
     id = '';
     locationForm!: FormGroup; // LocationModel
 
@@ -57,17 +67,7 @@ export class LocationsEditComponent implements OnInit {
     rerouteAfterSaveDelayInMs = 2000;
     isSaving = false;
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private locationService: LocationsService,
-        private deviceService: DeviceInstancesService,
-        private deviceDialogService: DeviceInstancesDialogService,
-        private deviceGroupService: DeviceGroupsService,
-        private deviceGroupDialogService: DeviceGroupsDialogService,
-        private snackBar: MatSnackBar,
-        private route: ActivatedRoute,
-        private router: Router,
-    ) {
+    constructor() {
         this.getRouterParams();
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
@@ -35,18 +35,22 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class FunctionsEditDialogComponent implements OnInit {
+    private conceptsService = inject(ConceptsService);
+    private dialogRef = inject<MatDialogRef<FunctionsEditDialogComponent>>(MatDialogRef);
+    private _formBuilder = inject(FormBuilder);
+
     functionFormGroup!: FormGroup;
 
     concepts: DeviceTypeConceptModel[] = [];
 
     disabled: boolean;
 
-    constructor(
-        private conceptsService: ConceptsService,
-        private dialogRef: MatDialogRef<FunctionsEditDialogComponent>,
-        private _formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { function: FunctionsPermSearchModel; disabled?: boolean },
-    ) {
+    constructor() {
+        const data = inject<{
+            function: FunctionsPermSearchModel;
+            disabled?: boolean;
+        }>(MAT_DIALOG_DATA);
+
         this.disabled = !!data.disabled;
         this.initFunctionFormGroup(data.function);
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { EditOutputDialogComponent } from '../dialogs/edit-output-dialog/edit-output-dialog.component';
 import { EditInputDialogComponent } from '../dialogs/edit-input-dialog/edit-input-dialog.component';
@@ -43,7 +43,8 @@ import { ProcessIncidentsConfig } from '../../incidents/shared/process-incidents
     providedIn: 'root',
 })
 export class DesignerDialogService {
-    constructor(private dialog: MatDialog) {}
+    private dialog = inject(MatDialog);
+
 
     openEditOutputDialog(outputs: BpmnParameter[], callback: () => void) {
         const dialogConfig = new MatDialogConfig();

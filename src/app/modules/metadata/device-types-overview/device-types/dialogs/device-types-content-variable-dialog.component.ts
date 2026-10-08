@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     contentVariableAspectIds,
@@ -55,6 +55,10 @@ interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, AspectSelectComponent, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class DeviceTypesContentVariableDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
+    private _formBuilder = inject(FormBuilder);
+    private deviceTypeHelperService = inject(DeviceTypeHelperService);
+
     disabled: boolean;
     contentVariable: DeviceTypeContentVariableModel;
     functions: DeviceTypeFunctionClassModel[] = [];
@@ -70,12 +74,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     allowVoid = false;
     prohibitedNames: string[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<DeviceTypesContentVariableDialogComponent>,
-        private _formBuilder: FormBuilder,
-        private deviceTypeHelperService: DeviceTypeHelperService,
-        @Inject(MAT_DIALOG_DATA)
-        data: {
+    constructor() {
+        const data = inject<{
             contentVariable: DeviceTypeContentVariableModel;
             disabled: boolean;
             functions: DeviceTypeFunctionModel[];
@@ -84,8 +84,8 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             aspectClasses?: DeviceTypeAspectClassModel[];
             allowVoid: boolean;
             prohibitedNames: string[];
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.disabled = data.disabled;
         this.contentVariable = data.contentVariable;
         this.functions = data.functions.map(f => {

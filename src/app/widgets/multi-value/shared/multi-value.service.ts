@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MultiValueMeasurement } from './multi-value.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -30,12 +30,11 @@ import { ExportDataService } from '../../shared/export-data.service';
     providedIn: 'root',
 })
 export class MultiValueService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
-        private exportDataService: ExportDataService,
-    ) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private exportDataService = inject(ExportDataService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

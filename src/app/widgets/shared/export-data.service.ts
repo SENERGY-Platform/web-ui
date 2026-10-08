@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -34,9 +34,12 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class ExportDataService {
+    private http = inject(HttpClient);
+    private ladonService = inject(LadonService);
+
     usageAuthorizations: PermissionTestResponse;
 
-    constructor(private http: HttpClient,  private ladonService: LadonService) {
+    constructor() {
         this.usageAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.timescaleAPIURL + '/usage');
     }
 

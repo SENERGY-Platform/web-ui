@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { forkJoin, Observable, Subscription, map, concatMap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -47,6 +47,15 @@ import { MatCheckbox } from '@angular/material/checkbox';
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
+    private dialogsService = inject(DialogsService);
+    private searchbarService = inject(SearchbarService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private permissionsService = inject(PermissionsService);
+    private preferencesService = inject(PreferencesService);
+
     displayedColumns = ['select', 'name', 'show'];
     pageSize = this.preferencesService.pageSize;
     selection = new SelectionModel<DeviceGroupModel>(true, []);
@@ -68,17 +77,6 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     hideGenerated = true;
     allDataLoaded = false;
-
-    constructor(
-        private deviceGroupsService: DeviceGroupsService,
-        private snackBar: MatSnackBar,
-        private router: Router,
-        private dialogsService: DialogsService,
-        private searchbarService: SearchbarService,
-        private permissionsDialogService: PermissionsDialogService,
-        private permissionsService: PermissionsService,
-        private preferencesService: PreferencesService,
-    ) {}
 
     ngOnInit() {
         this.initSearch();

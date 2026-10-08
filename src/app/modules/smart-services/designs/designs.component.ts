@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ProcessModel } from '../../processes/process-repo/shared/process.model';
@@ -55,6 +55,17 @@ const grids = new Map([
     imports: [SearchbarComponent, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatIcon, MatTooltip, MatGridTileText, MatGridTileFooterCssMatStyler, MatIconButton, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, SpinnerComponent, MatFabButton]
 })
 export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDestroy {
+    private searchbarService = inject(SearchbarService);
+    private designsService = inject(SmartServiceDesignsService);
+    private releaseService = inject(SmartServiceReleasesService);
+    private responsiveService = inject(ResponsiveService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private sanitizer = inject(DomSanitizer);
+    private utilService = inject(UtilService);
+    private _formBuilder = inject(FormBuilder);
+    private metadataExistenceService = inject(MetadataExistenceService);
+
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
 
     gridCols = 0;
@@ -78,21 +89,6 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     private knownMainPanelOffsetHeight = 0;
 
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
-
-    constructor(
-        private searchbarService: SearchbarService,
-        private designsService: SmartServiceDesignsService,
-        private releaseService: SmartServiceReleasesService,
-        private responsiveService: ResponsiveService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private sanitizer: DomSanitizer,
-        private utilService: UtilService,
-        private _formBuilder: FormBuilder,
-        private metadataExistenceService: MetadataExistenceService,
-    ) {
-
-    }
 
     ngOnInit() {
         this.userHasDeleteAuthorization = this.designsService.userHasDeleteAuthorization();

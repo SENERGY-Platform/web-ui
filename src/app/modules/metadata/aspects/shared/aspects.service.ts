@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable } from 'rxjs';
@@ -28,13 +28,13 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
     providedIn: 'root',
 })
 export class AspectsService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         const deviceRepoUrl = environment.deviceRepoUrl + '/aspects';
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(deviceRepoUrl);
     }

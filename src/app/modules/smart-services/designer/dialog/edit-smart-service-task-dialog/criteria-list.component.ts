@@ -16,7 +16,7 @@
 
 
 
-import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import {
     DeviceTypeAspectModel,
     DeviceTypeAspectNodeModel,
@@ -51,6 +51,10 @@ import { MatButton } from '@angular/material/button';
     imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, AspectSelectComponent, MatButton]
 })
 export class CriteriaListComponent implements OnInit {
+    private functionsService = inject(FunctionsService);
+    private deviceTypesService = inject(DeviceTypeService);
+    private deviceClassService = inject(DeviceClassesService);
+
 
     @Input() criteria_json = '[]';
     @Output() changed: EventEmitter<string> = new EventEmitter<string>();
@@ -65,9 +69,7 @@ export class CriteriaListComponent implements OnInit {
     private aspectNames = new Map<string, string>();
     private classified = new Map<string, AspectClassification>();
 
-    constructor(private functionsService: FunctionsService,
-        private deviceTypesService: DeviceTypeService,
-        private deviceClassService: DeviceClassesService) {
+    constructor() {
         this.functionsService.getFunctions('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.functions = value.result;
         });

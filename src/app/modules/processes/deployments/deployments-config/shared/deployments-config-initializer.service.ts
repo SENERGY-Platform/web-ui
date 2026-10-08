@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     AbstractControl, FormControl,
     FormGroup, UntypedFormArray,
@@ -44,7 +44,8 @@ import {
     providedIn: 'root',
 })
 export class DeploymentsConfigInitializerService {
-    constructor(private _formBuilder: UntypedFormBuilder) {}
+    private _formBuilder = inject(UntypedFormBuilder);
+
 
     initFormGroup(deployment: V2DeploymentsPreparedModel): FormGroup {
         return this._formBuilder.group({

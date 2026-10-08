@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
@@ -39,6 +39,12 @@ import { WidgetFooterComponent } from '../../../components/widget-footer/widget-
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, AfterViewInit {
+    private chartsProcessInstancesService = inject(ChartsProcessInstancesService);
+    private elementSizeService = inject(ElementSizeService);
+    private dashboardService = inject(DashboardService);
+    private el = inject(ElementRef);
+    private zone = inject(NgZone);
+
     /** undefined without data */
     chart?: ReturnType<typeof processStatusChart>;
     readonly plugins = [...googlePlugins, googlePiePlugin];
@@ -68,14 +74,6 @@ export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, After
         }));
         this.resizeObserver.observe(this.el.nativeElement);
     }
-
-    constructor(
-        private chartsProcessInstancesService: ChartsProcessInstancesService,
-        private elementSizeService: ElementSizeService,
-        private dashboardService: DashboardService,
-        private el: ElementRef,
-        private zone: NgZone,
-    ) { }
 
     ngOnInit() {
         this.getProcessInstances();

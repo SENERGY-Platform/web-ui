@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     NotificationBrokerModel,
@@ -64,6 +64,11 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTabGroup, MatTab, SpinnerComponent, MatCheckbox, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatIconButton, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatButtonToggleGroup, MatButtonToggle, MatButton, MatDialogActions]
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {
+    private dialogRef = inject<MatDialogRef<NotificationDialogComponent>>(MatDialogRef);
+    private fb = inject(UntypedFormBuilder);
+    private authorizationService = inject(AuthorizationService);
+    preferencesService = inject(PreferencesService);
+
     modes = Modes;
     mode = Modes.BROKER_LIST;
     notificationService: NotificationService;
@@ -102,13 +107,11 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
     private readonly saveSettings$ = new Subject<void>();
     private readonly destroy$ = new Subject<void>();
 
-    constructor(
-        private dialogRef: MatDialogRef<NotificationDialogComponent>,
-        private fb: UntypedFormBuilder,
-        private authorizationService: AuthorizationService,
-        public preferencesService: PreferencesService,
-        @Inject(MAT_DIALOG_DATA) data: { notificationService: NotificationService },
-    ) {
+    constructor() {
+        const data = inject<{
+            notificationService: NotificationService;
+        }>(MAT_DIALOG_DATA);
+
         this.notificationService = data.notificationService;
     }
 

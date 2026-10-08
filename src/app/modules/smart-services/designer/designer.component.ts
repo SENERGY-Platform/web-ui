@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 
 import { HttpClient } from '@angular/common/http';
@@ -56,6 +56,19 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     imports: [MatIconButton, MatTooltip, MatIcon, SpinnerComponent]
 })
 export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
+    private http = inject(HttpClient);
+    private route = inject(ActivatedRoute);
+    protected auth = inject(AuthorizationService);
+    protected designsService = inject(SmartServiceDesignsService);
+    protected releaseService = inject(SmartServiceReleasesService);
+    private snackBar = inject(MatSnackBar);
+    private dialogService = inject(DialogsService);
+    private router = inject(Router);
+    private dialog = inject(MatDialog);
+    protected designerService = inject(DesignerHelperService);
+    protected designerDialogService = inject(DesignerDialogService);
+    private metadataExistenceService = inject(MetadataExistenceService);
+
     modeler: any;
     id = '';
     releaseId = '';
@@ -65,20 +78,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
 
     private missingMetadataOverlays: MissingMetadataOverlays;
 
-    constructor(
-        private http: HttpClient,
-        private route: ActivatedRoute,
-        protected auth: AuthorizationService,
-        protected designsService: SmartServiceDesignsService,
-        protected releaseService: SmartServiceReleasesService,
-        private snackBar: MatSnackBar,
-        private dialogService: DialogsService,
-        private router: Router,
-        private dialog: MatDialog,
-        protected designerService: DesignerHelperService,
-        protected designerDialogService: DesignerDialogService,
-        private metadataExistenceService: MetadataExistenceService,
-    ) {
+    constructor() {
         this.missingMetadataOverlays = new MissingMetadataOverlays(this.metadataExistenceService);
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ValueHighlightConfig } from '../../shared/single-value.model';
@@ -34,6 +34,9 @@ import { MatButton } from '@angular/material/button';
     imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class AddThresholdComponent {
+    private dialogRef = inject<MatDialogRef<AddThresholdComponent>>(MatDialogRef);
+    config? = inject<ValueHighlightConfig>(MAT_DIALOG_DATA);
+
     form = new FormGroup({
         threshold: new FormControl<number|null>(null, {validators: Validators.required}),
         color: new FormControl('', {nonNullable: true, validators: Validators.required}),
@@ -41,10 +44,9 @@ export class AddThresholdComponent {
     });
     submitButtonText = 'Add';
 
-    constructor(
-      private dialogRef: MatDialogRef<AddThresholdComponent>,
-      @Inject(MAT_DIALOG_DATA) public config?: ValueHighlightConfig,
-    ) {
+    constructor() {
+        const config = this.config;
+
         if(config != null) {
             this.form.controls.threshold.patchValue(config.threshold);
             this.form.controls.color.patchValue(config.color);

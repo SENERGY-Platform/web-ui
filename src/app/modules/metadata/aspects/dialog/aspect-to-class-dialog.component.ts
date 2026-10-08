@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { deprecatedAspectName } from '../../device-types-overview/shared/device-type.model';
@@ -56,6 +56,9 @@ export interface AspectToClassDialogResult {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatHint, MatError, MatErrorMessagesDirective, MatRadioGroup, MatRadioButton, MatDialogActions, MatButton]
 })
 export class AspectToClassDialogComponent {
+    private dialogRef = inject<MatDialogRef<AspectToClassDialogComponent>>(MatDialogRef);
+    private _formBuilder = inject(FormBuilder);
+
     formGroup!: FormGroup;
     aspectName: string;
     childNames: string[];
@@ -63,11 +66,9 @@ export class AspectToClassDialogComponent {
 
     private existingClassNames: string[];
 
-    constructor(
-        private dialogRef: MatDialogRef<AspectToClassDialogComponent>,
-        private _formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: AspectToClassDialogData,
-    ) {
+    constructor() {
+        const data = inject<AspectToClassDialogData>(MAT_DIALOG_DATA);
+
         this.aspectName = data.aspectName;
         this.childNames = data.childNames;
         this.existingClassNames = data.existingClassNames;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { BpmnParameter } from '../../shared/designer.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -33,12 +33,16 @@ import { ShortOutputVariableNamePipe } from '../../../../../core/pipe/short-outp
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatInput, MatLabel, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton, ShortOutputVariableNamePipe]
 })
 export class EditOutputDialogComponent {
+    private dialogRef = inject<MatDialogRef<EditOutputDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        outputs: BpmnParameter[];
+    }>(MAT_DIALOG_DATA);
+
     outputs: BpmnParameter[];
 
-    constructor(
-        private dialogRef: MatDialogRef<EditOutputDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { outputs: BpmnParameter[] },
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.outputs = dialogParams.outputs;
     }
 

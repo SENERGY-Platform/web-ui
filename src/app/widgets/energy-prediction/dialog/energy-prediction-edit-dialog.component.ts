@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { AbstractControl, UntypedFormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
@@ -42,6 +42,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatHint, MatDialogActions, MatButton]
 })
 export class EnergyPredictionEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<EnergyPredictionEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private formBuilder = inject(UntypedFormBuilder);
+
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
@@ -74,19 +80,14 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         };
     }
 
-    constructor(
-        private dialogRef: MatDialogRef<EnergyPredictionEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private formBuilder: UntypedFormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

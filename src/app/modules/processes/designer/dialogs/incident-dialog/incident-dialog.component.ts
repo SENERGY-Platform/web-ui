@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ProcessIncidentsConfig } from '../../../incidents/shared/process-incidents.model';
@@ -33,13 +33,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class IncidentDialogComponent {
+    private dialogRef = inject<MatDialogRef<IncidentDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        config: ProcessIncidentsConfig;
+    }>(MAT_DIALOG_DATA);
+
     form = new FormGroup({
         message: new FormControl('')
     });
-    constructor(
-      private dialogRef: MatDialogRef<IncidentDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) private dialogParams: { config: ProcessIncidentsConfig},
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.form.controls.message.patchValue(dialogParams.config.message);
     }
 

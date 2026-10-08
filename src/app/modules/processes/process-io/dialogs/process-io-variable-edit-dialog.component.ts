@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ProcessIoVariable } from '../shared/process-io.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -33,16 +33,23 @@ import { ShortKeyPipe } from '../shared/short-key.pipe';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, IsJsonValidatorDirective, MatDialogActions, MatButton, ShortKeyPipe]
 })
 export class ProcessIoVariableEditDialogComponent {
+    private dialogRef = inject<MatDialogRef<ProcessIoVariableEditDialogComponent>>(MatDialogRef);
+    private data = inject<{
+        variable: ProcessIoVariable;
+        enableDefinitionId?: boolean;
+        enableInstanceId?: boolean;
+        enableKey?: boolean;
+    }>(MAT_DIALOG_DATA);
+
     variable: ProcessIoVariable;
     valueJson: string;
     enableKey?: boolean;
     enableDefinitionId?: boolean;
     enableInstanceId?: boolean;
 
-    constructor(
-        private dialogRef: MatDialogRef<ProcessIoVariableEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private data: { variable: ProcessIoVariable; enableDefinitionId?: boolean; enableInstanceId?: boolean; enableKey?: boolean },
-    ) {
+    constructor() {
+        const data = this.data;
+
         this.variable = data.variable;
         this.enableDefinitionId =data.enableDefinitionId;
         this.enableInstanceId =data.enableInstanceId;

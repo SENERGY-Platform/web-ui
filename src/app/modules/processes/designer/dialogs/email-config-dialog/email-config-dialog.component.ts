@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormControl, FormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
@@ -33,15 +33,19 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class EmailConfigDialogComponent {
+    private dialogRef = inject<MatDialogRef<EmailConfigDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        to: string;
+        subj: string;
+        content: string;
+    }>(MAT_DIALOG_DATA);
+
     toFormGroup: FormGroup;
     subjectFormGroup: FormGroup;
     contentFormGroup: FormGroup;
     parentErrorStateMatcher = new ParentErrorStateMatcher();
 
-    constructor(
-        private dialogRef: MatDialogRef<EmailConfigDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { to: string; subj: string; content: string },
-    ) {
+    constructor() {
         this.toFormGroup = new FormGroup(
             {
                 defaultValue: new FormControl(''),

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {forkJoin, Observable} from 'rxjs';
 import {AirQualityExternalProvider, AirQualityPropertiesModel, MeasurementModel} from './air-quality.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -35,22 +35,19 @@ import {environment} from '../../../../environments/environment';
     providedIn: 'root',
 })
 export class AirQualityService {
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private exportService = inject(ExportService);
+    private exportDataService = inject(ExportDataService);
+    private importInstancesService = inject(ImportInstancesService);
+
     public static getAbsoluteHumidity(temp: number, rel: number): number {
         return (13.2471 * Math.pow(Math.E, (17.67 * temp) / (temp + 243.5)) * rel) / (273.15 + temp);
     }
 
     public static getRelativeHumidity(temp: number, abs: number): number {
         return (abs * (273.15 + temp)) / (13.2471 * Math.pow(Math.E, (17.67 * temp) / (temp + 243.5)));
-    }
-
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
-        private exportService: ExportService,
-        private exportDataService: ExportDataService,
-        private importInstancesService: ImportInstancesService,
-    ) {
     }
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {

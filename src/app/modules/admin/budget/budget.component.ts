@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {BudgetService} from './shared/budget.service';
 import {BudgetModel} from './shared/budget.model';
 import {forkJoin, Observable} from 'rxjs';
@@ -38,6 +38,11 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [MatIconButton, MatIcon, SpinnerComponent, InfiniteScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton, MatTooltip]
 })
 export class BudgetComponent implements OnInit {
+    private authService = inject(AuthorizationService);
+    private budgetService = inject(BudgetService);
+    private dialog = inject(MatDialog);
+    private dialogsService = inject(DialogsService);
+
     @ViewChild(MatTable, {static: false}) table!: MatTable<BudgetModel>;
 
     budgets: BudgetModel[] = [];
@@ -48,14 +53,6 @@ export class BudgetComponent implements OnInit {
     dialogWidth = 700;
     roles: string[] = [];
     users: any[] = [];
-
-    constructor(
-        private authService: AuthorizationService,
-        private budgetService: BudgetService,
-        private dialog: MatDialog,
-        private dialogsService: DialogsService,
-    ) {
-    }
 
     ngOnInit(): void {
         forkJoin([

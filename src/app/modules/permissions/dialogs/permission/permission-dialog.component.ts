@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
@@ -46,6 +46,10 @@ export interface PermissionDialogComponentData {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, TableComponent, MatDivider, FormsModule, MatFormField, MatLabel, MtxSelect, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatIconButton, MatIcon, MatDialogActions, MatButton]
 })
 export class PermissionDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<PermissionDialogComponent>>(MatDialogRef);
+    private authorizationService = inject(AuthorizationService);
+    private permissionsService = inject(PermissionsService);
+
     @ViewChild('userTable', { static: false }) userTable?: TableComponent;
     @ViewChild('groupTable', { static: false }) groupTable?: TableComponent;
     @ViewChild('roleTable', { static: false }) roleTable?: TableComponent;
@@ -75,13 +79,9 @@ export class PermissionDialogComponent implements OnInit {
         administrate: 'delete resource, change permissions'
     };
 
-    constructor(
-        private dialogRef: MatDialogRef<PermissionDialogComponent>,
-        private authorizationService: AuthorizationService,
-        private permissionsService: PermissionsService,
-        @Inject(MAT_DIALOG_DATA)
-        data: PermissionDialogComponentData,
-    ) {
+    constructor() {
+        const data = inject<PermissionDialogComponentData>(MAT_DIALOG_DATA);
+
         this.name = data.name;
         this.hint = data.hint;
         this.permissions = data.permissions;

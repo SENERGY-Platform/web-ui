@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -27,7 +27,8 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatDialogActions, MatButton]
 })
 export class NetworksClearDialogComponent {
-    constructor(private dialogRef: MatDialogRef<NetworksClearDialogComponent>) {}
+    private dialogRef = inject<MatDialogRef<NetworksClearDialogComponent>>(MatDialogRef);
+
 
     close(): void {
         this.dialogRef.close(false);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Attribute, DeviceFilterCriteriaModel, DeviceInstanceModel, DeviceSelectablesModel } from '../../shared/device-instances.model';
@@ -80,6 +80,24 @@ export function deploymentElementCriteria(filterCriteria: V2DeploymentsPreparedF
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatRadioGroup, MatRadioButton, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class DeviceInstancesReplaceDialogComponent implements OnInit {
+  private dialogRef = inject<MatDialogRef<DeviceInstancesReplaceDialogComponent>>(MatDialogRef);
+  private fb = inject(FormBuilder);
+  private deviceInstancesService = inject(DeviceInstancesService);
+  private deviceGroupsService = inject(DeviceGroupsService);
+  private errorHandlerService = inject(ErrorHandlerService);
+  private datePipe = inject(DatePipe);
+  private deviceTypeService = inject(DeviceTypeService);
+  private pipelineRegistryService = inject(PipelineRegistryService);
+  private dialog = inject(MatDialog);
+  private smartServiceInstanceService = inject(SmartServiceInstanceService);
+  private smartServiceReleasesService = inject(SmartServiceReleasesService);
+  private networksService = inject(NetworksService);
+  private deploymentsFogFactory = inject(DeploymentsFogFactory);
+  private deploymentsService = inject(DeploymentsService);
+  private data = inject<{
+      device: DeviceInstanceModel;
+  }>(MAT_DIALOG_DATA);
+
   DeviceInstancesReplaceDialogComponent = DeviceInstancesReplaceDialogComponent;
   static modeClone = 1;
   static modeExisting = 2;
@@ -104,28 +122,6 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
   filteredDeviceTypes: DeviceTypeModel[] = [];
   deviceInstancesByType = new Map<string, DeviceInstanceModel[]>();
   allDeviceGroups: DeviceGroupModel[] | undefined;
-
-  constructor(
-    private dialogRef: MatDialogRef<DeviceInstancesReplaceDialogComponent>,
-    private fb: FormBuilder,
-    private deviceInstancesService: DeviceInstancesService,
-    private deviceGroupsService: DeviceGroupsService,
-    private errorHandlerService: ErrorHandlerService,
-    private datePipe: DatePipe,
-    private deviceTypeService: DeviceTypeService,
-    private pipelineRegistryService: PipelineRegistryService,
-    private dialog: MatDialog,
-    private smartServiceInstanceService: SmartServiceInstanceService,
-    private smartServiceReleasesService: SmartServiceReleasesService,
-    private networksService: NetworksService,
-    private deploymentsFogFactory: DeploymentsFogFactory,
-    private deploymentsService: DeploymentsService,
-
-    @Inject(MAT_DIALOG_DATA) private data: {
-      device: DeviceInstanceModel;
-    },
-  ) {
-  }
 
   ngOnInit(): void {
     const limit = 9999;

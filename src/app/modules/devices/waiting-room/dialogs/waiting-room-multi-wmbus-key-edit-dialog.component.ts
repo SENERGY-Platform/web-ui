@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WaitingDeviceModel } from '../shared/waiting-room.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -33,17 +33,21 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class WaitingRoomMultiWmbusKeyEditDialogComponent {
+    private _formBuilder = inject(FormBuilder);
+    private dialogRef = inject<MatDialogRef<WaitingRoomMultiWmbusKeyEditDialogComponent>>(MatDialogRef);
+    private deviceTypeService = inject(DeviceTypeService);
+    private data = inject<{
+        devices: WaitingDeviceModel[];
+    }>(MAT_DIALOG_DATA);
+
     static wmbusKeyAttributeKey = 'wmbus/key';
     public wmbusKeyAttributeKey = WaitingRoomMultiWmbusKeyEditDialogComponent.wmbusKeyAttributeKey;
 
     devices: WaitingDeviceModel[];
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private dialogRef: MatDialogRef<WaitingRoomMultiWmbusKeyEditDialogComponent>,
-        private deviceTypeService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) private data: { devices: WaitingDeviceModel[] },
-    ) {
+    constructor() {
+        const data = this.data;
+
         if (data.devices) {
             this.devices = JSON.parse(JSON.stringify(data.devices));
         } else {

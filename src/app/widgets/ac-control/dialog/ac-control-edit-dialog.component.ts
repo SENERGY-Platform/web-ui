@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -50,6 +50,13 @@ const FLOAT = 'https://schema.org/Float';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class AcControlEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<AcControlEditDialogComponent>>(MatDialogRef);
+    private dashboardService = inject(DashboardService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private fb = inject(UntypedFormBuilder);
+
 
     ready = false;
     widget: WidgetModel;
@@ -79,19 +86,14 @@ export class AcControlEditDialogComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
 
-    constructor(private dialogRef: MatDialogRef<AcControlEditDialogComponent>,
-                private dashboardService: DashboardService,
-                private deviceTypeService: DeviceTypeService,
-                private deviceInstancesService: DeviceInstancesService,
-                private deviceGroupsService: DeviceGroupsService,
-                private fb: UntypedFormBuilder,
-                @Inject(MAT_DIALOG_DATA) data: {
-                    widget: WidgetModel;
-                    dashboardId: string;
-                    userHasUpdateNameAuthorization: boolean;
-                    userHasUpdatePropertiesAuthorization: boolean;
-                },
-    ) {
+    constructor() {
+        const data = inject<{
+            widget: WidgetModel;
+            dashboardId: string;
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean;
+        }>(MAT_DIALOG_DATA);
+
         this.widget = data.widget;
         this.dashboardId = data.dashboardId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

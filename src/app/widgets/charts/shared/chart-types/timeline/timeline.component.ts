@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    ChangeDetectionStrategy,
-    Component, Input,
-    OnChanges,
-    SimpleChanges,
-    ViewChild
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, ViewChild, inject } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
@@ -35,6 +29,8 @@ import { timelineChartConfig, TimelineChartConfig, timelineSelection, TimelineSe
     imports: [BaseChartDirective]
 })
 export class TimelineComponent implements OnChanges {
+    private errorHandlerService = inject(ErrorHandlerService);
+
     /*
     Data is expected to be in shape
     [NUMBER_TIMELINE_ROWS, NUMBER_COLUMNS, NUMBER_TIMESTAMPS, 2]
@@ -52,8 +48,6 @@ export class TimelineComponent implements OnChanges {
     config?: TimelineChartConfig;
     private series: TimelineSeries[] = [];
     private isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent.toLowerCase());
-
-    constructor(private errorHandlerService: ErrorHandlerService) { }
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes['data'] || changes['vAxes'] || changes['hAxisLabel'] || changes['vAxisLabel']) {

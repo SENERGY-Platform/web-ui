@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Attribute, DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from '../shared/device-instances.model';
 import { AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
@@ -41,6 +41,17 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatButton, MatIcon, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, GenericValidator, MatDivider, MtxSelect, MatTooltip, MatIconButton, MatDialogActions]
 })
 export class DeviceInstancesEditDialogComponent implements OnDestroy {
+    private dialogRef = inject<MatDialogRef<DeviceInstancesEditDialogComponent>>(MatDialogRef);
+    private deviceTypeService = inject(DeviceTypeService);
+    private cd = inject(ChangeDetectorRef);
+    private data = inject<{
+        device: DeviceInstanceModel | DeviceInstanceWithDeviceTypeModel;
+        userHasUpdateDisplayNameAuthorization: boolean;
+        userHasUpdateAttributesAuthorization: boolean;
+        action?: string;
+        localIdIsEditable?: boolean;
+    }>(MAT_DIALOG_DATA);
+
     @ViewChild('qrVideo') qrVideo?: ElementRef<HTMLVideoElement>;
 
     device: DeviceInstanceModel | DeviceInstanceWithDeviceTypeModel;
@@ -62,19 +73,9 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
     private qrMediaStream: MediaStream | undefined;
     private qrCanvas = document.createElement('canvas');
 
-    constructor(
-        private dialogRef: MatDialogRef<DeviceInstancesEditDialogComponent>,
-        private deviceTypeService: DeviceTypeService,
-        private cd: ChangeDetectorRef,
+    constructor() {
+        const data = this.data;
 
-        @Inject(MAT_DIALOG_DATA) private data: {
-            device: DeviceInstanceModel | DeviceInstanceWithDeviceTypeModel;
-            userHasUpdateDisplayNameAuthorization: boolean;
-            userHasUpdateAttributesAuthorization: boolean;
-            action?: string;
-            localIdIsEditable?: boolean;
-        },
-    ) {
         this.userHasUpdateDisplayNameAuthorization = data.userHasUpdateDisplayNameAuthorization;
         this.userHasUpdateAttributesAuthorization = data.userHasUpdateAttributesAuthorization;
         this.device = data.device;

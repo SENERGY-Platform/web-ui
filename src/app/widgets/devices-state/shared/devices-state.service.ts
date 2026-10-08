@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DevicesStateModel, DevicesStatePropertiesModel } from './devices-state.model';
@@ -30,11 +30,10 @@ import { Attribute } from 'src/app/modules/devices/device-instances/shared/devic
     providedIn: 'root',
 })
 export class DevicesStateService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private deviceInstancesService: DeviceInstancesService,
-    ) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

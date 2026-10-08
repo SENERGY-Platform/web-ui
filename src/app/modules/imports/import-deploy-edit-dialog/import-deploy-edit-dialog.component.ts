@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-instances/shared/import-instances.model';
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
@@ -41,6 +41,13 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class ImportDeployEditDialogComponent implements OnInit {
+    data = inject<ImportInstancesModel>(MAT_DIALOG_DATA);
+    private fb = inject(UntypedFormBuilder);
+    private dialogRef = inject<MatDialogRef<ImportDeployEditDialogComponent>>(MatDialogRef);
+    private importTypesService = inject(ImportTypesService);
+    private snackBar = inject(MatSnackBar);
+    private importInstancesService = inject(ImportInstancesService);
+
     form = this.fb.group({
         id: { value: '', disabled: true },
         name: ['', Validators.required],
@@ -65,15 +72,6 @@ export class ImportDeployEditDialogComponent implements OnInit {
     UNKNOWN = 'unknown';
 
     types: Map<string, string> = new Map();
-
-    constructor(
-        @Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
-        private fb: UntypedFormBuilder,
-        private dialogRef: MatDialogRef<ImportDeployEditDialogComponent>,
-        private importTypesService: ImportTypesService,
-        private snackBar: MatSnackBar,
-        private importInstancesService: ImportInstancesService,
-    ) {}
 
     type: ImportTypeModel | undefined = undefined;
     ready = false;

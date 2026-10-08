@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../directives/close-mtx-select-on-scroll.directive';
@@ -27,10 +27,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatDialogActions, MatButton]
 })
 export class ConfirmDialogComponent {
+    private dialogRef = inject<MatDialogRef<ConfirmDialogComponent>>(MatDialogRef);
+
     text: string;
     title: string;
 
-    constructor(private dialogRef: MatDialogRef<ConfirmDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { text: string; title: string }) {
+    constructor() {
+        const data = inject<{
+            text: string;
+            title: string;
+        }>(MAT_DIALOG_DATA);
+
         this.text = data.text;
         this.title = data.title;
     }

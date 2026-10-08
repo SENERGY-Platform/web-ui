@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ChartsExportConversion } from '../../shared/charts-export-properties.model';
@@ -33,6 +33,9 @@ import { MatButton } from '@angular/material/button';
     imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class AddRuleComponent {
+  private dialogRef = inject<MatDialogRef<AddRuleComponent>>(MatDialogRef);
+  rule? = inject<ChartsExportConversion>(MAT_DIALOG_DATA);
+
   form = new FormGroup({
     from: new FormControl('', {nonNullable: true, validators: Validators.required}),
     to: new FormControl('', {nonNullable: true, validators: Validators.required}),
@@ -40,10 +43,9 @@ export class AddRuleComponent {
     alias: new FormControl(''),
   });
 
-  constructor(
-    private dialogRef: MatDialogRef<AddRuleComponent>,
-    @Inject(MAT_DIALOG_DATA) public rule?: ChartsExportConversion,
-  ) {
+  constructor() {
+    const rule = this.rule;
+
     if(rule != null) {
       this.form.controls.from.patchValue(rule.from);
       this.form.controls.to.patchValue(rule.to);

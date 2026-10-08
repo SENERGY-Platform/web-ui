@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -40,6 +40,10 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatSlideToggle, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, MtxSelect, MatDialogActions, MatButton]
 })
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<ProcessSchedulerScheduleDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private cronConverterService = inject(CronConverterService);
+
     form = new FormGroup({
         id: new FormControl(''),
         days: new FormArray([
@@ -60,12 +64,9 @@ export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     widget: WidgetModel = {} as WidgetModel;
     deployments: DeploymentsModel[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<ProcessSchedulerScheduleDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private cronConverterService: CronConverterService,
-        @Inject(MAT_DIALOG_DATA) data: ProcessSchedulerWidgetModel | null,
-    ) {
+    constructor() {
+        const data = inject<ProcessSchedulerWidgetModel | null>(MAT_DIALOG_DATA);
+
         if (data) {
             this.form.patchValue({
                 id: data.scheduleId,

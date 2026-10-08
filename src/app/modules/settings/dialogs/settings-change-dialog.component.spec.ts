@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { UntypedFormBuilder } from '@angular/forms';
+import { DOCUMENT } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SettingsChangeDialogComponent } from './settings-change-dialog.component';
@@ -23,7 +24,7 @@ import { AuthorizationService } from '../../../core/services/authorization.servi
 describe('SettingsChangeDialogComponent', () => {
     let redirectUris: string[];
 
-    /** Direct construction (no TestBed); the document only has to carry a location. */
+    /** Direct construction in an injection context; the document only has to carry a location. */
     const create = (origin: string, pathname: string): SettingsChangeDialogComponent => {
         redirectUris = [];
         const document = { location: { origin, pathname } } as unknown as Document;
@@ -34,13 +35,16 @@ describe('SettingsChangeDialogComponent', () => {
                 return Promise.resolve();
             },
         } as unknown as AuthorizationService;
-        const component = new SettingsChangeDialogComponent(
-            document,
-            authorizationService,
-            {} as MatDialogRef<SettingsChangeDialogComponent>,
-            {} as MatSnackBar,
-            new UntypedFormBuilder(),
-        );
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: DOCUMENT, useValue: document },
+                { provide: AuthorizationService, useValue: authorizationService },
+                { provide: MatDialogRef, useValue: {} },
+                { provide: MatSnackBar, useValue: {} },
+            ],
+        });
+        const component = TestBed.runInInjectionContext(() => new SettingsChangeDialogComponent());
         component.ngOnInit();
         return component;
     };

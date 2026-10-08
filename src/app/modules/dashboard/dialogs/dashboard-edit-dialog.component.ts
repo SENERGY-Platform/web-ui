@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DashboardModel } from '../shared/dashboard.model';
@@ -32,13 +32,16 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class DashboardEditDialogComponent {
+    private dialogRef = inject<MatDialogRef<DashboardEditDialogComponent>>(MatDialogRef);
+
     dashboard: DashboardModel;
     formControl = new UntypedFormControl('', [Validators.required, Validators.minLength(1)]);
 
-    constructor(
-        private dialogRef: MatDialogRef<DashboardEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { dashboard: DashboardModel },
-    ) {
+    constructor() {
+        const data = inject<{
+            dashboard: DashboardModel;
+        }>(MAT_DIALOG_DATA);
+
         this.dashboard = data.dashboard;
         this.formControl.setValue(this.dashboard.name);
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorModel } from '../model/error.model';
@@ -25,9 +25,9 @@ import { environment } from '../../../environments/environment';
     providedIn: 'root',
 })
 export class ErrorHandlerService {
-    private reportedSnackBar?: { ref: MatSnackBarRef<TextOnlySnackBar>; text: string };
+    private snackBar = inject(MatSnackBar);
 
-    constructor(private snackBar: MatSnackBar) {}
+    private reportedSnackBar?: { ref: MatSnackBarRef<TextOnlySnackBar>; text: string };
 
     logError(service: string, method: string, error: any) {
         console.error('Error =>> Service: ' + service + ' =>> Method: ' + method);

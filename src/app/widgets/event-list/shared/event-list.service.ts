@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { EventListEditDialogComponent } from '../dialogs/event-list-edit-dialog.component';
@@ -25,7 +25,9 @@ import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/das
     providedIn: 'root',
 })
 export class EventListService {
-    constructor(private dialog: MatDialog, private dashboardService: DashboardService) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

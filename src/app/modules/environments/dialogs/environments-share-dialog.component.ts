@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -53,6 +53,13 @@ export interface ShareDialogData {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, SpinnerComponent, MatIcon, MatButton, MatCheckbox, MatIconButton, MatTooltip, FormsModule, MatFormField, MatLabel, MtxSelect, ReactiveFormsModule, MatDivider, MatDialogActions]
 })
 export class EnvironmentsShareDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<EnvironmentsShareDialogComponent>>(MatDialogRef);
+    private environmentsService = inject(EnvironmentsService);
+    private permissionsService = inject(PermissionsService);
+    private authorizationService = inject(AuthorizationService);
+    private snackBar = inject(MatSnackBar);
+    data = inject<ShareDialogData>(MAT_DIALOG_DATA);
+
     userFormControl = new UntypedFormControl('');
     groupFormControl = new UntypedFormControl('');
 
@@ -73,15 +80,6 @@ export class EnvironmentsShareDialogComponent implements OnInit {
 
     errorMessage = '';
     deviceErrors: SharesDeviceError[] = [];
-
-    constructor(
-        private dialogRef: MatDialogRef<EnvironmentsShareDialogComponent>,
-        private environmentsService: EnvironmentsService,
-        private permissionsService: PermissionsService,
-        private authorizationService: AuthorizationService,
-        private snackBar: MatSnackBar,
-        @Inject(MAT_DIALOG_DATA) public data: ShareDialogData,
-    ) {}
 
     ngOnInit(): void {
         this.loadShares();

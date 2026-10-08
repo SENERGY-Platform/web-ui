@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CostService } from '../shared/cost.service';
 import { CostEntryModel, CostModel } from '../shared/cost.model';
 import { KeyValue, CurrencyPipe, DatePipe, KeyValuePipe } from '@angular/common';
@@ -54,6 +54,17 @@ import { CostElementComponent } from '../cost-element/cost-element.component';
     imports: [SpinnerComponent, MatFormField, MatLabel, MtxSelect, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MtxOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatTooltip, MatIcon, MatAccordion, CostElementComponent, CurrencyPipe, DatePipe, KeyValuePipe]
 })
 export class CostOverviewComponent implements OnInit {
+    private costService = inject(CostService);
+    private billingService = inject(BillingService);
+    private authorizationService = inject(AuthorizationService);
+    private pipelineService = inject(PipelineRegistryService);
+    private operatorService = inject(OperatorRepoService);
+    private importInstancesServcies = inject(ImportInstancesService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private exportService = inject(ExportService);
+    private brokerExportService = inject(BrokerExportService);
+    private reportingService = inject(ReportingService);
+
     dataReady = false;
     tree: Map<string, CostModel> | undefined;
     dates: Date[] = [];
@@ -72,18 +83,7 @@ export class CostOverviewComponent implements OnInit {
     brokerExports: ExportModel[] = [];
     reports: ReportModel[] = [];
 
-    constructor(
-        private costService: CostService,
-        private billingService: BillingService,
-        private authorizationService: AuthorizationService,
-        private pipelineService: PipelineRegistryService,
-        private operatorService: OperatorRepoService,
-        private importInstancesServcies: ImportInstancesService,
-        private deviceInstancesService: DeviceInstancesService,
-        private exportService: ExportService,
-        private brokerExportService: BrokerExportService,
-        private reportingService: ReportingService,
-    ) {
+    constructor() {
         this.isAdmin = this.authorizationService.userIsAdmin();
         if (this.isAdmin) {
             this.selectedUser.setValue(this.authorizationService.getUserId());

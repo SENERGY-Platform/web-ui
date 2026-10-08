@@ -17,7 +17,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {Observable} from 'rxjs';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
@@ -28,14 +28,14 @@ import {DocInfo, SwaggerModel} from './swagger.model';
     providedIn: 'root',
 })
 export class SwaggerService {
+    private http = inject(HttpClient);
+    private ladonService = inject(LadonService);
+
     public baseUrl: string = environment.swaggerUrl;
     authorizationsSwagger: PermissionTestResponse;
     authorizationsAsyncAPI: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         // Load in constructor to only load permissions once and not for each request as services are singletons in root
         this.authorizationsSwagger = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl + '/storage/swagger');
         this.authorizationsAsyncAPI = this.ladonService.getUserAuthorizationsForURI(environment.swaggerUrl + '/storage/asyncapi');

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, ViewChild, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Subscription, map, Observable, concatMap, of, forkJoin, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
@@ -45,6 +45,14 @@ interface InitCheck {
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, TimelineComponent, WidgetSpinnerComponent, WidgetFooterComponent]
 })
 export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
+    private dashboardService = inject(DashboardService);
+    private elementSizeService = inject(ElementSizeService);
+    private exportDataService = inject(ExportDataService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private dialog = inject(MatDialog);
+    private el = inject(ElementRef);
+    private zone = inject(NgZone);
+
     ready = false;
     init = false;
     refreshing = false;
@@ -63,16 +71,6 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private dashboardService: DashboardService,
-        private elementSizeService: ElementSizeService,
-        private exportDataService: ExportDataService,
-        private errorHandlerService: ErrorHandlerService,
-        private dialog: MatDialog,
-        private el: ElementRef,
-        private zone: NgZone,
-    ) { }
 
     resizeTimeout: any;
     ngAfterViewInit(): void {

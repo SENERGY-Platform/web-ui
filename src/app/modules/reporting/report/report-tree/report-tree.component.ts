@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReportObjectNode, inputTypeOfNode, isContainer } from '../../shared/report-object-node';
 import { ReportObjectViewService } from '../../shared/report-object-view.service';
 import { MatIconButton } from '@angular/material/button';
@@ -35,6 +35,8 @@ const TYPE_ICONS: { [key: string]: string } = {
     imports: [MatIconButton, MatIcon, MatTooltip]
 })
 export class ReportTreeComponent {
+    private viewService = inject(ReportObjectViewService);
+
 
     @Input() nodes: ReportObjectNode[] = [];
     @Input() depth = 0;
@@ -42,9 +44,6 @@ export class ReportTreeComponent {
     @Input() filter = '';
     @Output() copyItem: EventEmitter<ReportObjectNode> = new EventEmitter();
     @Output() removeItem: EventEmitter<ReportObjectNode> = new EventEmitter();
-
-    constructor(private viewService: ReportObjectViewService) {
-    }
 
     get selectedPath(): string {
         return this.viewService.selectedPath;

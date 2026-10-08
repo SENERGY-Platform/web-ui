@@ -15,7 +15,7 @@
  */
 
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { asapScheduler, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 
@@ -32,7 +32,8 @@ const mqQueries = new Map<string, string>([
     providedIn: 'root',
 })
 export class ResponsiveService {
-    constructor(private breakpointObserver: BreakpointObserver) {}
+    private breakpointObserver = inject(BreakpointObserver);
+
 
     getActiveMqAlias(): string {
         for (const [alias, query] of mqQueries) {

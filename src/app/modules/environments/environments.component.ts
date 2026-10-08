@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -50,6 +50,14 @@ export interface EnvironmentRow {
     imports: [MatSlideToggle, MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class EnvironmentsComponent implements OnInit {
+    private environmentsService = inject(EnvironmentsService);
+    private dialogsService = inject(DialogsService);
+    private dialog = inject(MatDialog);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
+    private permissionsService = inject(PermissionsService);
+    private authorizationService = inject(AuthorizationService);
+
     displayedColumns = ['name', 'type', 'owner', 'zones', 'assets', 'channels'];
     dataSource = new MatTableDataSource<EnvironmentRow>();
     dataReady = false;
@@ -68,16 +76,6 @@ export class EnvironmentsComponent implements OnInit {
     private ownerLookupFailed = new Set<string>();
 
     @ViewChild('importInput') importInput: any;
-
-    constructor(
-        private environmentsService: EnvironmentsService,
-        private dialogsService: DialogsService,
-        private dialog: MatDialog,
-        private snackBar: MatSnackBar,
-        private router: Router,
-        private permissionsService: PermissionsService,
-        private authorizationService: AuthorizationService,
-    ) {}
 
     ngOnInit(): void {
         this.displayedColumns.push('open');

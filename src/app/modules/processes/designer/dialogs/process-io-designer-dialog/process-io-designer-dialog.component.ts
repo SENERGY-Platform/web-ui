@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ProcessIoDesignerInfo, ProcessIoDesignerInfoGet, ProcessIoDesignerInfoSet } from '../../../process-io/shared/process-io.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -35,12 +35,16 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatInput, MatIconButton, MatIcon, MatDialogActions, MatButton]
 })
 export class ProcessIoDesignerDialogComponent {
+    private dialogRef = inject<MatDialogRef<ProcessIoDesignerDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        info: ProcessIoDesignerInfo;
+    }>(MAT_DIALOG_DATA);
+
     info: ProcessIoDesignerInfoWithBinding;
 
-    constructor(
-        private dialogRef: MatDialogRef<ProcessIoDesignerDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: ProcessIoDesignerInfo},
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.info = addBinding(dialogParams.info);
     }
 

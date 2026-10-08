@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
@@ -28,11 +28,15 @@ import { CostEstimationModel, CostModel } from './cost.model';
     providedIn: 'root',
 })
 export class CostService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
     estimationFlowAuthorizations: PermissionTestResponse;
     estimationImportAuthorizations: PermissionTestResponse;
 
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private ladonService: LadonService) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl);
         this.estimationFlowAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl + '/estimation/flow');
         this.estimationImportAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.costApiUrl + '/estimation/import');

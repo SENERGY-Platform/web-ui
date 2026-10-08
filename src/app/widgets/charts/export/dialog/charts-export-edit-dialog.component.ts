@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
@@ -56,6 +56,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatSlideToggle, DataSourceSelectorComponent, MatTooltip, MatTree, CdkDropList, MatTreeNodeDef, MatTreeNode, MatTreeNodePadding, AxisConfigComponent, MatNestedTreeNode, MatDialogActions, MatButton]
 })
 export class ChartsExportEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<ChartsExportEditDialogComponent>>(MatDialogRef);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private _formBuilder = inject(UntypedFormBuilder);
+
     typeString = 'https://schema.org/Text';
     typeInteger = 'https://schema.org/Integer';
     typeFloat = 'https://schema.org/Float';
@@ -127,19 +133,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     @ViewChild('datasourceselector', {static: false}) dataSourceSelector?: DataSourceSelectorComponent;
 
-    constructor(
-        private dialogRef: MatDialogRef<ChartsExportEditDialogComponent>,
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private _formBuilder: UntypedFormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

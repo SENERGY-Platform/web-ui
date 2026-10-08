@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ProcessModelListEditDialogComponent } from '../dialogs/process-model-list-edit-dialog.component';
@@ -29,7 +29,10 @@ import { ProcessRepoService } from '../../../modules/processes/process-repo/shar
     providedIn: 'root',
 })
 export class ProcessModelListService {
-    constructor(private dialog: MatDialog, private dashboardService: DashboardService, private processRepoService: ProcessRepoService) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private processRepoService = inject(ProcessRepoService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
@@ -45,6 +45,13 @@ import { DatePipe } from '@angular/common';
     imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatTooltip, RouterLink, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
+    snackBar = inject(MatSnackBar);
+    utilsService = inject(UtilService);
+    private reportingService = inject(ReportingService);
+    private searchbarService = inject(SearchbarService);
+    private dialogsService = inject(DialogsService);
+    private preferencesService = inject(PreferencesService);
+
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild(MatSort, { static: false }) sort?: MatSort;
 
@@ -55,15 +62,6 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     ready = false;
 
     private searchSub?: Subscription;
-
-    constructor(
-        public snackBar: MatSnackBar,
-        public utilsService: UtilService,
-        private reportingService: ReportingService,
-        private searchbarService: SearchbarService,
-        private dialogsService: DialogsService,
-        private preferencesService: PreferencesService,
-    ) {}
 
     ngOnInit() {
         if (this.reportingService.userHasReadReportFileAuthorization()) {

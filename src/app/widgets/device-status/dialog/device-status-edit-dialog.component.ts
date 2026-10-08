@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -61,6 +61,16 @@ import { MatCheckbox } from '@angular/material/checkbox';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatButton, MtxSelect, MtxSelectLabelTemplate, MatIcon, NgStyle, MtxOption, MatIconButton, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatCheckbox, MatDialogActions]
 })
 export class DeviceStatusEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DeviceStatusEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private fb = inject(FormBuilder);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceStatusService = inject(DeviceStatusService);
+    private processSchedulerService = inject(ProcessSchedulerService);
+    private deviceInstanceService = inject(DeviceInstancesService);
+
     aspects:  DeviceTypeAspectNodeModel[] = [];
     icons: string[] = [
         'power',
@@ -96,23 +106,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
 
-    constructor(
-        private dialogRef: MatDialogRef<DeviceStatusEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private fb: FormBuilder,
-        private deviceTypeService: DeviceTypeService,
-        private deviceStatusService: DeviceStatusService,
-        private processSchedulerService: ProcessSchedulerService,
-        private deviceInstanceService: DeviceInstancesService,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

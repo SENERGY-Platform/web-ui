@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, Subject, throwError } from 'rxjs';
 import { DeviceGroupCriteriaModel, DeviceGroupDisplayModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
@@ -72,6 +72,16 @@ interface ChartsExportVAxesModelWithGroup extends ChartsExportVAxesModel {
     imports: [MatProgressSpinner, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MtxSelect, MatError, MatErrorMessagesDirective, MtxOption, MatInput]
 })
 export class DataSourceSelectorComponent implements OnInit {
+    private fb = inject(FormBuilder);
+    private cdref = inject(ChangeDetectorRef);
+    private deviceTypeService = inject(DeviceTypeService);
+    private conceptsService = inject(ConceptsService);
+    private exportService = inject(ExportService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private locationsService = inject(LocationsService);
+    private functionsService = inject(FunctionsService);
+
     form: UntypedFormGroup = new UntypedFormGroup({});
     dataSourceClasses = ['Devices', 'Device Groups', 'Exports', 'Locations'];
 
@@ -145,18 +155,6 @@ export class DataSourceSelectorComponent implements OnInit {
     @Input() showTimeRange = true;
     @Input() showSource = true;
     @Output() updatedDataSourceConfig = new EventEmitter<DataSourceConfig>();
-
-    constructor(
-        private fb: FormBuilder,
-        private cdref: ChangeDetectorRef,
-        private deviceTypeService: DeviceTypeService,
-        private conceptsService: ConceptsService,
-        private exportService: ExportService,
-        private deviceInstancesService: DeviceInstancesService,
-        private deviceGroupsService: DeviceGroupsService,
-        private locationsService: LocationsService,
-        private functionsService: FunctionsService,
-    ) { }
 
     get exportsControlBySource() {
         return this.form.controls['exportsBySource'] as FormArray;

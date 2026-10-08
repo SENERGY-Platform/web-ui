@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
@@ -45,13 +45,12 @@ import { ImportTypeContentVariableModel } from 'src/app/modules/imports/import-t
     providedIn: 'root',
 })
 export class DeviceTypeService {
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService,
-        private dialog: MatDialog,
-        private importTypesService: ImportTypesService,
-    ) {}
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+    private dialog = inject(MatDialog);
+    private importTypesService = inject(ImportTypesService);
+
 
     openUsedInDeviceTypeDialog(element: UsedInDeviceTypeResponseElement) {
         const dialogConfig = new MatDialogConfig();

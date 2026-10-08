@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { SmartServiceInstanceService } from './shared/instances.service';
 import { SmartServiceInstanceModel } from './shared/instances.model';
@@ -59,6 +59,17 @@ import { JsonPipe, DatePipe } from '@angular/common';
     imports: [SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatButton, JsonPipe, DatePipe]
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
+    private instancesService = inject(SmartServiceInstanceService);
+    preferencesService = inject(PreferencesService);
+    private dialogsService = inject(DialogsService);
+    private router = inject(Router);
+    private activatedRoute = inject(ActivatedRoute);
+    private permission = inject(PermissionsService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private modulesService = inject(SmartServiceModuleService);
+    private instanceDialogService = inject(SmartServiceInstanceDialogService);
+    private authorizationService = inject(AuthorizationService);
+
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
 
     userHasDeleteAuthorization = false;
@@ -86,19 +97,6 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('tableContainer', { static: false }) tableContainer?: ElementRef<HTMLDivElement>;
-
-    constructor(
-        private instancesService: SmartServiceInstanceService,
-        public preferencesService: PreferencesService,
-        private dialogsService: DialogsService,
-        private router: Router,
-        private activatedRoute: ActivatedRoute,
-        private permission: PermissionsService,
-        private permissionsDialogService: PermissionsDialogService,
-        private modulesService: SmartServiceModuleService,
-        private instanceDialogService: SmartServiceInstanceDialogService,
-        private authorizationService: AuthorizationService,
-    ) { }
     ngOnInit(): void {
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
         // the log lines are only of use to someone who reads them, and the column is dead weight for

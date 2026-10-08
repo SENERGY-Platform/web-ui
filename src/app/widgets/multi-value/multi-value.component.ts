@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -38,6 +38,11 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetFooterComponent, DecimalPipe, PercentPipe, CurrencyPipe, DatePipe]
 })
 export class MultiValueComponent implements OnInit, OnDestroy {
+    private iconRegistry = inject(MatIconRegistry);
+    private sanitizer = inject(DomSanitizer);
+    private multiValueService = inject(MultiValueService);
+    private dashboardService = inject(DashboardService);
+
     configured = false;
     destroy = new Subscription();
     dataReady = false;
@@ -51,13 +56,6 @@ export class MultiValueComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
-
-    constructor(
-        private iconRegistry: MatIconRegistry,
-        private sanitizer: DomSanitizer,
-        private multiValueService: MultiValueService,
-        private dashboardService: DashboardService,
-    ) {}
 
     ngOnInit() {
         this.update();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     DeviceTypeModel,
@@ -56,6 +56,13 @@ import { MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDa
     imports: [MatDialogTitle, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, MatPrefix, MatTooltip, NgClass, FormsModule, MatError, MatErrorMessagesDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent, TimelineComponent, MatExpansionPanelDescription, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatSuffix, MatDialogActions, MatButton, DatePipe]
 })
 export class DeviceInstancesServiceDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DeviceInstancesServiceDialogComponent>>(MatDialogRef);
+    private exportDataService = inject(ExportDataService);
+    private fb = inject(FormBuilder);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private authorizationService = inject(AuthorizationService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
     services: DeviceTypeServiceModel[] = [];
     lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
     lastValueArray: {
@@ -102,22 +109,16 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     @ViewChild('connectionHistoryPanel') connectionHistoryPanel: MatExpansionPanel | undefined;
 
-    constructor(
-        private dialogRef: MatDialogRef<DeviceInstancesServiceDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             device: DeviceInstanceModel;
             services: DeviceTypeServiceModel[];
             lastValueElements: LastValuesRequestElementTimescaleModel[];
             deviceType: DeviceTypeModel;
             serviceOutputCounts: number[];
             descriptions: string[][];
-        },
-        private exportDataService: ExportDataService,
-        private fb: FormBuilder,
-        private errorHandlerService: ErrorHandlerService,
-        private authorizationService: AuthorizationService,
-        private deviceInstancesService: DeviceInstancesService
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.services = data.services;
         this.lastValueElements = data.lastValueElements;
         this.deviceType = data.deviceType;

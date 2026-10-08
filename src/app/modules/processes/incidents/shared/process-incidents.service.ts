@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
@@ -27,7 +27,9 @@ import { ProcessIncidentsModel } from './process-incidents.model';
     providedIn: 'root',
 })
 export class ProcessIncidentsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+
 
     getProcessIncidentsByProcessInstanceId(id: string): Observable<ProcessIncidentsModel[]> {
         return this.http.get<ProcessIncidentsModel[]>(environment.processIncidentApiUrl + '/incidents?process_instance_id=' + id).pipe(

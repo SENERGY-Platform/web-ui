@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    AfterContentChecked, Component,
-    Input,
-    OnDestroy,
-    OnInit,
-    ChangeDetectionStrategy
-} from '@angular/core';
+import { AfterContentChecked, Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { subMinutes } from 'date-fns';
 import { Subscription, concatMap, map, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
@@ -44,6 +38,10 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, AnomalyPhasesComponent, LastAnomalyComponent, LineComponent, WidgetFooterComponent]
 })
 export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
+    private dashboardService = inject(DashboardService);
+    private anomalyService = inject(AnomalyService);
+    private elementSizeService = inject(ElementSizeService);
+
     ready = false;
     refreshing = false;
     destroy = new Subscription();
@@ -64,13 +62,6 @@ export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
     configured = false;
-
-
-    constructor(
-        private dashboardService: DashboardService,
-        private anomalyService: AnomalyService,
-        private elementSizeService: ElementSizeService,
-    ) {}
 
     ngAfterContentChecked(): void {
         const element = this.elementSizeService.getHeightAndWidthByElementId(this.widget?.id||'');

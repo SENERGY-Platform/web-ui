@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { EnvironmentsService } from '../../shared/environments.service';
 import { DatasetMeta, isApiError } from '../../shared/environments.model';
@@ -37,6 +37,9 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatButton, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatIcon, MatDialogActions]
 })
 export class EnvironmentsDatasetUploadDialogComponent {
+    private dialogRef = inject<MatDialogRef<EnvironmentsDatasetUploadDialogComponent>>(MatDialogRef);
+    private environmentsService = inject(EnvironmentsService);
+
     fileName = '';
     name = '';
     timezone = 'Europe/Berlin';
@@ -46,11 +49,6 @@ export class EnvironmentsDatasetUploadDialogComponent {
     @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
     private content = '';
-
-    constructor(
-        private dialogRef: MatDialogRef<EnvironmentsDatasetUploadDialogComponent>,
-        private environmentsService: EnvironmentsService,
-    ) {}
 
     triggerFilePicker(): void {
         this.fileInput?.nativeElement.click();

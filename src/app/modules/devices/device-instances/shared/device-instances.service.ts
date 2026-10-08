@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
@@ -44,6 +44,13 @@ import { NetworksService } from '../../networks/shared/networks.service';
 })
 
 export class DeviceInstancesService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+    private utilService = inject(UtilService);
+    private locationService = inject(LocationsService);
+    private networkService = inject(NetworksService);
+
     nicknameAttributeKey = 'shared/nickname';
     authorizations: PermissionTestResponse;
     authorizationsDisplayName: PermissionTestResponse;
@@ -53,14 +60,7 @@ export class DeviceInstancesService {
     authorizationsShare: PermissionTestResponse;
     defaultOrigin = 'default';
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService,
-        private utilService: UtilService,
-        private locationService: LocationsService,
-        private networkService: NetworksService,
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
         this.authorizationsDisplayName = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices/id/display_name');
         this.authorizationsDefaultAttributes = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/defaults/devices/attributes');

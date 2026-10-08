@@ -23,8 +23,21 @@ import { lastValueFrom, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthorizationService } from './authorization.service';
 import { ErrorHandlerService } from './error-handler.service';
+import { keycloakServiceToken } from './keycloak-service.token';
 import { initializerService } from './initializer.service';
 import { LadonService } from '../../modules/admin/permissions/shared/services/ladom.service';
+
+// The constructor reads the multi-provided Keycloak services; the error handler and HttpClient are not touched here.
+function buildService(keycloak: KeycloakService): AuthorizationService {
+    TestBed.configureTestingModule({
+        providers: [
+            { provide: keycloakServiceToken, useValue: [keycloak] },
+            { provide: ErrorHandlerService, useValue: {} },
+            { provide: HttpClient, useValue: {} },
+        ],
+    });
+    return TestBed.runInInjectionContext(() => new AuthorizationService());
+}
 
 describe('AuthorizationService', () => {
     // A hand-built auth link comes back with ?code=&iss=, which keycloak-js ignores and Keycloak then refuses as redirect_uri.
@@ -35,7 +48,7 @@ describe('AuthorizationService', () => {
             logins.push(options);
             return Promise.resolve();
         };
-        const service = new AuthorizationService([keycloakService], {} as ErrorHandlerService, {} as HttpClient);
+        const service = buildService(keycloakService);
 
         await service.changePassword('https://ui.example.org/settings');
 
@@ -86,7 +99,7 @@ describe('AuthorizationService', () => {
             const keycloak = new KeycloakService();
             (keycloak as unknown as { initServiceValues(o: KeycloakOptions): void }).initServiceValues(initOptions);
             (keycloak as unknown as { _instance: Keycloak })._instance = fake;
-            service = new AuthorizationService([keycloak], {} as ErrorHandlerService, {} as HttpClient);
+            service = buildService(keycloak);
         });
 
         it('starts keycloak-js with a forced login and without the session iframe', () => {

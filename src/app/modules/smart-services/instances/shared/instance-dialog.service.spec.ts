@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NEVER, of } from 'rxjs';
@@ -82,7 +83,15 @@ describe('SmartServiceInstanceDialogService', () => {
             'updateInstanceInfo',
         ]);
         snackBar = jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']);
-        service = new SmartServiceInstanceDialogService(dialog, releases, instances, snackBar);
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: MatDialog, useValue: dialog },
+                { provide: SmartServiceReleasesService, useValue: releases },
+                { provide: SmartServiceInstanceService, useValue: instances },
+                { provide: MatSnackBar, useValue: snackBar },
+            ],
+        });
+        service = TestBed.runInInjectionContext(() => new SmartServiceInstanceDialogService());
 
         releases.getRelease.and.returnValue(of({ id: 'r2', design_id: 'de1', name: 'PV Forecast 2', description: '', created_at: '0' }));
         instances.createInstance.and.returnValue(of(instance({})));

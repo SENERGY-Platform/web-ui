@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CodeEditorLanguage, CodeEditorComponent } from '../../../../../core/components/code-editor/code-editor.component';
 import { CodeEditorCompletionSource } from '../../../../../core/components/code-editor/code-editor-completion';
@@ -38,6 +38,8 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, CodeEditorComponent, MatDialogActions, MatButton]
 })
 export class ScriptEditorDialogComponent {
+    private dialogRef = inject<MatDialogRef<ScriptEditorDialogComponent>>(MatDialogRef);
+
     script: string;
     label: string;
     scriptFormat: string;
@@ -54,10 +56,12 @@ export class ScriptEditorDialogComponent {
      */
     scriptEnvironment?: CodeEditorScriptEnvironment;
 
-    constructor(
-        private dialogRef: MatDialogRef<ScriptEditorDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) dialogParams: { script: ScriptEditModel; variables: string[] },
-    ) {
+    constructor() {
+        const dialogParams = inject<{
+            script: ScriptEditModel;
+            variables: string[];
+        }>(MAT_DIALOG_DATA);
+
         this.script = dialogParams.script.script || '';
         this.label = dialogParams.script.label || '';
         this.scriptFormat = dialogParams.script.scriptFormat || '';

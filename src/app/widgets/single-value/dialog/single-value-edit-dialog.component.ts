@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -54,6 +54,16 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatRadioGroup, MatRadioButton, MatProgressSpinner, MtxSelect, MtxOption, MatCheckbox, ThresholdComponent, MatDialogActions, MatButton]
 })
 export class SingleValueEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<SingleValueEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private fb = inject(UntypedFormBuilder);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private conceptsService = inject(ConceptsService);
+
     formIsReady = false;
     dataSourceFieldsReady = true;
     exports: ChartsExportMeasurementModel[] = [];
@@ -97,23 +107,14 @@ export class SingleValueEditDialogComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
 
-    constructor(
-        private dialogRef: MatDialogRef<SingleValueEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private fb: UntypedFormBuilder,
-        private deviceTypeService: DeviceTypeService,
-        private deviceInstancesService: DeviceInstancesService,
-        private deviceGroupsService: DeviceGroupsService,
-        private conceptsService: ConceptsService,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

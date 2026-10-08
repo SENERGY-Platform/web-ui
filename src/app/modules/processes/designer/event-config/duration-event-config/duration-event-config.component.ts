@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DurationIso, DurationResult } from '../../shared/designer.model';
 import { duration as toDuration, durationParts, durationToIsoString } from '../../../../../core/time/iso-duration';
@@ -31,6 +31,8 @@ import { MatErrorMessagesDirective } from '../../../../../core/directives/matErr
     imports: [FormsModule, MatFormField, MatInput, ReactiveFormsModule, MatLabel, MatError, MatErrorMessagesDirective]
 })
 export class DurationEventConfigComponent implements OnInit {
+    private localeId = inject(LOCALE_ID);
+
     @Input() initial = '';
     @Output() update = new EventEmitter<DurationResult>();
 
@@ -40,8 +42,6 @@ export class DurationEventConfigComponent implements OnInit {
     hour = new FormControl(0, Validators.min(0));
     minute = new FormControl(0, Validators.min(0));
     second = new FormControl(0, Validators.min(0));
-
-    constructor(@Inject(LOCALE_ID) private localeId: string) {}
 
     ngOnInit() {
         if (this.initial) {

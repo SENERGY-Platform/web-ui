@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../directives/close-mtx-select-on-scroll.directive';
@@ -42,11 +42,18 @@ export interface DeleteDialogResponse {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatCheckbox, FormsModule, MatDialogActions, MatButton]
 })
 export class DeleteDialogComponent {
+    private dialogRef = inject<MatDialogRef<DeleteDialogComponent>>(MatDialogRef);
+
     text: string;
     options: DeleteDialogOptions | undefined;
     checked = false;
 
-    constructor(private dialogRef: MatDialogRef<DeleteDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { text: string, options?: DeleteDialogOptions }) {
+    constructor() {
+        const data = inject<{
+            text: string;
+            options?: DeleteDialogOptions;
+        }>(MAT_DIALOG_DATA);
+
         this.text = data.text;
         this.options = data.options;
         this.checked = data.options?.checkboxDefault ?? false;

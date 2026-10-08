@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportModel } from '../../../modules/exports/shared/export.model';
@@ -28,13 +28,12 @@ import { Observable } from 'rxjs';
     providedIn: 'root',
 })
 export class DataTableService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private deploymentsService: DeploymentsService,
-        private processSchedulerService: ProcessSchedulerService,
-    ) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private deploymentsService = inject(DeploymentsService);
+    private processSchedulerService = inject(ProcessSchedulerService);
+
 
     deleteElements(elements: DataTableElementModel[] | undefined): void {
         if (elements === undefined) {

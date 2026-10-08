@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit, DOCUMENT, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, DOCUMENT, ChangeDetectionStrategy, inject } from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/model/authorization/authorization-profile.model';
 import { FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -34,6 +34,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class SettingsChangeDialogComponent implements OnInit {
+    private document = inject<Document>(DOCUMENT);
+    private authorizationService = inject(AuthorizationService);
+    private dialogRef = inject<MatDialogRef<SettingsChangeDialogComponent>>(MatDialogRef);
+    private snackBar = inject(MatSnackBar);
+    private _formBuilder = inject(UntypedFormBuilder);
+
     profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
     firstFormGroup: FormGroup = this._formBuilder.group({
         lastName: [''],
@@ -42,14 +48,6 @@ export class SettingsChangeDialogComponent implements OnInit {
     });
     /** The confidential client logs in without a browser session of the user's own, so there is none to change. */
     readonly canChangePassword = !AuthorizationService.usingConfidentialClient();
-
-    constructor(
-        @Inject(DOCUMENT) private document: Document,
-        private authorizationService: AuthorizationService,
-        private dialogRef: MatDialogRef<SettingsChangeDialogComponent>,
-        private snackBar: MatSnackBar,
-        private _formBuilder: UntypedFormBuilder,
-    ) {}
 
     ngOnInit(): void {
         this.authorizationService.getProfile().then((profile) => {

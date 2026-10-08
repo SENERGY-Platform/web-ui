@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { DeviceInstancesService } from './shared/device-instances.service';
 import {
@@ -76,23 +76,21 @@ export enum DeviceInstancesRouterStateTypesEnum {
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, StateIconComponent, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NgClass, MatMenu, MatMenuContent, MatMenuItem, MatPaginator]
 })
 export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private router = inject(Router);
+    private deviceInstancesDialogService = inject(DeviceInstancesDialogService);
+    private snackBar = inject(MatSnackBar);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private dialogsService = inject(DialogsService);
+    private deviceTypesService = inject(DeviceTypeService);
+    private searchbarService = inject(SearchbarService);
+    private dialog = inject(MatDialog);
+    private exportDataService = inject(ExportDataService);
+    private permissionsService = inject(PermissionsService);
+    preferencesService = inject(PreferencesService);
+    private cd = inject(ChangeDetectorRef);
+    private activatedRoute = inject(ActivatedRoute);
 
-    constructor(
-        private deviceInstancesService: DeviceInstancesService,
-        private router: Router, private deviceInstancesDialogService: DeviceInstancesDialogService,
-        private snackBar: MatSnackBar,
-        private permissionsDialogService: PermissionsDialogService,
-        private dialogsService: DialogsService,
-        private deviceTypesService: DeviceTypeService,
-        private searchbarService: SearchbarService,
-        private dialog: MatDialog,
-        private exportDataService: ExportDataService,
-        private permissionsService: PermissionsService,
-        public preferencesService: PreferencesService,
-        private cd: ChangeDetectorRef,
-        private activatedRoute: ActivatedRoute,
-    ) {
-    }
     displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'attributes', 'info'];
     maxShownAttributes = 3;
     pageSize = this.preferencesService.pageSize;

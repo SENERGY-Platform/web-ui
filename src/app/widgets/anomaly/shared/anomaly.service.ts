@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    Injectable
-} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
     MatDialog,
     MatDialogConfig
@@ -67,16 +65,12 @@ import { phaseWindows } from './anomaly-phases';
     providedIn: 'root'
 })
 export class AnomalyService {
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private exportDataService = inject(ExportDataService);
+    private chartsExportService = inject(ChartsExportService);
+    private errorService = inject(ErrorHandlerService);
 
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private exportDataService: ExportDataService,
-        private chartsExportService: ChartsExportService,
-        private errorService: ErrorHandlerService
-    ) {
-
-    }
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

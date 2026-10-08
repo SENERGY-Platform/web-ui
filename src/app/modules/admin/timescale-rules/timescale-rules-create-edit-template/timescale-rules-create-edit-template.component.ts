@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from '../shared/timescale-rule.model';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -37,6 +37,10 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, CdkTextareaAutosize, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent, MatDialogActions, MatButton]
 })
 export class TimescaleRulesCreateEditTemplateComponent {
+    private dialogRef = inject<MatDialogRef<TimescaleRulesCreateEditTemplateComponent>>(MatDialogRef);
+    private fb = inject(FormBuilder);
+    private timescaleRuleService = inject(TimescaleRulesService);
+
 
     rule?: TimescaleRuleModel;
     editable = false;
@@ -58,18 +62,15 @@ export class TimescaleRulesCreateEditTemplateComponent {
     create = false;
     templates: TimescaleRuleTemplateModel[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<TimescaleRulesCreateEditTemplateComponent>,
-        private fb: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             rule?: TimescaleRuleModel;
             editable: boolean;
             roles: string[];
             users: any[];
             templates: TimescaleRuleTemplateModel[];
-        },
-        private timescaleRuleService: TimescaleRulesService,
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.rule = data.rule;
         this.roles = data.roles;
         this.users = data.users;

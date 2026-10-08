@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -40,6 +40,9 @@ import { MatCheckbox } from '@angular/material/checkbox';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, ReactiveFormsModule, MatIcon, MatPrefix, MatIconButton, MatError, MatErrorMessagesDirective, InfiniteScrollDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatCheckbox, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class DeviceGroupsSelectDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DeviceGroupsSelectDialogComponent>>(MatDialogRef);
+    private deviceGroupsService = inject(DeviceGroupsService);
+
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceGroupsSelectDialogComponent>;
 
     deviceGroups: DeviceGroupModel[] = [];
@@ -52,8 +55,6 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
     offset = 0;
 
     selectedGroups: string[] = [];
-
-    constructor(private dialogRef: MatDialogRef<DeviceGroupsSelectDialogComponent>, private deviceGroupsService: DeviceGroupsService) {}
 
     ngOnInit() {
         this.load();

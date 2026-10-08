@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {SearchbarService} from './shared/searchbar.service';
 import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
@@ -31,12 +31,12 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [MatFormField, MatLabel, MatIcon, MatPrefix, MatInput, FormsModule, ReactiveFormsModule, MatIconButton, MatSuffix, MatTooltip]
 })
 export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
+    private searchbarService = inject(SearchbarService);
+
     @Input() searchTextIn = '';
     @Input() disable = false;
     @Input() supportRefresh = true;
     formControl = new UntypedFormControl(this.searchTextIn);
-
-    constructor(private searchbarService: SearchbarService) {}
 
     ngOnInit(): void {
         if (this.disable) {

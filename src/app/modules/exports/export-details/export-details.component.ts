@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Location, DatePipe } from '@angular/common';
 import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
 import {ActivatedRoute} from '@angular/router';
@@ -49,6 +49,15 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     imports: [MatIconButton, MatTooltip, MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, MatList, MatListItem, MatListItemIcon, MatListItemLine, MatDivider, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, SpinnerComponent, DatePipe]
 })
 export class ExportDetailsComponent implements OnInit {
+    private route = inject(ActivatedRoute);
+    private location = inject(Location);
+    private snackBar = inject(MatSnackBar);
+    private clipboardService = inject(ClipboardService);
+    private exportService = inject(ExportService);
+    private authorizationService = inject(AuthorizationService);
+    private brokerExportService = inject(BrokerExportService);
+    private exportDataService = inject(ExportDataService);
+
     id: string | null = null;
     userId: string | null = null;
     userName: string | null = null;
@@ -61,18 +70,6 @@ export class ExportDetailsComponent implements OnInit {
     lastValuesReady = false;
     lastValuesRequestElementModels: (LastValuesRequestElementInfluxModel | LastValuesRequestElementTimescaleModel)[] = [];
     showPassword = false;
-
-    constructor(
-        private route: ActivatedRoute,
-        private location: Location,
-        private snackBar: MatSnackBar,
-        private clipboardService: ClipboardService,
-        private exportService: ExportService,
-        private authorizationService: AuthorizationService,
-        private brokerExportService: BrokerExportService,
-        private exportDataService: ExportDataService,
-    ) {
-    }
 
     ngOnInit() {
         this.id = this.route.snapshot.paramMap.get('id');

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BpmnElement, BpmnParameter } from './designer.model';
 import { DeviceTypeSelectionResultModel } from '../../../metadata/device-types-overview/shared/device-type-selection.model';
 import { DesignerErrorModel } from './designer-error.model';
@@ -35,8 +35,8 @@ type DeviceTypeFilter = { function_id: string; device_class_id: string; aspect_i
     providedIn: 'root',
 })
 export class DesignerHelperService {
+    private deviceTypeService = inject(DeviceTypeService);
 
-    constructor(private deviceTypeService: DeviceTypeService) {}
 
     getIncomingOutputs(element: BpmnElement, done: BpmnElement[] = []): BpmnParameter[] {
         let result: BpmnParameter[] = [];

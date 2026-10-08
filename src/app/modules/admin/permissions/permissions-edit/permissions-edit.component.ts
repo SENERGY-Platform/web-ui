@@ -16,7 +16,7 @@
  *
  */
 
-import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -47,6 +47,14 @@ import { AsyncPipe } from '@angular/common';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatRadioButton, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, ReactiveFormsModule, MatCheckbox, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatDialogActions, MatButton, AsyncPipe]
 })
 export class PermissionsEditComponent implements OnInit {
+    dialogRef = inject<MatDialogRef<PermissionsEditComponent>>(MatDialogRef);
+    private kongService = inject(KongService);
+    private fb = inject(FormBuilder);
+    private route = inject(ActivatedRoute);
+    private ladonService = inject(LadonService);
+    private authService = inject(AuthorizationService);
+    private snackBar = inject(MatSnackBar);
+
     public isEditMode = false;
     public endpointControl = new FormControl();
     public userIsAdmin = false;
@@ -74,16 +82,14 @@ export class PermissionsEditComponent implements OnInit {
         head: new FormControl(),
     });
 
-    constructor(
-        @Inject(MAT_DIALOG_DATA) data: { permission: PermissionModel; roles: any[]; users: any[]; clients: any[] },
-        public dialogRef: MatDialogRef<PermissionsEditComponent>,
-        private kongService: KongService,
-        private fb: FormBuilder,
-        private route: ActivatedRoute,
-        private ladonService: LadonService,
-        private authService: AuthorizationService,
-        private snackBar: MatSnackBar,
-    ) {
+    constructor() {
+        const data = inject<{
+            permission: PermissionModel;
+            roles: any[];
+            users: any[];
+            clients: any[];
+        }>(MAT_DIALOG_DATA);
+
         this.permission = data.permission;
         this.roles = data.roles;
         this.users = data.users;

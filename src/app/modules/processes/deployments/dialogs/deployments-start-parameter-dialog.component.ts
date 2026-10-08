@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CamundaVariable } from '../shared/deployments-definition.model';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -36,6 +36,8 @@ import { KeyValuePipe } from '@angular/common';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatError, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MtxOption, MatErrorMessagesDirective, MatDialogActions, MatButton, KeyValuePipe]
 })
 export class DeploymentsStartParameterDialogComponent {
+    private dialogRef = inject<MatDialogRef<DeploymentsStartParameterDialogComponent>>(MatDialogRef);
+
     deploymentId: string;
     parameter: Map<string, CamundaVariable> = new Map<string, CamundaVariable>();
     err: string | null;
@@ -46,17 +48,15 @@ export class DeploymentsStartParameterDialogComponent {
         startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null>;
     };
 
-    constructor(
-        private dialogRef: MatDialogRef<DeploymentsStartParameterDialogComponent>,
-        @Inject(MAT_DIALOG_DATA)
-        data: {
+    constructor() {
+        const data = inject<{
             deploymentId: string;
             parameter: Map<string, CamundaVariable>;
             deploymentService: {
                 startDeploymentWithParameter(deploymentId: string, parameter: Map<string, CamundaVariable>): Observable<any | null>;
             };
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.deploymentsService = data.deploymentService;
         this.parameter = data.parameter;
         this.deploymentId = data.deploymentId;

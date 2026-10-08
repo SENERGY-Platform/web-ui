@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {forkJoin, Observable, Subscription, map, skip} from 'rxjs';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
@@ -55,6 +55,18 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
     imports: [SearchbarComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTooltip, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
+    private dialog = inject(MatDialog);
+    private searchbarService = inject(SearchbarService);
+    private functionsService = inject(FunctionsService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private authService = inject(AuthorizationService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private preferencesService = inject(PreferencesService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private conceptsService = inject(ConceptsService);
+
     displayedColumns = ['select', 'name'];
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceTypeFunctionModel>();
@@ -78,20 +90,6 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
     conceptIds: string[] = [];
     conceptNames: string[] = [];
-
-    constructor(
-        private dialog: MatDialog,
-        private searchbarService: SearchbarService,
-        private functionsService: FunctionsService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private authService: AuthorizationService,
-        private deviceTypeService: DeviceTypeService,
-        private preferencesService: PreferencesService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private conceptsService: ConceptsService,
-    ) {}
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();

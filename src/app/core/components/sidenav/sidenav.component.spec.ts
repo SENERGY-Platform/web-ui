@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
+import { ChangeDetectorRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { ResponsiveService } from '../../services/responsive.service';
+import { SidenavService } from './shared/sidenav.service';
 import { SidenavComponent } from './sidenav.component';
 import { SidenavSectionModel } from './shared/sidenav-section.model';
 import { SidenavPageModel } from './shared/sidenav-page.model';
 
 // isPageActive/matchesPage only touch currentUrl and the page/section arguments -- none of
-// the constructor's injected services -- so the component is built directly rather than
-// through TestBed, without needing to satisfy SidenavService's large dependency graph.
+// the injected services -- so they are empty stubs and the component is built in an injection
+// context rather than rendered, without needing to satisfy SidenavService's large dependency graph.
 describe('SidenavComponent.isPageActive', () => {
     let component: SidenavComponent;
 
     beforeEach(() => {
-        component = new SidenavComponent({} as any, {} as any, {} as any, {} as any);
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: Router, useValue: {} },
+                { provide: SidenavService, useValue: {} },
+                { provide: ResponsiveService, useValue: {} },
+                { provide: ChangeDetectorRef, useValue: {} },
+            ],
+        });
+        component = TestBed.runInInjectionContext(() => new SidenavComponent());
     });
 
     it('matches a page whose state exactly equals the current url', () => {

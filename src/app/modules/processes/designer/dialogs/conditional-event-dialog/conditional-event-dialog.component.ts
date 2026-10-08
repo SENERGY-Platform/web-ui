@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -53,6 +53,14 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, AspectSelectComponent, ReactiveFormsModule, MatFormField, MatLabel, MtxSelect, MatError, MatErrorMessagesDirective, MtxOption, MatInput, MatDialogActions, MatButton]
 })
 export class ConditionalEventDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<ConditionalEventDialogComponent>>(MatDialogRef);
+    private _formBuilder = inject(UntypedFormBuilder);
+    private deviceTypeService = inject(DeviceTypeService);
+    private conceptsService = inject(ConceptsService);
+    private data = inject<{
+        msg: ConditionalEventEditModel;
+    }>(MAT_DIALOG_DATA);
+
     aspectFormControl = new UntypedFormControl([]);
     functionFormControl = new UntypedFormControl({ value: '', disabled: true });
 
@@ -69,16 +77,9 @@ export class ConditionalEventDialogComponent implements OnInit {
     private aspectFunctionsSubscription?: Subscription;
     private classified = new Map<string, AspectClassification>();
 
-    constructor(
-        private dialogRef: MatDialogRef<ConditionalEventDialogComponent>,
-        private _formBuilder: UntypedFormBuilder,
-        private deviceTypeService: DeviceTypeService,
-        private conceptsService: ConceptsService,
-        @Inject(MAT_DIALOG_DATA)
-        private data: {
-            msg: ConditionalEventEditModel;
-        },
-    ) {
+    constructor() {
+        const data = this.data;
+
         this.result = data.msg || {
             characteristic: '',
             script: 'value == 42',

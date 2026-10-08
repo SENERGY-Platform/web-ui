@@ -20,6 +20,6 @@ import { KeycloakService } from 'keycloak-angular';
 /**
  * Lives in its own file rather than in core.module.ts: services injecting this token would
  * otherwise import the module that declares them, and the resulting cycle breaks module
- * initialization in the test bundle.
+ * initialization in the test bundle. Provided with `multi: true`, so injecting it yields the array.
  */
-export const keycloakServiceToken = new InjectionToken<KeycloakService>('KeycloakService');
+export const keycloakServiceToken = new InjectionToken<KeycloakService[]>('KeycloakService');

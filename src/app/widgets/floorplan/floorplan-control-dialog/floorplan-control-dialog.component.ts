@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { CapabilityCommandModel, CapabilityControlComponent } from '../shared/capability-control/capability-control.component';
@@ -39,15 +39,16 @@ export interface FloorplanControlDialogData {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatIcon, CapabilityControlComponent, MatDialogActions, MatButton]
 })
 export class FloorplanControlDialogComponent {
+    private dialogRef = inject<MatDialogRef<FloorplanControlDialogComponent>>(MatDialogRef);
+
     alias = '';
     controls: FloorplanControlModel[] = [];
 
     private run: (command: CapabilityCommandModel) => Observable<unknown>;
 
-    constructor(
-        @Inject(MAT_DIALOG_DATA) data: FloorplanControlDialogData,
-        private dialogRef: MatDialogRef<FloorplanControlDialogComponent>,
-    ) {
+    constructor() {
+        const data = inject<FloorplanControlDialogData>(MAT_DIALOG_DATA);
+
         this.alias = data.alias;
         this.controls = data.controls;
         this.run = data.run;

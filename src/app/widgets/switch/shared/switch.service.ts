@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { SwitchEditDialogComponent } from '../dialogs/switch-edit-dialog.component';
 import { environment } from '../../../../environments/environment';
@@ -32,12 +32,11 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
     providedIn: 'root',
 })
 export class SwitchService {
-    constructor(
-        private dialog: MatDialog,
-        private http: HttpClient,
-        private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
-    ) {}
+    private dialog = inject(MatDialog);
+    private http = inject(HttpClient);
+    private dashboardService = inject(DashboardService);
+    private errorHandlerService = inject(ErrorHandlerService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

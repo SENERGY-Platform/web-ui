@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {Router} from '@angular/router';
@@ -47,6 +47,15 @@ import { MatIcon } from '@angular/material/icon';
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatTooltip, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
+    private dialog = inject(MatDialog);
+    private router = inject(Router);
+    private searchbarService = inject(SearchbarService);
+    private conceptsService = inject(ConceptsService);
+    private functionsService = inject(FunctionsService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private preferencesService = inject(PreferencesService);
+
     displayedColumns = ['select', 'name', 'info', 'characteristic'];
     pageSize = this.preferencesService.pageSize;
     concepts: DeviceTypeConceptModel[] = [];
@@ -63,17 +72,6 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
-
-    constructor(
-        private dialog: MatDialog,
-        private router: Router,
-        private searchbarService: SearchbarService,
-        private conceptsService: ConceptsService,
-        private functionsService: FunctionsService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private preferencesService: PreferencesService,
-    ) {}
 
     ngOnInit() {
         this.initSearch();

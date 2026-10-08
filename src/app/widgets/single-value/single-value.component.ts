@@ -15,7 +15,7 @@
  */
 
 
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {DomSanitizer} from '@angular/platform-browser';
 import {SingleValueService} from './shared/single-value.service';
@@ -116,6 +116,11 @@ const dateDiff = {
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, FitTextComponent, NgClass, ValueComponent, MatIconButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, WidgetFooterComponent, DatePipe]
 })
 export class SingleValueComponent implements OnInit, OnDestroy {
+    private iconRegistry = inject(MatIconRegistry);
+    private sanitizer = inject(DomSanitizer);
+    private singleValueService = inject(SingleValueService);
+    private dashboardService = inject(DashboardService);
+
     svList: SingleValueModel[] = [];
     sv?: SingleValueModel;
     ready = false;
@@ -140,14 +145,6 @@ export class SingleValueComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     dateControl: FormControl<string | null> = new FormControl<string>('');
-
-    constructor(
-        private iconRegistry: MatIconRegistry,
-        private sanitizer: DomSanitizer,
-        private singleValueService: SingleValueService,
-        private dashboardService: DashboardService,
-    ) {
-    }
 
     set svListIndex(i: number) {
         this._svListIndex = i;

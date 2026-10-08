@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ImportTypeModel, ImportTypeModelWithCostEstimation } from './shared/import-types.model';
 import { ImportTypesService } from './shared/import-types.service';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
@@ -49,6 +49,17 @@ import { MatIcon } from '@angular/material/icon';
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, CurrencyPipe]
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
+    private importTypesService = inject(ImportTypesService);
+    private router = inject(Router);
+    private dialog = inject(MatDialog);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private snackBar = inject(MatSnackBar);
+    private deleteDialog = inject(DialogsService);
+    private searchbarService = inject(SearchbarService);
+    private costService = inject(CostService);
+    private permissionsService = inject(PermissionsService);
+    private prefeencesService = inject(PreferencesService);
+
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
     pageSize = this.prefeencesService.pageSize;
     dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
@@ -64,19 +75,6 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
     permissionsPerType: PermissionsV2RightsAndIdModel[] = [];
-
-    constructor(
-        private importTypesService: ImportTypesService,
-        private router: Router,
-        private dialog: MatDialog,
-        private permissionsDialogService: PermissionsDialogService,
-        private snackBar: MatSnackBar,
-        private deleteDialog: DialogsService,
-        private searchbarService: SearchbarService,
-        private costService: CostService,
-        private permissionsService: PermissionsService,
-        private prefeencesService: PreferencesService,
-    ) { }
 
     ngOnInit(): void {
         this.initSearch();

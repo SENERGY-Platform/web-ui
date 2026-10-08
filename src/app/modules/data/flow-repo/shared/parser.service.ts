@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
@@ -26,7 +26,9 @@ import { ParseModel } from './parse.model';
     providedIn: 'root',
 })
 export class ParserService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+
 
     getInputs(id: string): Observable<ParseModel[]> {
         return this.http.get<ParseModel[]>(environment.flowParserUrl + '/flow/getinputs/' + id).pipe(

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import {
     DynamicFormGroup,
@@ -51,6 +51,8 @@ const INPUT_TYPES: { value: InputType; label: string }[] = [
     imports: [FormsModule, ReactiveFormsModule, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, QueryEditorComponent, MtxSelect]
 })
 export class ReportObjectComponent implements OnChanges, OnDestroy {
+    private viewService = inject(ReportObjectViewService);
+
 
     @Input() node!: ReportObjectNode;
     @Input() allDevices: DeviceInstanceModel[] = [];
@@ -61,9 +63,6 @@ export class ReportObjectComponent implements OnChanges, OnDestroy {
 
     private destroy = new Subject<void>();
     private inputTypeSubscription = new Subject<void>();
-
-    constructor(private viewService: ReportObjectViewService) {
-    }
 
     ngOnChanges() {
         this.inputTypeSubscription.next();

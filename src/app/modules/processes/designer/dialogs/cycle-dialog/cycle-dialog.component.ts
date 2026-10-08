@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -29,13 +29,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, CycleEventConfigComponent, MatDialogActions, MatButton]
 })
 export class CycleDialogComponent {
+    private dialogRef = inject<MatDialogRef<CycleDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        initialCycle: string;
+    }>(MAT_DIALOG_DATA);
+
     initial: string;
     result = { cron: '', text: '' };
 
-    constructor(
-        private dialogRef: MatDialogRef<CycleDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { initialCycle: string },
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.initial = dialogParams.initialCycle || '* * * * * ?';
     }
 

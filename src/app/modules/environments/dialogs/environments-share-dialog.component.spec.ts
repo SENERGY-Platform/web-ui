@@ -93,7 +93,7 @@ describe('EnvironmentsShareDialogComponent', () => {
         environmentsServiceShares = undefined;
     });
 
-    /** Direct construction (no TestBed), same as environments-create-dialog.component.spec.ts. */
+    /** Direct construction in an injection context, same as environments-create-dialog.component.spec.ts. */
     const create = (): EnvironmentsShareDialogComponent => {
         environmentsService = new MockEnvironmentsService();
         if (environmentsServiceShares !== undefined) {
@@ -103,14 +103,18 @@ describe('EnvironmentsShareDialogComponent', () => {
         authorizationService = new MockAuthorizationService();
         dialogRef = new MockDialogRef();
         snackBar = new MockSnackBar();
-        const component = new EnvironmentsShareDialogComponent(
-            dialogRef as unknown as MatDialogRef<EnvironmentsShareDialogComponent>,
-            environmentsService as unknown as EnvironmentsService,
-            permissionsService as unknown as PermissionsService,
-            authorizationService as unknown as AuthorizationService,
-            snackBar as unknown as MatSnackBar,
-            { id: 'e1', name: 'Plant A' },
-        );
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: MatDialogRef, useValue: dialogRef },
+                { provide: EnvironmentsService, useValue: environmentsService },
+                { provide: PermissionsService, useValue: permissionsService },
+                { provide: AuthorizationService, useValue: authorizationService },
+                { provide: MatSnackBar, useValue: snackBar },
+                { provide: MAT_DIALOG_DATA, useValue: { id: 'e1', name: 'Plant A' } },
+            ],
+        });
+        const component = TestBed.runInInjectionContext(() => new EnvironmentsShareDialogComponent());
         component.ngOnInit();
         return component;
     };

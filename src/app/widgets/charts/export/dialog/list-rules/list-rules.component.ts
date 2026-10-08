@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ChartsExportConversion } from '../../shared/charts-export-properties.model';
@@ -32,6 +32,10 @@ import { MatIcon } from '@angular/material/icon';
     imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton, MatDialogActions, MatButton]
 })
 export class ListRulesComponent {
+  rules = inject(MAT_DIALOG_DATA);
+  private dialogRef = inject<MatDialogRef<ListRulesComponent>>(MatDialogRef);
+  dialog = inject(MatDialog);
+
   displayedColumns: string[] = [
     'from',
     'to',
@@ -86,11 +90,9 @@ export class ListRulesComponent {
     this.dialogRef.close();
   }
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA) public rules: ChartsExportConversion[],
-    private dialogRef: MatDialogRef<ListRulesComponent>,
-    public dialog: MatDialog
-  ) {
+  constructor() {
+    const rules = this.rules;
+
     this.dataSource = new MatTableDataSource(rules);
   }
 

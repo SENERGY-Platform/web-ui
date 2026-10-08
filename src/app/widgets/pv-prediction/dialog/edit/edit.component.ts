@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
@@ -43,6 +43,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatCheckbox, MtxOption, MatDialogActions, MatButton]
 })
 export class PVPredictionEditComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<PVPredictionEditComponent>>(MatDialogRef);
+    private exportService = inject(ExportService);
+    private dashboardService = inject(DashboardService);
+    private formBuilder = inject(UntypedFormBuilder);
+
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
     form = this.formBuilder.group({
@@ -72,18 +77,14 @@ export class PVPredictionEditComponent implements OnInit {
         }
     ];
 
-    constructor(
-    private dialogRef: MatDialogRef<PVPredictionEditComponent>,
-    private exportService: ExportService,
-    private dashboardService: DashboardService,
-    private formBuilder: UntypedFormBuilder,
-    @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-    },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

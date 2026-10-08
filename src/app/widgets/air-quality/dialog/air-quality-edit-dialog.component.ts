@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, NgZone, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, NgZone, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -71,26 +71,28 @@ import { AsyncPipe, DecimalPipe } from '@angular/common';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatStepper, MatStep, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MatButton, MatStepperNext, MatIconButton, MatIcon, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatHint, MatTooltip, MatStepperPrevious, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatDivider, MatSlideToggle, MatSuffix, MatList, MatListItem, MatDialogActions, AsyncPipe, DecimalPipe]
 })
 export class AirQualityEditDialogComponent implements OnInit {
-    constructor(
-        private dialogRef: MatDialogRef<AirQualityEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private ngZone: NgZone,
-        private ubaService: UBAService,
-        private dwdPollenService: DWDPollenService,
-        private geonamesService: GeonamesService,
-        private importInstancesService: ImportInstancesService,
-        private importTypesService: ImportTypesService,
-        private deviceInstancesService: DeviceInstancesService,
-        private deviceTypeService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) data: {
+    private dialogRef = inject<MatDialogRef<AirQualityEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private ngZone = inject(NgZone);
+    private ubaService = inject(UBAService);
+    private dwdPollenService = inject(DWDPollenService);
+    private geonamesService = inject(GeonamesService);
+    private importInstancesService = inject(ImportInstancesService);
+    private importTypesService = inject(ImportTypesService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private deviceTypeService = inject(DeviceTypeService);
+
+    constructor() {
+        const dwdPollenService = this.dwdPollenService;
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

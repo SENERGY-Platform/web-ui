@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProcessRepoService } from '../../process-repo/shared/process-repo.service';
 import { DeploymentsService } from '../shared/deployments.service';
@@ -61,6 +61,21 @@ interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2Deploymen
     imports: [MatFormField, MatLabel, MtxSelect, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCard, MatCardContent, MatInput, CdkTextareaAutosize, MatCardHeader, MatCardTitle, MatCheckbox, MatCardSubtitle, MtxOption, DeploymentsConfigTimeEventComponent, MatButton, KeyValuePipe]
 })
 export class ProcessDeploymentsConfigComponent implements OnInit {
+    private _formBuilder = inject(FormBuilder);
+    private processRepoService = inject(ProcessRepoService);
+    private utilService = inject(UtilService);
+    private platformDeploymentsService = inject(DeploymentsService);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private deploymentsConfigInitializerService = inject(DeploymentsConfigInitializerService);
+    private flowRepoService = inject(FlowRepoService);
+    private operatorRepoService = inject(OperatorRepoService);
+    private deploymentFogFactory = inject(DeploymentsFogFactory);
+    private hubsService = inject(NetworksService);
+    private characteristicsService = inject(CharacteristicsService);
+    private cd = inject(ChangeDetectorRef);
+
     @ViewChild('autosize', { static: false }) autosize!: CdkTextareaAutosize;
 
     processId: string | undefined;
@@ -82,22 +97,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     hubList: HubModel[] = [];
     characteristicNames: Map<string, string> = new Map();
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private processRepoService: ProcessRepoService,
-        private utilService: UtilService,
-        private platformDeploymentsService: DeploymentsService,
-        private snackBar: MatSnackBar,
-        private router: Router,
-        private route: ActivatedRoute,
-        private deploymentsConfigInitializerService: DeploymentsConfigInitializerService,
-        private flowRepoService: FlowRepoService,
-        private operatorRepoService: OperatorRepoService,
-        private deploymentFogFactory: DeploymentsFogFactory,
-        private hubsService: NetworksService,
-        private characteristicsService: CharacteristicsService,
-        private cd: ChangeDetectorRef,
-    ) {
+    constructor() {
+        const platformDeploymentsService = this.platformDeploymentsService;
+
         this.getRouterParams();
         this.getFlows();
         this.getOperators();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessIncidentListService } from './shared/process-incident-list.service';
 import { Subscription } from 'rxjs';
@@ -42,6 +42,11 @@ import { DatePipe } from '@angular/common';
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatIconButton, MatTooltip, MatIcon, MatListItemTitle, MatListItemLine, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class ProcessIncidentListComponent implements OnInit, OnDestroy {
+    private processIncidentListService = inject(ProcessIncidentListService);
+    private processIncidentsService = inject(ProcessIncidentsService);
+    private dashboardService = inject(DashboardService);
+    private router = inject(Router);
+
     incidents: ProcessIncidentsModel[] = [];
     ready = false;
     refreshing = false;
@@ -53,13 +58,6 @@ export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private processIncidentListService: ProcessIncidentListService,
-        private processIncidentsService: ProcessIncidentsService,
-        private dashboardService: DashboardService,
-        private router: Router,
-    ) {}
 
     ngOnInit() {
         this.getIncidents();

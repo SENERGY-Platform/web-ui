@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -33,14 +33,13 @@ import { ProcessSchedulerScheduleEditDialogComponent } from '../dialogs/process-
     providedIn: 'root',
 })
 export class ProcessSchedulerService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private processRepoService: ProcessRepoService,
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private snackBar: MatSnackBar,
-    ) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private processRepoService = inject(ProcessRepoService);
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private snackBar = inject(MatSnackBar);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HubModel } from '../shared/networks.model';
 import { Attribute } from '../../device-instances/shared/device-instances.model';
@@ -54,6 +54,9 @@ import { DatePipe } from '@angular/common';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatDivider, MtxSelect, MatError, MatErrorMessagesDirective, MatTooltip, MatIconButton, MatIcon, MatButton, MapComponent, MatDialogActions, DatePipe]
 })
 export class NetworksEditDialogComponent implements OnInit {
+    private cd = inject(ChangeDetectorRef);
+    private dialogRef = inject<MatDialogRef<NetworksEditDialogComponent>>(MatDialogRef);
+
     network: HubModel;
     knownAttributes = ['last_message_max_age', 'senergy/lora/eui'];
     hiddenAttributes = ['location-lat', 'location-lon'];
@@ -79,7 +82,9 @@ export class NetworksEditDialogComponent implements OnInit {
     isTranslating = false;
     zoomControl: Control | undefined;
 
-    constructor(private cd: ChangeDetectorRef, private dialogRef: MatDialogRef<NetworksEditDialogComponent>, @Inject(MAT_DIALOG_DATA) network?: HubModel) {
+    constructor() {
+        const network = inject<HubModel | undefined>(MAT_DIALOG_DATA);
+
         this.network = network || {
             id: '',
             name: '',

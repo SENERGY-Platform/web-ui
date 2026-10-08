@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
@@ -31,13 +31,12 @@ import { downtimePerGateway, GatewayDowntime } from './device-downtime-gateway-c
     providedIn: 'root',
 })
 export class DeviceDowntimeGatewayService {
-    constructor(
-        private monitorService: MonitorService,
-        private elementSizeService: ElementSizeService,
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private networksService: NetworksService,
-    ) {}
+    private monitorService = inject(MonitorService);
+    private elementSizeService = inject(ElementSizeService);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private networksService = inject(NetworksService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

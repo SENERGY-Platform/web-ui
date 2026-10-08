@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -45,6 +45,11 @@ import { IsJsonValidatorDirective } from '../../../../core/validators/is-json-va
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDivider, MatIconButton, MatIcon, MatButton, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, IsJsonValidatorDirective, MatSuffix, MatDialogActions]
 })
 export class ConceptsEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<ConceptsEditDialogComponent>>(MatDialogRef);
+    private conceptsService = inject(ConceptsService);
+    private characteristicsService = inject(CharacteristicsService);
+    private cd = inject(ChangeDetectorRef);
+
     conceptId: string;
     nameFormControl = new UntypedFormControl('', [Validators.required]);
     idFormControl = new UntypedFormControl({ value: '', disabled: true });
@@ -61,13 +66,12 @@ export class ConceptsEditDialogComponent implements OnInit {
 
     disabled: boolean;
 
-    constructor(
-        private dialogRef: MatDialogRef<ConceptsEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { conceptId: string; disabled?: boolean },
-        private conceptsService: ConceptsService,
-        private characteristicsService: CharacteristicsService,
-        private cd: ChangeDetectorRef,
-    ) {
+    constructor() {
+        const data = inject<{
+            conceptId: string;
+            disabled?: boolean;
+        }>(MAT_DIALOG_DATA);
+
         this.conceptId = data.conceptId;
         this.disabled = !!data.disabled;
     }

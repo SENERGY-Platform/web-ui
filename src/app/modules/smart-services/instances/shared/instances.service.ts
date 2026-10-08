@@ -16,7 +16,7 @@
 
 import { catchError, map, Observable } from 'rxjs';
 import { SmartServiceInstanceInfoModel, SmartServiceInstanceInitModel, SmartServiceInstanceModel, SmartServiceParameterModel } from './instances.model';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
@@ -27,13 +27,14 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
     providedIn: 'root',
 })
 export class SmartServiceInstanceService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
 
     authorizations: PermissionTestResponse;
 
-    constructor(private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService,
-    ) { 
+    constructor() { 
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/devices');
     }
 

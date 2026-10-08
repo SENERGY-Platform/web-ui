@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { PipelineModel } from '../../../../data/pipeline-registry/shared/pipeline.model';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -36,13 +36,11 @@ import { DatePipe } from '@angular/common';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, MatTooltip, DatePipe]
 })
 export class DeviceGroupsPipelineHelperDialogComponent implements OnInit {
-    pipelineSelection = new SelectionModel<PipelineModel>(true, []);
+    data = inject(MAT_DIALOG_DATA);
+    private dialogRef = inject<MatDialogRef<DeviceGroupsPipelineHelperDialogComponent>>(MatDialogRef);
+    private router = inject(Router);
 
-    constructor(
-        @Inject(MAT_DIALOG_DATA) public data: PipelineModel[],
-        private dialogRef: MatDialogRef<DeviceGroupsPipelineHelperDialogComponent>,
-        private router: Router,
-    ) {}
+    pipelineSelection = new SelectionModel<PipelineModel>(true, []);
 
     ngOnInit(): void {
         this.pipelineSelection = new SelectionModel<PipelineModel>(true, this.data);

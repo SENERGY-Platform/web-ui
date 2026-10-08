@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { environment } from '../../../../environments/environment';
@@ -38,6 +38,11 @@ import { PermissionTestResponse } from '../../admin/permissions/shared/permissio
     providedIn: 'root',
 })
 export class ExportService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+    private deviceService = inject(DeviceInstancesService);
+
     typeString = 'https://schema.org/Text';
     typeInteger = 'https://schema.org/Integer';
     typeFloat = 'https://schema.org/Float';
@@ -46,12 +51,7 @@ export class ExportService {
     typeList = 'https://schema.org/ItemList';
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService,
-        private deviceService: DeviceInstancesService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.exportService);
     }
 

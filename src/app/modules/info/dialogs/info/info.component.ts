@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { environment } from 'src/environments/environment';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -30,12 +30,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, MatDialogActions, MatButton]
 })
 export class InfoDialogComponent {
+    private dialogRef = inject<MatDialogRef<InfoDialogComponent>>(MatDialogRef);
+
     commit = '';
     version = '';
 
-    constructor(
-    private dialogRef: MatDialogRef<InfoDialogComponent>,
-    ) {
+    constructor() {
         this.commit = environment.commit;
         this.version = environment.version;
     }

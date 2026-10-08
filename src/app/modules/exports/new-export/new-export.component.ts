@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Location, NgClass, KeyValuePipe } from '@angular/common';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
@@ -69,6 +69,22 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     imports: [MatIconButton, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatCard, MatRadioGroup, MatRadioButton, MatFormField, MatLabel, MtxSelect, MtxOption, MatError, MatErrorMessagesDirective, MatSlideToggle, MatInput, MatAccordion, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatCheckbox, MatPaginator, MatButton, SpinnerComponent, MatFabButton, KeyValuePipe]
 })
 export class NewExportComponent implements OnInit {
+    private route = inject(ActivatedRoute);
+    private location = inject(Location);
+    private pipelineRegistryService = inject(PipelineRegistryService);
+    private deviceInstanceService = inject(DeviceInstancesService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private exportService = inject(ExportService);
+    private brokerExportService = inject(BrokerExportService);
+    private operatorRepoService = inject(OperatorRepoService);
+    private router = inject(Router);
+    private sanitizer = inject(DomSanitizer);
+    snackBar = inject(MatSnackBar);
+    private importInstancesService = inject(ImportInstancesService);
+    private importTypesService = inject(ImportTypesService);
+    private fb = inject(UntypedFormBuilder);
+    private preferencesService = inject(PreferencesService);
+
     targetDb = 'db';
     targetBroker = 'broker';
     defaultPageSize = this.preferencesService.pageSize;
@@ -133,23 +149,7 @@ export class NewExportComponent implements OnInit {
 
     exportDatabases: ExportDatabaseModel[] = [];
 
-    constructor(
-        private route: ActivatedRoute,
-        private location: Location,
-        private pipelineRegistryService: PipelineRegistryService,
-        private deviceInstanceService: DeviceInstancesService,
-        private deviceTypeService: DeviceTypeService,
-        private exportService: ExportService,
-        private brokerExportService: BrokerExportService,
-        private operatorRepoService: OperatorRepoService,
-        private router: Router,
-        private sanitizer: DomSanitizer,
-        public snackBar: MatSnackBar,
-        private importInstancesService: ImportInstancesService,
-        private importTypesService: ImportTypesService,
-        private fb: UntypedFormBuilder,
-        private preferencesService: PreferencesService,
-    ) {
+    constructor() {
         this.id = this.route.snapshot.paramMap.get('id');
 
         if (this.id) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { reconstructionPoints } from './reconstruction-chart';
 import { reconstructionChart } from './reconstruction-chartjs';
@@ -34,6 +34,11 @@ import { MatButton } from '@angular/material/button';
     imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, BaseChartDirective, MatDialogActions, MatButton]
 })
 export class AnomalyReconstructionComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<AnomalyReconstructionComponent>>(MatDialogRef);
+    data = inject<{
+        anomaly: AnomalyResultModel;
+    }>(MAT_DIALOG_DATA);
+
     chart?: FramedChartConfig<'line'>;
     readonly plugins = googlePlugins;
     ready = false;
@@ -56,10 +61,9 @@ export class AnomalyReconstructionComponent implements OnInit {
     ];
   
 
-    constructor(
-        private dialogRef: MatDialogRef<AnomalyReconstructionComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: {anomaly: AnomalyResultModel}
-    ) {
+    constructor() {
+        const data = this.data;
+
         this.values = data.anomaly.original_reconstructed_curves;
     }
 

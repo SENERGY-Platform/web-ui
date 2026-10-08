@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { EventListService } from './shared/event-list.service';
 import { EventListModel } from './shared/event-list.model';
@@ -36,6 +36,9 @@ import { DatePipe } from '@angular/common';
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatIcon, MatListItemIcon, MatListItemTitle, MatListItemLine, WidgetFooterComponent, DatePipe]
 })
 export class EventListComponent implements OnInit, OnDestroy {
+    private eventListService = inject(EventListService);
+    private dashboardService = inject(DashboardService);
+
     events: EventListModel[] = [];
     ready = false;
     refreshing = false;
@@ -47,8 +50,6 @@ export class EventListComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(private eventListService: EventListService, private dashboardService: DashboardService) {}
 
     ngOnInit() {
         this.initMockup();

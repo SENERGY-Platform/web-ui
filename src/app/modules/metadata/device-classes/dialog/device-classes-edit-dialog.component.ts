@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
@@ -33,14 +33,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class DeviceClassesEditDialogComponent {
+    private conceptsService = inject(ConceptsService);
+    private dialogRef = inject<MatDialogRef<DeviceClassesEditDialogComponent>>(MatDialogRef);
+    private _formBuilder = inject(FormBuilder);
+
     deviceClassFormGroup!: FormGroup;
 
-    constructor(
-        private conceptsService: ConceptsService,
-        private dialogRef: MatDialogRef<DeviceClassesEditDialogComponent>,
-        private _formBuilder: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: { deviceClass: DeviceTypeDeviceClassModel },
-    ) {
+    constructor() {
+        const data = inject<{
+            deviceClass: DeviceTypeDeviceClassModel;
+        }>(MAT_DIALOG_DATA);
+
         this.initDeviceClassFormGroup(data.deviceClass);
     }
 

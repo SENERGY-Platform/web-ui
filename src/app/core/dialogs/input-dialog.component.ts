@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../directives/close-mtx-select-on-scroll.directive';
@@ -31,13 +31,23 @@ import { TitleCasePipe } from '@angular/common';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatDialogActions, MatButton, TitleCasePipe]
 })
 export class InputDialogComponent {
+    private dialogRef = inject<MatDialogRef<InputDialogComponent>>(MatDialogRef);
+
     fields: {[key: string]: string};
     title: string;
     required: string[];
 
     Object = Object;
 
-    constructor(private dialogRef: MatDialogRef<InputDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { title: string; fields: {[key: string]: string}; required: string[] | undefined | null}) {
+    constructor() {
+        const data = inject<{
+            title: string;
+            fields: {
+                [key: string]: string;
+            };
+            required: string[] | undefined | null;
+        }>(MAT_DIALOG_DATA);
+
         this.fields = data.fields;
         this.title = data.title;
         this.required = data.required || [];

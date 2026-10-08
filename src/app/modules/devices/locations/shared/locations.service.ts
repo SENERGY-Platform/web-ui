@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable } from 'rxjs';
@@ -28,14 +28,14 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
     providedIn: 'root',
 })
 export class LocationsService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
     shareAuthorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.deviceRepoUrl + '/locations');
         this.shareAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.permissionV2Url + '/manage/locations');
     }

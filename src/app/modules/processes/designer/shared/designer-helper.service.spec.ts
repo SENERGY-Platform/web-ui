@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
+import { Injector, runInInjectionContext } from '@angular/core';
 import { of } from 'rxjs';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { DesignerHelperService } from './designer-helper.service';
 import { BpmnElement } from './designer.model';
+
+const createService = (deviceTypeService: unknown): DesignerHelperService =>
+    runInInjectionContext(Injector.create({ providers: [{ provide: DeviceTypeService, useValue: deviceTypeService }] }), () => new DesignerHelperService());
 
 /*
  * Covers which process variables a script is offered. Getting this wrong in the
@@ -24,10 +29,10 @@ import { BpmnElement } from './designer.model';
  * set yet produces a condition that silently evaluates against undefined at runtime.
  *
  * getAvailableVariables touches none of the injected services, so the service is
- * constructed directly rather than through the TestBed.
+ * constructed in a bare injection context rather than through the TestBed.
  */
 describe('DesignerHelperService.getAvailableVariables', () => {
-    const service = new DesignerHelperService(null as any);
+    const service = createService({});
 
     const task = (id: string, outputs: string[] = [], incoming: BpmnElement[] = []): BpmnElement =>
         ({
@@ -186,7 +191,7 @@ describe('DesignerHelperService.checkConstraints device-type filter', () => {
     function filterFor(...tasks: any[]): any[] {
         const deviceTypeService = jasmine.createSpyObj('DeviceTypeService', ['getDeviceTypeFiltered']);
         deviceTypeService.getDeviceTypeFiltered.and.returnValue(of([{ id: 'device-type' }]));
-        new DesignerHelperService(deviceTypeService).checkConstraints(modelerWith(...tasks)).subscribe();
+        createService(deviceTypeService).checkConstraints(modelerWith(...tasks)).subscribe();
         expect(deviceTypeService.getDeviceTypeFiltered).toHaveBeenCalledTimes(1);
         return deviceTypeService.getDeviceTypeFiltered.calls.mostRecent().args[0];
     }
@@ -243,7 +248,7 @@ describe('DesignerHelperService.checkConstraints device-type filter', () => {
         const deviceTypeService = jasmine.createSpyObj('DeviceTypeService', ['getDeviceTypeFiltered']);
         deviceTypeService.getDeviceTypeFiltered.and.returnValue(of([]));
         let errors: any;
-        new DesignerHelperService(deviceTypeService)
+        createService(deviceTypeService)
             .checkConstraints(modelerWith(externalTask({ function: temperature, device_class: null, aspect: air, aspects: [air, water] })))
             .subscribe((result) => (errors = result));
         expect(errors).toEqual([[{ error: true, errorType: 'deviceType', laneName: 'Pool' }]]);

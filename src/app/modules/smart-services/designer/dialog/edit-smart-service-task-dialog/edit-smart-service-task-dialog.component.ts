@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
@@ -114,6 +114,21 @@ interface GenericWatcherRequest {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTabGroup, MatTab, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, NgFor, NgIf, MtxSelect, MatCheckbox, CheckboxValueDirective, MatCard, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIconButton, MatTooltip, MatIcon, MatSuffix, MatMenuTrigger, MatMenu, MatMenuItem, MtxOption, MatExpansionPanelDescription, MatDivider, CriteriaListComponent, EsstdExportComponentComponent, IsJsonValidatorDirective, MatTabContent, CodeEditorComponent, MatButton, AspectSelectComponent, MatExpansionPanelContent, MatDialogActions]
 })
 export class EditSmartServiceTaskDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<EditSmartServiceTaskDialogComponent>>(MatDialogRef);
+    private processRepo = inject(ProcessRepoService);
+    private processDeployment = inject(DeploymentsService);
+    private flowService = inject(FlowRepoService);
+    private flowParser = inject(ParserService);
+    private importTypeService = inject(ImportTypesService);
+    private sanitizer = inject(DomSanitizer);
+    private functionsService = inject(FunctionsService);
+    private deviceTypesService = inject(DeviceTypeService);
+    private deviceClassService = inject(DeviceClassesService);
+    private dialogParams = inject<{
+        info: SmartServiceTaskDescription;
+        element: BpmnElement;
+    }>(MAT_DIALOG_DATA);
+
     init: SmartServiceTaskDescription;
     result: SmartServiceTaskDescription;
     tabs: string[] = ['process_deployment', 'process_deployment_start', 'analytics', 'export', 'import', 'info', 'device_repository', 'watcher'];
@@ -202,19 +217,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     infoModuleData = '';
 
 
-    constructor(
-        private dialogRef: MatDialogRef<EditSmartServiceTaskDialogComponent>,
-        private processRepo: ProcessRepoService,
-        private processDeployment: DeploymentsService,
-        private flowService: FlowRepoService,
-        private flowParser: ParserService,
-        private importTypeService: ImportTypesService,
-        private sanitizer: DomSanitizer,
-        private functionsService: FunctionsService,
-        private deviceTypesService: DeviceTypeService,
-        private deviceClassService: DeviceClassesService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskDescription; element: BpmnElement },
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.smartServiceBpmnElement = dialogParams.element;
         if (!dialogParams.info.topic) {
             dialogParams.info.topic = this.tabs[0];

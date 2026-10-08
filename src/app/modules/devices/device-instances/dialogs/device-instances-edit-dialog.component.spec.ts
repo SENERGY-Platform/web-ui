@@ -15,7 +15,8 @@
  */
 
 import { ChangeDetectorRef } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { of } from 'rxjs';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -31,16 +32,23 @@ describe('DeviceInstancesEditDialogComponent', () => {
         deviceTypeServiceSpy = createSpyFromClass(DeviceTypeService);
         deviceTypeServiceSpy.getProtocols.and.returnValue(of([]));
         deviceTypeServiceSpy.getDeviceType.and.returnValue(of(null));
-        return new DeviceInstancesEditDialogComponent(
-            dialogRefSpy,
-            deviceTypeServiceSpy,
-            {} as ChangeDetectorRef,
-            {
-                device,
-                userHasUpdateDisplayNameAuthorization: true,
-                userHasUpdateAttributesAuthorization: true,
-            },
-        );
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: MatDialogRef, useValue: dialogRefSpy },
+                { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+                { provide: ChangeDetectorRef, useValue: {} },
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
+                        device,
+                        userHasUpdateDisplayNameAuthorization: true,
+                        userHasUpdateAttributesAuthorization: true,
+                    },
+                },
+            ],
+        });
+        return TestBed.runInInjectionContext(() => new DeviceInstancesEditDialogComponent());
     };
 
     const deviceWithNickname = () => ({

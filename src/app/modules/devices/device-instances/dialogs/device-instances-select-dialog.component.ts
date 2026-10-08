@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
@@ -40,6 +40,9 @@ import { MatCheckbox } from '@angular/material/checkbox';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, ReactiveFormsModule, MatIcon, MatPrefix, MatIconButton, MatError, MatErrorMessagesDirective, InfiniteScrollDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatCheckbox, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class DeviceInstancesSelectDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DeviceInstancesSelectDialogComponent>>(MatDialogRef);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceInstanceModel>;
 
     devices: DeviceInstanceModel[] = [];
@@ -52,11 +55,6 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     offset = 0;
 
     selectedDevices: string[] = [];
-
-    constructor(
-        private dialogRef: MatDialogRef<DeviceInstancesSelectDialogComponent>,
-        private deviceInstancesService: DeviceInstancesService,
-    ) {}
 
     ngOnInit() {
         this.load();

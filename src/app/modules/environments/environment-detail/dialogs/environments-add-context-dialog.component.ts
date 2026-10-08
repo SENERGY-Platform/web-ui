@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Source } from '../../shared/environments.model';
 import { clonePresetSource, CONTEXT_PRESETS, ContextPreset } from '../../shared/environments-context-presets';
@@ -51,17 +51,15 @@ export interface AddContextDialogResult {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, BaseChartDirective, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatDialogActions, MatButton]
 })
 export class EnvironmentsAddContextDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<EnvironmentsAddContextDialogComponent>>(MatDialogRef);
+    private data = inject<AddContextDialogData>(MAT_DIALOG_DATA);
+
     presets = CONTEXT_PRESETS;
     selected: ContextPreset = CONTEXT_PRESETS[0];
     key = '';
     readonly todayWeekday = mondayStartWeekday(new Date());
     chart: ProfileChartConfig | undefined;
     readonly chartPlugins = [crosshairPlugin];
-
-    constructor(
-        private dialogRef: MatDialogRef<EnvironmentsAddContextDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private data: AddContextDialogData,
-    ) {}
 
     ngOnInit(): void {
         this.selectPreset(this.presets[0]);

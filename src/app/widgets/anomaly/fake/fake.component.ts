@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
 import { concatMap, of, throwError } from 'rxjs';
 import { ElementSizeService } from 'src/app/core/services/element-size.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -36,6 +36,12 @@ import { DecimalPipe, DatePipe } from '@angular/common';
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, TimelineComponent, MatIcon, WidgetFooterComponent, DecimalPipe, DatePipe]
 })
 export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
+    private chartsExportService = inject(ChartsExportService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private elementSizeService = inject(ElementSizeService);
+    private el = inject(ElementRef);
+    private zone = inject(NgZone);
+
     type = 'curve_anomaly'; // time, schema, curve_anomaly
     style = '';
 
@@ -116,15 +122,6 @@ export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
             valueAlias: 'Druck'
         }]
     };
-
-
-    constructor(
-        private chartsExportService: ChartsExportService,
-        private errorHandlerService: ErrorHandlerService,
-        private elementSizeService: ElementSizeService,
-        private el: ElementRef,
-        private zone: NgZone,
-    ) { }
 
     resizeTimeout: any = undefined;
     ngAfterViewInit() {

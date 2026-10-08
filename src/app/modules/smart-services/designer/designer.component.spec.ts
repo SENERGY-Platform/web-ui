@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
+import { HttpClient } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { DesignerDialogService } from '../../processes/designer/shared/designer-dialog.service';
+import { DesignerHelperService } from '../../processes/designer/shared/designer-helper.service';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { SmartServiceDesignsService } from '../designs/shared/designs.service';
+import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { SmartServiceDesignerComponent } from './designer.component';
 import { createSmartServiceModeler } from './smart-service-modeler';
 import { fetchText, mountModeler, MountedModeler, until } from '../../../../testing/bpmn-modeler';
@@ -34,9 +46,23 @@ describe('SmartServiceDesignerComponent load and save', () => {
         snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
         const designsService = { saveDesign, getDesign: () => of({ bpmn_xml: xml, name: 'Params', description: 'all parameters' }) };
         const dialogService = { openInputDialog: () => ({ afterClosed: () => of({ name: 'Params 2', description: 'saved' }) }) };
-        component = new SmartServiceDesignerComponent(
-            {} as any, {} as any, {} as any, designsService as any, {} as any, snackBar, dialogService as any, {} as any, {} as any, {} as any, {} as any, {} as any,
-        );
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: HttpClient, useValue: {} },
+                { provide: ActivatedRoute, useValue: {} },
+                { provide: AuthorizationService, useValue: {} },
+                { provide: SmartServiceDesignsService, useValue: designsService },
+                { provide: SmartServiceReleasesService, useValue: {} },
+                { provide: MatSnackBar, useValue: snackBar },
+                { provide: DialogsService, useValue: dialogService },
+                { provide: Router, useValue: {} },
+                { provide: MatDialog, useValue: {} },
+                { provide: DesignerHelperService, useValue: {} },
+                { provide: DesignerDialogService, useValue: {} },
+                { provide: MetadataExistenceService, useValue: {} },
+            ],
+        });
+        component = TestBed.runInInjectionContext(() => new SmartServiceDesignerComponent());
         component.modeler = mounted.modeler;
         component.id = 'design-1';
     });

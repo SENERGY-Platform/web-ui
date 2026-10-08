@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -44,14 +44,17 @@ const MAX_ROWS = 200;
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton, DatePipe]
 })
 export class QueryPreviewDialogComponent {
+    private dialogRef = inject<MatDialogRef<QueryPreviewDialogComponent>>(MatDialogRef);
+
 
     columns: PreviewColumn[] = [];
     displayedColumns: string[] = [];
     rows: any[][] = [];
     totalRows = 0;
 
-    constructor(@Inject(MAT_DIALOG_DATA) data: QueryPreviewData,
-        private dialogRef: MatDialogRef<QueryPreviewDialogComponent>) {
+    constructor() {
+        const data = inject<QueryPreviewData>(MAT_DIALOG_DATA);
+
         const rows = data.rows || [];
         this.totalRows = rows.length;
         this.rows = rows.slice(0, MAX_ROWS);

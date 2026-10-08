@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -44,6 +44,10 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, DataSourceSelectorComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class OpenWindowEditComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<OpenWindowEditComponent>>(MatDialogRef);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+
     form: any;
     ready = false;
     userHasUpdateNameAuthorization = false;
@@ -56,17 +60,14 @@ export class OpenWindowEditComponent implements OnInit {
     displayedColumns = ['exportName', 'valueName', 'valueAlias', 'conversions'];
     ruleConfigIsMissing = false;
 
-    constructor(
-      @Inject(MAT_DIALOG_DATA) data: {
-        dashboardId: string;
-        widget: WidgetModel;
-        userHasUpdateNameAuthorization: boolean;
-        userHasUpdatePropertiesAuthorization: boolean;
-      },
-      private dialogRef: MatDialogRef<OpenWindowEditComponent>,
-      private dialog: MatDialog,
-      private dashboardService: DashboardService
-    ) {
+    constructor() {
+        const data = inject<{
+            dashboardId: string;
+            widget: WidgetModel;
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean;
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widget = data.widget;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

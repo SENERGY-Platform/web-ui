@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { SmartServiceExtendedParameterModel, SmartServiceParameterOptionModel } from '../../../releases/shared/release.model';
@@ -111,6 +111,9 @@ const virtualScrollFrom = 50;
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, SpinnerComponent, MatDivider, MtxSelect, CharacteristicInputComponent, MatIconButton, MatTooltip, MatSlideToggle, MatDialogActions, MatButton]
 })
 export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {
+    private dialogRef = inject<MatDialogRef<SmartServiceParameterDialogComponent>>(MatDialogRef);
+    data = inject<SmartServiceParameterDialogData>(MAT_DIALOG_DATA);
+
     name: string;
     description: string;
     parameters: SmartServiceExtendedParameterModel[] = [];
@@ -121,10 +124,9 @@ export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {
 
     private sub = new Subscription();
 
-    constructor(
-        private dialogRef: MatDialogRef<SmartServiceParameterDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: SmartServiceParameterDialogData,
-    ) {
+    constructor() {
+        const data = this.data;
+
         this.name = data.name;
         this.description = data.description;
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, TimeoutError } from 'rxjs';
 import { catchError, map, timeout } from 'rxjs/operators';
@@ -146,6 +146,10 @@ function parseOccupiedDevices(lines: string[]): HistoryOccupiedDevice[] {
     providedIn: 'root',
 })
 export class EnvironmentsService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
     // Undefined when the endpoint is not part of ladon's startup authorization sweep.
     authorizations: PermissionTestResponse | undefined;
     datasetAuthorizations: PermissionTestResponse | undefined;
@@ -155,11 +159,7 @@ export class EnvironmentsService {
     private readonly deviceTypesUrl = environment.mosesUrl + '/device-types';
     private readonly devicesUrl = environment.mosesUrl + '/devices';
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService,
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(this.environmentsUrl);
         this.datasetAuthorizations = this.ladonService.getUserAuthorizationsForURI(this.datasetsUrl);
     }

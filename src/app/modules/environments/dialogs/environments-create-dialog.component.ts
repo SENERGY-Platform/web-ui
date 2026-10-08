@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ENVIRONMENT_TYPES, Environment, EnvironmentType, defaultZoneTypeFor, environmentTypeLabel } from '../shared/environments.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -32,12 +32,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class EnvironmentsCreateDialogComponent {
+    private dialogRef = inject<MatDialogRef<EnvironmentsCreateDialogComponent>>(MatDialogRef);
+
     name = '';
     type: EnvironmentType | null = null;
     types = ENVIRONMENT_TYPES;
     environmentTypeLabel = environmentTypeLabel;
-
-    constructor(private dialogRef: MatDialogRef<EnvironmentsCreateDialogComponent>) {}
 
     cancel(): void {
         this.dialogRef.close();

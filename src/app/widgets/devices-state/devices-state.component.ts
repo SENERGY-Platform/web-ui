@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DevicesStateService } from './shared/devices-state.service';
 import { DevicesStateModel } from './shared/devices-state.model';
@@ -36,6 +36,10 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, WidgetFooterComponent]
 })
 export class DevicesStateComponent implements OnInit, OnDestroy {
+    private devicesStateService = inject(DevicesStateService);
+    private dashboardService = inject(DashboardService);
+    private router = inject(Router);
+
     devicesStatus: DevicesStateModel = { count: 0, connected: 0, disconnected: 0, unknown: 0 };
     ready = false;
     refreshing = false;
@@ -47,8 +51,6 @@ export class DevicesStateComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(private devicesStateService: DevicesStateService, private dashboardService: DashboardService, private router: Router) {}
 
     ngOnInit() {
         this.setDeviceStatus();

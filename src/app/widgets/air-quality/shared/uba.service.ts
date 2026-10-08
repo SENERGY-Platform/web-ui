@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { UBAComponent, UBAData, UBADataResponse, UBAMetaResponse, UBAStation, UBAStationResponse } from './uba.model';
 import { catchError, map } from 'rxjs/operators';
@@ -27,7 +27,9 @@ import { environment } from '../../../../environments/environment';
     providedIn: 'root',
 })
 export class UBAService {
-    constructor(private errorHandlerService: ErrorHandlerService, private http: HttpClient) {}
+    private errorHandlerService = inject(ErrorHandlerService);
+    private http = inject(HttpClient);
+
 
     getUBAStations(): Observable<UBAStation[]> {
         const arr: UBAStation[] = [];

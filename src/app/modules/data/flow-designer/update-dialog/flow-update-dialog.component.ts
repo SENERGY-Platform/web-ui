@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {CellModel} from '../../diagram-editor/shared/diagram.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -34,10 +34,9 @@ export interface DialogData {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, JsonPipe]
 })
 export class FlowUpdateDialogComponent {
+    dialogRef = inject<MatDialogRef<FlowUpdateDialogComponent>>(MatDialogRef);
+    data = inject<DialogData>(MAT_DIALOG_DATA);
 
-    constructor(
-        public dialogRef: MatDialogRef<FlowUpdateDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: DialogData) {}
 
     areEqual(key: keyof CellModel): boolean {
         const oldValue = this.data.oldOperator[key];

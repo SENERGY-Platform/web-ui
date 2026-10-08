@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
@@ -41,15 +41,15 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class WaitingRoomService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private authorizationService = inject(AuthorizationService);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
     waitingRoomEventRS: ReplaySubject<WaitingRoomEvent> | undefined;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private authorizationService: AuthorizationService,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.waitingRoomUrl);
     }
 

@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
+import { DatePipe } from '@angular/common';
+import { ChangeDetectorRef, ElementRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
+import { ElementSizeService } from '../../../core/services/element-size.service';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { ChartsExportService } from './shared/charts-export.service';
 import { ChartsExportComponent } from './charts-export.component';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 
@@ -24,7 +31,18 @@ describe('ChartsExportComponent timeline', () => {
         const chartsExportService = jasmine.createSpyObj('ChartsExportService', ['getData']);
         chartsExportService.getData.and.returnValue(of({ data: null, metadata: [] }));
         const elementSizeService = { getHeightAndWidthByElementId: () => ({ height: 100, width: 100, heightPercentage: '90%', widthPercentage: '90%' }) };
-        const component = new ChartsExportComponent(chartsExportService, elementSizeService as any, {} as any, {} as any, {} as any, {} as any, {} as any, {} as any);
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: ChartsExportService, useValue: chartsExportService },
+                { provide: ElementSizeService, useValue: elementSizeService },
+                { provide: DashboardService, useValue: {} },
+                { provide: ErrorHandlerService, useValue: {} },
+                { provide: DatePipe, useValue: {} },
+                { provide: ChangeDetectorRef, useValue: {} },
+                { provide: ElementRef, useValue: {} },
+            ],
+        });
+        const component = TestBed.runInInjectionContext(() => new ChartsExportComponent());
         component.widget = { id: 'w', name: 'w', type: 'charts_export', properties: { chartType: 'Timeline', hAxisFormat: 'HH:mm', time: { last: '6h' } } } as WidgetModel;
         (component as any).hAxisFormat = 'HH:mm';
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Input, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import Map from 'ol/Map';
 
 @Component({
@@ -8,10 +8,10 @@ import Map from 'ol/Map';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MapComponent implements OnInit {
+  private elementRef = inject(ElementRef);
+
 
   @Input() map?: Map;
-  constructor(private elementRef: ElementRef) {
-  }
   ngOnInit() {
     if (this.map !== undefined) {
       this.map.setTarget(this.elementRef.nativeElement);

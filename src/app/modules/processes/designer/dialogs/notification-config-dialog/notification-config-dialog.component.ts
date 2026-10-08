@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormControl, FormGroup, ValidatorFn, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
@@ -31,14 +31,18 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatDialogActions, MatButton]
 })
 export class NotificationConfigDialogComponent {
+    private dialogRef = inject<MatDialogRef<NotificationConfigDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        to: string;
+        subj: string;
+        content: string;
+    }>(MAT_DIALOG_DATA);
+
     subjectFormGroup: FormGroup;
     contentFormGroup: FormGroup;
     parentErrorStateMatcher = new ParentErrorStateMatcher();
 
-    constructor(
-        private dialogRef: MatDialogRef<NotificationConfigDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { to: string; subj: string; content: string },
-    ) {
+    constructor() {
         this.subjectFormGroup = new FormGroup(
             {
                 defaultValue: new FormControl(''),

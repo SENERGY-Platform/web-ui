@@ -16,7 +16,7 @@
  *
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AllowedMethods, AuthorizationRequest, AuthorizationRequestResponse, PermissionApiModel, permissionApiToPermission, PermissionModel, PermissionTestResponse, permissionToPermissionApi } from '../permission.model';
 import { environment } from 'src/environments/environment';
@@ -27,14 +27,11 @@ import { HttpClient } from '@angular/common/http';
     providedIn: 'root',
 })
 export class LadonService {
+    private http = inject(HttpClient);
+
 
     public baseUrl: string = environment.ladonUrl;
     private authorizationsPerURL: Record<string, PermissionTestResponse> = {};
-
-    constructor(
-        private http: HttpClient
-    ) {
-    }
 
     private static handlePolicies(policies: PermissionModel[]): PermissionApiModel[] {
         const apiPolicies: PermissionApiModel[] = [];

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -52,6 +52,15 @@ import { MtxSelect } from '@ng-matero/extensions/select';
     imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatChipListbox, MatChipOption, MatCard, MatCardTitle, MatCardActions, MatIconButton, MatTooltip, MatIcon, MatDivider, MtxSelect, MatButton, MatPrefix]
 })
 export class DeviceGroupsEditComponent implements OnInit {
+    private _formBuilder = inject(FormBuilder);
+    private deviceGroupService = inject(DeviceGroupsService);
+    private deviceInstanceService = inject(DeviceInstancesService);
+    private snackBar = inject(MatSnackBar);
+    private dialog = inject(MatDialog);
+    private pipelineRegistryService = inject(PipelineRegistryService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+
     id = '';
     deviceGroupForm!: FormGroup; // DeviceGroupModel
     attributes: Attribute[] = [];
@@ -71,16 +80,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     rerouteAfterSaveDelayInMs = 2000;
     isSaving = false;
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private deviceGroupService: DeviceGroupsService,
-        private deviceInstanceService: DeviceInstancesService,
-        private snackBar: MatSnackBar,
-        private dialog: MatDialog,
-        private pipelineRegistryService: PipelineRegistryService,
-        private route: ActivatedRoute,
-        private router: Router,
-    ) {
+    constructor() {
         this.getRouterParams();
     }
 

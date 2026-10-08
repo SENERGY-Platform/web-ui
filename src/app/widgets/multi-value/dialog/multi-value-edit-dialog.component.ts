@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -47,6 +47,12 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MatSlideToggle, MatIconButton, MatIcon, MatDialogActions, MatButton]
 })
 export class MultiValueEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<MultiValueEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private fb = inject(FormBuilder);
+
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
@@ -64,19 +70,14 @@ export class MultiValueEditDialogComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
 
-    constructor(
-        private dialogRef: MatDialogRef<MultiValueEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private fb: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DeviceTypeService } from './shared/device-type.service';
@@ -45,6 +45,14 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatIcon, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
+    private searchbarService = inject(SearchbarService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private router = inject(Router);
+    private deviceInstancesDialogService = inject(DeviceInstancesDialogService);
+    private preferencesSerivce = inject(PreferencesService);
+
     displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];
     pageSize = this.preferencesSerivce.pageSize;
     deviceTypes: DeviceTypeModel[] = [];
@@ -63,16 +71,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
-
-    constructor(
-        private searchbarService: SearchbarService,
-        private deviceTypeService: DeviceTypeService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private router: Router,
-        private deviceInstancesDialogService: DeviceInstancesDialogService,
-        private preferencesSerivce: PreferencesService,
-    ) {}
 
     ngOnInit() {
         this.initSearch();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { concatMap, Observable, throwError, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -31,13 +31,11 @@ import { PVPrediction, PVPredictionResult } from './prediction.model';
     providedIn: 'root'
 })
 export class PvPredictionService {
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private chartsExportService = inject(ChartsExportService);
 
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
-        private chartsExportService: ChartsExportService
-    ) {}
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

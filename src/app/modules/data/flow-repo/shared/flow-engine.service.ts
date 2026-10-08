@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
@@ -29,13 +29,13 @@ import { PipelineStatus } from '../../pipeline-registry/shared/pipeline.model';
     providedIn: 'root',
 })
 export class FlowEngineService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowEngineUrl);
     }
 

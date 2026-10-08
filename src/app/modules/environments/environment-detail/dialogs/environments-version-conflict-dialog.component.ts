@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatButton } from '@angular/material/button';
@@ -33,7 +33,8 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class EnvironmentsVersionConflictDialogComponent {
-    constructor(private dialogRef: MatDialogRef<EnvironmentsVersionConflictDialogComponent>) {}
+    private dialogRef = inject<MatDialogRef<EnvironmentsVersionConflictDialogComponent>>(MatDialogRef);
+
 
     /** Keep the current, still-dirty edit open -- e.g. to copy values out before deciding to reload. */
     keepEditing(): void {

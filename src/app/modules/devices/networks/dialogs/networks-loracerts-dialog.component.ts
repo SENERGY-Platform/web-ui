@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HubModel, LoraCertsModel } from '../shared/networks.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -34,12 +34,19 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, MatIconButton, MatPrefix, MatTooltip, NgClass, MatIcon, CdkTextareaAutosize, MatDialogActions, MatButton, DatePipe]
 })
 export class NetworksLoraCertsDialogComponent {
+    private dialogRef = inject<MatDialogRef<NetworksLoraCertsDialogComponent>>(MatDialogRef);
+
     network: HubModel;
     certs: LoraCertsModel;
     clipboardTooltipTimeout: unknown[] = [];
     clipboardTooltip = 'Copy to Clipboard';
 
-    constructor(private dialogRef: MatDialogRef<NetworksLoraCertsDialogComponent>, @Inject(MAT_DIALOG_DATA) data: { network: HubModel, certs: LoraCertsModel }) {
+    constructor() {
+        const data = inject<{
+            network: HubModel;
+            certs: LoraCertsModel;
+        }>(MAT_DIALOG_DATA);
+
         this.network = data.network;
         this.certs = data.certs;
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ConsumptionProfileProperties, ConsumptionProfileResponse } from './shared/consumption-profile.model';
@@ -37,6 +37,9 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetFooterComponent]
 })
 export class ConsumptionProfileComponent implements OnInit, OnDestroy {
+    private consumptionService = inject(ConsumptionProfileService);
+    private dashboardService = inject(DashboardService);
+
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -56,13 +59,6 @@ export class ConsumptionProfileComponent implements OnInit, OnDestroy {
     operatorIsInitPhase = false;
     initialPhaseMsg = '';
     destroy: Subscription | undefined;
-
-    constructor(
-        private consumptionService: ConsumptionProfileService,
-        private dashboardService: DashboardService,
-    ) {
-
-    }
 
     private checkForInit(data: ConsumptionProfileResponse) {
         if (data.initial_phase !== '' && data.initial_phase !== null) {

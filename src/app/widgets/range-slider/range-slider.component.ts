@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { RangeSliderService } from './shared/range-slider.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -36,6 +36,10 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, FitTextComponent, MatSlider, MatSliderThumb, FormsModule, WidgetFooterComponent]
 })
 export class RangeSliderComponent implements OnInit, OnDestroy {
+    private rangeSliderService = inject(RangeSliderService);
+    private dashboardService = inject(DashboardService);
+    private deploymentService = inject(DeploymentsService);
+
     ready = false;
 
     private destroy = new Subscription();
@@ -46,12 +50,6 @@ export class RangeSliderComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private rangeSliderService: RangeSliderService,
-        private dashboardService: DashboardService,
-        private deploymentService: DeploymentsService,
-    ) {}
 
     ngOnInit() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {

@@ -14,15 +14,28 @@
  * limitations under the License.
  */
 
-import { fakeAsync, tick } from '@angular/core/testing';
+import { Location } from '@angular/common';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { UntypedFormBuilder } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DomSanitizer } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { NewExportComponent } from './new-export.component';
 import { ExportModel } from '../shared/export.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
+import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
+import { PipelineRegistryService } from '../../data/pipeline-registry/shared/pipeline-registry.service';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { ImportInstancesService } from '../../imports/import-instances/shared/import-instances.service';
+import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
+import { BrokerExportService } from '../shared/broker-export.service';
+import { ExportService } from '../shared/export.service';
+import { PreferencesService } from 'src/app/core/services/preferences.service';
 
-// The component is built by hand instead of through TestBed: what is covered here is
+// The component is built in an injection context instead of rendered: what is covered here is
 // the load and save path of an export that already exists, and the template would pull
 // in a dozen Material and mtx modules that say nothing about it.
 const PIPELINE_ID = 'pipe-1';
@@ -116,34 +129,44 @@ interface Harness {
 
 const openForEditing = (exp: ExportModel = existingExport()): Harness => {
     let saved: ExportModel | undefined;
-    const component = new NewExportComponent(
-        {snapshot: {paramMap: {get: () => 'export-1'}}} as any,
-        {} as any,
-        {getPipelines: () => of([pipeline])} as any,
-        {getDeviceInstances: () => of({result: [], total: 0})} as any,
-        {} as any,
-        {
-            getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ'],
-            getExportDatabases: () => of([]),
-            getExport: () => of(exp),
-            editExport: (_id: string, edited: ExportModel) => {
-                saved = edited;
-                return of({status: 200});
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+        providers: [
+            { provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => 'export-1'}}} },
+            { provide: Location, useValue: {} },
+            { provide: PipelineRegistryService, useValue: {getPipelines: () => of([pipeline])} },
+            { provide: DeviceInstancesService, useValue: {getDeviceInstances: () => of({result: [], total: 0})} },
+            { provide: DeviceTypeService, useValue: {} },
+            {
+                provide: ExportService,
+                useValue: {
+                    getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ'],
+                    getExportDatabases: () => of([]),
+                    getExport: () => of(exp),
+                    editExport: (_id: string, edited: ExportModel) => {
+                        saved = edited;
+                        return of({status: 200});
+                    },
+                },
             },
-        } as any,
-        {} as any,
-        {
-            getOperator: () => of({outputs: [{name: 'value', type: 'float'}]} as OperatorModel),
-            setPaths: () => new Map<string, string | undefined>([['analytics.overall_confidence', 'float']]),
-        } as any,
-        {navigate: () => undefined} as any,
-        {bypassSecurityTrustHtml: (html: string) => html} as any,
-        {open: () => undefined} as any,
-        {listImportInstances: () => of([importInstance])} as any,
-        {getImportType: () => of(importType)} as any,
-        new UntypedFormBuilder(),
-        {pageSize: 20} as any,
-    );
+            { provide: BrokerExportService, useValue: {} },
+            {
+                provide: OperatorRepoService,
+                useValue: {
+                    getOperator: () => of({outputs: [{name: 'value', type: 'float'}]} as OperatorModel),
+                    setPaths: () => new Map<string, string | undefined>([['analytics.overall_confidence', 'float']]),
+                },
+            },
+            { provide: Router, useValue: {navigate: () => undefined} },
+            { provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} },
+            { provide: MatSnackBar, useValue: {open: () => undefined} },
+            { provide: ImportInstancesService, useValue: {listImportInstances: () => of([importInstance])} },
+            { provide: ImportTypesService, useValue: {getImportType: () => of(importType)} },
+            { provide: UntypedFormBuilder, useValue: new UntypedFormBuilder() },
+            { provide: PreferencesService, useValue: {pageSize: 20} },
+        ],
+    });
+    const component = TestBed.runInInjectionContext(() => new NewExportComponent());
 
     component.ngOnInit();
     tick(200); // the load defers twice: once for the form, once for onChanges

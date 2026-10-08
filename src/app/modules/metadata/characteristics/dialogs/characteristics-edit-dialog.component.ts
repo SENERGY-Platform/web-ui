@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
 import { CharacteristicsPermSearchModel } from '../shared/characteristics-perm-search.model';
@@ -33,6 +33,10 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, CharacteristicElementComponent, MatDialogActions, MatButton]
 })
 export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit {
+    private conceptsService = inject(ConceptsService);
+    private characteristicsService = inject(CharacteristicsService);
+    private dialogRef = inject<MatDialogRef<CharacteristicsEditDialogComponent>>(MatDialogRef);
+
     @ViewChild('characteristicElementComponent', { static: false }) characteristicElementComponent!: CharacteristicElementComponent;
 
     characteristicPerm: CharacteristicsPermSearchModel | undefined = undefined;
@@ -41,12 +45,9 @@ export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit
 
     disabled: boolean;
 
-    constructor(
-        private conceptsService: ConceptsService,
-        private characteristicsService: CharacteristicsService,
-        private dialogRef: MatDialogRef<CharacteristicsEditDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { characteristic: CharacteristicsPermSearchModel; disabled?: boolean } | null,
-    ) {
+    constructor() {
+        const data = inject(MAT_DIALOG_DATA);
+
         if (data !== null) {
             this.characteristicPerm = data.characteristic;
         }

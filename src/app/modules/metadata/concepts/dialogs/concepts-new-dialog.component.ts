@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, ChangeDetectionStrategy} from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
 import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -32,9 +32,9 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class ConceptsNewDialogComponent {
-    nameControl = new UntypedFormControl('', [Validators.required]);
+    private dialogRef = inject<MatDialogRef<ConceptsNewDialogComponent>>(MatDialogRef);
 
-    constructor(private dialogRef: MatDialogRef<ConceptsNewDialogComponent>) {}
+    nameControl = new UntypedFormControl('', [Validators.required]);
 
     close(): void {
         this.dialogRef.close();

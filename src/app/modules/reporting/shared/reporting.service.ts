@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { environment } from '../../../../environments/environment';
@@ -46,18 +46,16 @@ export const REPORT_JOB_POLL_MAX_FAILURES = 3;
     providedIn: 'root',
 })
 export class ReportingService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
 
     private readonly reportUrl = environment.reportEngineUrl + '/report';
     private readonly reportFileUrl = environment.reportEngineUrl + '/report/file';
     private readonly reportCreateUrl = environment.reportEngineUrl + '/report/create';
     private readonly reportJobUrl = environment.reportEngineUrl + '/report/job';
     private readonly templateUrl = environment.reportEngineUrl + '/templates';
-
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService,
-    ) {}
 
     getTemplates(): Observable<TemplateListResponseModel | null> {
         return this.http.get<TemplateListResponseModel>(this.templateUrl)

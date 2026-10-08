@@ -15,7 +15,7 @@
  */
 
 import { BreakpointObserver, BreakpointState } from '@angular/cdk/layout';
-import { fakeAsync, tick } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Subject } from 'rxjs';
 import { ResponsiveService } from './responsive.service';
 
@@ -46,7 +46,8 @@ describe('ResponsiveService', () => {
 
     beforeEach(() => {
         observer = new FakeBreakpointObserver();
-        service = new ResponsiveService(observer as unknown as BreakpointObserver);
+        TestBed.configureTestingModule({ providers: [{ provide: BreakpointObserver, useValue: observer }] });
+        service = TestBed.runInInjectionContext(() => new ResponsiveService());
     });
 
     it('should name the range a width falls into, with the bounds belonging to the larger range', () => {

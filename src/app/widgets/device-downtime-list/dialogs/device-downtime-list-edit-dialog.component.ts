@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -38,6 +38,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatCheckbox, MatDialogActions, MatButton]
 })
 export class DeviceDowntimeListEditDialogComponent implements OnInit {
+    private fb = inject(FormBuilder);
+    private dialogRef = inject<MatDialogRef<DeviceDowntimeListEditDialogComponent>>(MatDialogRef);
+    private dashboardService = inject(DashboardService);
+    private locationService = inject(LocationsService);
+
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
@@ -46,18 +51,14 @@ export class DeviceDowntimeListEditDialogComponent implements OnInit {
     formGroup: FormGroup;
      locations: LocationModel[] = [];
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<DeviceDowntimeListEditDialogComponent>,
-        private dashboardService: DashboardService,
-        private locationService: LocationsService,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

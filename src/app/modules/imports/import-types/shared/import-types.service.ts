@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ImportTypeContentVariableModel, ImportTypeModel } from './import-types.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
@@ -28,6 +28,9 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
     providedIn: 'root',
 })
 export class ImportTypesService {
+    private http = inject(HttpClient);
+    private ladonService = inject(LadonService);
+
     eventualConsistencyDelay = 2000;
 
     STRING = 'https://schema.org/Text';
@@ -39,10 +42,7 @@ export class ImportTypesService {
     types: Map<string, string> = new Map();
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importRepoUrl);
     }
 

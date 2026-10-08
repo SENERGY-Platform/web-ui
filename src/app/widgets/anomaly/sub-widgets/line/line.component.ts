@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { forkJoin, map, Observable, of } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { AnomaliesPerDevice, AnomalyResultModel, DeviceValue } from '../../shared/anomaly.model';
@@ -34,6 +34,9 @@ import { BaseChartDirective } from 'ng2-charts';
     imports: [ChartToolbarComponent, BaseChartDirective]
 })
 export class LineComponent implements OnInit, OnChanges {
+    private anomalyService = inject(AnomalyService);
+    private cdr = inject(ChangeDetectorRef);
+
     chartsReady = false;
     timeChartData?: AnomalyChartConfig;
     readonly chartPlugins = [crosshairPlugin];
@@ -51,10 +54,6 @@ export class LineComponent implements OnInit, OnChanges {
     extremeOutliers: AnomalyResultModel[] = [];
 
     valueChartData?: AnomalyChartConfig;
-    constructor(
-      private anomalyService: AnomalyService,
-      private cdr: ChangeDetectorRef
-    ) {}
 
     ngOnInit(): void {
         this.setupCharts().subscribe({

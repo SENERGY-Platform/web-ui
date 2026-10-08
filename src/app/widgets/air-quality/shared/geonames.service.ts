@@ -22,13 +22,16 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { UtilService } from '../../../core/services/util.service';
 import { HttpClient } from '@angular/common/http';
 import { Geoname, GeonamesResponse } from './geonames.model';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GeonamesService {
-    constructor(private errorHandlerService: ErrorHandlerService, private utilService: UtilService, private http: HttpClient) {}
+    private errorHandlerService = inject(ErrorHandlerService);
+    private utilService = inject(UtilService);
+    private http = inject(HttpClient);
+
 
     getClosestGeoname(lat: number, lon: number): Observable<Geoname> {
         return new Observable<Geoname>((obs) => {

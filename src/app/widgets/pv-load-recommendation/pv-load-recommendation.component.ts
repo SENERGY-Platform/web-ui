@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { concatMap, Subscription, of } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
@@ -33,6 +33,9 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, WidgetFooterComponent]
 })
 export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
+    private dashboardService = inject(DashboardService);
+    private pvLoadService = inject(PvLoadService);
+
     ready = false;
     refreshing = false;
     destroy = new Subscription();
@@ -46,12 +49,6 @@ export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
     configured = false;
-
-
-    constructor(
-        private dashboardService: DashboardService,
-        private pvLoadService: PvLoadService
-    ) { }
 
     ngOnInit(): void {
         this.update();

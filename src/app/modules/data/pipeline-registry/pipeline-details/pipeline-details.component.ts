@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { PipelineRegistryService } from '../shared/pipeline-registry.service';
 import { OperatorInputTopic, PipelineModel } from '../shared/pipeline.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -38,19 +38,17 @@ import { FormsModule } from '@angular/forms';
     imports: [MatButton, MatCard, MatCardHeader, MatCardAvatar, MatIcon, MatCardTitle, MatCardSubtitle, RouterLink, MatCardContent, MatCheckbox, FormsModule]
 })
 export class PipelineDetailsComponent implements OnInit {
+    private route = inject(ActivatedRoute);
+    private pipelineRegistryService = inject(PipelineRegistryService);
+    private sanitizer = inject(DomSanitizer);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceInstanceService = inject(DeviceInstancesService);
+    private location = inject(Location);
+
     ready = false;
     pipe = {} as PipelineModel;
     showAll = false;
     configs = new Map<string, [[string, string]]>();
-
-    constructor(
-        private route: ActivatedRoute,
-        private pipelineRegistryService: PipelineRegistryService,
-        private sanitizer: DomSanitizer,
-        private deviceTypeService: DeviceTypeService,
-        private deviceInstanceService: DeviceInstancesService,
-        private location: Location,
-    ) {}
 
     ngOnInit() {
         const id = this.route.snapshot.paramMap.get('id');

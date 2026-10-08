@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
@@ -40,6 +40,12 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatTooltip, MatIcon, MatButton, MatDialogActions]
 })
 export class EditSmartServiceJsonExtractionDialogComponent {
+    private dialogRef = inject<MatDialogRef<EditSmartServiceJsonExtractionDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        info: SmartServiceTaskInputOutputDescription;
+        element: BpmnElement;
+    }>(MAT_DIALOG_DATA);
+
     exports: JsonExtract[] = [];
     prefix = 'JSON.parse(';
     seperator = ')';
@@ -49,10 +55,9 @@ export class EditSmartServiceJsonExtractionDialogComponent {
 
     availableProcessVariables: Map<string,BpmnParameterWithLabel[]> = new Map();
 
-    constructor(
-        private dialogRef: MatDialogRef<EditSmartServiceJsonExtractionDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceTaskInputOutputDescription; element: BpmnElement},
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.taskName = dialogParams.info.name;
         this.exports = dialogParams.info.outputs.map(value => this.outputToJsonExtract(value)).filter(value => value !== null) as JsonExtract[];
         this.exports.forEach(_ => this.opened.push(false));

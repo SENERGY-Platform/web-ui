@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     UsedInDeviceTypeResponseDeviceTypeRef,
@@ -34,16 +34,19 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class UsedInDeviceTypesDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<UsedInDeviceTypesDialogComponent>>(MatDialogRef);
+    private authService = inject(AuthorizationService);
+    private router = inject(Router);
+
     dataSource = new MatTableDataSource<UsedInDeviceTypeResponseDeviceTypeRef>();
     displayedColumns = ['name'];
     userHasUpdateAuthorization = false;
 
-    constructor(
-        private dialogRef: MatDialogRef<UsedInDeviceTypesDialogComponent>,
-        private authService: AuthorizationService,
-        private router: Router,
-        @Inject(MAT_DIALOG_DATA) data: { element: UsedInDeviceTypeResponseElement },
-    ) {
+    constructor() {
+        const data = inject<{
+            element: UsedInDeviceTypeResponseElement;
+        }>(MAT_DIALOG_DATA);
+
         this.dataSource = new MatTableDataSource(data.element.used_in || []);
     }
 

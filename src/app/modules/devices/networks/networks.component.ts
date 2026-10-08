@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { NetworksService } from './shared/networks.service';
 import { ExtendedHubModel, ExtendedHubTotalModel, HubModel } from './shared/networks.model';
@@ -49,6 +49,17 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
     imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, StateIconComponent, MatIcon, MatTooltip, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
+    private networksService = inject(NetworksService);
+    private searchbarService = inject(SearchbarService);
+    private router = inject(Router);
+    private dialog = inject(MatDialog);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private dialogsService = inject(DialogsService);
+    private snackBar = inject(MatSnackBar);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private permissionsService = inject(PermissionsService);
+    private preferencesService = inject(PreferencesService);
+
     displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<HubModel>();
@@ -68,19 +79,6 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     userIdToName: { [key: string]: string } = {};
 
     private searchSub: Subscription = new Subscription();
-
-    constructor(
-        private networksService: NetworksService,
-        private searchbarService: SearchbarService,
-        private router: Router,
-        private dialog: MatDialog,
-        private deviceInstancesService: DeviceInstancesService,
-        private dialogsService: DialogsService,
-        private snackBar: MatSnackBar,
-        private permissionsDialogService: PermissionsDialogService,
-        private permissionsService: PermissionsService,
-        private preferencesService: PreferencesService,
-    ) { }
 
     ngOnInit() {
         this.initSearch();

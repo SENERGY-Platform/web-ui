@@ -15,7 +15,7 @@
  */
 
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
@@ -27,14 +27,14 @@ import { CertificateInfo, Rfc5280Reason, rfc5280ReasonString } from './certifica
   providedIn: 'root'
 })
 export class CertificatesService {
+  private http = inject(HttpClient);
+  private ladonService = inject(LadonService);
+
   listAuthorizations: PermissionTestResponse;
   revokeAuthorizations: PermissionTestResponse;
 
 
-  constructor(
-    private http: HttpClient,
-    private ladonService: LadonService,
-  ) {
+  constructor() {
     this.listAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.certAuthorityUrl + '/list');
     this.revokeAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.certAuthorityUrl + '/revoke');
   }

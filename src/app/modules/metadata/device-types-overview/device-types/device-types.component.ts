@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import {
     DeviceTypeAspectClassModel,
     DeviceTypeAspectModel,
@@ -83,6 +83,17 @@ interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     imports: [SpinnerComponent, MatCard, MatCardContent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, MatStepLabel, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDivider, MatIconButton, MatIcon, MatButton, MatExpansionPanelContent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle, MatTabGroup, MatTab, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTooltip, MatNestedTreeNode, MatTreeNodeOutlet, MatCardFooter, MatFabButton]
 })
 export class DeviceTypesComponent implements OnInit {
+    private _formBuilder = inject(FormBuilder);
+    private deviceTypeService = inject(DeviceTypeService);
+    private dialog = inject(MatDialog);
+    private snackBar = inject(MatSnackBar);
+    private route = inject(ActivatedRoute);
+    private deviceTypeHelperService = inject(DeviceTypeHelperService);
+    private conceptsService = inject(ConceptsService);
+    private aspectClassesService = inject(AspectClassesService);
+    private router = inject(Router);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     protocols: DeviceTypeProtocolModel[] = [];
     interactionList: string[] = Object.values(DeviceTypeInteractionEnum);
@@ -110,18 +121,7 @@ export class DeviceTypesComponent implements OnInit {
     knownDTAttributes = ['senergy/canary-device-type', 'senergy/snowflake-canary-device-type', 'senergy/local-mqtt', 'senergy/zigbee-dc', 'senergy/zigbee-vendor', 'senergy/zigbee-model', 'senergy/zwave-dc', 'senergy/zwave-type-mapping-key', 'senergy/mqtt-generate-services', 'wmbus/driver'];
     knownServiceAttributes = ['senergy/local-mqtt/event-topic-tmpl', 'senergy/local-mqtt/cmd-topic-tmpl', 'senergy/local-mqtt/resp-topic-tmpl', 'senergy/time_path', 'json-unwrap-input', 'json-unwrap-output', 'mgw-service-selection-condition'];
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private deviceTypeService: DeviceTypeService,
-        private dialog: MatDialog,
-        private snackBar: MatSnackBar,
-        private route: ActivatedRoute,
-        private deviceTypeHelperService: DeviceTypeHelperService,
-        private conceptsService: ConceptsService,
-        private aspectClassesService: AspectClassesService,
-        private router: Router,
-        private changeDetectorRef: ChangeDetectorRef,
-    ) {
+    constructor() {
         try {
             this.equivalentProtocolSegments = JSON.parse(environment.equivalentProtocolSegments);
         } catch (_) {

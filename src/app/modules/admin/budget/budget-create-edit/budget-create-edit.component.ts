@@ -15,7 +15,7 @@
  */
 
 
-import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import {BudgetModel} from '../shared/budget.model';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
@@ -36,6 +36,10 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class BudgetCreateEditComponent {
+    private dialogRef = inject<MatDialogRef<BudgetCreateEditComponent>>(MatDialogRef);
+    private fb = inject(FormBuilder);
+    private budgetService = inject(BudgetService);
+
     budget?: BudgetModel;
     editable = false;
     roles: string[] = [];
@@ -47,17 +51,14 @@ export class BudgetCreateEditComponent {
         value: [0, Validators.min(0)],
     });
 
-    constructor(
-        private dialogRef: MatDialogRef<BudgetCreateEditComponent>,
-        private fb: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             budget?: BudgetModel;
             editable: boolean;
             roles: string[];
             users: any[];
-        },
-        private budgetService: BudgetService,
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.budget = data.budget;
         this.roles = data.roles;
         this.users = data.users;

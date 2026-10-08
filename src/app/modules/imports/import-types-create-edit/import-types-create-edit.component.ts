@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import { FormArray, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -59,18 +59,17 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDivider, MatIconButton, MatIcon, MtxSelect, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet, MatCheckbox, MatTooltip, MatButton]
 })
 export class ImportTypesCreateEditComponent implements OnInit {
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private fb: UntypedFormBuilder,
-        private importTypesService: ImportTypesService,
-        private aspectsService: AspectsService,
-        private conceptsService: ConceptsService,
-        private dialog: MatDialog,
-        private changeDetectorRef: ChangeDetectorRef,
-        private snackBar: MatSnackBar,
-        private deviceTypeService: DeviceTypeService,
-    ) {}
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private fb = inject(UntypedFormBuilder);
+    private importTypesService = inject(ImportTypesService);
+    private aspectsService = inject(AspectsService);
+    private conceptsService = inject(ConceptsService);
+    private dialog = inject(MatDialog);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+    private snackBar = inject(MatSnackBar);
+    private deviceTypeService = inject(DeviceTypeService);
+
 
     static STRING = 'https://schema.org/Text';
     static INTEGER = 'https://schema.org/Integer';

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {ImportInstancesModel} from '../shared/import-instances.model';
 import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -42,6 +42,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class ImportInstanceExportDialogComponent implements OnInit {
+    data = inject<ImportInstancesModel>(MAT_DIALOG_DATA);
+    private dialogRef = inject<MatDialogRef<ImportInstanceExportDialogComponent>>(MatDialogRef);
+    private importTypesService = inject(ImportTypesService);
+    private snackBar = inject(MatSnackBar);
+    private exportService = inject(ExportService);
+
     type: ImportTypeModel | undefined = undefined;
     ready = false;
     nameControl = new FormControl('', Validators.required);
@@ -52,14 +58,6 @@ export class ImportInstanceExportDialogComponent implements OnInit {
     tags: ExportValueModel[] = [];
 
     @ViewChild(MatTable, { static: false }) table: MatTable<ExportValueModel> | undefined;
-
-    constructor(
-        @Inject(MAT_DIALOG_DATA) public data: ImportInstancesModel,
-        private dialogRef: MatDialogRef<ImportInstanceExportDialogComponent>,
-        private importTypesService: ImportTypesService,
-        private snackBar: MatSnackBar,
-        private exportService: ExportService,
-    ) {}
 
     ngOnInit(): void {
         this.nameControl.setValue(this.data.name);

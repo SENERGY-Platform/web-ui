@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { Observable } from 'rxjs';
@@ -26,12 +26,12 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
     providedIn: 'root',
 })
 export class ImportInstancesService {
+    private http = inject(HttpClient);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.importDeployUrl);
     }
 

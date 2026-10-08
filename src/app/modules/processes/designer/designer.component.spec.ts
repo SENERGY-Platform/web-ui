@@ -14,10 +14,37 @@
  * limitations under the License.
  */
 
+import { HttpClient } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { ProcessRepoService } from '../process-repo/shared/process-repo.service';
+import { DesignerDialogService } from './shared/designer-dialog.service';
+import { DesignerHelperService } from './shared/designer-helper.service';
 import { ProcessDesignerComponent } from './designer.component';
 import { createProcessModeler } from './bpmn-js/bpmn-js';
 import { fetchText, importXml, mountModeler, MountedModeler, panelSettled, until } from '../../../../testing/bpmn-modeler';
+
+// Only the services a test passes in are used; the other injected dependencies are empty stubs.
+const buildDesigner = (stubs: { designerService?: unknown; processRepoService?: unknown; snackBar?: unknown }): ProcessDesignerComponent => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+        providers: [
+            { provide: HttpClient, useValue: {} },
+            { provide: ActivatedRoute, useValue: {} },
+            { provide: AuthorizationService, useValue: {} },
+            { provide: DesignerDialogService, useValue: {} },
+            { provide: DesignerHelperService, useValue: stubs.designerService ?? {} },
+            { provide: ProcessRepoService, useValue: stubs.processRepoService ?? {} },
+            { provide: MatSnackBar, useValue: stubs.snackBar ?? {} },
+            { provide: MetadataExistenceService, useValue: {} },
+        ],
+    });
+    return TestBed.runInInjectionContext(() => new ProcessDesignerComponent());
+};
 
 /*
  * Runs the component's own load and save code against the real modeler: bpmn-js 18 ignores the
@@ -37,9 +64,7 @@ describe('ProcessDesignerComponent load and save', () => {
         snackBar = jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']);
         const processRepoService = { saveProcess, getProcessModel: () => of({ bpmn_xml: xml }) };
         const designerService = { checkConstraints: () => of([]) };
-        component = new ProcessDesignerComponent(
-            {} as any, {} as any, {} as any, {} as any, designerService as any, processRepoService as any, snackBar, {} as any,
-        );
+        component = buildDesigner({ designerService, processRepoService, snackBar });
         component.modeler = mounted.modeler;
         component.id = 'model-1';
     });
@@ -88,7 +113,7 @@ describe('ProcessDesignerComponent IoT-Info', () => {
     beforeEach(() => {
         outputs = [];
         const designerService = { getIncomingOutputs: () => outputs };
-        component = new ProcessDesignerComponent({} as any, {} as any, {} as any, {} as any, designerService as any, {} as any, {} as any, {} as any);
+        component = buildDesigner({ designerService });
         (window as any).__senergyXss = undefined;
     });
 

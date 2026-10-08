@@ -15,7 +15,7 @@
  */
 
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
@@ -68,6 +68,17 @@ import { ColorPickerDirective } from 'ngx-color-picker';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatIconButton, MatIcon, ImageCropperComponent, NgClass, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MtxSelect, MtxOption, MatHint, MtxSelectLabelTemplate, MtxSelectOptionTemplate, ColorPickerDirective, MatDialogActions, MatButton]
 })
 export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
+  private dialogRef = inject<MatDialogRef<FloorplanEditDialogComponent>>(MatDialogRef);
+  private dashboardService = inject(DashboardService);
+  private errorHandlerService = inject(ErrorHandlerService);
+  private fb = inject(NonNullableFormBuilder);
+  private deviceGroupsService = inject(DeviceGroupsService);
+  private functionService = inject(FunctionsService);
+  private deviceClassService = inject(DeviceClassesService);
+  private conceptsService = inject(ConceptsService);
+  private cd = inject(ChangeDetectorRef);
+  private el = inject(ElementRef);
+
   dashboardId = '';
   widgetId = '';
   userHasUpdateNameAuthorization = false;
@@ -108,25 +119,15 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('canvas', { static: false }) canvas: ElementRef<HTMLCanvasElement> | undefined;
 
 
-  constructor(
-    private dialogRef: MatDialogRef<FloorplanEditDialogComponent>,
-    private dashboardService: DashboardService,
-    private errorHandlerService: ErrorHandlerService,
-    private fb: NonNullableFormBuilder,
-    private deviceGroupsService: DeviceGroupsService,
-    private functionService: FunctionsService,
-    private deviceClassService: DeviceClassesService,
-    private conceptsService: ConceptsService,
-    private cd: ChangeDetectorRef,
-    private el: ElementRef,
-    @Inject(MAT_DIALOG_DATA) data: {
-      dashboardId: string;
-      widgetId: string;
-      userHasUpdateNameAuthorization: boolean;
-      userHasUpdatePropertiesAuthorization: boolean;
-      aspectRatio: number;
-    },
-  ) {
+  constructor() {
+    const data = inject<{
+        dashboardId: string;
+        widgetId: string;
+        userHasUpdateNameAuthorization: boolean;
+        userHasUpdatePropertiesAuthorization: boolean;
+        aspectRatio: number;
+    }>(MAT_DIALOG_DATA);
+
     this.dashboardId = data.dashboardId;
     this.widgetId = data.widgetId;
     this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

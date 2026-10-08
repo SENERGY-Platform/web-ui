@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -83,6 +83,18 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MtxSelectLabelTemplate, MatIcon, NgStyle, MatIconButton, MatTooltip, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatRadioGroup, MatRadioButton, MatSlideToggle, MatDialogActions, MatButton]
 })
 export class DataTableEditDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DataTableEditDialogComponent>>(MatDialogRef);
+    dataTableHelperService = inject(DataTableHelperService);
+    private dataTableService = inject(DataTableService);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private fb = inject(UntypedFormBuilder);
+    private processSchedulerService = inject(ProcessSchedulerService);
+    private cdref = inject(ChangeDetectorRef);
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private conceptsService = inject(ConceptsService);
+
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
@@ -149,25 +161,14 @@ export class DataTableEditDialogComponent implements OnInit {
     aggregations = Object.values(DataTableAggregations);
 
 
-    constructor(
-        private dialogRef: MatDialogRef<DataTableEditDialogComponent>,
-        public dataTableHelperService: DataTableHelperService,
-        private dataTableService: DataTableService,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private fb: UntypedFormBuilder,
-        private processSchedulerService: ProcessSchedulerService,
-        private cdref: ChangeDetectorRef,
-        private deviceGroupsService: DeviceGroupsService,
-        private conceptsService: ConceptsService,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    AfterViewInit,
-    ChangeDetectorRef,
-    Component,
-    OnDestroy,
-    OnInit,
-    TemplateRef,
-    ViewChild,
-    ViewContainerRef,
-    ChangeDetectionStrategy
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FilterSelection, FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
@@ -81,6 +71,25 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, CdkOverlayOrigin, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, CurrencyPipe, DatePipe]
 })
 export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
+    private flowRepoService = inject(FlowRepoService);
+    snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private sanitizer = inject(DomSanitizer);
+    authService = inject(AuthorizationService);
+    private searchbarService = inject(SearchbarService);
+    private flowEngineService = inject(FlowEngineService);
+    costService = inject(CostService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    protected permissionsService = inject(PermissionsService);
+    private pipeService = inject(PipelineRegistryService);
+    private router = inject(Router);
+    preferencesService = inject(PreferencesService);
+    private overlay = inject(Overlay);
+    private vcr = inject(ViewContainerRef);
+    private dialog = inject(MatDialog);
+    private activatedRoute = inject(ActivatedRoute);
+    private cd = inject(ChangeDetectorRef);
+
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     @ViewChild('sort', {static: false}) sort!: MatSort;
     @ViewChild('overlayTpl') overlayTpl!: TemplateRef<any>;
@@ -115,28 +124,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
 
     routerOperator: string[] | undefined = undefined;
     routerOperatorNames: string[] | undefined = undefined;
-
-    constructor(
-        private flowRepoService: FlowRepoService,
-        public snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private sanitizer: DomSanitizer,
-        public authService: AuthorizationService,
-        private searchbarService: SearchbarService,
-        private flowEngineService: FlowEngineService,
-        public costService: CostService,
-        private permissionsDialogService: PermissionsDialogService,
-        protected permissionsService: PermissionsService,
-        private pipeService: PipelineRegistryService,
-        private router: Router,
-        public preferencesService: PreferencesService,
-        private overlay: Overlay,
-        private vcr: ViewContainerRef,
-        private dialog: MatDialog,
-        private activatedRoute: ActivatedRoute,
-        private cd: ChangeDetectorRef,
-    ) {
-    }
 
     ngOnInit() {
         this.userId = this.authService.getUserId();

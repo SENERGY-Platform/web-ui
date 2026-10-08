@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../shared/dashboard-widget.model';
 import { DashboardTypesEnum } from '../shared/dashboard-types.enum';
@@ -51,6 +51,10 @@ export interface SwitchCategories extends Types {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MtxSelect, MtxOption, MatIcon, MatTooltip, MatError, MatErrorMessagesDirective, MatInput, MatDialogActions, MatButton]
 })
 export class DashboardNewWidgetDialogComponent implements OnInit{
+    private dialogRef = inject<MatDialogRef<DashboardNewWidgetDialogComponent>>(MatDialogRef);
+    private energyPredictionRequirementsService = inject(EnergyPredictionRequirementsService);
+    private userService = inject(AuthorizationService);
+
     selectedType: Types = { value: '', viewValue: '', tooltip: '', disabled: false };
     selectedCategory: any = null;
     categories: Types[] | SwitchCategories[] = [];
@@ -136,11 +140,7 @@ export class DashboardNewWidgetDialogComponent implements OnInit{
         { value: 'charts_device_per_gateway', viewValue: 'Device per gateway', disabled: false, tooltip: '' },
     ];
 
-    constructor(
-        private dialogRef: MatDialogRef<DashboardNewWidgetDialogComponent>,
-        private energyPredictionRequirementsService: EnergyPredictionRequirementsService,
-        private userService: AuthorizationService
-    ) {
+    constructor() {
         this.types.forEach((t) => this.checkRequirements(t));
         const activeUserId = this.userService.getUserId();
         if(activeUserId === 'aae7e87b-63a2-477f-afb4-caa0db84e3fa') {

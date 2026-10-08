@@ -18,7 +18,7 @@ import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
 import {lastValueFrom, mergeMap, Observable} from 'rxjs';
 import {KeycloakProfile, KeycloakServerConfig} from 'keycloak-js';
 import {environment} from '../../../environments/environment';
-import {Injectable, OnDestroy} from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import {catchError, map} from 'rxjs/operators';
 import { KeycloakOptions } from 'keycloak-angular';
 
@@ -67,6 +67,8 @@ export interface RealmAccess {
     providedIn: 'root',
 })
 export class KeycloakConfidentialService implements OnDestroy {
+    private httpClient = inject(HttpClient);
+
     private timeout?: any;
     private options?: KeycloakOptions;
     private decodedToken?: DecodedToken;
@@ -119,10 +121,6 @@ export class KeycloakConfidentialService implements OnDestroy {
     }
 
     shouldAddToken: (request: HttpRequest<unknown>) => boolean = (request) => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token');
-
-    constructor(private httpClient: HttpClient) {
-
-    }
 
     ngOnDestroy(): void {
         clearTimeout(this.timeout);

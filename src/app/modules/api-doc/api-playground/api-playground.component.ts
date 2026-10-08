@@ -16,7 +16,7 @@
  *
  */
 
-import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { markRaw } from 'vue';
@@ -42,13 +42,15 @@ const routePrefix = '/dev/api/playground';
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ApiPlaygroundComponent implements OnInit, OnDestroy {
+    swaggerService = inject(SwaggerService);
+    private authService = inject(AuthorizationService);
+    private activatedRoute = inject(ActivatedRoute);
+
     ready = false;
     documents: OpenapiDocument[] = [];
     private scalarClient?: any; // no types available, unfortunately
 
     @ViewChild('scalarContainer', { static: true }) scalarContainer!: ElementRef;
-
-    constructor(public swaggerService: SwaggerService, private authService: AuthorizationService, private activatedRoute: ActivatedRoute) { }
 
     ngOnInit() {
         this.swaggerService.getSwagger().pipe(

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WaitingDeviceModel } from '../shared/waiting-room.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -38,17 +38,23 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, ReactiveFormsModule, MatDivider, MatIconButton, MatIcon, MatButton, MatDialogActions]
 })
 export class WaitingRoomDeviceEditDialogComponent {
+    private _formBuilder = inject(FormBuilder);
+    private dialogRef = inject<MatDialogRef<WaitingRoomDeviceEditDialogComponent>>(MatDialogRef);
+    private deviceTypeService = inject(DeviceTypeService);
+    private data = inject<{
+        device: WaitingDeviceModel;
+        useDialog: boolean;
+    }>(MAT_DIALOG_DATA);
+
     device: WaitingDeviceModel;
     deviceType: DeviceTypeModel = {} as DeviceTypeModel;
     useDialog: boolean;
     attrFormGroup: FormGroup = new FormGroup({ attributes: new FormArray([]) });
 
-    constructor(
-        private _formBuilder: FormBuilder,
-        private dialogRef: MatDialogRef<WaitingRoomDeviceEditDialogComponent>,
-        private deviceTypeService: DeviceTypeService,
-        @Inject(MAT_DIALOG_DATA) private data: { device: WaitingDeviceModel; useDialog: boolean },
-    ) {
+    constructor() {
+        const deviceTypeService = this.deviceTypeService;
+        const data = this.data;
+
         this.device = data.device;
         this.useDialog = data.useDialog;
         if (this.device.attributes === undefined || this.device.attributes === null) {

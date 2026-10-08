@@ -14,18 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    AfterViewChecked,
-    AfterViewInit,
-    Component,
-    ElementRef,
-    Input,
-    OnChanges,
-    OnDestroy,
-    SimpleChanges,
-    ViewChild,
-    ChangeDetectionStrategy
-} from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {ResponsiveService} from '../../services/responsive.service';
 import {Subscription} from 'rxjs';
 
@@ -36,6 +25,8 @@ import {Subscription} from 'rxjs';
     changeDetection: ChangeDetectionStrategy.Eager
 })
 export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, AfterViewChecked {
+    private responsiveService = inject(ResponsiveService);
+
     @ViewChild('element', {static: false}) element!: ElementRef;
 
     @Input() txt = '';
@@ -48,9 +39,6 @@ export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, Af
     private clientWidth = 0;
     private scrollHeight = 0;
     private clientHeight = 0;
-
-    constructor(private responsiveService: ResponsiveService) {
-    }
 
     ngAfterViewInit() {
         this.subscription = this.responsiveService.observeMqAlias().subscribe(() => {

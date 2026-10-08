@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -29,13 +29,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, DateTimeEventConfigComponent, MatDialogActions, MatButton]
 })
 export class DateTimeDialogComponent {
+    private dialogRef = inject<MatDialogRef<DateTimeDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        initialDateTime: string;
+    }>(MAT_DIALOG_DATA);
+
     initial: string;
     result = { iso: '', text: '' };
 
-    constructor(
-        private dialogRef: MatDialogRef<DateTimeDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { initialDateTime: string },
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.initial = dialogParams.initialDateTime || '';
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     DeviceTypeContentVariableModel,
@@ -38,19 +38,19 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, IsNotProhibitedNameValidatorDirective, MatError, MatErrorMessagesDirective, IsJsonValidatorDirective, MatDialogActions, MatButton]
 })
 export class DeviceTypesContentVariableJsonDialogComponent {
+    private dialogRef = inject<MatDialogRef<DeviceTypesContentVariableJsonDialogComponent>>(MatDialogRef);
+
     name = '';
     jsonStr = '';
     prohibitedNames: string[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<DeviceTypesContentVariableJsonDialogComponent>,
-        @Inject(MAT_DIALOG_DATA)
-        data: {
+    constructor() {
+        const data = inject<{
             contentVariable: DeviceTypeContentVariableModel;
             name: string;
             prohibitedNames: string[];
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.name = data.name;
         this.prohibitedNames = data.prohibitedNames;
     }

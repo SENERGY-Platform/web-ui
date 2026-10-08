@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { map, Subscription } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { LeackageDetectionProperties, LeakageDetectionResponse } from './shared/leakage-detction.model';
@@ -37,6 +37,9 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetFooterComponent]
 })
 export class LeakageDetectionComponent implements OnInit, OnDestroy {
+    private leakageService = inject(LeakageDetectionService);
+    private dashboardService = inject(DashboardService);
+
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -58,13 +61,6 @@ export class LeakageDetectionComponent implements OnInit, OnDestroy {
     readonly chartPlugins = [crosshairPlugin];
     operatorIsInitPhase = false;
     initialPhaseMsg = '';
-
-    constructor(
-        private leakageService: LeakageDetectionService,
-        private dashboardService: DashboardService,
-    ) {
-
-    }
 
     ngOnInit(): void {
         if (!this.widget.properties.leakageDetection) {

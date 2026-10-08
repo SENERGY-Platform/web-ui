@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
@@ -36,16 +36,16 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class FunctionsCreateDialogComponent implements OnInit {
+    private conceptsService = inject(ConceptsService);
+    private dialogRef = inject<MatDialogRef<FunctionsCreateDialogComponent>>(MatDialogRef);
+    private _formBuilder = inject(FormBuilder);
+
     optionsFormControl = new UntypedFormControl('Controlling');
     functionFormGroup!: FormGroup;
 
     concepts: DeviceTypeConceptModel[] = [];
 
-    constructor(
-        private conceptsService: ConceptsService,
-        private dialogRef: MatDialogRef<FunctionsCreateDialogComponent>,
-        private _formBuilder: FormBuilder,
-    ) {
+    constructor() {
         this.initFunctionFormGroup();
         this.optionListener();
     }

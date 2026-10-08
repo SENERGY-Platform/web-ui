@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { TimescaleRuleModel } from '../shared/timescale-rule.model';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -36,6 +36,10 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, CdkTextareaAutosize, MatDialogActions, MatButton]
 })
 export class TimescaleRulesCreateEditComponent {
+    private dialogRef = inject<MatDialogRef<TimescaleRulesCreateEditComponent>>(MatDialogRef);
+    private fb = inject(FormBuilder);
+    private timescaleRuleService = inject(TimescaleRulesService);
+
 
     rule?: TimescaleRuleModel;
     editable = false;
@@ -55,17 +59,14 @@ export class TimescaleRulesCreateEditComponent {
     });
     create = false;
 
-    constructor(
-        private dialogRef: MatDialogRef<TimescaleRulesCreateEditComponent>,
-        private fb: FormBuilder,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             rule?: TimescaleRuleModel;
             editable: boolean;
             roles: string[];
             users: any[];
-        },
-        private timescaleRuleService: TimescaleRulesService,
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.rule = data.rule;
         this.roles = data.roles;
         this.users = data.users;

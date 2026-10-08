@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DeviceStatusElementModel } from './device-status-properties.model';
@@ -28,14 +28,13 @@ import { ProcessSchedulerService } from '../../process-scheduler/shared/process-
     providedIn: 'root',
 })
 export class DeviceStatusService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private exportService: ExportService,
-        private deploymentsService: DeploymentsService,
-        private processSchedulerService: ProcessSchedulerService,
-        private http: HttpClient,
-    ) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private exportService = inject(ExportService);
+    private deploymentsService = inject(DeploymentsService);
+    private processSchedulerService = inject(ProcessSchedulerService);
+    private http = inject(HttpClient);
+
 
     deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
         if (elements) {

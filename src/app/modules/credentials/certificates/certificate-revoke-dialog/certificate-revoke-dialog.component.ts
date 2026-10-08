@@ -15,7 +15,7 @@
  */
 
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { getRfc5280ReasonStrings, Rfc5280Reason, rfc5280ReasonCode } from '../shared/certificates.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -33,9 +33,8 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class CertificateRevokeDialogComponent {
-  constructor(
-    private dialogRef: MatDialogRef<CertificateRevokeDialogComponent>,
-  ) { }
+  private dialogRef = inject<MatDialogRef<CertificateRevokeDialogComponent>>(MatDialogRef);
+
 
   reason: Rfc5280Reason | null = null;
   reasons = getRfc5280ReasonStrings();

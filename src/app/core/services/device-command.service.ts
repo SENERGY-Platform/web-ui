@@ -15,7 +15,7 @@
  */
 
 
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {Observable} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import {environment} from '../../../environments/environment';
@@ -26,8 +26,9 @@ import {ErrorHandlerService} from './error-handler.service';
     providedIn: 'root',
 })
 export class DeviceCommandService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
-    }
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+
 
     runCommands(commands: DeviceCommandModel[], preferEventValue: boolean = true, timeoutSeconds = 25): Observable<DeviceCommandResponseModel[]> {
         const url = environment.deviceCommandUrl + '/commands/batch?timeout=' + timeoutSeconds + 's&prefer_event_value=' + preferEventValue;

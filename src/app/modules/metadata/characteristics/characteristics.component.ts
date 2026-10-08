@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
 import {Navigation, Router} from '@angular/router';
@@ -49,6 +49,15 @@ import { MatIcon } from '@angular/material/icon';
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewInit {
+    private dialog = inject(MatDialog);
+    private searchbarService = inject(SearchbarService);
+    private characteristicsService = inject(CharacteristicsService);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
+    private dialogsService = inject(DialogsService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private preferencesService = inject(PreferencesService);
+
     displayedColumns = ['select', 'name'];
     pageSize = this.preferencesService.pageSize;
     ready = false;
@@ -69,16 +78,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     userHasUsedInAuthorization = false;
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
 
-    constructor(
-        private dialog: MatDialog,
-        private searchbarService: SearchbarService,
-        private characteristicsService: CharacteristicsService,
-        private snackBar: MatSnackBar,
-        private router: Router,
-        private dialogsService: DialogsService,
-        private deviceTypeService: DeviceTypeService,
-        private preferencesService: PreferencesService,
-    ) {
+    constructor() {
         this.getRouterParams();
     }
 

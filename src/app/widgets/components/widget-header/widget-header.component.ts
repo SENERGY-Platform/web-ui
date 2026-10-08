@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -32,6 +32,8 @@ import { MatIconButton } from '@angular/material/button';
     imports: [MatCardHeader, MatCardTitle, MatTooltip, MatIcon, NgClass, MatIconButton]
 })
 export class WidgetHeaderComponent {
+    private dashboardService = inject(DashboardService);
+
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
     @Input() warnText = '';
@@ -40,8 +42,6 @@ export class WidgetHeaderComponent {
     @Input() optionCustomTooltip: string[] = [];
     @Input() refreshing = false;
     @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
-
-    constructor(private dashboardService: DashboardService) {}
 
     refresh() {
         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, this.widget.id, this.widget);

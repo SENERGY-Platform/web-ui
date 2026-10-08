@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ParserService } from '../../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConfigModel, ParseModel } from '../../shared/parse.model';
@@ -49,6 +49,14 @@ import { SpinnerComponent } from '../../../../../core/components/spinner/spinner
     imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatExpansionPanelDescription, MatExpansionPanelContent, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MatCheckbox, MatButton, SpinnerComponent]
 })
 export class DeployFlowClassicComponent {
+    private parserService = inject(ParserService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    snackBar = inject(MatSnackBar);
+    private deviceInstanceService = inject(DeviceInstancesService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private flowEngineService = inject(FlowEngineService);
+
     ready = false;
     inputs: ParseModel[] = [];
     id = '' as string;
@@ -77,15 +85,7 @@ export class DeployFlowClassicComponent {
 
     pipeReq: PipelineRequestModel = {} as PipelineRequestModel;
 
-    constructor(
-        private parserService: ParserService,
-        private route: ActivatedRoute,
-        private router: Router,
-        public snackBar: MatSnackBar,
-        private deviceInstanceService: DeviceInstancesService,
-        private deviceTypeService: DeviceTypeService,
-        private flowEngineService: FlowEngineService,
-    ) {
+    constructor() {
         const id = this.route.snapshot.paramMap.get('id');
         if (id !== null) {
             this.id = id;

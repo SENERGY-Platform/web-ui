@@ -15,7 +15,7 @@
  */
 
 /* Preview harness - local only. Shows one chart widget per route, e.g. /charts/export-line, in a dashboard-sized box. */
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { WidgetModel } from '../app/modules/dashboard/shared/dashboard-widget.model';
@@ -39,10 +39,12 @@ import { WidgetComponent } from '../app/widgets/widget.component';
     imports: [WidgetComponent]
 })
 export class ChartsPreviewComponent implements OnInit, AfterViewInit {
+    private route = inject(ActivatedRoute);
+    private dashboardService = inject(DashboardService);
+    private dialog = inject(MatDialog);
+
     widget?: WidgetModel;
     zoom = false;
-
-    constructor(private route: ActivatedRoute, private dashboardService: DashboardService, private dialog: MatDialog) {}
 
     ngOnInit(): void {
         const name = this.route.snapshot.paramMap.get('name') || '';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
@@ -37,16 +37,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class NetworksDeleteDialogComponent implements OnInit {
+    data = inject<{
+        networkId: string;
+        devices: DeviceInstanceModel[];
+    }>(MAT_DIALOG_DATA);
+    private dialogRef = inject<MatDialogRef<NetworksDeleteDialogComponent>>(MatDialogRef);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private networksService = inject(NetworksService);
+    private snackBar = inject(MatSnackBar);
+
     deviceSelection = new SelectionModel<DeviceInstanceModel>(true, []);
     ready = true;
-
-    constructor(
-        @Inject(MAT_DIALOG_DATA) public data: { networkId: string; devices: DeviceInstanceModel[] },
-        private dialogRef: MatDialogRef<NetworksDeleteDialogComponent>,
-        private deviceInstancesService: DeviceInstancesService,
-        private networksService: NetworksService,
-        private snackBar: MatSnackBar,
-    ) {}
 
     ngOnInit(): void {
         this.deviceSelection = new SelectionModel<DeviceInstanceModel>(true, []);

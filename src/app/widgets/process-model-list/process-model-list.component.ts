@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessModelListService } from './shared/process-model-list.service';
 import { ProcessModelListModel } from './shared/process-model-list.model';
@@ -41,6 +41,10 @@ import { DatePipe } from '@angular/common';
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemTitle, MatListItemLine, MatListItemMeta, MatIconButton, MatTooltip, RouterLink, MatIcon, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class ProcessModelListComponent implements OnInit, OnDestroy {
+    private processModelListService = inject(ProcessModelListService);
+    private dashboardService = inject(DashboardService);
+    private processRepoService = inject(ProcessRepoService);
+
     processes: ProcessModelListModel[] = [];
     ready = false;
     refreshing = false;
@@ -54,12 +58,6 @@ export class ProcessModelListComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     userHasProcessRepoUpdateAuthorization = false;
-
-    constructor(
-        private processModelListService: ProcessModelListService,
-        private dashboardService: DashboardService,
-        private processRepoService: ProcessRepoService
-    ) {}
 
     ngOnInit() {
         this.getProcesses();

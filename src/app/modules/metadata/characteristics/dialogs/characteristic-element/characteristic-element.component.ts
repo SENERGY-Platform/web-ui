@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import {DeviceTypeCharacteristicsModel} from '../../../device-types-overview/shared/device-type.model';
 import { UntypedFormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NestedTreeControl} from '@angular/cdk/tree';
@@ -36,7 +36,8 @@ import { MatIcon } from '@angular/material/icon';
     imports: [FormsModule, ReactiveFormsModule, NgClass, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIconButton, MatSuffix, MatIcon, MatButton, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatTreeNodeToggle]
 })
 export class CharacteristicElementComponent implements OnInit {
-    constructor(private fb: UntypedFormBuilder) {}
+    private fb = inject(UntypedFormBuilder);
+
 
     @Input() data: DeviceTypeCharacteristicsModel | undefined;
     @Input() nested = false;

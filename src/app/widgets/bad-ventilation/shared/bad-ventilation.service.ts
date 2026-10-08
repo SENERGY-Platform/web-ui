@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { concatMap, of, throwError } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -33,14 +33,12 @@ import { DeviceValue, VentilationResult } from './model';
     providedIn: 'root'
 })
 export class BadVentilationService {
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private exportDataService = inject(ExportDataService);
+    private chartsExportService = inject(ChartsExportService);
+    private errorService = inject(ErrorHandlerService);
 
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private exportDataService: ExportDataService,
-        private chartsExportService: ChartsExportService,
-        private errorService: ErrorHandlerService
-    ) { }
 
     getDeviceCurve(deviceID: string, serviceID: string, pathToColumn: string, lastTimeRange: string, groupTime?: string) {
         const properties: any = {

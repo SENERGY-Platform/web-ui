@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {map} from 'rxjs';
 import {FilterDialogConfigModel, FilterDialogResultModel} from 'src/app/core/components/filter-dialog/shared/filter-dialog.model';
@@ -13,14 +13,15 @@ import { FilterDialogComponent } from '../../../../core/components/filter-dialog
     imports: [FilterDialogComponent]
 })
 export class FlowFilterDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<FlowFilterDialogComponent>>(MatDialogRef);
+    private operatorService = inject(OperatorRepoService);
+
     config: FilterDialogConfigModel = { fields: [] };
     savedFilterSelection!: FilterSelection | undefined;
 
-    constructor(
-        private dialogRef: MatDialogRef<FlowFilterDialogComponent>,
-        private operatorService: OperatorRepoService,
-        @Inject(MAT_DIALOG_DATA) data: FilterSelection | undefined,
-    ) {
+    constructor() {
+        const data = inject<FilterSelection | undefined>(MAT_DIALOG_DATA);
+
         this.savedFilterSelection = data;
     }
 

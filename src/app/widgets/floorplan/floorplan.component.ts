@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
@@ -82,6 +82,16 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, NgClass, NgStyle, MatIconButton, MatIcon, MatTooltip, CapabilityControlComponent, WidgetFooterComponent]
 })
 export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
+  private dialog = inject(MatDialog);
+  private dashboardService = inject(DashboardService);
+  private deviceCommandService = inject(DeviceCommandService);
+  private cd = inject(ChangeDetectorRef);
+  private deviceGroupsService = inject(DeviceGroupsService);
+  private conceptsService = inject(ConceptsService);
+  private deviceClassService = inject(DeviceClassesService);
+  private deviceInstancesService = inject(DeviceInstancesService);
+  private el = inject(ElementRef);
+
   @Input() dashboardId = '';
   @Input() widget: WidgetModel = {} as WidgetModel;
   @Input() zoom = false;
@@ -364,18 +374,6 @@ export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
       tooltipDisplay: 'none',
       tooltipAllowed: false,
     };
-
-  constructor(
-    private dialog: MatDialog,
-    private dashboardService: DashboardService,
-    private deviceCommandService: DeviceCommandService,
-    private cd: ChangeDetectorRef,
-    private deviceGroupsService: DeviceGroupsService,
-    private conceptsService: ConceptsService,
-    private deviceClassService: DeviceClassesService,
-    private deviceInstancesService: DeviceInstancesService,
-    private el: ElementRef,
-  ) { }
 
   ngOnInit(): void {
     migrateColoring(this.widget.properties);

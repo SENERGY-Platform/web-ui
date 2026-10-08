@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { IOModel, OperatorModel } from '../shared/operator.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OperatorRepoService } from '../shared/operator-repo.service';
@@ -40,20 +40,18 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [MatButton, RouterLink, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatIconButton, MatFabButton, MatTooltip]
 })
 export class OperatorComponent implements OnInit {
+    private route = inject(ActivatedRoute);
+    private operatorService = inject(OperatorRepoService);
+    snackBar = inject(MatSnackBar);
+    protected auth = inject(AuthorizationService);
+    protected permission = inject(PermissionsService);
+
     operator = {} as OperatorModel;
     userId: string | Error = '';
     dropdown = ['float', 'string', 'int', 'bool'];
     shareUser: string | undefined = undefined;
 
     permissionsPerOperator?: PermissionsV2RightsAndIdModel[];
-
-    constructor(
-        private route: ActivatedRoute,
-        private operatorService: OperatorRepoService,
-        public snackBar: MatSnackBar,
-        protected auth: AuthorizationService,
-        protected permission: PermissionsService,
-    ) {}
 
     ngOnInit() {
         this.userId = this.auth.getUserId();

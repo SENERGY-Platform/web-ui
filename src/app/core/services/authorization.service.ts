@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Inject, Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {KeycloakService} from 'keycloak-angular';
 import {from, mergeMap, Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
@@ -31,10 +31,14 @@ import {KeycloakOptions} from 'keycloak-angular';
     providedIn: 'root',
 })
 export class AuthorizationService implements HttpInterceptor {
+    private keycloakServices = inject(keycloakServiceToken);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private http = inject(HttpClient);
+
     private keycloakService: KeycloakService;
     private options?: KeycloakOptions;
 
-    constructor(@Inject(keycloakServiceToken) private keycloakServices: KeycloakService[], private errorHandlerService: ErrorHandlerService, private http: HttpClient) {
+    constructor() {
         if (AuthorizationService.usingConfidentialClient()) {
             this.keycloakService = this.keycloakServices.find(s => s instanceof KeycloakConfidentialService) as KeycloakService;
         } else {

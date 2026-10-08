@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -48,6 +48,14 @@ import { ShortKeyPipe } from '../shared/short-key.pipe';
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, JsonPipe, DatePipe, ShortKeyPipe]
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, OnInit {
+    private processIoService = inject(ProcessIoService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private dialog = inject(MatDialog);
+    private searchbarService = inject(SearchbarService);
+    utilsService = inject(UtilService);
+    private preferencesService = inject(PreferencesService);
+
     pageSize = this.preferencesService.pageSize;
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
@@ -68,15 +76,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
 
     private searchSub: Subscription = new Subscription();
 
-    constructor(
-        private processIoService: ProcessIoService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private dialog: MatDialog,
-        private searchbarService: SearchbarService,
-        public utilsService: UtilService,
-        private preferencesService: PreferencesService,
-    ) {
+    constructor() {
         this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization();
 
         this.userHasUpdateAuthorization = this.processIoService.userHasUpdateAuthorization();

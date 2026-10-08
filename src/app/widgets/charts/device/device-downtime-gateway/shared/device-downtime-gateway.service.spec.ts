@@ -14,7 +14,13 @@
  * limitations under the License.
  */
 
+import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { ElementSizeService } from '../../../../../core/services/element-size.service';
+import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
+import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
+import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { DeviceDowntimeGatewayService } from './device-downtime-gateway.service';
 import { NetworksHistoryModel } from '../../../../../modules/devices/networks/shared/networks-history.model';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
@@ -27,7 +33,16 @@ describe('DeviceDowntimeGatewayService', () => {
 
     function service(gateways: NetworksHistoryModel[]) {
         const networks = { getNetworksHistory: () => of(gateways) };
-        return new DeviceDowntimeGatewayService({} as any, {} as any, {} as any, {} as any, networks as any);
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: MonitorService, useValue: {} },
+                { provide: ElementSizeService, useValue: {} },
+                { provide: MatDialog, useValue: {} },
+                { provide: DashboardService, useValue: {} },
+                { provide: NetworksService, useValue: networks },
+            ],
+        });
+        return TestBed.runInInjectionContext(() => new DeviceDowntimeGatewayService());
     }
 
     // SNRGY-4848 item 1: the window used to end at the time the module was loaded.

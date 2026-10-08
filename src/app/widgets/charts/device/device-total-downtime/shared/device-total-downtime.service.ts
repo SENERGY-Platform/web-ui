@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
 import {ElementSizeService} from '../../../../../core/services/element-size.service';
@@ -34,14 +34,12 @@ import {FailureRatioInterval, failureRatioIntervals, toConnectionTimelines} from
     providedIn: 'root',
 })
 export class DeviceTotalDowntimeService {
-    constructor(
-        private monitorService: MonitorService,
-        private elementSizeService: ElementSizeService,
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private deviceInstancesService: DeviceInstancesService,
-    ) {
-    }
+    private monitorService = inject(MonitorService);
+    private elementSizeService = inject(ElementSizeService);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

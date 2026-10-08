@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DurationResult } from '../../shared/designer.model';
 import { duration, Duration, durationAs } from '../../../../../core/time/iso-duration';
@@ -30,14 +30,18 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, DurationEventConfigComponent, MatDialogActions, MatButton]
 })
 export class DurationDialogComponent {
+    private dialogRef = inject<MatDialogRef<DurationDialogComponent>>(MatDialogRef);
+    private dialogParams = inject<{
+        initialDuration: string;
+    }>(MAT_DIALOG_DATA);
+
     initial: string;
     result?: DurationResult;
     valid = false;
 
-    constructor(
-        private dialogRef: MatDialogRef<DurationDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { initialDuration: string },
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.initial = dialogParams.initialDuration || '';
         this.valid = this.isValid(duration(this.initial));
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, UntypedFormControl, ValidationErrors, Validator, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { AspectClassesService } from '../../../modules/metadata/aspects/shared/aspect-classes.service';
@@ -49,6 +49,10 @@ import { MtxSelect, MtxSelectLabelTemplate } from '@ng-matero/extensions/select'
     imports: [MatFormField, MatLabel, MtxSelect, FormsModule, ReactiveFormsModule, MtxSelectLabelTemplate, MatError]
 })
 export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAccessor, Validator {
+    private aspectClassesService = inject(AspectClassesService);
+    private injector = inject(Injector);
+    private defaultErrorStateMatcher = inject(ErrorStateMatcher);
+
     @Input() aspects: DeviceTypeAspectModel[] = [];
     /** Skips the AspectClassesService call when the caller already fetched the classes itself. */
     @Input() aspectClasses?: DeviceTypeAspectClassModel[];
@@ -80,11 +84,7 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
         },
     };
 
-    constructor(
-        private aspectClassesService: AspectClassesService,
-        private injector: Injector,
-        private defaultErrorStateMatcher: ErrorStateMatcher,
-    ) {
+    constructor() {
         this.control.setValidators(() => this.validate(this.control));
         this.control.valueChanges.subscribe((value: string[]) => this.onChange(value || []));
     }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnInit, ChangeDetectionStrategy, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, ViewChild, inject } from '@angular/core';
 import { subMinutes } from 'date-fns';
 import { concatMap, filter, map, Subscription, throwError } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -40,6 +40,9 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, ChartToolbarComponent, BaseChartDirective, WidgetFooterComponent]
 })
 export class BadVentilationComponent implements OnInit {
+    private ventilationService = inject(BadVentilationService);
+    private dashboardService = inject(DashboardService);
+
     ready = false;
     refreshing = false;
     destroy = new Subscription();
@@ -64,14 +67,6 @@ export class BadVentilationComponent implements OnInit {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-
-    constructor(
-      private ventilationService: BadVentilationService,
-      private dashboardService: DashboardService,
-    ) {
-
-    }
     ngOnInit(): void {
         this.configured = this.widget.properties.badVentilation !== undefined;
         this.update();

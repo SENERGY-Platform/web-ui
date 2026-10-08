@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -38,6 +38,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class EventListEditDialogComponent implements OnInit {
+    private fb = inject(FormBuilder);
+    private dialogRef = inject<MatDialogRef<EventListEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
     dashboardId: string;
@@ -46,13 +51,13 @@ export class EventListEditDialogComponent implements OnInit {
     userHasUpdateNameAuthorization = false;
     formGroup: FormGroup = new FormGroup({});
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<EventListEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string; userHasUpdateNameAuthorization: boolean},
-    ) {
+    constructor() {
+        const data = inject<{
+            dashboardId: string;
+            widgetId: string;
+            userHasUpdateNameAuthorization: boolean;
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

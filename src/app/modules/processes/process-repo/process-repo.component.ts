@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { concatMap, forkJoin, map, Observable, Subscription } from 'rxjs';
@@ -66,6 +66,21 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
     imports: [MatTabGroup, MatTab, SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatBadge, SortComponent, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, SpinnerComponent, MatFabButton, DatePipe]
 })
 export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
+    private sanitizer = inject(DomSanitizer);
+    private utilService = inject(UtilService);
+    private searchbarService = inject(SearchbarService);
+    private processRepoService = inject(ProcessRepoService);
+    private responsiveService = inject(ResponsiveService);
+    protected auth = inject(AuthorizationService);
+    private authorizationService = inject(AuthorizationService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private dialogsService = inject(DialogsService);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
+    private _formBuilder = inject(FormBuilder);
+    private permissionsService = inject(PermissionsService);
+    private metadataExistenceService = inject(MetadataExistenceService);
+
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
     activeIndex = 0;
     gridCols = 0;
@@ -98,22 +113,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
-    constructor(
-        private sanitizer: DomSanitizer,
-        private utilService: UtilService,
-        private searchbarService: SearchbarService,
-        private processRepoService: ProcessRepoService,
-        private responsiveService: ResponsiveService,
-        protected auth: AuthorizationService,
-        private authorizationService: AuthorizationService,
-        private permissionsDialogService: PermissionsDialogService,
-        private dialogsService: DialogsService,
-        private snackBar: MatSnackBar,
-        private router: Router,
-        private _formBuilder: FormBuilder,
-        private permissionsService: PermissionsService,
-        private metadataExistenceService: MetadataExistenceService,
-    ) {
+    constructor() {
         const sub = this.authorizationService.getUserId();
         if (typeof sub === 'string') {
             this.userID = sub;

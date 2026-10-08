@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
@@ -34,6 +34,10 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, TimelineComponent, MatDialogActions, MatButton]
 })
 export class ConnectionHistoryDialogComponent implements AfterViewInit {
+    private el = inject(ElementRef);
+    private dialogRef = inject<MatDialogRef<ConnectionHistoryDialogComponent>>(MatDialogRef);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
     ready = false;
     connectionHistory: any[][][] = [];
     baseAxis = {
@@ -50,14 +54,11 @@ export class ConnectionHistoryDialogComponent implements AfterViewInit {
     id = '';
     width = 0;
 
-    constructor(
-        @Inject(MAT_DIALOG_DATA) data: {
-              id: string
-            },
-        private el: ElementRef,
-        private dialogRef: MatDialogRef<ConnectionHistoryDialogComponent>,
-        private deviceInstancesService: DeviceInstancesService,
-    ) {
+    constructor() {
+        const data = inject<{
+            id: string;
+        }>(MAT_DIALOG_DATA);
+
         this.id = data.id;
     }
     ngAfterViewInit(): void {

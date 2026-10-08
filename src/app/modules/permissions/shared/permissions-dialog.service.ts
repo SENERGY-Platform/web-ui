@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {PermissionsV2ResourceBaseModel, PermissionsV2ResourceModel} from './permissions-resource.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { PermissionDialogComponent, PermissionDialogComponentData } from '../dialogs/permission/permission-dialog.component';
@@ -27,11 +27,10 @@ import { concatMap, map } from 'rxjs/operators';
     providedIn: 'root',
 })
 export class PermissionsDialogService {
-    constructor(
-        private dialog: MatDialog,
-        private permissionsService: PermissionsService,
-        public snackBar: MatSnackBar,
-    ) {}
+    private dialog = inject(MatDialog);
+    private permissionsService = inject(PermissionsService);
+    snackBar = inject(MatSnackBar);
+
 
     openPermissionV2Dialog(topicID: string, ressourceID: string, name: string) {
         this.permissionsService.getResourcePermissionsV2(topicID, ressourceID).subscribe((permissionsModel: PermissionsV2ResourceModel) => {

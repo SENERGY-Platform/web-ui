@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {
@@ -55,6 +55,14 @@ import { DatePipe } from '@angular/common';
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
 export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
+    private dialog = inject(MatDialog);
+    private searchbarService = inject(SearchbarService);
+    private waitingRoomService = inject(WaitingRoomService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    preferencesService = inject(PreferencesService);
+    private cd = inject(ChangeDetectorRef);
+
     static wmbusKeyAttributeKey = 'wmbus/key';
     public wmbusKeyAttributeKey = WaitingRoomComponent.wmbusKeyAttributeKey;
 
@@ -75,16 +83,6 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     private searchSub: Subscription = new Subscription();
     public searchText = '';
     private snackBarInstance?: MatSnackBarRef<ClosableSnackBarComponent>;
-
-    constructor(
-        private dialog: MatDialog,
-        private searchbarService: SearchbarService,
-        private waitingRoomService: WaitingRoomService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        public preferencesService: PreferencesService,
-        private cd: ChangeDetectorRef,
-    ) {}
 
     ngOnInit() {
         this.initSearchAndGetDevices();

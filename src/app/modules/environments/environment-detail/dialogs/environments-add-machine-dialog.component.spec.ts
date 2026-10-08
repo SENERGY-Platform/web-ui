@@ -15,6 +15,7 @@
  */
 
 import { of } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { EnvironmentsAddMachineDialogComponent } from './environments-add-machine-dialog.component';
 import { EnvironmentsService } from '../../shared/environments.service';
@@ -34,7 +35,14 @@ describe('EnvironmentsAddMachineDialogComponent', () => {
     });
 
     function build(): EnvironmentsAddMachineDialogComponent {
-        const component = new EnvironmentsAddMachineDialogComponent(dialogRef, environmentsService);
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: MatDialogRef, useValue: dialogRef },
+                { provide: EnvironmentsService, useValue: environmentsService },
+            ],
+        });
+        const component = TestBed.runInInjectionContext(() => new EnvironmentsAddMachineDialogComponent());
         component.ngOnInit();
         return component;
     }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
 import { AbstractControl, UntypedFormBuilder, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -47,6 +47,17 @@ interface DeviceTypeCharacteristicsModelWithGroup extends DeviceTypeCharacterist
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, AspectSelectComponent, MtxSelect, MtxOption, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class ContentVariableDialogComponent implements OnInit {
+    data = inject<{
+        content?: ImportTypeContentVariableModel;
+        functions: DeviceTypeFunctionModel[];
+        aspects: DeviceTypeAspectModel[];
+        typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>>;
+        infoOnly: boolean;
+        nameTimeAllowed: boolean;
+    }>(MAT_DIALOG_DATA);
+    private fb = inject(UntypedFormBuilder);
+    private dialogRef = inject<MatDialogRef<ContentVariableDialogComponent>>(MatDialogRef);
+
     static notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null {
         if (control.value === '') {
             const err = { notNamedTimeAndNotEmpty: 'Name required' };
@@ -87,21 +98,6 @@ export class ContentVariableDialogComponent implements OnInit {
         { id: this.STRUCTURE, name: 'Structure' },
         { id: this.LIST, name: 'List' },
     ];
-
-    constructor(
-        @Inject(MAT_DIALOG_DATA)
-        public data: {
-            content?: ImportTypeContentVariableModel;
-            functions: DeviceTypeFunctionModel[];
-            aspects: DeviceTypeAspectModel[];
-            typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>>;
-            infoOnly: boolean;
-            nameTimeAllowed: boolean;
-        },
-        private fb: UntypedFormBuilder,
-        private dialogRef: MatDialogRef<ContentVariableDialogComponent>,
-    ) {
-    }
 
     ngOnInit(): void {
         if (!this.data.nameTimeAllowed) {

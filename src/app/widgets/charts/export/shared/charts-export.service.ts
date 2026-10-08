@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
@@ -52,15 +52,13 @@ import { ChartsExportChart, chartsExportChart, chartsExportDefaultColor, chartsE
     providedIn: 'root',
 })
 export class ChartsExportService {
-    constructor(
-        private exportDataService: ExportDataService,
-        private elementSizeService: ElementSizeService,
-        private errorHandlerService: ErrorHandlerService,
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private deviceInstancesService: DeviceInstancesService,
-    ) {
-    }
+    private exportDataService = inject(ExportDataService);
+    private elementSizeService = inject(ElementSizeService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
 
     devices = new Map<string, DeviceInstanceWithDeviceTypeModel>();
 

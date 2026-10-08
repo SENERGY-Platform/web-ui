@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -41,6 +41,10 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, MatTooltip, MatIconButton, MatSlider, MatSliderThumb, MatButton, WidgetFooterComponent]
 })
 export class AcControlComponent implements OnInit, OnDestroy {
+    private dashboardService = inject(DashboardService);
+    private deviceCommandService = inject(DeviceCommandService);
+    private dialog = inject(MatDialog);
+
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -51,11 +55,6 @@ export class AcControlComponent implements OnInit, OnDestroy {
     ready = false;
     refreshing = false;
     destroy = new Subscription();
-
-
-    constructor(private dashboardService: DashboardService, private deviceCommandService: DeviceCommandService, private dialog: MatDialog,
-    ) {
-    }
 
     ngOnInit(): void {
         this.update();

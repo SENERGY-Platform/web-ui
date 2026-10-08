@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -77,6 +77,19 @@ export function bulkDeleteOutcome(status: number, count: number): { message: str
     imports: [SearchbarComponent, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatIconButton, MatTooltip, MatIcon, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, DatePipe]
 })
 export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
+    private exportService = inject(ExportService);
+    snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private searchbarService = inject(SearchbarService);
+    private brokerExportService = inject(BrokerExportService);
+    private route = inject(ActivatedRoute);
+    utilsService = inject(UtilService);
+    private exportDataService = inject(ExportDataService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private permissionsService = inject(PermissionsService);
+    private userService = inject(AuthorizationService);
+    preferencesService = inject(PreferencesService);
+
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
@@ -123,21 +136,6 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     private exportSub: Subscription = new Subscription();
 
     public brokerMode = false;
-
-    constructor(
-        private exportService: ExportService,
-        public snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private searchbarService: SearchbarService,
-        private brokerExportService: BrokerExportService,
-        private route: ActivatedRoute,
-        public utilsService: UtilService,
-        private exportDataService: ExportDataService,
-        private permissionsDialogService: PermissionsDialogService,
-        private permissionsService: PermissionsService,
-        private userService: AuthorizationService,
-        public preferencesService: PreferencesService,
-    ) { }
 
     ngAfterViewInit(): void {
         this.paginator.page.subscribe(() => {

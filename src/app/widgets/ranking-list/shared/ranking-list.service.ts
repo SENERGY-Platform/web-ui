@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { RankingListEditDialogComponent } from '../dialogs/ranking-list-edit-dialog.component';
@@ -25,7 +25,9 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
     providedIn: 'root',
 })
 export class RankingListService {
-    constructor(private dialog: MatDialog, private dashboardService: DashboardService) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

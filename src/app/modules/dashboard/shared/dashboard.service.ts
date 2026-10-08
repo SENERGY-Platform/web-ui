@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardNewDialogComponent } from '../dialogs/dashboard-new-dialog.component';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
@@ -38,6 +38,12 @@ import { LadonService } from '../../admin/permissions/shared/services/ladom.serv
     providedIn: 'root',
 })
 export class DashboardService {
+    private dialog = inject(MatDialog);
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private dialogsService = inject(DialogsService);
+    private ladonService = inject(LadonService);
+
     private animationDoneSubject = new Subject<string>();
     private dashboardSubject = new Subject<DashboardManipulationModel>();
     private widgetSubject = new Subject<DashboardWidgetManipulationModel>();
@@ -52,13 +58,7 @@ export class DashboardService {
     widgetPositionAuthorizations: PermissionTestResponse;
     widgetPropertiesAuthorizations: PermissionTestResponse;
 
-    constructor(
-        private dialog: MatDialog,
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private dialogsService: DialogsService,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.dashboardAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/dashboards');
         this.widgetAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets');
         this.widgetNameAuthorizations = this.ladonService.getUserAuthorizationsForURI(environment.dashboardServiceUrl + '/widgets/name');

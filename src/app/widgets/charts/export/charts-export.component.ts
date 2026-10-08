@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
 import { ChartsExportChart } from './shared/charts-export-table';
@@ -71,6 +71,15 @@ import { WidgetFooterComponent } from '../../components/widget-footer/widget-foo
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, TimelineComponent, WidgetSpinnerComponent, BaseChartDirective, AnnotationChartComponent, WidgetNoDataComponent, NgStyle, MatIconButton, MatIcon, MatTooltip, WidgetFooterComponent]
 })
 export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
+    private chartsExportService = inject(ChartsExportService);
+    private elementSizeService = inject(ElementSizeService);
+    private dashboardService = inject(DashboardService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private datePipe = inject(DatePipe);
+    private cd = inject(ChangeDetectorRef);
+    private el = inject(ElementRef);
+    private zone = inject(NgZone);
+
     chartExportData = {} as ChartsExportChart;
     /** Line, Scatter and Pie in the widget */
     framedChart?: { kind: 'line'; config: FramedChartConfig<'line'> } | { kind: 'pie'; config: FramedChartConfig<'pie'> };
@@ -170,18 +179,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
     @Input() initialWidgetData: any;
-
-    constructor(
-        private chartsExportService: ChartsExportService,
-        private elementSizeService: ElementSizeService,
-        private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
-        private datePipe: DatePipe,
-        private cd: ChangeDetectorRef,
-        private el: ElementRef,
-        private zone: NgZone,
-    ) {
-    }
 
     ngOnDestroy() {
         this.destroy.unsubscribe();

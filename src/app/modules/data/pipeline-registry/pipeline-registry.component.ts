@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {FilterSelection, PipelineModel} from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
@@ -54,6 +54,22 @@ import { DatePipe } from '@angular/common';
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestroy {
+    private pipelineRegistryService = inject(PipelineRegistryService);
+    private flowEngineService = inject(FlowEngineService);
+    snackBar = inject(MatSnackBar);
+    private searchbarService = inject(SearchbarService);
+    private dialogsService = inject(DialogsService);
+    utilsService = inject(UtilService);
+    preferencesService = inject(PreferencesService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    protected permission = inject(PermissionsService);
+    protected auth = inject(AuthorizationService);
+    private dialog = inject(MatDialog);
+    private cd = inject(ChangeDetectorRef);
+    private activatedRoute = inject(ActivatedRoute);
+    private router = inject(Router);
+    private smartServiceModuleService = inject(SmartServiceModuleService);
+
     pageSize = this.preferencesService.pageSize;
     offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
@@ -82,24 +98,6 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     permissionsPerPipeline: PermissionsV2RightsAndIdModel[] = [];
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-
-    constructor(
-        private pipelineRegistryService: PipelineRegistryService,
-        private flowEngineService: FlowEngineService,
-        public snackBar: MatSnackBar,
-        private searchbarService: SearchbarService,
-        private dialogsService: DialogsService,
-        public utilsService: UtilService,
-        public preferencesService: PreferencesService,
-        private permissionsDialogService: PermissionsDialogService,
-        protected permission: PermissionsService,
-        protected auth: AuthorizationService,
-        private dialog: MatDialog,
-        private cd: ChangeDetectorRef,
-        private activatedRoute: ActivatedRoute,
-        private router: Router,
-        private smartServiceModuleService: SmartServiceModuleService
-    ) {}
 
     ngOnInit() {
         this.userId = this.auth.getUserId();

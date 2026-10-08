@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
 import { DesignerErrorModel } from '../shared/designer-error.model';
 
@@ -27,9 +27,13 @@ import { DesignerErrorModel } from '../shared/designer-error.model';
     changeDetection: ChangeDetectionStrategy.Eager
 })
 export class DesignerSnackBarComponent {
+    data = inject(MAT_SNACK_BAR_DATA);
+
     poolErrors: DesignerErrorModel[][] = [];
 
-    constructor(@Inject(MAT_SNACK_BAR_DATA) public data: DesignerErrorModel[][]) {
+    constructor() {
+        const data = this.data;
+
         this.poolErrors = data;
     }
 }

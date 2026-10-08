@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+import { ElementRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
+import { ElementSizeService } from '../../../../core/services/element-size.service';
+import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { DeviceTotalDowntimeService } from './shared/device-total-downtime.service';
 import { DeviceTotalDowntimeComponent } from './device-total-downtime.component';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 
@@ -23,7 +28,16 @@ describe('DeviceTotalDowntimeComponent', () => {
         const service = { getTotalDowntime: () => result };
         const elementSizeService = { getHeightAndWidthByElementId: () => ({ height: 305, width: 605, heightPercentage: '90%', widthPercentage: '90%' }) };
         const dashboardService = { initWidgetObservable: of('reloadAll') };
-        const c = new DeviceTotalDowntimeComponent(service as any, elementSizeService as any, dashboardService as any, {} as any, {} as any);
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: DeviceTotalDowntimeService, useValue: service },
+                { provide: ElementSizeService, useValue: elementSizeService },
+                { provide: DashboardService, useValue: dashboardService },
+                { provide: ElementRef, useValue: {} },
+            ],
+        });
+        const c = TestBed.runInInjectionContext(() => new DeviceTotalDowntimeComponent());
         c.widget = { id: 'w', properties: {} } as WidgetModel;
         return c;
     }

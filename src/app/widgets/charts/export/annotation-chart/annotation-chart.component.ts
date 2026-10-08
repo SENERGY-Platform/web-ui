@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, QueryList, ViewChildren, inject } from '@angular/core';
 import { Chart } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 import { googleFocusPlugin } from 'src/app/core/charts/google-chartjs';
@@ -33,6 +33,8 @@ import {
     imports: [BaseChartDirective],
 })
 export class AnnotationChartComponent implements OnChanges, OnDestroy {
+    private cd = inject(ChangeDetectorRef);
+
     @Input() series: GoogleSeries[] = [];
     /** outer size including the 1px border */
     @Input() width = 0;
@@ -54,8 +56,6 @@ export class AnnotationChartComponent implements OnChanges, OnDestroy {
     private drag?: { part: 'from' | 'to' | 'both'; startX: number; window: { from: number; to: number } };
     private readonly move = (event: PointerEvent) => this.onDrag(event);
     private readonly up = () => this.endDrag();
-
-    constructor(private cd: ChangeDetectorRef) {}
 
     ngOnChanges(): void {
         const range = annotationRange(this.series, this.zoomStart);

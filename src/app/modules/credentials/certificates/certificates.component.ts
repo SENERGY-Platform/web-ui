@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CertificateInfo, Rfc5280Reason, rfc5280ReasonString } from './shared/certificates.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { MatPaginator } from '@angular/material/paginator';
@@ -40,6 +40,11 @@ import { MatIcon } from '@angular/material/icon';
     imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe, KeyValuePipe]
 })
 export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
+  private preferencesService = inject(PreferencesService);
+  private certificatesService = inject(CertificatesService);
+  private searchbarService = inject(SearchbarService);
+  private dialog = inject(MatDialog);
+
 
   dataReady = false;
   displayedColumns = ['serial_number', 'metadata', 'issued_at', 'not_before', 'expiry', 'revoked_at', 'reason'];
@@ -52,14 +57,6 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
   searchSub?: Subscription;
 
   @ViewChild(MatSort) sort?: MatSort;
-
-
-  constructor(
-    private preferencesService: PreferencesService,
-    private certificatesService: CertificatesService,
-    private searchbarService: SearchbarService,
-    private dialog: MatDialog,
-  ) { }
 
   ngOnInit() {
     this.initSearch();

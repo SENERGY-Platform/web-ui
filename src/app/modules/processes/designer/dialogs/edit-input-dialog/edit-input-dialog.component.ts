@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { BpmnElement, BpmnParameter } from '../../shared/designer.model';
 import { DesignerHelperService } from '../../shared/designer-helper.service';
@@ -36,15 +36,19 @@ import { ShortInputVariableNamePipe } from '../../../../../core/pipe/short-input
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatTooltip, MtxSelect, MatLabel, MtxOption, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton, ShortInputVariableNamePipe]
 })
 export class EditInputDialogComponent {
+    private dialogRef = inject<MatDialogRef<EditInputDialogComponent>>(MatDialogRef);
+    private designerService = inject(DesignerHelperService);
+    private dialogParams = inject<{
+        inputElement: BpmnElement;
+    }>(MAT_DIALOG_DATA);
+
     inputs: BpmnParameter[];
     outputs: BpmnParameter[];
     customOptions: string[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<EditInputDialogComponent>,
-        private designerService: DesignerHelperService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { inputElement: BpmnElement },
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.outputs = this.designerService.getIncomingOutputs(dialogParams.inputElement);
         const extensionValues = dialogParams.inputElement.businessObject.extensionElements.values;
         if (extensionValues) {

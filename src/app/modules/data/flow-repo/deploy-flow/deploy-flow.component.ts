@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ParserService } from '../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ParseModel } from '../shared/parse.model';
@@ -84,24 +84,23 @@ interface DeviceServicePath {
     imports: [MatButton, FormsModule, ReactiveFormsModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatExpansionPanelDescription, MatExpansionPanelContent, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatDivider, AspectSelectComponent, NgClass, MtxOption, MatCheckbox, MatFabButton, MatTooltip, SpinnerComponent]
 })
 export class DeployFlowComponent implements OnInit {
-    constructor(
-        private parserService: ParserService,
-        private route: ActivatedRoute,
-        private router: Router,
-        public snackBar: MatSnackBar,
-        private deviceInstanceService: DeviceInstancesService,
-        private deviceTypeService: DeviceTypeService,
-        private deviceGroupsService: DeviceGroupsService,
-        private pathOptionsService: PathOptionsService,
-        private pipelineRegistryService: PipelineRegistryService,
-        private fb: UntypedFormBuilder,
-        private conceptsService: ConceptsService,
-        private sanitizer: DomSanitizer,
-        private operatorRepoService: OperatorRepoService,
-        private importInstancesService: ImportInstancesService,
-        private flowEngineService: FlowEngineService,
-        private aspectClassesService: AspectClassesService,
-    ) { }
+    private parserService = inject(ParserService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    snackBar = inject(MatSnackBar);
+    private deviceInstanceService = inject(DeviceInstancesService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private pathOptionsService = inject(PathOptionsService);
+    private pipelineRegistryService = inject(PipelineRegistryService);
+    private fb = inject(UntypedFormBuilder);
+    private conceptsService = inject(ConceptsService);
+    private sanitizer = inject(DomSanitizer);
+    private operatorRepoService = inject(OperatorRepoService);
+    private importInstancesService = inject(ImportInstancesService);
+    private flowEngineService = inject(FlowEngineService);
+    private aspectClassesService = inject(AspectClassesService);
+
 
     static DEVICE_KEY = 'Devices';
     static GROUP_KEY = 'Device Groups';

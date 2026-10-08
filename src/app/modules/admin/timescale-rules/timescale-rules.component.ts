@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from './shared/timescale-rule.model';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -42,15 +42,12 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [MatIconButton, MatIcon, SpinnerComponent, InfiniteScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton]
 })
 export class TimescaleRulesComponent implements OnInit {
-    @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypeModel>;
+    private timescaleRuleService = inject(TimescaleRulesService);
+    private dialog = inject(MatDialog);
+    private dialogsService = inject(DialogsService);
+    private authService = inject(AuthorizationService);
 
-    constructor(
-        private timescaleRuleService: TimescaleRulesService,
-        private dialog: MatDialog,
-        private dialogsService: DialogsService,
-        private authService: AuthorizationService,
-    ) {
-    }
+    @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypeModel>;
 
     rules: TimescaleRuleModel[] = [];
     dataReady = false;

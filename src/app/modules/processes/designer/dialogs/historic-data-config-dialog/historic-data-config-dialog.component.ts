@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HistoricDataConfig } from '../../shared/designer.model';
 import { ExportModel } from '../../../../exports/shared/export.model';
@@ -36,6 +36,12 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MtxSelect, MtxOption, MatError, MatErrorMessagesDirective, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatDialogActions, MatButton]
 })
 export class HistoricDataConfigDialogComponent {
+    private dialogRef = inject<MatDialogRef<HistoricDataConfigDialogComponent>>(MatDialogRef);
+    private exportsService = inject(ExportService);
+    private dialogParams = inject<{
+        initial: HistoricDataConfig;
+    }>(MAT_DIALOG_DATA);
+
     config: HistoricDataConfig;
     availableMeasurements: ExportModel[] = [];
     readonly times = [
@@ -79,11 +85,10 @@ export class HistoricDataConfigDialogComponent {
         },
     ];
 
-    constructor(
-        private dialogRef: MatDialogRef<HistoricDataConfigDialogComponent>,
-        private exportsService: ExportService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { initial: HistoricDataConfig },
-    ) {
+    constructor() {
+        const exportsService = this.exportsService;
+        const dialogParams = this.dialogParams;
+
         this.config = dialogParams.initial || { dateInterval: {}, interval: {}, analysisAction: '' };
         exportsService.getExports(true, '', 9999, 0, 'name', 'asc').subscribe((value) => {
             if (value) {

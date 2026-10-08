@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { RangeSliderEditDialogComponent } from '../dialogs/range-slider-edit-dialog.component';
 import { HttpClient } from '@angular/common/http';
@@ -27,7 +27,10 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
     providedIn: 'root',
 })
 export class RangeSliderService {
-    constructor(private dialog: MatDialog, private http: HttpClient, private dashboardService: DashboardService) {}
+    private dialog = inject(MatDialog);
+    private http = inject(HttpClient);
+    private dashboardService = inject(DashboardService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

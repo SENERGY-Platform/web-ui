@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-import {
-    AfterViewInit,
-    Component,
-    ElementRef,
-    EventEmitter,
-    Input,
-    NgZone,
-    OnChanges,
-    OnDestroy,
-    Output,
-    SimpleChanges,
-    ViewChild,
-    ChangeDetectionStrategy
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import type { editor, IDisposable } from 'monaco-editor/editor/editor.api.js';
 import {
     CodeEditorCompletionIcon,
@@ -62,6 +49,8 @@ export type CodeEditorLanguage = 'javascript' | 'json' | 'plaintext';
     imports: [MatProgressSpinner]
 })
 export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy {
+    private zone = inject(NgZone);
+
     @Input() value = '';
     @Input() language: CodeEditorLanguage = 'javascript';
     @Input() readOnly = false;
@@ -102,8 +91,6 @@ export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
     private contentSubscription?: IDisposable;
     private completionProvider?: IDisposable;
     private destroyed = false;
-
-    constructor(private zone: NgZone) {}
 
     async ngAfterViewInit(): Promise<void> {
         /*

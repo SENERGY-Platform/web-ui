@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, HostListener, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import {dia, shapes, util, Vectorizer} from '@joint/core';
 import {DiagramModel, LinkIOModel} from './shared/diagram.model';
 import {IOModel} from '../operator-repo/shared/operator.model';
@@ -34,6 +34,11 @@ import {NodeFactory, NodePosition} from './shared/node-factory.service';
     changeDetection: ChangeDetectionStrategy.Eager
 })
 export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
+    snackBar = inject(MatSnackBar);
+    private readonly clipboard = inject(Clipboard);
+    paperService = inject(PaperService);
+    nodeFactory = inject(NodeFactory);
+
     private graph: any;
     private graphScale: Vectorizer.Scale = {sx: 1, sy: 1};
     idGenerated = uuid();
@@ -42,14 +47,6 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     paperHeight = 600;
 
     public dragStartPosition: { x: number; y: number } | null = null;
-
-    constructor(
-        public snackBar: MatSnackBar,
-        private readonly clipboard: Clipboard,
-        public paperService: PaperService,
-        public nodeFactory: NodeFactory
-    ) {
-    }
 
     ngAfterViewInit() {
         this.setPaperWidth(this.getPaperWidthFromWrap());

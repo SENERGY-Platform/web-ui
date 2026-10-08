@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -37,6 +37,11 @@ import { DatePipe } from '@angular/common';
     imports: [MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
 })
 export class EnvironmentsDatasetsComponent implements OnInit {
+    private environmentsService = inject(EnvironmentsService);
+    private dialog = inject(MatDialog);
+    private dialogsService = inject(DialogsService);
+    private snackBar = inject(MatSnackBar);
+
     displayedColumns = ['name', 'timezone', 'columns', 'size', 'created'];
     dataSource = new MatTableDataSource<DatasetMeta>();
     dataReady = false;
@@ -45,13 +50,6 @@ export class EnvironmentsDatasetsComponent implements OnInit {
     userHasReadAuthorization = this.environmentsService.userHasDatasetReadAuthorization();
     userHasCreateAuthorization = this.environmentsService.userHasDatasetCreateAuthorization();
     userHasDeleteAuthorization = this.environmentsService.userHasDatasetDeleteAuthorization();
-
-    constructor(
-        private environmentsService: EnvironmentsService,
-        private dialog: MatDialog,
-        private dialogsService: DialogsService,
-        private snackBar: MatSnackBar,
-    ) {}
 
     ngOnInit(): void {
         if (this.userHasDeleteAuthorization) {

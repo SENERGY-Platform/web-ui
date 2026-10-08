@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Inject, Injectable, DOCUMENT } from '@angular/core';
+import { Injectable, DOCUMENT, inject } from '@angular/core';
 
 import { environment } from '../../../environments/environment';
 import { Title } from '@angular/platform-browser';
@@ -23,7 +23,9 @@ import { Title } from '@angular/platform-browser';
     providedIn: 'root',
 })
 export class ThemingService {
-    constructor(@Inject(DOCUMENT) private document: Document, private titleService: Title) {}
+    private document = inject<Document>(DOCUMENT);
+    private titleService = inject(Title);
+
 
     applyTheme() {
         this.titleService.setTitle(environment.title);

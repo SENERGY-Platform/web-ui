@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -37,6 +37,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, MatDialogActions, MatButton]
 })
 export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
+    private fb = inject(FormBuilder);
+    private dialogRef = inject<MatDialogRef<ProcessSchedulerScheduleEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
@@ -45,18 +50,14 @@ export class ProcessSchedulerScheduleEditDialogComponent implements OnInit {
     userHasUpdatePropertiesAuthorization = false;
     formGroup: FormGroup;
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<ProcessSchedulerScheduleEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

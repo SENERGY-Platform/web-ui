@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -40,6 +40,13 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTooltip, MatIconButton, MatIcon, MatList, MatListSubheaderCssMatStyler, MatListItem, MatListItemLine, WidgetFooterComponent]
 })
 export class AirQualityComponent implements OnInit, OnDestroy {
+    private iconRegistry = inject(MatIconRegistry);
+    private sanitizer = inject(DomSanitizer);
+    private airRecommendationService = inject(AirQualityService);
+    private ubaService = inject(UBAService);
+    private dwdPollenService = inject(DWDPollenService);
+    private dashboardService = inject(DashboardService);
+
     ready = false;
     refreshing = false;
     destroy = new Subscription();
@@ -55,15 +62,6 @@ export class AirQualityComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private iconRegistry: MatIconRegistry,
-        private sanitizer: DomSanitizer,
-        private airRecommendationService: AirQualityService,
-        private ubaService: UBAService,
-        private dwdPollenService: DWDPollenService,
-        private dashboardService: DashboardService,
-    ) {}
 
     ngOnInit() {
         this.update();

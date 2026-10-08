@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from './device-instances.model';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { DeviceInstancesServiceDialogComponent } from '../dialogs/device-instances-service-dialog.component';
@@ -38,13 +38,11 @@ import { DeviceInstancesReplaceDialogComponent } from '../dialogs/device-instanc
     providedIn: 'root',
 })
 export class DeviceInstancesDialogService {
-    constructor(
-        private dialog: MatDialog,
-        private deviceTypeService: DeviceTypeService,
-        private snackBar: MatSnackBar,
-        private deviceInstancesService: DeviceInstancesService,
-    ) {
-    }
+    private dialog = inject(MatDialog);
+    private deviceTypeService = inject(DeviceTypeService);
+    private snackBar = inject(MatSnackBar);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
 
     openDeviceSelectDialog(): Observable<string[] | null | undefined> {
         const dialogConfig = new MatDialogConfig();

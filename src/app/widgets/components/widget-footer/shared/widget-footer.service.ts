@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
@@ -25,7 +25,10 @@ import { DialogsService } from '../../../../core/services/dialogs.service';
     providedIn: 'root',
 })
 export class WidgetFooterService {
-    constructor(private dialog: MatDialog, private dashboardService: DashboardService, private dialogsService: DialogsService) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private dialogsService = inject(DialogsService);
+
 
     openDeleteWidgetDialog(dashboardId: string, widgetId: string): void {
         this.dialogsService

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { AnomaliesPerDevice } from '../../shared/anomaly.model';
@@ -34,6 +34,9 @@ import { TimelineComponent } from '../../../charts/shared/chart-types/timeline/t
     imports: [TimelineComponent]
 })
 export class AnomalyPhasesComponent implements OnInit, OnChanges {
+    private dialog = inject(MatDialog);
+    private anomalyService = inject(AnomalyService);
+
     @Input() anomalies: AnomaliesPerDevice = {};
     @Input() hAxisLabel = '';
     @Input() vAxisLabel = '';
@@ -51,11 +54,6 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
     chartDataReady = false;
 
     self = this;
-
-    constructor(
-        private dialog: MatDialog,
-        private anomalyService: AnomalyService
-    ) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         const widgetWidth = changes['widgetWidth'];

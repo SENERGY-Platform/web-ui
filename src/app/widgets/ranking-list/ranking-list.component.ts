@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { RankingListModel } from './shared/ranking-list.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -34,6 +34,9 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, WidgetFooterComponent]
 })
 export class RankingListComponent implements OnInit, OnDestroy {
+    private rankingListService = inject(RankingListService);
+    private dashboardService = inject(DashboardService);
+
     rankings: RankingListModel[] = [];
     ready = false;
 
@@ -45,8 +48,6 @@ export class RankingListComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(private rankingListService: RankingListService, private dashboardService: DashboardService) {}
 
     ngOnInit() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {

@@ -17,7 +17,7 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {AfterViewInit, Component, isDevMode, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, Component, isDevMode, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import { MatSort, Sort, MatSortHeader } from '@angular/material/sort';
@@ -57,6 +57,14 @@ import { AsyncPipe } from '@angular/common';
     imports: [MatCard, MatCardTitle, MatCardContent, MatFormField, MatLabel, MtxSelect, MtxOption, MatInput, FormsModule, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatError, MatErrorMessagesDirective, MatCheckbox, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, MatFabButton, AsyncPipe]
 })
 export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestroy {
+    private authService = inject(AuthorizationService);
+    private ladonService = inject(LadonService);
+    dialog = inject(MatDialog);
+    private sanitizer = inject(DomSanitizer);
+    private kongService = inject(KongService);
+    private dialogsService = inject(DialogsService);
+    preferencesService = inject(PreferencesService);
+
 
     public displayedColumns = ['select', 'mode', 'subject', 'resource', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'edit', 'delete'];
     public policies: PermissionModel[] = [];
@@ -105,14 +113,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     selectedClientID = '';
     selectedEndpoint = '';
 
-    constructor(private authService: AuthorizationService,
-                private ladonService: LadonService,
-                public dialog: MatDialog,
-                private sanitizer: DomSanitizer,
-                private kongService: KongService,
-                private dialogsService: DialogsService,
-                public preferencesService: PreferencesService,
-    ) {
+    constructor() {
         this.authService.loadAllRoles().subscribe((roles: any | { error: string }) => {
             if (roles != null) {
                 this.roles = roles;

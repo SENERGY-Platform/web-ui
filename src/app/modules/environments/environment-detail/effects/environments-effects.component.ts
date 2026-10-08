@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import type { Core, StylesheetJsonBlock } from 'cytoscape';
 import type { DagreLayoutOptions } from 'cytoscape-dagre';
 import { themeColor } from 'src/app/core/charts/theme-color';
@@ -132,6 +132,8 @@ const effectsStylesheet = (): StylesheetJsonBlock[] => [
     imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MtxSelect, MatInput, MatIcon, MatSuffix, MatButton, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class EnvironmentsEffectsComponent implements OnChanges, AfterViewInit, OnDestroy {
+    private zone = inject(NgZone);
+
     @Input() result: EffectsResult | undefined;
     /** Top-level zone id -> name, from the environment document (see topLevelZoneNames) -- labels the site filter, since moses mostly answers with no zone node at all to read a name off. */
     @Input() siteNames: ReadonlyMap<string, string> = new Map();
@@ -164,8 +166,6 @@ export class EnvironmentsEffectsComponent implements OnChanges, AfterViewInit, O
     private cytoscapeFactory: CytoscapeFactory | undefined;
     private libraryReady = false;
     private destroyed = false;
-
-    constructor(private zone: NgZone) {}
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['siteNames'] && !changes['siteNames'].firstChange) {

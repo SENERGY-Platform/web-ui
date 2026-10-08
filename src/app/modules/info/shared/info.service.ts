@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../dialogs/info/info.component';
 
@@ -22,10 +22,8 @@ import { InfoDialogComponent } from '../dialogs/info/info.component';
     providedIn: 'root'
 })
 export class InfoService {
+    private dialog = inject(MatDialog);
 
-    constructor(
-    private dialog: MatDialog
-    ) { }
 
     openInfoDialog() {
         const dialogConfig = new MatDialogConfig();

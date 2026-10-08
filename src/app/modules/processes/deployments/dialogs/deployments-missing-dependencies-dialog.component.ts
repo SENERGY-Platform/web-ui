@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeploymentsService } from '../shared/deployments.service';
 import { DeploymentsOfflineReasonsModel } from '../shared/deployments.model';
@@ -30,14 +30,17 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class DeploymentsMissingDependenciesDialogComponent {
+    private dialogRef = inject<MatDialogRef<DeploymentsMissingDependenciesDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+
     displayedColumns: string[] = ['description', 'id'];
     missingDependencies: DeploymentsOfflineReasonsModel[] | null = null;
 
-    constructor(
-        private dialogRef: MatDialogRef<DeploymentsMissingDependenciesDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        @Inject(MAT_DIALOG_DATA) data: { reasons: DeploymentsOfflineReasonsModel[] },
-    ) {
+    constructor() {
+        const data = inject<{
+            reasons: DeploymentsOfflineReasonsModel[];
+        }>(MAT_DIALOG_DATA);
+
         this.missingDependencies = data.reasons;
     }
 

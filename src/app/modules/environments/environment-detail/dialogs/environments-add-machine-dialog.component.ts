@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { EnvironmentsService } from '../../shared/environments.service';
 import { CatalogDeviceType } from '../../shared/environments.model';
@@ -44,15 +44,13 @@ export interface AddMachineDialogResult {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MtxOption, MatHint, MatDialogActions, MatButton]
 })
 export class EnvironmentsAddMachineDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<EnvironmentsAddMachineDialogComponent>>(MatDialogRef);
+    private environmentsService = inject(EnvironmentsService);
+
     name = '';
     deviceType: CatalogDeviceType | null = null;
     deviceTypes: CatalogDeviceType[] = [];
     dataReady = false;
-
-    constructor(
-        private dialogRef: MatDialogRef<EnvironmentsAddMachineDialogComponent>,
-        private environmentsService: EnvironmentsService,
-    ) {}
 
     ngOnInit(): void {
         this.environmentsService.listDeviceTypes().subscribe((types) => {

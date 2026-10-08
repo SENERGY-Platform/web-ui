@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { EnvironmentsCreateDialogComponent } from './environments-create-dialog.component';
 import { Environment, EnvironmentType } from '../shared/environments.model';
@@ -25,8 +26,15 @@ describe('EnvironmentsCreateDialogComponent', () => {
         dialogRef = jasmine.createSpyObj<MatDialogRef<EnvironmentsCreateDialogComponent>>('MatDialogRef', ['close']);
     });
 
+    // A TestBed module can be instantiated only once, so every dialog gets a fresh one.
+    const build = (): EnvironmentsCreateDialogComponent => {
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({ providers: [{ provide: MatDialogRef, useValue: dialogRef }] });
+        return TestBed.runInInjectionContext(() => new EnvironmentsCreateDialogComponent());
+    };
+
     const created = (name: string, type: EnvironmentType): Environment => {
-        const component = new EnvironmentsCreateDialogComponent(dialogRef);
+        const component = build();
         component.name = name;
         component.type = type;
         component.create();
@@ -48,7 +56,7 @@ describe('EnvironmentsCreateDialogComponent', () => {
     });
 
     it('does not close without a name or a type', () => {
-        const component = new EnvironmentsCreateDialogComponent(dialogRef);
+        const component = build();
         component.name = '';
         component.type = 'industrial_site';
         component.create();

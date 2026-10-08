@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     SmartServiceInputsDescription,
@@ -66,6 +66,16 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatFormField, MatLabel, MatInput, FormsModule, GenericValidator, MatError, MatErrorMessagesDirective, MatCheckbox, MatTooltip, MtxSelect, MtxOption, MatDivider, AspectSelectComponent, MatButton, MatRadioGroup, MatRadioButton, MatIconButton, MatSuffix, MatIcon, MatDialogActions]
 })
 export class EditSmartServiceInputDialogComponent {
+    private dialogRef = inject<MatDialogRef<EditSmartServiceInputDialogComponent>>(MatDialogRef);
+    private functionsService = inject(FunctionsService);
+    private deviceTypesService = inject(DeviceTypeService);
+    private deviceClassService = inject(DeviceClassesService);
+    private characteristicsService = inject(CharacteristicsService);
+    private dialogParams = inject<{
+        info: SmartServiceInputsDescription;
+        element: BpmnElement;
+    }>(MAT_DIALOG_DATA);
+
     abstract: AbstractSmartServiceInput[] = [];
 
     functions: (FunctionsPermSearchModel | { id?: string; name: string })[] = [];
@@ -76,14 +86,9 @@ export class EditSmartServiceInputDialogComponent {
 
     characteristics: DeviceTypeCharacteristicsModel[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<EditSmartServiceInputDialogComponent>,
-        private functionsService: FunctionsService,
-        private deviceTypesService: DeviceTypeService,
-        private deviceClassService: DeviceClassesService,
-        private characteristicsService: CharacteristicsService,
-        @Inject(MAT_DIALOG_DATA) private dialogParams: { info: SmartServiceInputsDescription; element: BpmnElement },
-    ) {
+    constructor() {
+        const dialogParams = this.dialogParams;
+
         this.characteristicsService.getCharacteristics('', 9999, 0, 'name', 'asc').subscribe(value => {
             this.characteristics = value.result;
         });

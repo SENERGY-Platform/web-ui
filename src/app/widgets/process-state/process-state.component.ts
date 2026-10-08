@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -37,6 +37,11 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, WidgetFooterComponent]
 })
 export class ProcessStateComponent implements OnInit, OnDestroy {
+    private iconRegistry = inject(MatIconRegistry);
+    private sanitizer = inject(DomSanitizer);
+    private processStateService = inject(ProcessStateService);
+    private dashboardService = inject(DashboardService);
+
     processStatus: ProcessStateModel = { available: 0, executable: 0 };
     ready = false;
     refreshing = false;
@@ -48,13 +53,6 @@ export class ProcessStateComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private iconRegistry: MatIconRegistry,
-        private sanitizer: DomSanitizer,
-        private processStateService: ProcessStateService,
-        private dashboardService: DashboardService,
-    ) {}
 
     ngOnInit() {
         this.setDeviceStatus();

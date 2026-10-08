@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormRecord, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AddTagFn } from '../../model/mtx-select.model';
 import { forkJoin, map, Observable } from 'rxjs';
@@ -42,6 +42,8 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, SpinnerComponent, FormsModule, ReactiveFormsModule, MatDivider, MatCheckbox, MatFormField, MatIcon, MatPrefix, MatLabel, MtxSelect, MatHint, MatDialogActions, MatButton]
 })
 export class FilterDialogComponent implements OnInit {
+    private cd = inject(ChangeDetectorRef);
+
     @Input() config: FilterDialogConfigModel = { fields: [] };
     @Output() filterEvent = new EventEmitter<FilterDialogResultModel>();
     @Output() cancelEvent = new EventEmitter<void>();
@@ -51,9 +53,6 @@ export class FilterDialogComponent implements OnInit {
     items: { [key: string]: any[] } = {};
     addTagFns: { [key: string]: boolean | AddTagFn } = {};
     ready = false;
-
-    constructor(private cd: ChangeDetectorRef) {
-    }
 
     ngOnInit(): void {
         this.config.fields.forEach(field => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { ProcessSchedulerService } from './shared/process-scheduler.service';
 import { ProcessSchedulerModel } from './shared/process-scheduler.model';
@@ -46,6 +46,14 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, NgClass, MatListItemTitle, MatIcon, MatListItemIcon, MatListItemLine, MatListItemMeta, MatIconButton, MatTooltip, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class ProcessSchedulerComponent implements OnInit, OnDestroy {
+    private processSchedulerService = inject(ProcessSchedulerService);
+    private dashboardService = inject(DashboardService);
+    private deploymentsService = inject(DeploymentsService);
+    private dialog = inject(MatDialog);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private cronConverterService = inject(CronConverterService);
+
     schedules: ProcessSchedulerWidgetModel[] = [];
     numReady = -1;
     numReadyNeeded = 0;
@@ -57,16 +65,6 @@ export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private processSchedulerService: ProcessSchedulerService,
-        private dashboardService: DashboardService,
-        private deploymentsService: DeploymentsService,
-        private dialog: MatDialog,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private cronConverterService: CronConverterService,
-    ) {}
 
     ngOnInit() {
         this.getSchedules();

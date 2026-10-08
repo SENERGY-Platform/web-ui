@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 import { DeleteDialogComponent, DeleteDialogOptions } from '../dialogs/delete-dialog.component';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog.component';
@@ -24,7 +24,8 @@ import {InputDialogComponent} from '../dialogs/input-dialog.component';
     providedIn: 'root',
 })
 export class DialogsService {
-    constructor(private dialog: MatDialog) {}
+    private dialog = inject(MatDialog);
+
 
     openDeleteDialog(text: string, options?: DeleteDialogOptions): MatDialogRef<DeleteDialogComponent> {
         const dialogConfig = new MatDialogConfig();

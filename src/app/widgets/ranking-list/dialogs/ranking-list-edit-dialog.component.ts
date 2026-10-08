@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -38,6 +38,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class RankingListEditDialogComponent implements OnInit {
+    private fb = inject(FormBuilder);
+    private dialogRef = inject<MatDialogRef<RankingListEditDialogComponent>>(MatDialogRef);
+    private deploymentsService = inject(DeploymentsService);
+    private dashboardService = inject(DashboardService);
+
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
     dashboardId: string;
@@ -47,18 +52,14 @@ export class RankingListEditDialogComponent implements OnInit {
     userHasUpdatePropertiesAuthorization = false;
     formGroup: FormGroup;
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<RankingListEditDialogComponent>,
-        private deploymentsService: DeploymentsService,
-        private dashboardService: DashboardService,
-        @Inject(MAT_DIALOG_DATA) data: {
+    constructor() {
+        const data = inject<{
             dashboardId: string;
             widgetId: string;
             userHasUpdateNameAuthorization: boolean;
             userHasUpdatePropertiesAuthorization: boolean;
-        },
-    ) {
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

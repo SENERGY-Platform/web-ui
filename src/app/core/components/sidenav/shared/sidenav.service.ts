@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
+import { EventEmitter, Injectable, OnDestroy, Output, inject } from '@angular/core';
 
 import { SidenavSectionModel } from './sidenav-section.model';
 import { SidenavPageModel } from './sidenav-page.model';
@@ -57,6 +57,37 @@ import { EnvironmentsService } from 'src/app/modules/environments/shared/environ
     providedIn: 'root',
 })
 export class SidenavService implements OnDestroy {
+    private waitingRoomService = inject(WaitingRoomService);
+    private authService = inject(AuthorizationService);
+    private swaggerService = inject(SwaggerService);
+    private flowRepoService = inject(FlowRepoService);
+    private operatorRepoService = inject(OperatorRepoService);
+    private pipelineService = inject(PipelineRegistryService);
+    private processRepoService = inject(ProcessRepoService);
+    private processDeploymentService = inject(DeploymentsService);
+    private processMonitorService = inject(MonitorService);
+    private smartServiceDesignService = inject(SmartServiceDesignsService);
+    private exportService = inject(ExportService);
+    private exportBrokerService = inject(BrokerExportService);
+    private importTypeService = inject(ImportTypesService);
+    private importInstanceSercice = inject(ImportInstancesService);
+    private functionService = inject(FunctionsService);
+    private aspectsService = inject(AspectsService);
+    private conceptsService = inject(ConceptsService);
+    private characteristicsService = inject(CharacteristicsService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceClassService = inject(DeviceClassesService);
+    private locationService = inject(LocationsService);
+    private deviceGroupService = inject(DeviceGroupsService);
+    private deviceInstanceService = inject(DeviceInstancesService);
+    private networkService = inject(NetworksService);
+    private processIOService = inject(ProcessIoService);
+    private dashboardService = inject(DashboardService);
+    private costService = inject(CostService);
+    private ladonService = inject(LadonService);
+    private certificatesService = inject(CertificatesService);
+    private environmentsService = inject(EnvironmentsService);
+
     @Output() toggleChanged: EventEmitter<boolean> = new EventEmitter();
     @Output() sectionChanged: EventEmitter<string> = new EventEmitter();
 
@@ -65,39 +96,6 @@ export class SidenavService implements OnDestroy {
     private waitingRoomEventCloser?: () => void;
     private sections: SidenavSectionModel[] = [];
     private sectionsSubject: Subject<SidenavSectionModel[]> = new Subject();
-
-    constructor(
-        private waitingRoomService: WaitingRoomService,
-        private authService: AuthorizationService,
-        private swaggerService: SwaggerService,
-        private flowRepoService: FlowRepoService,
-        private operatorRepoService: OperatorRepoService,
-        private pipelineService: PipelineRegistryService,
-        private processRepoService: ProcessRepoService,
-        private processDeploymentService: DeploymentsService,
-        private processMonitorService: MonitorService,
-        private smartServiceDesignService: SmartServiceDesignsService,
-        private exportService: ExportService,
-        private exportBrokerService: BrokerExportService,
-        private importTypeService: ImportTypesService,
-        private importInstanceSercice: ImportInstancesService,
-        private functionService: FunctionsService,
-        private aspectsService: AspectsService,
-        private conceptsService: ConceptsService,
-        private characteristicsService: CharacteristicsService,
-        private deviceTypeService: DeviceTypeService,
-        private deviceClassService: DeviceClassesService,
-        private locationService: LocationsService,
-        private deviceGroupService: DeviceGroupsService,
-        private deviceInstanceService: DeviceInstancesService,
-        private networkService: NetworksService,
-        private processIOService: ProcessIoService,
-        private dashboardService: DashboardService,
-        private costService: CostService,
-        private ladonService: LadonService,
-        private certificatesService: CertificatesService,
-        private environmentsService: EnvironmentsService,
-    ) { }
 
     ngOnDestroy() {
         if (this.waitingRoomEventCloser) {

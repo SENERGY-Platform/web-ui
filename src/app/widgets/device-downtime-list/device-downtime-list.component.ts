@@ -46,6 +46,10 @@ function minutesSince(d: Date): number {
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatIcon, NgClass, MatListItemTitle, MatTooltip, MatListItemLine, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
+    private deviceDowntimeListService = inject(DeviceDowntimeListService);
+    private dashboardService = inject(DashboardService);
+    private dialog = inject(MatDialog);
+
     offlineSinceList: OfflineSinceModel[] = [];
     ready = false;
     refreshing = false;
@@ -59,12 +63,6 @@ export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     private localeId = inject(LOCALE_ID);
-
-    constructor(
-        private deviceDowntimeListService: DeviceDowntimeListService,
-        private dashboardService: DashboardService,
-        private dialog: MatDialog,
-    ) {}
 
     ngOnInit() {
          this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {

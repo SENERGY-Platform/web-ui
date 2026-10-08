@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { Observable, of } from 'rxjs';
@@ -28,7 +28,9 @@ import { PermissionsRightsModel } from './permissions-rights.model';
     providedIn: 'root',
 })
 export class PermissionsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {}
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+
 
     static rightObjToStr(right: PermissionsRightsModel): string {
         let result = '';

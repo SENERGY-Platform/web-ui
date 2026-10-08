@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, of } from 'rxjs';
@@ -46,12 +46,11 @@ export interface SmartServiceReleaseRef {
     providedIn: 'root',
 })
 export class SmartServiceInstanceDialogService {
-    constructor(
-        private dialog: MatDialog,
-        private releasesService: SmartServiceReleasesService,
-        private instancesService: SmartServiceInstanceService,
-        private snackBar: MatSnackBar,
-    ) {}
+    private dialog = inject(MatDialog);
+    private releasesService = inject(SmartServiceReleasesService);
+    private instancesService = inject(SmartServiceInstanceService);
+    private snackBar = inject(MatSnackBar);
+
 
     /**
      * Starts a new instance of the release. Emits true when one was created.

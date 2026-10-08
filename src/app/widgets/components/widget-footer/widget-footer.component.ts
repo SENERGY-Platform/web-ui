@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
@@ -32,6 +32,9 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatCardActions, MatIconButton, MatTooltip, MatIcon]
 })
 export class WidgetFooterComponent {
+    private widgetHeaderService = inject(WidgetFooterService);
+    private dashboardService = inject(DashboardService);
+
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() optionZoom = false;
@@ -51,13 +54,6 @@ export class WidgetFooterComponent {
     @Output() editEvent = new EventEmitter<boolean>();
     @Output() addEvent = new EventEmitter<boolean>();
     @Output() customEvent = new EventEmitter<{index: number; icon: string}>();
-
-    constructor(
-        private widgetHeaderService: WidgetFooterService,
-        private dashboardService: DashboardService,
-    ) {
-
-    }
 
     edit() {
         this.editEvent.emit(true);

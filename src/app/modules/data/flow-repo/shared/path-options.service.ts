@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
 import {environment} from '../../../../../environments/environment';
@@ -41,8 +41,9 @@ export interface PathOptionFull extends PathOption {
     providedIn: 'root',
 })
 export class PathOptionsService {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService) {
-    }
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+
 
     getPathOptions(
         deviceTypeIds: string[],

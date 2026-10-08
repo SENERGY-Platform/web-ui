@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -27,6 +27,6 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatButton, MatIconButton, MatIcon]
 })
 export class ClosableSnackBarComponent {
-    constructor(public snackBarRef: MatSnackBarRef<ClosableSnackBarComponent>,
-    @Inject(MAT_SNACK_BAR_DATA) public data: any){}
+    snackBarRef = inject<MatSnackBarRef<ClosableSnackBarComponent>>(MatSnackBarRef);
+    data = inject(MAT_SNACK_BAR_DATA);
 }

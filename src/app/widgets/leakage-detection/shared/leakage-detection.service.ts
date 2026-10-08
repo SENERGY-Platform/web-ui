@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { map, Observable } from 'rxjs';
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
@@ -29,11 +29,10 @@ import { LeakageDetectionResponse } from './leakage-detction.model';
     providedIn: 'root'
 })
 export class LeakageDetectionService {
-    constructor(
-      private exportDataService: ExportDataService,
-      private dialog: MatDialog,
-      private dashboardService: DashboardService,
-    ) { }
+    private exportDataService = inject(ExportDataService);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+
 
     getLatestLeakageDetectionOutput(exportID: string): Observable<LeakageDetectionResponse> {
         const requestPayload: (LastValuesRequestElementInfluxModel | LastValuesRequestElementTimescaleModel)[] = [];

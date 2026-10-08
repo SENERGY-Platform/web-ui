@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -37,6 +37,11 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, MatTooltip, NgClass, WidgetFooterComponent, DecimalPipe, DatePipe]
 })
 export class EnergyPredictionComponent implements OnInit, OnDestroy {
+    private iconRegistry = inject(MatIconRegistry);
+    private sanitizer = inject(DomSanitizer);
+    private predictionService = inject(EnergyPredictionService);
+    private dashboardService = inject(DashboardService);
+
     predictionModel: EnergyPredictionModel = { prediction: 0, predictionTotal: 0, timestamp: '' };
     ready = false;
     configured = false;
@@ -52,13 +57,6 @@ export class EnergyPredictionComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private iconRegistry: MatIconRegistry,
-        private sanitizer: DomSanitizer,
-        private predictionService: EnergyPredictionService,
-        private dashboardService: DashboardService,
-    ) {}
 
     ngOnInit() {
         this.update();

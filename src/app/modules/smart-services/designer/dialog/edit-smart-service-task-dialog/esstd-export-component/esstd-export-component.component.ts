@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import {ServingRequest, ServingRequestValue, SmartServiceTaskDescription} from '../../../shared/designer.model';
 import {BpmnElement, BpmnParameterWithLabel} from '../../../../../processes/designer/shared/designer.model';
 import {ExportDatabaseModel, IMPORT_ID, OPERATOR_ID} from '../../../../../exports/shared/export.model';
@@ -44,6 +44,11 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionP
     imports: [MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatIconButton, MatSuffix, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatTooltip, MatCheckbox, MatButton, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class EsstdExportComponentComponent implements OnInit {
+    private exportService = inject(ExportService);
+    private flowRepoService = inject(FlowRepoService);
+    private operatorRepoService = inject(OperatorRepoService);
+    private importTypeService = inject(ImportTypesService);
+
     @Input() result!: SmartServiceTaskDescription;
     @Output() resultChange = new EventEmitter<SmartServiceTaskDescription>();
 
@@ -58,12 +63,6 @@ export class EsstdExportComponentComponent implements OnInit {
     timestamp_formats: string[] = [];
 
     paths = new Map<string, string | undefined>();
-
-    constructor(private exportService: ExportService,
-                private flowRepoService: FlowRepoService,
-                private operatorRepoService: OperatorRepoService,
-                private importTypeService: ImportTypesService,) {
-    }
 
     ngOnInit() {
         if (this.exportRequest.FilterType !== undefined && this.exportRequest.Filter !== undefined) {

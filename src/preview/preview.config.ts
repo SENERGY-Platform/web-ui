@@ -1,6 +1,6 @@
 /* Preview harness providers - local only. */
-import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
-import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { ApplicationConfig, Injector, importProvidersFrom, inject, provideZoneChangeDetection } from '@angular/core';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
@@ -16,7 +16,7 @@ import { ChartsPreviewComponent } from './charts-preview.component';
 import { provideIconFontSet } from '../app/core/icon-font-set';
 import { provideOverlayDefaults } from '../app/core/overlay-defaults';
 import { AuthorizationService } from '../app/core/services/authorization.service';
-import { ErrorHandlerService } from '../app/core/services/error-handler.service';
+import { keycloakServiceToken } from '../app/core/services/keycloak-service.token';
 import { PreviewKeycloakService } from './preview-keycloak.service';
 import { PermissionTestResponse } from '../app/modules/admin/permissions/shared/permission.model';
 
@@ -37,12 +37,17 @@ export const previewConfig: ApplicationConfig = {
             { path: 'charts/:name', component: ChartsPreviewComponent },
         ]),
         { provide: KeycloakService, useClass: MockKeycloakService },
-        // AuthorizationService picks its Keycloak from keycloakServiceToken, which CoreModule fills with the real service.
+        // AuthorizationService reads its Keycloak from keycloakServiceToken; a child injector swaps in the preview service.
         {
             provide: AuthorizationService,
-            useFactory: (errorHandler: ErrorHandlerService, http: HttpClient) =>
-                new AuthorizationService([new PreviewKeycloakService()], errorHandler, http),
-            deps: [ErrorHandlerService, HttpClient],
+            useFactory: () =>
+                Injector.create({
+                    parent: inject(Injector),
+                    providers: [
+                        { provide: keycloakServiceToken, useValue: [new PreviewKeycloakService()] },
+                        { provide: AuthorizationService, useClass: AuthorizationService, deps: [] },
+                    ],
+                }).get(AuthorizationService),
         },
         { provide: LadonService, useClass: PreviewLadonService },
         { provide: HTTP_INTERCEPTORS, useClass: FixtureInterceptor, multi: true },

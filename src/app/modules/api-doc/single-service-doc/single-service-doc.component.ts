@@ -16,7 +16,7 @@
  *
  */
 
-import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { SwaggerService } from '../shared/swagger/swagger.service';
@@ -32,14 +32,15 @@ import '@asyncapi/web-component/lib/asyncapi-web-component';
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class SingleServiceDocComponent implements OnInit {
+    private authService = inject(AuthorizationService);
+    private route = inject(ActivatedRoute);
+    private swaggerService = inject(SwaggerService);
+
     public id: any;
     public swagger: any;
     public ui: any;
     public ready = false;
     public type = '';
-
-    constructor(private authService: AuthorizationService, private route: ActivatedRoute, private swaggerService: SwaggerService) {
-    }
 
     public ngOnInit() {
         this.route.params.subscribe((params) => {

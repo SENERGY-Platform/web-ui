@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -50,6 +50,15 @@ import { MatIcon } from '@angular/material/icon';
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit {
+    private dialog = inject(MatDialog);
+    private deviceClassesService = inject(DeviceClassesService);
+    private searchbarService = inject(SearchbarService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private authService = inject(AuthorizationService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private preferencesService = inject(PreferencesService);
+
     displayedColumns = ['select', 'name'];
     pageSize = this.preferencesService.pageSize;
     ready = false;
@@ -68,17 +77,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit 
     userHasCreateAuthorization = false;
     userHasUsedInAuthorization = false;
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
-
-    constructor(
-        private dialog: MatDialog,
-        private deviceClassesService: DeviceClassesService,
-        private searchbarService: SearchbarService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private authService: AuthorizationService,
-        private deviceTypeService: DeviceTypeService,
-        private preferencesService: PreferencesService,
-    ) {}
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();

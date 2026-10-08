@@ -16,7 +16,7 @@
  *
  */
 
-import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DocInfo } from '../shared/swagger/swagger.model';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 import { forkJoin, map, Observable, of } from 'rxjs';
@@ -34,6 +34,9 @@ import { RouterLink, RouterOutlet } from '@angular/router';
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ApiDocsComponent implements OnInit {
+    swaggerService = inject(SwaggerService);
+    private searchbarService = inject(SearchbarService);
+
     public title = 'SEPL API Documentation';
     public swaggerList: DocInfo[] = [];
     public swaggerListShown: DocInfo[] = [];
@@ -42,12 +45,6 @@ export class ApiDocsComponent implements OnInit {
     public searchPlaceholder: any;
     public ready = false;
     searchSub: any;
-
-    constructor(
-        public swaggerService: SwaggerService,
-        private searchbarService: SearchbarService,
-    ) {
-    }
 
     public ngOnInit(): void {
         const obs: Observable<unknown>[] = [of(null)];

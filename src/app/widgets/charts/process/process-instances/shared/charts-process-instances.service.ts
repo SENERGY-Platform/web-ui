@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
@@ -31,12 +31,11 @@ import { processStatusCounts, ProcessStatusCount } from './charts-process-instan
     providedIn: 'root',
 })
 export class ChartsProcessInstancesService {
-    constructor(
-        private monitorService: MonitorService,
-        private elementSizeService: ElementSizeService,
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-    ) {}
+    private monitorService = inject(MonitorService);
+    private elementSizeService = inject(ElementSizeService);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

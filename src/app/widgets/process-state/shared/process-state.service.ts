@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { forkJoin, Observable } from 'rxjs';
 import { ProcessStateModel } from './process-state.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -31,13 +31,12 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
     providedIn: 'root',
 })
 export class ProcessStateService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private processRepoService: ProcessRepoService,
-        private deploymentService: DeploymentsService,
-        private errorHandlerService: ErrorHandlerService,
-    ) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private processRepoService = inject(ProcessRepoService);
+    private deploymentService = inject(DeploymentsService);
+    private errorHandlerService = inject(ErrorHandlerService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

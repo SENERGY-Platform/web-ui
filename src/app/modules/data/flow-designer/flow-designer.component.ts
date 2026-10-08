@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, AfterViewInit, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import {IOModel, OperatorModel} from '../operator-repo/shared/operator.model';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {ActivatedRoute, Router} from '@angular/router';
@@ -44,6 +44,14 @@ import { DatePipe } from '@angular/common';
     imports: [SpinnerComponent, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, DiagramEditorComponent, MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, MatTooltip, MatButton, MatListItemMeta, MatFabButton, DatePipe]
 })
 export class FlowDesignerComponent implements AfterViewInit {
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private operatorRepoService = inject(OperatorRepoService);
+    private flowRepoService = inject(FlowRepoService);
+    snackBar = inject(MatSnackBar);
+    dialog = inject(MatDialog);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
 
     @ViewChild(DiagramEditorComponent, {static: false}) diagram!: DiagramEditorComponent;
 
@@ -53,17 +61,6 @@ export class FlowDesignerComponent implements AfterViewInit {
     viewInitialized = false;
     flow = {} as FlowModel;
     listHeight = 600;
-
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private operatorRepoService: OperatorRepoService,
-        private flowRepoService: FlowRepoService,
-        public snackBar: MatSnackBar,
-        public dialog: MatDialog,
-        private changeDetectorRef: ChangeDetectorRef
-    ) {
-    }
 
     ngAfterViewInit() {
         this.operatorRepoService.getAllOperators().subscribe((ops: {

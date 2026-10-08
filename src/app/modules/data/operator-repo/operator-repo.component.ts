@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { OperatorModel } from './shared/operator.model';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
@@ -51,6 +51,18 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     imports: [SearchbarComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatIconButton, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent]
 })
 export class OperatorRepoComponent implements OnInit, OnDestroy {
+    private operatorRepoService = inject(OperatorRepoService);
+    protected auth = inject(AuthorizationService);
+    private searchbarService = inject(SearchbarService);
+    snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    protected permission = inject(PermissionsService);
+    preferencesService = inject(PreferencesService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private pipeService = inject(PipelineRegistryService);
+    private flowService = inject(FlowRepoService);
+    private router = inject(Router);
+
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
@@ -76,20 +88,6 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
     pipeOperatorUsagePerOperator: PipelineOperatorUsage[] = [];
     flowOperatorUsagePerOperator: FlowOperatorUsage[] = [];
-
-    constructor(
-        private operatorRepoService: OperatorRepoService,
-        protected auth: AuthorizationService,
-        private searchbarService: SearchbarService,
-        public snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        protected permission: PermissionsService,
-        public preferencesService: PreferencesService,
-        private permissionsDialogService: PermissionsDialogService,
-        private pipeService: PipelineRegistryService,
-        private flowService: FlowRepoService,
-        private router: Router,
-    ) { }
 
     ngOnInit() {
         this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization();

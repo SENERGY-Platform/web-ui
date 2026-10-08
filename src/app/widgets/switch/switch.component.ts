@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { SwitchService } from './shared/switch.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -34,6 +34,9 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, MatCardImage, MatSlideToggle, FormsModule, WidgetFooterComponent]
 })
 export class SwitchComponent implements OnInit, OnDestroy {
+    private switchService = inject(SwitchService);
+    private dashboardService = inject(DashboardService);
+
     ready = false;
 
     private destroy = new Subscription();
@@ -44,8 +47,6 @@ export class SwitchComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(private switchService: SwitchService, private dashboardService: DashboardService) {}
 
     ngOnInit() {
         this.destroy = this.dashboardService.initWidgetObservable.subscribe((event: string) => {

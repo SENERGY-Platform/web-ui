@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { afterNextRender, ChangeDetectorRef, Component, Injector, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { afterNextRender, ChangeDetectorRef, Component, Injector, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { DashboardService } from './shared/dashboard.service';
 import { DashboardModel } from './shared/dashboard.model';
 import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.model';
@@ -61,6 +61,18 @@ import { WidgetComponent } from '../../widgets/widget.component';
     imports: [MatTabGroup, MatTab, MatTabLabel, NgClass, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider, WidgetComponent, GridstackComponent, GridstackItemComponent, MatFabButton]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+    private dashboardService = inject(DashboardService);
+    private dialogsService = inject(DialogsService);
+    private processSchedulerService = inject(ProcessSchedulerService);
+    private dataTableService = inject(DataTableService);
+    private airQualityService = inject(AirQualityService);
+    private deviceStatusService = inject(DeviceStatusService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private cd = inject(ChangeDetectorRef);
+    private injector = inject(Injector);
+
     dashboards: DashboardModel[] = [];
     dashboardsRetrieved = false;
     activeTabIndex = 0;
@@ -121,20 +133,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         { length: MAX_COLUMNS - MIN_COLUMNS + 1 },
         (_unused, index) => MIN_COLUMNS + index,
     );
-
-    constructor(
-        private dashboardService: DashboardService,
-        private dialogsService: DialogsService,
-        private processSchedulerService: ProcessSchedulerService,
-        private dataTableService: DataTableService,
-        private airQualityService: AirQualityService,
-        private deviceStatusService: DeviceStatusService,
-        private route: ActivatedRoute,
-        private router: Router,
-        private errorHandlerService: ErrorHandlerService,
-        private cd: ChangeDetectorRef,
-        private injector: Injector,
-    ) { }
 
     ngOnInit() {
         this.initDashboard();

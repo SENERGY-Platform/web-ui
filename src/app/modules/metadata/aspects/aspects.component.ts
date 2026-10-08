@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { concat, Observable, of } from 'rxjs';
 import { concatMap, map, tap, toArray } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -74,6 +74,17 @@ export interface AspectClassGroupNode extends DeviceTypeAspectModel {
     imports: [CdkDropListGroup, MatTree, MatTreeNodeDef, MatTreeNode, CdkDropList, MatTreeNodeToggle, CdkDrag, MatIconButton, CdkDragHandle, MatIcon, MatTooltip, MatFormField, MatLabel, MtxSelect, FormsModule, NgClass, MatInput, MatError, MatErrorMessagesDirective, MatNestedTreeNode, MatHint, MatTreeNodeOutlet, MatFabButton]
 })
 export class AspectsComponent implements OnInit {
+    private dialog = inject(MatDialog);
+    private responsiveService = inject(ResponsiveService);
+    private aspectsService = inject(AspectsService);
+    private searchbarService = inject(SearchbarService);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
+    private dialogsService = inject(DialogsService);
+    private authService = inject(AuthorizationService);
+    private deviceTypesService = inject(DeviceTypeService);
+    private aspectClassesService = inject(AspectClassesService);
+
     ready = false;
 
     treeControl = new NestedTreeControl<DeviceTypeAspectModel>((node) => node.sub_aspects);
@@ -100,20 +111,6 @@ export class AspectsComponent implements OnInit {
     dragging = false;
 
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
-
-    constructor(
-        private dialog: MatDialog,
-        private responsiveService: ResponsiveService,
-        private aspectsService: AspectsService,
-        private searchbarService: SearchbarService,
-        private snackBar: MatSnackBar,
-        private router: Router,
-        private dialogsService: DialogsService,
-        private authService: AuthorizationService,
-        private deviceTypesService: DeviceTypeService,
-        private aspectClassesService: AspectClassesService,
-    ) {
-    }
 
     ngOnInit() {
         this.checkAuthorization();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription, timer } from 'rxjs';
 import { exhaustMap, map } from 'rxjs/operators';
@@ -57,6 +57,10 @@ const MIN_PAST_MARGIN_MS = 2 * 60 * 1000;
     imports: [SpinnerComponent, MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatProgressBar, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
 })
 export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
+    private environmentsService = inject(EnvironmentsService);
+    private dialogsService = inject(DialogsService);
+    private snackBar = inject(MatSnackBar);
+
     @Input() environmentId = '';
 
     readonly channelColumns = ['name', 'publishable', 'published', 'silent', 'failed', 'last_error'];
@@ -95,12 +99,6 @@ export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
 
     private pollSub: Subscription | undefined;
     private refreshSub: Subscription | undefined;
-
-    constructor(
-        private environmentsService: EnvironmentsService,
-        private dialogsService: DialogsService,
-        private snackBar: MatSnackBar,
-    ) {}
 
     ngOnInit(): void {
         this.start();

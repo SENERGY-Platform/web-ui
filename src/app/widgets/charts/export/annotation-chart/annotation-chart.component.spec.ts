@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { ChangeDetectorRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { AnnotationChartComponent } from './annotation-chart.component';
 
 describe('AnnotationChartComponent', () => {
@@ -29,7 +31,8 @@ describe('AnnotationChartComponent', () => {
 
     beforeEach(() => {
         cd = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
-        component = new AnnotationChartComponent(cd as any);
+        TestBed.configureTestingModule({ providers: [{ provide: ChangeDetectorRef, useValue: cd }] });
+        component = TestBed.runInInjectionContext(() => new AnnotationChartComponent());
         component.series = series;
         component.width = 602;
         component.height = 400;

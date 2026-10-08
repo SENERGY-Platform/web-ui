@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
@@ -52,24 +52,22 @@ import { NgClass, DatePipe } from '@angular/common';
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
+    private importInstancesService = inject(ImportInstancesService);
+    private dialog = inject(MatDialog);
+    private snackBar = inject(MatSnackBar);
+    private deleteDialog = inject(DialogsService);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private searchbarService = inject(SearchbarService);
+    utilsService = inject(UtilService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private permissionsService = inject(PermissionsService);
+    private userService = inject(AuthorizationService);
+    private preferencesService = inject(PreferencesService);
+
     displayedColumns = ['select', 'status', 'name', 'image', 'created_at', 'updated_at', 'export'];
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-
-    constructor(
-        private importInstancesService: ImportInstancesService,
-        private dialog: MatDialog,
-        private snackBar: MatSnackBar,
-        private deleteDialog: DialogsService,
-        private router: Router,
-        private route: ActivatedRoute,
-        private searchbarService: SearchbarService,
-        public utilsService: UtilService,
-        private permissionsDialogService: PermissionsDialogService,
-        private permissionsService: PermissionsService,
-        private userService: AuthorizationService,
-        private preferencesService: PreferencesService,
-    ) {}
 
     searchText = '';
     pageSize = this.preferencesService.pageSize;

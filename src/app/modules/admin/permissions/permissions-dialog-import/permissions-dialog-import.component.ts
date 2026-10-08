@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -37,6 +37,9 @@ import { MatCheckbox } from '@angular/material/checkbox';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatButton, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatTooltip, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions]
 })
 export class PermissionsDialogImportComponent {
+    dialogRef = inject<MatDialogRef<PermissionsDialogImportComponent>>(MatDialogRef);
+    private snackBar = inject(MatSnackBar);
+
 
     @ViewChild('fileInput') public fileInput!: HTMLInputElement;
     public overwrite = new UntypedFormControl(undefined, Validators.required);
@@ -45,10 +48,6 @@ export class PermissionsDialogImportComponent {
     public fileChecked = true;
     public selections: boolean[] = [];
     public isAllSelected = false;
-
-    constructor(public dialogRef: MatDialogRef<PermissionsDialogImportComponent>,
-                private snackBar: MatSnackBar) {
-    }
 
     public yes() {
         const imports: any[] = [];

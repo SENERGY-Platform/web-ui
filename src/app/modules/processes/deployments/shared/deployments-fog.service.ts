@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { Observable, of } from 'rxjs';
@@ -31,7 +31,10 @@ import { ExtendedHubModel } from '../../../devices/networks/shared/networks.mode
     providedIn: 'root',
 })
 export class DeploymentsFogFactory {
-    constructor(private http: HttpClient, private errorHandlerService: ErrorHandlerService, private networksService: NetworksService) {}
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private networksService = inject(NetworksService);
+
 
     withHubId(hubId: string): DeploymentsFogService {
         return new DeploymentsFogService(hubId, this.http, this.errorHandlerService, this.networksService);

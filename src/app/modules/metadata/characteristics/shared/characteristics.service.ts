@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { DeviceTypeCharacteristicsModel } from '../../device-types-overview/shared/device-type.model';
@@ -28,13 +28,13 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class CharacteristicsService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         const characteristicsURL = environment.deviceRepoUrl + '/characteristics';
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(characteristicsURL);
     }

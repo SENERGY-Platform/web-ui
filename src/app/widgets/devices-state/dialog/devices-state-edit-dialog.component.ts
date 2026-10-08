@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -40,6 +40,11 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatCheckbox, MatDialogActions, MatButton]
 })
 export class DevicesStateEditDialogComponent implements OnInit {
+    private fb = inject(FormBuilder);
+    private dialogRef = inject<MatDialogRef<DevicesStateEditDialogComponent>>(MatDialogRef);
+    private dashboardService = inject(DashboardService);
+    private locationService = inject(LocationsService);
+
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
 
     dashboardId: string;
@@ -50,13 +55,14 @@ export class DevicesStateEditDialogComponent implements OnInit {
     formGroup: FormGroup = new FormGroup({});
     locations: LocationModel[] = [];
 
-    constructor(
-        private fb: FormBuilder,
-        private dialogRef: MatDialogRef<DevicesStateEditDialogComponent>,
-        private dashboardService: DashboardService,
-        private locationService: LocationsService,
-        @Inject(MAT_DIALOG_DATA) data: { dashboardId: string; widgetId: string; userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean },
-    ) {
+    constructor() {
+        const data = inject<{
+            dashboardId: string;
+            widgetId: string;
+            userHasUpdateNameAuthorization: boolean;
+            userHasUpdatePropertiesAuthorization: boolean;
+        }>(MAT_DIALOG_DATA);
+
         this.dashboardId = data.dashboardId;
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;

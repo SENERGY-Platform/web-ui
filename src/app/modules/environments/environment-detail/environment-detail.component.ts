@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -143,6 +143,17 @@ interface LiveStateEntry {
     imports: [SpinnerComponent, MatButton, MatIcon, MatTabGroup, MatTab, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatIconButton, MatTreeNodeToggle, MatBadge, MatTooltip, MatTreeNodeOutlet, FormsModule, MatFormField, MatLabel, MatInput, MtxSelect, MtxOption, MatHint, MatSuffix, EnvironmentsKeyValueEditorComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, EnvironmentsProfileEditorComponent, EnvironmentsDatasetEditorComponent, EnvironmentsTimelineEditorComponent, EnvironmentsMeterParentsEditorComponent, RouterLink, MatButtonToggleGroup, MatButtonToggle, MatDivider, EnvironmentsScheduleEditorComponent, EnvironmentsFaultsEditorComponent, MatTabContent, EnvironmentsEffectsComponent, EnvironmentsLiveStateTilesComponent, EnvironmentsHistoryComponent, DatePipe]
 })
 export class EnvironmentDetailComponent implements OnInit, OnDestroy {
+    private route = inject(ActivatedRoute);
+    private environmentsService = inject(EnvironmentsService);
+    private permissionsService = inject(PermissionsService);
+    private dialogsService = inject(DialogsService);
+    private snackBar = inject(MatSnackBar);
+    private dialog = inject(MatDialog);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private platformDeviceTypeService = inject(PlatformDeviceTypeService);
+    private exportService = inject(ExportService);
+    private changeDetectorRef = inject(ChangeDetectorRef);
+
     id = '';
     environment: Environment | undefined;
     dataReady = false;
@@ -313,19 +324,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     /** Owner id -> username, filled in lazily by loadUserNames once the environment is loaded. */
     userIdToName: { [key: string]: string } = {};
     private ownerLookupFailed = new Set<string>();
-
-    constructor(
-        private route: ActivatedRoute,
-        private environmentsService: EnvironmentsService,
-        private permissionsService: PermissionsService,
-        private dialogsService: DialogsService,
-        private snackBar: MatSnackBar,
-        private dialog: MatDialog,
-        private deviceInstancesService: DeviceInstancesService,
-        private platformDeviceTypeService: PlatformDeviceTypeService,
-        private exportService: ExportService,
-        private changeDetectorRef: ChangeDetectorRef,
-    ) {}
 
     ngOnInit(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';

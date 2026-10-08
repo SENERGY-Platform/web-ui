@@ -15,7 +15,7 @@
  */
 
 import { defer, Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { ExportValueModel } from '../../../modules/exports/shared/export.model';
@@ -24,7 +24,8 @@ import { ExportValueModel } from '../../../modules/exports/shared/export.model';
     providedIn: 'root',
 })
 export class EnergyPredictionRequirementsService {
-    constructor(private exportService: ExportService) {}
+    private exportService = inject(ExportService);
+
 
     static requirement = 'Needs an estimation export';
     public static exportHasRequiredValues(values: ExportValueModel[]): boolean {

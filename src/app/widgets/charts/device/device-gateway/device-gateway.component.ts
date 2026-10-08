@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ChangeDetectionStrategy, NgZone, inject } from '@angular/core';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
@@ -39,6 +39,12 @@ import { WidgetFooterComponent } from '../../../components/widget-footer/widget-
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class DeviceGatewayComponent implements OnInit, OnDestroy, AfterViewInit {
+    private deviceGatewayService = inject(DeviceGatewayService);
+    private elementSizeService = inject(ElementSizeService);
+    private dashboardService = inject(DashboardService);
+    private el = inject(ElementRef);
+    private zone = inject(NgZone);
+
     /** undefined without gateways */
     chart?: FramedChartConfig<'bar'>;
     readonly plugins = googlePlugins;
@@ -66,14 +72,6 @@ export class DeviceGatewayComponent implements OnInit, OnDestroy, AfterViewInit 
         }));
         this.resizeObserver.observe(this.el.nativeElement);
     }
-
-    constructor(
-        private deviceGatewayService: DeviceGatewayService,
-        private elementSizeService: ElementSizeService,
-        private dashboardService: DashboardService,
-        private el: ElementRef,
-        private zone: NgZone,
-    ) { }
 
     ngOnInit() {
         this.getProcessInstances();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -28,12 +28,15 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatDialogActions, MatButton]
 })
 export class MonitorDetailsDialogComponent {
+    private dialogRef = inject<MatDialogRef<MonitorDetailsDialogComponent>>(MatDialogRef);
+
     incidents: ProcessIncidentsModel[] = [];
 
-    constructor(
-        private dialogRef: MatDialogRef<MonitorDetailsDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) data: { incident: ProcessIncidentsModel[] },
-    ) {
+    constructor() {
+        const data = inject<{
+            incident: ProcessIncidentsModel[];
+        }>(MAT_DIALOG_DATA);
+
         this.incidents = data.incident;
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import {ThemingService} from './core/services/theming.service';
 import {AuthorizationService} from './core/services/authorization.service';
 import { ToolbarComponent } from './core/components/toolbar/toolbar.component';
@@ -28,12 +28,9 @@ import { SidenavComponent } from './core/components/sidenav/sidenav.component';
     imports: [ToolbarComponent, SidenavComponent]
 })
 export class AppComponent implements OnInit {
+    protected authorizationService = inject(AuthorizationService);
+    private themingService = inject(ThemingService);
 
-    constructor(
-        protected authorizationService: AuthorizationService,
-        private themingService: ThemingService
-    ) {
-    }
 
     ngOnInit(): void {
         this.setupLocalAndSessionStorage();

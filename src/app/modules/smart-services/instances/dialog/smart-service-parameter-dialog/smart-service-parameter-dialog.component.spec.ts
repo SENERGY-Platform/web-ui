@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { MatDialogRef } from '@angular/material/dialog';
+import { TestBed } from '@angular/core/testing';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Observable, Subject, of } from 'rxjs';
 import { SmartServiceExtendedParameterModel, SmartServiceParameterOptionModel } from '../../../releases/shared/release.model';
 import { ParameterInput, parameterTypeBoolean, parameterTypeInteger, parameterTypeText } from '../../shared/parameters';
@@ -71,16 +72,27 @@ describe('SmartServiceParameterDialogComponent', () => {
         parameters: of(setup.parameters || []),
     });
 
+    const create = (dialogData: SmartServiceParameterDialogData) => {
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: MatDialogRef, useValue: dialogRef },
+                { provide: MAT_DIALOG_DATA, useValue: dialogData },
+            ],
+        });
+        return TestBed.runInInjectionContext(() => new SmartServiceParameterDialogComponent());
+    };
+
     /** The parameters arrive after the dialog is open, so a built dialog is only filled in by ngOnInit */
     const build = (setup: DialogSetup) => {
-        const component = new SmartServiceParameterDialogComponent(dialogRef, data(setup));
+        const component = create(data(setup));
         component.ngOnInit();
         return component;
     };
 
     /** a dialog whose parameters are still on their way */
     const buildPending = (arriving: Observable<SmartServiceExtendedParameterModel[] | null>) => {
-        const component = new SmartServiceParameterDialogComponent(dialogRef, { ...data({}), parameters: arriving });
+        const component = create({ ...data({}), parameters: arriving });
         component.ngOnInit();
         return component;
     };

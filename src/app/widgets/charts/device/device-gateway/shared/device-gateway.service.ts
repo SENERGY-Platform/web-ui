@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
@@ -33,15 +33,14 @@ import { devicesPerGateway, GatewayDeviceCount } from './device-gateway-chart';
     providedIn: 'root',
 })
 export class DeviceGatewayService {
-    constructor(
-        private http: HttpClient,
-        private monitorService: MonitorService,
-        private elementSizeService: ElementSizeService,
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
-        private networksService: NetworksService,
-    ) {}
+    private http = inject(HttpClient);
+    private monitorService = inject(MonitorService);
+    private elementSizeService = inject(ElementSizeService);
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private networksService = inject(NetworksService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

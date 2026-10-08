@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { concatMap, forkJoin, from, map, mergeMap, Observable, Subscription, toArray } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -67,6 +67,22 @@ const grids = new Map([
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatBadge, MatMenuTrigger, MatMenu, MatMenuItem, NgClass, SortComponent, MatChipSet, MatChipRow, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatCheckbox, SpinnerComponent, DatePipe]
 })
 export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDestroy {
+    private sanitizer = inject(DomSanitizer);
+    private utilService = inject(UtilService);
+    private searchbarService = inject(SearchbarService);
+    private platformDeploymentsService = inject(DeploymentsService);
+    private responsiveService = inject(ResponsiveService);
+    private snackBar = inject(MatSnackBar);
+    private clipboardService = inject(ClipboardService);
+    private router = inject(Router);
+    private route = inject(ActivatedRoute);
+    private dialogsService = inject(DialogsService);
+    private dialog = inject(MatDialog);
+    private fogDeploymentsFactory = inject(DeploymentsFogFactory);
+    private _formBuilder = inject(FormBuilder);
+    private hubsService = inject(NetworksService);
+    private metadataExistenceService = inject(MetadataExistenceService);
+
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
     gridCols = 0;
     sortAttributes = [new SortModel('Date', 'deploymentTime', 'desc'), new SortModel('Name', 'name', 'asc')];
@@ -120,23 +136,9 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
-    constructor(
-        private sanitizer: DomSanitizer,
-        private utilService: UtilService,
-        private searchbarService: SearchbarService,
-        private platformDeploymentsService: DeploymentsService,
-        private responsiveService: ResponsiveService,
-        private snackBar: MatSnackBar,
-        private clipboardService: ClipboardService,
-        private router: Router,
-        private route: ActivatedRoute,
-        private dialogsService: DialogsService,
-        private dialog: MatDialog,
-        private fogDeploymentsFactory: DeploymentsFogFactory,
-        private _formBuilder: FormBuilder,
-        private hubsService: NetworksService,
-        private metadataExistenceService: MetadataExistenceService,
-    ) {
+    constructor() {
+        const platformDeploymentsService = this.platformDeploymentsService;
+
         this.deploymentsService = platformDeploymentsService;
     }
 

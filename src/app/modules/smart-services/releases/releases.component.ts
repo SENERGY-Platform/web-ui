@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {ProcessModel} from '../../processes/process-repo/shared/process.model';
@@ -59,6 +59,20 @@ const grids = new Map([
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, SpinnerComponent, DatePipe]
 })
 export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnDestroy {
+    private permissionsDialogService = inject(PermissionsDialogService);
+    private searchbarService = inject(SearchbarService);
+    private releasesService = inject(SmartServiceReleasesService);
+    private responsiveService = inject(ResponsiveService);
+    private snackBar = inject(MatSnackBar);
+    private dialogsService = inject(DialogsService);
+    private sanitizer = inject(DomSanitizer);
+    private utilService = inject(UtilService);
+    private _formBuilder = inject(FormBuilder);
+    private activatedRoute = inject(ActivatedRoute);
+    private router = inject(Router);
+    private instanceDialogService = inject(SmartServiceInstanceDialogService);
+    private metadataExistenceService = inject(MetadataExistenceService);
+
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
 
     gridCols = 0;
@@ -82,24 +96,6 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     private knownMainPanelOffsetHeight = 0;
 
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
-
-    constructor(
-        private permissionsDialogService: PermissionsDialogService,
-        private searchbarService: SearchbarService,
-        private releasesService: SmartServiceReleasesService,
-        private responsiveService: ResponsiveService,
-        private snackBar: MatSnackBar,
-        private dialogsService: DialogsService,
-        private sanitizer: DomSanitizer,
-        private utilService: UtilService,
-        private _formBuilder: FormBuilder,
-        private activatedRoute: ActivatedRoute,
-        private router: Router,
-        private instanceDialogService: SmartServiceInstanceDialogService,
-        private metadataExistenceService: MetadataExistenceService,
-    ) {
-
-    }
 
     ngOnInit() {
         this.userHasDeleteAuthorization = this.releasesService.userHasDeleteAuthorization();

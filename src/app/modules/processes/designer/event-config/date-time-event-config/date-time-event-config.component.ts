@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
+import { Component, EventEmitter, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {rangeValidator} from '../../../../../core/validators/range.validator';
 import { MatFormField, MatLabel, MatSuffix, MatError } from '@angular/material/form-field';
@@ -30,14 +30,14 @@ import { MatErrorMessagesDirective } from '../../../../../core/directives/matErr
     imports: [FormsModule, MatFormField, MatInput, MatDatepickerInput, ReactiveFormsModule, MatLabel, MatDatepickerToggle, MatSuffix, MatDatepicker, MatError, MatErrorMessagesDirective]
 })
 export class DateTimeEventConfigComponent implements OnInit {
+    private localeId = inject(LOCALE_ID);
+
     @Input() initial = '';
     @Output() update = new EventEmitter<{ iso: string; text: string }>();
 
     date = new UntypedFormControl(new Date(), Validators.required);
     hour = new UntypedFormControl(0, [rangeValidator(0, 23)]);
     minute = new UntypedFormControl(0, [rangeValidator(0, 59)]);
-
-    constructor(@Inject(LOCALE_ID) private localeId: string) {}
 
     ngOnInit() {
         this.date.valueChanges.subscribe((value) => {

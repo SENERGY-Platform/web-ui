@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ChartsExportVAxesModel, ChartsExportDeviceGroupMergingStrategy, ChartsExportConversion } from '../../shared/charts-export-properties.model';
 import { ListRulesComponent } from '../list-rules/list-rules.component';
@@ -41,6 +41,8 @@ import { MatCheckbox } from '@angular/material/checkbox';
     imports: [CdkDrag, MatIconButton, CdkDragHandle, MatIcon, MatCard, MatCardHeader, MatCardTitle, NgClass, MatCardContent, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatCheckbox, CdkDropList]
 })
 export class AxisConfigComponent {
+    private dialog = inject(MatDialog);
+
     @Input() groupTypeIsDifference = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
@@ -60,10 +62,6 @@ export class AxisConfigComponent {
 
     chartsExportDeviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy;
     super = ChartsExportEditDialogComponent;
-
-    constructor(
-        private dialog: MatDialog,
-    ) { }
 
     listRules(element: ChartsExportVAxesModel) {
         const dialog = this.dialog.open(ListRulesComponent, {

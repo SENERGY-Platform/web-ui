@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
@@ -64,6 +64,13 @@ interface DataTableComponentItem {
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatIcon, MatTooltip, NgStyle, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class DataTableComponent implements OnInit, OnDestroy {
+    private dashboardService = inject(DashboardService);
+    private dialog = inject(MatDialog);
+    private exportDataService = inject(ExportDataService);
+    private decimalPipe = inject(DecimalPipe);
+    private datePipe = inject(DatePipe);
+    private deviceInstancesServcie = inject(DeviceInstancesService);
+
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -79,16 +86,6 @@ export class DataTableComponent implements OnInit, OnDestroy {
     @Input() userHasDeleteAuthorization = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() userHasUpdateNameAuthorization = false;
-
-    constructor(
-        private dashboardService: DashboardService,
-        private dialog: MatDialog,
-        private exportDataService: ExportDataService,
-        private decimalPipe: DecimalPipe,
-        private datePipe: DatePipe,
-        private deviceInstancesServcie: DeviceInstancesService,
-    ) {
-    }
 
     private static parseNumber(m: DataTableComponentItem, max: boolean): number {
         if (m.value == null) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
@@ -46,6 +46,10 @@ export interface AttributeKeyWithDescription {
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatDivider, MatFormField, MatTooltip, MatLabel, MtxSelect, MtxOption, MatError, MatErrorMessagesDirective, MatInput, MatIconButton, MatIcon, MatButton, MatDialogActions]
 })
 export class DeviceInstancesDefaultAttributesDialogComponent implements OnInit {
+    private dialogRef = inject<MatDialogRef<DeviceInstancesDefaultAttributesDialogComponent>>(MatDialogRef);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private errorHandlerService = inject(ErrorHandlerService);
+
     knownAttributes: AttributeKeyWithDescription[] = [
         {key: 'anomaly-detector'},
         {key: 'timezone'},
@@ -58,14 +62,6 @@ export class DeviceInstancesDefaultAttributesDialogComponent implements OnInit {
     ];
     attributes: Attribute[] = [];
     ready = false;
-
-    constructor(
-        private dialogRef: MatDialogRef<DeviceInstancesDefaultAttributesDialogComponent>,
-        private deviceInstancesService: DeviceInstancesService,
-        private errorHandlerService: ErrorHandlerService,
-    ) {
-
-    }
 
     ngOnInit(): void {
         this.deviceInstancesService.getDefaultAttributes().subscribe(a => {

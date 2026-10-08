@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import {
     NotificationBrokerListModel,
@@ -38,19 +38,19 @@ import { LadonService } from 'src/app/modules/admin/permissions/shared/services/
     providedIn: 'root',
 })
 export class NotificationService implements OnDestroy {
+    private errorHandlerService = inject(ErrorHandlerService);
+    private http = inject(HttpClient);
+    private authorizationService = inject(AuthorizationService);
+    private dialog = inject(MatDialog);
+    private ladonService = inject(LadonService);
+
     private notificationEmitter: ReplaySubject<NotificationModel[]> = new ReplaySubject(1);
 
     private webSocketSubject: WebSocketSubject<any> | undefined;
     private notifications: NotificationModel[] = [];
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private errorHandlerService: ErrorHandlerService,
-        private http: HttpClient,
-        private authorizationService: AuthorizationService,
-        private dialog: MatDialog,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.initWs();
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.notificationsUrl);
     }

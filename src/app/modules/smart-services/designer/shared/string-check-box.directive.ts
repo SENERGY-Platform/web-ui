@@ -15,16 +15,19 @@
  */
 
 
-import {Directive, Input, Optional, Self} from '@angular/core';
+import { Directive, Input, inject } from '@angular/core';
 import {ControlValueAccessor, NgControl} from '@angular/forms';
 import { MatCheckbox } from '@angular/material/checkbox';
 
 @Directive({ selector: 'mat-checkbox[appStringCheckboxValue]' })
 export class CheckboxValueDirective implements ControlValueAccessor {
+    private ngControl = inject(NgControl, { optional: true, self: true });
+    private checkbox = inject(MatCheckbox);
+
     @Input() trueValue: any = true;
     @Input() falseValue: any = false;
 
-    constructor(@Optional() @Self() private ngControl: NgControl, private checkbox: MatCheckbox) {
+    constructor() {
         if (this.ngControl) {
             this.ngControl.valueAccessor = this;
         }

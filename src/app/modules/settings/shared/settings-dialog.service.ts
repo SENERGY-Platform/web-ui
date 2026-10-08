@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { SettingsChangeDialogComponent } from '../dialogs/settings-change-dialog.component';
@@ -28,15 +28,15 @@ import { environment } from '../../../../environments/environment';
     providedIn: 'root',
 })
 export class SettingsDialogService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private dialog = inject(MatDialog);
+    snackBar = inject(MatSnackBar);
+    private ladonService = inject(LadonService);
+
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private dialog: MatDialog,
-        public snackBar: MatSnackBar,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.usersServiceUrl);
     }
 

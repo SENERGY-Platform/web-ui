@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
@@ -74,6 +74,15 @@ import { DatePipe } from '@angular/common';
     imports: [SpinnerComponent, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatSuffix, ReportTreeComponent, MatCard, MatCardContent, MatError, MatErrorMessagesDirective, MatButton, ReportObjectComponent, MatProgressBar, RouterLink, MatFabButton, DatePipe]
 })
 export class ReportComponent implements OnInit, OnDestroy {
+    private route = inject(ActivatedRoute);
+    snackBar = inject(MatSnackBar);
+    utilsService = inject(UtilService);
+    private reportingService = inject(ReportingService);
+    private deviceInstanceService = inject(DeviceInstancesService);
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private router = inject(Router);
+    private viewService = inject(ReportObjectViewService);
+
 
     reportId: string | null = null;
     template: TemplateModel = { data: {} } as TemplateModel;
@@ -102,16 +111,7 @@ export class ReportComponent implements OnInit, OnDestroy {
 
     private destroy = new Subject<void>();
 
-    constructor(
-        private route: ActivatedRoute,
-        public snackBar: MatSnackBar,
-        public utilsService: UtilService,
-        private reportingService: ReportingService,
-        private deviceInstanceService: DeviceInstancesService,
-        private deviceGroupsService: DeviceGroupsService,
-        private router: Router,
-        private viewService: ReportObjectViewService
-    ) {
+    constructor() {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
         this.templateId = this.route.snapshot.paramMap.get('templateId');
     }

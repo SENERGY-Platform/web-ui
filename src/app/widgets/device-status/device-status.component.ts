@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -45,6 +45,13 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIcon, NgStyle, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetFooterComponent, DatePipe]
 })
 export class DeviceStatusComponent implements OnInit, OnDestroy {
+    private iconRegistry = inject(MatIconRegistry);
+    private sanitizer = inject(DomSanitizer);
+    private deviceStatusDialogService = inject(DeviceStatusDialogService);
+    private dashboardService = inject(DashboardService);
+    private deploymentsService = inject(DeploymentsService);
+    private exportDataService = inject(ExportDataService);
+
     configured = false;
     destroy = new Subscription();
     dataReady = false;
@@ -58,15 +65,6 @@ export class DeviceStatusComponent implements OnInit, OnDestroy {
     @Input() userHasUpdateNameAuthorization = false;
 
     @ViewChild(MatTable, { static: false }) table!: MatTable<any>;
-
-    constructor(
-        private iconRegistry: MatIconRegistry,
-        private sanitizer: DomSanitizer,
-        private deviceStatusDialogService: DeviceStatusDialogService,
-        private dashboardService: DashboardService,
-        private deploymentsService: DeploymentsService,
-        private exportDataService: ExportDataService,
-    ) {}
 
     ngOnInit() {
         this.update();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { forkJoin, map, Observable, of, shareReplay } from 'rxjs';
 import { FunctionsService } from '../functions/shared/functions.service';
 import { DeviceClassesService } from '../device-classes/shared/device-classes.service';
@@ -35,14 +35,12 @@ const listLimit = 9999;
     providedIn: 'root',
 })
 export class MetadataExistenceService {
-    private catalogs = new Map<MetadataKind, Observable<Set<string> | null>>();
+    private functionsService = inject(FunctionsService);
+    private deviceClassesService = inject(DeviceClassesService);
+    private characteristicsService = inject(CharacteristicsService);
+    private deviceTypeService = inject(DeviceTypeService);
 
-    constructor(
-        private functionsService: FunctionsService,
-        private deviceClassesService: DeviceClassesService,
-        private characteristicsService: CharacteristicsService,
-        private deviceTypeService: DeviceTypeService,
-    ) {}
+    private catalogs = new Map<MetadataKind, Observable<Set<string> | null>>();
 
     /**
      * Maps the key of every bpmn document that references missing metadata to the text of its

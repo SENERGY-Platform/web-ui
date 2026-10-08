@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { SidenavService } from '../sidenav/shared/sidenav.service';
 import { Router, RouterLink } from '@angular/router';
 import { AuthorizationService } from '../../services/authorization.service';
@@ -38,21 +38,19 @@ import { MatDivider } from '@angular/material/divider';
     imports: [MatToolbar, MatIconButton, MatIcon, RouterLink, MatBadge, MatMenuTrigger, MatMenu, MatMenuItem, MatDivider]
 })
 export class ToolbarComponent implements OnInit {
+    private sidenavService = inject(SidenavService);
+    private router = inject(Router);
+    private authorizationService = inject(AuthorizationService);
+    private settingsDialogService = inject(SettingsDialogService);
+    private themingService = inject(ThemingService);
+    private notificationService = inject(NotificationService);
+    private infoService = inject(InfoService);
+
     userName = '';
     notifications: NotificationModel[] = [];
     unreadCounter = 0;
     userHasSettingsUpdateAuthorization = false;
     userHasNotificationsReadAuthorization = false;
-
-    constructor(
-        private sidenavService: SidenavService,
-        private router: Router,
-        private authorizationService: AuthorizationService,
-        private settingsDialogService: SettingsDialogService,
-        private themingService: ThemingService,
-        private notificationService: NotificationService,
-        private infoService: InfoService
-    ) {}
 
     ngOnInit() {
         this.initUser();

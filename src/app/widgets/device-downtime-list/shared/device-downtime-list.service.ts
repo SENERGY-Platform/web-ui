@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DeviceDowntimeListEditDialogComponent } from '../dialogs/device-downtime-list-edit-dialog.component';
@@ -29,12 +29,10 @@ import { DevicesDowntimeListPropertiesModel } from './device-downtime-list.model
     providedIn: 'root',
 })
 export class DeviceDowntimeListService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private deviceInstancesService: DeviceInstancesService,
-    ) {
-    }
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

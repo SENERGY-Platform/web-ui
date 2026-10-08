@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -33,16 +33,16 @@ import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared
     providedIn: 'root',
 })
 export class MonitorService {
+    private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private dialog = inject(MatDialog);
+    private processIncidentsService = inject(ProcessIncidentsService);
+    private ladonService = inject(LadonService);
+
     private getAllHistoryInstancesObservable: Observable<MonitorProcessModel[]> | null = null;
     authorizations: PermissionTestResponse;
 
-    constructor(
-        private http: HttpClient,
-        private errorHandlerService: ErrorHandlerService,
-        private dialog: MatDialog,
-        private processIncidentsService: ProcessIncidentsService,
-        private ladonService: LadonService
-    ) {
+    constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl);
     }
 

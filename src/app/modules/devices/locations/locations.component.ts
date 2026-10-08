@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -45,6 +45,14 @@ import { MatIcon } from '@angular/material/icon';
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatTooltip, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
+    private locationsService = inject(LocationsService);
+    private searchbarService = inject(SearchbarService);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
+    private dialogsService = inject(DialogsService);
+    preferencesService = inject(PreferencesService);
+    private permissionsDialogService = inject(PermissionsDialogService);
+
     displayedColumns = ['select', 'name', 'show'];
     pageSize = this.preferencesService.pageSize;
     ready = false;
@@ -62,16 +70,6 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
     userHasShareAuthorization = false;
-
-    constructor(
-        private locationsService: LocationsService,
-        private searchbarService: SearchbarService,
-        private snackBar: MatSnackBar,
-        private router: Router,
-        private dialogsService: DialogsService,
-        public preferencesService: PreferencesService,
-        private permissionsDialogService: PermissionsDialogService,
-    ) {}
 
     ngOnInit() {
         this.initSearch();

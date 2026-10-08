@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {ExportService} from '../../../modules/exports/shared/export.service';
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
@@ -50,6 +50,14 @@ export interface DeviceTypeAspectNodeModelWithRootName extends DeviceTypeAspectN
     providedIn: 'root',
 })
 export class DataTableHelperService {
+    private exportService = inject(ExportService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private pipelineRegistryService = inject(PipelineRegistryService);
+    private operatorRepoService = inject(OperatorRepoService);
+    private importInstancesService = inject(ImportInstancesService);
+    private importTypesService = inject(ImportTypesService);
+
     exportCache: ExportModel[] | undefined = undefined;
     exportTagCache: Map<string, Map<string, { value: string; parent: string }[]>> | undefined = undefined;
     pipelineCache: PipelineModel[] | undefined = undefined;
@@ -63,16 +71,6 @@ export class DataTableHelperService {
     importTypes: ImportTypeModel[] = [];
     fullImportTypes = new Map<string, ImportTypeModel>();
     importTypeValues = new Map<string, ExportValueModel[]>();
-
-    constructor(
-        private exportService: ExportService,
-        private deviceTypeService: DeviceTypeService,
-        private deviceInstancesService: DeviceInstancesService,
-        private pipelineRegistryService: PipelineRegistryService,
-        private operatorRepoService: OperatorRepoService,
-        private importInstancesService: ImportInstancesService,
-        private importTypesService: ImportTypesService,
-    ) {}
 
     static translateValueType(schemaOrgType: string): string {
         switch (schemaOrgType) {

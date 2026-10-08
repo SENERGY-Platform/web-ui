@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { NavigationEnd, Router, RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
@@ -38,6 +38,11 @@ import { MatBadge } from '@angular/material/badge';
     imports: [MatSidenavContainer, NgStyle, MatSidenav, MatButton, RouterLinkActive, RouterLink, MatIcon, NgClass, MatBadge, MatSidenavContent, RouterOutlet, UpperCasePipe]
 })
 export class SidenavComponent implements OnInit, AfterViewInit {
+    private router = inject(Router);
+    private sidenavService = inject(SidenavService);
+    private responsiveService = inject(ResponsiveService);
+    private cd = inject(ChangeDetectorRef);
+
     @ViewChild('sidenav', { static: false }) sidenav!: MatSidenav;
     mode = '';
     sections: SidenavSectionModel[] = [];
@@ -56,14 +61,6 @@ export class SidenavComponent implements OnInit, AfterViewInit {
         } else {
             sessionStorage.removeItem('SidenavComponent/shouldStartOpen');
         }
-    }
-
-    constructor(
-        private router: Router,
-        private sidenavService: SidenavService,
-        private responsiveService: ResponsiveService,
-        private cd: ChangeDetectorRef,
-    ) {
     }
 
     ngOnInit() {

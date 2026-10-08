@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {Observable} from 'rxjs';
 import {EnergyPredictionColumnModel, EnergyPredictionModel} from './energy-prediction.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -35,12 +35,11 @@ import {environment} from '../../../../environments/environment';
     providedIn: 'root',
 })
 export class EnergyPredictionService {
-    constructor(
-        private dialog: MatDialog,
-        private dashboardService: DashboardService,
-        private errorHandlerService: ErrorHandlerService,
-        private exportDataService: ExportDataService,
-    ) {}
+    private dialog = inject(MatDialog);
+    private dashboardService = inject(DashboardService);
+    private errorHandlerService = inject(ErrorHandlerService);
+    private exportDataService = inject(ExportDataService);
+
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();

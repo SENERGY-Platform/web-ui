@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject, map, of, switchMap, takeUntil } from 'rxjs';
@@ -177,6 +177,13 @@ function combine(values: number[], aggregation: 'sum' | 'mean'): number | null {
     imports: [FormsModule, ReactiveFormsModule, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MtxSelect, MatError, MatErrorMessagesDirective, MatCheckbox, MtxOption, MatHint, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatButton]
 })
 export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceGroupsService = inject(DeviceGroupsService);
+    private functionsService = inject(FunctionsService);
+    private exportDataService = inject(ExportDataService);
+    private errorService = inject(ErrorHandlerService);
+    private dialog = inject(MatDialog);
+
 
     @Input() form!: DynamicFormGroup;
     @Input() allDevices: DeviceInstanceModel[] = [];
@@ -221,15 +228,6 @@ export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
     private deviceClasses: DeviceTypeDeviceClassModel[] = [];
 
     private formChange = new Subject<void>();
-
-    constructor(
-        private deviceTypeService: DeviceTypeService,
-        private deviceGroupsService: DeviceGroupsService,
-        private functionsService: FunctionsService,
-        private exportDataService: ExportDataService,
-        private errorService: ErrorHandlerService,
-        private dialog: MatDialog) {
-    }
 
     ngOnInit() {
         // Reference data for the criteria labels, shared by every device group and therefore loaded only once.

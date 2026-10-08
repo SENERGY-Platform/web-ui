@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -26,6 +26,9 @@ import { NameValuePair } from './dwd-pollen.model';
     providedIn: 'root',
 })
 export class DWDPollenService {
+    private errorHandlerService = inject(ErrorHandlerService);
+    private http = inject(HttpClient);
+
     private pollenLevel: NameValuePair[] = [
         {
             name: 'keine Belastung',
@@ -56,8 +59,6 @@ export class DWDPollenService {
             value: 7,
         },
     ];
-
-    constructor(private errorHandlerService: ErrorHandlerService, private http: HttpClient) {}
 
     getPollenAreaResponse(): Observable<any> {
         return this.http
