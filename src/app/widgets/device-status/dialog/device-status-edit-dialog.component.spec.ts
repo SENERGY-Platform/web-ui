@@ -175,28 +175,28 @@ describe('DeviceStatusEditDialogComponent', () => {
                 } as DeviceTypeModel),
             );
 
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DeviceStatusEditDialogComponent],
-    imports: [CoreModule,
-        MatSnackBarModule,
-        MatDialogModule,
-        MatIconModule,
-        MatExpansionModule,
-        MatInputModule,
-        ReactiveFormsModule],
-    providers: [
-        provideRouter([]),
-        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-        { provide: DashboardService, useValue: dashboardServiceSpy },
-        { provide: DeviceTypeService, useValue: deviceTypeServiceeSpy },
-        { provide: DeploymentsService, useValue: deploymentsServiceSpy },
-        { provide: ExportService, useValue: exportServiceSpy },
-        { provide: MatDialogRef, useValue: matDialogRefSpy },
-        { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [CoreModule,
+                    MatSnackBarModule,
+                    MatDialogModule,
+                    MatIconModule,
+                    MatExpansionModule,
+                    MatInputModule,
+                    ReactiveFormsModule, DeviceStatusEditDialogComponent],
+                providers: [
+                    provideRouter([]),
+                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+                    { provide: DashboardService, useValue: dashboardServiceSpy },
+                    { provide: DeviceTypeService, useValue: deviceTypeServiceeSpy },
+                    { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+                    { provide: ExportService, useValue: exportServiceSpy },
+                    { provide: MatDialogRef, useValue: matDialogRefSpy },
+                    { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            }).compileComponents();
             fixture = TestBed.createComponent(DeviceStatusEditDialogComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();

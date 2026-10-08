@@ -68,8 +68,6 @@ const routes: Routes = [
         MatInputModule,
         MatProgressSpinnerModule,
         MatIconModule,
-    ],
-    declarations: [
         SingleServiceDocComponent,
         ApiDocsComponent,
         ApiPlaygroundComponent,

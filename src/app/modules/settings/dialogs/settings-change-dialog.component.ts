@@ -17,20 +17,21 @@
 import {Component, Inject, OnInit, DOCUMENT, ChangeDetectionStrategy} from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/model/authorization/authorization-profile.model';
-import {
-    FormGroup,
-    UntypedFormBuilder,
-    Validators
-} from '@angular/forms';
-import {MatDialogRef} from '@angular/material/dialog';
+import { FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatButton } from '@angular/material/button';
 
 
 @Component({
     templateUrl: './settings-change-dialog.component.html',
     styleUrls: ['./settings-change-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class SettingsChangeDialogComponent implements OnInit {
     profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };

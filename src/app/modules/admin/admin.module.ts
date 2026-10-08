@@ -75,16 +75,6 @@ const listRules: Route[] = [
     }];
 
 @NgModule({
-    declarations: [
-        PermissionsListComponent,
-        PermissionsEditComponent,
-        PermissionsDialogImportComponent,
-        TimescaleRulesComponent,
-        TimescaleRulesCreateEditComponent,
-        TimescaleRulesCreateEditTemplateComponent,
-        BudgetComponent,
-        BudgetCreateEditComponent
-    ],
     imports: [
         CommonModule,
         FormsModule,
@@ -111,6 +101,14 @@ const listRules: Route[] = [
         MatExpansionModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        PermissionsListComponent,
+        PermissionsEditComponent,
+        PermissionsDialogImportComponent,
+        TimescaleRulesComponent,
+        TimescaleRulesCreateEditComponent,
+        TimescaleRulesCreateEditTemplateComponent,
+        BudgetComponent,
+        BudgetCreateEditComponent,
     ]
 })
 export class AdminModule {

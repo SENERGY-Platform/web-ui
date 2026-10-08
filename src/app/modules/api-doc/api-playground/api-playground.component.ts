@@ -16,7 +16,7 @@
  *
  */
 
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { markRaw } from 'vue';
@@ -38,7 +38,8 @@ const routePrefix = '/dev/api/playground';
     templateUrl: './api-playground.component.html',
     styleUrls: ['./api-playground.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    // Kept from the former ApiDocModule: the template uses custom elements and tags no component here registers.
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ApiPlaygroundComponent implements OnInit, OnDestroy {
     ready = false;

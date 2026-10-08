@@ -28,17 +28,17 @@ describe('EditComponent', () => {
     let fixture: ComponentFixture<EditComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [EditComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: {} },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-})
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule,
+                MatSnackBarModule, EditComponent],
+            providers: [
+                { provide: MAT_DIALOG_DATA, useValue: {} },
+                { provide: MatDialogRef, useValue: {} },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        })
             .compileComponents();
 
         fixture = TestBed.createComponent(EditComponent);

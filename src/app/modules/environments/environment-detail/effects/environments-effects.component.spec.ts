@@ -57,7 +57,6 @@ describe('EnvironmentsEffectsComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [EnvironmentsEffectsComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -68,6 +67,7 @@ describe('EnvironmentsEffectsComponent', () => {
                 MatButtonModule,
                 MatExpansionModule,
                 MtxSelectModule,
+                EnvironmentsEffectsComponent,
             ],
         }).compileComponents();
 

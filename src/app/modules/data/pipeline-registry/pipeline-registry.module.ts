@@ -64,7 +64,7 @@ const edit: Route = { path: 'data/pipelines/edit/:id', pathMatch: 'full', compon
         MatPrefix,
         MtxSelect,
         ReactiveFormsModule,
+        PipelineDetailsComponent, PipelineFilterDialogComponent,
     ],
-    declarations: [PipelineDetailsComponent, PipelineFilterDialogComponent],
 })
 export class PipelineRegistryModule {}

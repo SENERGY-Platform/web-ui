@@ -31,7 +31,7 @@ import { GoogleSeries } from '../../../core/charts/google-lines';
 import { chartsExportLineConfig, chartsExportPieConfig, chartsExportSeries } from './charts-export-line-chartjs';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './shared/charts-export-properties.model';
 import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartTypeRegistry, Point, TooltipModel, Plugin, LegendElement, LegendItem, ChartEvent } from 'chart.js';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgStyle } from '@angular/common';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import {
     columnDatasets,
@@ -51,13 +51,24 @@ import {
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { findLabel, getLabelHitBoxes } from './chartjs-axis-click';
 import { bucketTimes } from './chartjs-bucket-gaps';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../components/widget-header/widget-header.component';
+import { TimelineComponent } from '../shared/chart-types/timeline/timeline.component';
+import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { AnnotationChartComponent } from './annotation-chart/annotation-chart.component';
+import { WidgetNoDataComponent } from '../../../core/components/widget-no-data/widget-no-data.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { WidgetFooterComponent } from '../../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-charts-export',
     templateUrl: './charts-export.component.html',
     styleUrls: ['./charts-export.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, TimelineComponent, WidgetSpinnerComponent, BaseChartDirective, AnnotationChartComponent, WidgetNoDataComponent, NgStyle, MatIconButton, MatIcon, MatTooltip, WidgetFooterComponent]
 })
 export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     chartExportData = {} as ChartsExportChart;

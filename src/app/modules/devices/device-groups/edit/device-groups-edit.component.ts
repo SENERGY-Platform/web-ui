@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -33,13 +33,23 @@ import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups-pipel
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
+import { MatFormField, MatLabel, MatError, MatPrefix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { MatCard, MatCardTitle, MatCardActions } from '@angular/material/card';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/divider';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 @Component({
     selector: 'senergy-device-groups-edit',
     templateUrl: './device-groups-edit.component.html',
     styleUrls: ['./device-groups-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatChipListbox, MatChipOption, MatCard, MatCardTitle, MatCardActions, MatIconButton, MatTooltip, MatIcon, MatDivider, MtxSelect, MatButton, MatPrefix]
 })
 export class DeviceGroupsEditComponent implements OnInit {
     id = '';

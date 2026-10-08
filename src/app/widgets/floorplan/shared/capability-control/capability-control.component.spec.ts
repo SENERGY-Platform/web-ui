@@ -30,8 +30,8 @@ describe('CapabilityControlComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
+            imports: [CapabilityControlComponent],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [CapabilityControlComponent],
         }).compileComponents();
     }));
 

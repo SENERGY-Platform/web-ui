@@ -15,18 +15,27 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WaitingDeviceModel } from '../shared/waiting-room.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { Attribute } from '../../device-instances/shared/device-instances.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatDivider } from '@angular/material/divider';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     templateUrl: './waiting-room-device-edit-dialog.component.html',
     styleUrls: ['./waiting-room-device-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, ReactiveFormsModule, MatDivider, MatIconButton, MatIcon, MatButton, MatDialogActions]
 })
 export class WaitingRoomDeviceEditDialogComponent {
     device: WaitingDeviceModel;

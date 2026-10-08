@@ -64,27 +64,27 @@ describe('DeviceInstancesComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DeviceInstancesComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule,
-        CoreModule,
-        MatTabsModule,
-        InfiniteScrollModule,
-        NoopAnimationsModule,
-        DevicesModule],
-    providers: [
-        { provide: KeycloakService, useClass: MockKeycloakService },
-        { provide: Router, useClass: RouterStub },
-        { provide: ActivatedRoute, useClass: ActivatedRouteStub },
-        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-        { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
-        { provide: ExportDataService, useValue: exportDataServiceSpy },
-        { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [MatDialogModule,
+                    MatSnackBarModule,
+                    CoreModule,
+                    MatTabsModule,
+                    InfiniteScrollModule,
+                    NoopAnimationsModule,
+                    DevicesModule, DeviceInstancesComponent],
+                providers: [
+                    { provide: KeycloakService, useClass: MockKeycloakService },
+                    { provide: Router, useClass: RouterStub },
+                    { provide: ActivatedRoute, useClass: ActivatedRouteStub },
+                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+                    { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+                    { provide: ExportDataService, useValue: exportDataServiceSpy },
+                    { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            }).compileComponents();
         }),
     );
 

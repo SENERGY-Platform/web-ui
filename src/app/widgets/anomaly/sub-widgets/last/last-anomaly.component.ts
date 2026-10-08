@@ -17,13 +17,15 @@
 import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { AnomalyResultModel } from '../../shared/anomaly.model';
+import { MatIcon } from '@angular/material/icon';
+import { DecimalPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'last-anomaly',
     templateUrl: './last-anomaly.component.html',
     styleUrls: ['./last-anomaly.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIcon, DecimalPipe, DatePipe]
 })
 export class LastAnomalyComponent implements OnInit {
   @Input() anomaly?: AnomalyResultModel;

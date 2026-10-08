@@ -81,7 +81,7 @@ const pipelineRegistry: Route = { path: 'data/pipelines', pathMatch: 'full', com
         MatChipSet,
         MatBadge,
         CdkOverlayOrigin,
+        OperatorRepoComponent, FlowRepoComponent, PipelineRegistryComponent,
     ],
-    declarations: [OperatorRepoComponent, FlowRepoComponent, PipelineRegistryComponent],
 })
 export class DataModule {}

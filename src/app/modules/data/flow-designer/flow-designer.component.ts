@@ -25,13 +25,23 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogData, FlowUpdateDialogComponent} from './update-dialog/flow-update-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {CellModel} from '../diagram-editor/shared/diagram.model';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, MatListItemMeta } from '@angular/material/list';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatFabButton } from '@angular/material/button';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-flow-designer',
     templateUrl: './flow-designer.component.html',
     styleUrls: ['./flow-designer.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SpinnerComponent, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, DiagramEditorComponent, MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, MatTooltip, MatButton, MatListItemMeta, MatFabButton, DatePipe]
 })
 export class FlowDesignerComponent implements AfterViewInit {
 

@@ -16,7 +16,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ImportTypeModel, ImportTypeModelWithCostEstimation } from './shared/import-types.model';
 import { ImportTypesService } from './shared/import-types.service';
-import { Sort } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
@@ -26,20 +26,27 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { forkJoin, Observable, map, Subscription, of, mergeMap, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { NgClass, CurrencyPipe } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'senergy-import-types',
     templateUrl: './import-types.component.html',
     styleUrls: ['./import-types.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, CurrencyPipe]
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];

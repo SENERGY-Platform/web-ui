@@ -15,7 +15,9 @@
  */
 
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton } from '@angular/material/button';
 
 /**
  * Shown instead of the generic error snackbar when a save answers 409: somebody else's write
@@ -28,7 +30,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     templateUrl: './environments-version-conflict-dialog.component.html',
     styleUrls: ['./environments-version-conflict-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class EnvironmentsVersionConflictDialogComponent {
     constructor(private dialogRef: MatDialogRef<EnvironmentsVersionConflictDialogComponent>) {}

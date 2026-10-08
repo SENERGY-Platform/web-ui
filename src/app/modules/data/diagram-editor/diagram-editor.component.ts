@@ -31,8 +31,7 @@ import {NodeFactory, NodePosition} from './shared/node-factory.service';
     templateUrl: './diagram-editor.component.html',
     styleUrls: ['./diagram-editor.component.css'],
     providers: [PaperService],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager
 })
 export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     private graph: any;

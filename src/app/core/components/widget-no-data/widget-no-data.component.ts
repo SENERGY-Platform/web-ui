@@ -20,8 +20,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
     selector: 'senergy-no-data',
     templateUrl: './widget-no-data.component.html',
     styleUrls: ['./widget-no-data.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager
 })
 export class WidgetNoDataComponent {
     @Input() showIf = false;

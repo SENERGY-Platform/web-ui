@@ -15,15 +15,19 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeploymentsService } from '../shared/deployments.service';
 import { DeploymentsOfflineReasonsModel } from '../shared/deployments.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './deployments-missing-dependencies-dialog.component.html',
     styleUrls: ['./deployments-missing-dependencies-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class DeploymentsMissingDependenciesDialogComponent {
     displayedColumns: string[] = ['description', 'id'];

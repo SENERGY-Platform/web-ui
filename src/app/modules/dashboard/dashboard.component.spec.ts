@@ -75,29 +75,29 @@ describe('DashboardComponent', () => {
                 },
             ] as DashboardModel[]);
 
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DashboardComponent],
-    imports: [CoreModule,
-        MatSnackBarModule,
-        MatDialogModule,
-        MatIconModule,
-        MatExpansionModule,
-        MatInputModule,
-        MatMenuModule,
-        ReactiveFormsModule,
-        MatTabsModule,
-        MatDividerModule,
-        NoopAnimationsModule,
-        MatButtonModule],
-    providers: [
-        provideRouter([]),
-        { provide: DashboardService, useValue: dashboardServiceSpy },
-        { provide: ResponsiveService, useValue: responsiveServiceSpy },
-        { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [CoreModule,
+                    MatSnackBarModule,
+                    MatDialogModule,
+                    MatIconModule,
+                    MatExpansionModule,
+                    MatInputModule,
+                    MatMenuModule,
+                    ReactiveFormsModule,
+                    MatTabsModule,
+                    MatDividerModule,
+                    NoopAnimationsModule,
+                    MatButtonModule, DashboardComponent],
+                providers: [
+                    provideRouter([]),
+                    { provide: DashboardService, useValue: dashboardServiceSpy },
+                    { provide: ResponsiveService, useValue: responsiveServiceSpy },
+                    { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            }).compileComponents();
             fixture = TestBed.createComponent(DashboardComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();

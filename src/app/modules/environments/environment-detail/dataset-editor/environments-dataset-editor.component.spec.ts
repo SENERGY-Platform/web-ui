@@ -30,6 +30,9 @@ import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
 import { EnvironmentsDatasetEditorComponent } from './environments-dataset-editor.component';
 import { DatasetMeta, DatasetSource } from '../../shared/environments.model';
 import { ExportModel } from '../../../exports/shared/export.model';
+import { provideAppCharts } from '../../../../core/charts/provide-app-charts';
+import { provideRouter } from '@angular/router';
+
 
 describe('EnvironmentsDatasetEditorComponent', () => {
     let component: EnvironmentsDatasetEditorComponent;
@@ -38,7 +41,6 @@ describe('EnvironmentsDatasetEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsDatasetEditorComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -49,7 +51,9 @@ describe('EnvironmentsDatasetEditorComponent', () => {
                 MatCheckboxModule,
                 MatButtonModule,
                 MtxSelectModule,
+                EnvironmentsDatasetEditorComponent,
             ],
+            providers: [provideAppCharts(), provideRouter([])],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsDatasetEditorComponent);
         component = fixture.componentInstance;

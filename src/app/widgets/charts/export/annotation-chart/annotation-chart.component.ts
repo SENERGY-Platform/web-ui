@@ -30,7 +30,7 @@ import {
     templateUrl: './annotation-chart.component.html',
     styleUrls: ['./annotation-chart.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false,
+    imports: [BaseChartDirective],
 })
 export class AnnotationChartComponent implements OnChanges, OnDestroy {
     @Input() series: GoogleSeries[] = [];

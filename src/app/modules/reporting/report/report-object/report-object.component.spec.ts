@@ -32,6 +32,7 @@ import { buildReportObjectsForm, groupOf } from '../../shared/report-object-form
 import { ReportObjectNode, buildReportObjectNodes, findNode } from '../../shared/report-object-node';
 import { ReportObjectViewService } from '../../shared/report-object-view.service';
 import { DeviceInstanceModel } from '../../../devices/device-instances/shared/device-instances.model';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 const device = { id: 'd1', name: 'Device 1', display_name: 'Device 1', device_type_id: 'dt1' } as DeviceInstanceModel;
 
@@ -70,7 +71,6 @@ describe('ReportObjectComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ReportObjectComponent],
             imports: [
                 CommonModule,
                 ReactiveFormsModule,
@@ -81,8 +81,9 @@ describe('ReportObjectComponent', () => {
                 MatDialogModule,
                 MatSnackBarModule,
                 MtxSelectModule,
+                ReportObjectComponent,
             ],
-            providers: [ReportObjectViewService],
+            providers: [ReportObjectViewService, provideNativeDateAdapter()],
         }).compileComponents();
         fixture = TestBed.createComponent(ReportObjectComponent);
         component = fixture.componentInstance;

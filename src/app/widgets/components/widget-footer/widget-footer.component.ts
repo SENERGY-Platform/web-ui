@@ -19,13 +19,17 @@ import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { WidgetFooterService } from './shared/widget-footer.service';
+import { MatCardActions } from '@angular/material/card';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'senergy-widget-footer',
     templateUrl: './widget-footer.component.html',
     styleUrls: ['./widget-footer.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCardActions, MatIconButton, MatTooltip, MatIcon]
 })
 export class WidgetFooterComponent {
     @Input() dashboardId = '';

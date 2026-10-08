@@ -29,6 +29,13 @@ import { ReportObjectViewService } from '../../shared/report-object-view.service
 import { DeviceInstanceModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceGroupDisplayModel } from '../../../devices/device-groups/shared/device-groups.model';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { QueryEditorComponent } from './query-editor/query-editor.component';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 const INPUT_TYPES: { value: InputType; label: string }[] = [
     { value: 'value', label: 'Value' },
@@ -41,7 +48,7 @@ const INPUT_TYPES: { value: InputType; label: string }[] = [
     templateUrl: './report-object.component.html',
     styleUrls: ['./report-object.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, QueryEditorComponent, MtxSelect]
 })
 export class ReportObjectComponent implements OnChanges, OnDestroy {
 

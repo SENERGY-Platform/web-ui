@@ -15,21 +15,26 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../device-instances/shared/device-instances.model';
 import { NetworksService } from '../shared/networks.service';
 import { forkJoin, Observable } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-device-groups-pipeline-helper-dialog',
     templateUrl: './networks-delete-dialog.component.html',
     styleUrls: ['./networks-delete-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class NetworksDeleteDialogComponent implements OnInit {
     deviceSelection = new SelectionModel<DeviceInstanceModel>(true, []);

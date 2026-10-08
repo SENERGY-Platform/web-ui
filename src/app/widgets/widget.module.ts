@@ -180,9 +180,7 @@ registerLocaleData(localeDe, 'de');
         ChartToolbarComponent,
         ColorPickerComponent,
         ColorPickerDirective,
-        ImageCropperComponent, 
-    ],
-    declarations: [
+        ImageCropperComponent,
         AnnotationChartComponent,
         RangeSliderComponent,
         RangeSliderEditDialogComponent,

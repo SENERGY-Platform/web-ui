@@ -28,13 +28,20 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { AnomaliesPerDevice, AnomalyResultModel } from './shared/anomaly.model';
 import { AnomalyService } from './shared/anomaly.service';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { AnomalyPhasesComponent } from './sub-widgets/timeline/anomaly-phases.component';
+import { LastAnomalyComponent } from './sub-widgets/last/last-anomaly.component';
+import { LineComponent } from './sub-widgets/line/line.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-anomaly-detection',
     templateUrl: './anomaly.component.html',
     styleUrls: ['./anomaly.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, AnomalyPhasesComponent, LastAnomalyComponent, LineComponent, WidgetFooterComponent]
 })
 export class AnomalyComponent implements OnInit,OnDestroy, AfterContentChecked {
     ready = false;

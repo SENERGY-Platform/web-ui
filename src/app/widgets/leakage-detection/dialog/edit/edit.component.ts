@@ -15,8 +15,8 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, UntypedFormBuilder, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormControl, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { concatMap, forkJoin, Observable, map } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -24,13 +24,21 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { ExportModel } from 'src/app/modules/exports/shared/export.model';
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
 import { LeakageDetectionWidgetPropertiesModel } from '../../shared/leakage-detction.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-edit',
     templateUrl: './edit.component.html',
     styleUrls: ['./edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class LeakageDetectionEditComponent implements OnInit {
     userHasUpdateNameAuthorization = false;

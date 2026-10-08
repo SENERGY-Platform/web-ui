@@ -15,9 +15,15 @@
  */
 
 import { Component, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { EnvironmentsService } from '../../shared/environments.service';
 import { DatasetMeta, isApiError } from '../../shared/environments.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
 
 /**
  * Kept open on failure so the API's error -- typically naming the broken CSV line -- stays
@@ -28,7 +34,7 @@ import { DatasetMeta, isApiError } from '../../shared/environments.model';
     templateUrl: './environments-dataset-upload-dialog.component.html',
     styleUrls: ['./environments-dataset-upload-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatButton, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatIcon, MatDialogActions]
 })
 export class EnvironmentsDatasetUploadDialogComponent {
     fileName = '';

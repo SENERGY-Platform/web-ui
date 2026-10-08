@@ -44,17 +44,25 @@ import {PermissionsMockService} from '../../permissions/shared/permissions.servi
 import {CostMockService} from '../../cost/shared/cost.service.mock';
 import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-registry.service';
 import {FlowUsage,} from '../pipeline-registry/shared/pipeline.model';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {MatTableDataSource} from '@angular/material/table';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {PreferencesService} from '../../../core/services/preferences.service';
 import {SelectionModel} from '@angular/cdk/collections';
-import {MatSort} from '@angular/material/sort';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import {startWith, switchMap} from 'rxjs/operators';
-import {FlexibleConnectedPositionStrategy, Overlay, OverlayRef} from '@angular/cdk/overlay';
+import { FlexibleConnectedPositionStrategy, Overlay, OverlayRef, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
 import {FlowFilterDialogComponent} from './flow-filter-dialog/flow-filter-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 
 @Component({
@@ -70,7 +78,7 @@ import {MatDialog} from '@angular/material/dialog';
         }
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, CdkOverlayOrigin, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, CurrencyPipe, DatePipe]
 })
 export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;

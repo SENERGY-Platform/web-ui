@@ -23,9 +23,9 @@ import {
 } from '@angular/material/snack-bar';
 import {merge, Subscription} from 'rxjs';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import {SelectionModel} from '@angular/cdk/collections';
-import {MatTableDataSource} from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeDelete, WaitingRoomEventTypeSet, WaitingRoomEventTypeUse} from './shared/waiting-room.model';
 import {startWith, switchMap} from 'rxjs/operators';
 import {WaitingRoomService} from './shared/waiting-room.service';
@@ -38,6 +38,13 @@ import {
 import {ClosableSnackBarComponent} from '../../../core/components/closable-snack-bar/closable-snack-bar.component';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { TableRowAnimations } from 'src/app/core/animations/table-animation';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -45,7 +52,7 @@ import { TableRowAnimations } from 'src/app/core/animations/table-animation';
     styleUrls: ['./waiting-room.component.css'],
     animations: [TableRowAnimations.getRowAnimation()],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
 export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     static wmbusKeyAttributeKey = 'wmbus/key';

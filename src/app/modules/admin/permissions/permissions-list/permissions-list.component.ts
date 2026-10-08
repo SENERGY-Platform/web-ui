@@ -18,10 +18,10 @@
 
 import {SelectionModel} from '@angular/cdk/collections';
 import {AfterViewInit, Component, isDevMode, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
-import {MatSort, Sort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
+import { MatSort, Sort, MatSortHeader } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {DomSanitizer} from '@angular/platform-browser';
 import {interval, Observable, Subscription} from 'rxjs';
 import {debounce, map, startWith} from 'rxjs/operators';
@@ -35,13 +35,26 @@ import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.com
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { MatCard, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel, MatError, MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatInput } from '@angular/material/input';
+import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-permissions-list',
     templateUrl: './permissions-list.component.html',
     styleUrls: ['./permissions-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, MatCardTitle, MatCardContent, MatFormField, MatLabel, MtxSelect, MtxOption, MatInput, FormsModule, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatError, MatErrorMessagesDirective, MatCheckbox, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, MatFabButton, AsyncPipe]
 })
 export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestroy {
 

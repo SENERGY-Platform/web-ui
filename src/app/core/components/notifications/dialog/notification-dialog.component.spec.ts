@@ -73,8 +73,8 @@ describe('NotificationDialogComponent', () => {
         service = new NotificationServiceStub();
 
         await TestBed.configureTestingModule({
+            imports: [NotificationDialogComponent],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [NotificationDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: { close: () => undefined } },
                 { provide: AuthorizationService, useValue: { getUserId: () => 'user-1' } },

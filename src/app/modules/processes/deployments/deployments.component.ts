@@ -29,7 +29,7 @@ import { environment } from '../../../../environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeploymentsMissingDependenciesDialogComponent } from './dialogs/deployments-missing-dependencies-dialog.component';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CamundaVariable } from './shared/deployments-definition.model';
 import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-start-parameter-dialog.component';
@@ -37,6 +37,19 @@ import { DeploymentsFogFactory } from './shared/deployments-fog.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { NgClass, DatePipe } from '@angular/common';
+import { SortComponent } from '../../../core/components/sort/sort.component';
+import { MatChipSet, MatChipRow, MatChipRemove } from '@angular/material/chips';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler } from '@angular/material/grid-list';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -51,7 +64,7 @@ const grids = new Map([
     templateUrl: './deployments.component.html',
     styleUrls: ['./deployments.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatBadge, MatMenuTrigger, MatMenu, MatMenuItem, NgClass, SortComponent, MatChipSet, MatChipRow, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatCheckbox, SpinnerComponent, DatePipe]
 })
 export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

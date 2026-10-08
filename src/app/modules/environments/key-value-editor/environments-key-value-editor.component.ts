@@ -15,6 +15,13 @@
  */
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatIconButton, MatButton } from '@angular/material/button';
 
 export type KeyValueEditorMode = 'mixed' | 'number';
 
@@ -52,7 +59,7 @@ interface Row {
     templateUrl: './environments-key-value-editor.component.html',
     styleUrls: ['./environments-key-value-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatIcon, MatSuffix, MatTooltip, MatButtonToggleGroup, MatButtonToggle, MatIconButton, MatButton]
 })
 export class EnvironmentsKeyValueEditorComponent implements OnChanges {
     @Input() record: Record<string, unknown> | undefined;

@@ -16,6 +16,9 @@
 
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { withFactorSet } from '../../shared/environments-source';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 
 /**
  * A per-hour or per-weekday factor set (24 or 7 entries), edited as a small bar chart
@@ -34,7 +37,7 @@ import { withFactorSet } from '../../shared/environments-source';
     templateUrl: './environments-factor-bars.component.html',
     styleUrls: ['./environments-factor-bars.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatHint]
 })
 export class EnvironmentsFactorBarsComponent implements OnChanges {
     @Input() values: number[] | undefined;

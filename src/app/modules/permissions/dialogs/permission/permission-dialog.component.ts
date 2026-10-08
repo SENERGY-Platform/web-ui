@@ -15,16 +15,21 @@
  */
 
 import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
-import { UntypedFormControl } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { PermissionsUserModel } from '../../shared/permissions-user.model';
 import { PermissionsService } from '../../shared/permissions.service';
 import { PermissionsV2ResourceBaseModel } from '../../shared/permissions-resource.model';
 import { PermissionTypes, TableComponent } from './table/table.component';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatDivider } from '@angular/material/divider';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 export interface PermissionDialogComponentData {
     name: string;
@@ -38,7 +43,7 @@ export interface PermissionDialogComponentData {
     templateUrl: './permission-dialog.component.html',
     styleUrls: ['./permission-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, TableComponent, MatDivider, FormsModule, MatFormField, MatLabel, MtxSelect, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatIconButton, MatIcon, MatDialogActions, MatButton]
 })
 export class PermissionDialogComponent implements OnInit {
     @ViewChild('userTable', { static: false }) userTable?: TableComponent;

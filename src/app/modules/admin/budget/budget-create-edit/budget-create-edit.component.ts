@@ -17,16 +17,23 @@
 
 import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {BudgetModel} from '../shared/budget.model';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {BudgetService} from '../shared/budget.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-budget-create-edit',
     templateUrl: './budget-create-edit.component.html',
     styleUrls: ['./budget-create-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class BudgetCreateEditComponent {
     budget?: BudgetModel;

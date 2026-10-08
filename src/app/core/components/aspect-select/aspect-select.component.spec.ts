@@ -176,7 +176,7 @@ describe('AspectSelectComponent', () => {
                     [showCollisionUntouched]="showCollisionUntouched"></senergy-aspect-select>
             </form>`,
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [AspectSelectComponent, ReactiveFormsModule]
 })
         class HostComponent {
             form = new FormGroup({ aspect_ids: new FormControl<string[]>([inside, outside]) });
@@ -190,8 +190,7 @@ describe('AspectSelectComponent', () => {
         beforeEach(() => {
             TestBed.resetTestingModule();
             TestBed.configureTestingModule({
-                imports: [CoreModule, ReactiveFormsModule, NoopAnimationsModule],
-                declarations: [HostComponent],
+                imports: [CoreModule, ReactiveFormsModule, NoopAnimationsModule, HostComponent],
                 providers: [{ provide: AspectClassesService, useValue: aspectClassesServiceSpy }],
             });
             host = TestBed.createComponent(HostComponent);

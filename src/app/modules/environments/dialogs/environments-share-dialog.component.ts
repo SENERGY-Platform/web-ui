@@ -15,14 +15,23 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UntypedFormControl } from '@angular/forms';
+import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EnvironmentsService } from '../shared/environments.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../../permissions/shared/permissions-user.model';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { EnvironmentShares, isApiError, isSharesFailure, SharesDeviceError } from '../shared/environments.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatDivider } from '@angular/material/divider';
 
 export interface ShareDialogData {
     id: string;
@@ -41,7 +50,7 @@ export interface ShareDialogData {
     templateUrl: './environments-share-dialog.component.html',
     styleUrls: ['./environments-share-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, SpinnerComponent, MatIcon, MatButton, MatCheckbox, MatIconButton, MatTooltip, FormsModule, MatFormField, MatLabel, MtxSelect, ReactiveFormsModule, MatDivider, MatDialogActions]
 })
 export class EnvironmentsShareDialogComponent implements OnInit {
     userFormControl = new UntypedFormControl('');

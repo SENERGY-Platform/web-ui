@@ -34,7 +34,6 @@ describe('EnvironmentsKeyValueEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsKeyValueEditorComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -44,6 +43,7 @@ describe('EnvironmentsKeyValueEditorComponent', () => {
                 MatIconModule,
                 MatTooltipModule,
                 MatButtonToggleModule,
+                EnvironmentsKeyValueEditorComponent,
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsKeyValueEditorComponent);

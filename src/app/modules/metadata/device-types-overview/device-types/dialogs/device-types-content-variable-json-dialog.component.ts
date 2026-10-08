@@ -15,10 +15,19 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     DeviceTypeContentVariableModel,
 } from '../../shared/device-type.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { IsNotProhibitedNameValidatorDirective } from '../shared/is-not-prohibited-name.directive';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { IsJsonValidatorDirective } from '../../../../../core/validators/is-json-validator.directive';
+import { MatButton } from '@angular/material/button';
 
 
 
@@ -26,7 +35,7 @@ import {
     templateUrl: './device-types-content-variable-json-dialog.component.html',
     styleUrls: ['./device-types-content-variable-json-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, IsNotProhibitedNameValidatorDirective, MatError, MatErrorMessagesDirective, IsJsonValidatorDirective, MatDialogActions, MatButton]
 })
 export class DeviceTypesContentVariableJsonDialogComponent {
     name = '';

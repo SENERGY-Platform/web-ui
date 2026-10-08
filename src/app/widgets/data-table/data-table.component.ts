@@ -18,7 +18,7 @@ import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
-import { MatTable } from '@angular/material/table';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DataTableEditDialogComponent } from './dialog/data-table-edit-dialog.component';
 import {
@@ -30,14 +30,21 @@ import {
 import { DeviceStatusConfigConvertRuleModel } from '../device-status/shared/device-status-properties.model';
 import { ExportDataService } from '../shared/export-data.service';
 import { DataTableAggregations, DataTableOrderEnum, DataTableTimeValuePairModel, ExportValueTypes } from './shared/data-table.model';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass, NgStyle } from '@angular/common';
 import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { concatMap, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { Workbook } from 'exceljs';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { WidgetNoDataComponent } from '../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 interface DataTableComponentItem {
     name: string;
@@ -54,7 +61,7 @@ interface DataTableComponentItem {
     templateUrl: './data-table.component.html',
     styleUrls: ['./data-table.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatIcon, MatTooltip, NgStyle, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class DataTableComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';

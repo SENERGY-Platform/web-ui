@@ -15,15 +15,19 @@
  */
 
 import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
-import {UntypedFormControl, Validators} from '@angular/forms';
+import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {rangeValidator} from '../../../../../core/validators/range.validator';
+import { MatFormField, MatLabel, MatSuffix, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
 
 @Component({
     selector: 'senergy-date-time-event-config',
     templateUrl: './date-time-event-config.component.html',
     styleUrls: ['./date-time-event-config.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, MatFormField, MatInput, MatDatepickerInput, ReactiveFormsModule, MatLabel, MatDatepickerToggle, MatSuffix, MatDatepicker, MatError, MatErrorMessagesDirective]
 })
 export class DateTimeEventConfigComponent implements OnInit {
     @Input() initial = '';

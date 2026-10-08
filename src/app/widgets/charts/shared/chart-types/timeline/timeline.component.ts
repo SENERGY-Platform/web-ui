@@ -32,7 +32,7 @@ import { timelineChartConfig, TimelineChartConfig, timelineSelection, TimelineSe
     templateUrl: './timeline.component.html',
     styleUrls: ['./timeline.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [BaseChartDirective]
 })
 export class TimelineComponent implements OnChanges {
     /*

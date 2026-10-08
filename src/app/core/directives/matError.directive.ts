@@ -34,8 +34,7 @@ interface patternError {requiredPattern: string; actual: string}
 @Component({
     selector: '[senergyError]',
     template: '{{ error }}',
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager
 })
 export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
     @Input() label = '';                // Mat-form-field label, suggested to use to improve readability of "required" error

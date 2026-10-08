@@ -15,12 +15,23 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { catchError } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { Attribute } from '../shared/device-instances.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { FormsModule } from '@angular/forms';
+import { MatDivider } from '@angular/material/divider';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 export interface AttributeKeyWithDescription {
     label?: string;
@@ -32,7 +43,7 @@ export interface AttributeKeyWithDescription {
     templateUrl: './device-instances-default-attributes-dialog.component.html',
     styleUrls: ['./device-instances-default-attributes-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatDivider, MatFormField, MatTooltip, MatLabel, MtxSelect, MtxOption, MatError, MatErrorMessagesDirective, MatInput, MatIconButton, MatIcon, MatButton, MatDialogActions]
 })
 export class DeviceInstancesDefaultAttributesDialogComponent implements OnInit {
     knownAttributes: AttributeKeyWithDescription[] = [

@@ -19,9 +19,9 @@ import { FormArray, FormGroup } from '@angular/forms';
 import { SmartServiceInstanceService } from './shared/instances.service';
 import { SmartServiceInstanceModel } from './shared/instances.model';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -35,6 +35,13 @@ import { finalize } from 'rxjs/operators';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { environment } from 'src/environments/environment';
 import { smartServiceLogsUrl } from './shared/opensearch';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { JsonPipe, DatePipe } from '@angular/common';
 
 
 @Component({
@@ -49,7 +56,7 @@ import { smartServiceLogsUrl } from './shared/opensearch';
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatButton, JsonPipe, DatePipe]
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

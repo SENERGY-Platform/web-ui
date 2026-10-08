@@ -71,10 +71,10 @@ export { keycloakServiceToken };
 @NgModule({
     imports: [
         RouterModule.forChild([{
-            path: 'notifications',
-            component: NotificationsComponent,
-            data: { header: 'Notifications' },
-        }]),
+                path: 'notifications',
+                component: NotificationsComponent,
+                data: { header: 'Notifications' },
+            }]),
         CommonModule,
         MatSidenavModule,
         MatIconModule,
@@ -100,8 +100,6 @@ export { keycloakServiceToken };
         MatTabsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
-    ],
-    declarations: [
         SidenavComponent,
         ToolbarComponent,
         SearchbarComponent,

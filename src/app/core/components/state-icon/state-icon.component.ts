@@ -15,13 +15,15 @@
  */
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-state-icon',
     templateUrl: './state-icon.component.html',
     styleUrls: ['./state-icon.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIcon, MatTooltip]
 })
 export class StateIconComponent {
     @Input() state: '' | 'online' | 'offline' | 'inactive' = '';

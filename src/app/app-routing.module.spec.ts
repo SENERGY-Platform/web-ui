@@ -32,17 +32,17 @@ describe('AppRoutingModule', () => {
 
     beforeEach(() => {
 
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [AppComponent],
-    imports: [CoreModule, MatSnackBarModule],
-    providers: [
-        provideRouter([]),
-        { provide: KeycloakService, useClass: MockKeycloakService },
-        { provide: AuthorizationServiceMock, useClass: AuthorizationServiceMock },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-}).compileComponents();
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [CoreModule, MatSnackBarModule, AppComponent],
+            providers: [
+                provideRouter([]),
+                { provide: KeycloakService, useClass: MockKeycloakService },
+                { provide: AuthorizationServiceMock, useClass: AuthorizationServiceMock },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting()
+            ],
+        }).compileComponents();
         appRoutingModule = new AppRoutingModule();
     });
 

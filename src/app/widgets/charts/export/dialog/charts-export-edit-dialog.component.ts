@@ -18,19 +18,12 @@ import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
-import {
-    AbstractControl,
-    FormArray,
-    FormControl,
-    UntypedFormBuilder,
-    UntypedFormGroup,
-    ValidatorFn, Validators
-} from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExportService } from '../../../../modules/exports/shared/export.service';
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../shared/charts-export-properties.model';
 import { ChartsExportRangeTimeTypeEnum } from '../shared/charts-export-range-time-type.enum';
 import { MatTableDataSource } from '@angular/material/table';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialog } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialog, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
@@ -42,12 +35,25 @@ import { DataSourceConfig, DataSourceSelectorComponent } from '../../shared/data
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { hashCode } from 'src/app/core/services/util.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodePadding, MatNestedTreeNode } from '@angular/material/tree';
+import { CdkDropList } from '@angular/cdk/drag-drop';
+import { AxisConfigComponent } from './axis-config/axis-config.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
     styleUrls: ['./charts-export-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatSlideToggle, DataSourceSelectorComponent, MatTooltip, MatTree, CdkDropList, MatTreeNodeDef, MatTreeNode, MatTreeNodePadding, AxisConfigComponent, MatNestedTreeNode, MatDialogActions, MatButton]
 })
 export class ChartsExportEditDialogComponent implements OnInit {
     typeString = 'https://schema.org/Text';

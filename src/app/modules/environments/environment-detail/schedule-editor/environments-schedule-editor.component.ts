@@ -18,6 +18,17 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, Chang
 import { ScheduleSource, ScheduleState } from '../../shared/environments.model';
 import { schedulePreview } from '../../shared/environments-schedule-preview';
 import { scheduleChartConfig, ScheduleChartConfig } from '../../shared/environments-schedule-chartjs';
+import { BaseChartDirective } from 'ng2-charts';
+import { MatFormField, MatLabel, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { EnvironmentsKeyValueEditorComponent } from '../../key-value-editor/environments-key-value-editor.component';
+import { MatDivider } from '@angular/material/divider';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MtxSelect } from '@ng-matero/extensions/select';
 
 /**
  * The schedule source editor: state list (name/duration/value, reorder, per-state
@@ -33,7 +44,7 @@ import { scheduleChartConfig, ScheduleChartConfig } from '../../shared/environme
     templateUrl: './environments-schedule-editor.component.html',
     styleUrls: ['./environments-schedule-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [BaseChartDirective, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatIcon, MatSuffix, MatTooltip, MatIconButton, MatButton, EnvironmentsKeyValueEditorComponent, MatDivider, MatCheckbox, MtxSelect]
 })
 export class EnvironmentsScheduleEditorComponent implements OnChanges {
     @Input() schedule: ScheduleSource | undefined;

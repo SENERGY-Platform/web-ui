@@ -66,41 +66,42 @@ describe('ImportDeployDialogComponent', () => {
     importInstancesServiceSpy.saveImportInstance.and.returnValue(of(true));
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [
-            NO_ERRORS_SCHEMA],
-    declarations: [ImportDeployEditDialogComponent],
-    imports: [MatDialogModule,
-        MatTooltipModule,
-        MatButtonModule,
-        MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
-        ReactiveFormsModule,
-        MatSnackBarModule,
-        MatCheckboxModule,
-        BrowserAnimationsModule,
-        MatTableModule],
-    providers: [
-        {
-            provide: MAT_DIALOG_DATA,
-            useValue: {
-                name: 'name',
-                import_type_id: 'test-id',
-            } as ImportInstancesModel,
-        },
-        {
-            provide: MatDialogRef,
-            useValue: {
-                close: (rv: any) => {
-                    r = rv;
+        await TestBed.configureTestingModule({
+            schemas: [
+                NO_ERRORS_SCHEMA
+            ],
+            imports: [MatDialogModule,
+                MatTooltipModule,
+                MatButtonModule,
+                MatIconModule,
+                MatFormFieldModule,
+                MatInputModule,
+                ReactiveFormsModule,
+                MatSnackBarModule,
+                MatCheckboxModule,
+                BrowserAnimationsModule,
+                MatTableModule, ImportDeployEditDialogComponent],
+            providers: [
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
+                        name: 'name',
+                        import_type_id: 'test-id',
+                    } as ImportInstancesModel,
                 },
-            },
-        },
-        { provide: ImportTypesService, useValue: importTypeServiceSpy },
-        { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-    ]
-}).compileComponents();
+                {
+                    provide: MatDialogRef,
+                    useValue: {
+                        close: (rv: any) => {
+                            r = rv;
+                        },
+                    },
+                },
+                { provide: ImportTypesService, useValue: importTypeServiceSpy },
+                { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {

@@ -16,8 +16,8 @@
 
 
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
@@ -44,14 +44,28 @@ import {
 } from '../shared/floorplan.model';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import { ImageCroppedEvent } from 'ngx-image-cropper';
+import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass } from '@angular/common';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MtxSelect, MtxOption, MtxSelectLabelTemplate, MtxSelectOptionTemplate } from '@ng-matero/extensions/select';
+import { ColorPickerDirective } from 'ngx-color-picker';
 
 @Component({
     selector: 'senergy-floorplan-edit-dialog',
     templateUrl: './floorplan-edit-dialog.component.html',
     styleUrl: './floorplan-edit-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatIconButton, MatIcon, ImageCropperComponent, NgClass, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MtxSelect, MtxOption, MatHint, MtxSelectLabelTemplate, MtxSelectOptionTemplate, ColorPickerDirective, MatDialogActions, MatButton]
 })
 export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   dashboardId = '';

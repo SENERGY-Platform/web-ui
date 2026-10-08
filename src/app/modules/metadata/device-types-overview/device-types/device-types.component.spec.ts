@@ -150,37 +150,37 @@ describe('DeviceTypesComponent', () => {
         aspectClassesServiceSpy.userHasReadAuthorization.and.returnValue(true);
         aspectClassesServiceSpy.getAspectClasses.and.returnValue(of([]));
 
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DeviceTypesComponent],
-    imports: [CoreModule,
-        RouterTestingModule.withRoutes([devicetypesEdit]),
-        MatSnackBarModule,
-        MatStepperModule,
-        MatFormFieldModule,
-        MatIconModule,
-        ReactiveFormsModule,
-        MatInputModule,
-        MatExpansionModule,
-        MatTabsModule,
-        MatTooltipModule,
-        NoopAnimationsModule,
-        MatTreeModule],
-    providers: [
-        {
-            provide: ActivatedRoute,
-            useValue: {
-                snapshot: {
-                    paramMap: convertToParamMap({ id }),
-                    queryParamMap: convertToParamMap({ function: func }),
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [CoreModule,
+                RouterTestingModule.withRoutes([devicetypesEdit]),
+                MatSnackBarModule,
+                MatStepperModule,
+                MatFormFieldModule,
+                MatIconModule,
+                ReactiveFormsModule,
+                MatInputModule,
+                MatExpansionModule,
+                MatTabsModule,
+                MatTooltipModule,
+                NoopAnimationsModule,
+                MatTreeModule, DeviceTypesComponent],
+            providers: [
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        snapshot: {
+                            paramMap: convertToParamMap({ id }),
+                            queryParamMap: convertToParamMap({ function: func }),
+                        },
+                    },
                 },
-            },
-        },
-        { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
-        { provide: AspectClassesService, useValue: aspectClassesServiceSpy },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+                { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+                { provide: AspectClassesService, useValue: aspectClassesServiceSpy },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        }).compileComponents();
         fixture = TestBed.createComponent(DeviceTypesComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

@@ -4,12 +4,13 @@ import {map} from 'rxjs';
 import {FilterDialogConfigModel, FilterDialogResultModel} from 'src/app/core/components/filter-dialog/shared/filter-dialog.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 import {FilterSelection} from '../shared/flow.model';
+import { FilterDialogComponent } from '../../../../core/components/filter-dialog/filter-dialog.component';
 
 @Component({
     selector: 'app-flow-filter-dialog',
     templateUrl: './flow-filter-dialog.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FilterDialogComponent]
 })
 export class FlowFilterDialogComponent implements OnInit {
     config: FilterDialogConfigModel = { fields: [] };

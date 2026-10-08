@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     contentVariableAspectIds,
     deprecatedAspectAlias,
@@ -24,16 +24,21 @@ import {
     DeviceTypeCharacteristicsModel, DeviceTypeContentVariableModel,
     DeviceTypeFunctionModel
 } from '../../shared/device-type.model';
-import {
-    AbstractControl,
-    FormBuilder,
-    FormControl,
-    FormGroup, ValidatorFn
-} from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ConceptsCharacteristicsModel } from '../../../concepts/shared/concepts-characteristics.model';
 import { DeviceTypeHelperService } from '../shared/device-type-helper.service';
 import { convertPunctuation, typeValueValidator } from '../../../../imports/validators/type-value-validator';
 import { classifyAspects, collidingAspectNames } from '../../../../../core/components/aspect-select/aspect-select.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 interface DeviceTypeCharacteristicsClassModel extends DeviceTypeCharacteristicsModel {
     class: string;
@@ -47,7 +52,7 @@ interface DeviceTypeFunctionClassModel extends DeviceTypeFunctionModel {
     templateUrl: './device-types-content-variable-dialog.component.html',
     styleUrls: ['./device-types-content-variable-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, AspectSelectComponent, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class DeviceTypesContentVariableDialogComponent implements OnInit {
     disabled: boolean;

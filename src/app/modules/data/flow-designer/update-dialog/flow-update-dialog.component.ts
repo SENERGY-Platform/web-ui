@@ -15,8 +15,11 @@
  */
 
 import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {CellModel} from '../../diagram-editor/shared/diagram.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton } from '@angular/material/button';
+import { JsonPipe } from '@angular/common';
 
 export interface DialogData {
     oldOperator: CellModel;
@@ -28,7 +31,7 @@ export interface DialogData {
     templateUrl: './flow-update-dialog.component.html',
     styleUrls: ['./flow-update-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, JsonPipe]
 })
 export class FlowUpdateDialogComponent {
 

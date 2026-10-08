@@ -43,13 +43,17 @@ import { DesignerDialogService } from '../../processes/designer/shared/designer-
 import { DesignerHelperService } from '../../processes/designer/shared/designer-helper.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-overlays';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 @Component({
     selector: 'senergy-smart-service-designer',
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatIcon, SpinnerComponent]
 })
 export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     modeler: any;

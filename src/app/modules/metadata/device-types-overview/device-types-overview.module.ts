@@ -106,8 +106,6 @@ const devicetypesEdit: Route = {
         DragDropModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
-    ],
-    declarations: [
         DeviceTypesComponent,
         DeviceTypesContentVariableDialogComponent,
         DeviceTypesContentVariableJsonDialogComponent,

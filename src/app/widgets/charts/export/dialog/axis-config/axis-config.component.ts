@@ -19,16 +19,26 @@ import { MatDialog } from '@angular/material/dialog';
 import { ChartsExportVAxesModel, ChartsExportDeviceGroupMergingStrategy, ChartsExportConversion } from '../../shared/charts-export-properties.model';
 import { ListRulesComponent } from '../list-rules/list-rules.component';
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDrag, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
 import { ChartsExportEditDialogComponent } from '../charts-export-edit-dialog.component';
 import { hashCode } from 'src/app/core/services/util.service';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { NgClass } from '@angular/common';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
     selector: 'senergy-axis-config',
     templateUrl: './axis-config.component.html',
     styleUrls: ['./axis-config.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [CdkDrag, MatIconButton, CdkDragHandle, MatIcon, MatCard, MatCardHeader, MatCardTitle, NgClass, MatCardContent, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatCheckbox, CdkDropList]
 })
 export class AxisConfigComponent {
     @Input() groupTypeIsDifference = false;

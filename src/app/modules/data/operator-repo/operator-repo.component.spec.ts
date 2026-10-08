@@ -37,22 +37,22 @@ describe('OperatorRepoComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [OperatorRepoComponent],
-    imports: [MatSnackBarModule,
-        MatDialogModule,
-        CoreModule,
-        MatIconModule,
-        MatSortModule,
-        MatPaginatorModule],
-    providers: [
-        { provide: OperatorRepoService, useClass: MockOperatorRepoService },
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        DialogsService,
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-});
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [MatSnackBarModule,
+                    MatDialogModule,
+                    CoreModule,
+                    MatIconModule,
+                    MatSortModule,
+                    MatPaginatorModule, OperatorRepoComponent],
+                providers: [
+                    { provide: OperatorRepoService, useClass: MockOperatorRepoService },
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                    DialogsService,
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            });
             fixture = TestBed.createComponent(OperatorRepoComponent);
         }),
     );

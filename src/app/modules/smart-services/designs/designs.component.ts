@@ -20,7 +20,7 @@ import { SearchbarService } from '../../../core/components/searchbar/shared/sear
 import { ProcessModel } from '../../processes/process-repo/shared/process.model';
 import { SmartServiceDesignsService } from './shared/designs.service';
 import { SmartServiceDesignModel } from './shared/design.model';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { saveAs } from 'file-saver';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -29,6 +29,15 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UtilService } from '../../../core/services/util.service';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler } from '@angular/material/grid-list';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { RouterLink } from '@angular/router';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -43,7 +52,7 @@ const grids = new Map([
     templateUrl: './designs.component.html',
     styleUrls: ['./designs.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatIcon, MatTooltip, MatGridTileText, MatGridTileFooterCssMatStyler, MatIconButton, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, SpinnerComponent, MatFabButton]
 })
 export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

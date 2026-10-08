@@ -22,13 +22,13 @@ import { DialogsService } from '../../core/services/dialogs.service';
 import { Subscription, map, Observable } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UtilService } from 'src/app/core/services/util.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import { environment } from '../../../environments/environment';
@@ -38,6 +38,17 @@ import { AuthorizationService } from 'src/app/core/services/authorization.servic
 import { PermissionsRightsModel } from '../permissions/shared/permissions-rights.model';
 import { PermissionsV2RightsAndIdModel } from '../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../core/components/searchbar/searchbar.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../core/directives/matError.directive';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass, DatePipe } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SpinnerComponent } from '../../core/components/spinner/spinner.component';
 
 /** The bulk DELETE deletes one export after the other and keeps going after a gateway timeout. */
 export function bulkDeleteOutcome(status: number, count: number): { message: string; failed: boolean; pending: boolean } {
@@ -63,7 +74,7 @@ export function bulkDeleteOutcome(status: number, count: number): { message: str
     templateUrl: './export.component.html',
     styleUrls: ['./export.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatIconButton, MatTooltip, MatIcon, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, DatePipe]
 })
 export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

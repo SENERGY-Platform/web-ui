@@ -121,8 +121,6 @@ const deviceClasses: Route = {
         DragDropModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
-    ],
-    declarations: [
         DeviceTypesOverviewComponent,
         ConceptsComponent,
         ConceptsNewDialogComponent,

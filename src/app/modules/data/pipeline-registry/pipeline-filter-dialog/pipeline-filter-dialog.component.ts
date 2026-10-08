@@ -5,12 +5,13 @@ import {FilterDialogConfigModel, FilterDialogResultModel} from 'src/app/core/com
 import {FilterSelection} from '../shared/pipeline.model';
 import {OperatorRepoService} from '../../operator-repo/shared/operator-repo.service';
 import {FlowRepoService} from '../../flow-repo/shared/flow-repo.service';
+import { FilterDialogComponent } from '../../../../core/components/filter-dialog/filter-dialog.component';
 
 @Component({
     selector: 'app-pipeline-filter-dialog',
     templateUrl: './pipeline-filter-dialog.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FilterDialogComponent]
 })
 export class PipelineFilterDialogComponent implements OnInit {
     config: FilterDialogConfigModel = { fields: [] };

@@ -15,10 +15,14 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
-import { CapabilityCommandModel } from '../shared/capability-control/capability-control.component';
+import { CapabilityCommandModel, CapabilityControlComponent } from '../shared/capability-control/capability-control.component';
 import { FloorplanControlModel } from '../shared/floorplan.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 export interface FloorplanControlDialogData {
     alias: string;
@@ -32,7 +36,7 @@ export interface FloorplanControlDialogData {
     templateUrl: './floorplan-control-dialog.component.html',
     styleUrl: './floorplan-control-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatIcon, CapabilityControlComponent, MatDialogActions, MatButton]
 })
 export class FloorplanControlDialogComponent {
     alias = '';

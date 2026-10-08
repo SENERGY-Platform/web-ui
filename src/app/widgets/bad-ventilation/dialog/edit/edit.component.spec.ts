@@ -28,17 +28,17 @@ describe('EditVentilationWidgetComponent', () => {
   let fixture: ComponentFixture<EditVentilationWidgetComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [EditVentilationWidgetComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: {} },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, EditVentilationWidgetComponent],
+        providers: [
+            { provide: MAT_DIALOG_DATA, useValue: {} },
+            { provide: MatDialogRef, useValue: {} },
+            provideHttpClient(withXhr(), withInterceptorsFromDi()),
+            provideHttpClientTesting(),
+        ],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(EditVentilationWidgetComponent);

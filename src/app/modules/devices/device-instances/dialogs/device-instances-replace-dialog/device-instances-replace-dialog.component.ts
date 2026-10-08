@@ -15,8 +15,8 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Attribute, DeviceFilterCriteriaModel, DeviceInstanceModel, DeviceSelectablesModel } from '../../shared/device-instances.model';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
@@ -44,6 +44,14 @@ import {
 } from 'src/app/modules/processes/deployments/shared/deployments-prepared-v2.model';
 import { PipelineModel } from 'src/app/modules/data/pipeline-registry/shared/pipeline.model';
 import { PipelineInputSelectionModel } from 'src/app/modules/data/flow-repo/deploy-flow/shared/pipeline-request.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 /** The device-selection criteria of a pipeline input: its aspects as the union of both spellings, written in both. */
 export function pipelineInputCriteria(input: PipelineInputSelectionModel): DeviceFilterCriteriaModel {
@@ -69,7 +77,7 @@ export function deploymentElementCriteria(filterCriteria: V2DeploymentsPreparedF
     styleUrls: ['./device-instances-replace-dialog.component.css'],
     providers: [DatePipe],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatRadioGroup, MatRadioButton, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class DeviceInstancesReplaceDialogComponent implements OnInit {
   DeviceInstancesReplaceDialogComponent = DeviceInstancesReplaceDialogComponent;

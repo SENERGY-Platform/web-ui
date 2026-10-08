@@ -25,12 +25,13 @@ import { ExtendedHubModel } from '../../../networks/shared/networks.model';
 import { NetworksService } from '../../../networks/shared/networks.service';
 import { DeviceConnectionState, DeviceInstancesRouterStateTabEnum, FilterSelection } from '../../shared/device-instances.model';
 import { DeviceInstancesService } from '../../shared/device-instances.service';
+import { FilterDialogComponent } from '../../../../../core/components/filter-dialog/filter-dialog.component';
 
 @Component({
     selector: 'app-device-instances-filter-dialog',
     templateUrl: './device-instances-filter-dialog.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FilterDialogComponent]
 })
 export class DeviceInstancesFilterDialogComponent implements OnInit {
     sortDirection: SortDirection = 'asc';

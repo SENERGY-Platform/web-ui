@@ -18,13 +18,15 @@
 import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {SingleValueModel} from '../shared/single-value.model';
+import { FitTextComponent } from '../../../core/components/fit-text/fit-text.component';
+import { NgStyle, DecimalPipe, PercentPipe, CurrencyPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-single-value-value',
     templateUrl: './value.component.html',
     styleUrls: ['./value.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FitTextComponent, NgStyle, DecimalPipe, PercentPipe, CurrencyPipe, DatePipe]
 })
 export class ValueComponent {
     @Input() widget: WidgetModel | undefined;

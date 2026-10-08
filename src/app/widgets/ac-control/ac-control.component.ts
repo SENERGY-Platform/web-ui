@@ -24,13 +24,21 @@ import { AcControlEditDialogComponent } from './dialog/ac-control-edit-dialog.co
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { environment } from '../../../environments/environment';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-ac-control',
     templateUrl: './ac-control.component.html',
     styleUrls: ['./ac-control.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, MatTooltip, MatIconButton, MatSlider, MatSliderThumb, MatButton, WidgetFooterComponent]
 })
 export class AcControlComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';

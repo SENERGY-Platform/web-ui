@@ -21,13 +21,24 @@ import { ProcessModelListModel } from './shared/process-model-list.model';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { ProcessRepoService } from 'src/app/modules/processes/process-repo/shared/process-repo.service';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatList, MatListItem, MatListItemTitle, MatListItemLine, MatListItemMeta } from '@angular/material/list';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { RouterLink } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { WidgetNoDataComponent } from '../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-process-model-list',
     templateUrl: './process-model-list.component.html',
     styleUrls: ['./process-model-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemTitle, MatListItemLine, MatListItemMeta, MatIconButton, MatTooltip, RouterLink, MatIcon, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class ProcessModelListComponent implements OnInit, OnDestroy {
     processes: ProcessModelListModel[] = [];

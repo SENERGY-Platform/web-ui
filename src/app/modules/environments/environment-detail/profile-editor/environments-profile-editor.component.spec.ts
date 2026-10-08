@@ -34,8 +34,7 @@ describe('EnvironmentsProfileEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsProfileEditorComponent],
-            imports: [FormsModule, NoopAnimationsModule, MatFormFieldModule, MatInputModule, MatIconModule, MatTooltipModule, MatCheckboxModule],
+            imports: [FormsModule, NoopAnimationsModule, MatFormFieldModule, MatInputModule, MatIconModule, MatTooltipModule, MatCheckboxModule, EnvironmentsProfileEditorComponent],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsProfileEditorComponent);
         component = fixture.componentInstance;

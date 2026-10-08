@@ -79,7 +79,7 @@ const brokerDataExport: Route = { path: 'exports/broker', pathMatch: 'full', com
         MatSlideToggleModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        ExportComponent, NewExportComponent, ExportDetailsComponent,
     ],
-    declarations: [ExportComponent, NewExportComponent, ExportDetailsComponent],
 })
 export class ExportModule {}

@@ -16,10 +16,7 @@
 
 import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
@@ -28,11 +25,19 @@ import {contentVariableAspectIds, criteriaAspectIds, deprecatedAspectAlias, Devi
 import {environment} from '../../../../environments/environment';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {map} from 'rxjs/operators';
-import {UntypedFormBuilder, Validators} from '@angular/forms';
+import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {AcControlElementModel} from '../shared/ac-control.model';
 import {Observable, of, concatMap, forkJoin} from 'rxjs';
 import {DeviceGroupsService} from '../../../modules/devices/device-groups/shared/device-groups.service';
 import {rangeValidator} from '../../../core/validators/range.validator';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 const INTEGER = 'https://schema.org/Integer';
 const FLOAT = 'https://schema.org/Float';
@@ -42,7 +47,7 @@ const FLOAT = 'https://schema.org/Float';
     templateUrl: './ac-control-edit-dialog.component.html',
     styleUrls: ['./ac-control-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class AcControlEditDialogComponent implements OnInit {
 

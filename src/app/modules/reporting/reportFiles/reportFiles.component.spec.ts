@@ -103,7 +103,6 @@ describe('ReportFilesComponent', () => {
     const configure = (reportId: string | null) => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ReportFilesComponent],
             imports: [
                 CommonModule,
                 CoreModule,
@@ -115,6 +114,7 @@ describe('ReportFilesComponent', () => {
                 MatTooltipModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                ReportFilesComponent,
             ],
             providers: [
                 { provide: ReportingService, useClass: MockReportingService },
@@ -123,7 +123,7 @@ describe('ReportFilesComponent', () => {
                     provide: ActivatedRoute,
                     useValue: { snapshot: { paramMap: convertToParamMap(reportId === null ? {} : { reportId }) } }
                 },
-            ]
+            ],
         });
         fixture = TestBed.createComponent(ReportFilesComponent);
         component = fixture.componentInstance;

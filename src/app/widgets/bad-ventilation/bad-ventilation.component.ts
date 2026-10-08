@@ -26,13 +26,18 @@ import { badVentilationChartConfig, BadVentilationChartConfig, refreshBadVentila
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart } from 'chart.js';
 import { crosshairPlugin } from 'src/app/core/charts/chart-look';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { ChartToolbarComponent } from '../shared/chart-toolbar/chart-toolbar.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-bad-ventilation',
     templateUrl: './bad-ventilation.component.html',
     styleUrls: ['./bad-ventilation.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, ChartToolbarComponent, BaseChartDirective, WidgetFooterComponent]
 })
 export class BadVentilationComponent implements OnInit {
     ready = false;

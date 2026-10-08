@@ -24,13 +24,19 @@ import { ProcessStatusCount } from './shared/charts-process-instances-chart';
 import { processStatusChart } from './shared/charts-process-instances-chartjs';
 import { googleFrame, googlePlugins } from '../../../../core/charts/google-chartjs';
 import { googlePiePlugin } from '../../../../core/charts/google-pie';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { WidgetNoDataComponent } from '../../../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../../../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-charts-process-instances',
     templateUrl: './charts-process-instances.component.html',
     styleUrls: ['./charts-process-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class ChartsProcessInstancesComponent implements OnInit, OnDestroy, AfterViewInit {
     /** undefined without data */

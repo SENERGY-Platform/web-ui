@@ -31,11 +31,11 @@ describe('SwitchComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [SwitchComponent],
-    imports: [MatDialogModule, WidgetModule, MatCardModule],
-    providers: [MatDialogModule, MatSnackBar, { provide: DashboardService, useClass: DashboardService }, provideHttpClient(withXhr(), withInterceptorsFromDi())]
-}).compileComponents();
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [MatDialogModule, WidgetModule, MatCardModule, SwitchComponent],
+                providers: [MatDialogModule, MatSnackBar, { provide: DashboardService, useClass: DashboardService }, provideHttpClient(withXhr(), withInterceptorsFromDi())],
+            }).compileComponents();
         }),
     );
 

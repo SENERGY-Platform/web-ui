@@ -512,35 +512,35 @@ describe('DeviceGroupsEditComponent', () => {
                 );
             });
 
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DeviceGroupsEditComponent],
-    imports: [CoreModule,
-        RouterTestingModule.withRoutes([deviceGroupsEdit]),
-        NoopAnimationsModule,
-        MatSnackBarModule,
-        MatFormFieldModule,
-        MatIconModule,
-        ReactiveFormsModule,
-        MatInputModule,
-        MatChipsModule,
-        MatCardModule,
-        MatTooltipModule,
-        CommonModule],
-    providers: [
-        {
-            provide: ActivatedRoute,
-            useValue: {
-                snapshot: {
-                    paramMap: convertToParamMap({ id: 'test-group:id' }),
-                },
-            },
-        },
-        { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
-        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [CoreModule,
+                    RouterTestingModule.withRoutes([deviceGroupsEdit]),
+                    NoopAnimationsModule,
+                    MatSnackBarModule,
+                    MatFormFieldModule,
+                    MatIconModule,
+                    ReactiveFormsModule,
+                    MatInputModule,
+                    MatChipsModule,
+                    MatCardModule,
+                    MatTooltipModule,
+                    CommonModule, DeviceGroupsEditComponent],
+                providers: [
+                    {
+                        provide: ActivatedRoute,
+                        useValue: {
+                            snapshot: {
+                                paramMap: convertToParamMap({ id: 'test-group:id' }),
+                            },
+                        },
+                    },
+                    { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
+                    { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            }).compileComponents();
             fixture = TestBed.createComponent(DeviceGroupsEditComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();

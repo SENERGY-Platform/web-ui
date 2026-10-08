@@ -23,19 +23,26 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { Router } from '@angular/router';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
 import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-type.model';
-import { MatTableDataSource } from '@angular/material/table';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UntypedFormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { NgClass } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-device-types',
     templateUrl: './device-types-overview.component.html',
     styleUrls: ['./device-types-overview.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatIcon, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];

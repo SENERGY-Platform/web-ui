@@ -44,9 +44,9 @@ describe('DeviceTypesContentVariableDialog', () => {
     const matDialogRefSpy: Spy<MatDialogRef<DeviceTypesContentVariableDialogComponent>> =
         createSpyFromClass<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     function init(contentVariable: DeviceTypeContentVariableModel, concepts: ConceptsCharacteristicsModel[], functions: DeviceTypeFunctionModel[], aspects: DeviceTypeAspectModel[], aspectClasses: DeviceTypeAspectClassModel[] = []) {
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule, NoopAnimationsModule],
-            declarations: [DeviceTypesContentVariableDialogComponent],
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule, NoopAnimationsModule, DeviceTypesContentVariableDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: matDialogRefSpy },
                 {

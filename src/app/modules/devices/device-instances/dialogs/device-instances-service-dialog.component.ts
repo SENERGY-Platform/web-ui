@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     DeviceTypeModel,
     DeviceTypeServiceModel
@@ -26,21 +26,34 @@ import {
     TimeValuePairModel
 } from '../../../../widgets/shared/export-data.model';
 import { ExportDataService } from '../../../../widgets/shared/export-data.service';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { environment } from '../../../../../environments/environment';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
-import { MatExpansionPanel } from '@angular/material/expansion';
+import { MatExpansionPanel, MatAccordion, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent, MatExpansionPanelDescription } from '@angular/material/expansion';
 import { detectAndMergeFlapping } from '../shared/flapping.function';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatPrefix, MatError, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass, DatePipe } from '@angular/common';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { TimelineComponent } from '../../../../widgets/charts/shared/chart-types/timeline/timeline.component';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker } from '@angular/material/datepicker';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
     styleUrls: ['./device-instances-service-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, MatPrefix, MatTooltip, NgClass, FormsModule, MatError, MatErrorMessagesDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent, TimelineComponent, MatExpansionPanelDescription, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatSuffix, MatDialogActions, MatButton, DatePipe]
 })
 export class DeviceInstancesServiceDialogComponent implements OnInit {
     services: DeviceTypeServiceModel[] = [];

@@ -58,15 +58,14 @@ describe('FunctionsComponent concept filter', () => {
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, NoopAnimationsModule, MatSnackBarModule, MatPaginatorModule],
-            declarations: [FunctionsComponent],
+            imports: [CoreModule, NoopAnimationsModule, MatSnackBarModule, MatPaginatorModule, FunctionsComponent],
             providers: [
-                provideRouter([{path: 'metadata/functions', component: FunctionsComponent}]),
-                {provide: FunctionsService, useValue: functionsServiceSpy},
-                {provide: ConceptsService, useValue: conceptsServiceSpy},
-                {provide: DeviceTypeService, useValue: deviceTypeServiceSpy},
-                {provide: AuthorizationService, useValue: authServiceSpy},
-                {provide: MatDialog, useValue: {open: jasmine.createSpy('open')}},
+                provideRouter([{ path: 'metadata/functions', component: FunctionsComponent }]),
+                { provide: FunctionsService, useValue: functionsServiceSpy },
+                { provide: ConceptsService, useValue: conceptsServiceSpy },
+                { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+                { provide: AuthorizationService, useValue: authServiceSpy },
+                { provide: MatDialog, useValue: { open: jasmine.createSpy('open') } },
             ],
         });
         harness = await RouterTestingHarness.create();

@@ -15,24 +15,33 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatTableDataSource } from '@angular/material/table';
+import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { forkJoin } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ListRulesComponent } from '../../../export/dialog/list-rules/list-rules.component';
 import { ChartsExportConversion, ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../../../export/shared/charts-export-properties.model';
-import { DataSourceConfig } from '../../../shared/data-source-selector/data-source-selector.component';
+import { DataSourceConfig, DataSourceSelectorComponent } from '../../../shared/data-source-selector/data-source-selector.component';
 import { DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../../../components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-edit',
     templateUrl: './edit.component.html',
     styleUrls: ['./edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, DataSourceSelectorComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class OpenWindowEditComponent implements OnInit {
     form: any;

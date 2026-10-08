@@ -15,14 +15,18 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { CycleEventConfigComponent } from '../../event-config/cycle-event-config/cycle-event-config.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './cycle-dialog.component.html',
     styleUrls: ['./cycle-dialog.component.css'],
     selector: 'senergy-cycle-dialog',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, CycleEventConfigComponent, MatDialogActions, MatButton]
 })
 export class CycleDialogComponent {
     initial: string;

@@ -21,13 +21,19 @@ import { ErrorHandlerService } from 'src/app/core/services/error-handler.service
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
 import { fakeTimelineData, thresholdTimeline } from './fake-timeline';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../components/widget-header/widget-header.component';
+import { TimelineComponent } from '../../charts/shared/chart-types/timeline/timeline.component';
+import { MatIcon } from '@angular/material/icon';
+import { WidgetFooterComponent } from '../../components/widget-footer/widget-footer.component';
+import { DecimalPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'fake-senergy-anomaly-detection',
     templateUrl: './fake.component.html',
     styleUrls: ['./fake.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, TimelineComponent, MatIcon, WidgetFooterComponent, DecimalPipe, DatePipe]
 })
 export class FakeAnomalyComponent implements AfterViewInit, AfterViewChecked {
     type = 'curve_anomaly'; // time, schema, curve_anomaly

@@ -29,11 +29,10 @@ describe('LineComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      schemas: [NO_ERRORS_SCHEMA],
-      declarations: [LineComponent],
-      imports: [MatDialogModule,
-        MatSnackBarModule],
-      providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, LineComponent],
+        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
     })
       .compileComponents();
 

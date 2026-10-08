@@ -30,10 +30,10 @@ import { ProcessSchedulerService } from '../../widgets/process-scheduler/shared/
 import { DataTableService } from '../../widgets/data-table/shared/data-table.service';
 import { AirQualityService } from '../../widgets/air-quality/shared/air-quality.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatTabGroup } from '@angular/material/tabs';
+import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
 import { removeWidgetStorage } from '../../widgets/charts/shared/widget-storage';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import { elementCB, GridstackComponent } from 'gridstack/dist/angular';
+import { elementCB, GridstackComponent, GridstackItemComponent } from 'gridstack/dist/angular';
 import { GridStack, GridStackOptions, Responsive } from 'gridstack';
 import {
     AUTO_COLUMNS,
@@ -45,13 +45,20 @@ import {
     MIN_COLUMNS,
     MIN_UNIT_PX,
 } from './shared/dashboard.model';
+import { NgClass } from '@angular/common';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/divider';
+import { WidgetComponent } from '../../widgets/widget.component';
 
 @Component({
     selector: 'senergy-dashboard',
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatTabGroup, MatTab, MatTabLabel, NgClass, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider, WidgetComponent, GridstackComponent, GridstackItemComponent, MatFabButton]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     dashboards: DashboardModel[] = [];

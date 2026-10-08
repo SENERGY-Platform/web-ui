@@ -17,8 +17,8 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
-import {MatTableDataSource} from '@angular/material/table';
-import {Sort, SortDirection} from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -29,6 +29,14 @@ import {forkJoin, Observable, Subscription} from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
+import { NgClass, JsonPipe, DatePipe } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { ShortKeyPipe } from '../shared/short-key.pipe';
 
 
 
@@ -37,7 +45,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, JsonPipe, DatePipe, ShortKeyPipe]
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, OnInit {
     pageSize = this.preferencesService.pageSize;

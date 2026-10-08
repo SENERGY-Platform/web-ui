@@ -25,12 +25,13 @@ describe('AnomalyReconstructionComponent', () => {
   let fixture: ComponentFixture<AnomalyReconstructionComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-      declarations: [ AnomalyReconstructionComponent ],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {anomaly: {original_reconstructed_curves: []}}},
-        {provide: MatDialogRef, useValue: {}},
-    ]
+    await TestBed.configureTestingModule({
+        imports: [AnomalyReconstructionComponent],
+        schemas: [NO_ERRORS_SCHEMA],
+        providers: [
+            { provide: MAT_DIALOG_DATA, useValue: { anomaly: { original_reconstructed_curves: [] } } },
+            { provide: MatDialogRef, useValue: {} },
+        ],
     })
     .compileComponents();
 

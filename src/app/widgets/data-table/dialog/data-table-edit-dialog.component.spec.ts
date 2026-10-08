@@ -200,39 +200,39 @@ describe('DataTableEditDialogComponent', () => {
             deviceGroupServiceSpy.getAspectListByIds.and.returnValue(of([]));
             deviceGroupServiceSpy.getFunctionListByIds.and.returnValue(of([]));
             deviceGroupServiceSpy.getDeviceClassListByIds.and.returnValue(of([]));
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DataTableEditDialogComponent],
-    imports: [CoreModule,
-        MatSnackBarModule,
-        MatDialogModule,
-        MatIconModule,
-        MatExpansionModule,
-        MatInputModule,
-        ReactiveFormsModule,
-        NoopAnimationsModule,
-        WidgetModule],
-    providers: [
-        provideRouter([]),
-        { provide: DashboardService, useValue: dashboardServiceSpy },
-        { provide: DeploymentsService, useValue: deploymentsServiceSpy },
-        { provide: ExportService, useValue: exportServiceSpy },
-        { provide: MatDialogRef, useValue: matDialogRefSpy },
-        { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
-        { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
-        { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
-        { provide: ConceptsService, useValue: conceptsServiceSpy },
-        {
-            provide: MAT_DIALOG_DATA, useValue: {
-                widgetId: 'widgetId-1',
-                dashboardId: 'dashboardId-1',
-                userHasUpdateNameAuthorization: true,
-                userHasUpdatePropertiesAuthorization: true
-            }
-        },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [CoreModule,
+                    MatSnackBarModule,
+                    MatDialogModule,
+                    MatIconModule,
+                    MatExpansionModule,
+                    MatInputModule,
+                    ReactiveFormsModule,
+                    NoopAnimationsModule,
+                    WidgetModule, DataTableEditDialogComponent],
+                providers: [
+                    provideRouter([]),
+                    { provide: DashboardService, useValue: dashboardServiceSpy },
+                    { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+                    { provide: ExportService, useValue: exportServiceSpy },
+                    { provide: MatDialogRef, useValue: matDialogRefSpy },
+                    { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
+                    { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
+                    { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
+                    { provide: ConceptsService, useValue: conceptsServiceSpy },
+                    {
+                        provide: MAT_DIALOG_DATA, useValue: {
+                            widgetId: 'widgetId-1',
+                            dashboardId: 'dashboardId-1',
+                            userHasUpdateNameAuthorization: true,
+                            userHasUpdatePropertiesAuthorization: true
+                        }
+                    },
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            }).compileComponents();
         }),
     );
 

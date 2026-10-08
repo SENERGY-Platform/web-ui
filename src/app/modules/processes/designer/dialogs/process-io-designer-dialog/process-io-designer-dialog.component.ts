@@ -15,14 +15,24 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ProcessIoDesignerInfo, ProcessIoDesignerInfoGet, ProcessIoDesignerInfoSet } from '../../../process-io/shared/process-io.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     templateUrl: './process-io-designer-dialog.component.html',
     styleUrls: ['./process-io-designer-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatInput, MatIconButton, MatIcon, MatDialogActions, MatButton]
 })
 export class ProcessIoDesignerDialogComponent {
     info: ProcessIoDesignerInfoWithBinding;

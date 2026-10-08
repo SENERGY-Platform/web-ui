@@ -17,6 +17,9 @@
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ReportObjectNode, inputTypeOfNode, isContainer } from '../../shared/report-object-node';
 import { ReportObjectViewService } from '../../shared/report-object-view.service';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 const TYPE_ICONS: { [key: string]: string } = {
     value: 'input',
@@ -29,7 +32,7 @@ const TYPE_ICONS: { [key: string]: string } = {
     templateUrl: './report-tree.component.html',
     styleUrls: ['./report-tree.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatIcon, MatTooltip]
 })
 export class ReportTreeComponent {
 

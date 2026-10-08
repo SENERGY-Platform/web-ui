@@ -150,50 +150,51 @@ describe('ImportTypesCreateEditComponent', () => {
     paramMap.set('id', 'urn:infai:ses:import-type:1234');
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [ImportTypesCreateEditComponent],
-    imports: [
-        CoreModule,
-        RouterModule.forRoot([
-            {
-                path: 'imports/types/list',
-                pathMatch: 'full',
-                component: ImportTypesComponent,
-                data: { header: 'Import Types' },
-            },
-        ], {}),
-        ReactiveFormsModule,
-        MatDialogModule,
-        MatSnackBarModule,
-        MatCheckboxModule,
-        MatTooltipModule,
-        MatButtonModule,
-        MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDividerModule,
-        MatDialogModule,
-        MatTreeModule,
-        WidgetModule,
-        MtxSelectModule,
-        NoopAnimationsModule,
-        CloseMtxSelectOnScrollDirective,
-    ],
-    providers: [
-        { provide: DeviceTypeService, useValue: deviceTypeService },
-        { provide: AspectsService, useValue: aspectsServiceSpy },
-        { provide: ImportTypesService, useValue: importTypesServiceSpy },
-        { provide: ConceptsService, useValue: conceptsServiceSpy },
-        {
-            provide: ActivatedRoute,
-            useValue: {
-                url: of(['edit', '1234']),
-                snapshot: { paramMap },
-            },
-        },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-    ]
-}).compileComponents();
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [
+                CoreModule,
+                RouterModule.forRoot([
+                        {
+                            path: 'imports/types/list',
+                            pathMatch: 'full',
+                            component: ImportTypesComponent,
+                            data: { header: 'Import Types' },
+                        },
+                    ], {}),
+                ReactiveFormsModule,
+                MatDialogModule,
+                MatSnackBarModule,
+                MatCheckboxModule,
+                MatTooltipModule,
+                MatButtonModule,
+                MatIconModule,
+                MatFormFieldModule,
+                MatInputModule,
+                MatDividerModule,
+                MatDialogModule,
+                MatTreeModule,
+                WidgetModule,
+                MtxSelectModule,
+                NoopAnimationsModule,
+                CloseMtxSelectOnScrollDirective,
+                ImportTypesCreateEditComponent,
+            ],
+            providers: [
+                { provide: DeviceTypeService, useValue: deviceTypeService },
+                { provide: AspectsService, useValue: aspectsServiceSpy },
+                { provide: ImportTypesService, useValue: importTypesServiceSpy },
+                { provide: ConceptsService, useValue: conceptsServiceSpy },
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        url: of(['edit', '1234']),
+                        snapshot: { paramMap },
+                    },
+                },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {

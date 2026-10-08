@@ -17,6 +17,12 @@
 import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { FloorplanControlInput, FloorplanControlModel, isOneClickControl, sendsOnChange } from '../floorplan.model';
+import { MatIconButton } from '@angular/material/button';
+import { NgClass } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { CharacteristicInputComponent } from '../characteristic-input/characteristic-input.component';
 
 export interface CapabilityCommandModel {
   criteria: DeviceGroupCriteriaModel;
@@ -32,7 +38,7 @@ export interface CapabilityCommandModel {
     templateUrl: './capability-control.component.html',
     styleUrl: './capability-control.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, NgClass, MatTooltip, MatIcon, MatSlideToggle, CharacteristicInputComponent]
 })
 export class CapabilityControlComponent implements OnInit {
   @Input() control: FloorplanControlModel = {} as FloorplanControlModel;

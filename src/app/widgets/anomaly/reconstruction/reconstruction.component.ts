@@ -15,19 +15,23 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { reconstructionPoints } from './reconstruction-chart';
 import { reconstructionChart } from './reconstruction-chartjs';
 import { FramedChartConfig } from '../../../core/charts/google-columns';
 import { googlePlugins } from '../../../core/charts/google-chartjs';
 import { AnomalyResultModel } from '../shared/anomaly.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { BaseChartDirective } from 'ng2-charts';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'anomaly-reconstruction',
     templateUrl: './reconstruction.component.html',
     styleUrls: ['./reconstruction.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, BaseChartDirective, MatDialogActions, MatButton]
 })
 export class AnomalyReconstructionComponent implements OnInit {
     chart?: FramedChartConfig<'line'>;

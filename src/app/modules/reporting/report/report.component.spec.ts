@@ -154,7 +154,6 @@ describe('ReportComponent', () => {
         router = { navigateByUrl: jasmine.createSpy('navigateByUrl') };
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ReportComponent],
             imports: [
                 CommonModule,
                 CoreModule,
@@ -167,6 +166,7 @@ describe('ReportComponent', () => {
                 MatInputModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                ReportComponent,
             ],
             providers: [
                 { provide: ReportingService, useClass: MockReportingService },
@@ -174,7 +174,7 @@ describe('ReportComponent', () => {
                 { provide: DeviceGroupsService, useClass: MockDeviceGroupsService },
                 { provide: Router, useValue: router },
                 { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap(params) } } },
-            ]
+            ],
         });
         fixture = TestBed.createComponent(ReportComponent);
         component = fixture.componentInstance;

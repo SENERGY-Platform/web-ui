@@ -25,23 +25,30 @@ import { SearchbarService } from '../../../core/components/searchbar/shared/sear
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { startWith, switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
 import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-registry.service';
 import {PipelineOperatorUsage} from '../pipeline-registry/shared/pipeline.model';
-import {Router} from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { NgClass } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
     styleUrls: ['./operator-repo.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatIconButton, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent]
 })
 export class OperatorRepoComponent implements OnInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

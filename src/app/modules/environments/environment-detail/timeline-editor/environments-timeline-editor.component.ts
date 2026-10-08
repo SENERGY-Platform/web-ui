@@ -15,11 +15,18 @@
  */
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
-import { PageEvent } from '@angular/material/paginator';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { DatedChange } from '../../shared/environments.model';
 import { TimelineTargetOption } from '../../shared/environments-timeline-targets';
 import { NodeProblem } from '../../shared/environments-path';
 import { toLocalDateTimeInput, toRfc3339Seconds } from '../../shared/environments-datetime';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatTooltip } from '@angular/material/tooltip';
 
 /** Parses a timeline problem's suffix, e.g. "timeline[1].at" -> index 1, field "at" (undefined for one naming the whole entry). */
 const ROW_SUFFIX_RE = /^timeline\[(\d+)\](?:\.(.+))?$/;
@@ -73,7 +80,7 @@ export const TIMELINE_DEFAULT_PAGE_SIZE = 50;
     templateUrl: './environments-timeline-editor.component.html',
     styleUrls: ['./environments-timeline-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIcon, MatButton, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MatIconButton, MatTooltip, MatPaginator]
 })
 export class EnvironmentsTimelineEditorComponent implements OnChanges {
     @Input() timeline: DatedChange[] | undefined;

@@ -15,10 +15,20 @@
  */
 
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, FormRecord } from '@angular/forms';
+import { FormControl, FormRecord, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AddTagFn } from '../../model/mtx-select.model';
 import { forkJoin, map, Observable } from 'rxjs';
 import { FilterDialogConfigModel, FilterDialogFieldModel, FilterDialogResultModel } from './shared/filter-dialog.model';
+import { MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../directives/close-mtx-select-on-scroll.directive';
+import { SpinnerComponent } from '../spinner/spinner.component';
+import { MatDivider } from '@angular/material/divider';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatFormField, MatPrefix, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 /**
  * Renders the content of a filter dialog based on a list of field descriptions. Is meant to be used as the only
@@ -29,7 +39,7 @@ import { FilterDialogConfigModel, FilterDialogFieldModel, FilterDialogResultMode
     templateUrl: './filter-dialog.component.html',
     styleUrls: ['./filter-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, SpinnerComponent, FormsModule, ReactiveFormsModule, MatDivider, MatCheckbox, MatFormField, MatIcon, MatPrefix, MatLabel, MtxSelect, MatHint, MatDialogActions, MatButton]
 })
 export class FilterDialogComponent implements OnInit {
     @Input() config: FilterDialogConfigModel = { fields: [] };

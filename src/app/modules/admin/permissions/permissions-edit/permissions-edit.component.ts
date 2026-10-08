@@ -17,8 +17,8 @@
  */
 
 import {Component, Inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs';
@@ -27,13 +27,24 @@ import { AuthorizationService } from 'src/app/core/services/authorization.servic
 import { KongService } from '../shared/services/kong.service';
 import { LadonService } from '../shared/services/ladom.service';
 import { PermissionModel } from '../shared/permission.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatRadioButton } from '@angular/material/radio';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatInput } from '@angular/material/input';
+import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import { MatButton } from '@angular/material/button';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-permissions-edit',
     templateUrl: './permissions-edit.component.html',
     styleUrls: ['./permissions-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatRadioButton, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, ReactiveFormsModule, MatCheckbox, MatInput, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatDialogActions, MatButton, AsyncPipe]
 })
 export class PermissionsEditComponent implements OnInit {
     public isEditMode = false;

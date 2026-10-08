@@ -15,7 +15,7 @@
  */
 import {ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {FormArray, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
+import { FormArray, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
     ImportTypeConfigModel,
     ImportTypeContentVariableModel,
@@ -26,7 +26,7 @@ import {AspectsService} from '../../metadata/aspects/shared/aspects.service';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ContentVariableDialogComponent} from './content-variable-dialog/content-variable-dialog.component';
 import {environment} from '../../../../environments/environment';
-import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
+import { MatTree, MatTreeNestedDataSource, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet } from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {Observable} from 'rxjs';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -40,13 +40,23 @@ import {
     DeviceTypeFunctionModel
 } from '../../metadata/device-types-overview/shared/device-type.model';
 import {DeviceTypeService} from '../../metadata/device-types-overview/shared/device-type.service';
+import { WidgetSpinnerComponent } from '../../../widgets/components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatDivider } from '@angular/material/divider';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-import-types-create-edit',
     templateUrl: './import-types-create-edit.component.html',
     styleUrls: ['./import-types-create-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDivider, MatIconButton, MatIcon, MtxSelect, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet, MatCheckbox, MatTooltip, MatButton]
 })
 export class ImportTypesCreateEditComponent implements OnInit {
     constructor(

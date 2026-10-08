@@ -305,8 +305,7 @@ describe('EnvironmentsShareDialogComponent graph writer checkbox', () => {
         environmentsService.shares = shares;
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsShareDialogComponent],
-            imports: [MatCheckboxModule, NoopAnimationsModule],
+            imports: [MatCheckboxModule, NoopAnimationsModule, EnvironmentsShareDialogComponent],
             providers: [
                 { provide: MatDialogRef, useClass: MockDialogRef },
                 { provide: EnvironmentsService, useValue: environmentsService },

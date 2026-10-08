@@ -67,7 +67,7 @@ const deployClassic: Route = {
         ReactiveFormsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        DeployFlowComponent, DeployFlowClassicComponent, FlowFilterDialogComponent,
     ],
-    declarations: [DeployFlowComponent, DeployFlowClassicComponent, FlowFilterDialogComponent],
 })
 export class FlowRepoModule {}

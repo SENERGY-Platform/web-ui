@@ -50,8 +50,7 @@ describe('ReportTreeComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ReportTreeComponent],
-            imports: [CommonModule, NoopAnimationsModule, MatButtonModule, MatIconModule, MatTooltipModule],
+            imports: [CommonModule, NoopAnimationsModule, MatButtonModule, MatIconModule, MatTooltipModule, ReportTreeComponent],
             providers: [ReportObjectViewService],
         }).compileComponents();
         fixture = TestBed.createComponent(ReportTreeComponent);

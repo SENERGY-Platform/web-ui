@@ -28,12 +28,12 @@ describe('ConsumptionProfileComponent', () => {
   let fixture: ComponentFixture<ConsumptionProfileComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [ConsumptionProfileComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, ConsumptionProfileComponent],
+        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(ConsumptionProfileComponent);

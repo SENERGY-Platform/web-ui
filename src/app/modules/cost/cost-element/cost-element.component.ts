@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { KeyValue } from '@angular/common';
+import { KeyValue, DecimalPipe, CurrencyPipe, KeyValuePipe } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CostEntryModel, CostModel, } from '../shared/cost.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
@@ -22,13 +22,16 @@ import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { ExportModel } from '../../exports/shared/export.model';
 import { ReportModel } from '../../reporting/shared/reporting.model';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatAccordion } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-cost-element',
     templateUrl: './cost-element.component.html',
     styleUrls: ['./cost-element.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatIcon, MatTooltip, MatAccordion, DecimalPipe, CurrencyPipe, KeyValuePipe]
 })
 export class CostElementComponent {
     private _element: CostModel = {} as CostModel;

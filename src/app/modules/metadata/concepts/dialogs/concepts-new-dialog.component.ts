@@ -15,15 +15,21 @@
  */
 
 import {Component, ChangeDetectionStrategy} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
-import {UntypedFormControl, Validators} from '@angular/forms';
+import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './concepts-new-dialog.component.html',
     styleUrls: ['./concepts-new-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MatInput, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class ConceptsNewDialogComponent {
     nameControl = new UntypedFormControl('', [Validators.required]);

@@ -34,7 +34,6 @@ describe('EnvironmentsLiveStateTilesComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsLiveStateTilesComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -44,6 +43,7 @@ describe('EnvironmentsLiveStateTilesComponent', () => {
                 MatIconModule,
                 MatTooltipModule,
                 MatButtonToggleModule,
+                EnvironmentsLiveStateTilesComponent,
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsLiveStateTilesComponent);

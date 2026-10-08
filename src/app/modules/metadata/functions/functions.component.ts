@@ -26,8 +26,8 @@ import {DeviceTypeFunctionModel} from '../device-types-overview/shared/device-ty
 import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
 import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import {MatTableDataSource} from '@angular/material/table';
-import {Sort, SortDirection} from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -38,13 +38,21 @@ import {
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { NgClass } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-functions',
     templateUrl: './functions.component.html',
     styleUrls: ['./functions.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTooltip, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];

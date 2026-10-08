@@ -30,13 +30,23 @@ import { FlowEngineService } from '../../shared/flow-engine.service';
 import { NodeInput, NodeModel, NodeValue, PipelineRequestModel } from '../shared/pipeline-request.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton } from '@angular/material/button';
+import { SpinnerComponent } from '../../../../../core/components/spinner/spinner.component';
 
 @Component({
     selector: 'senergy-deploy-flow-classic',
     templateUrl: './deploy-flow-component-classic.component.html',
     styleUrls: ['./deploy-flow-component-classic.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatExpansionPanelDescription, MatExpansionPanelContent, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MatCheckbox, MatButton, SpinnerComponent]
 })
 export class DeployFlowClassicComponent {
     ready = false;

@@ -15,13 +15,13 @@
  */
 
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTabChangeEvent } from '@angular/material/tabs';
-import { MatExpansionPanel } from '@angular/material/expansion';
+import { MatTabChangeEvent, MatTabGroup, MatTab, MatTabContent } from '@angular/material/tabs';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { MatTreeNestedDataSource, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatTreeNodeToggle, MatTreeNodeOutlet } from '@angular/material/tree';
 import { Subscription, timer } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { switchMap } from 'rxjs/operators';
@@ -101,7 +101,27 @@ import {
     meterParentTargets,
     removeMeterReferences,
 } from '../shared/environments-meter-graph';
-import { TIMELINE_DEFAULT_PAGE_SIZE } from './timeline-editor/environments-timeline-editor.component';
+import { TIMELINE_DEFAULT_PAGE_SIZE, EnvironmentsTimelineEditorComponent } from './timeline-editor/environments-timeline-editor.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { MatTooltip } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { EnvironmentsKeyValueEditorComponent } from '../key-value-editor/environments-key-value-editor.component';
+import { EnvironmentsProfileEditorComponent } from './profile-editor/environments-profile-editor.component';
+import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
+import { EnvironmentsMeterParentsEditorComponent } from './meter-parents-editor/environments-meter-parents-editor.component';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatDivider } from '@angular/material/divider';
+import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
+import { EnvironmentsFaultsEditorComponent } from './faults-editor/environments-faults-editor.component';
+import { EnvironmentsEffectsComponent } from './effects/environments-effects.component';
+import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
+import { DatePipe } from '@angular/common';
 
 /** One zone or asset row in the Live state tab: the suggested defaults, the working draft and which keys the user actually touched. */
 interface LiveStateEntry {
@@ -120,7 +140,7 @@ interface LiveStateEntry {
     templateUrl: './environment-detail.component.html',
     styleUrls: ['./environment-detail.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SpinnerComponent, MatButton, MatIcon, MatTabGroup, MatTab, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatIconButton, MatTreeNodeToggle, MatBadge, MatTooltip, MatTreeNodeOutlet, FormsModule, MatFormField, MatLabel, MatInput, MtxSelect, MtxOption, MatHint, MatSuffix, EnvironmentsKeyValueEditorComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, EnvironmentsProfileEditorComponent, EnvironmentsDatasetEditorComponent, EnvironmentsTimelineEditorComponent, EnvironmentsMeterParentsEditorComponent, RouterLink, MatButtonToggleGroup, MatButtonToggle, MatDivider, EnvironmentsScheduleEditorComponent, EnvironmentsFaultsEditorComponent, MatTabContent, EnvironmentsEffectsComponent, EnvironmentsLiveStateTilesComponent, EnvironmentsHistoryComponent, DatePipe]
 })
 export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     id = '';

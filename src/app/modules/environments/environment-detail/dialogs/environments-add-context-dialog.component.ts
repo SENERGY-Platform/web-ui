@@ -15,12 +15,18 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Source } from '../../shared/environments.model';
 import { clonePresetSource, CONTEXT_PRESETS, ContextPreset } from '../../shared/environments-context-presets';
 import { mondayStartWeekday, profilePreview } from '../../shared/environments-profile-preview';
 import { profileChartConfig, ProfileChartConfig } from '../../shared/environments-profile-chartjs';
 import { crosshairPlugin } from 'src/app/core/charts/chart-look';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { BaseChartDirective } from 'ng2-charts';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 
 export interface AddContextDialogData {
     /** Every context key already in use, static and driven alike -- a duplicate key would silently shadow one of them. */
@@ -42,7 +48,7 @@ export interface AddContextDialogResult {
     templateUrl: './environments-add-context-dialog.component.html',
     styleUrls: ['./environments-add-context-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, BaseChartDirective, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatDialogActions, MatButton]
 })
 export class EnvironmentsAddContextDialogComponent implements OnInit {
     presets = CONTEXT_PRESETS;

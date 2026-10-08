@@ -15,16 +15,25 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CamundaVariable } from '../shared/deployments-definition.model';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatButton } from '@angular/material/button';
+import { KeyValuePipe } from '@angular/common';
 
 @Component({
     templateUrl: './deployments-start-parameter-dialog.component.html',
     styleUrls: ['./deployments-start-parameter-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatError, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MtxOption, MatErrorMessagesDirective, MatDialogActions, MatButton, KeyValuePipe]
 })
 export class DeploymentsStartParameterDialogComponent {
     deploymentId: string;

@@ -20,13 +20,17 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { PvLoadService } from './shared/pv-load.service';
 import { PVLoadRecommendationResult } from './shared/recommendation.model';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-pv-load-recommendation',
     templateUrl: './pv-load-recommendation.component.html',
     styleUrls: ['./pv-load-recommendation.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, WidgetFooterComponent]
 })
 export class PvLoadRecommendationComponent implements OnInit, OnDestroy {
     ready = false;

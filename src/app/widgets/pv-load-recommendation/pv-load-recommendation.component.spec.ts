@@ -28,12 +28,12 @@ describe('PvLoadRecommendationComponent', () => {
   let fixture: ComponentFixture<PvLoadRecommendationComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [PvLoadRecommendationComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, PvLoadRecommendationComponent],
+        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(PvLoadRecommendationComponent);

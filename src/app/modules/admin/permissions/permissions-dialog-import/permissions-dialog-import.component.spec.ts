@@ -18,7 +18,6 @@ import {waitForAsync, ComponentFixture, TestBed} from '@angular/core/testing';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
-import {MatDialogHarness} from '@angular/material/dialog/testing';
 import {MatInputModule} from '@angular/material/input';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -34,12 +33,13 @@ describe('PermissionsDialogImportComponent', () => {
     const snackBarMock = jasmine.createSpyObj(['open']);
 
     beforeEach(waitForAsync(() => {
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            declarations: [PermissionsDialogImportComponent],
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
             providers: [
-                {provide: MatDialog, useClass: MatDialogHarness},
-                {provide: MatDialogRef, useValue: {}},
-                {provide: MatSnackBar, useValue: snackBarMock},
+                // the dialog directives of the template look up their dialog through MatDialog
+                { provide: MatDialog, useValue: { openDialogs: [] } },
+                { provide: MatDialogRef, useValue: {} },
+                { provide: MatSnackBar, useValue: snackBarMock },
             ],
             imports: [
                 MatCheckboxModule,
@@ -48,6 +48,7 @@ describe('PermissionsDialogImportComponent', () => {
                 FormsModule,
                 ReactiveFormsModule,
                 MatInputModule,
+                PermissionsDialogImportComponent,
             ],
         })
             .compileComponents();

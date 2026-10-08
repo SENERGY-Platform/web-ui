@@ -16,24 +16,30 @@
 
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
 import { TemplateListResponseModel, TemplateModel } from '../shared/reporting.model';
 import { ReportingService } from '../shared/reporting.service';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { saveAs } from 'file-saver';
 import { Observable, Subscription, concatMap, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { reportFileName } from '../shared/report-file-name';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'senergy-reporting-templates',
     templateUrl: './templates.component.html',
     styleUrls: ['./templates.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatTooltip, MatIcon, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

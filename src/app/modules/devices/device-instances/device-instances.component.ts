@@ -27,11 +27,11 @@ import {
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatTableDataSource } from '@angular/material/table';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { DeviceInstancesDialogService } from './shared/device-instances-dialog.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { forkJoin, Observable, map, Subscription, of } from 'rxjs';
@@ -43,6 +43,16 @@ import { concatMap } from 'rxjs/operators';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { DeviceInstancesDefaultAttributesDialogComponent } from './dialogs/device-instances-default-attributes-dialog.component';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { StateIconComponent } from '../../../core/components/state-icon/state-icon.component';
+import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from '@angular/material/menu';
+import { NgClass } from '@angular/common';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -63,7 +73,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     templateUrl: './device-instances.component.html',
     styleUrls: ['./device-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, StateIconComponent, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NgClass, MatMenu, MatMenuContent, MatMenuItem, MatPaginator]
 })
 export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
 

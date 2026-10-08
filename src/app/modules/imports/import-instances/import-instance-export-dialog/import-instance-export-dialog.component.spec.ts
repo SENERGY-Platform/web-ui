@@ -165,41 +165,41 @@ describe('ImportInstanceExportDialogComponent', () => {
     let r: any;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [ImportInstanceExportDialogComponent],
-    imports: [MatDialogModule,
-        MatButtonModule,
-        MatIconModule,
-        MatFormFieldModule,
-        MatInputModule,
-        ReactiveFormsModule,
-        MatSnackBarModule,
-        MatCheckboxModule,
-        MatTableModule,
-        BrowserAnimationsModule],
-    providers: [
-        {
-            provide: MAT_DIALOG_DATA,
-            useValue: {
-                name: 'name',
-                id: 'instance-id',
-                kafka_topic: 'kafka-topic',
-                import_type_id: 'urn:infai:ses:import-type:1234',
-            } as ImportInstancesModel,
-        },
-        {
-            provide: MatDialogRef,
-            useValue: {
-                close: (rv: any) => {
-                    r = rv;
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule,
+                MatButtonModule,
+                MatIconModule,
+                MatFormFieldModule,
+                MatInputModule,
+                ReactiveFormsModule,
+                MatSnackBarModule,
+                MatCheckboxModule,
+                MatTableModule,
+                BrowserAnimationsModule, ImportInstanceExportDialogComponent],
+            providers: [
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
+                        name: 'name',
+                        id: 'instance-id',
+                        kafka_topic: 'kafka-topic',
+                        import_type_id: 'urn:infai:ses:import-type:1234',
+                    } as ImportInstancesModel,
                 },
-            },
-        },
-        { provide: ImportTypesService, useValue: importTypesServiceSpy },
-        { provide: ExportService, useValue: exportServiceSpy },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-    ]
-}).compileComponents();
+                {
+                    provide: MatDialogRef,
+                    useValue: {
+                        close: (rv: any) => {
+                            r = rv;
+                        },
+                    },
+                },
+                { provide: ImportTypesService, useValue: importTypesServiceSpy },
+                { provide: ExportService, useValue: exportServiceSpy },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+            ],
+        }).compileComponents();
     });
 
     beforeEach(() => {

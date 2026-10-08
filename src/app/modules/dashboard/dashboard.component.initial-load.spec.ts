@@ -52,8 +52,7 @@ describe('DashboardComponent first load with animations enabled', () => {
 
         await TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [DashboardComponent],
-            imports: [CoreModule, MatTabsModule, MatDialogModule, MatSnackBarModule, MatMenuModule, MatIconModule, MatButtonModule, MatDividerModule],
+            imports: [CoreModule, MatTabsModule, MatDialogModule, MatSnackBarModule, MatMenuModule, MatIconModule, MatButtonModule, MatDividerModule, DashboardComponent],
             providers: [
                 provideRouter([]),
                 provideHttpClient(withXhr(), withInterceptorsFromDi()),

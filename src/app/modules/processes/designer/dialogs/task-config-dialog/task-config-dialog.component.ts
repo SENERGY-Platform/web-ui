@@ -15,11 +15,8 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
-import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import {
     compareAspectIds,
@@ -46,12 +43,23 @@ import {
     collidingAspectNames,
 } from '../../../../../core/components/aspect-select/aspect-select.model';
 import { selectedAspectNodes } from '../../bpmn-js/properties-provider/aspects';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatFormField, MatLabel, MatHint, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxSelectLabelTemplate, MtxSelectOptionTemplate } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
     styleUrls: ['./task-config-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatFormField, MatLabel, MtxSelect, MtxSelectLabelTemplate, MtxSelectOptionTemplate, MatHint, MatError, MatErrorMessagesDirective, AspectSelectComponent, MatInput, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class TaskConfigDialogComponent implements OnInit {
     optionsFormControl = new UntypedFormControl('');

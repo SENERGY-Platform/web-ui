@@ -62,7 +62,6 @@ describe('EnvironmentsHistoryComponent', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            declarations: [EnvironmentsHistoryComponent],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -78,6 +77,7 @@ describe('EnvironmentsHistoryComponent', () => {
                 MatExpansionModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                EnvironmentsHistoryComponent,
             ],
             providers: [
                 EnvironmentsService,

@@ -110,14 +110,14 @@ describe('AspectsComponent', () => {
                 DragDropModule,
                 FormsModule,
                 MtxSelectModule,
+                AspectsComponent,
             ],
-            declarations: [AspectsComponent],
             providers: [
-                {provide: AspectsService, useValue: aspectsServiceSpy},
-                {provide: AspectClassesService, useValue: aspectClassesServiceSpy},
-                {provide: DeviceTypeService, useValue: deviceTypeServiceSpy},
-                {provide: AuthorizationService, useValue: authServiceSpy},
-                {provide: MatDialog, useValue: matDialogStub},
+                { provide: AspectsService, useValue: aspectsServiceSpy },
+                { provide: AspectClassesService, useValue: aspectClassesServiceSpy },
+                { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
+                { provide: AuthorizationService, useValue: authServiceSpy },
+                { provide: MatDialog, useValue: matDialogStub },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(AspectsComponent);

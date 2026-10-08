@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -30,6 +30,11 @@ import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create
 import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
 import { PermissionsService } from '../permissions/shared/permissions.service';
 import { AuthorizationService } from '../../core/services/authorization.service';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../../core/components/spinner/spinner.component';
+import { MatTooltip } from '@angular/material/tooltip';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
 export interface EnvironmentRow {
@@ -42,7 +47,7 @@ export interface EnvironmentRow {
     templateUrl: './environments.component.html',
     styleUrls: ['./environments.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatSlideToggle, MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class EnvironmentsComponent implements OnInit {
     displayedColumns = ['name', 'type', 'owner', 'zones', 'assets', 'channels'];

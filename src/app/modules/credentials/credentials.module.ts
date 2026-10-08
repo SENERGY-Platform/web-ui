@@ -41,25 +41,23 @@ const routes: Route[] = [
 ];
 
 @NgModule({
-  declarations: [
-    CertificatesComponent,
-    CertificateRevokeDialogComponent
-  ],
-  imports: [
-    CommonModule,
-    RouterModule.forChild(routes),
-    CoreModule,
-    MatPaginatorModule,
-    MatTableModule,
-    MatTooltipModule,
-    MatSortModule,
-    MatIconModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MtxSelectModule,
-    FormsModule,
-    MatButtonModule,
-    KeyValuePipe,
-  ]
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes),
+        CoreModule,
+        MatPaginatorModule,
+        MatTableModule,
+        MatTooltipModule,
+        MatSortModule,
+        MatIconModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MtxSelectModule,
+        FormsModule,
+        MatButtonModule,
+        KeyValuePipe,
+        CertificatesComponent,
+        CertificateRevokeDialogComponent,
+    ]
 })
 export class CredentialsModule { }

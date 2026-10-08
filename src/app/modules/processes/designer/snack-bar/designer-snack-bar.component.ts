@@ -24,8 +24,7 @@ import { DesignerErrorModel } from '../shared/designer-error.model';
     selector: 'senergy-process-designer-snack-bar',
     templateUrl: 'designer-snack-bar.component.html',
     styles: [],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager
 })
 export class DesignerSnackBarComponent {
     poolErrors: DesignerErrorModel[][] = [];

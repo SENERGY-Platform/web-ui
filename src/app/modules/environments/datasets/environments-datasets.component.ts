@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EnvironmentsService } from '../shared/environments.service';
@@ -23,13 +23,18 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DatasetMeta } from '../shared/environments.model';
 import { formatBytes } from '../shared/environments-format';
 import { EnvironmentsDatasetUploadDialogComponent } from './dialogs/environments-dataset-upload-dialog.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-environments-datasets',
     templateUrl: './environments-datasets.component.html',
     styleUrls: ['./environments-datasets.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
 })
 export class EnvironmentsDatasetsComponent implements OnInit {
     displayedColumns = ['name', 'timezone', 'columns', 'size', 'created'];

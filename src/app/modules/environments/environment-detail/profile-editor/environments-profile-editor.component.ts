@@ -19,6 +19,14 @@ import { ProfileSource } from '../../shared/environments.model';
 import { profilePreview } from '../../shared/environments-profile-preview';
 import { profileChartConfig, ProfileChartConfig } from '../../shared/environments-profile-chartjs';
 import { crosshairPlugin } from 'src/app/core/charts/chart-look';
+import { BaseChartDirective } from 'ng2-charts';
+import { MatFormField, MatLabel, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { EnvironmentsFactorBarsComponent } from '../factor-bars/environments-factor-bars.component';
 
 /**
  * The profile source editor: base/spread/cumulative, hour/weekday factors and the 24-hour
@@ -35,7 +43,7 @@ import { crosshairPlugin } from 'src/app/core/charts/chart-look';
     templateUrl: './environments-profile-editor.component.html',
     styleUrls: ['./environments-profile-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [BaseChartDirective, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatIcon, MatSuffix, MatTooltip, MatCheckbox, EnvironmentsFactorBarsComponent]
 })
 export class EnvironmentsProfileEditorComponent implements OnChanges {
     @Input() profile: ProfileSource | undefined;

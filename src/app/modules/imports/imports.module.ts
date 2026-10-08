@@ -74,14 +74,6 @@ const instances: Route = {
 };
 
 @NgModule({
-    declarations: [
-        ImportTypesComponent,
-        ImportInstancesComponent,
-        ImportTypesCreateEditComponent,
-        ContentVariableDialogComponent,
-        ImportDeployEditDialogComponent,
-        ImportInstanceExportDialogComponent,
-    ],
     imports: [
         CommonModule,
         RouterModule.forChild([types, instances, editType, createType, detailsType]),
@@ -104,6 +96,12 @@ const instances: Route = {
         MatChipsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        ImportTypesComponent,
+        ImportInstancesComponent,
+        ImportTypesCreateEditComponent,
+        ContentVariableDialogComponent,
+        ImportDeployEditDialogComponent,
+        ImportInstanceExportDialogComponent,
     ],
 })
 export class ImportsModule {}

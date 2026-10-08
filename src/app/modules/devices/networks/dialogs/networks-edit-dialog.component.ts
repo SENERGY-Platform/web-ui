@@ -15,7 +15,7 @@
  */
 
 import { ChangeDetectorRef, Component, ElementRef, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HubModel } from '../shared/networks.model';
 import { Attribute } from '../../device-instances/shared/device-instances.model';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
@@ -33,12 +33,25 @@ import { useGeographic } from 'ol/proj';
 import Style from 'ol/style/Style';
 import Icon from 'ol/style/Icon';
 import { getCenter } from 'ol/extent';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatDivider } from '@angular/material/divider';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MapComponent } from '../../map/map.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
     templateUrl: './networks-edit-dialog.component.html',
     styleUrls: ['./networks-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatDivider, MtxSelect, MatError, MatErrorMessagesDirective, MatTooltip, MatIconButton, MatIcon, MatButton, MapComponent, MatDialogActions, DatePipe]
 })
 export class NetworksEditDialogComponent implements OnInit {
     network: HubModel;

@@ -14,21 +14,31 @@
  * limitations under the License.
  */
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-instances/shared/import-instances.model';
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/import-types.model';
-import {FormArray, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
+import { FormArray, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { typeValueValidator } from '../validators/type-value-validator';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatSort } from '@angular/material/sort';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-import-deploy-dialog',
     templateUrl: './import-deploy-edit-dialog.component.html',
     styleUrls: ['./import-deploy-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class ImportDeployEditDialogComponent implements OnInit {
     form = this.fb.group({

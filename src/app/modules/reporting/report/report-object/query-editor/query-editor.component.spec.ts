@@ -135,7 +135,6 @@ describe('QueryEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [QueryEditorComponent],
             imports: [
                 CommonModule,
                 CoreModule,
@@ -151,13 +150,14 @@ describe('QueryEditorComponent', () => {
                 MatDialogModule,
                 MatSnackBarModule,
                 MtxSelectModule,
+                QueryEditorComponent,
             ],
             providers: [
                 { provide: DeviceTypeService, useClass: MockDeviceTypeService },
                 { provide: ExportDataService, useClass: MockExportDataService },
                 { provide: FunctionsService, useClass: MockFunctionsService },
                 { provide: DeviceGroupsService, useClass: MockDeviceGroupsService },
-            ]
+            ],
         }).compileComponents();
         fixture = TestBed.createComponent(QueryEditorComponent);
         component = fixture.componentInstance;

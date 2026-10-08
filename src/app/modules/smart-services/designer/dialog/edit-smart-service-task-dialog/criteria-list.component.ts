@@ -35,13 +35,20 @@ import {
     SmartServiceCriteria,
     storableCriteria,
 } from '../../shared/smart-service-criteria';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-criteria-list',
     templateUrl: './criteria-list.component.html',
     styleUrls: ['./criteria-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, AspectSelectComponent, MatButton]
 })
 export class CriteriaListComponent implements OnInit {
 

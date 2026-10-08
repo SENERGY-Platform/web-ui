@@ -17,8 +17,11 @@
 import { AfterContentInit, Component, Input, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { PermissionsRightsModel } from '../../../shared/permissions-rights.model';
 import { PermissionsUserModel } from '../../../shared/permissions-user.model';
-import { MatTable, MatTableDataSource } from '@angular/material/table';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { MatTable, MatTableDataSource, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
 
 export interface AnnotatedPermissionsV2ResourceModel extends PermissionsRightsModel {
   name: string;
@@ -38,7 +41,7 @@ export enum PermissionTypes {
     templateUrl: './table.component.html',
     styleUrls: ['./table.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIcon, MatCheckbox, MatTooltip, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class TableComponent implements AfterContentInit {
 

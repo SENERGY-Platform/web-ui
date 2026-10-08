@@ -101,7 +101,6 @@ describe('ImportInstancesComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ImportInstancesComponent],
             imports: [CoreModule,
                 RouterModule.forRoot([], {}),
                 ReactiveFormsModule,
@@ -120,7 +119,7 @@ describe('ImportInstancesComponent', () => {
                 MatTreeModule,
                 MatTableModule,
                 WidgetModule,
-                InfiniteScrollModule],
+                InfiniteScrollModule, ImportInstancesComponent],
             providers: [
                 { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
                 { provide: DialogsService, useValue: deleteDialogServiceSpy },
@@ -131,7 +130,7 @@ describe('ImportInstancesComponent', () => {
                 { provide: PermissionsService, useValue: permissionsServiceSpy },
                 { provide: AuthorizationService, useValue: authorizationServiceSpy },
                 provideHttpClient(withXhr(), withInterceptorsFromDi()),
-            ]
+            ],
         }).compileComponents();
     });
 

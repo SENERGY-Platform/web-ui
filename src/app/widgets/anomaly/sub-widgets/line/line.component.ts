@@ -23,13 +23,15 @@ import { ChangeDetectorRef } from '@angular/core';
 import { chartAnomalies, timeChartSeries, valueChartSeries, waitingTimes } from './anomaly-line-chart';
 import { AnomalyChartConfig, timeChartConfig, valueChartConfig } from './anomaly-line-chartjs';
 import { crosshairPlugin } from 'src/app/core/charts/chart-look';
+import { ChartToolbarComponent } from '../../../shared/chart-toolbar/chart-toolbar.component';
+import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
     selector: 'anomaly-line',
     templateUrl: './line.component.html',
     styleUrls: ['./line.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [ChartToolbarComponent, BaseChartDirective]
 })
 export class LineComponent implements OnInit, OnChanges {
     chartsReady = false;

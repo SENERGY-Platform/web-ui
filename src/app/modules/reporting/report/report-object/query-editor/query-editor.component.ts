@@ -15,7 +15,7 @@
  */
 
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { AbstractControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, Subject, map, of, switchMap, takeUntil } from 'rxjs';
 import { DeviceInstanceModel } from '../../../../devices/device-instances/shared/device-instances.model';
@@ -43,6 +43,16 @@ import {
     queryFromForm
 } from '../../../shared/report-object-form';
 import { QueryPreviewData, QueryPreviewDialogComponent } from '../query-preview/query-preview-dialog.component';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatInput } from '@angular/material/input';
+import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 
 interface TimeUnit {
     unit: string;
@@ -164,7 +174,7 @@ function combine(values: number[], aggregation: 'sum' | 'mean'): number | null {
     templateUrl: './query-editor.component.html',
     styleUrls: ['./query-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatIconButton, MatTooltip, MatIcon, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MtxSelect, MatError, MatErrorMessagesDirective, MatCheckbox, MtxOption, MatHint, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatButton]
 })
 export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
 

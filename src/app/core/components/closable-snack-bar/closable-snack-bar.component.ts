@@ -16,13 +16,15 @@
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'senergy-closable-snack-bar',
     templateUrl: './closable-snack-bar.component.html',
     styleUrls: ['./closable-snack-bar.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatButton, MatIconButton, MatIcon]
 })
 export class ClosableSnackBarComponent {
     constructor(public snackBarRef: MatSnackBarRef<ClosableSnackBarComponent>,

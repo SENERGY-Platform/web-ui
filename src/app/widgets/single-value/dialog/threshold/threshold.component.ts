@@ -16,16 +16,18 @@
 
 import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ValueHighlightConfig } from '../../shared/single-value.model';
 import { AddThresholdComponent } from '../add-threshold/add-threshold.component';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'single-value-threshold',
     templateUrl: './threshold.component.html',
     styleUrls: ['./threshold.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton]
 })
 export class ThresholdComponent implements OnInit {
     displayedColumns = ['threshold', 'direction', 'color', 'edit', 'delete'];

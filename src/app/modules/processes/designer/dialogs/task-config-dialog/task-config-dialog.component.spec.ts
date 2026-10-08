@@ -89,8 +89,7 @@ describe('TaskConfigDialogComponent', () => {
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule, NoopAnimationsModule],
-            declarations: [TaskConfigDialogComponent],
+            imports: [CoreModule, MatDialogModule, MatRadioModule, ReactiveFormsModule, MatInputModule, MatCheckboxModule, MtxSelectModule, NoopAnimationsModule, TaskConfigDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { selection } },

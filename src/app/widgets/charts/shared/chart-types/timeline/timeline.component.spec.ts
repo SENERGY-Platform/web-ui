@@ -25,9 +25,9 @@ describe('TimelineComponent', () => {
   let fixture: ComponentFixture<TimelineComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-      declarations: [ TimelineComponent ],
-      imports: [MatSnackBarModule]
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatSnackBarModule, TimelineComponent],
     })
     .compileComponents();
 

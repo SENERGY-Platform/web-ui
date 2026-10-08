@@ -17,7 +17,7 @@
 import {Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from './shared/timescale-rule.model';
-import {MatTable} from '@angular/material/table';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {TimescaleRulesCreateEditComponent} from './timescale-rules-create-edit/timescale-rules-create-edit.component';
@@ -28,13 +28,18 @@ import {map} from 'rxjs/operators';
 import {
     TimescaleRulesCreateEditTemplateComponent
 } from './timescale-rules-create-edit-template/timescale-rules-create-edit-template.component';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-timescale-rules',
     templateUrl: './timescale-rules.component.html',
     styleUrls: ['./timescale-rules.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatIcon, SpinnerComponent, InfiniteScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton]
 })
 export class TimescaleRulesComponent implements OnInit {
     @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypeModel>;

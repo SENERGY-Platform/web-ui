@@ -16,7 +16,7 @@
 
 import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { MatIconRegistry } from '@angular/material/icon';
+import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { AirQualityService } from './shared/air-quality.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
@@ -24,13 +24,20 @@ import { Observable, of, Subscription } from 'rxjs';
 import { UBAService } from './shared/uba.service';
 import { DWDPollenService } from './shared/dwd-pollen.service';
 import { map } from 'rxjs/operators';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatList, MatListSubheaderCssMatStyler, MatListItem, MatListItemLine } from '@angular/material/list';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-air-quality',
     templateUrl: './air-quality.component.html',
     styleUrls: ['./air-quality.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTooltip, MatIconButton, MatIcon, MatList, MatListSubheaderCssMatStyler, MatListItem, MatListItemLine, WidgetFooterComponent]
 })
 export class AirQualityComponent implements OnInit, OnDestroy {
     ready = false;

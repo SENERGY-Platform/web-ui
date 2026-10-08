@@ -43,18 +43,18 @@ describe('PermissionsEditComponent', () => {
     const snackBarMock = jasmine.createSpyObj(['open']);
 
     beforeEach(waitForAsync(() => {
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            declarations: [PermissionsEditComponent],
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
             providers: [
-                {provide: MatDialogRef, useValue: {}},
-                {provide: MAT_DIALOG_DATA, useValue: {permission: {id: 'id', subject: 'admin', resource: '', actions: ['GET']}, roles: [], users: [], clients: []}},
+                { provide: MatDialogRef, useValue: {} },
+                { provide: MAT_DIALOG_DATA, useValue: { permission: { id: 'id', subject: 'admin', resource: '', actions: ['GET'] }, roles: [], users: [], clients: [] } },
                 FormBuilder,
-                {provide: AuthorizationService, useClass: AuthorizationServiceMock},
-                {provide: LadonService, useClass: LadomServiceMock},
-                {provide: KongService, useClass: KongServiceMock},
+                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                { provide: LadonService, useClass: LadomServiceMock },
+                { provide: KongService, useClass: KongServiceMock },
                 {
                     provide: ActivatedRoute, useValue: {
-                        params: of([{id: 0}]),
+                        params: of([{ id: 0 }]),
                         snapshot: {
                             paramMap: {
                                 get: () => '',
@@ -62,7 +62,7 @@ describe('PermissionsEditComponent', () => {
                         },
                     },
                 },
-                {provide: MatSnackBar, useValue: snackBarMock},
+                { provide: MatSnackBar, useValue: snackBarMock },
             ],
             imports: [
                 MatAutocompleteModule,
@@ -73,6 +73,7 @@ describe('PermissionsEditComponent', () => {
                 FormsModule,
                 ReactiveFormsModule,
                 MatInputModule,
+                PermissionsEditComponent,
             ],
         })
             .compileComponents();

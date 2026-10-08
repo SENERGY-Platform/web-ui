@@ -28,9 +28,9 @@ describe('SearchbarComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-                imports: [BrowserAnimationsModule, MatInputModule, ReactiveFormsModule],
-                declarations: [SearchbarComponent],
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [BrowserAnimationsModule, MatInputModule, ReactiveFormsModule, SearchbarComponent],
             }).compileComponents();
         }),
     );

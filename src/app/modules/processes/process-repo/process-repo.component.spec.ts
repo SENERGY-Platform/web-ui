@@ -61,7 +61,7 @@ describe('ProcessRepoComponent', () => {
         });
 
         TestBed.configureTestingModule({
-            declarations: [ProcessRepoComponent],
+            imports: [ProcessRepoComponent],
             schemas: [NO_ERRORS_SCHEMA],
             providers: [
                 { provide: ProcessRepoService, useValue: repoService },

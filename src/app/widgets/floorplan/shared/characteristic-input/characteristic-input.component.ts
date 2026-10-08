@@ -25,6 +25,17 @@ import {
   resolveControlInput,
   roundTo,
 } from '../floorplan.model';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { NgClass } from '@angular/common';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 /**
  * Collects a value in the shape of a characteristic. Structures and lists are rendered by nesting this
@@ -35,7 +46,7 @@ import {
     templateUrl: './characteristic-input.component.html',
     styleUrl: './characteristic-input.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatSlideToggle, MatSlider, MatSliderThumb, MatButton, NgClass, MatFormField, MatLabel, MatSelect, MatOption, MatInput, FormsModule, MatSuffix, MatIconButton, MatTooltip, MatIcon]
 })
 export class CharacteristicInputComponent implements OnInit {
   @Input() characteristic: DeviceTypeCharacteristicsModel | undefined;

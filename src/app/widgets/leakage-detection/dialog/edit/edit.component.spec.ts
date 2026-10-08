@@ -28,17 +28,17 @@ describe('LeakageDetectionEditComponent', () => {
   let fixture: ComponentFixture<LeakageDetectionEditComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [LeakageDetectionEditComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: {} },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, LeakageDetectionEditComponent],
+        providers: [
+            { provide: MAT_DIALOG_DATA, useValue: {} },
+            { provide: MatDialogRef, useValue: {} },
+            provideHttpClient(withXhr(), withInterceptorsFromDi()),
+            provideHttpClientTesting(),
+        ],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(LeakageDetectionEditComponent);

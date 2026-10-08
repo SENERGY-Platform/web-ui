@@ -16,17 +16,22 @@
 
 import { AfterViewInit, Component, ElementRef, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { concatMap, map } from 'rxjs';
 import { detectAndMergeFlapping } from 'src/app/modules/devices/device-instances/shared/flapping.function';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { TimelineComponent } from '../../charts/shared/chart-types/timeline/timeline.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-connection-history-dialog',
     templateUrl: './connection-history-dialog.component.html',
     styleUrl: './connection-history-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, TimelineComponent, MatDialogActions, MatButton]
 })
 export class ConnectionHistoryDialogComponent implements AfterViewInit {
     ready = false;

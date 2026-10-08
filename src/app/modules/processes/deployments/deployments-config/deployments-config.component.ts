@@ -19,7 +19,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProcessRepoService } from '../../process-repo/shared/process-repo.service';
 import { DeploymentsService } from '../shared/deployments.service';
 import { UtilService } from '../../../../core/services/util.service';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DeploymentsConfigInitializerService } from './shared/deployments-config-initializer.service';
@@ -39,6 +39,15 @@ import { OperatorRepoService } from '../../../data/operator-repo/shared/operator
 import { OperatorModel } from '../../../data/operator-repo/shared/operator.model';
 import { CharacteristicsService } from '../../../metadata/characteristics/shared/characteristics.service';
 import { DeviceTypeAspectNodeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatCard, MatCardContent, MatCardHeader, MatCardTitle, MatCardSubtitle } from '@angular/material/card';
+import { MatInput } from '@angular/material/input';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { DeploymentsConfigTimeEventComponent } from './components/time-event/deployments-config-time-event.component';
+import { MatButton } from '@angular/material/button';
+import { KeyValuePipe } from '@angular/common';
 
 interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2DeploymentsPreparedSelectionOptionModel {
     group?: string;
@@ -49,7 +58,7 @@ interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2Deploymen
     templateUrl: './deployments-config.component.html',
     styleUrls: ['./deployments-config.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatFormField, MatLabel, MtxSelect, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCard, MatCardContent, MatInput, CdkTextareaAutosize, MatCardHeader, MatCardTitle, MatCheckbox, MatCardSubtitle, MtxOption, DeploymentsConfigTimeEventComponent, MatButton, KeyValuePipe]
 })
 export class ProcessDeploymentsConfigComponent implements OnInit {
     @ViewChild('autosize', { static: false }) autosize!: CdkTextareaAutosize;

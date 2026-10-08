@@ -27,6 +27,10 @@ import { ExportDataService } from '../../shared/export-data.service';
 import { ChartsExportRangeTimeTypeEnum } from '../export/shared/charts-export-range-time-type.enum';
 import { OpenWindowEditComponent } from './dialog/edit/edit.component';
 import { TimelineComponent } from '../shared/chart-types/timeline/timeline.component';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { WidgetFooterComponent } from '../../components/widget-footer/widget-footer.component';
 
 interface InitCheck {
     message: string;
@@ -38,7 +42,7 @@ interface InitCheck {
     templateUrl: './open-window.component.html',
     styleUrls: ['./open-window.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, TimelineComponent, WidgetSpinnerComponent, WidgetFooterComponent]
 })
 export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
     ready = false;

@@ -15,16 +15,7 @@
  */
 
 import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef, ChangeDetectionStrategy } from '@angular/core';
-import {
-    AbstractControl,
-    ControlValueAccessor,
-    NG_VALIDATORS,
-    NG_VALUE_ACCESSOR,
-    NgControl,
-    UntypedFormControl,
-    ValidationErrors,
-    Validator,
-} from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, UntypedFormControl, ValidationErrors, Validator, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { AspectClassesService } from '../../../modules/metadata/aspects/shared/aspect-classes.service';
 import { DeviceTypeAspectClassModel, DeviceTypeAspectModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
@@ -35,6 +26,8 @@ import {
     classifyAspects,
     collidingAspectNames,
 } from './aspect-select.model';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxSelectLabelTemplate } from '@ng-matero/extensions/select';
 
 /**
  * Multi-aspect picker, used wherever a content variable or criteria selects one or more aspects.
@@ -53,7 +46,7 @@ import {
         { provide: NG_VALIDATORS, useExisting: forwardRef(() => AspectSelectComponent), multi: true },
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatFormField, MatLabel, MtxSelect, FormsModule, ReactiveFormsModule, MtxSelectLabelTemplate, MatError]
 })
 export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAccessor, Validator {
     @Input() aspects: DeviceTypeAspectModel[] = [];

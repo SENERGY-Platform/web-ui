@@ -27,6 +27,16 @@ import {
     HistoryStatus,
     isHistoryStartRefusal,
 } from '../../shared/environments.model';
+import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { DatePipe } from '@angular/common';
 
 const POLL_INTERVAL_MS = 5000;
 const MAX_WINDOW_DAYS = 366;
@@ -44,7 +54,7 @@ const MIN_PAST_MARGIN_MS = 2 * 60 * 1000;
     templateUrl: './environments-history.component.html',
     styleUrls: ['./environments-history.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SpinnerComponent, MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatHint, MatProgressBar, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
 })
 export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
     @Input() environmentId = '';

@@ -24,13 +24,24 @@ import {FlowRepoService} from '../../../../../data/flow-repo/shared/flow-repo.se
 import {OperatorRepoService} from '../../../../../data/operator-repo/shared/operator-repo.service';
 import {OperatorModel} from '../../../../../data/operator-repo/shared/operator.model';
 import {ImportTypesService} from '../../../../../imports/import-types/shared/import-types.service';
+import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 
 @Component({
     selector: 'esstd-export-component',
-    standalone: false,
     templateUrl: './esstd-export-component.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
-    styleUrl: './esstd-export-component.component.css'
+    styleUrl: './esstd-export-component.component.css',
+    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatIconButton, MatSuffix, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatTooltip, MatCheckbox, MatButton, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class EsstdExportComponentComponent implements OnInit {
     @Input() result!: SmartServiceTaskDescription;

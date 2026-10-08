@@ -15,17 +15,25 @@
  */
 
 import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
-import {MatDialogRef} from '@angular/material/dialog';
-import {FormBuilder, FormGroup, UntypedFormControl, Validators} from '@angular/forms';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
 import {v4 as uuid} from 'uuid';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './functions-create-dialog.component.html',
     styleUrls: ['./functions-create-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class FunctionsCreateDialogComponent implements OnInit {
     optionsFormControl = new UntypedFormControl('Controlling');

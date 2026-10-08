@@ -35,32 +35,32 @@ describe('DeployFlowClassicComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DeployFlowClassicComponent],
-    imports: [MatSnackBarModule,
-        MatDialogModule,
-        CoreModule,
-        InfiniteScrollModule],
-    providers: [
-        provideRouter([]),
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        DialogsService,
-        {
-            provide: ActivatedRoute,
-            useValue: {
-                snapshot: {
-                    paramMap: {
-                        get(): string {
-                            return '123';
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [MatSnackBarModule,
+                    MatDialogModule,
+                    CoreModule,
+                    InfiniteScrollModule, DeployFlowClassicComponent],
+                providers: [
+                    provideRouter([]),
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                    DialogsService,
+                    {
+                        provide: ActivatedRoute,
+                        useValue: {
+                            snapshot: {
+                                paramMap: {
+                                    get(): string {
+                                        return '123';
+                                    },
+                                },
+                            },
                         },
                     },
-                },
-            },
-        },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            }).compileComponents();
         }),
     );
 

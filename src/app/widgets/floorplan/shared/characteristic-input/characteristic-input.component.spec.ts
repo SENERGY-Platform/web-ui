@@ -50,8 +50,8 @@ describe('CharacteristicInputComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
+            imports: [CharacteristicInputComponent],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [CharacteristicInputComponent],
         }).compileComponents();
     }));
 

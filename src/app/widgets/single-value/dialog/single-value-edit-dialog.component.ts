@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {FormControl, FormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
+import { FormControl, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -23,7 +23,7 @@ import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../mod
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceInstanceModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { criteriaAspectIds, DeviceTypeAspectModel, DeviceTypeCharacteristicsModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel, DeviceTypeServiceModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
@@ -35,12 +35,23 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations, ValueHighlightConfig } from '../shared/single-value.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { ThresholdComponent } from './threshold/threshold.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatRadioGroup, MatRadioButton, MatProgressSpinner, MtxSelect, MtxOption, MatCheckbox, ThresholdComponent, MatDialogActions, MatButton]
 })
 export class SingleValueEditDialogComponent implements OnInit {
     formIsReady = false;

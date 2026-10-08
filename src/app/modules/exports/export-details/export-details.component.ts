@@ -15,7 +15,7 @@
  */
 
 import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
-import {Location} from '@angular/common';
+import { Location, DatePipe } from '@angular/common';
 import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
 import {ActivatedRoute} from '@angular/router';
 import {ExportService} from '../shared/export.service';
@@ -32,13 +32,21 @@ import {AuthorizationService} from '../../../core/services/authorization.service
 import {environment} from '../../../../environments/environment';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ClipboardService} from 'ngx-clipboard';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { MatList, MatListItem, MatListItemIcon, MatListItemLine } from '@angular/material/list';
+import { MatDivider } from '@angular/material/divider';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 @Component({
     selector: 'senergy-export-details',
     templateUrl: './export-details.component.html',
     styleUrls: ['./export-details.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, MatList, MatListItem, MatListItemIcon, MatListItemLine, MatDivider, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, SpinnerComponent, DatePipe]
 })
 export class ExportDetailsComponent implements OnInit {
     id: string | null = null;

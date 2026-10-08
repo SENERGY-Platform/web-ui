@@ -22,10 +22,21 @@ import {SingleValueService} from './shared/single-value.service';
 import {SingleValueAggregations, SingleValueModel} from './shared/single-value.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Observable, Subscription, map} from 'rxjs';
-import {MatIconRegistry} from '@angular/material/icon';
-import {FormControl} from '@angular/forms';
+import { MatIconRegistry, MatIcon } from '@angular/material/icon';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {debounceTime} from 'rxjs/operators';
 import {animate, state, style, transition, trigger,} from '@angular/animations';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { FitTextComponent } from '../../core/components/fit-text/fit-text.component';
+import { NgClass, DatePipe } from '@angular/common';
+import { ValueComponent } from './value/value.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../core/directives/matError.directive';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 const dateDiff = {
     inSeconds(d1: Date, d2: Date) {
@@ -102,7 +113,7 @@ const dateDiff = {
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, FitTextComponent, NgClass, ValueComponent, MatIconButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, WidgetFooterComponent, DatePipe]
 })
 export class SingleValueComponent implements OnInit, OnDestroy {
     svList: SingleValueModel[] = [];

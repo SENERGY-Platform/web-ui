@@ -15,15 +15,20 @@
  */
 
 import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy} from '@angular/core';
-import {UntypedFormControl} from '@angular/forms';
+import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {SearchbarService} from './shared/searchbar.service';
+import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-searchbar',
     templateUrl: './searchbar.component.html',
     styleUrls: ['./searchbar.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatFormField, MatLabel, MatIcon, MatPrefix, MatInput, FormsModule, ReactiveFormsModule, MatIconButton, MatSuffix, MatTooltip]
 })
 export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     @Input() searchTextIn = '';

@@ -15,12 +15,12 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
     DeviceTypeAspectNodeModel,
     DeviceTypeFunctionModel,
@@ -42,12 +42,23 @@ import { ProcessSchedulerModel } from '../../process-scheduler/shared/process-sc
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MtxSelect, MtxSelectLabelTemplate, MtxOption } from '@ng-matero/extensions/select';
+import { MatIcon } from '@angular/material/icon';
+import { NgStyle, NgClass } from '@angular/common';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
     templateUrl: './device-status-edit-dialog.component.html',
     styleUrls: ['./device-status-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatButton, MtxSelect, MtxSelectLabelTemplate, MatIcon, NgStyle, MtxOption, MatIconButton, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatCheckbox, MatDialogActions]
 })
 export class DeviceStatusEditDialogComponent implements OnInit {
     aspects:  DeviceTypeAspectNodeModel[] = [];

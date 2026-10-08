@@ -14,25 +14,32 @@
  * limitations under the License.
  */
 import {Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {ImportInstancesModel} from '../shared/import-instances.model';
-import {FormControl, Validators} from '@angular/forms';
+import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {ImportTypesService} from '../../import-types/shared/import-types.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ImportTypeModel} from '../../import-types/shared/import-types.model';
 import {ExportService} from '../../../exports/shared/export.service';
 import {ExportModel, ExportValueModel} from '../../../exports/shared/export.model';
 import {SelectionModel} from '@angular/cdk/collections';
-import {MatCheckboxChange} from '@angular/material/checkbox';
-import {MatTable} from '@angular/material/table';
+import { MatCheckboxChange, MatCheckbox } from '@angular/material/checkbox';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {environment} from '../../../../../environments/environment';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatSort } from '@angular/material/sort';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-import-instance-export-dialog',
     templateUrl: './import-instance-export-dialog.component.html',
     styleUrls: ['./import-instance-export-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class ImportInstanceExportDialogComponent implements OnInit {
     type: ImportTypeModel | undefined = undefined;

@@ -15,14 +15,17 @@
  */
 
 import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
 
 @Component({
     selector: 'senergy-cycle-event-config',
     templateUrl: './cycle-event-config.component.html',
     styleUrls: ['./cycle-event-config.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, MatFormField, MatInput, ReactiveFormsModule, MatLabel, MatError, MatErrorMessagesDirective]
 })
 export class CycleEventConfigComponent implements OnInit {
     @Input() initial = '';

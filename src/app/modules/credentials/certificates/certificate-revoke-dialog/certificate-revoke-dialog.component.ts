@@ -16,15 +16,21 @@
 
 
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { getRfc5280ReasonStrings, Rfc5280Reason, rfc5280ReasonCode } from '../shared/certificates.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-certificate-revoke-dialog',
     templateUrl: './certificate-revoke-dialog.component.html',
     styleUrl: './certificate-revoke-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class CertificateRevokeDialogComponent {
   constructor(

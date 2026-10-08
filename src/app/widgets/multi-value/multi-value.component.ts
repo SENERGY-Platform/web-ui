@@ -22,15 +22,20 @@ import { MultiValueService } from './shared/multi-value.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { MultiValueMeasurement, MultiValueOrderEnum } from './shared/multi-value.model';
-import { Sort } from '@angular/material/sort';
-import { MatTable } from '@angular/material/table';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { NgClass, DecimalPipe, PercentPipe, CurrencyPipe, DatePipe } from '@angular/common';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-multi-value',
     templateUrl: './multi-value.component.html',
     styleUrls: ['./multi-value.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetFooterComponent, DecimalPipe, PercentPipe, CurrencyPipe, DatePipe]
 })
 export class MultiValueComponent implements OnInit, OnDestroy {
     configured = false;

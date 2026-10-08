@@ -23,13 +23,19 @@ import { ChartsProcessDeploymentsService } from './shared/charts-process-deploym
 import { DeploymentsPerDay } from './shared/charts-process-deployments-chart';
 import { deploymentsChart } from './shared/charts-process-deployments-chartjs';
 import { googleFrame, googlePlugins } from '../../../../core/charts/google-chartjs';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { WidgetNoDataComponent } from '../../../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../../../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-charts-process-deployments',
     templateUrl: './charts-process-deployments.component.html',
     styleUrls: ['./charts-process-deployments.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class ChartsProcessDeploymentsComponent implements OnInit, OnDestroy, AfterViewInit {
     /** undefined without data */

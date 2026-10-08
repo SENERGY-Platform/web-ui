@@ -45,8 +45,7 @@ describe('DiagramEditorComponent links', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [DiagramEditorComponent],
-            imports: [MatSnackBarModule],
+            imports: [MatSnackBarModule, DiagramEditorComponent],
         }).compileComponents();
     }));
 

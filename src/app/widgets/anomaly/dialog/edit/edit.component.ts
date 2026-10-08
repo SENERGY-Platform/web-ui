@@ -15,8 +15,8 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {UntypedFormBuilder, Validators} from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -27,6 +27,16 @@ import { ExportModel, ExportResponseModel } from 'src/app/modules/exports/shared
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
 import { ChartsExportMeasurementModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-selector/data-source-selector.component';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { DataSourceSelectorComponent } from '../../../charts/shared/data-source-selector/data-source-selector.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatButton } from '@angular/material/button';
 
 const visualizationTypeLine =  {
     id: 'device',
@@ -43,7 +53,7 @@ const visualizationTypeTimeline = {
     templateUrl: './edit.component.html',
     styleUrls: ['./edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, DataSourceSelectorComponent, MtxOption, MatCheckbox, MatDialogActions, MatButton]
 })
 export class EditComponent implements OnInit {
     userHasUpdateNameAuthorization = false;

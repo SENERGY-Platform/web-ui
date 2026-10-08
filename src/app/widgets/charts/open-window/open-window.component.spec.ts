@@ -28,12 +28,12 @@ describe('OpenWindowComponent', () => {
   let fixture: ComponentFixture<OpenWindowComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [OpenWindowComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, OpenWindowComponent],
+        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(OpenWindowComponent);

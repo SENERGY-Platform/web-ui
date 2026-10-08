@@ -25,12 +25,13 @@ describe('AddThresholdComponent', () => {
   let fixture: ComponentFixture<AddThresholdComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-      declarations: [ AddThresholdComponent ],
-      providers: [
-        {provide: MatDialogRef, useValue: {}},
-        {provide: MAT_DIALOG_DATA, useValue: []},
-      ]
+    await TestBed.configureTestingModule({
+        imports: [AddThresholdComponent],
+        schemas: [NO_ERRORS_SCHEMA],
+        providers: [
+            { provide: MatDialogRef, useValue: {} },
+            { provide: MAT_DIALOG_DATA, useValue: [] },
+        ],
     })
     .compileComponents();
 

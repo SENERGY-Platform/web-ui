@@ -19,7 +19,7 @@ import {Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {ProcessModel} from '../../processes/process-repo/shared/process.model';
 import {SmartServiceReleaseModel, SmartServiceExtendedReleaseModel} from './shared/release.model';
-import {FormArray, FormBuilder, FormGroup} from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {ResponsiveService} from '../../../core/services/responsive.service';
 import {saveAs} from 'file-saver';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -29,9 +29,19 @@ import {UtilService} from '../../../core/services/util.service';
 import {SmartServiceReleasesService} from './shared/release.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import { DeleteDialogResponse } from 'src/app/core/dialogs/delete-dialog.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SmartServiceInstanceDialogService } from '../instances/shared/instance-dialog.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler } from '@angular/material/grid-list';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { DatePipe } from '@angular/common';
 
 const grids = new Map([
     ['xs', 1],
@@ -46,7 +56,7 @@ const grids = new Map([
     templateUrl: './releases.component.html',
     styleUrls: ['./releases.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, SpinnerComponent, DatePipe]
 })
 export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

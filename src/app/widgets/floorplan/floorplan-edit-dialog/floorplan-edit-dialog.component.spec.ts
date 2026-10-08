@@ -39,8 +39,7 @@ describe('FloorplanEditDialogComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [FloorplanEditDialogComponent],
-            imports: [ReactiveFormsModule],
+            imports: [ReactiveFormsModule, FloorplanEditDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: createSpyFromClass<MatDialogRef<FloorplanEditDialogComponent>>(MatDialogRef) },
                 { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId', dashboardId: 'dashboardId', aspectRatio: 1 } },

@@ -31,6 +31,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { EnvironmentsScheduleEditorComponent } from './environments-schedule-editor.component';
 import { EnvironmentsKeyValueEditorComponent } from '../../key-value-editor/environments-key-value-editor.component';
 import { ScheduleSource, ScheduleState } from '../../shared/environments.model';
+import { provideAppCharts } from '../../../../core/charts/provide-app-charts';
 
 describe('EnvironmentsScheduleEditorComponent', () => {
     let component: EnvironmentsScheduleEditorComponent;
@@ -39,7 +40,6 @@ describe('EnvironmentsScheduleEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsScheduleEditorComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -50,7 +50,9 @@ describe('EnvironmentsScheduleEditorComponent', () => {
                 MatCheckboxModule,
                 MatButtonModule,
                 MatDividerModule,
+                EnvironmentsScheduleEditorComponent,
             ],
+            providers: [provideAppCharts()],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsScheduleEditorComponent);
         component = fixture.componentInstance;
@@ -245,7 +247,6 @@ describe('EnvironmentsScheduleEditorComponent + the real key-value editor (state
             // mtx-select and the baseChart canvas are still unresolved here (irrelevant to this suite);
             // only the schedule editor and the key-value editor need to be the real thing.
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsScheduleEditorComponent, EnvironmentsKeyValueEditorComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -257,7 +258,9 @@ describe('EnvironmentsScheduleEditorComponent + the real key-value editor (state
                 MatButtonModule,
                 MatButtonToggleModule,
                 MatDividerModule,
+                EnvironmentsScheduleEditorComponent, EnvironmentsKeyValueEditorComponent,
             ],
+            providers: [provideAppCharts()],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsScheduleEditorComponent);
         component = fixture.componentInstance;

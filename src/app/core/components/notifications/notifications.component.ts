@@ -17,7 +17,7 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { Component, OnDestroy, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SearchbarService } from '../searchbar/shared/searchbar.service';
 import { DialogsService } from '../../services/dialogs.service';
 import { PreferencesService } from '../../services/preferences.service';
@@ -34,6 +34,13 @@ import { NotificationService } from './shared/notification.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConnectionHistoryDialogComponent } from 'src/app/widgets/shared/connection-history-dialog/connection-history-dialog.component';
 import { Router } from '@angular/router';
+import { SearchbarComponent } from '../searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../spinner/spinner.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { DatePipe } from '@angular/common';
 
 interface NotificationDisplayModel extends NotificationModel {
   action?: () => void;
@@ -44,7 +51,7 @@ interface NotificationDisplayModel extends NotificationModel {
     templateUrl: './notifications.component.html',
     styleUrl: './notifications.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   @ViewChild('paginator', { static: false })

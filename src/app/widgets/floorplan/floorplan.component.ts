@@ -62,15 +62,24 @@ import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/sh
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
 import { FloorplanControlDialogComponent, FloorplanControlDialogData } from './floorplan-control-dialog/floorplan-control-dialog.component';
-import { CapabilityCommandModel } from './shared/capability-control/capability-control.component';
+import { CapabilityCommandModel, CapabilityControlComponent } from './shared/capability-control/capability-control.component';
 import { markerText, placementMarker, placementPosition, tooltipValueLabel } from './shared/floorplan-markers';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { NgClass, NgStyle } from '@angular/common';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-floorplan',
     templateUrl: './floorplan.component.html',
     styleUrl: './floorplan.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, NgClass, NgStyle, MatIconButton, MatIcon, MatTooltip, CapabilityControlComponent, WidgetFooterComponent]
 })
 export class FloorplanComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input() dashboardId = '';

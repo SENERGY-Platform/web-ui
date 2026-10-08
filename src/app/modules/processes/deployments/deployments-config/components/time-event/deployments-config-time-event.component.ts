@@ -15,15 +15,18 @@
  */
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { duration, durationToIsoString } from '../../../../../../core/time/iso-duration';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../../../core/directives/matError.directive';
 
 @Component({
     selector: 'senergy-process-deployments-config-time-event',
     templateUrl: './deployments-config-time-event.component.html',
     styleUrls: ['./deployments-config-time-event.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective]
 })
 export class DeploymentsConfigTimeEventComponent {
     @Input() time_event: FormGroup = new FormGroup({});

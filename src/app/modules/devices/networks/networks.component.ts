@@ -23,8 +23,8 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
 import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
@@ -33,13 +33,20 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { StateIconComponent } from '../../../core/components/state-icon/state-icon.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-networks',
     templateUrl: './networks.component.html',
     styleUrls: ['./networks.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, StateIconComponent, MatIcon, MatTooltip, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];

@@ -69,7 +69,7 @@ const routes: Route[] = [
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
         GridstackModule,
+        DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent,
     ],
-    declarations: [DashboardComponent, DashboardNewDialogComponent, DashboardNewWidgetDialogComponent, DashboardEditDialogComponent],
 })
 export class DashboardModule {}

@@ -17,18 +17,24 @@
  */
 
 import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { UntypedFormControl, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionImportModel } from './permissions-dialog-import.model';
 import { PermissionModel } from '../shared/permission.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton } from '@angular/material/button';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
     selector: 'senergy-permissions-dialog-import',
     templateUrl: './permissions-dialog-import.component.html',
     styleUrls: ['./permissions-dialog-import.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatButton, MatRadioGroup, FormsModule, ReactiveFormsModule, MatRadioButton, MatTooltip, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions]
 })
 export class PermissionsDialogImportComponent {
 

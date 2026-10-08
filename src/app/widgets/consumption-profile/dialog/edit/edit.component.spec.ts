@@ -28,17 +28,17 @@ describe('ConsumptionProfileEditComponent', () => {
   let fixture: ComponentFixture<ConsumptionProfileEditComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [ConsumptionProfileEditComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: {} },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, ConsumptionProfileEditComponent],
+        providers: [
+            { provide: MAT_DIALOG_DATA, useValue: {} },
+            { provide: MatDialogRef, useValue: {} },
+            provideHttpClient(withXhr(), withInterceptorsFromDi()),
+            provideHttpClientTesting(),
+        ],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(ConsumptionProfileEditComponent);

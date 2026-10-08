@@ -25,13 +25,19 @@ import { pvPredictionChart } from './shared/pv-prediction-chartjs';
 import { FramedChartConfig } from '../../core/charts/google-columns';
 import { googlePlugins } from '../../core/charts/google-chartjs';
 import { SingleValueModel } from '../single-value/shared/single-value.model';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { ValueComponent } from '../single-value/value/value.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-pv-prediction',
     templateUrl: './pv-prediction.component.html',
     styleUrls: ['./pv-prediction.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, ValueComponent, BaseChartDirective, WidgetFooterComponent]
 })
 export class PvPredictionComponent implements OnInit, OnDestroy {
     ready = false;

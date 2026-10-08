@@ -39,13 +39,23 @@ import {
     withoutDeprecatedSuffix
 } from '../device-types-overview/shared/device-type.model';
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTree, MatTreeNestedDataSource } from '@angular/material/tree';
+import { MatTree, MatTreeNestedDataSource, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet } from '@angular/material/tree';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { DeviceTypeService } from '../device-types-overview/shared/device-type.service';
 import {
     UsedInDeviceTypeQuery,
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
+import { CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 
 /**
  * A row that stands for an aspect class rather than an aspect. It is shaped like an aspect so the
@@ -61,7 +71,7 @@ export interface AspectClassGroupNode extends DeviceTypeAspectModel {
     templateUrl: './aspects.component.html',
     styleUrls: ['./aspects.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [CdkDropListGroup, MatTree, MatTreeNodeDef, MatTreeNode, CdkDropList, MatTreeNodeToggle, CdkDrag, MatIconButton, CdkDragHandle, MatIcon, MatTooltip, MatFormField, MatLabel, MtxSelect, FormsModule, NgClass, MatInput, MatError, MatErrorMessagesDirective, MatNestedTreeNode, MatHint, MatTreeNodeOutlet, MatFabButton]
 })
 export class AspectsComponent implements OnInit {
     ready = false;

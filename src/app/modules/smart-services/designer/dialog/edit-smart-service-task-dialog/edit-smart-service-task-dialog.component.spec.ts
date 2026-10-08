@@ -15,6 +15,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -76,8 +77,7 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         const info: SmartServiceTaskDescription = { name: 'task', topic, inputs, outputs: [], smartServiceInputs: { inputs: [] } };
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [MatMenuModule],
-            declarations: [EditSmartServiceTaskDialogComponent],
+            imports: [EditSmartServiceTaskDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { info, element: { id: 'task', incoming: [] } as unknown as BpmnElement } },
@@ -91,6 +91,8 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
                 { provide: DeviceClassesService, useValue: deviceClassesService },
             ],
         });
+        // standalone components ignore the TestBed schemas; the rendered specs read the content of every tab, which the real tab group only renders for the active one
+        TestBed.overrideComponent(EditSmartServiceTaskDialogComponent, { set: { imports: [CommonModule, MatMenuModule], schemas: [NO_ERRORS_SCHEMA] } });
         if (!render) {
             TestBed.overrideTemplate(EditSmartServiceTaskDialogComponent, '');
         }

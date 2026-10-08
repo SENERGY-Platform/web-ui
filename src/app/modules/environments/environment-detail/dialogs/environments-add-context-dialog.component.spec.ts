@@ -25,6 +25,8 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { AddContextDialogData, EnvironmentsAddContextDialogComponent } from './environments-add-context-dialog.component';
 import { CONTEXT_PRESETS } from '../../shared/environments-context-presets';
+import { provideAppCharts } from '../../../../core/charts/provide-app-charts';
+
 
 describe('EnvironmentsAddContextDialogComponent', () => {
     let component: EnvironmentsAddContextDialogComponent;
@@ -35,9 +37,9 @@ describe('EnvironmentsAddContextDialogComponent', () => {
         dialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsAddContextDialogComponent],
-            imports: [FormsModule, NoopAnimationsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+            imports: [FormsModule, NoopAnimationsModule, MatDialogModule, MatFormFieldModule, MatInputModule, MatButtonModule, EnvironmentsAddContextDialogComponent],
             providers: [
+                provideAppCharts(),
                 { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: data },
             ],

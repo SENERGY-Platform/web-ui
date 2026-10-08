@@ -264,20 +264,6 @@ describe('EnvironmentDetailComponent', () => {
         exportServiceSpy = createSpyFromClass(ExportService);
         exportServiceSpy.getAvailableExports.and.returnValue(of([]));
         TestBed.configureTestingModule({
-            declarations: [
-                EnvironmentDetailComponent,
-                EnvironmentsKeyValueEditorComponent,
-                EnvironmentsProfileEditorComponent,
-                EnvironmentsScheduleEditorComponent,
-                EnvironmentsTimelineEditorComponent,
-                EnvironmentsFaultsEditorComponent,
-                EnvironmentsMeterParentsEditorComponent,
-                EnvironmentsFactorBarsComponent,
-                EnvironmentsDatasetEditorComponent,
-                EnvironmentsLiveStateTilesComponent,
-                EnvironmentsHistoryComponent,
-                EnvironmentsEffectsComponent,
-            ],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -302,6 +288,18 @@ describe('EnvironmentDetailComponent', () => {
                 MatPaginatorModule,
                 MtxSelectModule,
                 BaseChartDirective,
+                EnvironmentDetailComponent,
+                EnvironmentsKeyValueEditorComponent,
+                EnvironmentsProfileEditorComponent,
+                EnvironmentsScheduleEditorComponent,
+                EnvironmentsTimelineEditorComponent,
+                EnvironmentsFaultsEditorComponent,
+                EnvironmentsMeterParentsEditorComponent,
+                EnvironmentsFactorBarsComponent,
+                EnvironmentsDatasetEditorComponent,
+                EnvironmentsLiveStateTilesComponent,
+                EnvironmentsHistoryComponent,
+                EnvironmentsEffectsComponent,
             ],
             providers: [
                 EnvironmentsService,

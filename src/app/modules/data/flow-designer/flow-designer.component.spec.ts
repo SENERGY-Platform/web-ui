@@ -40,8 +40,7 @@ describe('FlowDesignerComponent', () => {
         waitForAsync(() => {
             TestBed.configureTestingModule({
                 schemas: [NO_ERRORS_SCHEMA],
-                declarations: [FlowDesignerComponent],
-                imports: [MatDialogModule, MatSnackBarModule, NoopAnimationsModule],
+                imports: [MatDialogModule, MatSnackBarModule, NoopAnimationsModule, FlowDesignerComponent],
                 providers: [
                     provideRouter([]),
                     {

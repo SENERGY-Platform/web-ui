@@ -22,13 +22,18 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { DeviceInstancesRouterStateTabEnum } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatIcon } from '@angular/material/icon';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-devices-state',
     templateUrl: './devices-state.component.html',
     styleUrls: ['./devices-state.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, WidgetFooterComponent]
 })
 export class DevicesStateComponent implements OnInit, OnDestroy {
     devicesStatus: DevicesStateModel = { count: 0, connected: 0, disconnected: 0, unknown: 0 };

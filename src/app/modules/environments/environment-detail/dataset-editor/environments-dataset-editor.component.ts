@@ -34,6 +34,15 @@ import {
 } from '../../shared/environments.model';
 import { DeviceTypeModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { ExportModel, ExportValueModel } from '../../../exports/shared/export.model';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { RouterLink } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 const NUMERIC_EXPORT_VALUE_TYPES = new Set(['https://schema.org/Float', 'https://schema.org/Integer', 'https://schema.org/Number']);
 
@@ -74,7 +83,7 @@ function isNumericExportColumn(value: ExportValueModel): boolean {
     templateUrl: './environments-dataset-editor.component.html',
     styleUrls: ['./environments-dataset-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatHint, MatButton, RouterLink, MatIcon, MatInput, MatTooltip, MatCheckbox, MatIconButton]
 })
 export class EnvironmentsDatasetEditorComponent {
     @Input() dataset: DatasetSource | undefined;

@@ -95,7 +95,6 @@ describe('EnvironmentsDatasetsComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsDatasetsComponent],
             imports: [
                 CommonModule,
                 CoreModule,
@@ -106,6 +105,7 @@ describe('EnvironmentsDatasetsComponent', () => {
                 MatTooltipModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                EnvironmentsDatasetsComponent,
             ],
             providers: [
                 { provide: EnvironmentsService, useClass: MockEnvironmentsService },

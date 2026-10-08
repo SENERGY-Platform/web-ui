@@ -85,8 +85,7 @@ describe('ConditionalEventDialogComponent', () => {
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MtxSelectModule, NoopAnimationsModule],
-            declarations: [ConditionalEventDialogComponent],
+            imports: [CoreModule, MatDialogModule, FormsModule, ReactiveFormsModule, MatInputModule, MtxSelectModule, NoopAnimationsModule, ConditionalEventDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { msg } },

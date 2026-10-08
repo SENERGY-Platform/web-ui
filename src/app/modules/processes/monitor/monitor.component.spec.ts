@@ -43,11 +43,10 @@ describe('ProcessMonitorComponent first load with animations enabled', () => {
 
         await TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ProcessMonitorComponent],
-            imports: [MatTabsModule, MatTableModule, MatSortModule, MatPaginatorModule, MatMenuModule],
+            imports: [MatTabsModule, MatTableModule, MatSortModule, MatPaginatorModule, MatMenuModule, ProcessMonitorComponent],
             providers: [
                 provideRouter([]),
-                { provide: SearchbarService, useValue: { currentSearchText: new BehaviorSubject('') } },
+                { provide: SearchbarService, useValue: { currentSearchText: new BehaviorSubject(''), changeMessage: () => undefined } },
                 { provide: MonitorService, useValue: monitorService },
                 { provide: DialogsService, useValue: {} },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([]) } },

@@ -55,34 +55,34 @@ describe('DeployFlowComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DeployFlowComponent],
-    imports: [MatSnackBarModule,
-        MatDialogModule,
-        CoreModule,
-        InfiniteScrollModule],
-    providers: [
-        provideRouter([]),
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        { provide: AspectClassesService, useValue: createSpyFromClass(AspectClassesService) },
-        DialogsService,
-        {
-            provide: ActivatedRoute,
-            useValue: {
-                url: of(['deploy', '123']),
-                snapshot: {
-                    paramMap: {
-                        get(): string {
-                            return '123';
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [MatSnackBarModule,
+                    MatDialogModule,
+                    CoreModule,
+                    InfiniteScrollModule, DeployFlowComponent],
+                providers: [
+                    provideRouter([]),
+                    { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                    { provide: AspectClassesService, useValue: createSpyFromClass(AspectClassesService) },
+                    DialogsService,
+                    {
+                        provide: ActivatedRoute,
+                        useValue: {
+                            url: of(['deploy', '123']),
+                            snapshot: {
+                                paramMap: {
+                                    get(): string {
+                                        return '123';
+                                    },
+                                },
+                            },
                         },
                     },
-                },
-            },
-        },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-}).compileComponents();
+                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClientTesting(),
+                ],
+            }).compileComponents();
         }),
     );
 
@@ -157,8 +157,7 @@ describe('DeployFlowComponent aspects', () => {
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [ReactiveFormsModule],
-            declarations: [DeployFlowComponent],
+            imports: [ReactiveFormsModule, DeployFlowComponent],
             providers: [
                 { provide: Router, useValue: createSpyFromClass(Router) },
                 { provide: MatSnackBar, useValue: createSpyFromClass(MatSnackBar) },

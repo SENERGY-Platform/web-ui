@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
-import { AbstractControl, UntypedFormBuilder, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
     contentVariableAspectIds,
     deprecatedAspectAlias,
@@ -27,6 +24,16 @@ import {
     DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel
 } from '../../../metadata/device-types-overview/shared/device-type.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { AspectSelectComponent } from '../../../../core/components/aspect-select/aspect-select.component';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 
 interface DeviceTypeCharacteristicsModelWithGroup extends DeviceTypeCharacteristicsModel {
     group?: string;
@@ -37,7 +44,7 @@ interface DeviceTypeCharacteristicsModelWithGroup extends DeviceTypeCharacterist
     templateUrl: './content-variable-dialog.component.html',
     styleUrls: ['./content-variable-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, AspectSelectComponent, MtxSelect, MtxOption, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class ContentVariableDialogComponent implements OnInit {
     static notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null {

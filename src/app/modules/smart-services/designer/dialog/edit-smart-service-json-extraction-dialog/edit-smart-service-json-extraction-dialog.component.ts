@@ -15,18 +15,29 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
     SmartServiceTaskInputOutputDescription
 } from '../../shared/designer.model';
 import {BpmnElement, BpmnParameter, BpmnParameterWithLabel} from '../../../../processes/designer/shared/designer.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     templateUrl: './edit-smart-service-json-extraction-dialog.component.html',
     styleUrls: ['./edit-smart-service-json-extraction-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatTooltip, MatIcon, MatButton, MatDialogActions]
 })
 export class EditSmartServiceJsonExtractionDialogComponent {
     exports: JsonExtract[] = [];

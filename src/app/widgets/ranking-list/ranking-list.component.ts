@@ -20,13 +20,18 @@ import { RankingListModel } from './shared/ranking-list.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { RankingListService } from './shared/ranking-list.service';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine } from '@angular/material/list';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-ranking-list',
     templateUrl: './ranking-list.component.html',
     styleUrls: ['./ranking-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, WidgetFooterComponent]
 })
 export class RankingListComponent implements OnInit, OnDestroy {
     rankings: RankingListModel[] = [];

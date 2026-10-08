@@ -15,12 +15,22 @@
  */
 
 import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../shared/dashboard-widget.model';
 import { DashboardTypesEnum } from '../shared/dashboard-types.enum';
 import { Observable } from 'rxjs';
 import { EnergyPredictionRequirementsService } from '../../../widgets/energy-prediction/shared/energy-prediction-requirements.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
 
 export interface Types {
     value: string;
@@ -38,7 +48,7 @@ export interface SwitchCategories extends Types {
     templateUrl: './dashboard-new-widget-dialog.component.html',
     styleUrls: ['./dashboard-new-widget-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatLabel, MtxSelect, MtxOption, MatIcon, MatTooltip, MatError, MatErrorMessagesDirective, MatInput, MatDialogActions, MatButton]
 })
 export class DashboardNewWidgetDialogComponent implements OnInit{
     selectedType: Types = { value: '', viewValue: '', tooltip: '', disabled: false };

@@ -28,12 +28,12 @@ describe('AnomalyPhasesComponent', () => {
   let fixture: ComponentFixture<AnomalyPhasesComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [AnomalyPhasesComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, AnomalyPhasesComponent],
+        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(AnomalyPhasesComponent);

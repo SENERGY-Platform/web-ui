@@ -33,13 +33,9 @@ import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-m
 
 
 @NgModule({
-    declarations: [
-        CostOverviewComponent,
-        CostElementComponent
-    ],
     imports: [
         CommonModule,
-        RouterModule.forChild([ { path: 'costs/overview', pathMatch: 'full', component: CostOverviewComponent, data: { header: 'Cost Overview' } }]),
+        RouterModule.forChild([{ path: 'costs/overview', pathMatch: 'full', component: CostOverviewComponent, data: { header: 'Cost Overview' } }]),
         MatExpansionModule,
         CoreModule,
         MatIconModule,
@@ -50,6 +46,8 @@ import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-m
         MatInputModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        CostOverviewComponent,
+        CostElementComponent,
     ]
 })
 export class CostModule { }

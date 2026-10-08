@@ -59,12 +59,11 @@ describe('ConceptsComponent', () => {
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, RouterTestingModule, NoopAnimationsModule, MatSnackBarModule, MatPaginatorModule],
-            declarations: [ConceptsComponent],
+            imports: [CoreModule, RouterTestingModule, NoopAnimationsModule, MatSnackBarModule, MatPaginatorModule, ConceptsComponent],
             providers: [
-                {provide: ConceptsService, useValue: conceptsServiceSpy},
-                {provide: FunctionsService, useValue: functionsServiceSpy},
-                {provide: MatDialog, useValue: matDialogStub},
+                { provide: ConceptsService, useValue: conceptsServiceSpy },
+                { provide: FunctionsService, useValue: functionsServiceSpy },
+                { provide: MatDialog, useValue: matDialogStub },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(ConceptsComponent);

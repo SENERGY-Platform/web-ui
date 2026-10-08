@@ -25,8 +25,9 @@ describe('DiagramEditorComponent', () => {
 
     beforeEach(
         waitForAsync(() => {
-            TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-                declarations: [DiagramEditorComponent],
+            TestBed.configureTestingModule({
+                imports: [DiagramEditorComponent],
+                schemas: [NO_ERRORS_SCHEMA],
             }).compileComponents();
         }),
     );

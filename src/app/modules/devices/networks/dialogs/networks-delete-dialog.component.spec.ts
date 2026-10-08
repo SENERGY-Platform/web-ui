@@ -35,9 +35,9 @@ describe('NetworksDeleteDialogComponent', () => {
     let fixture: ComponentFixture<NetworksDeleteDialogComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            declarations: [NetworksDeleteDialogComponent],
-            imports: [MatDialogModule, MatTableModule, MatTooltipModule, MatCheckboxModule, MatSnackBarModule],
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule, MatTableModule, MatTooltipModule, MatCheckboxModule, MatSnackBarModule, NetworksDeleteDialogComponent],
             providers: [
                 {
                     provide: MAT_DIALOG_DATA,

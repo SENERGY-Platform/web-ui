@@ -25,15 +25,16 @@ describe('IncidentDialogComponent', () => {
   let fixture: ComponentFixture<IncidentDialogComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-      declarations: [ IncidentDialogComponent ],
-      imports: [
-        MatDialogModule
-      ],
-      providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {config: {message: ''}} },
-        {provide: MatDialogRef, useValue: {}},
-    ]
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [
+            MatDialogModule,
+            IncidentDialogComponent
+        ],
+        providers: [
+            { provide: MAT_DIALOG_DATA, useValue: { config: { message: '' } } },
+            { provide: MatDialogRef, useValue: {} },
+        ],
     })
     .compileComponents();
 

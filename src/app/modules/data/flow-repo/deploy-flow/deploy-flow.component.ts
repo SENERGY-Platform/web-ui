@@ -39,7 +39,7 @@ import { concatMap, first, map, tap } from 'rxjs/operators';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
-import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { ConceptsService } from '../../../metadata/concepts/shared/concepts.service';
 import { OperatorInputTopic, PipelineModel, PipelineOperatorModel } from '../../pipeline-registry/shared/pipeline.model';
@@ -50,6 +50,19 @@ import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.se
 import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
+import { MatButton, MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatDivider } from '@angular/material/divider';
+import { AspectSelectComponent } from '../../../../core/components/aspect-select/aspect-select.component';
+import { NgClass } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
 
 interface CustomSelectable {
     id: string;
@@ -68,7 +81,7 @@ interface DeviceServicePath {
     templateUrl: './deploy-flow.component.html',
     styleUrls: ['./deploy-flow.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatButton, FormsModule, ReactiveFormsModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatExpansionPanelDescription, MatExpansionPanelContent, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatDivider, AspectSelectComponent, NgClass, MtxOption, MatCheckbox, MatFabButton, MatTooltip, SpinnerComponent]
 })
 export class DeployFlowComponent implements OnInit {
     constructor(

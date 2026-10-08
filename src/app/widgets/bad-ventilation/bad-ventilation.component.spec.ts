@@ -33,12 +33,12 @@ describe('BadVentilationComponent', () => {
   let fixture: ComponentFixture<BadVentilationComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [BadVentilationComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, BadVentilationComponent],
+        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(BadVentilationComponent);
@@ -64,12 +64,12 @@ describe('BadVentilationComponent reload', () => {
       getDeviceCurve: () => of([{ timestamp: '2026-10-05T08:00:00Z', value: 50 }, { timestamp: '2026-10-05T08:01:00Z', value: 51 }]),
     };
     await TestBed.configureTestingModule({
-      schemas: [NO_ERRORS_SCHEMA],
-      declarations: [BadVentilationComponent],
-      providers: [
-        { provide: BadVentilationService, useValue: ventilationService },
-        { provide: DashboardService, useValue: { initWidgetObservable: events.asObservable() } },
-      ],
+        imports: [BadVentilationComponent],
+        schemas: [NO_ERRORS_SCHEMA],
+        providers: [
+            { provide: BadVentilationService, useValue: ventilationService },
+            { provide: DashboardService, useValue: { initWidgetObservable: events.asObservable() } },
+        ],
     }).compileComponents();
     const fixture = TestBed.createComponent(BadVentilationComponent);
     const component = fixture.componentInstance;
@@ -109,14 +109,13 @@ describe('BadVentilationComponent refresh', () => {
     ventilationService.getVentilationOutput.and.returnValue(of(results));
     ventilationService.getDeviceCurve.and.callFake(() => of(curves.shift()));
     await TestBed.configureTestingModule({
-      schemas: [NO_ERRORS_SCHEMA],
-      declarations: [BadVentilationComponent],
-      imports: [BaseChartDirective],
-      providers: [
-        provideAppCharts(),
-        { provide: BadVentilationService, useValue: ventilationService },
-        { provide: DashboardService, useValue: { initWidgetObservable: events.asObservable() } },
-      ],
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [BaseChartDirective, BadVentilationComponent],
+        providers: [
+            provideAppCharts(),
+            { provide: BadVentilationService, useValue: ventilationService },
+            { provide: DashboardService, useValue: { initWidgetObservable: events.asObservable() } },
+        ],
     }).compileComponents();
     const fixture = TestBed.createComponent(BadVentilationComponent);
     fixture.componentInstance.widget = widget;

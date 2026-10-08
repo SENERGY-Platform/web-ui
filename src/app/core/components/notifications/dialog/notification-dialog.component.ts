@@ -15,10 +15,7 @@
  */
 
 import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     NotificationBrokerModel,
     NotificationChannel,
@@ -31,14 +28,26 @@ import {
 // Type-only: notification.service.ts imports this component to open the dialog, so a value
 // import would close the cycle and break module initialization in the test bundle.
 import type { NotificationService } from '../shared/notification.service';
-import { PageEvent } from '@angular/material/paginator';
-import { UntypedFormBuilder, UntypedFormControl, Validators } from '@angular/forms';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
+import { UntypedFormBuilder, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, concatMap, debounceTime, forkJoin, of, takeUntil } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { environment } from '../../../../../environments/environment';
 import { AuthorizationService } from '../../../services/authorization.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../directives/close-mtx-select-on-scroll.directive';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { SpinnerComponent } from '../../spinner/spinner.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../directives/matError.directive';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 
 
 export enum Modes {
@@ -52,7 +61,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
     templateUrl: './notification-dialog.component.html',
     styleUrls: ['./notification-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTabGroup, MatTab, SpinnerComponent, MatCheckbox, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatIconButton, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatButtonToggleGroup, MatButtonToggle, MatButton, MatDialogActions]
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {
     modes = Modes;

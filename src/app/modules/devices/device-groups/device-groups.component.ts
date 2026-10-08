@@ -20,8 +20,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeviceGroupsService } from './shared/device-groups.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -30,6 +30,13 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { NgClass } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 
 @Component({
@@ -37,7 +44,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
     templateUrl: './device-groups.component.html',
     styleUrls: ['./device-groups.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];

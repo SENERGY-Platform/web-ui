@@ -20,13 +20,18 @@ import { SwitchService } from './shared/switch.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel } from './shared/switch-properties.model';
 import { Subscription } from 'rxjs';
+import { MatCard, MatCardContent, MatCardImage } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-switch',
     templateUrl: './switch.component.html',
     styleUrls: ['./switch.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, MatCardImage, MatSlideToggle, FormsModule, WidgetFooterComponent]
 })
 export class SwitchComponent implements OnInit, OnDestroy {
     ready = false;

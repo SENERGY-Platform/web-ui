@@ -27,13 +27,23 @@ import { ProcessSchedulerScheduleDialogComponent } from './dialogs/process-sched
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { CronConverterService } from './shared/cron-converter.service';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatList, MatListItem, MatListItemTitle, MatListItemIcon, MatListItemLine, MatListItemMeta } from '@angular/material/list';
+import { NgClass } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { WidgetNoDataComponent } from '../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-process-scheduler',
     templateUrl: './process-scheduler.component.html',
     styleUrls: ['./process-scheduler.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, NgClass, MatListItemTitle, MatIcon, MatListItemIcon, MatListItemLine, MatListItemMeta, MatIconButton, MatTooltip, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class ProcessSchedulerComponent implements OnInit, OnDestroy {
     schedules: ProcessSchedulerWidgetModel[] = [];

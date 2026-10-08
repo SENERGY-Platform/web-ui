@@ -15,14 +15,17 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { CodeEditorLanguage } from '../../../../../core/components/code-editor/code-editor.component';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CodeEditorLanguage, CodeEditorComponent } from '../../../../../core/components/code-editor/code-editor.component';
 import { CodeEditorCompletionSource } from '../../../../../core/components/code-editor/code-editor-completion';
 import {
     CodeEditorScriptEnvironment,
     nashornScriptEnvironment,
 } from '../../../../../core/components/code-editor/code-editor-environment';
 import { ScriptEditModel } from '../../shared/designer-dialog.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatButton } from '@angular/material/button';
 
 /**
  * Edits a script belonging to a bpmn element in a proper editor, because the
@@ -32,7 +35,7 @@ import { ScriptEditModel } from '../../shared/designer-dialog.model';
     templateUrl: './script-editor-dialog.component.html',
     styleUrls: ['./script-editor-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, CodeEditorComponent, MatDialogActions, MatButton]
 })
 export class ScriptEditorDialogComponent {
     script: string;

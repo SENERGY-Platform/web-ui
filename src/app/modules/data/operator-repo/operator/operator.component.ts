@@ -16,20 +16,28 @@
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { IOModel, OperatorModel } from '../shared/operator.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OperatorRepoService } from '../shared/operator-repo.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { PermissionsService } from '../../../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../../../permissions/shared/permissions-user.model';
 import {PermissionsV2RightsAndIdModel} from '../../../permissions/shared/permissions-resource.model';
+import { MatButton, MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-operator',
     templateUrl: './operator.component.html',
     styleUrls: ['./operator.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatButton, RouterLink, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatIconButton, MatFabButton, MatTooltip]
 })
 export class OperatorComponent implements OnInit {
     operator = {} as OperatorModel;

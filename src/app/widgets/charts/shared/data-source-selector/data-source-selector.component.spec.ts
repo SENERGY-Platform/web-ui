@@ -28,12 +28,12 @@ describe('DataSourceSelectorComponent', () => {
   let fixture: ComponentFixture<DataSourceSelectorComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DataSourceSelectorComponent],
-    imports: [MatSnackBarModule,
-        MatDialogModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatSnackBarModule,
+            MatDialogModule, DataSourceSelectorComponent],
+        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(DataSourceSelectorComponent);

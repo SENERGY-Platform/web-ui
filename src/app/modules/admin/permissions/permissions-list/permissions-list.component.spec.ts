@@ -41,13 +41,13 @@ xdescribe('PermissionsListComponent', () => {
     let fixture: ComponentFixture<PermissionsListComponent>;
 
     beforeEach((() => {
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            declarations: [PermissionsListComponent],
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
             providers: [
-                {provide: AuthorizationService, useClass: AuthorizationServiceMock},
-                {provide: MatDialog, useClass: MatDialogHarness},
-                {provide: LadonService, useClass: LadomServiceMock},
-                {provide: KongService, useClass: KongServiceMock},
+                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                { provide: MatDialog, useClass: MatDialogHarness },
+                { provide: LadonService, useClass: LadomServiceMock },
+                { provide: KongService, useClass: KongServiceMock },
             ],
             imports: [
                 MatCardModule,
@@ -60,6 +60,7 @@ xdescribe('PermissionsListComponent', () => {
                 BrowserAnimationsModule,
                 ReactiveFormsModule,
                 MatInputModule,
+                PermissionsListComponent,
             ],
         }).compileComponents();
     }));

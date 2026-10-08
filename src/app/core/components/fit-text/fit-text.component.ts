@@ -33,8 +33,7 @@ import {Subscription} from 'rxjs';
     selector: 'senergy-fit-text',
     templateUrl: './fit-text.component.html',
     styleUrls: ['./fit-text.component.css'],
-    changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    changeDetection: ChangeDetectionStrategy.Eager
 })
 export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, AfterViewChecked {
     @ViewChild('element', {static: false}) element!: ElementRef;

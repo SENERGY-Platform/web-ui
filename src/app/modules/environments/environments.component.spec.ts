@@ -163,7 +163,6 @@ describe('EnvironmentsComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsComponent],
             imports: [
                 CommonModule,
                 CoreModule,
@@ -175,6 +174,7 @@ describe('EnvironmentsComponent', () => {
                 MatDialogModule,
                 MatSnackBarModule,
                 MatSlideToggleModule,
+                EnvironmentsComponent,
             ],
             providers: [
                 { provide: EnvironmentsService, useClass: MockEnvironmentsService },

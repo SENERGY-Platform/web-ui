@@ -34,8 +34,7 @@ describe('FilterDialogComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [FilterDialogComponent],
-            imports: [MatDialogModule, MatCheckboxModule, MatFormFieldModule, MtxSelectModule, NoopAnimationsModule, ReactiveFormsModule],
+            imports: [MatDialogModule, MatCheckboxModule, MatFormFieldModule, MtxSelectModule, NoopAnimationsModule, ReactiveFormsModule, FilterDialogComponent],
         }).compileComponents();
 
         fixture = TestBed.createComponent(FilterDialogComponent);

@@ -15,18 +15,22 @@
  */
 
 import { AfterViewInit, Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
 import { CharacteristicsPermSearchModel } from '../shared/characteristics-perm-search.model';
 import { CharacteristicsService } from '../shared/characteristics.service';
 import { DeviceTypeCharacteristicsModel } from '../../device-types-overview/shared/device-type.model';
 import { CharacteristicElementComponent } from './characteristic-element/characteristic-element.component';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { FormsModule } from '@angular/forms';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './characteristics-edit-dialog.component.html',
     styleUrls: ['./characteristics-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, CharacteristicElementComponent, MatDialogActions, MatButton]
 })
 export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit {
     @ViewChild('characteristicElementComponent', { static: false }) characteristicElementComponent!: CharacteristicElementComponent;

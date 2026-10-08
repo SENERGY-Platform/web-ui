@@ -62,7 +62,7 @@ const designerEdit: Route = { path: 'data/designer/:id', pathMatch: 'full', comp
         ReactiveFormsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        FlowDesignerComponent, FlowUpdateDialogComponent, DiagramEditorComponent,
     ],
-    declarations: [FlowDesignerComponent,FlowUpdateDialogComponent, DiagramEditorComponent],
 })
 export class FlowDesignerModule {}

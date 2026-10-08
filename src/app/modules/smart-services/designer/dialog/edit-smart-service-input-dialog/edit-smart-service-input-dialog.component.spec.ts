@@ -15,6 +15,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
@@ -114,8 +115,8 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
         const characteristicsService = createSpyFromClass(CharacteristicsService);
         characteristicsService.getCharacteristics.and.returnValue(of({ result: [], total: 0 }));
         TestBed.configureTestingModule({
+            imports: [EditSmartServiceInputDialogComponent],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EditSmartServiceInputDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { info: { inputs }, element: {} } },
@@ -125,6 +126,8 @@ describe('EditSmartServiceInputDialogComponent criteria', () => {
                 { provide: CharacteristicsService, useValue: characteristicsService },
             ],
         });
+        // standalone components ignore the TestBed schemas; the rendered specs read the content of every tab, which the real tab group only renders for the active one
+        TestBed.overrideComponent(EditSmartServiceInputDialogComponent, { set: { imports: [CommonModule], schemas: [NO_ERRORS_SCHEMA] } });
         if (!render) {
             TestBed.overrideTemplate(EditSmartServiceInputDialogComponent, '');
         }

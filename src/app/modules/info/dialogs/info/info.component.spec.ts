@@ -25,11 +25,12 @@ describe('InfoComponent', () => {
     let fixture: ComponentFixture<InfoDialogComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ InfoDialogComponent ],
+        await TestBed.configureTestingModule({
+            imports: [InfoDialogComponent],
+            schemas: [NO_ERRORS_SCHEMA],
             providers: [
-                {provide: MatDialogRef, useValue: {}}
-            ]
+                { provide: MatDialogRef, useValue: {} }
+            ],
         })
             .compileComponents();
 

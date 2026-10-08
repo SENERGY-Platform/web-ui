@@ -28,17 +28,17 @@ describe('PVPredictionEditComponent', () => {
     let fixture: ComponentFixture<PVPredictionEditComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [PVPredictionEditComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [
-        { provide: MAT_DIALOG_DATA, useValue: {} },
-        { provide: MatDialogRef, useValue: {} },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-})
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule,
+                MatSnackBarModule, PVPredictionEditComponent],
+            providers: [
+                { provide: MAT_DIALOG_DATA, useValue: {} },
+                { provide: MatDialogRef, useValue: {} },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        })
             .compileComponents();
 
         fixture = TestBed.createComponent(PVPredictionEditComponent);

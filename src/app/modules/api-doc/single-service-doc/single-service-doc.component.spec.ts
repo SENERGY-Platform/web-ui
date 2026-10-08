@@ -53,8 +53,7 @@ describe('SingleServiceDocComponent', () => {
         waitForAsync(() => {
             TestBed.configureTestingModule({
                 schemas: [NO_ERRORS_SCHEMA],
-                declarations: [SingleServiceDocComponent],
-                imports: [CommonModule],
+                imports: [CommonModule, SingleServiceDocComponent],
                 providers: [
                     { provide: ActivatedRoute, useValue: { params: of({ type: 'openapi', id: 'test-service' }) } },
                     { provide: SwaggerService, useValue: { getSingleSwagger: () => of(specResponse) } },

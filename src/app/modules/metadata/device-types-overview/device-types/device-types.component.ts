@@ -33,7 +33,7 @@ import {
     DeviceTypeServiceModel,
     functionTypes, senergyConnectorLocalIdConstraint,
 } from '../shared/device-type.model';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DeviceTypeService } from '../shared/device-type.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -41,14 +41,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, Observable, of } from 'rxjs';
 import { DeviceTypeHelperService } from './shared/device-type-helper.service';
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { MatTreeNestedDataSource, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet } from '@angular/material/tree';
 import { DeviceTypesContentVariableDialogComponent } from './dialogs/device-types-content-variable-dialog.component';
 import { MatOption } from '@angular/material/core';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
 import { ConceptsCharacteristicsModel } from '../../concepts/shared/concepts-characteristics.model';
 import { environment } from '../../../../../environments/environment';
 import { debounceTime, map, mergeAll } from 'rxjs/operators';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { v4 as uuid } from 'uuid';
 import {
     DeviceTypesContentVariableJsonDialogComponent
@@ -56,6 +56,19 @@ import {
 import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { AspectClassesService } from '../../aspects/shared/aspect-classes.service';
+import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
+import { MatCard, MatCardContent, MatCardFooter } from '@angular/material/card';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatStepLabel } from '@angular/material/stepper';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatDivider } from '@angular/material/divider';
+import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatTooltip } from '@angular/material/tooltip';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -67,7 +80,7 @@ interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     templateUrl: './device-types.component.html',
     styleUrls: ['./device-types.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SpinnerComponent, MatCard, MatCardContent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, MatStepLabel, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDivider, MatIconButton, MatIcon, MatButton, MatExpansionPanelContent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle, MatTabGroup, MatTab, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTooltip, MatNestedTreeNode, MatTreeNodeOutlet, MatCardFooter, MatFabButton]
 })
 export class DeviceTypesComponent implements OnInit {
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];

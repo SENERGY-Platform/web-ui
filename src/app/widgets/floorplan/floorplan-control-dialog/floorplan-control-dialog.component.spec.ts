@@ -52,9 +52,7 @@ describe('FloorplanControlDialogComponent', () => {
         answer = () => of(null);
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [CommonModule, FormsModule],
-            // the real controls, so the bindings the dialog puts on them are exercised
-            declarations: [FloorplanControlDialogComponent, CapabilityControlComponent, CharacteristicInputComponent],
+            imports: [CommonModule, FormsModule, FloorplanControlDialogComponent, CapabilityControlComponent, CharacteristicInputComponent],
             providers: [
                 { provide: MatDialogRef, useValue: { close: () => undefined } },
                 {

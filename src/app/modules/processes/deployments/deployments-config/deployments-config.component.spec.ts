@@ -55,7 +55,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
     function initSpies(): void {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ProcessDeploymentsConfigComponent],
             imports: [MatDialogModule,
                 MatSnackBarModule,
                 CoreModule,
@@ -66,7 +65,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 ReactiveFormsModule,
                 MatInputModule,
                 NoopAnimationsModule,
-                ProcessesModule],
+                ProcessesModule, ProcessDeploymentsConfigComponent],
             providers: [
                 { provide: KeycloakService, useClass: MockKeycloakService },
                 { provide: Router, useValue: routerSpy },
@@ -83,7 +82,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 },
                 provideHttpClient(withXhr(), withInterceptorsFromDi()),
                 provideHttpClientTesting(),
-            ]
+            ],
         }).compileComponents();
         fixture = TestBed.createComponent(ProcessDeploymentsConfigComponent);
         component = fixture.componentInstance;

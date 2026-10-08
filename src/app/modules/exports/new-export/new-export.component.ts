@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { Location } from '@angular/common';
+import { Location, NgClass, KeyValuePipe } from '@angular/common';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
@@ -41,25 +41,32 @@ import { ImportInstancesModel } from '../../imports/import-instances/shared/impo
 import { ImportTypeContentVariableModel, ImportTypeModel } from '../../imports/import-types/shared/import-types.model';
 import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
 import { map } from 'rxjs/operators';
-import {
-    AbstractControl,
-    FormArray,
-    FormControl,
-    UntypedFormBuilder,
-    Validators
-} from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import * as _ from 'lodash';
 import { BrokerExportService } from '../shared/broker-export.service';
-import { PageEvent } from '@angular/material/paginator';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 import { AddTagFn } from '../../../core/model/mtx-select.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard } from '@angular/material/card';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatInput } from '@angular/material/input';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 @Component({
     selector: 'senergy-new-export',
     templateUrl: './new-export.component.html',
     styleUrls: ['./new-export.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatCard, MatRadioGroup, MatRadioButton, MatFormField, MatLabel, MtxSelect, MtxOption, MatError, MatErrorMessagesDirective, MatSlideToggle, MatInput, MatAccordion, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatCheckbox, MatPaginator, MatButton, SpinnerComponent, MatFabButton, KeyValuePipe]
 })
 export class NewExportComponent implements OnInit {
     targetDb = 'db';

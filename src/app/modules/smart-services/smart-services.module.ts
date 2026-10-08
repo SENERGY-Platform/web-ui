@@ -160,8 +160,6 @@ const designer: Route = {
         MatProgressSpinnerModule,
         // for senergy-characteristic-input, which collects a parameter in the shape of its characteristic
         WidgetModule,
-    ],
-    declarations: [
         SmartServiceReleasesComponent,
         SmartServiceDesignsComponent,
         SmartServiceDesignerComponent,
@@ -172,7 +170,7 @@ const designer: Route = {
         SmartServiceInstancesComponent,
         SmartServiceParameterDialogComponent,
         CheckboxValueDirective,
-        CriteriaListComponent
+        CriteriaListComponent,
     ],
 })
 export class SmartServicesModule {}

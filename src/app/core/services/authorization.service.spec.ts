@@ -124,7 +124,7 @@ describe('AuthorizationService', () => {
         });
     });
 
-    // AppModule imports KeycloakAngularModule, whose own interceptor sees a KeycloakService nobody initialises.
+    // The app config imports KeycloakAngularModule, whose own interceptor sees a KeycloakService nobody initialises.
     it('lets the uninitialised KeycloakAngularModule interceptor pass requests unchanged', () => {
         TestBed.configureTestingModule({
             imports: [KeycloakAngularModule],

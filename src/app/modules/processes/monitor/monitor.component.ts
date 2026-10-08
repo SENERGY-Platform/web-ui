@@ -26,21 +26,31 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { DeploymentsModel } from '../deployments/shared/deployments.model';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass, DatePipe } from '@angular/common';
+import { MatChipListbox, MatChipOption, MatChipRemove, MatChipSet, MatChipRow } from '@angular/material/chips';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 @Component({
     selector: 'senergy-process-monitor',
     templateUrl: './monitor.component.html',
     styleUrls: ['./monitor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatTabGroup, MatTab, SearchbarComponent, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, NgClass, MatChipListbox, MatChipOption, MatChipRemove, MatChipSet, MatChipRow, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
 export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();

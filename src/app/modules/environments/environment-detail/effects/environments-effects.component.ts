@@ -38,6 +38,14 @@ import {
     visibleEffectsEdgeIndexes,
     visibleEffectsNodeIds,
 } from '../../shared/environments-effects';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatInput } from '@angular/material/input';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 
 /**
  * Node/edge look by kind, applied once per (re)built graph (see renderGraph) -- filtering
@@ -121,7 +129,7 @@ const effectsStylesheet = (): StylesheetJsonBlock[] => [
     templateUrl: './environments-effects.component.html',
     styleUrls: ['./environments-effects.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCheckbox, FormsModule, MatFormField, MatLabel, MtxSelect, MatInput, MatIcon, MatSuffix, MatButton, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class EnvironmentsEffectsComponent implements OnChanges, AfterViewInit, OnDestroy {
     @Input() result: EffectsResult | undefined;

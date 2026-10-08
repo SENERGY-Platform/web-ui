@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
@@ -24,8 +24,19 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { SwitchPropertiesDeploymentsModel } from '../shared/switch-properties.model';
-import { MatTable } from '@angular/material/table';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatFooterCellDef, MatFooterCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFooterRowDef, MatFooterRow } from '@angular/material/table';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import { MatSelect } from '@angular/material/select';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
 
 export interface TableElement {
     name: string;
@@ -37,7 +48,7 @@ export interface TableElement {
     templateUrl: './switch-edit-dialog.component.html',
     styleUrls: ['./switch-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatFooterCellDef, MatFooterCell, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatSelect, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFooterRowDef, MatFooterRow, MatDialogActions, MatButton, AsyncPipe]
 })
 export class SwitchEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

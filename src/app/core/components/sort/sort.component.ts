@@ -16,13 +16,18 @@
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChange, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { SortModel } from './shared/sort.model';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass } from '@angular/common';
 
 @Component({
     selector: 'senergy-sort',
     templateUrl: './sort.component.html',
     styleUrls: ['./sort.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, NgClass]
 })
 export class SortComponent implements OnChanges {
     @Input() sortAttributes: SortModel[] = [];

@@ -29,9 +29,9 @@ describe('DeviceGroupsPipelineHelperDialogComponent', () => {
     let fixture: ComponentFixture<DeviceGroupsPipelineHelperDialogComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            declarations: [DeviceGroupsPipelineHelperDialogComponent],
-            imports: [MatDialogModule, MatTableModule, MatTooltipModule, MatCheckboxModule],
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule, MatTableModule, MatTooltipModule, MatCheckboxModule, DeviceGroupsPipelineHelperDialogComponent],
             providers: [
                 provideRouter([]),
                 {

@@ -31,8 +31,7 @@ describe('EnvironmentsFactorBarsComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
-            declarations: [EnvironmentsFactorBarsComponent],
-            imports: [CommonModule, FormsModule, NoopAnimationsModule, MatFormFieldModule, MatInputModule],
+            imports: [CommonModule, FormsModule, NoopAnimationsModule, MatFormFieldModule, MatInputModule, EnvironmentsFactorBarsComponent],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsFactorBarsComponent);
         component = fixture.componentInstance;

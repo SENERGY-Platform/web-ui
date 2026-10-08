@@ -19,8 +19,7 @@ import { AbstractControl, ValidationErrors, NG_VALIDATORS, Validator } from '@an
 
 @Directive({
     selector: '[generic_validator]',
-    providers: [{ provide: NG_VALIDATORS, useExisting: GenericValidator, multi: true }],
-    standalone: false
+    providers: [{ provide: NG_VALIDATORS, useExisting: GenericValidator, multi: true }]
 })
 export class GenericValidator implements Validator {
 

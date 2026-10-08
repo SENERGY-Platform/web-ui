@@ -15,8 +15,8 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AbstractControl, UntypedFormBuilder, ValidatorFn, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { AbstractControl, UntypedFormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -27,12 +27,19 @@ import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { chartsExportMeasurementModelValidator } from '../../charts/export/shared/chartsExportMeasurementModel.validator';
 import { EnergyPredictionRequirementsService } from '../shared/energy-prediction-requirements.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './energy-prediction-edit-dialog.component.html',
     styleUrls: ['./energy-prediction-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatHint, MatDialogActions, MatButton]
 })
 export class EnergyPredictionEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];

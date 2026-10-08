@@ -15,8 +15,8 @@
  */
 
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MatSidenav } from '@angular/material/sidenav';
-import { NavigationEnd, Router } from '@angular/router';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
+import { NavigationEnd, Router, RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 
 import { SidenavService } from './shared/sidenav.service';
@@ -24,6 +24,10 @@ import { SidenavSectionModel } from './shared/sidenav-section.model';
 import { SidenavPageModel } from './shared/sidenav-page.model';
 import { ResponsiveService } from '../../services/responsive.service';
 import { fadeInAnimation } from '../../../animations/fade-in.animation';
+import { NgStyle, NgClass, UpperCasePipe } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
 
 @Component({
     selector: 'senergy-sidenav',
@@ -31,7 +35,7 @@ import { fadeInAnimation } from '../../../animations/fade-in.animation';
     styleUrls: ['./sidenav.component.css'],
     animations: [fadeInAnimation],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatSidenavContainer, NgStyle, MatSidenav, MatButton, RouterLinkActive, RouterLink, MatIcon, NgClass, MatBadge, MatSidenavContent, RouterOutlet, UpperCasePipe]
 })
 export class SidenavComponent implements OnInit, AfterViewInit {
     @ViewChild('sidenav', { static: false }) sidenav!: MatSidenav;

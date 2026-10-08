@@ -15,15 +15,21 @@
  */
 
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ENVIRONMENT_TYPES, Environment, EnvironmentType, defaultZoneTypeFor, environmentTypeLabel } from '../shared/environments.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-environments-create-dialog',
     templateUrl: './environments-create-dialog.component.html',
     styleUrls: ['./environments-create-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class EnvironmentsCreateDialogComponent {
     name = '';

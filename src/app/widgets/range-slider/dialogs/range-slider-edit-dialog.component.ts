@@ -15,27 +15,31 @@
  */
 
 import {Component, Inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
-import {UntypedFormBuilder, Validators} from '@angular/forms';
+import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {MatTable} from '@angular/material/table';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 import {checkValueValidator} from './range-slider-edit-dialog.validators';
 import {forkJoin, Observable } from 'rxjs';
 import {rangeValidator} from '../../../core/validators/range.validator';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
     styleUrls: ['./range-slider-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class RangeSliderEditDialogComponent implements OnInit {
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;

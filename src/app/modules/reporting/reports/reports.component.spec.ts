@@ -34,6 +34,7 @@ import { ReportModel } from '../shared/reporting.model';
 import { CoreModule } from '../../../core/core.module';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { provideRouter } from '@angular/router';
 
 const reports = [
     { id: 'r1', name: 'Energy Report', templateName: 'energy' },
@@ -84,7 +85,6 @@ describe('ReportsComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ReportsComponent],
             imports: [
                 CommonModule,
                 CoreModule,
@@ -96,11 +96,13 @@ describe('ReportsComponent', () => {
                 MatTooltipModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                ReportsComponent,
             ],
             providers: [
+                provideRouter([]),
                 { provide: ReportingService, useClass: MockReportingService },
                 { provide: DialogsService, useClass: MockDialogsService },
-            ]
+            ],
         }).compileComponents();
         fixture = TestBed.createComponent(ReportsComponent);
         component = fixture.componentInstance;

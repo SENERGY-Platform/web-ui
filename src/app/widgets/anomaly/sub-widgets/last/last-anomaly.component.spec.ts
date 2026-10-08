@@ -24,8 +24,9 @@ describe('LastAnomalyComponent', () => {
   let fixture: ComponentFixture<LastAnomalyComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-      declarations: [ LastAnomalyComponent ]
+    await TestBed.configureTestingModule({
+        imports: [LastAnomalyComponent],
+        schemas: [NO_ERRORS_SCHEMA],
     })
     .compileComponents();
 

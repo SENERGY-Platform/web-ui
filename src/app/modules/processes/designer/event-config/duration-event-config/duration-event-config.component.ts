@@ -15,17 +15,20 @@
  */
 
 import { Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DurationIso, DurationResult } from '../../shared/designer.model';
 import { duration as toDuration, durationParts, durationToIsoString } from '../../../../../core/time/iso-duration';
 import { humanizeDuration } from '../../../../../core/time/humanize-duration';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
 
 @Component({
     selector: 'senergy-duration-event-config',
     templateUrl: './duration-event-config.component.html',
     styleUrls: ['./duration-event-config.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, MatFormField, MatInput, ReactiveFormsModule, MatLabel, MatError, MatErrorMessagesDirective]
 })
 export class DurationEventConfigComponent implements OnInit {
     @Input() initial = '';

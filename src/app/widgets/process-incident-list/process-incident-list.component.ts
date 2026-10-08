@@ -23,13 +23,23 @@ import { ProcessIncidentsModel } from '../../modules/processes/incidents/shared/
 import { ProcessIncidentsService } from '../../modules/processes/incidents/shared/process-incidents.service';
 import { DeploymentsModel } from '../../modules/processes/deployments/shared/deployments.model';
 import { Router } from '@angular/router';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine } from '@angular/material/list';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { WidgetNoDataComponent } from '../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-process-incident-list',
     templateUrl: './process-incident-list.component.html',
     styleUrls: ['./process-incident-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatIconButton, MatTooltip, MatIcon, MatListItemTitle, MatListItemLine, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class ProcessIncidentListComponent implements OnInit, OnDestroy {
     incidents: ProcessIncidentsModel[] = [];

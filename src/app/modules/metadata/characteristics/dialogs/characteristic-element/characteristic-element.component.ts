@@ -16,16 +16,24 @@
 
 import {Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
 import {DeviceTypeCharacteristicsModel} from '../../../device-types-overview/shared/device-type.model';
-import {UntypedFormBuilder} from '@angular/forms';
+import { UntypedFormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NestedTreeControl} from '@angular/cdk/tree';
-import {MatTreeNestedDataSource} from '@angular/material/tree';
+import { MatTreeNestedDataSource, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatTreeNodeToggle } from '@angular/material/tree';
+import { NgClass } from '@angular/common';
+import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'senergy-characteristic-element',
     templateUrl: './characteristic-element.component.html',
     styleUrls: ['./characteristic-element.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgClass, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIconButton, MatSuffix, MatIcon, MatButton, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatTreeNodeToggle]
 })
 export class CharacteristicElementComponent implements OnInit {
     constructor(private fb: UntypedFormBuilder) {}

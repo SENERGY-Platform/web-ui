@@ -15,7 +15,7 @@
  */
 
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, Subject, throwError } from 'rxjs';
 import { DeviceGroupCriteriaModel, DeviceGroupDisplayModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
@@ -35,6 +35,11 @@ import { LocationsService } from 'src/app/modules/devices/locations/shared/locat
 import { FunctionsService } from 'src/app/modules/metadata/functions/shared/functions.service';
 import _ from 'lodash';
 import { debounceTime, switchMap } from 'rxjs/operators';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatInput } from '@angular/material/input';
 
 export interface DataSourceConfig {
     exports?: (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel | LocationDisplayModel)[];
@@ -64,7 +69,7 @@ interface ChartsExportVAxesModelWithGroup extends ChartsExportVAxesModel {
     templateUrl: './data-source-selector.component.html',
     styleUrls: ['./data-source-selector.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatProgressSpinner, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MtxSelect, MatError, MatErrorMessagesDirective, MtxOption, MatInput]
 })
 export class DataSourceSelectorComponent implements OnInit {
     form: UntypedFormGroup = new UntypedFormGroup({});

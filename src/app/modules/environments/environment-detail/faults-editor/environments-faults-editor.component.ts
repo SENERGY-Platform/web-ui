@@ -18,6 +18,14 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, Chang
 import { FAULT_KINDS, Fault, FaultKind, faultKindDescription, faultKindLabel } from '../../shared/environments.model';
 import { NodeProblem } from '../../shared/environments-path';
 import { toLocalDateTimeInput, toRfc3339Seconds } from '../../shared/environments-datetime';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
 
 /** A fault is either dated (from/to) or rated (per_hour/duration_seconds); see mode(). */
 export type FaultMode = 'window' | 'rate';
@@ -55,7 +63,7 @@ interface RowProblem {
     templateUrl: './environments-faults-editor.component.html',
     styleUrls: ['./environments-faults-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIcon, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatHint, MatButtonToggleGroup, MatButtonToggle, MatInput, MatSuffix, MatTooltip, MatIconButton, MatButton]
 })
 export class EnvironmentsFaultsEditorComponent implements OnChanges {
     @Input() faults: Fault[] | undefined;

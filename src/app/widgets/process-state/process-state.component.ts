@@ -16,13 +16,17 @@
 
 import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { MatIconRegistry } from '@angular/material/icon';
+import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ProcessStateService } from './shared/process-state.service';
 import { ProcessStateModel } from './shared/process-state.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-process-state',
@@ -30,7 +34,7 @@ import { HttpClient } from '@angular/common/http';
     styleUrls: ['./process-statecomponent.css'],
     providers: [HttpClient],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, WidgetFooterComponent]
 })
 export class ProcessStateComponent implements OnInit, OnDestroy {
     processStatus: ProcessStateModel = { available: 0, executable: 0 };

@@ -16,20 +16,26 @@
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { SidenavService } from '../sidenav/shared/sidenav.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthorizationService } from '../../services/authorization.service';
 import { SettingsDialogService } from '../../../modules/settings/shared/settings-dialog.service';
 import { NotificationService } from '../notifications/shared/notification.service';
 import { NotificationModel } from '../notifications/shared/notification.model';
 import { ThemingService } from '../../services/theming.service';
 import { InfoService } from 'src/app/modules/info/shared/info.service';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
 
 @Component({
     selector: 'senergy-toolbar',
     templateUrl: './toolbar.component.html',
     styleUrls: ['./toolbar.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatToolbar, MatIconButton, MatIcon, RouterLink, MatBadge, MatMenuTrigger, MatMenu, MatMenuItem, MatDivider]
 })
 export class ToolbarComponent implements OnInit {
     userName = '';

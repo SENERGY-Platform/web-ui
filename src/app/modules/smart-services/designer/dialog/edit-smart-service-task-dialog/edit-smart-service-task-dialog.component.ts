@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     SmartServiceTaskInputDescription,
     SmartServiceTaskDescription,
@@ -75,6 +75,29 @@ import {
     SmartServiceCriteria,
     storableCriteria,
 } from '../../shared/smart-service-criteria';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatTabGroup, MatTab, MatTabContent } from '@angular/material/tabs';
+import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { NgFor, NgIf } from '@angular/common';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { CheckboxValueDirective } from '../../shared/string-check-box.directive';
+import { MatCard } from '@angular/material/card';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
+import { CriteriaListComponent } from './criteria-list.component';
+import { EsstdExportComponentComponent } from './esstd-export-component/esstd-export-component.component';
+import { IsJsonValidatorDirective } from '../../../../../core/validators/is-json-validator.directive';
+import { CodeEditorComponent } from '../../../../../core/components/code-editor/code-editor.component';
+import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
 
 interface GenericWatcherRequest {
     method: string;
@@ -88,7 +111,7 @@ interface GenericWatcherRequest {
     templateUrl: './edit-smart-service-task-dialog.component.html',
     styleUrls: ['./edit-smart-service-task-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTabGroup, MatTab, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, NgFor, NgIf, MtxSelect, MatCheckbox, CheckboxValueDirective, MatCard, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIconButton, MatTooltip, MatIcon, MatSuffix, MatMenuTrigger, MatMenu, MatMenuItem, MtxOption, MatExpansionPanelDescription, MatDivider, CriteriaListComponent, EsstdExportComponentComponent, IsJsonValidatorDirective, MatTabContent, CodeEditorComponent, MatButton, AspectSelectComponent, MatExpansionPanelContent, MatDialogActions]
 })
 export class EditSmartServiceTaskDialogComponent implements OnInit {
     init: SmartServiceTaskDescription;

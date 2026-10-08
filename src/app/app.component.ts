@@ -17,13 +17,15 @@
 import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {ThemingService} from './core/services/theming.service';
 import {AuthorizationService} from './core/services/authorization.service';
+import { ToolbarComponent } from './core/components/toolbar/toolbar.component';
+import { SidenavComponent } from './core/components/sidenav/sidenav.component';
 
 @Component({
     selector: 'senergy-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [ToolbarComponent, SidenavComponent]
 })
 export class AppComponent implements OnInit {
 

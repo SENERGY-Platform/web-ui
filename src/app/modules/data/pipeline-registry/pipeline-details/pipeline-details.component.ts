@@ -17,20 +17,25 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { PipelineRegistryService } from '../shared/pipeline-registry.service';
 import { OperatorInputTopic, PipelineModel } from '../shared/pipeline.model';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {Location} from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'senergy-pipeline-details',
     templateUrl: './pipeline-details.component.html',
     styleUrls: ['./pipeline-details.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatButton, MatCard, MatCardHeader, MatCardAvatar, MatIcon, MatCardTitle, MatCardSubtitle, RouterLink, MatCardContent, MatCheckbox, FormsModule]
 })
 export class PipelineDetailsComponent implements OnInit {
     ready = false;

@@ -19,16 +19,21 @@ import { WidgetModel, WidgetPropertiesModels } from '../../modules/dashboard/sha
 import { RangeSliderService } from './shared/range-slider.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
-import { MatSliderChange } from '@angular/material/slider';
+import { MatSliderChange, MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { CamundaVariable } from '../../modules/processes/deployments/shared/deployments-definition.model';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { FitTextComponent } from '../../core/components/fit-text/fit-text.component';
+import { FormsModule } from '@angular/forms';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-range-slider',
     templateUrl: './range-slider.component.html',
     styleUrls: ['./range-slider.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, FitTextComponent, MatSlider, MatSliderThumb, FormsModule, WidgetFooterComponent]
 })
 export class RangeSliderComponent implements OnInit, OnDestroy {
     ready = false;

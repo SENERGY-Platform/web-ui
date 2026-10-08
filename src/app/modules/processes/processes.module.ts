@@ -166,8 +166,6 @@ const processIo: Route = {
         MatExpansionModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
-    ],
-    declarations: [
         ProcessRepoComponent,
         ProcessDeploymentsComponent,
         DeploymentsStartParameterDialogComponent,

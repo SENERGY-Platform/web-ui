@@ -48,19 +48,19 @@ describe('AppComponent', () => {
     const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {    });
     notificationServiceSpy.getNotifications.and.returnValue(of([]));
     beforeEach(() => {
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [AppComponent],
-    imports: [CoreModule, MatSnackBarModule, NoopAnimationsModule],
-    providers: [
-        provideRouter([]),
-        { provide: KeycloakService, useClass: MockKeycloakService },
-        { provide: AuthorizationService, useClass: AuthorizationServiceMock },
-        { provide: LadonService, useValue: ladonServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-}).compileComponents();
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [CoreModule, MatSnackBarModule, NoopAnimationsModule, AppComponent],
+            providers: [
+                provideRouter([]),
+                { provide: KeycloakService, useClass: MockKeycloakService },
+                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
+                { provide: LadonService, useValue: ladonServiceSpy },
+                { provide: NotificationService, useValue: notificationServiceSpy },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting()
+            ],
+        }).compileComponents();
         fixture = TestBed.createComponent(AppComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();

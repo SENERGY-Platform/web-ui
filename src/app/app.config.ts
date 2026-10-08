@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2026 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,46 +14,29 @@
  * limitations under the License.
  */
 
-import { BrowserModule } from '@angular/platform-browser';
-import { APP_INITIALIZER, LOCALE_ID, NgModule } from '@angular/core';
-
-import { AppComponent } from './app.component';
-import { CoreModule } from './core/core.module';
-import { AppRoutingModule } from './app-routing.module';
+import { APP_INITIALIZER, ApplicationConfig, LOCALE_ID, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
-import { KeycloakAngularModule } from 'keycloak-angular';
-import { initializerService } from './core/services/initializer.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { PermissionsModule } from './modules/permissions/permissions.module';
-import localeDe from '@angular/common/locales/de';
 import { registerLocaleData } from '@angular/common';
-import { SettingsModule } from './modules/settings/settings.module';
-import { ClipboardModule } from 'ngx-clipboard';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthorizationService } from './core/services/authorization.service';
-import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
-import {MatNativeDateModule} from '@angular/material/core';
+import localeDe from '@angular/common/locales/de';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { KeycloakAngularModule } from 'keycloak-angular';
+import { AppRoutingModule } from './app-routing.module';
+import { CoreModule } from './core/core.module';
 import { provideIconFontSet } from './core/icon-font-set';
 import { provideOverlayDefaults } from './core/overlay-defaults';
+import { AuthorizationService } from './core/services/authorization.service';
+import { initializerService } from './core/services/initializer.service';
+import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 
 registerLocaleData(localeDe);
 
-@NgModule({
-    declarations: [AppComponent],
-    bootstrap: [AppComponent],
-    imports: [
-        BrowserModule,
-        CoreModule,
-        AppRoutingModule,
-        KeycloakAngularModule,
-        MatProgressSpinnerModule,
-        BrowserAnimationsModule,
-        PermissionsModule,
-        SettingsModule,
-        ClipboardModule,
-        MatNativeDateModule
-    ], providers: [
+export const appConfig: ApplicationConfig = {
+    providers: [
+        provideZoneChangeDetection(),
+        // CoreModule before AppRoutingModule: its forChild route ('notifications') has to precede the root routes.
+        importProvidersFrom(CoreModule, AppRoutingModule, KeycloakAngularModule),
+        provideAnimations(),
         {
             provide: APP_INITIALIZER,
             useFactory: initializerService,
@@ -73,6 +56,5 @@ registerLocaleData(localeDe);
         provideNativeDateAdapter(),
         provideIconFontSet(),
         provideOverlayDefaults(),
-    ]
-})
-export class AppModule { }
+    ],
+};

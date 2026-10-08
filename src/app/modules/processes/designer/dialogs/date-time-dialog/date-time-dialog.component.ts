@@ -15,14 +15,18 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { DateTimeEventConfigComponent } from '../../event-config/date-time-event-config/date-time-event-config.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './date-time-dialog.component.html',
     styleUrls: ['./date-time-dialog.component.css'],
     selector: 'senergy-date-time-dialog',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, DateTimeEventConfigComponent, MatDialogActions, MatButton]
 })
 export class DateTimeDialogComponent {
     initial: string;

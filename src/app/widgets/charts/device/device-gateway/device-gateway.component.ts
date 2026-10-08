@@ -24,13 +24,19 @@ import { GatewayDeviceCount } from './shared/device-gateway-chart';
 import { devicesPerGatewayChart } from './shared/device-gateway-chartjs';
 import { FramedChartConfig } from '../../../../core/charts/google-columns';
 import { googleFrame, googlePlugins } from '../../../../core/charts/google-chartjs';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { WidgetNoDataComponent } from '../../../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../../../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-device-gateway',
     templateUrl: './device-gateway.component.html',
     styleUrls: ['./device-gateway.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class DeviceGatewayComponent implements OnInit, OnDestroy, AfterViewInit {
     /** undefined without gateways */

@@ -28,21 +28,21 @@ describe('OpenWindowEditComponent', () => {
   let fixture: ComponentFixture<OpenWindowEditComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [OpenWindowEditComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [
-        { provide: MAT_DIALOG_DATA,
-            useValue: {
-                widget: { properties: { windowExports: [] }, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1 }
-            }
-        },
-        { provide: MatDialogRef, useValue: {} },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-})
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule,
+            MatSnackBarModule, OpenWindowEditComponent],
+        providers: [
+            { provide: MAT_DIALOG_DATA,
+                useValue: {
+                    widget: { properties: { windowExports: [] }, id: '', name: '', type: '', y: 1, x: 1, cols: 1, rows: 1 }
+                }
+            },
+            { provide: MatDialogRef, useValue: {} },
+            provideHttpClient(withXhr(), withInterceptorsFromDi()),
+            provideHttpClientTesting()
+        ],
+    })
     .compileComponents();
 
     fixture = TestBed.createComponent(OpenWindowEditComponent);

@@ -15,16 +15,25 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { BpmnElement, BpmnParameter } from '../../shared/designer.model';
 import { DesignerHelperService } from '../../shared/designer-helper.service';
 import { AddTagFn } from '../../../../../core/model/mtx-select.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MatButton } from '@angular/material/button';
+import { ShortInputVariableNamePipe } from '../../../../../core/pipe/short-input-variable-name.pipe';
 
 @Component({
     templateUrl: './edit-input-dialog.component.html',
     styleUrls: ['./edit-input-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatFormField, MatTooltip, MtxSelect, MatLabel, MtxOption, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton, ShortInputVariableNamePipe]
 })
 export class EditInputDialogComponent {
     inputs: BpmnParameter[];

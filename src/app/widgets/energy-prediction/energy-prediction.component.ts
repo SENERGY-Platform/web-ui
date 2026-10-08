@@ -16,19 +16,25 @@
 
 import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { MatIconRegistry } from '@angular/material/icon';
+import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { EnergyPredictionService } from './shared/energy-prediction.service';
 import { EnergyPredictionModel } from './shared/energy-prediction.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass, DecimalPipe, DatePipe } from '@angular/common';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-energy-prediction',
     templateUrl: './energy-prediction.component.html',
     styleUrls: ['./energy-prediction.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatIcon, MatTooltip, NgClass, WidgetFooterComponent, DecimalPipe, DatePipe]
 })
 export class EnergyPredictionComponent implements OnInit, OnDestroy {
     predictionModel: EnergyPredictionModel = { prediction: 0, predictionTotal: 0, timestamp: '' };

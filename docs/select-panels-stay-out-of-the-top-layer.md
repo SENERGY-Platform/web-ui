@@ -9,7 +9,7 @@ matero 22.1.1 with @ng-matero/ng-select 1.2.1 (2026-10).
 
 ## The setup
 
-`core/overlay-defaults.ts` (`provideOverlayDefaults()`, provided in `AppModule` and the preview module) sets two
+`core/overlay-defaults.ts` (`provideOverlayDefaults()`, provided in `app.config.ts` and the preview config) sets two
 defaults:
 
 - `OVERLAY_DEFAULT_CONFIG` `{ usePopover: false }`: CDK overlays (dialogs, menus) stay out of the browser's top layer.

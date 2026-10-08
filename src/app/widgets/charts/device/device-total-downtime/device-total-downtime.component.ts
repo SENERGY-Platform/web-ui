@@ -25,13 +25,19 @@ import { totalDowntimeChart } from './shared/device-total-downtime-chartjs';
 import { FramedChartConfig } from '../../../../core/charts/google-columns';
 import { googleFrame, googlePlugins } from '../../../../core/charts/google-chartjs';
 import { Chart } from 'chart.js';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { WidgetNoDataComponent } from '../../../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../../../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-device-total-downtime',
     templateUrl: './device-total-downtime.component.html',
     styleUrls: ['./device-total-downtime.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class DeviceTotalDowntimeComponent implements OnInit, OnDestroy, AfterViewInit {
     /** undefined when no device has a history or loading failed */

@@ -18,20 +18,26 @@ import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetection
 import { CertificateInfo, Rfc5280Reason, rfc5280ReasonString } from './shared/certificates.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { CertificatesService } from './shared/certificates.service';
 import { concatMap, map, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { CertificateRevokeDialogComponent } from './certificate-revoke-dialog/certificate-revoke-dialog.component';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { NgClass, DatePipe, KeyValuePipe } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-certificates',
     templateUrl: './certificates.component.html',
     styleUrl: './certificates.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe, KeyValuePipe]
 })
 export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
 

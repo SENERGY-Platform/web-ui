@@ -21,13 +21,20 @@ import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ExtendedLocationModel, LocationModel } from './shared/locations.model';
 import { LocationsService } from './shared/locations.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { NgClass } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 
 @Component({
@@ -35,7 +42,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
     templateUrl: './locations.component.html',
     styleUrls: ['./locations.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatTooltip, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];

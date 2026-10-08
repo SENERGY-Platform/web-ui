@@ -15,19 +15,30 @@
  */
 
 import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Attribute, DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from '../shared/device-instances.model';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { senergyConnectorLocalIdConstraint } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import jsQR from 'jsqr';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { GenericValidator } from '../../../../core/validators/generc-validator.directive';
+import { MatDivider } from '@angular/material/divider';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     templateUrl: './device-instances-edit-dialog.component.html',
     styleUrls: ['./device-instances-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, MatButton, MatIcon, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, GenericValidator, MatDivider, MtxSelect, MatTooltip, MatIconButton, MatDialogActions]
 })
 export class DeviceInstancesEditDialogComponent implements OnDestroy {
     @ViewChild('qrVideo') qrVideo?: ElementRef<HTMLVideoElement>;

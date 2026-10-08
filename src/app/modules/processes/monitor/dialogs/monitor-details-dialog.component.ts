@@ -15,14 +15,17 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './monitor-details-dialog.component.html',
     styleUrls: ['./monitor-details-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatDialogActions, MatButton]
 })
 export class MonitorDetailsDialogComponent {
     incidents: ProcessIncidentsModel[] = [];

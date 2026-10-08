@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, NgZone, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -29,7 +29,7 @@ import { DWDPollenService } from '../shared/dwd-pollen.service';
 import { UBAStation } from '../shared/uba.model';
 import { GeonamesService } from '../shared/geonames.service';
 import { Geoname } from '../shared/geonames.model';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, map } from 'rxjs/operators';
 import { forkJoin, from, Observable, of, Subscriber, concatMap } from 'rxjs';
 import { NameValuePair } from '../shared/dwd-pollen.model';
@@ -45,12 +45,30 @@ import {
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { MatStepper, MatStep, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
+import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatDivider } from '@angular/material/divider';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatList, MatListItem } from '@angular/material/list';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
     styleUrls: ['./air-quality-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatStepper, MatStep, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MatButton, MatStepperNext, MatIconButton, MatIcon, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatHint, MatTooltip, MatStepperPrevious, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatDivider, MatSlideToggle, MatSuffix, MatList, MatListItem, MatDialogActions, AsyncPipe, DecimalPipe]
 })
 export class AirQualityEditDialogComponent implements OnInit {
     constructor(

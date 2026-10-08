@@ -24,6 +24,15 @@ import { humanizeDuration } from '../../core/time/humanize-duration';
 import { OfflineSinceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine } from '@angular/material/list';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass, DatePipe } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { WidgetNoDataComponent } from '../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 function minutesSince(d: Date): number {
     return (Date.now() - new Date(d).getTime()) / 6e4;
@@ -34,7 +43,7 @@ function minutesSince(d: Date): number {
     templateUrl: './device-downtime-list.component.html',
     styleUrls: ['./device-downtime-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatListItemIcon, MatIcon, NgClass, MatListItemTitle, MatTooltip, MatListItemLine, WidgetNoDataComponent, WidgetFooterComponent, DatePipe]
 })
 export class DeviceDowntimeListComponent implements OnInit, OnDestroy {
     offlineSinceList: OfflineSinceModel[] = [];

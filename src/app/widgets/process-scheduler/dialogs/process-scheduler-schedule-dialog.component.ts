@@ -15,20 +15,29 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProcessSchedulerModel } from '../shared/process-scheduler.model';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { ProcessSchedulerWidgetModel } from '../shared/process-scheduler-widget.model';
 import { CronConverterService } from '../shared/cron-converter.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './process-scheduler-schedule-dialog.component.html',
     styleUrls: ['./process-scheduler-schedule-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatSlideToggle, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, MtxSelect, MatDialogActions, MatButton]
 })
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     form = new FormGroup({

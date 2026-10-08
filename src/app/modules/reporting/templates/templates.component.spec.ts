@@ -32,6 +32,7 @@ import { ReportingService } from '../shared/reporting.service';
 import { TemplateModel } from '../shared/reporting.model';
 import { CoreModule } from '../../../core/core.module';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { provideRouter } from '@angular/router';
 
 const templates = [
     { id: 't1', name: 'Energy Template', type: 'pdf' },
@@ -63,7 +64,6 @@ describe('TemplatesComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [TemplatesComponent],
             imports: [
                 CommonModule,
                 CoreModule,
@@ -75,10 +75,12 @@ describe('TemplatesComponent', () => {
                 MatTooltipModule,
                 MatDialogModule,
                 MatSnackBarModule,
+                TemplatesComponent,
             ],
             providers: [
+                provideRouter([]),
                 { provide: ReportingService, useClass: MockReportingService },
-            ]
+            ],
         }).compileComponents();
         fixture = TestBed.createComponent(TemplatesComponent);
         component = fixture.componentInstance;

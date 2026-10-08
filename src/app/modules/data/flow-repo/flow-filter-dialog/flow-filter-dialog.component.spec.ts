@@ -16,14 +16,13 @@ describe('FlowFilterDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
         schemas: [NO_ERRORS_SCHEMA],
-        imports: [MatDialogModule],
-        declarations: [FlowFilterDialogComponent],
+        imports: [MatDialogModule, FlowFilterDialogComponent],
         providers: [
-            {provide: MatDialog, useValue: dialogSpy},
+            { provide: MatDialog, useValue: dialogSpy },
             { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
             { provide: MAT_DIALOG_DATA, useValue: undefined },
             provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        ]
+        ],
     })
     .compileComponents();
 

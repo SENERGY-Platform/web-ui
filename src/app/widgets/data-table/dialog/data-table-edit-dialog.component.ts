@@ -15,10 +15,7 @@
  */
 
 import { ChangeDetectorRef, Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import {
@@ -27,7 +24,7 @@ import {
     ExportValueCharacteristicModel
 } from '../../../modules/exports/shared/export.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { AbstractControl, FormArray, FormControl, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DeviceStatusConfigConvertRuleModel } from '../../device-status/shared/device-status-properties.model';
 import {
     DataTableAggregations,
@@ -64,12 +61,26 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 import { CompareWithFn, GroupValueFn } from '../../../core/model/mtx-select.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption, MtxSelectLabelTemplate } from '@ng-matero/extensions/select';
+import { MatIcon } from '@angular/material/icon';
+import { NgStyle, NgClass } from '@angular/common';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
     styleUrls: ['./data-table-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MtxSelectLabelTemplate, MatIcon, NgStyle, MatIconButton, MatTooltip, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatRadioGroup, MatRadioButton, MatSlideToggle, MatDialogActions, MatButton]
 })
 export class DataTableEditDialogComponent implements OnInit {
     dashboardId: string;

@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -24,15 +24,27 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MultiValueMeasurement, MultiValueOrderEnum } from '../shared/multi-value.model';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { emptyObjectValidator } from '../../../core/validators/empty-object.validator';
 import { forkJoin, Observable } from 'rxjs';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { NgClass } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     templateUrl: './multi-value-edit-dialog.component.html',
     styleUrls: ['./multi-value-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MatSlideToggle, MatIconButton, MatIcon, MatDialogActions, MatButton]
 })
 export class MultiValueEditDialogComponent implements OnInit {
     exports: ChartsExportMeasurementModel[] = [];

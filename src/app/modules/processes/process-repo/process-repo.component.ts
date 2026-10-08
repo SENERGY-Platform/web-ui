@@ -29,11 +29,24 @@ import { DesignerProcessModel } from '../designer/shared/designer.model';
 import { saveAs } from 'file-saver';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatBadge } from '@angular/material/badge';
+import { SortComponent } from '../../../core/components/sort/sort.component';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler } from '@angular/material/grid-list';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { DatePipe } from '@angular/common';
 
 const grids = new Map([
     ['xs', 1],
@@ -50,7 +63,7 @@ const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel(
     templateUrl: './process-repo.component.html',
     styleUrls: ['./process-repo.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatTabGroup, MatTab, SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatBadge, SortComponent, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, SpinnerComponent, MatFabButton, DatePipe]
 })
 export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });

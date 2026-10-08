@@ -16,18 +16,22 @@
  *
  */
 
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { DocInfo } from '../shared/swagger/swagger.model';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 import { forkJoin, map, Observable, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 @Component({
     selector: 'senergy-api-docs',
     templateUrl: './api-docs.component.html',
     styleUrls: ['./api-docs.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, RouterLink, MatCardHeader, MatCardTitle, MatCardContent, RouterOutlet],
+    // Kept from the former ApiDocModule: the template uses custom elements and tags no component here registers.
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ApiDocsComponent implements OnInit {
     public title = 'SEPL API Documentation';

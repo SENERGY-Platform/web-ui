@@ -31,8 +31,7 @@ describe('EnvironmentsVersionConflictDialogComponent', () => {
         dialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsVersionConflictDialogComponent],
-            imports: [NoopAnimationsModule, MatDialogModule, MatButtonModule],
+            imports: [NoopAnimationsModule, MatDialogModule, MatButtonModule, EnvironmentsVersionConflictDialogComponent],
             providers: [{ provide: MatDialogRef, useValue: dialogRef }],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsVersionConflictDialogComponent);

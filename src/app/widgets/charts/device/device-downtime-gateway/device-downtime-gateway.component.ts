@@ -24,13 +24,19 @@ import { GatewayDowntime } from './shared/device-downtime-gateway-chart';
 import { downtimePerGatewayChart } from './shared/device-downtime-gateway-chartjs';
 import { FramedChartConfig } from '../../../../core/charts/google-columns';
 import { googleFrame, googlePlugins } from '../../../../core/charts/google-chartjs';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../../../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { WidgetNoDataComponent } from '../../../../core/components/widget-no-data/widget-no-data.component';
+import { WidgetFooterComponent } from '../../../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-device-downtime-gateway',
     templateUrl: './device-downtime-gateway.component.html',
     styleUrls: ['./device-downtime-gateway.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetNoDataComponent, WidgetFooterComponent]
 })
 export class DeviceDowntimeGatewayComponent implements OnInit, AfterViewInit, OnDestroy {
     /** undefined without gateways */

@@ -15,13 +15,16 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../directives/close-mtx-select-on-scroll.directive';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatDialogActions, MatButton]
 })
 export class ConfirmDialogComponent {
     text: string;

@@ -25,21 +25,28 @@ import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-sear
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ConceptsPermSearchModel} from '../concepts/shared/concepts-perm-search.model';
-import {Sort, SortDirection} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from '../device-types-overview/shared/used-in-device-type.model';
 import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { NgClass } from '@angular/common';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'senergy-characteristic',
     templateUrl: './characteristics.component.html',
     styleUrls: ['./characteristics.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
 export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];

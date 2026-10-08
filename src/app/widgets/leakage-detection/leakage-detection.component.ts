@@ -23,13 +23,18 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { consumptionSeries } from '../shared/consumption-series';
 import { consumptionChartConfig, ConsumptionChartConfig } from '../shared/consumption-chartjs';
 import { crosshairPlugin } from 'src/app/core/charts/chart-look';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { BaseChartDirective } from 'ng2-charts';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-leakage-detection-widget',
     templateUrl: './leakage-detection.component.html',
     styleUrls: ['./leakage-detection.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, WidgetFooterComponent]
 })
 export class LeakageDetectionComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';

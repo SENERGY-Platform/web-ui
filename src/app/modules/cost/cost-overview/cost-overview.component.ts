@@ -17,11 +17,11 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CostService } from '../shared/cost.service';
 import { CostEntryModel, CostModel } from '../shared/cost.model';
-import { KeyValue } from '@angular/common';
+import { KeyValue, CurrencyPipe, DatePipe, KeyValuePipe } from '@angular/common';
 import {Observable, forkJoin, map, mergeMap, of, concatMap} from 'rxjs';
 import { BillingService } from '../shared/billing.service';
-import { FormControl } from '@angular/forms';
-import { DateFilterFn, MatDatepicker } from '@angular/material/datepicker';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DateFilterFn, MatDatepicker, MatDatepickerInput, MatDatepickerToggle } from '@angular/material/datepicker';
 import { BillingInformationModel } from '../shared/billing.model';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
@@ -36,13 +36,22 @@ import { ExportModel } from '../../exports/shared/export.model';
 import { BrokerExportService } from '../../exports/shared/broker-export.service';
 import { ReportModel } from '../../reporting/shared/reporting.model';
 import { ReportingService } from '../../reporting/shared/reporting.service';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatAccordion } from '@angular/material/expansion';
+import { CostElementComponent } from '../cost-element/cost-element.component';
 
 @Component({
     selector: 'senergy-cost-overview',
     templateUrl: './cost-overview.component.html',
     styleUrls: ['./cost-overview.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SpinnerComponent, MatFormField, MatLabel, MtxSelect, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MtxOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatTooltip, MatIcon, MatAccordion, CostElementComponent, CurrencyPipe, DatePipe, KeyValuePipe]
 })
 export class CostOverviewComponent implements OnInit {
     dataReady = false;

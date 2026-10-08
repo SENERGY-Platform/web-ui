@@ -70,8 +70,8 @@ describe('ContentVariableDialogComponent', () => {
             infoOnly: false,
             aspects,
         };
-        TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-            declarations: [ContentVariableDialogComponent],
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
             imports: [
                 CoreModule,
                 ReactiveFormsModule,
@@ -86,6 +86,7 @@ describe('ContentVariableDialogComponent', () => {
                 MtxSelectModule,
                 NoopAnimationsModule,
                 CloseMtxSelectOnScrollDirective,
+                ContentVariableDialogComponent,
             ],
             providers: [
                 { provide: MAT_DIALOG_DATA, useValue: dialogData },

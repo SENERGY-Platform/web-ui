@@ -35,20 +35,20 @@ describe('DeviceInstancesFilterDialogComponent', () => {
   createSpyFromClass<MatDialogRef<DeviceInstancesFilterDialogComponent>>(MatDialogRef);
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [DeviceInstancesFilterDialogComponent],
-    imports: [MatSnackBarModule, MatDialogModule],
-    providers: [
-        { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
-        { provide: MatDialogRef, useValue: matDialogRefSpy },
-        {
-            provide: MAT_DIALOG_DATA,
-            useValue: {},
-        },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-})
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatSnackBarModule, MatDialogModule, DeviceInstancesFilterDialogComponent],
+            providers: [
+                { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
+                { provide: MatDialogRef, useValue: matDialogRefSpy },
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {},
+                },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        })
             .compileComponents();
 
         fixture = TestBed.createComponent(DeviceInstancesFilterDialogComponent);

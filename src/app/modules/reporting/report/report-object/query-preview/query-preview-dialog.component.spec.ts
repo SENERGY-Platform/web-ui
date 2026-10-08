@@ -32,12 +32,11 @@ describe('QueryPreviewDialogComponent', () => {
         TestBed.resetTestingModule();
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [QueryPreviewDialogComponent],
-            imports: [CommonModule, NoopAnimationsModule, MatDialogModule, MatTableModule],
+            imports: [CommonModule, NoopAnimationsModule, MatDialogModule, MatTableModule, QueryPreviewDialogComponent],
             providers: [
                 { provide: MAT_DIALOG_DATA, useValue: data },
                 { provide: MatDialogRef, useValue: dialogRef },
-            ]
+            ],
         });
         fixture = TestBed.createComponent(QueryPreviewDialogComponent);
         component = fixture.componentInstance;

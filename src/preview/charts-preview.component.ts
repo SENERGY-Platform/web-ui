@@ -22,6 +22,7 @@ import { WidgetModel } from '../app/modules/dashboard/shared/dashboard-widget.mo
 import { DashboardService } from '../app/modules/dashboard/shared/dashboard.service';
 import { AnomalyReconstructionComponent } from '../app/widgets/anomaly/reconstruction/reconstruction.component';
 import { previewCharts, previewReconstruction } from './chart-fixtures';
+import { WidgetComponent } from '../app/widgets/widget.component';
 
 @Component({
     selector: 'senergy-charts-preview',
@@ -35,7 +36,7 @@ import { previewCharts, previewReconstruction } from './chart-fixtures';
         }
       </div>`,
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [WidgetComponent]
 })
 export class ChartsPreviewComponent implements OnInit, AfterViewInit {
     widget?: WidgetModel;

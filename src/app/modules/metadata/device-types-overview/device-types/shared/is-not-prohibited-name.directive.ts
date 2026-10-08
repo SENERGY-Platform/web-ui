@@ -20,8 +20,7 @@ import {AbstractControl, NG_VALIDATORS, ValidationErrors, Validator} from '@angu
 
 @Directive({
     selector: '[isNotProhibitedName]',
-    providers: [{ provide: NG_VALIDATORS, useExisting: IsNotProhibitedNameValidatorDirective, multi: true }],
-    standalone: false
+    providers: [{ provide: NG_VALIDATORS, useExisting: IsNotProhibitedNameValidatorDirective, multi: true }]
 })
 export class IsNotProhibitedNameValidatorDirective implements Validator {
     @Input('isNotProhibitedName') prohibitedNames: string[] = [];

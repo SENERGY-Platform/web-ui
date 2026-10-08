@@ -29,6 +29,7 @@ import { DeviceInstancesService } from '../../modules/devices/device-instances/s
 import { DeviceClassesService } from '../../modules/metadata/device-classes/shared/device-classes.service';
 import { ConceptsService } from '../../modules/metadata/concepts/shared/concepts.service';
 import { FloorplanComponent } from './floorplan.component';
+import { provideAppCharts } from '../../core/charts/provide-app-charts';
 import {
     characteristicTypeFloat,
     DeviceGroupWithValueModel,
@@ -63,9 +64,10 @@ describe('FloorplanComponent', () => {
 
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
+            imports: [FloorplanComponent],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [FloorplanComponent],
             providers: [
+                provideAppCharts(),
                 { provide: MatDialog, useValue: dialogSpy },
                 { provide: DashboardService, useValue: createSpyFromClass<DashboardService>(DashboardService) },
                 { provide: DeviceCommandService, useValue: commandSpy },

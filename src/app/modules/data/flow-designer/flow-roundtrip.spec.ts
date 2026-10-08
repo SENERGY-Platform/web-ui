@@ -150,8 +150,7 @@ describe('FlowDesignerComponent with the diagram editor', () => {
         routeId = null;
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [FlowDesignerComponent, DiagramEditorComponent],
-            imports: [MatDialogModule, MatSnackBarModule, NoopAnimationsModule],
+            imports: [MatDialogModule, MatSnackBarModule, NoopAnimationsModule, FlowDesignerComponent, DiagramEditorComponent],
             providers: [
                 provideRouter([]),
                 { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => routeId } } } },

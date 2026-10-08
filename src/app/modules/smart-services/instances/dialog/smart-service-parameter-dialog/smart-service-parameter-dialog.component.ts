@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable, Subscription } from 'rxjs';
 import { SmartServiceExtendedParameterModel, SmartServiceParameterOptionModel } from '../../../releases/shared/release.model';
 import { SmartServiceParameterModel } from '../../shared/instances.model';
@@ -32,6 +32,19 @@ import {
     toSmartServiceParameters,
     visibleOptions,
 } from '../../shared/parameters';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { SpinnerComponent } from '../../../../../core/components/spinner/spinner.component';
+import { MatDivider } from '@angular/material/divider';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { CharacteristicInputComponent } from '../../../../../widgets/floorplan/shared/characteristic-input/characteristic-input.component';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 
 export interface SmartServiceParameterDialogData {
     title: string;
@@ -95,7 +108,7 @@ const virtualScrollFrom = 50;
     templateUrl: './smart-service-parameter-dialog.component.html',
     styleUrls: ['./smart-service-parameter-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, SpinnerComponent, MatDivider, MtxSelect, CharacteristicInputComponent, MatIconButton, MatTooltip, MatSlideToggle, MatDialogActions, MatButton]
 })
 export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {
     name: string;

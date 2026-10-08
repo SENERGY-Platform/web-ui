@@ -15,15 +15,19 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DurationResult } from '../../shared/designer.model';
 import { duration, Duration, durationAs } from '../../../../../core/time/iso-duration';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { DurationEventConfigComponent } from '../../event-config/duration-event-config/duration-event-config.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './duration-dialog.component.html',
     styleUrls: ['./duration-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, DurationEventConfigComponent, MatDialogActions, MatButton]
 })
 export class DurationDialogComponent {
     initial: string;

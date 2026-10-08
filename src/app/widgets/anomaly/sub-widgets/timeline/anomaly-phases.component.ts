@@ -24,13 +24,14 @@ import { subtractDuration } from '../../../../core/time/iso-duration';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { anomalyOfBar, curveAnomaliesPerDevice, phaseTimelineData, phaseVAxes } from '../../shared/anomaly-phases';
 import { TimelineSelection } from 'src/app/widgets/charts/shared/chart-types/timeline/timeline-chartjs';
+import { TimelineComponent } from '../../../charts/shared/chart-types/timeline/timeline.component';
 
 @Component({
     selector: 'anomaly-phases',
     templateUrl: './anomaly-phases.component.html',
     styleUrls: ['./anomaly-phases.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [TimelineComponent]
 })
 export class AnomalyPhasesComponent implements OnInit, OnChanges {
     @Input() anomalies: AnomaliesPerDevice = {};

@@ -15,11 +15,8 @@
  */
 
 import { Component, Inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import {
-    MAT_DIALOG_DATA,
-    MatDialogRef
-} from '@angular/material/dialog';
-import { UntypedFormBuilder, UntypedFormControl } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import {
     compareAspectIds,
@@ -40,12 +37,20 @@ import {
     classifyAspects,
     collidingAspectNames,
 } from '../../../../../core/components/aspect-select/aspect-select.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     templateUrl: './conditional-event-dialog.component.html',
     styleUrls: ['./conditional-event-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, AspectSelectComponent, ReactiveFormsModule, MatFormField, MatLabel, MtxSelect, MatError, MatErrorMessagesDirective, MtxOption, MatInput, MatDialogActions, MatButton]
 })
 export class ConditionalEventDialogComponent implements OnInit {
     aspectFormControl = new UntypedFormControl([]);

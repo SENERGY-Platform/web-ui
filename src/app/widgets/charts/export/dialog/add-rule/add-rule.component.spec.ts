@@ -25,12 +25,13 @@ describe('AddRuleComponent', () => {
   let fixture: ComponentFixture<AddRuleComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-      declarations: [ AddRuleComponent ],
-      providers: [
-        {provide: MatDialogRef, useValue: {}},
-        {provide: MAT_DIALOG_DATA, useValue: []},
-      ]
+    await TestBed.configureTestingModule({
+        imports: [AddRuleComponent],
+        schemas: [NO_ERRORS_SCHEMA],
+        providers: [
+            { provide: MatDialogRef, useValue: {} },
+            { provide: MAT_DIALOG_DATA, useValue: [] },
+        ],
     })
     .compileComponents();
 

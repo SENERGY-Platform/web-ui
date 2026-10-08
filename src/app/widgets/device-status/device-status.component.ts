@@ -16,11 +16,11 @@
 
 import { Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { MatIconRegistry } from '@angular/material/icon';
+import { MatIconRegistry, MatIcon } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
-import { MatTable } from '@angular/material/table';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { DeviceStatusConfigConvertRuleModel, DeviceStatusElementModel } from './shared/device-status-properties.model';
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { DeviceStatusDialogService } from './shared/device-status-dialog.service';
@@ -29,13 +29,20 @@ import {
 } from '../shared/export-data.model';
 import { ExportDataService } from '../shared/export-data.service';
 import { DeviceStatusItemModel } from './shared/device-status-item.model';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { NgStyle, DatePipe } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
 
 @Component({
     selector: 'senergy-device-status',
     templateUrl: './device-status.component.html',
     styleUrls: ['./device-status.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIcon, NgStyle, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, WidgetFooterComponent, DatePipe]
 })
 export class DeviceStatusComponent implements OnInit, OnDestroy {
     configured = false;

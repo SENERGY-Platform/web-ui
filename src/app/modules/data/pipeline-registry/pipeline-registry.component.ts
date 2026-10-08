@@ -19,9 +19,9 @@ import {FilterSelection, PipelineModel} from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { Sort, SortDirection } from '@angular/material/sort';
+import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import {forkJoin, Observable, Subscription, concatMap, of, map, finalize} from 'rxjs';
@@ -34,16 +34,24 @@ import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatDialog} from '@angular/material/dialog';
 import {PipelineFilterDialogComponent} from './pipeline-filter-dialog/pipeline-filter-dialog.component';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import {SmartServiceModuleService} from '../../smart-services/instances/shared/modules.service';
 import {switchMap} from 'rxjs/operators';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-pipeline-registry',
     templateUrl: './pipeline-registry.component.html',
     styleUrls: ['./pipeline-registry.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestroy {
     pageSize = this.preferencesService.pageSize;

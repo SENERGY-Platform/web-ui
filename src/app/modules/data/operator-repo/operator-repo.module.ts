@@ -57,7 +57,7 @@ const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'ful
         MatCheckboxModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        OperatorComponent,
     ],
-    declarations: [OperatorComponent],
 })
 export class OperatorRepoModule {}

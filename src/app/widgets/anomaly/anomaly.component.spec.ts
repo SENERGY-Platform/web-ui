@@ -32,12 +32,12 @@ describe('AnomalyComponent', () => {
     let fixture: ComponentFixture<AnomalyComponent>;
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
-    declarations: [AnomalyComponent],
-    imports: [MatDialogModule,
-        MatSnackBarModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
-})
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [MatDialogModule,
+                MatSnackBarModule, AnomalyComponent],
+            providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+        })
             .compileComponents();
 
         fixture = TestBed.createComponent(AnomalyComponent);
@@ -58,8 +58,8 @@ describe('AnomalyComponent init phase', () => {
         const lastAnomalies: (Partial<AnomalyResultModel> | null)[] = [{ initial_phase: 'learning, 3 of 10 days' }, { initial_phase: '' }, { initial_phase: 'again' }, null];
         const anomalyService = { getAnomaly: () => of(lastAnomalies.shift()), getAnomalyHistory: () => of({}) };
         await TestBed.configureTestingModule({
+            imports: [AnomalyComponent],
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [AnomalyComponent],
             providers: [
                 { provide: AnomalyService, useValue: anomalyService },
                 { provide: DashboardService, useValue: { initWidgetObservable: events.asObservable() } },

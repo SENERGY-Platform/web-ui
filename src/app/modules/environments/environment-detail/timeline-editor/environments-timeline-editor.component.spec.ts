@@ -38,7 +38,6 @@ describe('EnvironmentsTimelineEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsTimelineEditorComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -49,6 +48,7 @@ describe('EnvironmentsTimelineEditorComponent', () => {
                 MatButtonModule,
                 MatPaginatorModule,
                 MtxSelectModule,
+                EnvironmentsTimelineEditorComponent,
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsTimelineEditorComponent);

@@ -18,13 +18,18 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { NgClass } from '@angular/common';
+import { MatIconButton } from '@angular/material/button';
 
 @Component({
     selector: 'senergy-widget-header',
     templateUrl: './widget-header.component.html',
     styleUrls: ['./widget-header.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCardHeader, MatCardTitle, MatTooltip, MatIcon, NgClass, MatIconButton]
 })
 export class WidgetHeaderComponent {
     @Input() widget: WidgetModel = {} as WidgetModel;

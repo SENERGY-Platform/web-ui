@@ -15,7 +15,7 @@
  */
 
 import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     SmartServiceInputsDescription,
     SmartServiceInput, SmartServiceInputProperty
@@ -32,7 +32,7 @@ import {
     DeviceTypeDeviceClassModel,
 } from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { CharacteristicsService } from '../../../../metadata/characteristics/shared/characteristics.service';
-import { AbstractControl, ValidationErrors } from '@angular/forms';
+import { AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
 import { AspectClassification, aspectTreeFromAspectNodes, classifyAspects, withStoredAspects } from '../../../../../core/components/aspect-select/aspect-select.model';
 import {
     criteriaAspectsLabel,
@@ -43,12 +43,27 @@ import {
     SmartServiceCriteria,
     storableCriteria,
 } from '../../shared/smart-service-criteria';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
+import { MatFormField, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { GenericValidator } from '../../../../../core/validators/generc-validator.directive';
+import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatDivider } from '@angular/material/divider';
+import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     templateUrl: './edit-smart-service-input-dialog.component.html',
     styleUrls: ['./edit-smart-service-input-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatFormField, MatLabel, MatInput, FormsModule, GenericValidator, MatError, MatErrorMessagesDirective, MatCheckbox, MatTooltip, MtxSelect, MtxOption, MatDivider, AspectSelectComponent, MatButton, MatRadioGroup, MatRadioButton, MatIconButton, MatSuffix, MatIcon, MatDialogActions]
 })
 export class EditSmartServiceInputDialogComponent {
     abstract: AbstractSmartServiceInput[] = [];

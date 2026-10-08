@@ -31,7 +31,7 @@ import { MatErrorMessagesDirective } from './matError.directive';
             <mat-error senergyError label="User"></mat-error>
         </mat-form-field>`,
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false,
+    imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MtxSelectModule, MatErrorMessagesDirective],
 })
 class ReactiveSelectHostComponent {
     @ViewChild(MatErrorMessagesDirective) error!: MatErrorMessagesDirective;
@@ -46,7 +46,7 @@ class ReactiveSelectHostComponent {
             <mat-error senergyError label="Role"></mat-error>
         </mat-form-field>`,
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false,
+    imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MtxSelectModule, MatErrorMessagesDirective],
 })
 class NgModelSelectHostComponent {
     @ViewChild(MatErrorMessagesDirective) error!: MatErrorMessagesDirective;
@@ -61,7 +61,7 @@ class NgModelSelectHostComponent {
             <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>`,
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false,
+    imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MtxSelectModule, MatErrorMessagesDirective],
 })
 class ReactiveInputHostComponent {
     @ViewChild(MatErrorMessagesDirective) error!: MatErrorMessagesDirective;
@@ -72,8 +72,7 @@ class ReactiveInputHostComponent {
 describe('MatErrorMessagesDirective', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [MatErrorMessagesDirective, ReactiveSelectHostComponent, NgModelSelectHostComponent, ReactiveInputHostComponent],
-            imports: [NoopAnimationsModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MtxSelectModule],
+            imports: [NoopAnimationsModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MtxSelectModule, MatErrorMessagesDirective, ReactiveSelectHostComponent, NgModelSelectHostComponent, ReactiveInputHostComponent],
         }).compileComponents();
     });
 

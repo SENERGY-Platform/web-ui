@@ -15,7 +15,7 @@
  */
 
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import {
@@ -27,7 +27,7 @@ import {
 } from '../shared/reporting.model';
 import { reportJobDone, reportJobFailed, reportJobLabel } from '../shared/report-job';
 import { ReportingService } from '../shared/reporting.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { DeviceGroupsService } from '../../devices/device-groups/shared/device-groups.service';
@@ -52,6 +52,18 @@ import {
     removeReportObjectItem
 } from '../shared/report-object-node';
 import { REPORT_SETTINGS_PATH, ReportObjectViewService } from '../shared/report-object-view.service';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { ReportTreeComponent } from './report-tree/report-tree.component';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { ReportObjectComponent } from './report-object/report-object.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-reporting-new',
@@ -59,7 +71,7 @@ import { REPORT_SETTINGS_PATH, ReportObjectViewService } from '../shared/report-
     styleUrls: ['./report.component.css'],
     providers: [ReportObjectViewService],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SpinnerComponent, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatSuffix, ReportTreeComponent, MatCard, MatCardContent, MatError, MatErrorMessagesDirective, MatButton, ReportObjectComponent, MatProgressBar, RouterLink, MatFabButton, DatePipe]
 })
 export class ReportComponent implements OnInit, OnDestroy {
 

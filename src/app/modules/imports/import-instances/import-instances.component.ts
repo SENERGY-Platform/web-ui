@@ -15,7 +15,7 @@
  */
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
-import { Sort } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
@@ -26,7 +26,7 @@ import { ExportModel } from '../../exports/shared/export.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin, Observable, Subscription, map, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UtilService } from 'src/app/core/services/util.service';
 import { MatPaginator } from '@angular/material/paginator';
@@ -35,13 +35,21 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { NgClass, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-import-instances',
     templateUrl: './import-instances.component.html',
     styleUrls: ['./import-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns = ['select', 'status', 'name', 'image', 'created_at', 'updated_at', 'export'];

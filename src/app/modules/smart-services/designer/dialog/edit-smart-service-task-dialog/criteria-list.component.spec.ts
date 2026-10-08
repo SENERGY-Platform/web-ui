@@ -66,8 +66,7 @@ describe('CriteriaListComponent', () => {
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [CoreModule, FormsModule, MatExpansionModule, MatInputModule, MtxSelectModule, NoopAnimationsModule],
-            declarations: [CriteriaListComponent],
+            imports: [CoreModule, FormsModule, MatExpansionModule, MatInputModule, MtxSelectModule, NoopAnimationsModule, CriteriaListComponent],
             providers: [
                 { provide: DeviceTypeService, useValue: deviceTypeService },
                 { provide: FunctionsService, useValue: functionsService },

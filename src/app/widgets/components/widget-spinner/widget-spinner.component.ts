@@ -15,13 +15,14 @@
  */
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'senergy-widget-spinner',
     templateUrl: './widget-spinner.component.html',
     styleUrls: ['./widget-spinner.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatProgressSpinner]
 })
 export class WidgetSpinnerComponent {
     @Input() show = false;

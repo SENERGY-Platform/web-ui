@@ -65,7 +65,6 @@ describe('EnvironmentsDatasetUploadDialogComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsDatasetUploadDialogComponent],
             imports: [
                 CommonModule,
                 FormsModule,
@@ -75,6 +74,7 @@ describe('EnvironmentsDatasetUploadDialogComponent', () => {
                 MatFormFieldModule,
                 MatInputModule,
                 MatDialogModule,
+                EnvironmentsDatasetUploadDialogComponent,
             ],
             providers: [
                 { provide: EnvironmentsService, useClass: MockEnvironmentsService },

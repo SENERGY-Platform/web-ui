@@ -20,13 +20,20 @@ import { EventListService } from './shared/event-list.service';
 import { EventListModel } from './shared/event-list.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { Subscription } from 'rxjs';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
+import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
+import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine } from '@angular/material/list';
+import { MatIcon } from '@angular/material/icon';
+import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'senergy-event-list',
     templateUrl: './event-list.component.html',
     styleUrls: ['./event-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, MatList, MatListItem, MatIcon, MatListItemIcon, MatListItemTitle, MatListItemLine, WidgetFooterComponent, DatePipe]
 })
 export class EventListComponent implements OnInit, OnDestroy {
     events: EventListModel[] = [];

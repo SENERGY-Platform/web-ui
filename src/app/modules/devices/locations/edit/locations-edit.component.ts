@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LocationsService } from '../shared/locations.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -27,13 +27,21 @@ import { DeviceGroupModel } from '../../device-groups/shared/device-groups.model
 import { DeviceGroupsService } from '../../device-groups/shared/device-groups.service';
 import { DeviceInstancesDialogService } from '../../device-instances/shared/device-instances-dialog.service';
 import { DeviceGroupsDialogService } from '../../device-groups/shared/device-groups-dialog.service';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
+import { MatCard, MatCardTitle, MatCardActions } from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/divider';
 
 @Component({
     selector: 'senergy-locations-edit',
     templateUrl: './locations-edit.component.html',
     styleUrls: ['./locations-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCard, MatCardTitle, MatTooltip, MatCardActions, MatIconButton, MatIcon, MatButton, MatDivider]
 })
 export class LocationsEditComponent implements OnInit {
     id = '';

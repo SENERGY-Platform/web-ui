@@ -15,6 +15,13 @@
  */
 
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIconButton } from '@angular/material/button';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 interface Tile {
     key: string;
@@ -51,7 +58,7 @@ interface Tile {
     templateUrl: './environments-live-state-tiles.component.html',
     styleUrls: ['./environments-live-state-tiles.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIcon, MatTooltip, MatIconButton, MatButtonToggleGroup, FormsModule, MatButtonToggle, MatFormField, MatInput, MatLabel]
 })
 export class EnvironmentsLiveStateTilesComponent implements OnChanges {
     @Input() record: Record<string, unknown> | undefined;

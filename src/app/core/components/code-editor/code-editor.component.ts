@@ -37,6 +37,7 @@ import {
 } from './code-editor-completion';
 import { CodeEditorScriptEnvironment } from './code-editor-environment';
 import type { LanguageServiceDefaults, Monaco, ScriptTarget } from './monaco-loader';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 /**
  * 'plaintext' needs no language contribution and is the honest fallback for script
@@ -58,7 +59,7 @@ export type CodeEditorLanguage = 'javascript' | 'json' | 'plaintext';
     templateUrl: './code-editor.component.html',
     styleUrls: ['./code-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatProgressSpinner]
 })
 export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input() value = '';

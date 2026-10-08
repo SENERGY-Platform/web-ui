@@ -19,6 +19,14 @@ import { MeterParent } from '../../shared/environments.model';
 import { NodeProblem } from '../../shared/environments-path';
 import { meterWeightHint, meterWeightProblem } from '../../shared/environments-meter-graph';
 import { SubmeteringOption } from '../../shared/environments-submetering';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { FormsModule } from '@angular/forms';
+import { MatInput } from '@angular/material/input';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIconButton, MatButton } from '@angular/material/button';
 
 interface RowProblem {
     field?: string;
@@ -38,7 +46,20 @@ interface RowProblem {
     templateUrl: './environments-meter-parents-editor.component.html',
     styleUrls: ['./environments-meter-parents-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false,
+    imports: [
+        MatIcon,
+        MatFormField,
+        MatLabel,
+        MtxSelect,
+        FormsModule,
+        MatHint,
+        MatInput,
+        MatSuffix,
+        MatTooltip,
+        MatCheckbox,
+        MatIconButton,
+        MatButton,
+    ],
 })
 export class EnvironmentsMeterParentsEditorComponent implements OnChanges {
     @Input() parents: MeterParent[] | undefined;

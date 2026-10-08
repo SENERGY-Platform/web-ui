@@ -15,9 +15,15 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { EnvironmentsService } from '../../shared/environments.service';
 import { CatalogDeviceType } from '../../shared/environments.model';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { MatButton } from '@angular/material/button';
 
 export interface AddMachineDialogResult {
     name: string;
@@ -35,7 +41,7 @@ export interface AddMachineDialogResult {
     templateUrl: './environments-add-machine-dialog.component.html',
     styleUrls: ['./environments-add-machine-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MtxOption, MatHint, MatDialogActions, MatButton]
 })
 export class EnvironmentsAddMachineDialogComponent implements OnInit {
     name = '';

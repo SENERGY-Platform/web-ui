@@ -21,16 +21,21 @@ import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import {MatTable} from '@angular/material/table';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {BudgetCreateEditComponent} from './budget-create-edit/budget-create-edit.component';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-budget',
     templateUrl: './budget.component.html',
     styleUrls: ['./budget.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatIcon, SpinnerComponent, InfiniteScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton, MatTooltip]
 })
 export class BudgetComponent implements OnInit {
     @ViewChild(MatTable, {static: false}) table!: MatTable<BudgetModel>;

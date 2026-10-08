@@ -45,7 +45,6 @@ describe('EnvironmentsMeterParentsEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsMeterParentsEditorComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -56,6 +55,7 @@ describe('EnvironmentsMeterParentsEditorComponent', () => {
                 MatButtonModule,
                 MatCheckboxModule,
                 MtxSelectModule,
+                EnvironmentsMeterParentsEditorComponent,
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsMeterParentsEditorComponent);

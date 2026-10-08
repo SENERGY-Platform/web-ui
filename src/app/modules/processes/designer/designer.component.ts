@@ -36,6 +36,10 @@ import { defaultProcessIoDesignerConfig, ProcessIoDesignerConfig, ProcessIoDesig
 import { ProcessIncidentsConfig } from '../incidents/shared/process-incidents.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-overlays';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
 /** Model text shown in the IoT-Info table; parameter names and values come from the user's model. */
 const escapeHtml = (text: string): string =>
@@ -46,7 +50,7 @@ const escapeHtml = (text: string): string =>
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatIcon, SpinnerComponent]
 })
 export class ProcessDesignerComponent implements OnInit, OnDestroy {
     modeler: any;

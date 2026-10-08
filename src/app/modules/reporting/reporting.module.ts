@@ -54,8 +54,6 @@ const editReport: Route = { path: 'reporting/edit/:reportId', pathMatch: 'full',
 const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: 'full', component: ReportFilesComponent, data: { header: 'Report Files' } };
 
 @NgModule({
-    declarations: [TemplatesComponent, ReportComponent, ReportObjectComponent, ReportTreeComponent,
-        QueryEditorComponent, ReportsComponent, ReportFilesComponent, QueryPreviewDialogComponent],
     imports: [
         RouterModule.forChild([templateList, reportsList, newReport, editReport, reportFilesList]),
         CommonModule,
@@ -79,7 +77,9 @@ const reportFilesList: Route = { path: 'reporting/files/:reportId', pathMatch: '
         MatProgressBarModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
-        MatNativeDateModule
+        MatNativeDateModule,
+        TemplatesComponent, ReportComponent, ReportObjectComponent, ReportTreeComponent,
+        QueryEditorComponent, ReportsComponent, ReportFilesComponent, QueryPreviewDialogComponent
     ]
 })
 export class ReportingModule { }

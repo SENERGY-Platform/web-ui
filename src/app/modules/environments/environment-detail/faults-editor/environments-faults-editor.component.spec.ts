@@ -37,7 +37,6 @@ describe('EnvironmentsFaultsEditorComponent', () => {
     beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            declarations: [EnvironmentsFaultsEditorComponent],
             imports: [
                 FormsModule,
                 NoopAnimationsModule,
@@ -48,6 +47,7 @@ describe('EnvironmentsFaultsEditorComponent', () => {
                 MatButtonModule,
                 MatButtonToggleModule,
                 MtxSelectModule,
+                EnvironmentsFaultsEditorComponent,
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsFaultsEditorComponent);

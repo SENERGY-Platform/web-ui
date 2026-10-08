@@ -16,10 +16,7 @@
 
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-    name: 'shortOutputVariableName',
-    standalone: false
-})
+@Pipe({ name: 'shortOutputVariableName' })
 export class ShortOutputVariableNamePipe implements PipeTransform {
     transform(value: string): string {
         return value.substring('${result.outputs.'.length, value.length - 1);
