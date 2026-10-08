@@ -20,8 +20,6 @@ import { DeviceInstancesComponent } from './device-instances.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { KeycloakService } from 'keycloak-angular';
-import { MockKeycloakService } from '../../../core/services/keycloak.mock';
 import { CoreModule } from '../../../core/core.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
@@ -74,7 +72,6 @@ describe('DeviceInstancesComponent', () => {
                     NoopAnimationsModule,
                     DevicesModule, DeviceInstancesComponent],
                 providers: [
-                    { provide: KeycloakService, useClass: MockKeycloakService },
                     { provide: Router, useClass: RouterStub },
                     { provide: ActivatedRoute, useClass: ActivatedRouteStub },
                     { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },

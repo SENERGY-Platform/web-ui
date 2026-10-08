@@ -15,18 +15,19 @@
  */
 
 import { APP_INITIALIZER, ApplicationConfig, LOCALE_ID, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { KeycloakAngularModule } from 'keycloak-angular';
 import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core/core.module';
 import { provideIconFontSet } from './core/icon-font-set';
 import { provideOverlayDefaults } from './core/overlay-defaults';
+import { authInterceptor } from './core/services/auth.interceptor';
 import { AuthorizationService } from './core/services/authorization.service';
 import { initializerService } from './core/services/initializer.service';
+import { provideAuth } from './core/services/provide-auth';
 import { LadonService } from './modules/admin/permissions/shared/services/ladom.service';
 
 registerLocaleData(localeDe);
@@ -35,7 +36,8 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideZoneChangeDetection(),
         // CoreModule before AppRoutingModule: its forChild route ('notifications') has to precede the root routes.
-        importProvidersFrom(CoreModule, AppRoutingModule, KeycloakAngularModule),
+        importProvidersFrom(CoreModule, AppRoutingModule),
+        provideAuth(),
         provideAnimations(),
         {
             provide: APP_INITIALIZER,
@@ -47,12 +49,7 @@ export const appConfig: ApplicationConfig = {
             provide: LOCALE_ID,
             useValue: 'de',
         },
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: AuthorizationService,
-            multi: true,
-        },
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptors([authInterceptor])),
         provideNativeDateAdapter(),
         provideIconFontSet(),
         provideOverlayDefaults(),

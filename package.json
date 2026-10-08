@@ -51,6 +51,7 @@
     "gridstack": "^14.0.0",
     "jsqr": "^1.4.0",
     "keycloak-angular": "^22.0.0",
+    "keycloak-js": "^26.2.4",
     "lodash": "^4.17.19",
     "monaco-editor": "^0.56.0",
     "ng2-charts": "^11.0.0",

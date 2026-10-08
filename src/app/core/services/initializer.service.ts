@@ -25,20 +25,7 @@ function showErrorBox() {
 export function initializerService(authorizationService: AuthorizationService, ladonService: LadonService): () => Promise<any> {
     return (): Promise<any> =>
         authorizationService
-            .init({
-                config: {
-                    url: environment.keycloakUrl + '/auth',
-                    realm: environment.keyCloakRealm,
-                    clientId: environment.keyCloakClientId,
-                },
-                initOptions: {
-                    onLoad: 'login-required',
-                    checkLoginIframe: false,
-                    // token: token,
-                },
-                bearerPrefix: 'Bearer',
-                shouldAddToken: request => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token')
-            })
+            .init()
             .then(() => loadEnv(authorizationService, environment.configUrl)
                 .then(() => {
                     if (!environment.production) {

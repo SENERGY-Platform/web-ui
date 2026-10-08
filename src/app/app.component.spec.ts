@@ -17,10 +17,8 @@
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { CoreModule } from './core/core.module';
-import { KeycloakService } from 'keycloak-angular';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MockKeycloakService } from './core/services/keycloak.mock';
 import { AuthorizationServiceMock } from './core/services/authorization.service.mock';
 import { AuthorizationService } from './core/services/authorization.service';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
@@ -53,7 +51,6 @@ describe('AppComponent', () => {
             imports: [CoreModule, MatSnackBarModule, NoopAnimationsModule, AppComponent],
             providers: [
                 provideRouter([]),
-                { provide: KeycloakService, useClass: MockKeycloakService },
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 { provide: LadonService, useValue: ladonServiceSpy },
                 { provide: NotificationService, useValue: notificationServiceSpy },

@@ -22,8 +22,6 @@ import { CoreModule } from '../../../../core/core.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { DevicesModule } from '../../../devices/devices.module';
-import { KeycloakService } from 'keycloak-angular';
-import { MockKeycloakService } from '../../../../core/services/keycloak.mock';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProcessDeploymentsConfigComponent } from './deployments-config.component';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
@@ -67,7 +65,6 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 NoopAnimationsModule,
                 ProcessesModule, ProcessDeploymentsConfigComponent],
             providers: [
-                { provide: KeycloakService, useClass: MockKeycloakService },
                 { provide: Router, useValue: routerSpy },
                 { provide: DeploymentsService, useValue: deploymentsServiceSpy },
                 {

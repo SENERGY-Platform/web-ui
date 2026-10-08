@@ -14,145 +14,308 @@
  * limitations under the License.
  */
 
-import { HttpClient, HttpEvent, HttpHandler, HttpRequest, HttpResponse, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { KeycloakAngularModule, KeycloakOptions, KeycloakService } from 'keycloak-angular';
 import Keycloak, { KeycloakLoginOptions } from 'keycloak-js';
-import { lastValueFrom, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AUTH_CLIENT, AuthClient, keycloakConfig } from './auth-client';
+import { authInterceptor } from './auth.interceptor';
 import { AuthorizationService } from './authorization.service';
 import { ErrorHandlerService } from './error-handler.service';
-import { keycloakServiceToken } from './keycloak-service.token';
-import { initializerService } from './initializer.service';
-import { LadonService } from '../../modules/admin/permissions/shared/services/ladom.service';
+import { KeycloakConfidentialService } from './keycloak-confidential.service';
+import { KeycloakPublicClient } from './keycloak-public-client';
+import { provideAuth } from './provide-auth';
 
-// The constructor reads the multi-provided Keycloak services; the error handler and HttpClient are not touched here.
-function buildService(keycloak: KeycloakService): AuthorizationService {
+const STORAGE_PREFIX = 'KeycloakConfidentialService_';
+
+function clearAuthStorage(): void {
+    localStorage.removeItem('sub');
+    Object.keys(sessionStorage)
+        .filter((k) => k.startsWith(STORAGE_PREFIX))
+        .forEach((k) => sessionStorage.removeItem(k));
+}
+
+/** An unsigned JWT; the confidential client only base64-decodes the segments. */
+function jwt(claims: object): string {
+    return btoa(JSON.stringify({ alg: 'none' })) + '.' + btoa(JSON.stringify(claims)) + '.';
+}
+
+function buildService(client: AuthClient): AuthorizationService {
     TestBed.configureTestingModule({
         providers: [
-            { provide: keycloakServiceToken, useValue: [keycloak] },
+            { provide: AUTH_CLIENT, useValue: client },
             { provide: ErrorHandlerService, useValue: {} },
             { provide: HttpClient, useValue: {} },
         ],
     });
-    return TestBed.runInInjectionContext(() => new AuthorizationService());
+    return TestBed.inject(AuthorizationService);
+}
+
+/** keycloak-js after a login with roles and a profile, without a server behind it. */
+function loggedInKeycloak(): Keycloak {
+    const keycloak = {
+        authenticated: true,
+        subject: 'user-1',
+        token: 'tok',
+        tokenParsed: { groups: ['/g1'] },
+        resourceAccess: { frontend: { roles: ['developer'] }, other: { roles: ['viewer'] } },
+        realmAccess: { roles: ['admin', 'user'] },
+        loadUserProfile: () => Promise.resolve({ username: 'alice', email: 'a@example.org', firstName: 'A', lastName: 'L' }),
+        login: jasmine.createSpy('login').and.resolveTo(),
+        logout: jasmine.createSpy('logout').and.resolveTo(),
+    } as unknown as Keycloak;
+    // Same lookups as keycloak-js: the client's own resource roles unless another resource is named.
+    keycloak.hasResourceRole = (role: string, resource?: string) => !!keycloak.resourceAccess?.[resource || 'frontend']?.roles.includes(role);
+    keycloak.hasRealmRole = (role: string) => !!keycloak.realmAccess?.roles.includes(role);
+    return keycloak;
 }
 
 describe('AuthorizationService', () => {
+    afterEach(() => clearAuthStorage());
+
     // A hand-built auth link comes back with ?code=&iss=, which keycloak-js ignores and Keycloak then refuses as redirect_uri.
     it('should start the password change through keycloak-js with the given redirect', async () => {
-        const logins: (KeycloakLoginOptions | undefined)[] = [];
-        const keycloakService = Object.create(KeycloakService.prototype) as KeycloakService;
-        keycloakService.login = (options?: KeycloakLoginOptions) => {
-            logins.push(options);
-            return Promise.resolve();
-        };
-        const service = buildService(keycloakService);
+        const logins: KeycloakLoginOptions[] = [];
+        const client = {
+            login: (options: KeycloakLoginOptions) => {
+                logins.push(options);
+                return Promise.resolve();
+            },
+        } as unknown as AuthClient;
+        const service = buildService(client);
 
         await service.changePassword('https://ui.example.org/settings');
 
         expect(logins).toEqual([{ action: 'UPDATE_PASSWORD', redirectUri: 'https://ui.example.org/settings' }]);
     });
 
-    describe('as HTTP interceptor', () => {
-        let initOptions: KeycloakOptions;
-        let instance: { token: string; expired: boolean; updates: (number | undefined)[] };
-        let service: AuthorizationService;
-        let sent: HttpRequest<unknown>[];
-        const next: HttpHandler = {
-            handle: (req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> => {
-                sent.push(req);
-                return of(new HttpResponse({ status: 200 }));
-            },
-        };
+    it('loads the user profile after a successful login only', async () => {
+        const client = jasmine.createSpyObj<AuthClient>('client', ['init', 'loadUserProfile']);
+        client.loadUserProfile.and.resolveTo({});
+        const service = buildService(client);
 
-        beforeAll(async () => {
-            const captured: KeycloakOptions[] = [];
-            const authorization = {
-                init: (o: KeycloakOptions) => {
-                    captured.push(o);
-                    return Promise.reject(new Error('stop'));
-                },
-            };
-            spyOn(console, 'log');
-            await initializerService(authorization as unknown as AuthorizationService, {} as LadonService)();
-            initOptions = captured[0];
-        });
+        client.init.and.resolveTo(false);
+        expect(await service.init()).toBeFalse();
+        expect(client.loadUserProfile).not.toHaveBeenCalled();
+
+        client.init.and.resolveTo(true);
+        expect(await service.init()).toBeTrue();
+        expect(client.loadUserProfile).toHaveBeenCalledTimes(1);
+    });
+
+    describe('over the public client', () => {
+        let keycloak: Keycloak;
+        let service: AuthorizationService;
 
         beforeEach(() => {
-            sent = [];
-            instance = { token: 'tok', expired: false, updates: [] };
-            const fake = {
-                get token() {
-                    return instance.token;
-                },
-                isTokenExpired: () => instance.expired,
-                updateToken: (minValidity?: number) => {
-                    instance.updates.push(minValidity);
-                    instance.token = 'fresh';
-                    instance.expired = false;
-                    return Promise.resolve(true);
-                },
-            } as unknown as Keycloak;
-            // The real legacy KeycloakService, set up with the app's init options but without keycloak-js contacting a server.
-            const keycloak = new KeycloakService();
-            (keycloak as unknown as { initServiceValues(o: KeycloakOptions): void }).initServiceValues(initOptions);
-            (keycloak as unknown as { _instance: Keycloak })._instance = fake;
-            service = buildService(keycloak);
+            keycloak = loggedInKeycloak();
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: Keycloak, useValue: keycloak },
+                    { provide: AUTH_CLIENT, useExisting: KeycloakPublicClient },
+                    { provide: ErrorHandlerService, useValue: {} },
+                    { provide: HttpClient, useValue: {} },
+                ],
+            });
+            service = TestBed.inject(AuthorizationService);
         });
 
-        it('starts keycloak-js with a forced login and without the session iframe', () => {
-            expect(initOptions.initOptions).toEqual({ onLoad: 'login-required', checkLoginIframe: false });
-            expect(initOptions.config).toEqual({
+        it('takes the user id from the stored sub first, then from the token', () => {
+            expect(service.getUserId()).toBe('user-1');
+            localStorage.setItem('sub', 'stored');
+            expect(service.getUserId()).toBe('stored');
+        });
+
+        it('reports a missing subject as an Error value', () => {
+            (keycloak as { subject?: string }).subject = undefined;
+            expect(service.getUserId()).toEqual(Error('Could not load sub'));
+        });
+
+        it('knows the user name only once the profile is loaded', async () => {
+            expect(() => service.getUserName()).toThrowError('User not logged in or user profile was not loaded.');
+            await service.getProfile();
+            expect(service.getUserName()).toBe('alice');
+        });
+
+        it('maps the profile with empty strings for missing fields', async () => {
+            keycloak.loadUserProfile = () => Promise.resolve({ username: 'bob' });
+            expect(await service.getProfile()).toEqual({ email: '', firstName: '', lastName: '', username: 'bob' });
+        });
+
+        it('reads groups from the token and falls back to none without a parsed token', () => {
+            expect(service.getUsersGroups()).toEqual(['/g1']);
+            (keycloak as { tokenParsed?: object }).tokenParsed = undefined;
+            expect(service.getUsersGroups()).toEqual([]);
+        });
+
+        it('checks roles of the own client first, then of the realm', () => {
+            expect(service.userIsDeveloper()).toBeTrue();
+            expect(service.userIsAdmin()).toBeTrue();
+            keycloak.realmAccess = { roles: [] };
+            expect(service.userIsAdmin()).toBeFalse();
+        });
+
+        it('lists the roles of every client, then the realm roles', () => {
+            expect(service.getUserRoles()).toEqual(['developer', 'viewer', 'admin', 'user']);
+        });
+
+        it('prefixes the token with Bearer', async () => {
+            expect(await service.getToken()).toBe('Bearer tok');
+        });
+
+        it('clears both storages and logs out through keycloak-js', () => {
+            localStorage.setItem('sub', 'stored');
+            sessionStorage.setItem(STORAGE_PREFIX + 'probe', 'x');
+
+            service.logout();
+
+            expect(localStorage.getItem('sub')).toBeNull();
+            expect(sessionStorage.getItem(STORAGE_PREFIX + 'probe')).toBeNull();
+            expect(keycloak.logout).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe('over the confidential client', () => {
+        let service: AuthorizationService;
+
+        beforeEach(() => {
+            const claims = {
+                sub: 'user-2',
+                preferred_username: 'carol',
+                groups: ['/g2'],
+                realm_access: { roles: ['developer'] },
+            };
+            sessionStorage.setItem(STORAGE_PREFIX + 'tokenResponse', JSON.stringify({ access_token: jwt(claims) }));
+            sessionStorage.setItem(STORAGE_PREFIX + 'userinfo', JSON.stringify({ id: 'user-2', username: 'carol' }));
+            localStorage.setItem('sub', 'user-2');
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: AUTH_CLIENT, useExisting: KeycloakConfidentialService },
+                    { provide: ErrorHandlerService, useValue: {} },
+                    { provide: HttpClient, useValue: {} },
+                ],
+            });
+            service = TestBed.inject(AuthorizationService);
+        });
+
+        it('reads user, groups and roles from the stored token', async () => {
+            expect(service.getUserId()).toBe('user-2');
+            expect(service.getUserName()).toBe('carol');
+            expect(service.getUsersGroups()).toEqual(['/g2']);
+            expect(service.userIsDeveloper()).toBeTrue();
+            expect(service.userIsAdmin()).toBeFalse();
+            expect(service.getUserRoles()).toEqual(['developer']);
+            expect(await service.getToken()).toMatch(/^Bearer .+\..+\.$/);
+            expect((await service.getProfile()).username).toBe('carol');
+        });
+
+        it('refuses the browser password form', async () => {
+            await expectAsync(service.changePassword('https://ui.example.org/settings')).toBeRejected();
+        });
+    });
+
+    describe('variant selection', () => {
+        let confidential: string;
+
+        beforeEach(() => (confidential = environment.keyCloakConfidential));
+        afterEach(() => (environment.keyCloakConfidential = confidential));
+
+        function clientFor(flag: string): AuthClient {
+            environment.keyCloakConfidential = flag;
+            TestBed.configureTestingModule({ providers: [provideAuth(), provideHttpClient(withXhr()), provideHttpClientTesting()] });
+            return TestBed.inject(AUTH_CLIENT);
+        }
+
+        it('uses keycloak-js from provideKeycloak unless the confidential client is configured', () => {
+            const client = clientFor('false');
+
+            expect(client).toBeInstanceOf(KeycloakPublicClient);
+            expect(TestBed.inject(Keycloak)).toBeInstanceOf(Keycloak);
+            expect(client.getKeycloakInstance()).toBe(TestBed.inject(Keycloak));
+        });
+
+        it('uses the confidential client for keyCloakConfidential "true"', () => {
+            expect(clientFor('true')).toBeInstanceOf(KeycloakConfidentialService);
+        });
+
+        it('builds the keycloak-js config from the environment', () => {
+            expect(keycloakConfig()).toEqual({
                 url: environment.keycloakUrl + '/auth',
                 realm: environment.keyCloakRealm,
                 clientId: environment.keyCloakClientId,
             });
         });
-
-        it('attaches the current token as Bearer', async () => {
-            await lastValueFrom(service.intercept(new HttpRequest('GET', 'https://api.example.org/devices'), next));
-
-            expect(sent.length).toBe(1);
-            expect(sent[0].headers.get('Authorization')).toBe('Bearer tok');
-            expect(instance.updates).toEqual([]);
-        });
-
-        it('refreshes an expired token before attaching it', async () => {
-            instance.expired = true;
-
-            await lastValueFrom(service.intercept(new HttpRequest('GET', 'https://api.example.org/devices'), next));
-
-            expect(instance.updates).toEqual([20]);
-            expect(sent[0].headers.get('Authorization')).toBe('Bearer fresh');
-        });
-
-        it('leaves requests to the token endpoint alone', async () => {
-            const url = environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token';
-
-            await lastValueFrom(service.intercept(new HttpRequest('POST', url, 'grant_type=refresh_token'), next));
-
-            expect(sent[0].headers.has('Authorization')).toBeFalse();
-        });
     });
 
-    // The app config imports KeycloakAngularModule, whose own interceptor sees a KeycloakService nobody initialises.
-    it('lets the uninitialised KeycloakAngularModule interceptor pass requests unchanged', () => {
-        TestBed.configureTestingModule({
-            imports: [KeycloakAngularModule],
-            providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+    describe('confidential login through the interceptor', () => {
+        let http: HttpTestingController;
+        const tokenUrl = () => environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token';
+        const settle = () => new Promise((resolve) => setTimeout(resolve));
+
+        beforeEach(() => {
+            TestBed.configureTestingModule({
+                providers: [
+                    { provide: AUTH_CLIENT, useExisting: KeycloakConfidentialService },
+                    provideHttpClient(withXhr(), withInterceptors([authInterceptor])),
+                    provideHttpClientTesting(),
+                ],
+            });
+            http = TestBed.inject(HttpTestingController);
         });
-        const http = TestBed.inject(HttpClient);
-        const controller = TestBed.inject(HttpTestingController);
-        let body: unknown;
 
-        http.get('https://api.example.org/devices').subscribe((b) => (body = b));
-        const req = controller.expectOne('https://api.example.org/devices');
-        req.flush({ ok: true });
+        it('sends the token requests bare and the user lookup with the service account token', async () => {
+            spyOn(window, 'prompt').and.returnValues('secret', 'alice');
+            const done = TestBed.inject(KeycloakConfidentialService).init();
 
-        expect(req.request.headers.has('Authorization')).toBeFalse();
-        expect(body).toEqual({ ok: true });
-        controller.verify();
+            const serviceAccount = http.expectOne(tokenUrl());
+            expect(serviceAccount.request.headers.has('Authorization')).toBeFalse();
+            expect(serviceAccount.request.body).toContain('grant_type=client_credentials');
+            serviceAccount.flush({ access_token: 'sa-token', expires_in: 300 });
+            await settle();
+
+            const lookup = http.expectOne((r) => r.url.includes('/admin/realms/'));
+            expect(lookup.request.url).toBe(
+                environment.keycloakUrl + '/auth/admin/realms/' + environment.keyCloakRealm + '/users?exact=true&username=alice',
+            );
+            expect(lookup.request.headers.get('Authorization')).toBe('Bearer sa-token');
+            lookup.flush([{ id: 'user-3', username: 'alice' }]);
+            await settle();
+
+            const exchange = http.expectOne(tokenUrl());
+            expect(exchange.request.headers.has('Authorization')).toBeFalse();
+            expect(exchange.request.body).toContain('requested_subject=user-3');
+            exchange.flush({ access_token: 'user-token', refresh_token: 'r1', expires_in: 300, refresh_expires_in: 1800 });
+
+            expect(await done).toBeTrue();
+            expect(localStorage.getItem('sub')).toBe('user-3');
+            http.verify();
+        });
+
+        it('refreshes an expired user token before the request and attaches the new one', async () => {
+            sessionStorage.setItem(STORAGE_PREFIX + 'clientSecret', 'secret');
+            sessionStorage.setItem(STORAGE_PREFIX + 'isUserToken', 'true');
+            sessionStorage.setItem(STORAGE_PREFIX + 'tokenResponse', JSON.stringify({ access_token: 'old', refresh_token: 'r1' }));
+            sessionStorage.setItem(STORAGE_PREFIX + 'tokenExpires', String(Date.now() + 60000));
+            await TestBed.inject(KeycloakConfidentialService).init();
+            sessionStorage.setItem(STORAGE_PREFIX + 'tokenExpires', String(Date.now() - 1));
+            let body: unknown;
+
+            TestBed.inject(HttpClient).get('https://api.example.org/devices').subscribe((b) => (body = b));
+            await settle();
+            const refresh = http.expectOne(tokenUrl());
+            expect(refresh.request.body).toContain('grant_type=refresh_token');
+            expect(refresh.request.body).toContain('refresh_token=r1');
+            expect(refresh.request.headers.has('Authorization')).toBeFalse();
+            http.expectNone('https://api.example.org/devices');
+            refresh.flush({ access_token: 'new', refresh_token: 'r2', expires_in: 300, refresh_expires_in: 1800 });
+            await settle();
+
+            const api = http.expectOne('https://api.example.org/devices');
+            expect(api.request.headers.get('Authorization')).toBe('Bearer new');
+            api.flush({ ok: true });
+            expect(body).toEqual({ ok: true });
+            http.verify();
+        });
     });
 });

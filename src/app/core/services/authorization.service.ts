@@ -15,61 +15,27 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import {KeycloakService} from 'keycloak-angular';
-import {from, mergeMap, Observable} from 'rxjs';
+import {Observable} from 'rxjs';
 import {environment} from '../../../environments/environment';
-import {catchError, map} from 'rxjs/operators';
+import {catchError} from 'rxjs/operators';
 import {ErrorHandlerService} from './error-handler.service';
-import { HttpClient, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {AuthorizationProfileModel} from '../model/authorization/authorization-profile.model';
 import {AuthorizationUserProfileModel} from '../model/authorization/authorization-user-profile.model';
-import {keycloakServiceToken} from './keycloak-service.token';
-import {KeycloakConfidentialService} from './keycloak-confidential.service';
-import {KeycloakOptions} from 'keycloak-angular';
+import {AUTH_CLIENT} from './auth-client';
 
 @Injectable({
     providedIn: 'root',
 })
-export class AuthorizationService implements HttpInterceptor {
-    private keycloakServices = inject(keycloakServiceToken);
+export class AuthorizationService {
+    private authClient = inject(AUTH_CLIENT);
     private errorHandlerService = inject(ErrorHandlerService);
     private http = inject(HttpClient);
 
-    private keycloakService: KeycloakService;
-    private options?: KeycloakOptions;
-
-    constructor() {
-        if (AuthorizationService.usingConfidentialClient()) {
-            this.keycloakService = this.keycloakServices.find(s => s instanceof KeycloakConfidentialService) as KeycloakService;
-        } else {
-            this.keycloakService = this.keycloakServices.find(s => s instanceof KeycloakService) as KeycloakService;
-        }
-    }
-
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        if (!this.keycloakService.shouldAddToken(req)) {
-            return next.handle(req);
-        }
-        let p: Promise<boolean>;
-        if (this.keycloakService.isTokenExpired()) {
-            p = this.keycloakService.updateToken();
-        } else {
-            const pConst = Promise<boolean>;
-            p = pConst.resolve(true);
-        }
-        return from(p).pipe(
-            mergeMap(() => from(this.keycloakService.getToken())),
-            map(token => req.clone({
-                headers: req.headers.set('Authorization', 'Bearer ' + token),
-            })),
-            mergeMap(r => next.handle(r)));
-    }
-
-    init(options?: KeycloakOptions): Promise<boolean> {
-        this.options = options;
-        return this.keycloakService.init(options).then((initialized) => {
+    init(): Promise<boolean> {
+        return this.authClient.init().then((initialized) => {
             if (initialized) {
-                this.keycloakService.loadUserProfile();
+                this.authClient.loadUserProfile();
             }
             return initialized;
         });
@@ -80,17 +46,17 @@ export class AuthorizationService implements HttpInterceptor {
         if (sub !== null) {
             return sub;
         } else {
-            return this.keycloakService.getKeycloakInstance().subject || Error('Could not load sub');
+            return this.authClient.getKeycloakInstance().subject || Error('Could not load sub');
         }
     }
 
     getUserName(): string {
-        return this.keycloakService.getUsername();
+        return this.authClient.getUsername() as string;
     }
 
     getProfile(): Promise<AuthorizationProfileModel> {
         const returnProfile: AuthorizationProfileModel = {email: '', firstName: '', lastName: '', username: ''};
-        return this.keycloakService.loadUserProfile().then(profile => {
+        return this.authClient.loadUserProfile().then(profile => {
             if (profile) {
                 returnProfile.email = profile.email || '';
                 returnProfile.firstName = profile.firstName || '';
@@ -102,17 +68,17 @@ export class AuthorizationService implements HttpInterceptor {
     }
 
     getUsersGroups(): string[] {
-        return (this.keycloakService.getKeycloakInstance().tokenParsed || {groups: []})['groups'];
+        return (this.authClient.getKeycloakInstance().tokenParsed || {groups: []})['groups'];
     }
 
     getToken(): Promise<string> {
-        return this.keycloakService.getToken().then((resp) => 'Bearer ' + resp);
+        return this.authClient.getToken().then((resp) => 'Bearer ' + resp);
     }
 
     logout() {
         localStorage.clear();
         sessionStorage.clear();
-        this.keycloakService.logout();
+        this.authClient.logout();
     }
 
     /**
@@ -120,7 +86,7 @@ export class AuthorizationService implements HttpInterceptor {
      * return; a hand-built link comes back with ?code=&iss=, which Keycloak refuses as the next redirect_uri.
      */
     changePassword(redirectUri: string): Promise<void> {
-        return this.keycloakService.login({ action: 'UPDATE_PASSWORD', redirectUri });
+        return this.authClient.login({ action: 'UPDATE_PASSWORD', redirectUri });
     }
 
     changeUserProfile(userProfile: AuthorizationUserProfileModel): Observable<null | { error: string }> {
@@ -130,15 +96,15 @@ export class AuthorizationService implements HttpInterceptor {
     }
 
     userIsAdmin(): boolean {
-        return this.keycloakService.isUserInRole('admin');
+        return this.authClient.isUserInRole('admin');
     }
 
     userIsDeveloper(): boolean {
-        return this.keycloakService.isUserInRole('developer');
+        return this.authClient.isUserInRole('developer');
     }
 
     getUserRoles(): string[] {
-        return this.keycloakService.getUserRoles(true);
+        return this.authClient.getUserRoles();
     }
 
     loadAllUsers() {

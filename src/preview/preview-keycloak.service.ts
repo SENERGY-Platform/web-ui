@@ -15,43 +15,52 @@
  */
 
 /* Preview harness - local only. */
-import { HttpRequest } from '@angular/common/http';
-import { KeycloakService } from 'keycloak-angular';
-import Keycloak, { KeycloakProfile } from 'keycloak-js';
+import { KeycloakProfile, KeycloakTokenParsed } from 'keycloak-js';
+import { AuthClient } from '../app/core/services/auth-client';
 
-/** A logged-in admin without a Keycloak server; extends KeycloakService because AuthorizationService selects by instanceof. */
-export class PreviewKeycloakService extends KeycloakService {
-    override getKeycloakInstance(): Keycloak {
-        return { subject: 'preview-user', tokenParsed: { groups: [] } } as unknown as Keycloak;
+/** A logged-in admin without a Keycloak server. */
+export class PreviewAuthClient implements AuthClient {
+    init(): Promise<boolean> {
+        return Promise.resolve(true);
     }
 
-    override getUsername(): string {
+    getKeycloakInstance(): { subject?: string; tokenParsed?: KeycloakTokenParsed } {
+        return { subject: 'preview-user', tokenParsed: { groups: [] } };
+    }
+
+    getUsername(): string {
         return 'preview';
     }
 
-    override getToken(): Promise<string> {
+    getToken(): Promise<string> {
         return Promise.resolve('preview-token');
     }
 
-    override loadUserProfile(): Promise<KeycloakProfile> {
+    loadUserProfile(): Promise<KeycloakProfile> {
         return Promise.resolve({ username: 'preview', firstName: 'Preview', lastName: 'User', email: 'preview@example.org' });
     }
 
-    override isUserInRole(_role: string): boolean {
+    isUserInRole(_role: string): boolean {
         return true;
     }
 
-    override getUserRoles(): string[] {
+    getUserRoles(): string[] {
         return ['admin', 'developer', 'user'];
     }
 
-    override isTokenExpired(): boolean {
+    isTokenExpired(): boolean {
         return false;
     }
 
-    override shouldAddToken = (_request: HttpRequest<unknown>): boolean => false;
+    updateToken(): Promise<boolean> {
+        return Promise.resolve(true);
+    }
 
-    override logout(): Promise<void> {
+    login(): Promise<void> {
+        return Promise.resolve();
+    }
+
+    logout(): Promise<void> {
         return Promise.resolve();
     }
 }

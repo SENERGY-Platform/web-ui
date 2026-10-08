@@ -54,19 +54,13 @@ import { InputDialogComponent } from './dialogs/input-dialog.component';
 import { IsJsonValidatorDirective } from './validators/is-json-validator.directive';
 import { GenericValidator } from './validators/generc-validator.directive';
 import { FitTextComponent } from './components/fit-text/fit-text.component';
-import { KeycloakService } from 'keycloak-angular';
-import { KeycloakConfidentialService } from './services/keycloak-confidential.service';
 import { MatErrorMessagesDirective } from './directives/matError.directive';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from './directives/close-mtx-select-on-scroll.directive';
 import { NotificationsComponent } from './components/notifications/notifications.component';
 import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
-import { keycloakServiceToken } from './services/keycloak-service.token';
 import { CodeEditorComponent } from './components/code-editor/code-editor.component';
 import { AspectSelectComponent } from './components/aspect-select/aspect-select.component';
-
-export { keycloakServiceToken };
-
 
 @NgModule({
     imports: [
@@ -141,16 +135,6 @@ export { keycloakServiceToken };
         AspectSelectComponent,
     ],
     providers: [
-        {
-            provide: keycloakServiceToken,
-            useClass: KeycloakConfidentialService,
-            multi: true,
-        },
-        {
-            provide: keycloakServiceToken,
-            useClass: KeycloakService,
-            multi: true,
-        },
         // at root, as the device and the connection history dialogs draw charts outside the lazy modules
         provideAppCharts(),
     ]

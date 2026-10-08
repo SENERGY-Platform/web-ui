@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {lastValueFrom, mergeMap, Observable} from 'rxjs';
-import {KeycloakProfile, KeycloakServerConfig} from 'keycloak-js';
+import {KeycloakProfile} from 'keycloak-js';
 import {environment} from '../../../environments/environment';
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import {catchError, map} from 'rxjs/operators';
-import { KeycloakOptions } from 'keycloak-angular';
+import {AuthClient, keycloakConfig} from './auth-client';
 
 
 export interface TokenResponse {
@@ -66,11 +66,11 @@ export interface RealmAccess {
 @Injectable({
     providedIn: 'root',
 })
-export class KeycloakConfidentialService implements OnDestroy {
+export class KeycloakConfidentialService implements AuthClient, OnDestroy {
     private httpClient = inject(HttpClient);
 
     private timeout?: any;
-    private options?: KeycloakOptions;
+    private url = '';
     private decodedToken?: DecodedToken;
     private refreshing?: Observable<boolean>;
 
@@ -117,20 +117,15 @@ export class KeycloakConfidentialService implements OnDestroy {
     }
 
     private get tokenUrl(): string {
-        return ((this.options?.config as KeycloakServerConfig).url || '') + '/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token';
+        return this.url + '/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token';
     }
-
-    shouldAddToken: (request: HttpRequest<unknown>) => boolean = (request) => !request.url.startsWith(environment.keycloakUrl + '/auth/realms/' + environment.keyCloakRealm + '/protocol/openid-connect/token');
 
     ngOnDestroy(): void {
         clearTimeout(this.timeout);
     }
 
-    init(options?: KeycloakOptions): Promise<boolean> {
-        this.options = options;
-        if (this.options !== undefined && this.options.shouldAddToken !== undefined) {
-            this.shouldAddToken = this.options.shouldAddToken;
-        }
+    init(): Promise<boolean> {
+        this.url = keycloakConfig().url;
         const now = new Date().valueOf();
 
         if (this.isUserToken && this.tokenResponse?.access_token !== undefined && this.tokenResponse.access_token.length > 0 && this.tokenExpires > now - 10000) {
@@ -203,6 +198,11 @@ export class KeycloakConfidentialService implements OnDestroy {
         return p.resolve(this.tokenResponse?.access_token || '');
     }
 
+    /** There is no browser session of the user to send to Keycloak's forms; the UI offers none for this client. */
+    login(): Promise<void> {
+        return Promise.reject(new Error('The confidential client has no browser login.'));
+    }
+
     getUsername(): string {
         return this.decodeToken()?.preferred_username || '';
     }
@@ -251,7 +251,7 @@ export class KeycloakConfidentialService implements OnDestroy {
     }
 
     private getUserInfo(username: string): Promise<KeycloakProfile> {
-        const url = ((this.options?.config as KeycloakServerConfig).url || '') + '/admin/realms/' + environment.keyCloakRealm + '/users?exact=true&username=' + username;
+        const url = this.url + '/admin/realms/' + environment.keyCloakRealm + '/users?exact=true&username=' + username;
         return lastValueFrom(this.httpClient.get<KeycloakProfile[]>(url).pipe(map(arr => arr[0])));
     }
 
