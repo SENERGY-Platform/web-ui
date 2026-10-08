@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -42,6 +43,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 export class DeviceGroupsSelectDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DeviceGroupsSelectDialogComponent>>(MatDialogRef);
     private deviceGroupsService = inject(DeviceGroupsService);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeviceGroupsSelectDialogComponent>;
 
@@ -58,7 +60,7 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
 
     ngOnInit() {
         this.load();
-        this.searchControl.valueChanges.pipe(debounceTime(300)).subscribe(() => this.reload());
+        this.searchControl.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(() => this.reload());
     }
 
     matSortChange($event: Sort) {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, EventEmitter, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {rangeValidator} from '../../../../../core/validators/range.validator';
 import { MatFormField, MatLabel, MatSuffix, MatError } from '@angular/material/form-field';
@@ -31,6 +32,7 @@ import { MatErrorMessagesDirective } from '../../../../../core/directives/matErr
 })
 export class DateTimeEventConfigComponent implements OnInit {
     private localeId = inject(LOCALE_ID);
+    private destroyRef = inject(DestroyRef);
 
     @Input() initial = '';
     @Output() update = new EventEmitter<{ iso: string; text: string }>();
@@ -40,19 +42,19 @@ export class DateTimeEventConfigComponent implements OnInit {
     minute = new UntypedFormControl(0, [rangeValidator(0, 59)]);
 
     ngOnInit() {
-        this.date.valueChanges.subscribe((value) => {
+        this.date.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
             if (value) {
                 this.update.emit(this.getResult());
             }
         });
 
-        this.hour.valueChanges.subscribe(() => {
+        this.hour.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             if (this.date.value) {
                 this.update.emit(this.getResult());
             }
         });
 
-        this.minute.valueChanges.subscribe(() => {
+        this.minute.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             if (this.date.value) {
                 this.update.emit(this.getResult());
             }

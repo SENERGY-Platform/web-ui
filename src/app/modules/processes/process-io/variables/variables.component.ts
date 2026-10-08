@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -25,7 +26,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variable-edit-dialog.component';
 import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
-import {forkJoin, Observable, Subscription} from 'rxjs';
+import {forkJoin, Observable} from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -47,12 +48,13 @@ import { ShortKeyPipe } from '../shared/short-key.pipe';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, JsonPipe, DatePipe, ShortKeyPipe]
 })
-export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, OnInit {
+export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     private processIoService = inject(ProcessIoService);
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
     private dialog = inject(MatDialog);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     utilsService = inject(UtilService);
     private preferencesService = inject(PreferencesService);
 
@@ -74,7 +76,6 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     sortBy = 'unix_timestamp_in_s';
     sortDirection: SortDirection = 'desc';
 
-    private searchSub: Subscription = new Subscription();
 
     constructor() {
         this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization();
@@ -92,16 +93,12 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
         this.updateTotal();
     }
 
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-    }
-
     ngOnInit() {
         this.initSearch();
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -116,7 +113,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     }
 
     initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             if(this.keyRegex !== searchText) {
                 this.keyRegex = searchText;
                 this.offset = 0;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { concatMap, forkJoin, from, map, mergeMap, Observable, Subscription, toArray } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -82,6 +83,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private _formBuilder = inject(FormBuilder);
     private hubsService = inject(NetworksService);
     private metadataExistenceService = inject(MetadataExistenceService);
+    private destroyRef = inject(DestroyRef);
 
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
     gridCols = 0;
@@ -95,9 +97,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
-    private searchSub: Subscription = new Subscription();
     private getAllSub = new Subscription();
-    private routeSub: Subscription = new Subscription();
     private allDataLoaded = false;
     private source = 'sepl';
     private gridColChangeTimeout: number | undefined;
@@ -147,7 +147,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
         this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
         this.deploymentIdFilter = this.route.snapshot.queryParamMap.get('deploymentId');
-        this.routeSub = this.route.queryParamMap.subscribe((params) => {
+        this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             const hubId = params.get('hubId');
             const deploymentId = params.get('deploymentId');
             const hubChanged = hubId !== this.requestedHubId;
@@ -187,9 +187,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     ngOnDestroy() {
-        this.searchSub.unsubscribe();
         this.getAllSub.unsubscribe();
-        this.routeSub.unsubscribe();
     }
 
     onScroll() {
@@ -376,7 +374,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((mqAlias) => {
             const gridCols = grids.get(mqAlias) || 0;
             if (gridCols > this.gridCols) {
                 this.gridColChangeTimeout = this.adjustForResize(2);
@@ -397,7 +395,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     private initSearchAndGetDevices() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.getRepoItems(true);
         });

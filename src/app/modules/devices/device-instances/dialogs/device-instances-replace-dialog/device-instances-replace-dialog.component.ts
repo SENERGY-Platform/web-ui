@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Attribute, DeviceFilterCriteriaModel, DeviceInstanceModel, DeviceSelectablesModel } from '../../shared/device-instances.model';
@@ -94,6 +95,7 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
   private networksService = inject(NetworksService);
   private deploymentsFogFactory = inject(DeploymentsFogFactory);
   private deploymentsService = inject(DeploymentsService);
+  private destroyRef = inject(DestroyRef);
   private data = inject<{
       device: DeviceInstanceModel;
   }>(MAT_DIALOG_DATA);
@@ -137,7 +139,7 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
     };
     f();
 
-    this.form.get('mode')?.valueChanges.subscribe(mode => {
+    this.form.get('mode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(mode => {
       if (mode === DeviceInstancesReplaceDialogComponent.modeExisting) {
         if (this.form.get('groupAddition')?.value === this.groupAddNone) { // no groups are added --> all devices can be used
           this.filteredDeviceTypes = this.deviceTypes;
@@ -146,7 +148,7 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
         }
       }
     });
-    this.form.get('groupAddition')?.valueChanges.subscribe(groupAddition => {
+    this.form.get('groupAddition')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(groupAddition => {
       if (this.form.get('mode')?.value === DeviceInstancesReplaceDialogComponent.modeExisting) {
         if (groupAddition === this.groupAddNone) { // no groups are added --> all devices can be used
           this.filteredDeviceTypes = this.deviceTypes;
@@ -155,7 +157,7 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
         }
       }
     });
-    this.form.get('existing.deviceType')?.valueChanges.subscribe(deviceType => {
+    this.form.get('existing.deviceType')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(deviceType => {
       if (deviceType !== null) {
         this.loadDeviceInstancesByType(deviceType).subscribe();
       }

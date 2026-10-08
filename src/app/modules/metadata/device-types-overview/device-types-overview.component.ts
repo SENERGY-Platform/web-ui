@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { forkJoin, Observable, Subscription, map } from 'rxjs';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin, Observable, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DeviceTypeService } from './shared/device-type.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -44,8 +45,9 @@ import { MatTooltip } from '@angular/material/tooltip';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatIcon, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
+export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private deviceTypeService = inject(DeviceTypeService);
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
@@ -64,7 +66,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
-    private searchSub: Subscription = new Subscription();
     searchText = '';
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
@@ -76,10 +77,6 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
         this.initSearch();
         this.loadDeviceClasses();
         this.checkAuthorization();
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
     }
 
     matSortChange($event: Sort) {
@@ -101,7 +98,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesSerivce.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -178,7 +175,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

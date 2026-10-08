@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
 import {Navigation, Router} from '@angular/router';
 import {CharacteristicsService} from './shared/characteristics.service';
-import {forkJoin, Observable, Subscription, map} from 'rxjs';
+import {forkJoin, Observable, map} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
@@ -48,9 +49,10 @@ import { MatIcon } from '@angular/material/icon';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CharacteristicsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private characteristicsService = inject(CharacteristicsService);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
@@ -68,7 +70,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     routerConcept: ConceptsPermSearchModel | null = null;
     selectedTag = '';
-    private searchSub: Subscription = new Subscription();
     searchText = '';
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
@@ -85,10 +86,6 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     ngOnInit() {
         this.initSearch();
         this.checkAuthorization();
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
     }
 
     matSortChange($event: Sort) {
@@ -120,7 +117,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -129,7 +126,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

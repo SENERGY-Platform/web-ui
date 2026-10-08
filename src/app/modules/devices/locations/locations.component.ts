@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { forkJoin, Observable, Subscription, map } from 'rxjs';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin, Observable, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -44,9 +45,10 @@ import { MatIcon } from '@angular/material/icon';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatTooltip, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class LocationsComponent implements OnInit, AfterViewInit {
     private locationsService = inject(LocationsService);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
     private dialogsService = inject(DialogsService);
@@ -62,7 +64,6 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     dataSource = new MatTableDataSource<ExtendedLocationModel>();
     selection = new SelectionModel<ExtendedLocationModel>(true, []);
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    private searchSub: Subscription = new Subscription();
     searchText = '';
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
@@ -76,12 +77,8 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.checkAuthorization();
     }
 
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-    }
-
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -125,7 +122,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

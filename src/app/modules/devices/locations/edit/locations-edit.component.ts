@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LocationsService } from '../shared/locations.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -53,6 +54,7 @@ export class LocationsEditComponent implements OnInit {
     private snackBar = inject(MatSnackBar);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    private destroyRef = inject(DestroyRef);
 
     id = '';
     locationForm!: FormGroup; // LocationModel
@@ -184,7 +186,7 @@ export class LocationsEditComponent implements OnInit {
         // watch devices changes
         const devicesFc = this.locationForm.get('device_ids');
         if (devicesFc) {
-            devicesFc.valueChanges.subscribe((value) => {
+            devicesFc.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
                 that.updateDevicesForm(value);
             });
             this.updateDevicesForm(location.device_ids);
@@ -195,7 +197,7 @@ export class LocationsEditComponent implements OnInit {
         // watch device groups changes
         const devicesGroupsFc = this.locationForm.get('device_group_ids');
         if (devicesGroupsFc) {
-            devicesGroupsFc.valueChanges.subscribe((value) => {
+            devicesGroupsFc.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
                 that.updateDeviceGroupsForm(value);
             });
             this.updateDeviceGroupsForm(location.device_group_ids);

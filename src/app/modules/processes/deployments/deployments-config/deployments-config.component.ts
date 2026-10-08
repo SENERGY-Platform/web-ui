@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProcessRepoService } from '../../process-repo/shared/process-repo.service';
 import { DeploymentsService } from '../shared/deployments.service';
@@ -75,6 +76,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private hubsService = inject(NetworksService);
     private characteristicsService = inject(CharacteristicsService);
     private cd = inject(ChangeDetectorRef);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild('autosize', { static: false }) autosize!: CdkTextareaAutosize;
 
@@ -115,7 +117,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             }
         });
         this.setDeployment();
-        this.selectedHubForm.valueChanges.subscribe((value: HubModel) => {
+        this.selectedHubForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: HubModel) => {
             if (value && value.id && value.id !== '') {
                 this.handlerList = this.operatorImageList;
                 this.deploymentsService = this.deploymentFogFactory.withHubId(value.id);
@@ -195,7 +197,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         const that = this;
         this.elementsFormArray.controls.forEach((element: AbstractControl) => {
             const selectedServiceFormControl = element.get(['task', 'selection', 'selected_service_id']);
-            selectedServiceFormControl?.valueChanges.subscribe((selectedServiceId: string) => {
+            selectedServiceFormControl?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selectedServiceId: string) => {
                 const selectedPathOption = element.get(['task', 'selection', 'selected_path']);
                 const option: V2DeploymentsPreparedSelectionOptionModel | undefined = that.getSelectedOption(element.get(['task', 'selection'])?.value);
                 if (option && option.path_options && option.path_options[selectedServiceId]) {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -60,6 +61,7 @@ export class DeviceGroupsEditComponent implements OnInit {
     private pipelineRegistryService = inject(PipelineRegistryService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
+    private destroyRef = inject(DestroyRef);
 
     id = '';
     deviceGroupForm!: FormGroup; // DeviceGroupModel
@@ -165,10 +167,10 @@ export class DeviceGroupsEditComponent implements OnInit {
         // watch device selection changes
         const devicesFc = this.deviceGroupForm.get('device_ids');
         if (devicesFc) {
-            devicesFc.valueChanges.subscribe((value) => {
+            devicesFc.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
                 that.updateSelectedDevices(value);
             });
-            devicesFc.valueChanges.subscribe((value) => {
+            devicesFc.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
                 that.runHelper(this.searchText.value, value);
             });
             this.updateSelectedDevices(deviceGroup.device_ids);
@@ -179,7 +181,7 @@ export class DeviceGroupsEditComponent implements OnInit {
 
         const criteriaFc = this.deviceGroupForm.get('criteria');
         if (criteriaFc && deviceGroup.criteria !== undefined) {
-            criteriaFc.valueChanges.subscribe((value) => {
+            criteriaFc.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
                 that.updateCapabilities(value);
             });
             this.updateCapabilities(deviceGroup.criteria);
@@ -188,7 +190,7 @@ export class DeviceGroupsEditComponent implements OnInit {
         }
 
         // update search
-        this.searchText.valueChanges.pipe(debounceTime(this.debounceTimeInMs)).subscribe((value) => {
+        this.searchText.valueChanges.pipe(debounceTime(this.debounceTimeInMs), takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
             that.search(value);
         });
     }

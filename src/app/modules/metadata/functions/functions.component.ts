@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {forkJoin, Observable, Subscription, map, skip} from 'rxjs';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
@@ -66,6 +67,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private conceptsService = inject(ConceptsService);
+    private destroyRef = inject(DestroyRef);
 
     displayedColumns = ['select', 'name'];
     pageSize = this.preferencesService.pageSize;
@@ -76,8 +78,6 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     offset = 0;
     ready = false;
     userIsAdmin = false;
-    private searchSub: Subscription = new Subscription();
-    private routeSub: Subscription = new Subscription();
     // one listing in flight at a time: a slower, superseded answer must not overwrite a newer one
     private loadSub: Subscription = new Subscription();
     searchText = '';
@@ -95,7 +95,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.readConceptFilter(this.route.snapshot.queryParamMap);
         this.initSearch();
-        this.routeSub = this.route.queryParamMap.pipe(skip(1)).subscribe((params) => {
+        this.route.queryParamMap.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             if (this.readConceptFilter(params)) {
                 this.reload();
             }
@@ -104,7 +104,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=> {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=> {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -113,8 +113,6 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngOnDestroy() {
-        this.searchSub.unsubscribe();
-        this.routeSub.unsubscribe();
         this.loadSub.unsubscribe();
     }
 
@@ -165,7 +163,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

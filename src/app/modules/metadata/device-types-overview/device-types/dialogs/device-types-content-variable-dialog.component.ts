@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     contentVariableAspectIds,
@@ -58,6 +59,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DeviceTypesContentVariableDialogComponent>>(MatDialogRef);
     private _formBuilder = inject(FormBuilder);
     private deviceTypeHelperService = inject(DeviceTypeHelperService);
+    private destroyRef = inject(DestroyRef);
 
     disabled: boolean;
     contentVariable: DeviceTypeContentVariableModel;
@@ -218,7 +220,7 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             this.typeOptionsControl.setValue('void');
         }
 
-        this.typeOptionsControl.valueChanges.subscribe(() => {
+        this.typeOptionsControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.firstFormGroup.patchValue({
                 sub_content_variables: this.isPrimitiveType() || this.isVoidType() ? null : [],
                 serialization_options: null,
@@ -299,20 +301,20 @@ export class DeviceTypesContentVariableDialogComponent implements OnInit {
             aspectIdsControl.markAsTouched();
         }
 
-        this.firstFormGroup?.get('characteristic_id')?.valueChanges.subscribe((id) => {
+        this.firstFormGroup?.get('characteristic_id')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id) => {
             if (id) {
                 this.patchType(id);
             }
             this.highlightFunctions();
         });
-        this.firstFormGroup?.get('type')?.valueChanges.subscribe((_) => {
+        this.firstFormGroup?.get('type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
             this.highlightCharacteristics();
             this.firstFormGroup.get('characteristic_id')?.updateValueAndValidity({onlySelf: true, emitEvent: false});
         });
         if (this.firstFormGroup.get('characteristic_id')?.value) {
             this.patchType(this.firstFormGroup.get('characteristic_id')?.value);
         }
-        this.firstFormGroup?.get('function_id')?.valueChanges.subscribe((_) => {
+        this.firstFormGroup?.get('function_id')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
             this.highlightCharacteristics();
             this.firstFormGroup.get('characteristic_id')?.updateValueAndValidity({onlySelf: true, emitEvent: false});
         });

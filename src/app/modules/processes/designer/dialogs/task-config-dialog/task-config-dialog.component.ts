@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable, Subscription } from 'rxjs';
@@ -67,6 +68,7 @@ export class TaskConfigDialogComponent implements OnInit {
     private _formBuilder = inject(UntypedFormBuilder);
     private deviceTypeService = inject(DeviceTypeService);
     private conceptsService = inject(ConceptsService);
+    private destroyRef = inject(DestroyRef);
     private data = inject<{
         selection: DeviceTypeSelectionRefModel | null;
     }>(MAT_DIALOG_DATA);
@@ -194,7 +196,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initOptions(): void {
-        this.optionsFormControl.valueChanges.subscribe((options) => {
+        this.optionsFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((options) => {
             this.deviceClassFormControl.setValue('');
             this.aspectFormControl.setValue([]);
             this.functionFormControl.setValue('');
@@ -212,7 +214,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initCompletionStrategy(): void {
-        this.completionStrategyFormControl.valueChanges.subscribe((completionStrategy) => {
+        this.completionStrategyFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((completionStrategy) => {
             if (completionStrategy === 'optimistic') {
                 this.retriesFormControl.patchValue(0);
                 this.retriesFormControl.disable();
@@ -268,14 +270,14 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initFunctions(): void {
-        this.functionFormControl.valueChanges.subscribe((func: DeviceTypeFunctionModel) => {
+        this.functionFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func: DeviceTypeFunctionModel) => {
             this.getBaseCharacteristics(func);
             if (this.unlistedFunction && func !== this.unlistedFunction) {
                 this.functions = this.functions.filter((f) => f !== this.unlistedFunction);
                 this.unlistedFunction = null;
             }
         });
-        this.deviceClassFormControl.valueChanges.subscribe((deviceClass: DeviceTypeDeviceClassModel) => {
+        this.deviceClassFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deviceClass: DeviceTypeDeviceClassModel) => {
             if (this.unlistedDeviceClass && deviceClass !== this.unlistedDeviceClass) {
                 this.deviceClasses = this.deviceClasses.filter((c) => c !== this.unlistedDeviceClass);
                 this.unlistedDeviceClass = null;
@@ -284,7 +286,7 @@ export class TaskConfigDialogComponent implements OnInit {
             this.getFunctions();
         });
 
-        this.aspectFormControl.valueChanges.subscribe(() => {
+        this.aspectFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.resetFunctions();
             this.getFunctions();
         });

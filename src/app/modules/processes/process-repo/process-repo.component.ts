@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
 import { concatMap, forkJoin, map, Observable, Subscription } from 'rxjs';
@@ -80,6 +81,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     private _formBuilder = inject(FormBuilder);
     private permissionsService = inject(PermissionsService);
     private metadataExistenceService = inject(MetadataExistenceService);
+    private destroyRef = inject(DestroyRef);
 
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
     activeIndex = 0;
@@ -102,7 +104,6 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     private limit = this.limitInit;
     private offset = 0;
     private sortAttribute = this.sortAttributes[0];
-    private searchSub: Subscription = new Subscription();
     // one listing in flight at a time: an answer for a previous tab or search must not be appended
     private loadSub: Subscription = new Subscription();
     private allDataLoaded = false;
@@ -138,7 +139,6 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        this.searchSub.unsubscribe();
         this.loadSub.unsubscribe();
     }
 
@@ -277,7 +277,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((mqAlias) => {
             const gridCols = grids.get(mqAlias) || 0;
             if (gridCols > this.gridCols) {
                 clearTimeout(this.gridColChangeTimeout);
@@ -288,7 +288,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initSearchAndGetDevices() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchInitialized = true;
             this.searchText = searchText;
             this.getRepoItems(true);

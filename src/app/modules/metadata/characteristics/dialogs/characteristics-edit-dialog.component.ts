@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ConceptsService } from '../../concepts/shared/concepts.service';
 import { CharacteristicsPermSearchModel } from '../shared/characteristics-perm-search.model';
@@ -35,6 +36,7 @@ import { MatButton } from '@angular/material/button';
 export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit {
     private conceptsService = inject(ConceptsService);
     private characteristicsService = inject(CharacteristicsService);
+    private destroyRef = inject(DestroyRef);
     private dialogRef = inject<MatDialogRef<CharacteristicsEditDialogComponent>>(MatDialogRef);
 
     @ViewChild('characteristicElementComponent', { static: false }) characteristicElementComponent!: CharacteristicElementComponent;
@@ -64,7 +66,7 @@ export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit
     }
 
     ngAfterViewInit() {
-        this.characteristicElementComponent.valueChange.asObservable().subscribe((value) => {
+        this.characteristicElementComponent.valueChange.asObservable().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
             this.baseCharacteristic = value;
         });
     }

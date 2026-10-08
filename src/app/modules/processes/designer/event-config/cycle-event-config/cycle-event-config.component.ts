@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -28,6 +29,8 @@ import { MatErrorMessagesDirective } from '../../../../../core/directives/matErr
     imports: [FormsModule, MatFormField, MatInput, ReactiveFormsModule, MatLabel, MatError, MatErrorMessagesDirective]
 })
 export class CycleEventConfigComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
+
     @Input() initial = '';
     @Output() update = new EventEmitter<{ cron: string; text: string }>();
 
@@ -36,7 +39,7 @@ export class CycleEventConfigComponent implements OnInit {
     constructor() {}
 
     ngOnInit() {
-        this.cronFormControl.valueChanges.subscribe(() => {
+        this.cronFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.update.emit(this.getResult());
         });
         this.cronFormControl.setValue(this.initial || '* * * * * ?');

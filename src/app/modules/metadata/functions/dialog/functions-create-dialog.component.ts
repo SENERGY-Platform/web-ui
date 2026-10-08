@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
@@ -39,6 +40,7 @@ export class FunctionsCreateDialogComponent implements OnInit {
     private conceptsService = inject(ConceptsService);
     private dialogRef = inject<MatDialogRef<FunctionsCreateDialogComponent>>(MatDialogRef);
     private _formBuilder = inject(FormBuilder);
+    private destroyRef = inject(DestroyRef);
 
     optionsFormControl = new UntypedFormControl('Controlling');
     functionFormGroup!: FormGroup;
@@ -70,7 +72,7 @@ export class FunctionsCreateDialogComponent implements OnInit {
 
     private optionListener(): void {
         this.generateUuid(this.optionsFormControl.value);
-        this.optionsFormControl.valueChanges.subscribe((option) => {
+        this.optionsFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((option) => {
             this.generateUuid(option as string);
         });
     }

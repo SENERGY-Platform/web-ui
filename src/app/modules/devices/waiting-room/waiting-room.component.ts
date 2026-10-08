@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {
     MatSnackBar,
     MatSnackBarRef
 } from '@angular/material/snack-bar';
-import {merge, Subscription} from 'rxjs';
+import {merge} from 'rxjs';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import {SelectionModel} from '@angular/cdk/collections';
@@ -62,6 +63,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     private dialogsService = inject(DialogsService);
     preferencesService = inject(PreferencesService);
     private cd = inject(ChangeDetectorRef);
+    private destroyRef = inject(DestroyRef);
 
     static wmbusKeyAttributeKey = 'wmbus/key';
     public wmbusKeyAttributeKey = WaitingRoomComponent.wmbusKeyAttributeKey;
@@ -80,7 +82,6 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     animate = false;
     animationParams = {};
 
-    private searchSub: Subscription = new Subscription();
     public searchText = '';
     private snackBarInstance?: MatSnackBarRef<ClosableSnackBarComponent>;
 
@@ -90,7 +91,6 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngOnDestroy() {
-        this.searchSub.unsubscribe();
         if (this.snackBarInstance) {
             this.snackBarInstance.dismiss();
         }
@@ -124,7 +124,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
             this.reset();
         }
         this.devicesDataSource.sort = this.sort;
-        this.sort.sortChange.subscribe(() => {
+        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginator.pageIndex = 0;
             this.selectionClear();
         });
@@ -143,6 +143,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                         this.showHidden,
                     );
                 }),
+                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((resp: WaitingDeviceListModel | null) => {
                 if (resp !== null) {
@@ -159,7 +160,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearchAndGetDevices() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.getDevices(true);
         });
@@ -500,6 +501,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private initEventNotification() {
         this.waitingRoomService.events()
+            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((msg) => {
                 switch (msg.type) {
                     case WaitingRoomEventTypeSet:

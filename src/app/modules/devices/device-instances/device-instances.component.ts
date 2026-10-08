@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { DeviceInstancesService } from './shared/device-instances.service';
 import {
@@ -34,7 +35,7 @@ import { DeviceTypeService } from '../../metadata/device-types-overview/shared/d
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
-import { forkJoin, Observable, map, Subscription, of } from 'rxjs';
+import { forkJoin, Observable, map, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -75,7 +76,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, StateIconComponent, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NgClass, MatMenu, MatMenuContent, MatMenuItem, MatPaginator]
 })
-export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     private deviceInstancesService = inject(DeviceInstancesService);
     private router = inject(Router);
     private deviceInstancesDialogService = inject(DeviceInstancesDialogService);
@@ -84,6 +85,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     private dialogsService = inject(DialogsService);
     private deviceTypesService = inject(DeviceTypeService);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private dialog = inject(MatDialog);
     private exportDataService = inject(ExportDataService);
     private permissionsService = inject(PermissionsService);
@@ -123,7 +125,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     routerAttributeValues: string[] = [];
     DeviceInstancesRouterStateTabEnum = DeviceInstancesRouterStateTabEnum;
 
-    private searchSub: Subscription = new Subscription();
     sortBy = 'display_name';
     sortDirection: SortDirection = 'asc';
 
@@ -145,16 +146,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     ngAfterViewInit(): void {
         this.getRouterParams();
         this.initSearch(); // does automatically load data on first page load
-        this.paginator.page.subscribe((e) => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.load().subscribe();
         });
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
     }
 
     checkAuthorization() {
@@ -193,7 +190,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });
@@ -467,7 +464,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private getRouterParams(): void {
-        this.activatedRoute.queryParamMap.subscribe(params => {
+        this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             if (params !== undefined && params !== null) {
                 if (params.has('device-type-id')) {
                     this.routerDeviceType = params.getAll('device-type-id');

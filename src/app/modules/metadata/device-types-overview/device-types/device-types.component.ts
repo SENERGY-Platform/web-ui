@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
     DeviceTypeAspectClassModel,
     DeviceTypeAspectModel,
@@ -93,6 +94,7 @@ export class DeviceTypesComponent implements OnInit {
     private aspectClassesService = inject(AspectClassesService);
     private router = inject(Router);
     private changeDetectorRef = inject(ChangeDetectorRef);
+    private destroyRef = inject(DestroyRef);
 
     deviceTypeDeviceClasses: DeviceTypeDeviceClassModel[] = [];
     protocols: DeviceTypeProtocolModel[] = [];
@@ -508,7 +510,7 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     private initProtocolIdChangeListener(formGroup: FormGroup) {
-        formGroup.controls['protocol_id'].valueChanges.subscribe((protocolId: string) => {
+        formGroup.controls['protocol_id'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((protocolId: string) => {
             formGroup.setControl('inputs', this.createContent(protocolId, formGroup.get('inputs')?.value, true));
             formGroup.setControl('outputs', this.createContent(protocolId, formGroup.get('outputs')?.value, true));
         });
@@ -636,7 +638,7 @@ export class DeviceTypesComponent implements OnInit {
                 description: [deviceTypeServiceGroup?.description || ''],
             });
         }
-        group.get('name')?.valueChanges.pipe(debounceTime(300)).subscribe(() => this.updateServiceGroups());
+        group.get('name')?.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateServiceGroups());
         return group;
     }
 

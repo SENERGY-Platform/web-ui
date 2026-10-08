@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, EventEmitter, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DurationIso, DurationResult } from '../../shared/designer.model';
 import { duration as toDuration, durationParts, durationToIsoString } from '../../../../../core/time/iso-duration';
@@ -32,6 +33,7 @@ import { MatErrorMessagesDirective } from '../../../../../core/directives/matErr
 })
 export class DurationEventConfigComponent implements OnInit {
     private localeId = inject(LOCALE_ID);
+    private destroyRef = inject(DestroyRef);
 
     @Input() initial = '';
     @Output() update = new EventEmitter<DurationResult>();
@@ -53,12 +55,12 @@ export class DurationEventConfigComponent implements OnInit {
             this.minute.setValue(parts.minutes);
             this.second.setValue(parts.seconds);
         }
-        this.year.valueChanges.subscribe(() => this.updateResult());
-        this.month.valueChanges.subscribe(() => this.updateResult());
-        this.day.valueChanges.subscribe(() => this.updateResult());
-        this.hour.valueChanges.subscribe(() => this.updateResult());
-        this.minute.valueChanges.subscribe(() => this.updateResult());
-        this.second.valueChanges.subscribe(() => this.updateResult());
+        this.year.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateResult());
+        this.month.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateResult());
+        this.day.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateResult());
+        this.hour.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateResult());
+        this.minute.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateResult());
+        this.second.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateResult());
     }
 
     private updateResult() {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {DeviceTypeCharacteristicsModel} from '../../../device-types-overview/shared/device-type.model';
 import { UntypedFormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NestedTreeControl} from '@angular/cdk/tree';
@@ -37,6 +38,7 @@ import { MatIcon } from '@angular/material/icon';
 })
 export class CharacteristicElementComponent implements OnInit {
     private fb = inject(UntypedFormBuilder);
+    private destroyRef = inject(DestroyRef);
 
 
     @Input() data: DeviceTypeCharacteristicsModel | undefined;
@@ -90,7 +92,7 @@ export class CharacteristicElementComponent implements OnInit {
     ngOnInit() {
         this.patch(this.data);
         this.initTypesList();
-        this.form.valueChanges.subscribe((value) => {
+        this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
             switch (this.form.get('type')?.value) {
             case 'https://schema.org/Integer':
                 value.min_value = value.min_value ? parseInt(value.min_value, 10) : undefined;
@@ -109,7 +111,7 @@ export class CharacteristicElementComponent implements OnInit {
             console.log(value);
             this.valueChange.emit(value);
         });
-        this.form.get('type')?.valueChanges.subscribe((_) => {
+        this.form.get('type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
             this.form.get('allowed_values')?.setValue([]);
             if (this.isNumeric()) {
                 this.form.get('sub_characteristics')?.setValue([]);

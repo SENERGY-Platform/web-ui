@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { NetworksService } from './shared/networks.service';
 import { ExtendedHubModel, ExtendedHubTotalModel, HubModel } from './shared/networks.model';
-import { forkJoin, Observable, Subscription, map } from 'rxjs';
+import { forkJoin, Observable, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
@@ -48,9 +49,10 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, StateIconComponent, MatIcon, MatTooltip, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
+export class NetworksComponent implements OnInit, AfterViewInit {
     private networksService = inject(NetworksService);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     private dialog = inject(MatDialog);
     private deviceInstancesService = inject(DeviceInstancesService);
@@ -78,15 +80,10 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
 
     userIdToName: { [key: string]: string } = {};
 
-    private searchSub: Subscription = new Subscription();
 
     ngOnInit() {
         this.initSearch();
         this.checkAuthorization();
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
     }
 
     checkAuthorization() {
@@ -113,7 +110,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });
@@ -133,7 +130,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e) => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;

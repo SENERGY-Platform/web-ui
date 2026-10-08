@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { forkJoin, Observable, Subscription, map } from 'rxjs';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin, Observable, map } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -49,10 +50,11 @@ import { MatIcon } from '@angular/material/icon';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit {
+export class DeviceClassesComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
     private deviceClassesService = inject(DeviceClassesService);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
     private authService = inject(AuthorizationService);
@@ -69,7 +71,6 @@ export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit 
     userIsAdmin = false;
     searchText = '';
     offset = 0;
-    private searchSub: Subscription = new Subscription();
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
     userHasUpdateAuthorization = false;
@@ -85,16 +86,12 @@ export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit 
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.getDeviceClasses().subscribe();
         });
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
     }
 
     checkAuthorization() {
@@ -117,7 +114,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit 
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

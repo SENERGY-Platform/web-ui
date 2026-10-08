@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ConceptsNewDialogComponent} from './dialogs/concepts-new-dialog.component';
 import {Router} from '@angular/router';
 import {ConceptsService} from './shared/concepts.service';
-import {forkJoin, Observable, of, Subscription, map} from 'rxjs';
+import {forkJoin, Observable, of, map} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {ConceptsEditDialogComponent} from './dialogs/concepts-edit-dialog.component';
 import {DeviceTypeConceptModel, DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
@@ -46,10 +47,11 @@ import { MatIcon } from '@angular/material/icon';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatTooltip, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ConceptsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
     private router = inject(Router);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private conceptsService = inject(ConceptsService);
     private functionsService = inject(FunctionsService);
     private snackBar = inject(MatSnackBar);
@@ -65,7 +67,6 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     totalCount = 200;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    private searchSub: Subscription = new Subscription();
     searchText = '';
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
@@ -76,10 +77,6 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     ngOnInit() {
         this.initSearch();
         this.checkAuthorization();
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
     }
 
     checkAuthorization() {
@@ -96,7 +93,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -105,7 +102,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

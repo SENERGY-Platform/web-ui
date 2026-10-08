@@ -16,8 +16,9 @@
 
 import { map, startWith, switchMap } from 'rxjs/operators';
 
-import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { merge, Observable, Subscription } from 'rxjs';
+import { AfterViewInit, Component, EventEmitter, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { merge, Observable } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MonitorService } from './shared/monitor.service';
 import { MonitorProcessModel } from './shared/monitor-process.model';
@@ -52,7 +53,7 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatTabGroup, MatTab, SearchbarComponent, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, NgClass, MatChipListbox, MatChipOption, MatChipRemove, MatChipSet, MatChipRow, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
-export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
     private plattformMonitorService = inject(MonitorService);
     private dialogsService = inject(DialogsService);
@@ -62,6 +63,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     private fogMonitorFactory = inject(MonitorFogFactory);
     utilsService = inject(UtilService);
     preferencesService = inject(PreferencesService);
+    private destroyRef = inject(DestroyRef);
 
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
@@ -83,10 +85,6 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     @ViewChild('sortFinished', { static: false }) sortFinished!: MatSort;
     @ViewChild('sortRunning', { static: false }) sortRunning!: MatSort;
 
-    private searchSub: Subscription = new Subscription();
-    private finishedSub: Subscription = new Subscription();
-    private runningSub: Subscription = new Subscription();
-    private routeSub: Subscription = new Subscription();
     private reloadFinishedSub: EventEmitter<boolean> = new EventEmitter();
     private reloadRunningSub: EventEmitter<boolean> = new EventEmitter();
     private requestedHubId: string | null = null;
@@ -126,7 +124,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     ngOnInit() {
         this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
         this.businessKeyFilter = this.route.snapshot.queryParamMap.get('businessKey') || this.route.snapshot.queryParamMap.get('businesskey');
-        this.routeSub = this.route.queryParamMap.subscribe((params) => {
+        this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             const hubId = params.get('hubId');
             const businessKey = params.get('businessKey') || params.get('businesskey');
             const hubChanged = hubId !== this.requestedHubId;
@@ -163,13 +161,6 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         // Material 22 fires no animationDone for the tab that is active from creation, which
         // would keep the tables hidden behind the spinner; the old tab animation ended right after render.
         setTimeout(() => this.animationDone());
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-        this.finishedSub.unsubscribe();
-        this.runningSub.unsubscribe();
-        this.routeSub.unsubscribe();
     }
 
     selectHub(hub: HubModel | null, updateQueryParam = false) {
@@ -335,10 +326,10 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     private initRunning() {
         this.dataSourceRunning.sort = this.sortRunning;
-        this.dataSourceRunning.sort.sortChange.subscribe(() => {
+        this.dataSourceRunning.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginatorRunning.pageIndex = 0;
         });
-        this.runningSub = merge(this.dataSourceRunning.sort.sortChange, this.paginatorRunning.page, this.reloadRunningSub)
+        merge(this.dataSourceRunning.sort.sortChange, this.paginatorRunning.page, this.reloadRunningSub)
             .pipe(
                 startWith({}),
                 switchMap(() => {
@@ -359,6 +350,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                     this.totalCountRunning = resp.total;
                     return resp.data;
                 }),
+                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((data: MonitorProcessModel[]) => {
                 this.dataSourceRunning.data = data || [];
@@ -368,12 +360,12 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     private initFinished() {
         this.dataSourceFinished.sort = this.sortFinished;
-        this.dataSourceFinished.sort.sortChange.subscribe(() => {
+        this.dataSourceFinished.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginatorFinished.pageIndex = 0;
             this.selectionClear();
         });
 
-        this.finishedSub = merge(this.dataSourceFinished.sort.sortChange, this.paginatorFinished.page, this.reloadFinishedSub)
+        merge(this.dataSourceFinished.sort.sortChange, this.paginatorFinished.page, this.reloadFinishedSub)
             .pipe(
                 startWith({}),
                 switchMap(() => {
@@ -394,6 +386,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                     this.totalCountFinished = resp.total;
                     return resp.data;
                 }),
+                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((data: MonitorProcessModel[]) => {
                 this.dataSourceFinished.data = data || [];
@@ -416,7 +409,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             if (searchText !== '') {
                 this.searchInitialized = true;
             }

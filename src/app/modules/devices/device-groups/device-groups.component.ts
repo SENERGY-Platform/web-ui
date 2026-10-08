@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { forkJoin, Observable, Subscription, map, concatMap } from 'rxjs';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -46,12 +47,13 @@ import { MatCheckbox } from '@angular/material/checkbox';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     private deviceGroupsService = inject(DeviceGroupsService);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
     private dialogsService = inject(DialogsService);
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private permissionsDialogService = inject(PermissionsDialogService);
     private permissionsService = inject(PermissionsService);
     private preferencesService = inject(PreferencesService);
@@ -73,7 +75,6 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     userHasCreateAuthorization = false;
     permissionsPerInstance: PermissionsV2RightsAndIdModel[] = [];
 
-    private searchSub: Subscription = new Subscription();
 
     hideGenerated = true;
     allDataLoaded = false;
@@ -84,7 +85,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -112,12 +113,8 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.reload();
     }
 
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-    }
-
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

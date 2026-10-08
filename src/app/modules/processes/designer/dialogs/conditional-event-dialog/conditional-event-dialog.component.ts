@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -57,6 +58,7 @@ export class ConditionalEventDialogComponent implements OnInit {
     private _formBuilder = inject(UntypedFormBuilder);
     private deviceTypeService = inject(DeviceTypeService);
     private conceptsService = inject(ConceptsService);
+    private destroyRef = inject(DestroyRef);
     private data = inject<{
         msg: ConditionalEventEditModel;
     }>(MAT_DIALOG_DATA);
@@ -136,11 +138,11 @@ export class ConditionalEventDialogComponent implements OnInit {
     }
 
     private initFunctionsUpdate(): void {
-        this.functionFormControl.valueChanges.subscribe((func: DeviceTypeFunctionModel) => {
+        this.functionFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func: DeviceTypeFunctionModel) => {
             this.getBaseCharacteristics(func);
         });
 
-        this.aspectFormControl.valueChanges.subscribe(() => {
+        this.aspectFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.resetFunctions();
             this.getAspectFunctions(this.selectedAspectIds());
         });
