@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router} from '@angular/router';
 import { FormArray, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -60,6 +61,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 })
 export class ImportTypesCreateEditComponent implements OnInit {
     private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     private fb = inject(UntypedFormBuilder);
     private importTypesService = inject(ImportTypesService);
@@ -153,7 +155,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     hasChild = (_: number, node: ImportTypeContentVariableModel) => !!node.sub_content_variables && node.sub_content_variables.length > 0;
 
     ngOnInit(): void {
-        this.route.url.subscribe((url) => {
+        this.route.url.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((url) => {
             if (url[url.length - 1]?.toString() === 'new') {
                 this.editMode = false;
                 if (this.defaultOutput.sub_content_variables !== null) {

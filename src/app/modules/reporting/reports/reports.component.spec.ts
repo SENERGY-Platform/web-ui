@@ -124,7 +124,7 @@ describe('ReportsComponent', () => {
         expect(component.reportsDataSource.data.length).toBe(2);
         expect(component.reportsDataSource.sort).toBeTruthy();
         expect(component.reportsDataSource.paginator).toBeTruthy();
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 
     it('should add the action columns according to the authorizations', fakeAsync(() => {
@@ -134,7 +134,7 @@ describe('ReportsComponent', () => {
         expect(component.displayedColumns).toContain('files');
         expect(component.displayedColumns).toContain('edit');
         expect(component.displayedColumns).toContain('delete');
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 
     it('should filter the reports by the search text', fakeAsync(() => {
@@ -146,7 +146,7 @@ describe('ReportsComponent', () => {
 
         expect(component.reportsDataSource.data.length).toBe(1);
         expect(component.reportsDataSource.data[0].id).toBe('r2');
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 
     it('should delete a report after the deletion was confirmed', fakeAsync(() => {
@@ -158,7 +158,7 @@ describe('ReportsComponent', () => {
 
         expect(reportingService.deletedIds).toEqual(['r1']);
         expect(component.reportsDataSource.data.length).toBe(1);
-        component.ngOnDestroy();
+        fixture.destroy();
         tick(3000);
     }));
 
@@ -172,6 +172,6 @@ describe('ReportsComponent', () => {
 
         expect(reportingService.deletedIds).toEqual([]);
         expect(component.reportsDataSource.data.length).toBe(2);
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 });

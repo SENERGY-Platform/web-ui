@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, AfterViewInit, Injector, Input, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, AfterViewInit, Injector, Input, OnDestroy, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatFormFieldControl, MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import {FormControl} from '@angular/forms';
@@ -38,6 +39,7 @@ interface patternError {requiredPattern: string; actual: string}
 })
 export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
     private _inj = inject(Injector);
+    private destroyRef = inject(DestroyRef);
 
     @Input() label = '';                // Mat-form-field label, suggested to use to improve readability of "required" error
     @Input() codeToOverwrite = '';      // optional, in combination with customMessage to make single time adjustments
@@ -82,7 +84,7 @@ export class MatErrorMessagesDirective implements AfterViewInit, OnDestroy {
         // console.log(this.label, ' inputRef: ', this.inputRef);
         // console.log(this.label, ' formControl: ', this.formControl);
 
-        this.formControl.statusChanges.subscribe(this.updateErrors);
+        this.formControl.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(this.updateErrors);
         this.subscribeToTouched();
     }
 

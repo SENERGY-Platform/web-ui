@@ -100,7 +100,7 @@ describe('TemplatesComponent', () => {
         expect(component.templatesDataSource.data.length).toBe(2);
         expect(component.templatesDataSource.sort).toBeTruthy();
         expect(component.templatesDataSource.paginator).toBeTruthy();
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 
     it('should filter the templates by the search text', fakeAsync(() => {
@@ -112,7 +112,7 @@ describe('TemplatesComponent', () => {
 
         expect(component.templatesDataSource.data.length).toBe(1);
         expect(component.templatesDataSource.data[0].id).toBe('t2');
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 
     it('should stop the download indicator if the preview is unavailable', fakeAsync(() => {
@@ -124,7 +124,7 @@ describe('TemplatesComponent', () => {
 
         expect(component.downloading).toBe(false);
         expect(component.ready).toBe(true);
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 
     it('should keep the table usable if loading the templates fails', fakeAsync(() => {
@@ -134,6 +134,6 @@ describe('TemplatesComponent', () => {
 
         expect(component.ready).toBe(true);
         expect(component.templatesDataSource.data.length).toBe(0);
-        component.ngOnDestroy();
+        fixture.destroy();
     }));
 });

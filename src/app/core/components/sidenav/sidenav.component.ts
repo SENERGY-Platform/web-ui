@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { NavigationEnd, Router, RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
@@ -42,6 +43,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     private sidenavService = inject(SidenavService);
     private responsiveService = inject(ResponsiveService);
     private cd = inject(ChangeDetectorRef);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild('sidenav', { static: false }) sidenav!: MatSidenav;
     mode = '';
@@ -114,7 +116,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
     }
 
     private sidenavChangeListener(): void {
-        this.sidenavService.toggleChanged.subscribe((state: boolean) => {
+        this.sidenavService.toggleChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((state: boolean) => {
             this.shouldStartOpen = this.sidenav.mode !== 'side' || state;
             if (state) {
                 this.zIndex = 0;
@@ -124,14 +126,14 @@ export class SidenavComponent implements OnInit, AfterViewInit {
             this.sidenav.toggle(state);
             this.cd.detectChanges();
         });
-        this.sidenavService.sectionChanged.subscribe((section: SidenavSectionModel) => {
+        this.sidenavService.sectionChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((section: any) => {
             this.openSection = section.state;
         });
-        this.sidenav.openedChange.subscribe(o => this.sidenavService.toggle(o));
+        this.sidenav.openedChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(o => this.sidenavService.toggle(o));
     }
 
     private showOrHideSidenav(): void {
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((mqAlias) => {
             if (mqAlias === 'sm' || mqAlias === 'xs') {
                 this.sidenav.close();
                 this.sidenav.mode = 'over';
@@ -155,6 +157,7 @@ export class SidenavComponent implements OnInit, AfterViewInit {
             .pipe(
                 filter((event) => event instanceof NavigationEnd),
                 map(() => this.router.url.split('?')[0].split('#')[0]),
+                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((url: string) => {
                 this.currentUrl = url;

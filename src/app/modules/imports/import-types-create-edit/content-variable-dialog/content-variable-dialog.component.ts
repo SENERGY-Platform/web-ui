@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
 import { AbstractControl, UntypedFormBuilder, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -55,6 +56,7 @@ export class ContentVariableDialogComponent implements OnInit {
         infoOnly: boolean;
         nameTimeAllowed: boolean;
     }>(MAT_DIALOG_DATA);
+    private destroyRef = inject(DestroyRef);
     private fb = inject(UntypedFormBuilder);
     private dialogRef = inject<MatDialogRef<ContentVariableDialogComponent>>(MatDialogRef);
 
@@ -114,7 +116,7 @@ export class ContentVariableDialogComponent implements OnInit {
         if (this.data.infoOnly) {
             this.form.disable();
         }
-        this.form.get('type')?.valueChanges.subscribe((_) => {
+        this.form.get('type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
             this.form.patchValue({ characteristic_id: null });
         });
     }

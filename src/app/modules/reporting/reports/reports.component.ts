@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
@@ -25,7 +26,7 @@ import {
 } from '../shared/reporting.model';
 import { ReportingService } from '../shared/reporting.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Observable, Subscription, concatMap, map } from 'rxjs';
+import { Observable, concatMap, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
@@ -44,8 +45,9 @@ import { DatePipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatTooltip, RouterLink, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
-export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ReportsComponent implements OnInit, AfterViewInit {
     snackBar = inject(MatSnackBar);
+    private destroyRef = inject(DestroyRef);
     utilsService = inject(UtilService);
     private reportingService = inject(ReportingService);
     private searchbarService = inject(SearchbarService);
@@ -60,8 +62,6 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     displayedColumns: string[] = ['id', 'name', 'createdAt', 'updatedAt'];
     pageSize = this.preferencesService.pageSize;
     ready = false;
-
-    private searchSub?: Subscription;
 
     ngOnInit() {
         if (this.reportingService.userHasReadReportFileAuthorization()) {
@@ -84,14 +84,10 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         this.reportsDataSource.paginator = this.paginator;
-        this.paginator.page.subscribe((event) => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
         });
-    }
-
-    ngOnDestroy() {
-        this.searchSub?.unsubscribe();
     }
 
     deleteReport(report: ReportModel) {
@@ -120,8 +116,9 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.pipe(
+        this.searchbarService.currentSearchText.pipe(
             concatMap((searchText: string) => this.reload().pipe(map(() => searchText))),
+            takeUntilDestroyed(this.destroyRef),
         ).subscribe((searchText: string) => this.filter(searchText));
     }
 

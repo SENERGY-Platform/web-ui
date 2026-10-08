@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FilterSelection, FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {merge, Subscription} from 'rxjs';
+import {merge} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {FlowEngineService} from './shared/flow-engine.service';
@@ -70,8 +71,9 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, CdkOverlayOrigin, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, CurrencyPipe, DatePipe]
 })
-export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
+export class FlowRepoComponent implements OnInit, AfterViewInit {
     private flowRepoService = inject(FlowRepoService);
+    private destroyRef = inject(DestroyRef);
     snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
     private sanitizer = inject(DomSanitizer);
@@ -111,8 +113,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
     flowUsagePerFlow: FlowUsage[] = [];
 
     private searchText = '';
-    private searchSub: Subscription = new Subscription();
-    private flowSub: Subscription = new Subscription();
 
     permissionsPerFlows: PermissionsV2RightsAndIdModel[] = [];
 
@@ -145,7 +145,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization();
 
-        this.activatedRoute.queryParamMap.subscribe(value => {
+        this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
             if (value.has('operator')){
                 this.routerOperator = value.getAll('operator');
             }
@@ -163,11 +163,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.sort.sortChange.emit();
         });
         this.initSearchAndGetFlows();
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-        this.flowSub.unsubscribe();
     }
 
     deleteFlow(flow: FlowModel) {
@@ -203,7 +198,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         if (reset) {
             this.reset();
         }
-        this.sort.sortChange.subscribe(() => {
+        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginator.pageIndex = 0;
             this.selectionClear();
         });
@@ -212,7 +207,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         if (this.routerOperator != null && this.routerOperator.length > 0){
             filter = 'operator:'+this.routerOperator!.toString();
         }
-        this.flowSub = merge(this.sort.sortChange, this.paginator.page)
+        merge(this.sort.sortChange, this.paginator.page)
             .pipe(
                 startWith({}),
                 switchMap(() => {
@@ -224,6 +219,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
                             this.sort.direction,
                             filter);
                 }),
+                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((resp: { flows: FlowModel[], total: number }) => {
                 if (resp.flows !== null && resp.flows.length > 0) {
@@ -262,7 +258,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearchAndGetFlows(): void {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.getFlows(true);
         });

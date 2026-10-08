@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
-import { Subscription, map, Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -76,8 +77,9 @@ export function bulkDeleteOutcome(status: number, count: number): { message: str
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatIconButton, MatTooltip, MatIcon, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, DatePipe]
 })
-export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
+export class ExportComponent implements OnInit, AfterViewInit {
     private exportService = inject(ExportService);
+    private destroyRef = inject(DestroyRef);
     snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
     private searchbarService = inject(SearchbarService);
@@ -131,18 +133,14 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         ['Beschreibung', 'description'],
         ['Service', 'service_name'],
     ];
-    private searchSub: Subscription = new Subscription();
-
-    private exportSub: Subscription = new Subscription();
-
     public brokerMode = false;
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(() => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.reload();
         });
 
-        this.sort.sortChange.subscribe(() => {
+        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginator.pageIndex = 0;
             this.selectionClear();
             this.reload();
@@ -193,7 +191,8 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 }
                 return null;
             }),
-            concatMap((_) => this.getExports())
+            concatMap((_) => this.getExports()),
+            takeUntilDestroyed(this.destroyRef),
         ).subscribe({
             next: () => {
                 this.ready = true;
@@ -202,11 +201,6 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.ready = true;
             }
         });
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-        this.exportSub.unsubscribe();
     }
 
     checkAuthorization() {
@@ -318,7 +312,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearchAndGetExports() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             localStorage.setItem('data.exports.search', this.searchText);
             this.reload();

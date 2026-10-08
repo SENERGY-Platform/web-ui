@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Location, NgClass, KeyValuePipe } from '@angular/common';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
@@ -70,6 +71,7 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
 })
 export class NewExportComponent implements OnInit {
     private route = inject(ActivatedRoute);
+    private destroyRef = inject(DestroyRef);
     private location = inject(Location);
     private pipelineRegistryService = inject(PipelineRegistryService);
     private deviceInstanceService = inject(DeviceInstancesService);
@@ -407,7 +409,7 @@ export class NewExportComponent implements OnInit {
     onChanges(): void {
         if (this.exportForm) {
             if (this.exportForm.get('selector')) {
-                this.exportForm.get('selector')?.valueChanges.subscribe((selection) => {
+                this.exportForm.get('selector')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selection) => {
                     this.applySelectorState(selection);
 
                     if (!this.id) {
@@ -428,7 +430,7 @@ export class NewExportComponent implements OnInit {
                     }
                 });
             }
-            this.exportForm.get('targetSelector')?.valueChanges.subscribe((target) => {
+            this.exportForm.get('targetSelector')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((target) => {
                 if (target === this.targetDb) {
                     this.exportForm.patchValue({
                         customBrokerEnabled: false,
@@ -440,7 +442,7 @@ export class NewExportComponent implements OnInit {
                 }
                 this.autofillValues();
             });
-            this.exportForm.get('customBrokerEnabled')?.valueChanges.subscribe((customBrokerEnabled) => {
+            this.exportForm.get('customBrokerEnabled')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((customBrokerEnabled) => {
                 if (!customBrokerEnabled) {
                     this.exportForm.patchValue({
                         customMqttBroker: undefined,
@@ -458,7 +460,7 @@ export class NewExportComponent implements OnInit {
                 }
             });
             if (this.exportForm.get('device')) {
-                this.exportForm.get('device')?.valueChanges.subscribe((device: DeviceInstanceModel) => {
+                this.exportForm.get('device')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((device: DeviceInstanceModel) => {
                     if (!_.isEmpty(device)) {
                         if (this.exportForm.value.device !== device) {
                             this.deviceTypeService.getDeviceType(device.device_type_id).subscribe((resp: DeviceTypeModel | null) => {
@@ -475,7 +477,7 @@ export class NewExportComponent implements OnInit {
                 });
             }
             if (this.exportForm.get('service')) {
-                this.exportForm.get('service')?.valueChanges.subscribe((service: DeviceTypeServiceModel) => {
+                this.exportForm.get('service')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((service: DeviceTypeServiceModel) => {
                     if (!_.isEmpty(service)) {
                         this.resetVars();
                         const pathString = 'value';
@@ -488,7 +490,7 @@ export class NewExportComponent implements OnInit {
                 });
             }
             if (this.exportForm.get('pipeline')) {
-                this.exportForm.get('pipeline')?.valueChanges.subscribe((pipe: PipelineModel) => {
+                this.exportForm.get('pipeline')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((pipe: PipelineModel) => {
                     this.exportForm.patchValue({operator: null, timePath: null});
                     this.operator = {} as PipelineOperatorModel;
 
@@ -515,7 +517,7 @@ export class NewExportComponent implements OnInit {
             }
 
             if (this.exportForm.get('import')) {
-                this.exportForm.get('import')?.valueChanges.subscribe((i: ImportInstancesModel) => {
+                this.exportForm.get('import')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((i: ImportInstancesModel) => {
                     this.resetVars();
                     if (!_.isEmpty(i)) {
                         this.exportForm.controls['timePath'].enable({onlySelf: true, emitEvent: false});
@@ -535,7 +537,7 @@ export class NewExportComponent implements OnInit {
             }
 
             if (this.exportForm.get('timePath')) {
-                this.exportForm.get('timePath')?.valueChanges.subscribe((path) => {
+                this.exportForm.get('timePath')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((path) => {
                     if (path !== '' && path !== null) {
                         // ensure value not also exported
                         const i = this.exportValues.controls.findIndex((v) => v.value.Path === path);
@@ -571,7 +573,7 @@ export class NewExportComponent implements OnInit {
                 });
             }
 
-            this.formatControl.valueChanges.subscribe((selection) => {
+            this.formatControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selection) => {
                 this.exportForm.get('timestampFormat')?.setValue(selection);
             });
         }

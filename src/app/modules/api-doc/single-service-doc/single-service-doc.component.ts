@@ -16,7 +16,8 @@
  *
  */
 
-import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { SwaggerService } from '../shared/swagger/swagger.service';
@@ -33,6 +34,7 @@ import '@asyncapi/web-component/lib/asyncapi-web-component';
 })
 export class SingleServiceDocComponent implements OnInit {
     private authService = inject(AuthorizationService);
+    private destroyRef = inject(DestroyRef);
     private route = inject(ActivatedRoute);
     private swaggerService = inject(SwaggerService);
 
@@ -43,7 +45,7 @@ export class SingleServiceDocComponent implements OnInit {
     public type = '';
 
     public ngOnInit() {
-        this.route.params.subscribe((params) => {
+        this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             this.type = params.type;
             if (params.type === 'openapi') {
                 this.swaggerService.getSingleSwagger(decodeURIComponent(params.id)).subscribe((api) => {

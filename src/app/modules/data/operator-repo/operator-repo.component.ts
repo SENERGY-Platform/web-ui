@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OperatorModel } from './shared/operator.model';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { Subscription, merge } from 'rxjs';
+import { merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
@@ -50,8 +51,9 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatIconButton, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent]
 })
-export class OperatorRepoComponent implements OnInit, OnDestroy {
+export class OperatorRepoComponent implements OnInit {
     private operatorRepoService = inject(OperatorRepoService);
+    private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthorizationService);
     private searchbarService = inject(SearchbarService);
     snackBar = inject(MatSnackBar);
@@ -82,8 +84,6 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     userHasCreateAuthorization = false;
 
     private searchText = '';
-    private searchSub: Subscription = new Subscription();
-    private operatorSub: Subscription = new Subscription();
 
     permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
     pipeOperatorUsagePerOperator: PipelineOperatorUsage[] = [];
@@ -111,11 +111,6 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-        this.operatorSub.unsubscribe();
     }
 
     deleteOperator(operator: OperatorModel) {
@@ -148,12 +143,12 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
             this.reset();
         }
         this.operatorsDataSource.sort = this.sort;
-        this.sort.sortChange.subscribe(() => {
+        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginator.pageIndex = 0;
             this.selectionClear();
         });
 
-        this.operatorSub = merge(this.sort.sortChange, this.paginator.page)
+        merge(this.sort.sortChange, this.paginator.page)
             .pipe(
                 startWith({}),
                 switchMap(() => {
@@ -166,6 +161,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
                         this.sort.direction,
                     );
                 }),
+                takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
                 if (resp.operators.length > 0) {
@@ -185,7 +181,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     }
 
     private initSearchAndGetOperators() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.getOperators(true);
         });

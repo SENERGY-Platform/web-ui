@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CostService } from '../shared/cost.service';
 import { CostEntryModel, CostModel } from '../shared/cost.model';
 import { KeyValue, CurrencyPipe, DatePipe, KeyValuePipe } from '@angular/common';
@@ -55,6 +56,7 @@ import { CostElementComponent } from '../cost-element/cost-element.component';
 })
 export class CostOverviewComponent implements OnInit {
     private costService = inject(CostService);
+    private destroyRef = inject(DestroyRef);
     private billingService = inject(BillingService);
     private authorizationService = inject(AuthorizationService);
     private pipelineService = inject(PipelineRegistryService);
@@ -91,12 +93,12 @@ export class CostOverviewComponent implements OnInit {
     }
     ngOnInit(): void {
         const obs: Observable<any>[] = [];
-        this.selectedBill.valueChanges.subscribe(tree => this.tree = tree);
+        this.selectedBill.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(tree => this.tree = tree);
         if (this.isAdmin) {
             this.selectedUser.valueChanges.pipe(mergeMap(userid => {
                 this.dataReady = false;
                 return this.loadForUser(userid);
-            })).subscribe(() => this.dataReady = true);
+            }), takeUntilDestroyed(this.destroyRef)).subscribe(() => this.dataReady = true);
             obs.push(this.authorizationService.loadAllUsers().pipe(map((users: any | { error: string }) => {
                 if (users != null) {
                     this.users = users;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ParserService } from '../shared/parser.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ParseModel } from '../shared/parse.model';
@@ -85,6 +86,7 @@ interface DeviceServicePath {
 })
 export class DeployFlowComponent implements OnInit {
     private parserService = inject(ParserService);
+    private destroyRef = inject(DestroyRef);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     snackBar = inject(MatSnackBar);
@@ -291,14 +293,14 @@ export class DeployFlowComponent implements OnInit {
                 pipelines: this.fb.array([]),
             });
             let aspectFunctionsSubscription: Subscription | undefined;
-            inputGroup.get('aspectIds')?.valueChanges.subscribe((aspectIds: string[] | null) => {
+            inputGroup.get('aspectIds')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((aspectIds: string[] | null) => {
                 aspectFunctionsSubscription?.unsubscribe();
                 aspectFunctionsSubscription = this.loadAspectFunctions(aspectIds || []).subscribe();
                 inputGroup.patchValue({
                     functionId: null,
                 });
             });
-            inputGroup.get('functionId')?.valueChanges.subscribe((functionId) => {
+            inputGroup.get('functionId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((functionId) => {
                 this.prepareSelectables(inputGroup).subscribe();
                 const func = this.getAspectFunctions(inputGroup.get('aspectIds')?.value).find((f) => f.id === functionId);
                 if (func !== undefined) {
@@ -310,13 +312,13 @@ export class DeployFlowComponent implements OnInit {
                 }
                
             });
-            inputGroup.get('characteristics')?.valueChanges.subscribe((_) => {
+            inputGroup.get('characteristics')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
                 this.prepareSelectables(inputGroup).subscribe();
                 inputGroup.patchValue({
                     selectableId: null,
                 });
             });
-            inputGroup.get('selectableId')?.valueChanges.subscribe((selectableId) => {
+            inputGroup.get('selectableId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selectableId) => {
                 inputGroup.patchValue({
                     filter: new Map<string, { serviceId: string; path: string }>(), // deviceId to serviceId and path
                     devices: [],
@@ -324,7 +326,7 @@ export class DeployFlowComponent implements OnInit {
                 (inputGroup.get('deviceTypes') as FormArray).clear();
                 this.selectableSelected(inputGroup, selectableId);
             });
-            inputGroup.get('devices')?.valueChanges.subscribe((_) => {
+            inputGroup.get('devices')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
                 const formArray = inputGroup.get('deviceTypes') as FormArray;
                 formArray.clear();
                 const deviceTypes = this.getDeviceTypes(inputGroup);
@@ -337,7 +339,7 @@ export class DeployFlowComponent implements OnInit {
                     formArray.push(deviceTypeGroup);
                     deviceTypeGroup
                         .get('selection')
-                        ?.valueChanges.subscribe((value) => this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value, value));
+                        ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value, value));
                     const options = this.getServiceOptions(inputGroup, deviceTypeGroup.get('id')?.value);
                     if (options.length === 1) {
                         deviceTypeGroup.patchValue({ selection: options });
@@ -1126,7 +1128,7 @@ export class DeployFlowComponent implements OnInit {
             topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
             path: '',
         });
-        pipelineGroup.get('pipelineId')?.valueChanges.subscribe((newPipelineId) => {
+        pipelineGroup.get('pipelineId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((newPipelineId) => {
             const pipeline = this.getPipelineById(newPipelineId);
             if (pipeline !== undefined && pipeline.operators.length === 1) {
                 pipelineGroup.patchValue({
@@ -1137,7 +1139,7 @@ export class DeployFlowComponent implements OnInit {
                 pipelineGroup.patchValue({ operatorId: '', topic: '' });
             }
         });
-        pipelineGroup.get('operatorId')?.valueChanges.subscribe((newOperatorId) => {
+        pipelineGroup.get('operatorId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((newOperatorId) => {
             const newPipelineId = pipelineGroup.get('pipelineId')?.value;
             if (newPipelineId !== undefined && newPipelineId !== '' && newOperatorId !== '') {
                 const newPipelineOperator = this.getPipelineById(newPipelineId)?.operators.find((o) => o.id === newOperatorId);

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import { afterNextRender, ChangeDetectorRef, Component, Injector, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { afterNextRender, ChangeDetectorRef, Component, Injector, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardService } from './shared/dashboard.service';
 import { DashboardModel } from './shared/dashboard.model';
 import { WidgetModel, WidgetUpdatePosition } from './shared/dashboard-widget.model';
 import { DashboardWidgetManipulationModel } from './shared/dashboard-widget-manipulation.model';
 import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
 import { DashboardManipulationModel } from './shared/dashboard-manipulation.model';
-import { catchError, forkJoin, Observable, of, Subscription, tap } from 'rxjs';
+import { catchError, forkJoin, Observable, of, tap } from 'rxjs';
 import { DashboardTypesEnum, dashboardTypesEnumFromString, resizable } from './shared/dashboard-types.enum';
 import { DeviceStatusService } from '../../widgets/device-status/shared/device-status.service';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
@@ -62,6 +63,7 @@ import { WidgetComponent } from '../../widgets/widget.component';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     private dashboardService = inject(DashboardService);
+    private destroyRef = inject(DestroyRef);
     private dialogsService = inject(DialogsService);
     private processSchedulerService = inject(ProcessSchedulerService);
     private dataTableService = inject(DataTableService);
@@ -78,8 +80,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     activeTabIndex = 0;
     interval = 0;
     zoomedWidgetIndex: number | null = null;
-    dashWidgetSubscription = new Subscription();
-    dashSubscription = new Subscription();
     inDragMode = false;
     dragModeDisabled = false;
     dragging = false;
@@ -141,8 +141,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.dashWidgetSubscription.unsubscribe();
-        this.dashSubscription.unsubscribe();
         clearInterval(this.interval);
     }
 
@@ -418,7 +416,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             // Material 22 fires no animationDone for a tab that is active from creation, so the first
             // dashboard's widgets would never get their load signal. After render, they have subscribed.
             afterNextRender(() => this.initAllWidgets(), { injector: this.injector });
-            this.route.url.subscribe((url) => {
+            this.route.url.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((url) => {
                 const id = url[url.length - 1].toString();
                 const idx = this.dashboards.findIndex((d) => d.id === id);
                 if (idx === -1) {
@@ -436,7 +434,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             });
         });
 
-        this.dashSubscription = this.dashboardService.dashboardObservable.subscribe(
+        this.dashboardService.dashboardObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(
             (dashboardManipulationModel: DashboardManipulationModel) => {
                 switch (dashboardManipulationModel.manipulation) {
                     case DashboardManipulationEnum.Create: {
@@ -494,7 +492,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     private initWidgets() {
-        this.dashWidgetSubscription = this.dashboardService.dashboardWidgetObservable.subscribe(
+        this.dashboardService.dashboardWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(
             (widgetManipulationModel: DashboardWidgetManipulationModel) => {
                 switch (widgetManipulationModel.manipulation) {
                     case DashboardManipulationEnum.Create: {

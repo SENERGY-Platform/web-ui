@@ -16,6 +16,7 @@
 
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {BudgetModel} from '../shared/budget.model';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
@@ -63,7 +64,7 @@ export class BudgetCreateEditComponent {
         this.roles = data.roles;
         this.users = data.users;
         this.editable = data.editable;
-        this.form.get('role')?.valueChanges.subscribe(v => {
+        this.form.get('role')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(v => {
             const userIdForm = this.form.get('user_id');
             if (v !== null && v !== undefined && v !== '') {
                 this.form.patchValue({user_id: undefined});
@@ -74,7 +75,7 @@ export class BudgetCreateEditComponent {
                 userIdForm.enable();
             }
         });
-        this.form.get('user_id')?.valueChanges.subscribe(v => {
+        this.form.get('user_id')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(v => {
             const roleForm = this.form.get('role');
             if (v !== null && v !== undefined && v !== '') {
                 this.form.patchValue({role: undefined});

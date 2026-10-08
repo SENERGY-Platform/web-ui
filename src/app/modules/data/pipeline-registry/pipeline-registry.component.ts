@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {FilterSelection, PipelineModel} from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
@@ -24,7 +25,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import {forkJoin, Observable, Subscription, concatMap, of, map, finalize} from 'rxjs';
+import {forkJoin, Observable, concatMap, of, map, finalize} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -53,8 +54,9 @@ import { DatePipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
-export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     private pipelineRegistryService = inject(PipelineRegistryService);
+    private destroyRef = inject(DestroyRef);
     private flowEngineService = inject(FlowEngineService);
     snackBar = inject(MatSnackBar);
     private searchbarService = inject(SearchbarService);
@@ -77,7 +79,6 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     displayedColumns: string[] = ['select', 'status','access', 'id', 'name','smartServiceInstanceId', 'createdat', 'updatedat', 'info'];
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 0;
-    searchSub: Subscription = new Subscription();
     sortBy = 'createdat';
     sortDirection: SortDirection = 'desc';
     search: string | undefined = undefined;
@@ -111,7 +112,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         if(this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
-        this.activatedRoute.queryParamMap.subscribe(value => {
+        this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
            if (value.has('operator')){
                this.routerOperator = value.getAll('operator');
            }
@@ -129,12 +130,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         this.initSearch();
     }
 
-    ngOnDestroy(){
-        this.searchSub.unsubscribe();
-    }
-
     initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             if (searchText != ''){
                 this.search = searchText;
             } else {
@@ -155,7 +152,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     }
 
     ngAfterViewInit() {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageIndex*this.paginator.pageSize;

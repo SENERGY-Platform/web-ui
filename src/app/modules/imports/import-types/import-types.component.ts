@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ImportTypeModel, ImportTypeModelWithCostEstimation } from './shared/import-types.model';
 import { ImportTypesService } from './shared/import-types.service';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
@@ -24,7 +25,7 @@ import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/im
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { forkJoin, Observable, map, Subscription, of, mergeMap, concatMap } from 'rxjs';
+import { forkJoin, Observable, map, of, mergeMap, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -48,8 +49,9 @@ import { MatIcon } from '@angular/material/icon';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, CurrencyPipe]
 })
-export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ImportTypesComponent implements OnInit, AfterViewInit {
     private importTypesService = inject(ImportTypesService);
+    private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     private dialog = inject(MatDialog);
     private permissionsDialogService = inject(PermissionsDialogService);
@@ -68,7 +70,6 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     dataReady = false;
     sort = 'name.asc';
     searchText = '';
-    searchSub: Subscription = new Subscription();
     totalCount = 200;
     offset = 0;
     userHasUpdateAuthorization = false;
@@ -81,12 +82,8 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
         this.checkAuthorization();
     }
 
-    ngOnDestroy(){
-        this.searchSub.unsubscribe();
-    }
-
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e) => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
             this.prefeencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
@@ -113,7 +110,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });

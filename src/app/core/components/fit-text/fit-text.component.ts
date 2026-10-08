@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {ResponsiveService} from '../../services/responsive.service';
-import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'senergy-fit-text',
@@ -26,6 +26,7 @@ import {Subscription} from 'rxjs';
 })
 export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, AfterViewChecked {
     private responsiveService = inject(ResponsiveService);
+    private destroyRef = inject(DestroyRef);
 
     @ViewChild('element', {static: false}) element!: ElementRef;
 
@@ -34,14 +35,13 @@ export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, Af
     @Input() minFontSize = 8;
 
     private resizeTimeout: any;
-    private subscription: Subscription | undefined;
     private scrollWidth = 0;
     private clientWidth = 0;
     private scrollHeight = 0;
     private clientHeight = 0;
 
     ngAfterViewInit() {
-        this.subscription = this.responsiveService.observeMqAlias().subscribe(() => {
+        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             if (this.resizeTimeout === undefined) {
                 this.resizeTimeout = setTimeout(() => this.resizeText(), 0);
             }
@@ -73,7 +73,6 @@ export class FitTextComponent implements AfterViewInit, OnChanges, OnDestroy, Af
         if (this.resizeTimeout !== undefined) {
             clearTimeout(this.resizeTimeout);
         }
-        this.subscription?.unsubscribe();
     }
 
     private isOverflown(element: any) {

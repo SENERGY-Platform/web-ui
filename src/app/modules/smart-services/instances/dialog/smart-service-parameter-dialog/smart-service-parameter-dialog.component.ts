@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { Observable, Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { SmartServiceExtendedParameterModel, SmartServiceParameterOptionModel } from '../../../releases/shared/release.model';
 import { SmartServiceParameterModel } from '../../shared/instances.model';
 import {
@@ -110,8 +111,9 @@ const virtualScrollFrom = 50;
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, SpinnerComponent, MatDivider, MtxSelect, CharacteristicInputComponent, MatIconButton, MatTooltip, MatSlideToggle, MatDialogActions, MatButton]
 })
-export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {
+export class SmartServiceParameterDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<SmartServiceParameterDialogComponent>>(MatDialogRef);
+    private destroyRef = inject(DestroyRef);
     data = inject<SmartServiceParameterDialogData>(MAT_DIALOG_DATA);
 
     name: string;
@@ -122,8 +124,6 @@ export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {
     ready = false;
     inputs = ParameterInput;
 
-    private sub = new Subscription();
-
     constructor() {
         const data = this.data;
 
@@ -132,26 +132,20 @@ export class SmartServiceParameterDialogComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.sub.add(
-            this.data.parameters.subscribe((parameters) => {
-                if (parameters === null) {
-                    // there is nothing to fill in and the failure has already been reported
-                    this.dialogRef.close();
-                    return;
-                }
-                // the caller merges the values of an instance in; this fills in whatever is still unset
-                this.parameters = initParameterValues(parameters).parameters;
-                // an instance can carry a value whose device has been deleted since; the user has to
-                // re-pick rather than have a value the release cannot resolve submitted back unseen
-                pruneInvalidValues(this.parameters);
-                this.views = this.parameters.map((param) => this.viewOf(param));
-                this.ready = true;
-            }),
-        );
-    }
-
-    ngOnDestroy(): void {
-        this.sub.unsubscribe();
+        this.data.parameters.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((parameters) => {
+            if (parameters === null) {
+                // there is nothing to fill in and the failure has already been reported
+                this.dialogRef.close();
+                return;
+            }
+            // the caller merges the values of an instance in; this fills in whatever is still unset
+            this.parameters = initParameterValues(parameters).parameters;
+            // an instance can carry a value whose device has been deleted since; the user has to
+            // re-pick rather than have a value the release cannot resolve submitted back unseen
+            pruneInvalidValues(this.parameters);
+            this.views = this.parameters.map((param) => this.viewOf(param));
+            this.ready = true;
+        });
     }
 
     private viewOf(param: SmartServiceExtendedParameterModel): ParameterView {

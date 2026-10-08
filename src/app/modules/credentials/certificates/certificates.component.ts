@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CertificateInfo, Rfc5280Reason, rfc5280ReasonString } from './shared/certificates.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { CertificatesService } from './shared/certificates.service';
-import { concatMap, map, Observable, Subscription } from 'rxjs';
+import { concatMap, map, Observable } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
@@ -39,8 +40,9 @@ import { MatIcon } from '@angular/material/icon';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe, KeyValuePipe]
 })
-export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CertificatesComponent implements OnInit, AfterViewInit {
   private preferencesService = inject(PreferencesService);
+  private destroyRef = inject(DestroyRef);
   private certificatesService = inject(CertificatesService);
   private searchbarService = inject(SearchbarService);
   private dialog = inject(MatDialog);
@@ -54,7 +56,6 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
   rfc5280ReasonString = rfc5280ReasonString;
   userHasRevokeAuthorization = this.certificatesService.userHasRevokeAuthorization();
   certs: CertificateInfo[] = [];
-  searchSub?: Subscription;
 
   @ViewChild(MatSort) sort?: MatSort;
 
@@ -65,15 +66,11 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  ngOnDestroy(): void {
-    this.searchSub?.unsubscribe();
-  }
-
   ngAfterViewInit() {
     if (this.sort) {
       this.dataSource.sort = this.sort;
     }
-    this.paginator.page.subscribe((e) => {
+    this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
       this.preferencesService.pageSize = e.pageSize;
       this.pageSize = this.paginator.pageSize;
     });
@@ -98,8 +95,9 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private initSearch() {
-    this.searchSub = this.searchbarService.currentSearchText.pipe(
+    this.searchbarService.currentSearchText.pipe(
       concatMap((searchText: string) => this.reload().pipe(map(_ => searchText))),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe(searchText => {
       this.dataSource.data = this.certs.filter(c => {
         if (c.serial_number.indexOf(searchText) !== -1) {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import {Subscription} from 'rxjs';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {ProcessModel} from '../../processes/process-repo/shared/process.model';
 import {SmartServiceReleaseModel, SmartServiceExtendedReleaseModel} from './shared/release.model';
@@ -58,8 +58,9 @@ const grids = new Map([
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, SpinnerComponent, DatePipe]
 })
-export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
     private permissionsDialogService = inject(PermissionsDialogService);
+    private destroyRef = inject(DestroyRef);
     private searchbarService = inject(SearchbarService);
     private releasesService = inject(SmartServiceReleasesService);
     private responsiveService = inject(ResponsiveService);
@@ -90,7 +91,6 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
-    private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
     private gridColChangeTimeout: number | undefined;
     private knownMainPanelOffsetHeight = 0;
@@ -100,7 +100,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     ngOnInit() {
         this.userHasDeleteAuthorization = this.releasesService.userHasDeleteAuthorization();
         this.initGridCols();
-        this.activatedRoute.queryParamMap.subscribe((params) => {
+        this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             const id = params.get('id');
             if (id) {
                 this.id = id;
@@ -113,10 +113,6 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
         this.limitInit = this.maxItemsDisplayed;
         this.limit = this.limitInit;
         this.initSearchAndGetDevices();
-    }
-
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
     }
 
     onScroll() {
@@ -133,7 +129,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
 
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((mqAlias) => {
             const gridCols = grids.get(mqAlias) || 0;
             if (gridCols > this.gridCols) {
                 clearTimeout(this.gridColChangeTimeout);
@@ -148,7 +144,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     }
 
     private initSearchAndGetDevices() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchInitialized = true;
             this.searchText = searchText;
             this.getRepoItems(true);

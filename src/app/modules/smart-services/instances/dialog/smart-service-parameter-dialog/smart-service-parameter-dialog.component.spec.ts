@@ -173,7 +173,7 @@ describe('SmartServiceParameterDialogComponent', () => {
         it('drops its subscription when it is destroyed', () => {
             const arriving = new Subject<SmartServiceExtendedParameterModel[] | null>();
             const component = buildPending(arriving);
-            component.ngOnDestroy();
+            TestBed.resetTestingModule();
             arriving.next([param({})]);
             expect(component.ready).toBe(false);
         });

@@ -17,13 +17,14 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import { AfterViewInit, Component, isDevMode, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, isDevMode, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import { MatSort, Sort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {DomSanitizer} from '@angular/platform-browser';
-import {interval, Observable, Subscription} from 'rxjs';
+import {interval, Observable} from 'rxjs';
 import {debounce, map, startWith} from 'rxjs/operators';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { KongService } from '../shared/services/kong.service';
@@ -56,8 +57,9 @@ import { AsyncPipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatCard, MatCardTitle, MatCardContent, MatFormField, MatLabel, MtxSelect, MtxOption, MatInput, FormsModule, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatError, MatErrorMessagesDirective, MatCheckbox, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, MatFabButton, AsyncPipe]
 })
-export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestroy {
+export class PermissionsListComponent implements OnInit, AfterViewInit {
     private authService = inject(AuthorizationService);
+    private destroyRef = inject(DestroyRef);
     private ladonService = inject(LadonService);
     dialog = inject(MatDialog);
     private sanitizer = inject(DomSanitizer);
@@ -106,7 +108,6 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
         HEAD: false
     };
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
-    private subscriptions: Subscription[] = [];
     total = 0;
     selectedUser = '';
     selectedRole = '';
@@ -150,14 +151,10 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     ngAfterViewInit() {
-        this.subscriptions.push(this.paginator.page.subscribe((e) => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.sortData(this.sort, this.policies, e);
-        }));
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        });
     }
 
     initAutoComplete() {
@@ -171,7 +168,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
                         startWith(''),
                         map((value) => this._filter(value)),
                     );
-                this.filteredOptions.pipe(debounce(() => interval(300))).subscribe(() => this.testAccess());
+                this.filteredOptions.pipe(debounce(() => interval(300)), takeUntilDestroyed(this.destroyRef)).subscribe(() => this.testAccess());
             });
         } catch (e) {
             console.error('Could not load Uris from kong: ' + e);

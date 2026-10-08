@@ -111,7 +111,7 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         this.reportsDataSource.paginator = this.paginator;
-        this.paginator.page.subscribe((event) => {
+        this.paginator.page.pipe(takeUntil(this.destroy)).subscribe((event) => {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
         });

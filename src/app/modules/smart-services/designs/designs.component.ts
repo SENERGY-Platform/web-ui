@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ProcessModel } from '../../processes/process-repo/shared/process.model';
 import { SmartServiceDesignsService } from './shared/designs.service';
@@ -54,8 +54,9 @@ const grids = new Map([
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatIcon, MatTooltip, MatGridTileText, MatGridTileFooterCssMatStyler, MatIconButton, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, SpinnerComponent, MatFabButton]
 })
-export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
     private designsService = inject(SmartServiceDesignsService);
     private releaseService = inject(SmartServiceReleasesService);
     private responsiveService = inject(ResponsiveService);
@@ -83,7 +84,6 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
-    private searchSub: Subscription = new Subscription();
     private allDataLoaded = false;
     private gridColChangeTimeout: number | undefined;
     private knownMainPanelOffsetHeight = 0;
@@ -105,10 +105,6 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
         this.initSearchAndGetDevices();
     }
 
-    ngOnDestroy() {
-        this.searchSub.unsubscribe();
-    }
-
     onScroll() {
         if (!this.allDataLoaded && this.ready) {
             this.setRepoItemsParams(this.limitInit);
@@ -118,7 +114,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
 
     private initGridCols(): void {
         this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().subscribe((mqAlias) => {
+        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((mqAlias) => {
             const gridCols = grids.get(mqAlias) || 0;
             if (gridCols > this.gridCols) {
                 clearTimeout(this.gridColChangeTimeout);
@@ -133,7 +129,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit, OnDe
     }
 
     private initSearchAndGetDevices() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchInitialized = true;
             this.searchText = searchText;
             this.getRepoItems(true);

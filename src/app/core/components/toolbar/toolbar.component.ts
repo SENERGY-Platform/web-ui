@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidenavService } from '../sidenav/shared/sidenav.service';
 import { Router, RouterLink } from '@angular/router';
 import { AuthorizationService } from '../../services/authorization.service';
@@ -45,6 +46,7 @@ export class ToolbarComponent implements OnInit {
     private themingService = inject(ThemingService);
     private notificationService = inject(NotificationService);
     private infoService = inject(InfoService);
+    private destroyRef = inject(DestroyRef);
 
     userName = '';
     notifications: NotificationModel[] = [];
@@ -54,7 +56,7 @@ export class ToolbarComponent implements OnInit {
 
     ngOnInit() {
         this.initUser();
-        this.notificationService.getNotifications().subscribe((n) => {
+        this.notificationService.getNotifications().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((n) => {
             this.unreadCounter = 0;
             this.notifications = n;
             this.notifications.forEach((no) => (!no.isRead ? this.unreadCounter++ : null));

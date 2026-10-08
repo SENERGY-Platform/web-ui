@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
@@ -24,7 +25,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router, ActivatedRoute } from '@angular/router';
-import { forkJoin, Observable, Subscription, map, concatMap } from 'rxjs';
+import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -51,8 +52,9 @@ import { NgClass, DatePipe } from '@angular/common';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
-export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ImportInstancesComponent implements OnInit, AfterViewInit {
     private importInstancesService = inject(ImportInstancesService);
+    private destroyRef = inject(DestroyRef);
     private dialog = inject(MatDialog);
     private snackBar = inject(MatSnackBar);
     private deleteDialog = inject(DialogsService);
@@ -73,7 +75,6 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     pageSize = this.preferencesService.pageSize;
     totalCount = 200;
     selection = new SelectionModel<ImportInstancesModel>(true, []);
-    searchSub: Subscription = new Subscription();
     dataReady = false;
     sort = 'updated_at.desc';
     offset = 0;
@@ -87,7 +88,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     instanceId: string | null = null;
 
     ngOnInit(): void {
-        this.route.queryParamMap.subscribe(params => {
+        this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             this.instanceId = params.get('id');
             this.initSearch();
             this.getTotalNumberOfTypes();
@@ -97,10 +98,6 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
             this.userID = userIDResp;
         }
         this.userRoles = this.userService.getUserRoles();
-    }
-
-    ngOnDestroy(){
-        this.searchSub.unsubscribe();
     }
 
     getTotalNumberOfTypes(): Observable<number> {
@@ -120,7 +117,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
             this.reload();
         });
@@ -128,7 +125,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e)=>{
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;

@@ -16,7 +16,8 @@
  *
  */
 
-import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DocInfo } from '../shared/swagger/swagger.model';
 import { SwaggerService } from '../shared/swagger/swagger.service';
 import { forkJoin, map, Observable, of } from 'rxjs';
@@ -35,6 +36,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 })
 export class ApiDocsComponent implements OnInit {
     swaggerService = inject(SwaggerService);
+    private destroyRef = inject(DestroyRef);
     private searchbarService = inject(SearchbarService);
 
     public title = 'SEPL API Documentation';
@@ -44,7 +46,6 @@ export class ApiDocsComponent implements OnInit {
     public asyncListShown: DocInfo[] = [];
     public searchPlaceholder: any;
     public ready = false;
-    searchSub: any;
 
     public ngOnInit(): void {
         const obs: Observable<unknown>[] = [of(null)];
@@ -65,7 +66,7 @@ export class ApiDocsComponent implements OnInit {
         }
         forkJoin(obs).subscribe(_ => this.ready = true);
 
-        this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             const insensitiveQuery = new RegExp(searchText, 'i');
             this.swaggerListShown = this.swaggerList.filter((api) => insensitiveQuery.test(api.description) || insensitiveQuery.test(api.title));
             this.asyncListShown = this.asyncList.filter((api) => insensitiveQuery.test(api.description) || insensitiveQuery.test(api.title));

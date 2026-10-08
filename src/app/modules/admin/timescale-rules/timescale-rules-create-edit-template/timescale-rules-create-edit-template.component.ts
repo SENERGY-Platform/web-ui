@@ -15,6 +15,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from '../shared/timescale-rule.model';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -83,7 +84,7 @@ export class TimescaleRulesCreateEditTemplateComponent {
             this.form.disable();
         }
         this.create = data.rule === undefined;
-        this.form.get('template')?.valueChanges.subscribe(name => {
+        this.form.get('template')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(name => {
             const template = this.templates.find(t => t.name === name);
             if (template === undefined) {
                 return;

@@ -15,6 +15,7 @@
  */
 
 import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, UntypedFormControl, ValidationErrors, Validator, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { AspectClassesService } from '../../../modules/metadata/aspects/shared/aspect-classes.service';
@@ -86,7 +87,7 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
 
     constructor() {
         this.control.setValidators(() => this.validate(this.control));
-        this.control.valueChanges.subscribe((value: string[]) => this.onChange(value || []));
+        this.control.valueChanges.pipe(takeUntilDestroyed()).subscribe((value: string[]) => this.onChange(value || []));
     }
 
     ngOnInit(): void {

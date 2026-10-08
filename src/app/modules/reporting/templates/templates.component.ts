@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
@@ -23,7 +24,7 @@ import { TemplateListResponseModel, TemplateModel } from '../shared/reporting.mo
 import { ReportingService } from '../shared/reporting.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { saveAs } from 'file-saver';
-import { Observable, Subscription, concatMap, map } from 'rxjs';
+import { Observable, concatMap, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { reportFileName } from '../shared/report-file-name';
@@ -41,8 +42,9 @@ import { RouterLink } from '@angular/router';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatTooltip, MatIcon, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
-export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
+export class TemplatesComponent implements OnInit, AfterViewInit {
     snackBar = inject(MatSnackBar);
+    private destroyRef = inject(DestroyRef);
     utilsService = inject(UtilService);
     private reportingService = inject(ReportingService);
     private searchbarService = inject(SearchbarService);
@@ -57,8 +59,6 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
     pageSize = this.preferencesService.pageSize;
     ready = false;
     downloading = false;
-
-    private searchSub?: Subscription;
 
     ngOnInit() {
         if (this.reportingService.userHasCreateReportAuthorization()) {
@@ -76,14 +76,10 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
         }
         this.templatesDataSource.paginator = this.paginator;
-        this.paginator.page.subscribe((event) => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
         });
-    }
-
-    ngOnDestroy() {
-        this.searchSub?.unsubscribe();
     }
 
     downloadPreview($event: Event, template: TemplateModel) {
@@ -98,8 +94,9 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initSearch() {
-        this.searchSub = this.searchbarService.currentSearchText.pipe(
+        this.searchbarService.currentSearchText.pipe(
             concatMap((searchText: string) => this.reload().pipe(map(() => searchText))),
+            takeUntilDestroyed(this.destroyRef),
         ).subscribe((searchText: string) => this.filter(searchText));
     }
 

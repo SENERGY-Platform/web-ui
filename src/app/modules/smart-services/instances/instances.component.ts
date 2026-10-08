@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormGroup } from '@angular/forms';
 import { SmartServiceInstanceService } from './shared/instances.service';
 import { SmartServiceInstanceModel } from './shared/instances.model';
@@ -60,6 +61,7 @@ import { JsonPipe, DatePipe } from '@angular/common';
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     private instancesService = inject(SmartServiceInstanceService);
+    private destroyRef = inject(DestroyRef);
     preferencesService = inject(PreferencesService);
     private dialogsService = inject(DialogsService);
     private router = inject(Router);
@@ -107,7 +109,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete', 'force-delete');
         }
-        this.activatedRoute.queryParamMap.subscribe((params) => {
+        this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             this.releaseId = params.get('release_id') || undefined;
             this.instanceId = params.get('instance_id') || undefined;
             this.expandedInstanceId = params.get('expanded_instance') || undefined;
@@ -129,7 +131,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe((e) => {
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.pageIndex = this.paginator.pageIndex;
