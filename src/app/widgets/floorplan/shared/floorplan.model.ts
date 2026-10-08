@@ -458,6 +458,8 @@ export function findStateSource(control: DeviceGroupCriteriaModel, context: Stat
 /**
  * The controlling criteria a displayed measurement gives access to, so its value can act as the button
  * operating it. Functions without input have no concept to pair them up, the semantic keys name them.
+ * The functions of a pair come closest first: a group lists the device-class criteria, which acts on every
+ * aspect of the class, before the one on the measured aspect.
  */
 export function impliedControllingCriteria(
     measuring: DeviceGroupCriteriaModel,
@@ -469,8 +471,13 @@ export function impliedControllingCriteria(
     }
     const pair = pairs.find(p => p.state === measuring.function_id);
     if (pair !== undefined) {
-        return context.criteria.filter(c => (c.function_id === pair.on || c.function_id === pair.off) &&
-            aspectDistance(c.aspect_id, measuring.aspect_id, context.aspects) !== undefined);
+        return context.criteria
+            .filter(c => c.function_id === pair.on || c.function_id === pair.off)
+            .map(c => ({ criteria: c, aspect: aspectDistance(c.aspect_id, measuring.aspect_id, context.aspects) }))
+            .filter(c => c.aspect !== undefined)
+            .map(c => ({ criteria: c.criteria, rank: [c.aspect as number, deviceClassDistance(c.criteria.device_class_id, measuring.device_class_id)] }))
+            .sort((a, b) => compareRanks(a.rank, b.rank))
+            .map(c => c.criteria);
     }
     const counterpart = findCounterpart(measuring, context, true);
     return counterpart === undefined ? [] : [counterpart];

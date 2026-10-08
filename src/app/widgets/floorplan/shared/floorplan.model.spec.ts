@@ -745,6 +745,18 @@ describe('FloorplanModel', () => {
             expect(implied.map((c: DeviceGroupCriteriaModel) => c.function_id)).toEqual([setOn, setOff]);
         });
 
+        it('puts the pair on the measured aspect before the one on the device class', () => {
+            // the order a device group answers with: sorted by Short(), the empty aspect first
+            const byClass = [crit(setOn, '', 'lamp'), crit(setOff, '', 'lamp')];
+            const byAspect = [crit(setOn, 'room', ''), crit(setOff, 'room', '')];
+
+            const implied = impliedControllingCriteria(crit(getOnOff, 'room', ''), context({
+                criteria: [crit(getOnOff, 'room', ''), ...byClass, ...byAspect],
+            }), onOffPair);
+
+            expect(implied).toEqual([...byAspect, ...byClass]);
+        });
+
         it('gives nothing for a measurement the group cannot set', () => {
             const implied = impliedControllingCriteria(crit(getTemperature), context({
                 criteria: [crit(getTemperature)],
