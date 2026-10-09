@@ -16,7 +16,7 @@
 
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, ControlEvent, FormArray, FormBuilder, FormControl, FormGroup, TouchedChangeEvent, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { catchError, concatMap, defaultIfEmpty, forkJoin, map, Observable, of, Subject, throwError } from 'rxjs';
 import { DeviceGroupCriteriaModel, DeviceGroupDisplayModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
@@ -65,6 +65,36 @@ interface ChartsExportVAxesModelWithGroup extends ChartsExportVAxesModel {
     group?: string;
 }
 
+type SourceGroup = FormGroup<{
+    sourceClass: FormControl<string | null>;
+    sourceExports: FormControl<string[] | null | undefined>;
+    lastScrollStart: FormControl<number | null>;
+    lastScrollEnd: FormControl<number | null>;
+    lastSearch: FormControl<string | null>;
+    lastOffset: FormControl<number | null>;
+}>;
+
+type DataSourceForm = FormGroup<{
+    dataSourceClasses: FormControl<string[] | null>;
+    exportsBySource: FormArray<SourceGroup>;
+    exports: FormControl<NonNullable<DataSourceConfig['exports']> | null>;
+    timeRange: FormGroup<{
+        type: FormControl<string | null>;
+        start: FormControl<string | null>;
+        end: FormControl<string | null>;
+        time: FormControl<number | string | null>;
+        level: FormControl<string | null>;
+    }>;
+    group: FormGroup<{
+        time: FormControl<number | string | null>;
+        type: FormControl<string | null>;
+        level: FormControl<string | null>;
+    }>;
+    fields: FormControl<ChartsExportVAxesModel[] | null>;
+    // starts as [] and is set to the loaded options, a map by option group
+    fieldOptions: FormControl<Map<string, ChartsExportVAxesModel[]> | never[] | null>;
+}>;
+
 @Component({
     selector: 'data-source-selector',
     templateUrl: './data-source-selector.component.html',
@@ -84,7 +114,8 @@ export class DataSourceSelectorComponent implements OnInit {
     private functionsService = inject(FunctionsService);
     private destroyRef = inject(DestroyRef);
 
-    form: UntypedFormGroup = new UntypedFormGroup({});
+    // Replaced by initForm() in ngOnInit before the template reads it.
+    form = new FormGroup({}) as unknown as DataSourceForm;
     dataSourceClasses = ['Devices', 'Device Groups', 'Exports', 'Locations'];
 
     searchSubject = new Subject<{ term: string, sourceForm: AbstractControl }>();
@@ -159,7 +190,7 @@ export class DataSourceSelectorComponent implements OnInit {
     @Output() updatedDataSourceConfig = new EventEmitter<DataSourceConfig>();
 
     get exportsControlBySource() {
-        return this.form.controls['exportsBySource'] as FormArray;
+        return this.form.controls.exportsBySource;
     }
 
     ngOnInit(): void {
@@ -200,23 +231,23 @@ export class DataSourceSelectorComponent implements OnInit {
 
     private initForm() {
         this.form = new FormGroup({
-            dataSourceClasses: new FormControl([], Validators.required),
-            exportsBySource: new FormArray([]),
-            exports: new FormControl(this.dataSourceConfig?.exports || [], Validators.required),
+            dataSourceClasses: new FormControl<string[] | null>([], Validators.required),
+            exportsBySource: new FormArray<SourceGroup>([]),
+            exports: new FormControl<NonNullable<DataSourceConfig['exports']> | null>(this.dataSourceConfig?.exports || [], Validators.required),
             timeRange: new FormGroup({
                 type: new FormControl(this.dataSourceConfig?.timeRange?.type || '', Validators.required),
                 start: new FormControl(this.dataSourceConfig?.timeRange?.start || ''),
                 end: new FormControl(this.dataSourceConfig?.timeRange?.end || ''),
-                time: new FormControl(this.dataSourceConfig?.timeRange?.time || '',),
+                time: new FormControl<number | string | null>(this.dataSourceConfig?.timeRange?.time || '',),
                 level: new FormControl(this.dataSourceConfig?.timeRange?.level || '')
             }),
             group: new FormGroup({
-                time: new FormControl(this.dataSourceConfig?.group?.time || '', this.validateInterval),
+                time: new FormControl<number | string | null>(this.dataSourceConfig?.group?.time || '', this.validateInterval),
                 type: new FormControl(this.dataSourceConfig?.group?.type || ''),
                 level: new FormControl(this.dataSourceConfig?.group?.level || '')
             }),
             fields: new FormControl(this.dataSourceConfig?.fields || []),
-            fieldOptions: new FormControl([])
+            fieldOptions: new FormControl<Map<string, ChartsExportVAxesModel[]> | never[] | null>([])
         });
         this.initExportsBySource();
         this.initDataSourceClasses();
@@ -226,9 +257,9 @@ export class DataSourceSelectorComponent implements OnInit {
     private initExportsBySource() {
         const preSelections = this.getPreSelectionsByClass();
         this.dataSourceClasses.forEach((sourceClass) => {
-            const sourceExportsControl = this.fb.group({
+            const sourceExportsControl: SourceGroup = this.fb.group({
                 sourceClass: sourceClass,
-                sourceExports: [(preSelections.get(sourceClass)?.ids)],
+                sourceExports: this.fb.control<string[] | null | undefined>(preSelections.get(sourceClass)?.ids),
                 lastScrollStart: 0,
                 lastScrollEnd: this.scrollDynInitLimit,
                 lastSearch: '',
@@ -252,7 +283,7 @@ export class DataSourceSelectorComponent implements OnInit {
 
     private subscribeToFormUpdates() {
         this.exportsControlBySource.controls.forEach(fieldControl => {
-            const selectionControl = (fieldControl as FormGroup).controls['sourceExports'];
+            const selectionControl = fieldControl.controls.sourceExports;
             selectionControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(
                 (val: any) => {
                     this.updateExportSelections(fieldControl, val);
@@ -269,7 +300,7 @@ export class DataSourceSelectorComponent implements OnInit {
         });
 
         this.form.controls['dataSourceClasses'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(chosenClasses => { // delete exports of class when class gets unselected
-            const notChosen = this.dataSourceClasses.filter(x => !chosenClasses.includes(x));
+            const notChosen = this.dataSourceClasses.filter(x => !(chosenClasses as string[]).includes(x));
             this.exportsControlBySource.controls.forEach(control => {
                 const sourceClass = this.getSourceClass(control);
                 if (notChosen.includes(sourceClass)) {
@@ -285,7 +316,7 @@ export class DataSourceSelectorComponent implements OnInit {
                 if (!this.ready) {
                     return;
                 }
-                const newDataSourceConfig: DataSourceConfig = this.form.getRawValue();
+                const newDataSourceConfig = this.form.getRawValue() as DataSourceConfig;
                 this.updatedDataSourceConfig.emit(newDataSourceConfig);
             }
         });
@@ -313,7 +344,7 @@ export class DataSourceSelectorComponent implements OnInit {
     }
 
     private updateErrorMessage() {
-        if (this.form.controls['exports'].value?.length > 0) {
+        if ((this.form.controls.exports.value?.length ?? 0) > 0) {
             this.showDataSourceError = false;
             return;
         } else {
@@ -762,7 +793,7 @@ export class DataSourceSelectorComponent implements OnInit {
 
     updateFieldOptions() {
         this.waitingForDataSourceChange = true;
-        const selectedExports = this.form.get('exports')?.value;
+        const selectedExports = this.form.get('exports')?.value as NonNullable<DataSourceConfig['exports']>;
         this.loadFieldOptions(selectedExports).pipe(
             map((fieldOptions) => {
                 const tmp: ChartsExportVAxesModelWithGroup[] = [];
@@ -775,14 +806,14 @@ export class DataSourceSelectorComponent implements OnInit {
                 });
                 this.fieldOptionsTMP = tmp;
                 setTimeout(() => {
-                    let f = this.form.get('fieldOptions');
-                    if (f !== null) {
-                        f.setValue(fieldOptions);
+                    const fieldOptionsControl = this.form.get('fieldOptions');
+                    if (fieldOptionsControl !== null) {
+                        fieldOptionsControl.setValue(fieldOptions);
                     }
                     const filteredFields = this.filterSelectedFields(selectedExports);
-                    f = this.form.get('fields');
-                    if (f !== null) {
-                        f.setValue(filteredFields);
+                    const fieldsControl = this.form.get('fields');
+                    if (fieldsControl !== null) {
+                        fieldsControl.setValue(filteredFields);
                     }
                 });
                 return null;
@@ -799,7 +830,7 @@ export class DataSourceSelectorComponent implements OnInit {
         });
     }
 
-    filterSelectedFields(selectedDataSources: (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel)[]) {
+    filterSelectedFields(selectedDataSources: (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel | LocationDisplayModel)[]) {
         /* Filter the selected fields depending on the current selection of the data source
         */
         const selectedFields = JSON.parse(JSON.stringify(this.form.value['fields']));
@@ -1029,7 +1060,7 @@ export class DataSourceSelectorComponent implements OnInit {
         const cls = sourceForm.get('sourceClass')?.value;
         if (cls !== null) {
             const chosen = this.form.controls['dataSourceClasses'].value;
-            return chosen.some((a: string | string[]) => a.includes(cls));
+            return (chosen as string[]).some((a: string | string[]) => a.includes(cls));
         }
         return false;
     }

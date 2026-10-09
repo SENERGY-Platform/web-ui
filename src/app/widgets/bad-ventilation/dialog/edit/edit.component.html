@@ -28,17 +28,17 @@
             <mat-error senergyError [label]="'Widget name'"></mat-error>
           </mat-form-field>
         }
-        <data-source-selector [dataSourceConfig]="form.controls.exportConfig.value"
+        <data-source-selector [dataSourceConfig]="exportSourceConfig"
           [enableAggretationConfig]="false" (updatedDataSourceConfig)="exportConfigUpdated($event)"
           [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"
           [showExportsAsSource]="true" [showTimeRange]="false">
         </data-source-selector>
-        <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
+        <data-source-selector [dataSourceConfig]="deviceValueSourceConfig"
           [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceConfigUpdated($event)"
           [enableFieldSelection]="true" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
           [showExportsAsSource]="false" [showTimeRange]="false">
         </data-source-selector>
-        <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value"
+        <data-source-selector [dataSourceConfig]="timeRangeSourceConfig"
           [enableAggretationConfig]="false" (updatedDataSourceConfig)="timeConfigUpdated($event)"
           [showTimeRange]="true" [showSource]="false">
         </data-source-selector>

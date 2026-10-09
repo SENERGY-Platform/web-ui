@@ -17,7 +17,7 @@
 import { Component, OnInit, DOCUMENT, ChangeDetectionStrategy, inject } from '@angular/core';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {AuthorizationProfileModel} from '../../../core/model/authorization/authorization-profile.model';
-import { FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -38,10 +38,10 @@ export class SettingsChangeDialogComponent implements OnInit {
     private authorizationService = inject(AuthorizationService);
     private dialogRef = inject<MatDialogRef<SettingsChangeDialogComponent>>(MatDialogRef);
     private snackBar = inject(MatSnackBar);
-    private _formBuilder = inject(UntypedFormBuilder);
+    private _formBuilder = inject(FormBuilder);
 
     profile: AuthorizationProfileModel = { email: '', firstName: '', lastName: '', username: '' };
-    firstFormGroup: FormGroup = this._formBuilder.group({
+    firstFormGroup = this._formBuilder.group({
         lastName: [''],
         firstName: [''],
         email: ['', [Validators.email]]
@@ -72,9 +72,9 @@ export class SettingsChangeDialogComponent implements OnInit {
     save(): void {
         this.authorizationService
             .changeUserProfile({
-                firstName: this.firstFormGroup.value.firstName,
-                lastName: this.firstFormGroup.value.lastName,
-                email: this.firstFormGroup.value.email,
+                firstName: this.firstFormGroup.value.firstName as string,
+                lastName: this.firstFormGroup.value.lastName as string,
+                email: this.firstFormGroup.value.email as string,
             })
             .subscribe((resp: null | { error: string }) => {
                 if (resp === null) {

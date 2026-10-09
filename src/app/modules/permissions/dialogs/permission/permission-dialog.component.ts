@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { PermissionsUserModel } from '../../shared/permissions-user.model';
 import { PermissionsService } from '../../shared/permissions.service';
@@ -55,9 +55,9 @@ export class PermissionDialogComponent implements OnInit {
     @ViewChild('roleTable', { static: false }) roleTable?: TableComponent;
 
 
-    userFormControl = new UntypedFormControl('');
-    groupFormControl = new UntypedFormControl('');
-    roleFormControl = new UntypedFormControl('');
+    userFormControl = new FormControl<string | null>('');
+    groupFormControl = new FormControl<string | null>('');
+    roleFormControl = new FormControl<string | null>('');
     name: string;
     hint?: string;
     userId: null | string = null;
@@ -191,7 +191,7 @@ export class PermissionDialogComponent implements OnInit {
             return;
         }
 
-        this.permissions.user_permissions[this.userFormControl.value] = {
+        this.permissions.user_permissions[this.userFormControl.value as string] = {
             administrate: false,
             execute: false,
             write: false,
@@ -207,7 +207,7 @@ export class PermissionDialogComponent implements OnInit {
         if (this.groupFormControl.value === '') {
             return;
         }
-        this.permissions.group_permissions[this.groupFormControl.value] = {
+        this.permissions.group_permissions[this.groupFormControl.value as string] = {
             administrate: false,
             execute: false,
             write: false,
@@ -223,7 +223,7 @@ export class PermissionDialogComponent implements OnInit {
         if (this.roleFormControl.value === '') {
             return;
         }
-        this.permissions.role_permissions[this.roleFormControl.value] = {
+        this.permissions.role_permissions[this.roleFormControl.value as string] = {
             administrate: false,
             execute: false,
             write: false,

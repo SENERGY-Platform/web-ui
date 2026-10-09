@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {ConceptsService} from '../../concepts/shared/concepts.service';
 import { DeviceTypeConceptModel } from '../../device-types-overview/shared/device-type.model';
 import {v4 as uuid} from 'uuid';
@@ -42,8 +42,14 @@ export class FunctionsCreateDialogComponent implements OnInit {
     private _formBuilder = inject(FormBuilder);
     private destroyRef = inject(DestroyRef);
 
-    optionsFormControl = new UntypedFormControl('Controlling');
-    functionFormGroup!: FormGroup;
+    optionsFormControl = new FormControl<string | null>('Controlling');
+    functionFormGroup!: FormGroup<{
+        id: FormControl<string | null>;
+        name: FormControl<string | null>;
+        display_name: FormControl<string | null>;
+        description: FormControl<string | null>;
+        concept_id: FormControl<string | null>;
+    }>;
 
     concepts: DeviceTypeConceptModel[] = [];
 
@@ -71,7 +77,7 @@ export class FunctionsCreateDialogComponent implements OnInit {
     }
 
     private optionListener(): void {
-        this.generateUuid(this.optionsFormControl.value);
+        this.generateUuid(this.optionsFormControl.value as string);
         this.optionsFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((option) => {
             this.generateUuid(option as string);
         });
@@ -79,7 +85,7 @@ export class FunctionsCreateDialogComponent implements OnInit {
 
     private initFunctionFormGroup(): void {
         this.functionFormGroup = this._formBuilder.group({
-            id: [{ value: '', disabled: true }],
+            id: this._formBuilder.control<string | null>({ value: '', disabled: true }),
             name: ['', Validators.required],
             display_name: '',
             description: '',

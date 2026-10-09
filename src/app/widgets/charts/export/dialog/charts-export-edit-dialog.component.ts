@@ -19,9 +19,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { DashboardResponseMessageModel } from '../../../../modules/dashboard/shared/dashboard-response-message.model';
-import { AbstractControl, FormArray, FormControl, UntypedFormBuilder, UntypedFormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, FormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ExportService } from '../../../../modules/exports/shared/export.service';
-import { ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportVAxesModel } from '../shared/charts-export-properties.model';
+import { ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportPropertiesModel, ChartsExportVAxesModel } from '../shared/charts-export-properties.model';
 import { ChartsExportRangeTimeTypeEnum } from '../shared/charts-export-range-time-type.enum';
 import { MatTableDataSource } from '@angular/material/table';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialog, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
@@ -50,6 +50,40 @@ import { CdkDropList } from '@angular/cdk/drag-drop';
 import { AxisConfigComponent } from './axis-config/axis-config.component';
 import { MatButton } from '@angular/material/button';
 
+type OptionalControl<T> = FormControl<T | null | undefined>;
+
+type ChartsExportForm = FormGroup<{
+    id: FormControl<string | null>;
+    name: FormControl<string | null>;
+    type: FormControl<string | null>;
+    properties: FormGroup<{
+        chartType: OptionalControl<string>;
+        curvedFunction: OptionalControl<boolean>;
+        calculateIntervals: OptionalControl<boolean>;
+        breakInterval: OptionalControl<string>;
+        break: OptionalControl<boolean>;
+        exports: OptionalControl<ChartsExportPropertiesModel['exports']>;
+        timeRangeType: OptionalControl<string>;
+        time: FormGroup<{
+            last: OptionalControl<string>;
+            ahead: OptionalControl<string>;
+            start: OptionalControl<string>;
+            end: OptionalControl<string>;
+        }>;
+        group: FormGroup<{
+            time: OptionalControl<string>;
+            type: OptionalControl<string>;
+        }>;
+        hAxisLabel: OptionalControl<string>;
+        hAxisFormat: OptionalControl<string>;
+        vAxisLabel: OptionalControl<string>;
+        secondVAxisLabel: OptionalControl<string>;
+        vAxes: OptionalControl<ChartsExportVAxesModel[]>;
+        zoomTimeFactor: FormControl<number | null>;
+        stacked: OptionalControl<boolean>;
+    }>;
+}>;
+
 @Component({
     templateUrl: './charts-export-edit-dialog.component.html',
     styleUrls: ['./charts-export-edit-dialog.component.css'],
@@ -61,7 +95,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
     private dialog = inject(MatDialog);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
-    private _formBuilder = inject(UntypedFormBuilder);
+    private _formBuilder = inject(FormBuilder);
     private destroyRef = inject(DestroyRef);
 
     typeString = 'https://schema.org/Text';
@@ -74,7 +108,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
     chartsExportDeviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy;
     dataSourceConfig?: DataSourceConfig;
 
-    formGroupController = new UntypedFormGroup({});
+    // Replaced by initFormGroup() once the widget is loaded; the template renders only when ready.
+    formGroupController = new FormGroup({}) as unknown as ChartsExportForm;
     dashboardId: string;
     widgetId: string;
     chartTypes = ['LineChart', 'ColumnChart', 'ScatterChart', 'PieChart', 'Timeline'];
@@ -242,34 +277,35 @@ export class ChartsExportEditDialogComponent implements OnInit {
             name: [widget.name, Validators.required],
             type: widget.type,
             properties: this._formBuilder.group({
-                chartType: widget.properties.chartType,
+                chartType: this._formBuilder.control<string | null | undefined>(widget.properties.chartType),
                 curvedFunction: this._formBuilder.control(widget.properties.curvedFunction),
                 calculateIntervals: this._formBuilder.control(widget.properties.calculateIntervals),
                 breakInterval: this._formBuilder.control(widget.properties.breakInterval),
                 break: this._formBuilder.control(widget.properties.break),
                 exports: this._formBuilder.control(widget.properties.exports),
-                timeRangeType: widget.properties.timeRangeType,
+                timeRangeType: this._formBuilder.control<string | null | undefined>(widget.properties.timeRangeType),
                 time: this._formBuilder.group({
-                    last: widget.properties.time ? widget.properties.time.last : '',
-                    ahead: widget.properties.time ? widget.properties.time.ahead : '',
-                    start: widget.properties.time ? widget.properties.time.start : '',
-                    end: widget.properties.time ? widget.properties.time.end : '',
+                    last: this._formBuilder.control<string | null | undefined>(widget.properties.time ? widget.properties.time.last : ''),
+                    ahead: this._formBuilder.control<string | null | undefined>(widget.properties.time ? widget.properties.time.ahead : ''),
+                    start: this._formBuilder.control<string | null | undefined>(widget.properties.time ? widget.properties.time.start : ''),
+                    end: this._formBuilder.control<string | null | undefined>(widget.properties.time ? widget.properties.time.end : ''),
                 }),
                 group: this._formBuilder.group({
-                    time: [widget.properties.group ? widget.properties.group.time : '', [this.validateInterval]],
-                    type: widget.properties.group ? widget.properties.group.type : undefined,
+                    time: this._formBuilder.control<string | null | undefined>(widget.properties.group ? widget.properties.group.time : '', [this.validateInterval]),
+                    type: this._formBuilder.control<string | null | undefined>(widget.properties.group ? widget.properties.group.type : undefined),
                 }),
-                hAxisLabel: widget.properties.hAxisLabel,
-                hAxisFormat: widget.properties.hAxisFormat,
-                vAxisLabel: widget.properties.vAxisLabel,
-                secondVAxisLabel: widget.properties.secondVAxisLabel,
-                vAxes: [widget.properties.vAxes || []],
+                hAxisLabel: this._formBuilder.control<string | null | undefined>(widget.properties.hAxisLabel),
+                hAxisFormat: this._formBuilder.control<string | null | undefined>(widget.properties.hAxisFormat),
+                vAxisLabel: this._formBuilder.control<string | null | undefined>(widget.properties.vAxisLabel),
+                secondVAxisLabel: this._formBuilder.control<string | null | undefined>(widget.properties.secondVAxisLabel),
+                vAxes: this._formBuilder.control<ChartsExportVAxesModel[] | null | undefined>(widget.properties.vAxes || []),
                 zoomTimeFactor: widget.properties.zoomTimeFactor || 2,
-                stacked: widget.properties.stacked,
+                stacked: this._formBuilder.control<boolean | null | undefined>(widget.properties.stacked),
             }),
         });
         this.groupTypeIsDifference = widget.properties.group?.type?.startsWith ? (widget.properties.group?.type?.startsWith('difference') || false) : false;
-        this.formGroupController.get('properties.group.type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val) => {
+        this.formGroupController.get('properties.group.type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+            const val = value as string;
             this.groupTypeIsDifference = val.startsWith ? val.startsWith('difference') : false;
             if (this.groupTypeIsDifference) {
                 this.dataSource.data.forEach((element) => (element.math = ''));
@@ -281,7 +317,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 this.preloadExportTags(exp.id || '').subscribe();
             }
         });
-        this.formGroupController.get('properties.exports')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((exports: (ChartsExportMeasurementModel | DeviceInstanceModel)[]) => {
+        this.formGroupController.get('properties.exports')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((exportsValue) => {
+            const exports = exportsValue as (ChartsExportMeasurementModel | DeviceInstanceModel)[];
             exports.forEach((exp) => {
                 if ((exp as DeviceInstanceModel).device_type_id === undefined &&
                     ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
@@ -290,7 +327,8 @@ export class ChartsExportEditDialogComponent implements OnInit {
             });
         });
 
-        this.formGroupController.get('properties.vAxes')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((vAxes: ChartsExportVAxesModel[]) => {
+        this.formGroupController.get('properties.vAxes')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((vAxesValue) => {
+            const vAxes = vAxesValue as ChartsExportVAxesModel[];
             // Remove no longer existing
             for (let i = this.dataSource.data.length - 1; i >= 0; i--) {
                 const axis = this.dataSource.data[i] as ChartsExportVAxesModel;
@@ -351,14 +389,14 @@ export class ChartsExportEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName = (this.formGroupController.get('name') as FormControl).value;
+        const newName = this.formGroupController.controls.name.value as string;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
         // bug patchValue leads to dataSource.data being empty ?
         // this.formGroupController.patchValue({properties: {vAxes: this.dataSource.data}});
-        const newProperties = (this.formGroupController.get('properties') as FormControl).value;
+        const newProperties = this.formGroupController.controls.properties.value;
         newProperties['vAxes'] = this.dataSource.data;
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], newProperties);
     }
@@ -407,16 +445,16 @@ export class ChartsExportEditDialogComponent implements OnInit {
         }
     }
 
-    get chartType(): FormControl {
-        return this.formGroupController.get(['properties', 'chartType']) as FormControl;
+    get chartType(): OptionalControl<string> {
+        return this.formGroupController.controls.properties.controls.chartType;
     }
 
-    get exports(): FormArray {
-        return this.formGroupController.get(['properties', 'exports']) as FormArray;
+    get exports(): OptionalControl<ChartsExportPropertiesModel['exports']> {
+        return this.formGroupController.controls.properties.controls.exports;
     }
 
-    get timeRangeType(): FormControl {
-        return this.formGroupController.get(['properties', 'timeRangeType']) as FormControl;
+    get timeRangeType(): OptionalControl<string> {
+        return this.formGroupController.controls.properties.controls.timeRangeType;
     }
 
     addConversion(element: any) {

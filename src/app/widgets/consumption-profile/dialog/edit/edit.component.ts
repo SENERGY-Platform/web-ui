@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { concatMap, forkJoin, Observable, map } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
@@ -44,13 +44,13 @@ export class ConsumptionProfileEditComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<ConsumptionProfileEditComponent>>(MatDialogRef);
     private exportService = inject(ExportService);
     private dashboardService = inject(DashboardService);
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
     form = this.formBuilder.group({
         name: ['', Validators.required],
-        export: ['', Validators.required],
+        export: this.formBuilder.control<ExportModel | string | null | undefined>('', Validators.required),
     });
     dashboardId: string;
     widgetId: string;
@@ -108,14 +108,14 @@ export class ConsumptionProfileEditComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName =  this.form.get('name')?.value;
+        const newName =  this.form.get('name')?.value as string;
         this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
         const widgetProperties: ConsumptionProfileProperties = {
-            exportID: this.form.get('export')?.value['ID'],
+            exportID: (this.form.controls.export.value as ExportModel).ID as string,
         };
         this.widget.properties.consumptionProfile = widgetProperties;
 

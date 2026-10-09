@@ -25,7 +25,7 @@ import {contentVariableAspectIds, criteriaAspectIds, deprecatedAspectAlias, Devi
 import {environment} from '../../../../environments/environment';
 import {DeviceInstancesService} from '../../../modules/devices/device-instances/shared/device-instances.service';
 import {map} from 'rxjs/operators';
-import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {AcControlElementModel} from '../shared/ac-control.model';
 import {Observable, of, concatMap, forkJoin} from 'rxjs';
 import {DeviceGroupsService} from '../../../modules/devices/device-groups/shared/device-groups.service';
@@ -42,6 +42,13 @@ import { MatButton } from '@angular/material/button';
 const INTEGER = 'https://schema.org/Integer';
 const FLOAT = 'https://schema.org/Float';
 
+interface AcControlFormControls {
+    name: FormControl<string | null>;
+    selectable: FormControl<string | null | undefined>;
+    minTarget: FormControl<number | null>;
+    maxTarget: FormControl<number | null>;
+}
+
 @Component({
     selector: 'senergy-ac-control-edit-dialog',
     templateUrl: './ac-control-edit-dialog.component.html',
@@ -55,13 +62,14 @@ export class AcControlEditDialogComponent implements OnInit {
     private deviceTypeService = inject(DeviceTypeService);
     private deviceInstancesService = inject(DeviceInstancesService);
     private deviceGroupsService = inject(DeviceGroupsService);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
 
 
     ready = false;
     widget: WidgetModel;
     dashboardId: string;
-    form = this.fb.group([]);
+    // Empty until the selectables are loaded; the template renders it only once ready.
+    form = this.fb.group([]) as unknown as FormGroup<AcControlFormControls>;
     tempStep = -1;
     functionIds: string[] = [
         environment.getTemperatureFunctionId,
@@ -110,7 +118,7 @@ export class AcControlEditDialogComponent implements OnInit {
             this.selectables = r;
             this.form = this.fb.group({
                 name: [this.widget.name, Validators.required],
-                selectable: [this.widget.properties.acControl?.deviceGroupId || this.widget.properties.acControl?.deviceId, Validators.required],
+                selectable: this.fb.control<string | null | undefined>(this.widget.properties.acControl?.deviceGroupId || this.widget.properties.acControl?.deviceId, Validators.required),
                 minTarget: [this.widget.properties.acControl?.minTarget || 15, [Validators.required, rangeValidator(-270, 1000)]],
                 maxTarget: [this.widget.properties.acControl?.maxTarget || 30, [Validators.required, rangeValidator(-270, 1000)]],
             });
@@ -132,14 +140,14 @@ export class AcControlEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName = this.form.get('name')?.value;
+        const newName = this.form.get('name')?.value as string;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateACProperties(): Observable<DashboardResponseMessageModel> {
         this.widget.properties.acControl = {
-            minTarget: this.form.get('minTarget')?.value,
-            maxTarget: this.form.get('maxTarget')?.value,
+            minTarget: this.form.get('minTarget')?.value as number,
+            maxTarget: this.form.get('maxTarget')?.value as number,
             tempStep: this.tempStep,
         };
 

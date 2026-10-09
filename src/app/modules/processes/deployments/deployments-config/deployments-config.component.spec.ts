@@ -661,7 +661,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
             selectedDeviceIdControl.patchValue('urn:infai:ses:device:25491149-c826-44a7-a22b-4f1e2d5a78a2');
         }
         component.changeTaskSelectionOption(0, 2);
-        expect(component.deploymentFormGroup.getRawValue()).toEqual({
+        expect(component.deploymentFormGroup.getRawValue() as V2DeploymentsPreparedModel).toEqual({
             version: 3,
             description: 'description',
             diagram: {

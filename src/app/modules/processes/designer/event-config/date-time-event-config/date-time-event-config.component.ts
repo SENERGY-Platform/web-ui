@@ -16,7 +16,7 @@
 
 import { Component, EventEmitter, Input, LOCALE_ID, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {rangeValidator} from '../../../../../core/validators/range.validator';
 import { MatFormField, MatLabel, MatSuffix, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -37,9 +37,9 @@ export class DateTimeEventConfigComponent implements OnInit {
     @Input() initial = '';
     @Output() update = new EventEmitter<{ iso: string; text: string }>();
 
-    date = new UntypedFormControl(new Date(), Validators.required);
-    hour = new UntypedFormControl(0, [rangeValidator(0, 23)]);
-    minute = new UntypedFormControl(0, [rangeValidator(0, 59)]);
+    date = new FormControl<Date | null>(new Date(), Validators.required);
+    hour = new FormControl<number | null>(0, [rangeValidator(0, 23)]);
+    minute = new FormControl<number | null>(0, [rangeValidator(0, 59)]);
 
     ngOnInit() {
         this.date.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
@@ -72,8 +72,8 @@ export class DateTimeEventConfigComponent implements OnInit {
 
     private getResult(): { iso: string; text: string } {
         const date = this.date.value as Date;
-        date.setHours(this.hour.value);
-        date.setMinutes(this.minute.value);
+        date.setHours(this.hour.value ?? 0); // setHours(null) already meant 0
+        date.setMinutes(this.minute.value ?? 0);
         return { iso: date.toISOString(), text: date.toLocaleString(this.localeId) };
     }
 }

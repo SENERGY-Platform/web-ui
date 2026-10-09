@@ -172,7 +172,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     }
 
     save(): void {
-        const raw: V2DeploymentsPreparedModel = this.deploymentFormGroup.getRawValue();
+        const raw = this.deploymentFormGroup.getRawValue() as V2DeploymentsPreparedModel;
         raw?.elements?.forEach((element: V2DeploymentsPreparedElementModel) => {
             if (element.message_event?.selection?.selection_options !== undefined) {
                 element.message_event.selection.selection_options = [];

@@ -16,7 +16,7 @@
 
 import { Location } from '@angular/common';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { UntypedFormBuilder } from '@angular/forms';
+import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -162,7 +162,7 @@ const openForEditing = (exp: ExportModel = existingExport()): Harness => {
             { provide: MatSnackBar, useValue: {open: () => undefined} },
             { provide: ImportInstancesService, useValue: {listImportInstances: () => of([importInstance])} },
             { provide: ImportTypesService, useValue: {getImportType: () => of(importType)} },
-            { provide: UntypedFormBuilder, useValue: new UntypedFormBuilder() },
+            { provide: FormBuilder, useValue: new FormBuilder() },
             { provide: PreferencesService, useValue: {pageSize: 20} },
         ],
     });
@@ -179,7 +179,7 @@ describe('NewExportComponent', () => {
         const {component} = openForEditing();
 
         expect(component.operator.id).toBe(OPERATOR_ID);
-        expect(component.exportForm.getRawValue().pipeline.id).toBe(PIPELINE_ID);
+        expect(component.exportForm.getRawValue().pipeline?.id).toBe(PIPELINE_ID);
         // the selected operator is marked in the image, so there is an image to click at all
         expect(component.image as string).toContain('stroke="red"');
         expect(component.export.ID).toBe('export-1');

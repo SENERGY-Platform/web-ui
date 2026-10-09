@@ -312,7 +312,7 @@ describe('DataTableEditDialogComponent', () => {
             element?.patchValue({ name: 'name', id: 'known-test-id' });
             component.formGroup.patchValue({ valueAlias: 'alias', order: DataTableOrderEnum.TimeAsc, refreshTime: 10 });
             const elementDetails = element?.get('elementDetails');
-            elementDetails?.get('device')?.patchValue({ aspectId: 'aspectId' });
+            element?.controls.elementDetails.controls.device.patchValue({ aspectId: 'aspectId' });
             expect(elementDetails?.get('device')?.get('aspectId')?.value).toBe('aspectId');
 
             component.runChangeDetection();
@@ -498,7 +498,7 @@ describe('DataTableEditDialogComponent', () => {
             const id0 = component.getElement(0)?.get('id')?.value;
             const id1 = component.getElement(1).get('id')?.value;
             const id2 = component.getElement(2)?.get('id')?.value;
-            expect(id0.length).toBeGreaterThan(0);
+            expect((id0 as string).length).toBeGreaterThan(0);
             expect(id0 !== id1).toBeTrue();
             expect(id1 !== id2).toBeTrue();
             expect(component.step).toBe(2);
@@ -528,8 +528,8 @@ describe('DataTableEditDialogComponent', () => {
             const element = component.getElements().at(0);
             const elementDetails = element.get('elementDetails');
 
-            elementDetails?.patchValue({ elementType: DataTableElementTypesEnum.PIPELINE });
-            elementDetails?.get('pipeline')?.patchValue({ pipelineId: 'pipelineId' });
+            element.controls.elementDetails.patchValue({ elementType: DataTableElementTypesEnum.PIPELINE });
+            element.controls.elementDetails.controls.pipeline.patchValue({ pipelineId: 'pipelineId' });
             component.runChangeDetection();
             expect(elementDetails?.get('pipeline')?.get('operatorId')?.value).toBe('operatorId');
             expect(element?.get('exportValuePath')?.value).toBe('analytics.opValueName');

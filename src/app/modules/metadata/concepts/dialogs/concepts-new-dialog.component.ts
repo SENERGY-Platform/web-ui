@@ -17,7 +17,7 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {DeviceTypeConceptModel} from '../../device-types-overview/shared/device-type.model';
-import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -34,7 +34,7 @@ import { MatButton } from '@angular/material/button';
 export class ConceptsNewDialogComponent {
     private dialogRef = inject<MatDialogRef<ConceptsNewDialogComponent>>(MatDialogRef);
 
-    nameControl = new UntypedFormControl('', [Validators.required]);
+    nameControl = new FormControl<string | null>('', [Validators.required]);
 
     close(): void {
         this.dialogRef.close();
@@ -43,7 +43,7 @@ export class ConceptsNewDialogComponent {
     create(): void {
         const concept: DeviceTypeConceptModel = {
             id: '',
-            name: this.nameControl.value,
+            name: this.nameControl.value as string,
             base_characteristic_id: '',
             characteristic_ids: [],
         };

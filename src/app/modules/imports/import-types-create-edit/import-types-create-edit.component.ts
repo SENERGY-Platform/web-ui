@@ -16,7 +16,7 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router} from '@angular/router';
-import { FormArray, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
     ImportTypeConfigModel,
     ImportTypeContentVariableModel,
@@ -52,6 +52,13 @@ import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 
+type ConfigGroup = FormGroup<{
+    name: FormControl<string | null | undefined>;
+    description: FormControl<string | null>;
+    type: FormControl<string | null | undefined>;
+    default_value: FormControl<string | null>;
+}>;
+
 @Component({
     selector: 'senergy-import-types-create-edit',
     templateUrl: './import-types-create-edit.component.html',
@@ -63,7 +70,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
     private router = inject(Router);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private importTypesService = inject(ImportTypesService);
     private aspectsService = inject(AspectsService);
     private conceptsService = inject(ConceptsService);
@@ -100,16 +107,16 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     form = this.fb.group({
         id: '',
-        name: [undefined, Validators.required],
+        name: this.fb.control<string | null | undefined>(undefined, Validators.required),
         description: '',
-        image: [undefined, Validators.required],
+        image: this.fb.control<string | null | undefined>(undefined, Validators.required),
         default_restart: true,
-        configs: this.fb.array([]),
+        configs: this.fb.array<ConfigGroup>([]),
         owner: '',
         cost: [0, Validators.min(0)],
     });
 
-    timeAspect = this.fb.control(null);
+    timeAspect = this.fb.control<string | null | undefined>(null);
     /**
      * The time variable's aspects as read on open. The select shows only the alias, so a list of several
      * (possible through the API) is written back unchanged while the alias is still selected.
@@ -244,7 +251,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     save() {
         this.ready = false;
-        const val: ImportTypeModel = this.form.getRawValue();
+        const val = this.form.getRawValue() as ImportTypeModel;
         val.configs.forEach((config: ImportTypeConfigModel) => {
             if (config.type !== ImportTypesCreateEditComponent.STRING) {
                 let toParse = config.default_value;
@@ -260,7 +267,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 return;
             }
             this.defaultOutput.sub_content_variables[2].sub_content_variables = this.dataSource.data;
-            const timeAspectId: string | null = this.timeAspect.value;
+            const timeAspectId: string | null = this.timeAspect.value as string | null;
             this.defaultOutput.sub_content_variables[1].aspect_id = timeAspectId ?? undefined;
             const keepOpenedAspects = !!timeAspectId && timeAspectId === deprecatedAspectAlias(this.openedTimeAspectIds);
             this.defaultOutput.sub_content_variables[1].aspect_ids = keepOpenedAspects ? [...this.openedTimeAspectIds] : timeAspectId ? [timeAspectId] : [];
@@ -285,11 +292,11 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     addConfig(config: ImportTypeConfigModel | undefined) {
-        const group = this.fb.group(
+        const group: ConfigGroup = this.fb.group(
             {
-                name: [undefined, Validators.required],
+                name: this.fb.control<string | null | undefined>(undefined, Validators.required),
                 description: '',
-                type: [undefined, Validators.required],
+                type: this.fb.control<string | null | undefined>(undefined, Validators.required),
                 default_value: '',
             },
             { validators: typeValueValidator('type', 'default_value') },
@@ -309,12 +316,12 @@ export class ImportTypesCreateEditComponent implements OnInit {
         this.getConfigsFormArray().push(group);
     }
 
-    getConfigsFormArray(): FormArray {
-        return this.form.get('configs') as FormArray;
+    getConfigsFormArray(): FormArray<ConfigGroup> {
+        return this.form.controls.configs;
     }
 
-    getConfigsFormArrayGroups(): FormGroup[] {
-        return this.getConfigsFormArray().controls as FormGroup[];
+    getConfigsFormArrayGroups(): ConfigGroup[] {
+        return this.getConfigsFormArray().controls;
     }
 
     deleteConfig(index: number) {

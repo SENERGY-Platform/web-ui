@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EnvironmentsService } from '../shared/environments.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../../permissions/shared/permissions-user.model';
@@ -60,8 +60,8 @@ export class EnvironmentsShareDialogComponent implements OnInit {
     private snackBar = inject(MatSnackBar);
     data = inject<ShareDialogData>(MAT_DIALOG_DATA);
 
-    userFormControl = new UntypedFormControl('');
-    groupFormControl = new UntypedFormControl('');
+    userFormControl = new FormControl<string | null>('');
+    groupFormControl = new FormControl<string | null>('');
 
     loading = true;
     loadFailed = false;

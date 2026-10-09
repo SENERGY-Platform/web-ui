@@ -42,7 +42,7 @@ import { ImportInstancesModel } from '../../imports/import-instances/shared/impo
 import { ImportTypeContentVariableModel, ImportTypeModel } from '../../imports/import-types/shared/import-types.model';
 import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
 import { map } from 'rxjs/operators';
-import { AbstractControl, FormArray, FormControl, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import * as _ from 'lodash';
 import { BrokerExportService } from '../shared/broker-export.service';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
@@ -61,6 +61,13 @@ import { MatInput } from '@angular/material/input';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+
+type ExportValueGroup = FormGroup<{
+    Name: FormControl<string | null>;
+    Path: FormControl<string | null>;
+    Type: FormControl<string | null>;
+    Tag: FormControl<boolean | null>;
+}>;
 
 @Component({
     selector: 'senergy-new-export',
@@ -84,7 +91,7 @@ export class NewExportComponent implements OnInit {
     snackBar = inject(MatSnackBar);
     private importInstancesService = inject(ImportInstancesService);
     private importTypesService = inject(ImportTypesService);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private preferencesService = inject(PreferencesService);
 
     targetDb = 'db';
@@ -99,29 +106,30 @@ export class NewExportComponent implements OnInit {
     exportForm = this.fb.group({
         selector: ['', Validators.required],
         targetSelector: [this.targetDb, Validators.required],
-        customBrokerEnabled: [''],
-        customMqttBroker: undefined,
-        customMqttUser: undefined,
-        customMqttPassword: undefined,
-        customMqttBaseTopic: undefined,
+        customBrokerEnabled: this.fb.control<string | boolean | null>(''),
+        customMqttBroker: this.fb.control<string | null | undefined>(undefined),
+        customMqttUser: this.fb.control<string | null | undefined>(undefined),
+        customMqttPassword: this.fb.control<string | null | undefined>(undefined),
+        customMqttBaseTopic: this.fb.control<string | null | undefined>(undefined),
         name: ['', Validators.required],
         description: '',
-        device: [null, Validators.required],
-        service: [
+        device: this.fb.control<DeviceInstanceModel | null>(null, Validators.required),
+        service: this.fb.control<DeviceTypeServiceModel | null>(
             {
                 value: null,
                 disabled: true,
             },
             Validators.required,
-        ],
-        timePath: {value: '', disabled: true},
+        ),
+        timePath: this.fb.control<string | null>({value: '', disabled: true}),
         allMessages: false,
-        import: [{value: null, disabled: true}, Validators.required],
-        operator: [{value: null, disabled: true}, Validators.required],
-        pipeline: [{value: null, disabled: true}, Validators.required],
-        exportDatabaseId: [{value: environment.exportDatabaseIdInternalTimescaleDb}, Validators.required],
+        import: this.fb.control<ImportInstancesModel | null>({value: null, disabled: true}, Validators.required),
+        operator: this.fb.control<PipelineOperatorModel | null>({value: null, disabled: true}, Validators.required),
+        pipeline: this.fb.control<PipelineModel | null>({value: null, disabled: true}, Validators.required),
+        // Without a disabled key this is no boxed value: the control starts as this object until ngOnInit patches the id.
+        exportDatabaseId: this.fb.control<string | { value: string } | null>({value: environment.exportDatabaseIdInternalTimescaleDb}, Validators.required),
         timestampFormat: [''],
-        exportValues: this.fb.array([] as ExportValueModel[]),
+        exportValues: this.fb.array<ExportValueGroup>([]),
     });
 
     ready = true;
@@ -306,16 +314,16 @@ export class NewExportComponent implements OnInit {
             // still holds what the form shows.
             const raw = this.exportForm.getRawValue();
 
-            this.export.Name = raw.name;
-            this.export.Description = raw.description;
-            this.export.TimePath = raw.timePath;
-            this.export.Values = raw.exportValues;
-            this.export.CustomMqttBroker = raw.customMqttBroker;
-            this.export.CustomMqttUser = raw.customMqttUser;
-            this.export.CustomMqttPassword = raw.customMqttPassword;
-            this.export.CustomMqttBaseTopic = raw.customMqttBaseTopic;
-            this.export.ExportDatabaseID = raw.exportDatabaseId;
-            this.export.TimestampFormat = raw.timestampFormat;
+            this.export.Name = raw.name as string;
+            this.export.Description = raw.description as string | undefined;
+            this.export.TimePath = raw.timePath as string | undefined;
+            this.export.Values = raw.exportValues as ExportValueModel[];
+            this.export.CustomMqttBroker = raw.customMqttBroker as string | undefined;
+            this.export.CustomMqttUser = raw.customMqttUser as string | undefined;
+            this.export.CustomMqttPassword = raw.customMqttPassword as string | undefined;
+            this.export.CustomMqttBaseTopic = raw.customMqttBaseTopic as string | undefined;
+            this.export.ExportDatabaseID = raw.exportDatabaseId as string | undefined;
+            this.export.TimestampFormat = raw.timestampFormat as string | undefined;
 
             if (raw.selector === 'device' && raw.device && raw.service) {
                 this.export.EntityName = raw.device.name;
@@ -382,7 +390,7 @@ export class NewExportComponent implements OnInit {
         if (source === undefined) {
             return;
         }
-        for (const control of ['device', 'service', 'pipeline', 'operator', 'import', 'timePath']) {
+        for (const control of ['device', 'service', 'pipeline', 'operator', 'import', 'timePath'] as const) {
             if (control === source) {
                 this.exportForm.controls[control].enable({onlySelf: true, emitEvent: false});
             } else {
@@ -399,7 +407,7 @@ export class NewExportComponent implements OnInit {
     // which is why this cannot wait for that handler.
     private disableUnusedSources(selection: string) {
         const source = this.sourceControls.get(selection);
-        for (const control of ['device', 'pipeline', 'import']) {
+        for (const control of ['device', 'pipeline', 'import'] as const) {
             if (control !== source) {
                 this.exportForm.controls[control].disable({onlySelf: true, emitEvent: false});
             }
@@ -460,7 +468,8 @@ export class NewExportComponent implements OnInit {
                 }
             });
             if (this.exportForm.get('device')) {
-                this.exportForm.get('device')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((device: DeviceInstanceModel) => {
+                this.exportForm.get('device')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deviceValue) => {
+                    const device = deviceValue as DeviceInstanceModel;
                     if (!_.isEmpty(device)) {
                         if (this.exportForm.value.device !== device) {
                             this.deviceTypeService.getDeviceType(device.device_type_id).subscribe((resp: DeviceTypeModel | null) => {
@@ -477,7 +486,8 @@ export class NewExportComponent implements OnInit {
                 });
             }
             if (this.exportForm.get('service')) {
-                this.exportForm.get('service')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((service: DeviceTypeServiceModel) => {
+                this.exportForm.get('service')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((serviceValue) => {
+                    const service = serviceValue as DeviceTypeServiceModel;
                     if (!_.isEmpty(service)) {
                         this.resetVars();
                         const pathString = 'value';
@@ -490,7 +500,8 @@ export class NewExportComponent implements OnInit {
                 });
             }
             if (this.exportForm.get('pipeline')) {
-                this.exportForm.get('pipeline')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((pipe: PipelineModel) => {
+                this.exportForm.get('pipeline')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((pipeValue) => {
+                    const pipe = pipeValue as PipelineModel;
                     this.exportForm.patchValue({operator: null, timePath: null});
                     this.operator = {} as PipelineOperatorModel;
 
@@ -517,7 +528,8 @@ export class NewExportComponent implements OnInit {
             }
 
             if (this.exportForm.get('import')) {
-                this.exportForm.get('import')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((i: ImportInstancesModel) => {
+                this.exportForm.get('import')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((importValue) => {
+                    const i = importValue as ImportInstancesModel;
                     this.resetVars();
                     if (!_.isEmpty(i)) {
                         this.exportForm.controls['timePath'].enable({onlySelf: true, emitEvent: false});
@@ -642,13 +654,13 @@ export class NewExportComponent implements OnInit {
             }
             this.paths.set('time', 'string');
             this.paths.set('analytics', this.typeStructure);
-            this.exportForm.patchValue({timePath: 'time', timeFormat: '%Y-%m-%dT%H:%M:%S.%fZ'});
+            this.exportForm.patchValue({timePath: 'time'});
             this.autofillValues();
         });
     }
 
-    get exportValues(): FormArray {
-        return this.exportForm.get('exportValues') as FormArray;
+    get exportValues(): FormArray<ExportValueGroup> {
+        return this.exportForm.controls.exportValues;
     }
 
     addValue(name?: string, path?: string, type?: string, tag?: boolean) {
@@ -671,8 +683,8 @@ export class NewExportComponent implements OnInit {
             if (this.exportValues.at(id).value.Tag) {
                 this.exportValues.at(id).patchValue({Type: 'string'});
             } else {
-                let type = this.paths.get(this.exportValues.at(id).value.Path);
-                switch (this.paths.get(this.exportValues.at(id).value.Path)) {
+                let type = this.paths.get(this.exportValues.at(id).value.Path as string);
+                switch (this.paths.get(this.exportValues.at(id).value.Path as string)) {
                 case this.typeString:
                     type = 'string';
                     break;
@@ -798,7 +810,7 @@ export class NewExportComponent implements OnInit {
             ) {
                 const rect: DOMRect = operatorNode.getBoundingClientRect();
                 if ($event.x < rect.right && $event.x > rect.left && $event.y > rect.top && $event.y < rect.bottom) {
-                    const clickedOperator = this.exportForm.getRawValue().pipeline.operators.find(
+                    const clickedOperator = (this.exportForm.getRawValue().pipeline as PipelineModel).operators.find(
                         (o: PipelineOperatorModel) => o.id === operatorNode.attributes['model-id'].value,
                     );
                     if (clickedOperator !== undefined) {

@@ -15,7 +15,7 @@
  */
 
 import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
-import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {SearchbarService} from './shared/searchbar.service';
 import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
@@ -36,7 +36,7 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     @Input() searchTextIn = '';
     @Input() disable = false;
     @Input() supportRefresh = true;
-    formControl = new UntypedFormControl(this.searchTextIn);
+    formControl = new FormControl<string | null>(this.searchTextIn);
 
     ngOnInit(): void {
         if (this.disable) {
@@ -65,12 +65,12 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     }
 
     changeSearchtext(): void {
-        this.searchbarService.changeMessage(this.formControl.value);
+        this.searchbarService.changeMessage(this.formControl.value as string);
     }
 
     resetSearchtext(): void {
         this.formControl.setValue('');
-        this.searchbarService.changeMessage(this.formControl.value);
+        this.searchbarService.changeMessage(this.formControl.value as string);
     }
 
     ngOnDestroy() {

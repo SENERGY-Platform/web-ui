@@ -17,7 +17,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {DeviceTypeCharacteristicsModel} from '../../../device-types-overview/shared/device-type.model';
-import { UntypedFormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import { MatTreeNestedDataSource, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatTreeNodeToggle } from '@angular/material/tree';
 import { NgClass } from '@angular/common';
@@ -37,7 +37,7 @@ import { MatIcon } from '@angular/material/icon';
     imports: [FormsModule, ReactiveFormsModule, NgClass, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIconButton, MatSuffix, MatIcon, MatButton, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatTreeNodeToggle]
 })
 export class CharacteristicElementComponent implements OnInit {
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private destroyRef = inject(DestroyRef);
 
 
@@ -51,16 +51,16 @@ export class CharacteristicElementComponent implements OnInit {
 
     types: { type: string; typeShort: string }[] = [];
     form = this.fb.group({
-        id: undefined,
+        id: this.fb.control<string | null | undefined>(undefined),
         name: '',
         display_unit: '',
         type: '',
         rdf_type: 'https://senergy.infai.org/ontology/Characteristic',
-        min_value: undefined,
-        max_value: undefined,
-        allowed_values: [],
-        value: undefined,
-        sub_characteristics: [],
+        min_value: this.fb.control<number | string | null | undefined>(undefined),
+        max_value: this.fb.control<number | string | null | undefined>(undefined),
+        allowed_values: this.fb.control<any[] | null | undefined>(undefined),
+        value: this.fb.control<string | boolean | number | null | undefined>(undefined),
+        sub_characteristics: this.fb.control<DeviceTypeCharacteristicsModel[] | null | undefined>(undefined),
     });
     private static compareCharacteristics = (a: DeviceTypeCharacteristicsModel, b: DeviceTypeCharacteristicsModel): boolean => {
         if (a.type === b.type && a.max_value === b.max_value && a.min_value === b.min_value && a.name === b.name) {
@@ -95,21 +95,21 @@ export class CharacteristicElementComponent implements OnInit {
         this.form.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
             switch (this.form.get('type')?.value) {
             case 'https://schema.org/Integer':
-                value.min_value = value.min_value ? parseInt(value.min_value, 10) : undefined;
-                value.max_value = value.max_value ? parseInt(value.max_value, 10) : undefined;
-                value.value = value.value ? parseInt(value.value, 10) : undefined;
+                value.min_value = value.min_value ? parseInt(value.min_value as string, 10) : undefined;
+                value.max_value = value.max_value ? parseInt(value.max_value as string, 10) : undefined;
+                value.value = value.value ? parseInt(value.value as string, 10) : undefined;
                 break;
             case 'https://schema.org/Float':
-                value.min_value = value.min_value ? parseFloat(value.min_value) : undefined;
-                value.max_value = value.max_value ? parseFloat(value.max_value) : undefined;
-                value.value = value.value ? parseFloat(value.value) : undefined;
+                value.min_value = value.min_value ? parseFloat(value.min_value as string) : undefined;
+                value.max_value = value.max_value ? parseFloat(value.max_value as string) : undefined;
+                value.value = value.value ? parseFloat(value.value as string) : undefined;
                 break;
             case 'https://schema.org/Boolean':
                 value.value = value.value ? value.value === 'true' : undefined;
                 break;
             }
             console.log(value);
-            this.valueChange.emit(value);
+            this.valueChange.emit(value as DeviceTypeCharacteristicsModel);
         });
         this.form.get('type')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
             this.form.get('allowed_values')?.setValue([]);
@@ -199,7 +199,7 @@ export class CharacteristicElementComponent implements OnInit {
     }
 
     isValid(): boolean {
-        return this.isCharacteristicValid(this.form.value);
+        return this.isCharacteristicValid(this.form.value as DeviceTypeCharacteristicsModel);
     }
 
     getType(): string {
@@ -210,7 +210,7 @@ export class CharacteristicElementComponent implements OnInit {
     }
 
     showValue() {
-        return this.form.get('type')?.value.length > 0 && !this.isStructureOrList();
+        return (this.form.controls.type.value as string).length > 0 && !this.isStructureOrList();
     }
 
     showAllowedValues(){
@@ -261,7 +261,7 @@ export class CharacteristicElementComponent implements OnInit {
     }
 
     get allowedValues(): any[] {
-        return this.form.get('allowed_values')?.value;
+        return this.form.get('allowed_values')?.value as any[];
     }
 
     set allowedValues(value: any[]) {
@@ -269,7 +269,7 @@ export class CharacteristicElementComponent implements OnInit {
     }
 
     refreshFormAllowedValues() {
-        this.form.get('allowed_values')?.setValue(this.form.get('allowed_values')?.value);
+        this.form.get('allowed_values')?.setValue(this.form.get('allowed_values')?.value as any[] | null);
     }
 
     addAllowedValue() {

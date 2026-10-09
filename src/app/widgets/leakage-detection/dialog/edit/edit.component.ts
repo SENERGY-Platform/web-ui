@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { FormControl, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { concatMap, forkJoin, Observable, map } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
@@ -44,7 +44,7 @@ export class LeakageDetectionEditComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<LeakageDetectionEditComponent>>(MatDialogRef);
     private exportService = inject(ExportService);
     private dashboardService = inject(DashboardService);
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
@@ -109,7 +109,7 @@ export class LeakageDetectionEditComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName =  this.form.get('name')?.value;
+        const newName =  this.form.get('name')?.value as string;
         this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
@@ -117,7 +117,7 @@ export class LeakageDetectionEditComponent implements OnInit {
     updateProperties(): Observable<DashboardResponseMessageModel> {
         const leakageDetection: LeakageDetectionWidgetPropertiesModel = {
             leakageDetection: {
-                exportID: this.form.controls.export.value.ID,
+                exportID: (this.form.controls.export.value as ExportModel).ID as string,
             }
         };
 

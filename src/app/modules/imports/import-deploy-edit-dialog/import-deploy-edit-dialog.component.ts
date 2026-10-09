@@ -19,7 +19,7 @@ import { ImportInstanceConfigModel, ImportInstancesModel } from '../import-insta
 import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { ImportTypeConfigModel, ImportTypeModel } from '../import-types/shared/import-types.model';
-import { FormArray, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { typeValueValidator } from '../validators/type-value-validator';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -33,6 +33,13 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
 
+type ConfigGroup = FormGroup<{
+    name: FormControl<string | null>;
+    value: FormControl<any>; // ImportInstanceConfigModel.value is any: JSON for non-string types, plain text otherwise
+    type: FormControl<string | null>;
+    description: FormControl<string | null>;
+}>;
+
 @Component({
     selector: 'senergy-import-deploy-dialog',
     templateUrl: './import-deploy-edit-dialog.component.html',
@@ -42,7 +49,7 @@ import { MatButton } from '@angular/material/button';
 })
 export class ImportDeployEditDialogComponent implements OnInit {
     data = inject<ImportInstancesModel>(MAT_DIALOG_DATA);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private dialogRef = inject<MatDialogRef<ImportDeployEditDialogComponent>>(MatDialogRef);
     private importTypesService = inject(ImportTypesService);
     private snackBar = inject(MatSnackBar);
@@ -54,10 +61,10 @@ export class ImportDeployEditDialogComponent implements OnInit {
         import_type_id: { value: '', disabled: true },
         image: { value: '', disabled: true },
         kafka_topic: { value: '', disabled: true },
-        configs: this.fb.array([]),
+        configs: this.fb.array<ConfigGroup>([]),
         restart: true,
-        created_at: undefined,
-        updated_at: undefined,
+        created_at: this.fb.control<Date | null | undefined>(undefined),
+        updated_at: this.fb.control<Date | null | undefined>(undefined),
         generated: false,
     });
 
@@ -75,7 +82,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     type: ImportTypeModel | undefined = undefined;
     ready = false;
-    configs: FormGroup[] = [];
+    configs: ConfigGroup[] = [];
 
     ngOnInit(): void {
         this.types.set(this.STRING, 'string');
@@ -101,21 +108,21 @@ export class ImportDeployEditDialogComponent implements OnInit {
                             group.patchValue({ value: configured.value });
                         }
                     }
-                    (this.form.get('configs') as FormArray).push(group);
+                    this.form.controls.configs.push(group);
                 });
                 this.data.configs?.forEach((instanceConfig) => {
                     const t = type.configs?.find((typeConfig) => instanceConfig.name === typeConfig.name);
                     if (t === undefined) {
                         // instance has more configs than type
                         const group = this.newConfigGroupFromInstance(instanceConfig);
-                        (this.form.get('configs') as FormArray).push(group);
+                        this.form.controls.configs.push(group);
                     }
                 });
                 this.form.patchValue({ image: type.image });
                 if (this.data.restart === undefined) {
                     this.form.patchValue({ restart: type.default_restart });
                 }
-                this.configs = (this.form.get('configs') as FormArray).controls as FormGroup[];
+                this.configs = this.form.controls.configs.controls;
                 this.ready = true;
             },
             (err) => {
@@ -126,11 +133,11 @@ export class ImportDeployEditDialogComponent implements OnInit {
         );
     }
 
-    private newConfigGroupFromType(config: ImportTypeConfigModel): FormGroup {
-        const group = this.fb.group(
+    private newConfigGroupFromType(config: ImportTypeConfigModel): ConfigGroup {
+        const group: ConfigGroup = this.fb.group(
             {
                 name: [config.name, Validators.required],
-                value: ['', Validators.required],
+                value: this.fb.control<any>('', Validators.required),
                 type: config.type,
                 description: config.description,
             },
@@ -144,10 +151,10 @@ export class ImportDeployEditDialogComponent implements OnInit {
         return group;
     }
 
-    private newConfigGroupFromInstance(config: ImportInstanceConfigModel): FormGroup {
+    private newConfigGroupFromInstance(config: ImportInstanceConfigModel): ConfigGroup {
         return this.fb.group({
             name: config.name,
-            value: config.value,
+            value: this.fb.control<any>(config.value),
             description: '',
             type: this.UNKNOWN,
         });
@@ -155,13 +162,13 @@ export class ImportDeployEditDialogComponent implements OnInit {
 
     save() {
         const instance = this.form.getRawValue();
-        (instance.configs as any[]).forEach((config, i) => {
+        instance.configs.forEach((config, i) => {
             if (config.type !== this.STRING && config.type !== this.UNKNOWN) {
                 config.value = JSON.parse(config.value);
                 instance.configs[i] = config;
             }
         });
-        this.importInstancesService.saveImportInstance(instance).subscribe(
+        this.importInstancesService.saveImportInstance(instance as ImportInstancesModel).subscribe(
             () => this.dialogRef.close(true),
             (err) => {
                 if (err !== undefined && err !== null && err.status !== undefined && err.status === 402) {

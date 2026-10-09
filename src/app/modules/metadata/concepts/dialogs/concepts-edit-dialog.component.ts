@@ -16,14 +16,13 @@
 
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
     DeviceTypeCharacteristicsModel,
     DeviceTypeConceptModel
 } from '../../device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../shared/concepts.service';
 import {CharacteristicsService} from '../../characteristics/shared/characteristics.service';
-import {CharacteristicsPermSearchModel} from '../../characteristics/shared/characteristics-perm-search.model';
 import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -51,10 +50,11 @@ export class ConceptsEditDialogComponent implements OnInit {
     private cd = inject(ChangeDetectorRef);
 
     conceptId: string;
-    nameFormControl = new UntypedFormControl('', [Validators.required]);
-    idFormControl = new UntypedFormControl({ value: '', disabled: true });
-    characteristicsControl = new UntypedFormControl('', [Validators.required]);
-    baseCharacteristicControl = new UntypedFormControl('', [Validators.required]);
+    nameFormControl = new FormControl<string | null | undefined>('', [Validators.required]);
+    idFormControl = new FormControl<string | null | undefined>({ value: '', disabled: true });
+    // Starts as '', which the template iterates as an empty list until the concept is loaded.
+    characteristicsControl = new FormControl<DeviceTypeCharacteristicsModel[] | null>('' as unknown as null, [Validators.required]);
+    baseCharacteristicControl = new FormControl<string | null | undefined>('', [Validators.required]);
     characteristics: DeviceTypeCharacteristicsModel[] = [];
     concept: DeviceTypeConceptModel|undefined;
     ready = false;
@@ -151,10 +151,10 @@ export class ConceptsEditDialogComponent implements OnInit {
 
     save(): void {
         const returnConcept: DeviceTypeConceptModel = {
-            id: this.idFormControl.value,
-            name: this.nameFormControl.value,
-            base_characteristic_id: this.baseCharacteristicControl.value,
-            characteristic_ids: (this.characteristicsControl.value as CharacteristicsPermSearchModel[]).map(c => c.id),
+            id: this.idFormControl.value as string,
+            name: this.nameFormControl.value as string,
+            base_characteristic_id: this.baseCharacteristicControl.value as string,
+            characteristic_ids: (this.characteristicsControl.value as DeviceTypeCharacteristicsModel[]).map(c => c.id as string),
             conversions: this.concept?.conversions
         };
         this.dialogRef.close(returnConcept);

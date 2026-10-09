@@ -419,7 +419,7 @@ describe('TaskConfigDialogComponent', () => {
                     [setTemperature],
                 );
                 await settle();
-                expect(component.functionFormControl.value.id).toBe(setColor.id);
+                expect((component.functionFormControl.value as DeviceTypeFunctionModel).id).toBe(setColor.id);
                 expect(functionIds()).toEqual([setTemperature.id, setColor.id]);
                 //the aspect select sits between device class and function
                 expect(label(2)).toBe('Set-Color (no longer offered for this device class)');

@@ -25,13 +25,14 @@ import {
     ExportValueCharacteristicModel
 } from '../../../modules/exports/shared/export.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { AbstractControl, FormArray, FormControl, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DeviceStatusConfigConvertRuleModel } from '../../device-status/shared/device-status-properties.model';
 import {
     DataTableAggregations,
     DataTableElementModel,
     DataTableElementTypesEnum,
     DataTableOrderEnum,
+    DataTablePropertiesModel,
     ExportValueTypes
 } from '../shared/data-table.model';
 import {
@@ -77,6 +78,64 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionP
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
+/** A control that starts as undefined, like the `[undefined]` entries of the untyped builder did. */
+function unset<T>(validators?: ValidatorFn | ValidatorFn[]): FormControl<T | null | undefined> {
+    return new FormControl<T | null | undefined>(undefined, validators);
+}
+
+type ConvertRuleGroup = FormGroup<{
+    status: FormControl<string | null>;
+    icon: FormControl<string | null>;
+    color: FormControl<string | null>;
+}>;
+
+type ElementGroup = FormGroup<{
+    id: FormControl<string | null | undefined>;
+    name: FormControl<string | null | undefined>;
+    valueType: FormControl<ExportValueTypes | null | undefined>;
+    format: FormControl<string | null | undefined>;
+    exportId: FormControl<string | null | undefined>;
+    exportValuePath: FormControl<string | null | undefined>;
+    exportValueName: FormControl<string | null | undefined>;
+    exportCreatedByWidget: FormControl<boolean | null | undefined>;
+    exportTagSelection: FormControl<string[] | null | undefined>;
+    exportDbId: FormControl<string | null | undefined>;
+    groupType: FormControl<string | null | undefined>;
+    groupTime: FormControl<string | null | undefined>;
+    unit: FormControl<string | null | undefined>;
+    warning: FormGroup<{
+        enabled: FormControl<boolean | null>;
+        lowerBoundary: FormControl<number | null | undefined>;
+        upperBoundary: FormControl<number | null | undefined>;
+    }>;
+    elementDetails: FormGroup<{
+        elementType: FormControl<DataTableElementTypesEnum | null>;
+        device: FormGroup<{
+            aspectId: FormControl<string | null | undefined>;
+            functionId: FormControl<string | null | undefined>;
+            deviceId: FormControl<string | null | undefined>;
+            serviceId: FormControl<string | null | undefined>;
+            deploymentId: FormControl<string | null | undefined>;
+            requestDevice: FormControl<boolean | null>;
+            scheduleId: FormControl<string | null | undefined>;
+        }>;
+        pipeline: FormGroup<{
+            pipelineId: FormControl<string | null | undefined>;
+            operatorId: FormControl<string | null | undefined>;
+        }>;
+        import: FormGroup<{
+            typeId: FormControl<string | null | undefined>;
+            instanceId: FormControl<string | null | undefined>;
+        }>;
+        deviceGroup: FormGroup<{
+            deviceGroupId: FormControl<string | null | undefined>;
+            deviceGroupCriteria: FormControl<DeviceGroupCriteriaModel | null | undefined>;
+            targetCharacteristic: FormControl<string | null | undefined>;
+            deviceGroupAggregation: FormControl<DataTableAggregations | SingleValueAggregations | null>;
+        }>;
+    }>;
+}>;
+
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
     styleUrls: ['./data-table-edit-dialog.component.css'],
@@ -90,7 +149,7 @@ export class DataTableEditDialogComponent implements OnInit {
     private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private processSchedulerService = inject(ProcessSchedulerService);
     private cdref = inject(ChangeDetectorRef);
     private deviceGroupsService = inject(DeviceGroupsService);
@@ -145,12 +204,12 @@ export class DataTableEditDialogComponent implements OnInit {
         'difference-median',
     ];
     formGroup = this.fb.group({
-        name: [undefined, Validators.required],
-        order: [undefined, Validators.required],
-        valueAlias: [undefined],
-        refreshTime: [undefined],
-        elements: this.fb.array([]),
-        convertRules: this.fb.array([]),
+        name: unset<string>(Validators.required),
+        order: unset<DataTableOrderEnum>(Validators.required),
+        valueAlias: unset<string>(),
+        refreshTime: unset<number | string>(),
+        elements: this.fb.array<ElementGroup>([]),
+        convertRules: this.fb.array<ConvertRuleGroup>([]),
         valuesPerElement: [1, [Validators.min(1)]],
     });
     userHasUpdateNameAuthorization = false;
@@ -177,8 +236,8 @@ export class DataTableEditDialogComponent implements OnInit {
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
     }
 
-    get convertRulesControl(): FormArray {
-        return this.formGroup.get('convertRules') as FormArray;
+    get convertRulesControl(): FormArray<ConvertRuleGroup> {
+        return this.formGroup.controls.convertRules;
     }
 
     ngOnInit() {
@@ -189,12 +248,12 @@ export class DataTableEditDialogComponent implements OnInit {
         this.getWidgetData();
         this.initDeviceGroups();
         this.formGroup.get('valuesPerElement')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v => {
-            (this.formGroup.get('elements') as FormArray).controls.forEach(c => {
-                const dg = c.get('elementDetails.deviceGroup');
+            this.formGroup.controls.elements.controls.forEach(c => {
+                const dg = c.controls.elementDetails.controls.deviceGroup;
                 if (dg === undefined) {
                     return;
                 }
-                if (v > 1) {
+                if ((v as number) > 1) {
                     dg?.patchValue({ deviceGroupAggregation: SingleValueAggregations.Latest });
                     dg?.get('deviceGroupAggregation')?.disable();
                 } else {
@@ -270,8 +329,8 @@ export class DataTableEditDialogComponent implements OnInit {
         });
     }
 
-    getElements(): FormArray {
-        return this.formGroup.get('elements') as FormArray;
+    getElements(): FormArray<ElementGroup> {
+        return this.formGroup.controls.elements;
     }
 
     getWarningGroup(element: AbstractControl): FormGroup {
@@ -279,26 +338,26 @@ export class DataTableEditDialogComponent implements OnInit {
     }
 
     addMeasurement(measurement: DataTableElementModel | undefined, init: boolean = false) {
-        const newGroup = this.fb.group(
+        const newGroup: ElementGroup = this.fb.group(
             {
-                id: [undefined, Validators.required],
-                name: [undefined, Validators.required],
-                valueType: [undefined, Validators.required],
-                format: [undefined],
-                exportId: [undefined, Validators.required],
-                exportValuePath: [undefined],
-                exportValueName: [undefined],
-                exportCreatedByWidget: [undefined],
-                exportTagSelection: [undefined],
-                exportDbId: [undefined],
-                groupType: [undefined],
-                groupTime: [undefined],
-                unit: [undefined],
+                id: unset<string>(Validators.required),
+                name: unset<string>(Validators.required),
+                valueType: unset<ExportValueTypes>(Validators.required),
+                format: unset<string>(),
+                exportId: unset<string>(Validators.required),
+                exportValuePath: unset<string>(),
+                exportValueName: unset<string>(),
+                exportCreatedByWidget: unset<boolean>(),
+                exportTagSelection: unset<string[]>(),
+                exportDbId: unset<string>(),
+                groupType: unset<string>(),
+                groupTime: unset<string>(),
+                unit: unset<string>(),
                 warning: this.fb.group(
                     {
                         enabled: [false],
-                        lowerBoundary: [undefined],
-                        upperBoundary: [undefined],
+                        lowerBoundary: unset<number>(),
+                        upperBoundary: unset<number>(),
                     },
                     { validators: [boundaryValidator()] },
                 ),
@@ -306,27 +365,27 @@ export class DataTableEditDialogComponent implements OnInit {
                     {
                         elementType: [DataTableElementTypesEnum.DEVICE, Validators.required],
                         device: this.fb.group({
-                            aspectId: [undefined],
-                            functionId: [undefined],
-                            deviceId: [undefined],
-                            serviceId: [undefined],
-                            deploymentId: [undefined],
+                            aspectId: unset<string>(),
+                            functionId: unset<string>(),
+                            deviceId: unset<string>(),
+                            serviceId: unset<string>(),
+                            deploymentId: unset<string>(),
                             requestDevice: [false],
-                            scheduleId: [undefined],
+                            scheduleId: unset<string>(),
                         }),
                         pipeline: this.fb.group({
-                            pipelineId: [undefined],
-                            operatorId: [undefined],
+                            pipelineId: unset<string>(),
+                            operatorId: unset<string>(),
                         }),
                         import: this.fb.group({
-                            typeId: [undefined],
-                            instanceId: [undefined],
+                            typeId: unset<string>(),
+                            instanceId: unset<string>(),
                         }),
                         deviceGroup: this.fb.group({
-                            deviceGroupId: [undefined],
-                            deviceGroupCriteria: [undefined],
-                            targetCharacteristic: [undefined],
-                            deviceGroupAggregation: [SingleValueAggregations.Latest],
+                            deviceGroupId: unset<string>(),
+                            deviceGroupCriteria: unset<DeviceGroupCriteriaModel>(),
+                            targetCharacteristic: unset<string>(),
+                            deviceGroupAggregation: this.fb.control<DataTableAggregations | SingleValueAggregations | null>(SingleValueAggregations.Latest),
                         }),
                     },
                     { validators: [elementDetailsValidator()] },
@@ -339,7 +398,7 @@ export class DataTableEditDialogComponent implements OnInit {
         newGroup
             .get('elementDetails')
             ?.get('elementType')
-            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((elementType) => this.enableDisableElementDetailsFields(newGroup, elementType));
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((elementType) => this.enableDisableElementDetailsFields(newGroup, elementType as DataTableElementTypesEnum));
 
         newGroup
             .get('elementDetails')
@@ -350,7 +409,7 @@ export class DataTableEditDialogComponent implements OnInit {
                     if (init) {
                         this.numReadyNeeded++;
                     }
-                    this.dataTableHelperService.preloadMeasuringFunctionsOfAspect(aspectId).subscribe(() => {
+                    this.dataTableHelperService.preloadMeasuringFunctionsOfAspect(aspectId as string).subscribe(() => {
                         if (init) {
                             this.numReady++;
                             this.setReady();
@@ -402,7 +461,7 @@ export class DataTableEditDialogComponent implements OnInit {
 
         newGroup
             .get('elementDetails.import.typeId')
-            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id) => this.dataTableHelperService.preloadFullImportType(id).subscribe());
+            ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id) => this.dataTableHelperService.preloadFullImportType(id as string | null).subscribe());
 
         newGroup.get('exportValuePath')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.onExportValueSelected(newGroup));
 
@@ -436,8 +495,8 @@ export class DataTableEditDialogComponent implements OnInit {
             });
 
         newGroup.get('exportId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((exportId) => {
-            this.dataTableHelperService.preloadExportTags(exportId).subscribe();
-            newGroup.get('exportDbId')?.setValue(this.dataTableHelperService.getPreloadedExportById(exportId)?.ExportDatabaseID);
+            this.dataTableHelperService.preloadExportTags(exportId as string | null).subscribe();
+            newGroup.get('exportDbId')?.setValue(this.dataTableHelperService.getPreloadedExportById(exportId as string)?.ExportDatabaseID);
         });
 
         newGroup.get('elementDetails.deviceGroup.deviceGroupCriteria')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(criteria => {
@@ -463,11 +522,11 @@ export class DataTableEditDialogComponent implements OnInit {
                 return;
             }
             const characteristic = this.concepts.get(f?.concept_id)?.characteristics.find(c => this.getDisplayUnit(c) === unit);
-            newGroup.get('elementDetails.deviceGroup')?.patchValue({ targetCharacteristic: characteristic?.id });
+            newGroup.controls.elementDetails.controls.deviceGroup.patchValue({ targetCharacteristic: characteristic?.id });
             if (characteristic === undefined) {
                 return;
             }
-            newGroup.patchValue({ valueType: DataTableHelperService.translateValueType(characteristic?.type) });
+            newGroup.patchValue({ valueType: DataTableHelperService.translateValueType(characteristic?.type) as ExportValueTypes });
         });
 
         if ((this.formGroup.get('valuesPerElement')?.value || 0) > 1) {
@@ -487,7 +546,7 @@ export class DataTableEditDialogComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName = this.formGroup.get('name')?.value;
+        const newName = this.formGroup.get('name')?.value as string;
         this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widgetId, newName);
     }
@@ -511,7 +570,7 @@ export class DataTableEditDialogComponent implements OnInit {
             const obs = forkJoin(observables)
                 .pipe(
                     flatMap(() => {
-                        this.widget.properties.dataTable = this.formGroup.value;
+                        this.widget.properties.dataTable = this.formGroup.value as DataTablePropertiesModel;
                         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], this.widget.properties);
                     }),
                 );
@@ -592,11 +651,11 @@ export class DataTableEditDialogComponent implements OnInit {
     }
 
     getIcon(index: number): string {
-        return this.convertRulesControl.at(index).value.icon;
+        return this.convertRulesControl.at(index).value.icon as string;
     }
 
     getColor(index: number): string {
-        return this.convertRulesControl.at(index).value.color;
+        return this.convertRulesControl.at(index).value.color as string;
     }
 
     deleteConvertRule(index: number): void {
@@ -850,8 +909,8 @@ export class DataTableEditDialogComponent implements OnInit {
         return values;
     }
 
-    getElement(index: number): FormGroup {
-        return this.getElements().at(index) as FormGroup;
+    getElement(index: number): ElementGroup {
+        return this.getElements().at(index);
     }
 
     copyTab(index: number) {
@@ -947,7 +1006,7 @@ export class DataTableEditDialogComponent implements OnInit {
         element.patchValue({ valueType: value.Type, exportValueName: value.Name });
     }
 
-    private setConvertRule(convertRule: DeviceStatusConfigConvertRuleModel): FormGroup {
+    private setConvertRule(convertRule: DeviceStatusConfigConvertRuleModel): ConvertRuleGroup {
         return this.fb.group({
             status: [convertRule.status],
             icon: [convertRule.icon],
@@ -1017,7 +1076,7 @@ export class DataTableEditDialogComponent implements OnInit {
     }
 
     private ensureCorrectExportCreatedByWidget() {
-        const elements = (this.formGroup.get('elements') as FormArray).controls;
+        const elements = this.formGroup.controls.elements.controls;
         elements.forEach((element) => {
             const id = element.get('id')?.value;
             if (id === undefined) {
@@ -1042,7 +1101,7 @@ export class DataTableEditDialogComponent implements OnInit {
     }
 
     private createExports(): Observable<any>[] {
-        const elements = (this.formGroup.get('elements') as FormArray).controls;
+        const elements = this.formGroup.controls.elements.controls;
         const observables: Observable<any>[] = [of(null)];
         elements.forEach((element) => {
             if (element.get('exportCreatedByWidget')?.value !== true) {
@@ -1131,7 +1190,7 @@ export class DataTableEditDialogComponent implements OnInit {
     }
 
     private createDeploymentsAndSchedules(): Observable<any>[] {
-        const elements = (this.formGroup.get('elements') as FormArray).controls;
+        const elements = this.formGroup.controls.elements.controls;
         const observables: Observable<any>[] = [of(null)];
         elements.forEach((element, index) => {
             if (element.get('elementDetails')?.get('device')?.get('requestDevice')?.value === true) {
@@ -1142,8 +1201,8 @@ export class DataTableEditDialogComponent implements OnInit {
                 }
 
                 const aspectId = element.get('elementDetails')?.get('device')?.get('aspectId')?.value;
-                const serviceId = element.get('elementDetails')?.get('device')?.get('serviceId')?.value;
-                const deviceId = element.get('elementDetails')?.get('device')?.get('deviceId')?.value;
+                const serviceId = element.get('elementDetails')?.get('device')?.get('serviceId')?.value as string;
+                const deviceId = element.get('elementDetails')?.get('device')?.get('deviceId')?.value as string;
 
                 const xml =
                     '<?xml version="1.0" encoding="UTF-8"?>\n' +
@@ -1214,12 +1273,12 @@ export class DataTableEditDialogComponent implements OnInit {
                         .pipe(
                             flatMap((deployment) => {
                                 if (deployment !== null && deployment.status === 200) {
-                                    element.get('elementDetails')?.get('device')?.patchValue({ deploymentId: deployment.id });
+                                    element.controls.elementDetails.controls.device.patchValue({ deploymentId: deployment.id });
                                     // spread process starts
                                     let cron =
                                         refreshTime === '*'
                                             ? refreshTime
-                                            : (Math.round((refreshTime / elements.length) * index) as unknown as string) +
+                                            : (Math.round(((refreshTime as number) / elements.length) * index) as unknown as string) +
                                             '/' +
                                             refreshTime;
                                     cron += ' * * * * *';
@@ -1237,7 +1296,7 @@ export class DataTableEditDialogComponent implements OnInit {
                         .pipe(
                             flatMap((schedule) => {
                                 if (schedule !== null) {
-                                    element.get('elementDetails')?.get('device')?.patchValue({ scheduleId: schedule.id });
+                                    element.controls.elementDetails.controls.device.patchValue({ scheduleId: schedule.id });
                                 }
                                 return of(null);
                             }),

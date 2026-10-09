@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {DeploymentsModel} from '../../../modules/processes/deployments/shared/deployments.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -46,7 +46,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<RangeSliderEditDialogComponent>>(MatDialogRef);
     private dashboardService = inject(DashboardService);
     private deploymentsService = inject(DeploymentsService);
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
     private destroyRef = inject(DestroyRef);
 
     @ViewChild(MatTable, { static: false }) table!: MatTable<DeploymentsModel>;
@@ -54,10 +54,11 @@ export class RangeSliderEditDialogComponent implements OnInit {
     formGroup = this.formBuilder.group(
         {
             name: ['', Validators.required],
-            deployment: '',
+            deployment: this.formBuilder.control<DeploymentsModel | string | null | undefined>(''),
             parameter: '',
-            minValue: [{ value: '' }, [Validators.required, rangeValidator(0, 100)]],
-            maxValue: [{ value: '' }, [Validators.required, rangeValidator(0, 100)]],
+            // A boxed value needs both keys, so this starts as the object itself, not as ''.
+            minValue: this.formBuilder.control<number | { value: string } | null | undefined>({ value: '' }, [Validators.required, rangeValidator(0, 100)]),
+            maxValue: this.formBuilder.control<number | { value: string } | null | undefined>({ value: '' }, [Validators.required, rangeValidator(0, 100)]),
             unit: '',
         },
         { validators: [checkValueValidator()] },
@@ -89,9 +90,9 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.formGroup.get('deployment')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deployment: DeploymentsModel) => {
+        this.formGroup.get('deployment')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deployment) => {
             if (deployment) {
-                this.deploymentsService.getDeploymentInputParameters(deployment.id).subscribe((pars) => {
+                this.deploymentsService.getDeploymentInputParameters((deployment as DeploymentsModel).id).subscribe((pars) => {
                     if (pars !== null) {
                         this.parametersMap = pars;
                         this.parameters = [];
@@ -103,7 +104,7 @@ export class RangeSliderEditDialogComponent implements OnInit {
             }
         });
         this.formGroup.controls['name'].valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-            this.widget.name = val;
+            this.widget.name = val as string;
         });
         this.getWidgetData();
         this.initDeployments();
@@ -132,13 +133,13 @@ export class RangeSliderEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        this.widget.name = this.formGroup.get('name')?.value;
-        this.widget.properties.deployment = this.formGroup.get('deployment')?.value;
-        this.widget.properties.selectedParameter = this.formGroup.get('parameter')?.value;
-        this.widget.properties.selectedMinValue = this.formGroup.get('minValue')?.value;
-        this.widget.properties.selectedMaxValue = this.formGroup.get('maxValue')?.value;
-        this.widget.properties.selectedUnit = this.formGroup.get('unit')?.value;
-        this.widget.properties.selectedParameterModel = this.parametersMap.get(this.formGroup.get('parameter')?.value);
+        this.widget.name = this.formGroup.get('name')?.value as string;
+        this.widget.properties.deployment = this.formGroup.get('deployment')?.value as DeploymentsModel | undefined;
+        this.widget.properties.selectedParameter = this.formGroup.get('parameter')?.value as string | undefined;
+        this.widget.properties.selectedMinValue = this.formGroup.get('minValue')?.value as number | undefined;
+        this.widget.properties.selectedMaxValue = this.formGroup.get('maxValue')?.value as number | undefined;
+        this.widget.properties.selectedUnit = this.formGroup.get('unit')?.value as string | undefined;
+        this.widget.properties.selectedParameterModel = this.parametersMap.get(this.formGroup.get('parameter')?.value as string);
 
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }

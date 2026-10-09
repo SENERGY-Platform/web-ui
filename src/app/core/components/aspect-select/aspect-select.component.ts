@@ -16,7 +16,7 @@
 
 import { Component, Injector, Input, OnChanges, OnInit, SimpleChanges, forwardRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, UntypedFormControl, ValidationErrors, Validator, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, NgControl, FormControl, ValidationErrors, Validator, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { AspectClassesService } from '../../../modules/metadata/aspects/shared/aspect-classes.service';
 import { DeviceTypeAspectClassModel, DeviceTypeAspectModel } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
@@ -68,7 +68,7 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
     @Input() appendTo = '.ng-select-anchor';
 
     aspectOptions: AspectSelectOption[] = [];
-    control = new UntypedFormControl([]);
+    control = new FormControl<string[] | null>([]);
 
     private classified: Map<string, AspectClassification> = new Map();
     private aspectClassNames = new Map<string, string>();
@@ -87,7 +87,7 @@ export class AspectSelectComponent implements OnChanges, OnInit, ControlValueAcc
 
     constructor() {
         this.control.setValidators(() => this.validate(this.control));
-        this.control.valueChanges.pipe(takeUntilDestroyed()).subscribe((value: string[]) => this.onChange(value || []));
+        this.control.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => this.onChange(value || []));
     }
 
     ngOnInit(): void {

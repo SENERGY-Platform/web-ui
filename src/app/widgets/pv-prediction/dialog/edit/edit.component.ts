@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
@@ -25,7 +25,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { ExportModel, ExportResponseModel } from 'src/app/modules/exports/shared/export.model';
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
 import { ChartsExportMeasurementModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
-import { PVPredictionProperties } from '../../shared/prediction.model';
+import { PVPredictionNextValue, PVPredictionProperties } from '../../shared/prediction.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { WidgetSpinnerComponent } from '../../../components/widget-spinner/widget-spinner.component';
@@ -47,18 +47,18 @@ export class PVPredictionEditComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<PVPredictionEditComponent>>(MatDialogRef);
     private exportService = inject(ExportService);
     private dashboardService = inject(DashboardService);
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
     private destroyRef = inject(DestroyRef);
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
     form = this.formBuilder.group({
         name: ['', Validators.required],
-        export: [''],
+        export: this.formBuilder.control<ChartsExportMeasurementModel | string | null | undefined>(''),
         displayTimeline: [false],
         displayNextValue: [false],
         nextValueConfig: this.formBuilder.group({
-            time: [''],
+            time: this.formBuilder.control<number | string | null>(''),
             level: ['']
         })
     });
@@ -147,17 +147,17 @@ export class PVPredictionEditComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName =  this.form.get('name')?.value;
+        const newName =  this.form.get('name')?.value as string;
         this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
         const pvPrediction: PVPredictionProperties = {
-            exportID: this.form.get('export')?.value['id'],
-            displayNextValue: this.form.get('displayNextValue')?.value,
-            displayTimeline: this.form.get('displayTimeline')?.value,
-            nextValueConfig: this.form.get('nextValueConfig')?.value
+            exportID: (this.form.controls.export.value as ChartsExportMeasurementModel).id,
+            displayNextValue: this.form.get('displayNextValue')?.value as boolean,
+            displayTimeline: this.form.get('displayTimeline')?.value as boolean,
+            nextValueConfig: this.form.get('nextValueConfig')?.value as PVPredictionNextValue
         };
         this.widget.properties.pvPrediction = pvPrediction;
 

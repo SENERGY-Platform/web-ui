@@ -20,7 +20,7 @@ import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -51,7 +51,7 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
     dataReady = false;
     sortBy = 'name';
     sortOrder = 'asc';
-    searchControl = new UntypedFormControl('');
+    searchControl = new FormControl<string | null>('');
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;
@@ -71,7 +71,7 @@ export class DeviceInstancesSelectDialogComponent implements OnInit {
 
     load() {
         this.deviceInstancesService
-            .getDeviceInstances({limit: this.limit, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortOrder === 'desc', searchText: this.searchControl.value})
+            .getDeviceInstances({limit: this.limit, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortOrder === 'desc', searchText: this.searchControl.value as string})
             .subscribe((devices) => {
                 this.devices.push(...devices.result);
                 if (this.table !== undefined) {

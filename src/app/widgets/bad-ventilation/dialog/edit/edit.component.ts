@@ -15,13 +15,14 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, map } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
 import { ChartsExportMeasurementModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { VentilationWidgetProperties } from '../../shared/model';
 import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-selector/data-source-selector.component';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -40,7 +41,7 @@ import { MatButton } from '@angular/material/button';
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, DataSourceSelectorComponent, MatDialogActions, MatButton]
 })
 export class EditVentilationWidgetComponent implements OnInit {
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
     private dialogRef = inject<MatDialogRef<EditVentilationWidgetComponent>>(MatDialogRef);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
@@ -48,16 +49,16 @@ export class EditVentilationWidgetComponent implements OnInit {
     form = this.formBuilder.group({
         name: ['', Validators.required],
         exportConfig:  this.formBuilder.group({
-            exports: [[]],
+            exports: this.formBuilder.control<VentilationWidgetProperties['exportConfig']['exports'] | null>([]),
         }),
         deviceValueConfig: this.formBuilder.group({
-            exports: [[]],
-            fields: [[]]
+            exports: this.formBuilder.control<VentilationWidgetProperties['deviceConfig']['exports'] | null>([]),
+            fields: this.formBuilder.control<VentilationWidgetProperties['deviceConfig']['fields'] | null>([])
         }),
         timeRangeConfig: this.formBuilder.group({
             timeRange: this.formBuilder.group({
                 type: [''],
-                time: [''],
+                time: this.formBuilder.control<number | string | null>(''),
                 level: [''],
                 start: [''],
                 end: ['']
@@ -114,19 +115,32 @@ export class EditVentilationWidgetComponent implements OnInit {
     }
 
     updateName() {
-        const newName =  this.form.get('name')?.value;
+        const newName =  this.form.get('name')?.value as string;
         this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateProperties() {
         this.widget.properties.badVentilation = {
-            exportConfig: this.form.controls.exportConfig.value,
-            deviceConfig: this.form.controls.deviceValueConfig.value,
-            timeRangeConfig: this.form.controls.timeRangeConfig.value,
+            exportConfig: this.form.controls.exportConfig.value as VentilationWidgetProperties['exportConfig'],
+            deviceConfig: this.form.controls.deviceValueConfig.value as VentilationWidgetProperties['deviceConfig'],
+            timeRangeConfig: this.form.controls.timeRangeConfig.value as VentilationWidgetProperties['timeRangeConfig'],
         };
 
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
+    }
+
+    /** The form values hold null and '' where DataSourceConfig has optional fields, so the template binds these. */
+    get exportSourceConfig(): DataSourceConfig {
+        return this.form.controls.exportConfig.value as DataSourceConfig;
+    }
+
+    get deviceValueSourceConfig(): DataSourceConfig {
+        return this.form.controls.deviceValueConfig.value as DataSourceConfig;
+    }
+
+    get timeRangeSourceConfig(): DataSourceConfig {
+        return this.form.controls.timeRangeConfig.value as DataSourceConfig;
     }
 
     close(): void {

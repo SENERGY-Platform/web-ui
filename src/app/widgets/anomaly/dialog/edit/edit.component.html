@@ -38,7 +38,7 @@
                 appendTo=".ng-select-anchor">
               </mtx-select>
             </mat-form-field>
-            <data-source-selector [dataSourceConfig]="form.controls.timeRangeConfig.value"
+            <data-source-selector [dataSourceConfig]="timeRangeSourceConfig"
               [enableAggretationConfig]="false" (updatedDataSourceConfig)="timeRangeConfigUpdated($event)"
               [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="false"
               [showSource]="false">
@@ -55,17 +55,17 @@
               </mtx-select>
               <mat-error senergyError label="Choose Visualization"></mat-error>
             </mat-form-field>
-            @if (form.controls.visualizationType.value.id === 'timeline') {
+            @if (form.controls.visualizationType.value!.id === 'timeline') {
               <div>
-                <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
+                <data-source-selector [dataSourceConfig]="deviceValueSourceConfig"
                   [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)"
                   [enableFieldSelection]="false" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
                 [showExportsAsSource]="false" [showTimeRange]="false"></data-source-selector>
               </div>
             }
-            @if (form.controls.visualizationType.value.id === 'device') {
+            @if (form.controls.visualizationType.value!.id === 'device') {
               <div>
-                <data-source-selector [dataSourceConfig]="form.controls.deviceValueConfig.value"
+                <data-source-selector [dataSourceConfig]="deviceValueSourceConfig"
                   [enableAggretationConfig]="false" (updatedDataSourceConfig)="deviceValuesConfigUpdated($event)"
                   [enableFieldSelection]="true" [showDeviceGroupsAsSource]="false" [showDevicesAsSource]="true"
                 [showExportsAsSource]="false" [showTimeRange]="false"></data-source-selector>

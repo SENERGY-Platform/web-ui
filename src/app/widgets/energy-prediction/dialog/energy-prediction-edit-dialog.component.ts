@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { AbstractControl, UntypedFormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -46,7 +46,7 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
     private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
 
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
@@ -57,15 +57,15 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
 
     form = this.formBuilder.group({
         name: ['', Validators.required],
-        export: ['', [Validators.required, chartsExportMeasurementModelValidator()]],  // , EnergyPredictionEditDialogComponent.estimationExportValidator()]],
+        export: this.formBuilder.control<ChartsExportMeasurementModel | string | null | undefined>('', [Validators.required, chartsExportMeasurementModelValidator()]),  // , EnergyPredictionEditDialogComponent.estimationExportValidator()]],
         math: [''],
         unit: ['kWh'],
         predictionType: ['', Validators.required],
         numberFormat: ['1.3-3'],
-        pricePerUnit: ['', Validators.required],
+        pricePerUnit: this.formBuilder.control<number | string | null | undefined>('', Validators.required),
         currency: ['€'],
         thresholdOption: ['', Validators.required],
-        threshold: ['', Validators.required],
+        threshold: this.formBuilder.control<number | string | null | undefined>('', Validators.required),
     });
 
     userHasUpdateNameAuthorization = false;
@@ -141,26 +141,26 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
 
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName =  this.form.get('name')?.value;
+        const newName =  this.form.get('name')?.value as string;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        this.widget.properties.selectedOption = this.form.get('predictionType')?.value;
-        this.widget.properties.thresholdOption = this.form.get('thresholdOption')?.value;
+        this.widget.properties.selectedOption = this.form.get('predictionType')?.value as string | undefined;
+        this.widget.properties.thresholdOption = this.form.get('thresholdOption')?.value as string | undefined;
         if (this.widget.properties.columns === undefined) {
             this.widget.properties.columns = { timestamp: '', prediction: '', predictionTotal: '' };
         }
         this.widget.properties.columns.prediction = this.form.get('predictionType')?.value + 'Prediction';
         this.widget.properties.columns.predictionTotal = this.form.get('predictionType')?.value + 'PredictionTotal';
         this.widget.properties.columns.timestamp = this.form.get('predictionType')?.value + 'Timestamp';
-        this.widget.properties.math = this.form.get('math')?.value;
-        this.widget.properties.format = this.form.get('numberFormat')?.value;
-        this.widget.properties.unit = this.form.get('unit')?.value;
-        this.widget.properties.currency = this.form.get('currency')?.value;
-        this.widget.properties.price = this.form.get('pricePerUnit')?.value;
-        this.widget.properties.threshold = this.form.get('threshold')?.value;
-        this.widget.properties.measurement = this.form.get('export')?.value;
+        this.widget.properties.math = this.form.get('math')?.value as string | undefined;
+        this.widget.properties.format = this.form.get('numberFormat')?.value as string | undefined;
+        this.widget.properties.unit = this.form.get('unit')?.value as string | undefined;
+        this.widget.properties.currency = this.form.get('currency')?.value as string | undefined;
+        this.widget.properties.price = this.form.get('pricePerUnit')?.value as number | undefined;
+        this.widget.properties.threshold = this.form.get('threshold')?.value as number | undefined;
+        this.widget.properties.measurement = this.form.get('export')?.value as ChartsExportMeasurementModel | undefined;
 
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }

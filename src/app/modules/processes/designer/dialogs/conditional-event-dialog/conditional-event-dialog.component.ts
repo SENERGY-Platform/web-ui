@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import {
     compareAspectIds,
@@ -55,7 +55,7 @@ import { MatButton } from '@angular/material/button';
 })
 export class ConditionalEventDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<ConditionalEventDialogComponent>>(MatDialogRef);
-    private _formBuilder = inject(UntypedFormBuilder);
+    private _formBuilder = inject(FormBuilder);
     private deviceTypeService = inject(DeviceTypeService);
     private conceptsService = inject(ConceptsService);
     private destroyRef = inject(DestroyRef);
@@ -63,8 +63,8 @@ export class ConditionalEventDialogComponent implements OnInit {
         msg: ConditionalEventEditModel;
     }>(MAT_DIALOG_DATA);
 
-    aspectFormControl = new UntypedFormControl([]);
-    functionFormControl = new UntypedFormControl({ value: '', disabled: true });
+    aspectFormControl = new FormControl<string[] | null>([]);
+    functionFormControl = new FormControl<DeviceTypeFunctionModel | '' | null | undefined>({ value: '', disabled: true });
 
     aspects: DeviceTypeAspectModel[] = [];
     functions: DeviceTypeFunctionModel[] = [];
@@ -116,9 +116,11 @@ export class ConditionalEventDialogComponent implements OnInit {
         const aspectIds = [...this.selectedAspectIds()].sort(compareAspectIds);
         this.result.aspects = aspectIds;
         this.result.aspect = deprecatedAspectAlias(aspectIds) || '';
-        this.result.iotfunction = this.functionFormControl.value?.id || '';
+        // The save button is only enabled while a function is selected.
+        const selectedFunction = this.functionFormControl.value as DeviceTypeFunctionModel;
+        this.result.iotfunction = selectedFunction?.id || '';
         this.result.characteristic = this.characteristic?.id || '';
-        this.result.label = this.functionFormControl.value.name + ' ' + this.characteristic.name + '\n' + this.result.script;
+        this.result.label = selectedFunction.name + ' ' + this.characteristic.name + '\n' + this.result.script;
         this.dialogRef.close(this.result);
     }
 
@@ -138,7 +140,7 @@ export class ConditionalEventDialogComponent implements OnInit {
     }
 
     private initFunctionsUpdate(): void {
-        this.functionFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func: DeviceTypeFunctionModel) => {
+        this.functionFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func) => {
             this.getBaseCharacteristics(func);
         });
 
@@ -203,7 +205,7 @@ export class ConditionalEventDialogComponent implements OnInit {
         this.functionFormControl.enable();
     }
 
-    private getBaseCharacteristics(func: DeviceTypeFunctionModel): void {
+    private getBaseCharacteristics(func: DeviceTypeFunctionModel | '' | null | undefined): void {
         if (func && func.concept_id !== '') {
             this.conceptsService
                 .getConceptWithCharacteristics(func.concept_id)

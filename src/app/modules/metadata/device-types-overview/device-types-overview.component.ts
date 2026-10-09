@@ -27,7 +27,7 @@ import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-typ
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { SelectionModel } from '@angular/cdk/collections';
-import { UntypedFormControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
@@ -63,7 +63,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     selection = new SelectionModel<DeviceTypeModel>(true, []);
     totalCount = 200;
     offset = 0;
-    searchControl = new UntypedFormControl('');
+    searchControl = new FormControl<string | null>('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     searchText = '';

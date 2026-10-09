@@ -19,7 +19,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceGroupsService } from '../shared/device-groups.service';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { DeviceGroupModel } from '../shared/device-groups.model';
@@ -51,7 +51,7 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
     dataReady = false;
     sortBy = 'name';
     sortOrder = 'asc';
-    searchControl = new UntypedFormControl('');
+    searchControl = new FormControl<string | null>('');
     limitInit = 100;
     limit = this.limitInit;
     offset = 0;
@@ -71,7 +71,7 @@ export class DeviceGroupsSelectDialogComponent implements OnInit {
 
     load() {
         this.deviceGroupsService
-            .getDeviceGroups(this.searchControl.value, this.limit, this.offset, this.sortBy, this.sortOrder)
+            .getDeviceGroups(this.searchControl.value as string, this.limit, this.offset, this.sortBy, this.sortOrder)
             .subscribe((res) => {
                 this.deviceGroups.push(...res.result);
                 if (this.table !== undefined) {

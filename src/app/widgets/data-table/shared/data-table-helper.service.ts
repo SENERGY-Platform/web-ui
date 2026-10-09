@@ -341,7 +341,8 @@ export class DataTableHelperService {
         return this.importInstances.filter((i) => i.import_type_id === id);
     }
 
-    getImportTypeValues(id: string): ExportValueModel[] {
+    getImportTypeValues(importTypeId: string | null | undefined): ExportValueModel[] {
+        const id = importTypeId as string;
         if (this.importTypeValues.has(id)) {
             return this.importTypeValues.get(id) || [];
         }

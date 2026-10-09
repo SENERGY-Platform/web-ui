@@ -29,7 +29,7 @@ import {
 // import would close the cycle and break module initialization in the test bundle.
 import type { NotificationService } from '../shared/notification.service';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
-import { UntypedFormBuilder, UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, concatMap, debounceTime, forkJoin, of, takeUntil } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -65,7 +65,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {
     private dialogRef = inject<MatDialogRef<NotificationDialogComponent>>(MatDialogRef);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private authorizationService = inject(AuthorizationService);
     preferencesService = inject(PreferencesService);
 
@@ -96,13 +96,13 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
         password: [''],
         topic: [''],
         qos: [0, [Validators.min(0), Validators.max(2)]],
-        created_at: [undefined],
-        updated_at: [undefined],
+        created_at: this.fb.control<Date | null | undefined>(undefined),
+        updated_at: this.fb.control<Date | null | undefined>(undefined),
     });
 
     platformBrokerTooltip = environment.brokerExportBroker + ', Topic: notifications/' + this.authorizationService.getUserId() + ', Use platform credentials';
 
-    platformBrokerActive = new UntypedFormControl(false);
+    platformBrokerActive = new FormControl<boolean | null>(false);
 
     private readonly saveSettings$ = new Subject<void>();
     private readonly destroy$ = new Subject<void>();
@@ -257,7 +257,7 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
 
     private registerPlatformBrokerSaver() {
         this.platformBrokerActive.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(v =>
-            this.notificationService.updatePlatformBrokerConfig({ enabled: v }).subscribe({
+            this.notificationService.updatePlatformBrokerConfig({ enabled: v as boolean }).subscribe({
                 error: () => this.platformBrokerActive.setValue(!v, { emitEvent: false }),
             }),
         );

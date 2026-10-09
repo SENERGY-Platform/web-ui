@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { UntypedFormBuilder } from '@angular/forms';
+import { FormBuilder, FormControl } from '@angular/forms';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { of } from 'rxjs';
 
@@ -41,7 +41,7 @@ describe('AcControlEditDialogComponent', () => {
 
         TestBed.configureTestingModule({
             providers: [
-                UntypedFormBuilder,
+                FormBuilder,
                 {provide: DashboardService, useValue: dashboardServiceSpy},
                 {provide: DeviceTypeService, useValue: deviceTypeServiceSpy},
                 {provide: DeviceInstancesService, useValue: deviceInstancesServiceSpy},
@@ -103,8 +103,8 @@ describe('AcControlEditDialogComponent', () => {
             init(widget);
             deviceTypeServiceSpy.getDeviceType.and.returnValue(of(deviceTypeWithAspects(['room', 'air'])));
             dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({message: 'OK'}));
-            component.form = new UntypedFormBuilder().group({
-                name: ['ac'], selectable: ['device1'], minTarget: [15], maxTarget: [30],
+            component.form = new FormBuilder().group({
+                name: ['ac'], selectable: new FormControl<string | null | undefined>('device1'), minTarget: [15], maxTarget: [30],
             });
             component.selectables = [{device: {id: 'device1', device_type_id: 'dt1'} as any}];
 

@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap, throwError } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
@@ -44,13 +44,13 @@ export class PVLoadRecommendationEditComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<PVLoadRecommendationEditComponent>>(MatDialogRef);
     private exportService = inject(ExportService);
     private dashboardService = inject(DashboardService);
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
     form = this.formBuilder.group({
         name: ['', Validators.required],
-        export: ['']
+        export: this.formBuilder.control<ChartsExportMeasurementModel | string | null | undefined>('')
     });
     dashboardId: string;
     widgetId: string;
@@ -104,7 +104,7 @@ export class PVLoadRecommendationEditComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName =  this.form.get('name')?.value;
+        const newName =  this.form.get('name')?.value as string;
         if(this.widget == null) {
             return throwError(() => new Error('Widget data missing'));
         }
@@ -117,7 +117,7 @@ export class PVLoadRecommendationEditComponent implements OnInit {
             return throwError(() => new Error('Widget data missing'));
         }
         const pvLoadRecommendation = {
-            exportID: this.form.get('export')?.value['id']
+            exportID: (this.form.controls.export.value as ChartsExportMeasurementModel).id
         };
         this.widget.properties.pvLoadRecommendation = pvLoadRecommendation;
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget?.properties);

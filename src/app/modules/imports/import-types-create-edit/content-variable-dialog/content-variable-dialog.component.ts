@@ -17,7 +17,7 @@ import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ImportTypeContentVariableModel } from '../../import-types/shared/import-types.model';
-import { AbstractControl, UntypedFormBuilder, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormBuilder, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
     contentVariableAspectIds,
     deprecatedAspectAlias,
@@ -57,7 +57,7 @@ export class ContentVariableDialogComponent implements OnInit {
         nameTimeAllowed: boolean;
     }>(MAT_DIALOG_DATA);
     private destroyRef = inject(DestroyRef);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private dialogRef = inject<MatDialogRef<ContentVariableDialogComponent>>(MatDialogRef);
 
     static notNamedTimeAndNotEmpty(control: AbstractControl): ValidationErrors | null {
@@ -77,12 +77,12 @@ export class ContentVariableDialogComponent implements OnInit {
     }
 
     form = this.fb.group({
-        name: [undefined, Validators.required],
-        type: [undefined, Validators.required],
-        characteristic_id: null,
+        name: this.fb.control<string | null | undefined>(undefined, Validators.required),
+        type: this.fb.control<string | null | undefined>(undefined, Validators.required),
+        characteristic_id: this.fb.control<string | null>(null),
         use_as_tag: false,
         aspect_ids: [[] as string[]],
-        function_id: undefined,
+        function_id: this.fb.control<string | null | undefined>(undefined),
     });
 
     STRING = 'https://schema.org/Text';
@@ -127,15 +127,15 @@ export class ContentVariableDialogComponent implements OnInit {
             return;
         }
         const aspectIds: string[] = this.form.get('aspect_ids')?.value || [];
-        this.data.content.name = this.form.get('name')?.value;
-        this.data.content.type = this.form.get('type')?.value;
-        this.data.content.characteristic_id = this.form.get('characteristic_id')?.value;
-        this.data.content.use_as_tag = this.form.get('use_as_tag')?.value;
+        this.data.content.name = this.form.get('name')?.value as string;
+        this.data.content.type = this.form.get('type')?.value as string;
+        this.data.content.characteristic_id = this.form.get('characteristic_id')?.value as string | undefined;
+        this.data.content.use_as_tag = this.form.get('use_as_tag')?.value as boolean;
         this.data.content.aspect_ids = aspectIds;
         // Derived fresh from the current selection rather than carried over, so an aspect removed
         // here is not resurrected by a stale aspect_id when the import-repository folds it back in.
         this.data.content.aspect_id = deprecatedAspectAlias(aspectIds);
-        this.data.content.function_id = this.form.get('function_id')?.value;
+        this.data.content.function_id = this.form.get('function_id')?.value as string | undefined;
         this.dialogRef.close(this.data.content);
     }
 
@@ -146,7 +146,7 @@ export class ContentVariableDialogComponent implements OnInit {
     getConceptCharacteristics(): DeviceTypeCharacteristicsModelWithGroup[] {
         const type = this.form.get('type')?.value;
         const res: DeviceTypeCharacteristicsModelWithGroup[] = [];
-        this.data.typeConceptCharacteristics.get(type)?.forEach((v, k) => {
+        this.data.typeConceptCharacteristics.get(type as string)?.forEach((v, k) => {
             v.forEach(e => {
                 (e as DeviceTypeCharacteristicsModelWithGroup).group = k;
                 res.push(e);

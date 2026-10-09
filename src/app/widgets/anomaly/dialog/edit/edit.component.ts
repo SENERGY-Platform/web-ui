@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
@@ -25,7 +25,8 @@ import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/sh
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { ExportModel, ExportResponseModel } from 'src/app/modules/exports/shared/export.model';
 import { ExportService } from 'src/app/modules/exports/shared/export.service';
-import { ChartsExportMeasurementModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { ChartsExportMeasurementModel, ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
+import { AnomalyWidgetProperties } from '../../shared/anomaly.model';
 import { DataSourceConfig } from 'src/app/widgets/charts/shared/data-source-selector/data-source-selector.component';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -60,23 +61,23 @@ export class EditComponent implements OnInit {
     private exportService = inject(ExportService);
     private dashboardService = inject(DashboardService);
     private deviceInstancesService = inject(DeviceInstancesService);
-    private formBuilder = inject(UntypedFormBuilder);
+    private formBuilder = inject(FormBuilder);
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
     form = this.formBuilder.group({
         name: ['', Validators.required],
-        export: [''],
+        export: this.formBuilder.control<ChartsExportMeasurementModel | string | null | undefined>(''),
         showDebug: [false],
         deviceValueConfig: this.formBuilder.group({
-            exports: [''],
-            fields: ['']
+            exports: this.formBuilder.control<AnomalyWidgetProperties['deviceValueConfig']['exports'] | string | null>(''),
+            fields: this.formBuilder.control<ChartsExportVAxesModel[] | string | null>('')
         }),
-        visualizationType: [visualizationTypeLine],
+        visualizationType: this.formBuilder.control<typeof visualizationTypeLine | null>(visualizationTypeLine),
         timeRangeConfig: this.formBuilder.group({
             timeRange: this.formBuilder.group({
                 type: [''],
-                time: [''],
+                time: this.formBuilder.control<number | string | null>(''),
                 level: [''],
                 start: [''],
                 end: ['']
@@ -105,6 +106,15 @@ export class EditComponent implements OnInit {
         this.widgetId = data.widgetId;
         this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
+    }
+
+    /** The form values hold null and '' where DataSourceConfig has optional fields, so the template binds these. */
+    get timeRangeSourceConfig(): DataSourceConfig {
+        return this.form.controls.timeRangeConfig.value as DataSourceConfig;
+    }
+
+    get deviceValueSourceConfig(): DataSourceConfig {
+        return this.form.controls.deviceValueConfig.value as DataSourceConfig;
     }
 
     close(): void {
@@ -170,23 +180,23 @@ export class EditComponent implements OnInit {
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {
-        const newName =  this.form.get('name')?.value;
+        const newName =  this.form.get('name')?.value as string;
         this.widget.name = newName;
         return this.dashboardService.updateWidgetName(this.dashboardId, this.widget.id, newName);
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
         this.widget.properties.anomalyDetection = {
-            export: this.form.controls.export?.value?.['id'],
-            showDebug: this.form.controls.showDebug?.value,
+            export: (this.form.controls.export?.value as ChartsExportMeasurementModel | null)?.id as string,
+            showDebug: this.form.controls.showDebug?.value as boolean,
             timelineConfig: {
                 vAxisLabel: '',
                 hAxisLabel: '',
             },
-            timeRangeConfig: this.form.controls.timeRangeConfig?.value,
-            deviceValueConfig: this.form.controls.deviceValueConfig?.value,
-            visualizationType: this.form.controls.visualizationType.value['id'],
-            showFrequencyAnomalies: this.form.controls.showFrequencyAnomalies.value
+            timeRangeConfig: this.form.controls.timeRangeConfig?.value as AnomalyWidgetProperties['timeRangeConfig'],
+            deviceValueConfig: this.form.controls.deviceValueConfig?.value as AnomalyWidgetProperties['deviceValueConfig'],
+            visualizationType: (this.form.controls.visualizationType.value as typeof visualizationTypeLine).id,
+            showFrequencyAnomalies: this.form.controls.showFrequencyAnomalies.value as boolean
         };
 
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);

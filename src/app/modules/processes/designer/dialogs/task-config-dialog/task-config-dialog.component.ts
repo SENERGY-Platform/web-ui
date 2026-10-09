@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { UntypedFormBuilder, UntypedFormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import {
     compareAspectIds,
@@ -65,7 +65,7 @@ import { MatButton } from '@angular/material/button';
 export class TaskConfigDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<TaskConfigDialogComponent>>(MatDialogRef);
     private dtService = inject(DeviceTypeService);
-    private _formBuilder = inject(UntypedFormBuilder);
+    private _formBuilder = inject(FormBuilder);
     private deviceTypeService = inject(DeviceTypeService);
     private conceptsService = inject(ConceptsService);
     private destroyRef = inject(DestroyRef);
@@ -73,13 +73,13 @@ export class TaskConfigDialogComponent implements OnInit {
         selection: DeviceTypeSelectionRefModel | null;
     }>(MAT_DIALOG_DATA);
 
-    optionsFormControl = new UntypedFormControl('');
-    deviceClassFormControl = new UntypedFormControl('');
-    aspectFormControl = new UntypedFormControl([]);
-    functionFormControl = new UntypedFormControl({ value: '', disabled: true });
-    completionStrategyFormControl = new UntypedFormControl('');
-    retriesFormControl = new UntypedFormControl({ value: 0, disabled: true }, [rangeValidator(-1, 100)]);
-    preferEventsFormControl = new UntypedFormControl({ value: false, disabled: true });
+    optionsFormControl = new FormControl<string | null>('');
+    deviceClassFormControl = new FormControl<DeviceTypeDeviceClassModel | '' | null>('');
+    aspectFormControl = new FormControl<string[] | null>([]);
+    functionFormControl = new FormControl<DeviceTypeFunctionModel | '' | null>({ value: '', disabled: true });
+    completionStrategyFormControl = new FormControl<string | null>('');
+    retriesFormControl = new FormControl<number | null>({ value: 0, disabled: true }, [rangeValidator(-1, 100)]);
+    preferEventsFormControl = new FormControl<boolean | null>({ value: false, disabled: true });
 
 
 
@@ -135,12 +135,12 @@ export class TaskConfigDialogComponent implements OnInit {
         this.result = {
             aspect: (aspects[0] || null) as DeviceTypeAspectModel,
             aspects,
-            function: this.functionFormControl.value,
-            device_class: this.deviceClassFormControl.value || null,
+            function: this.functionFormControl.value as DeviceTypeFunctionModel,
+            device_class: (this.deviceClassFormControl.value || null) as DeviceTypeDeviceClassModel,
             characteristic: this.characteristic,
-            completionStrategy: this.completionStrategyFormControl.value,
-            retries: this.retriesFormControl.value,
-            prefer_events: this.preferEventsFormControl.value
+            completionStrategy: this.completionStrategyFormControl.value as string,
+            retries: this.retriesFormControl.value as number,
+            prefer_events: this.preferEventsFormControl.value as boolean
         };
         this.dialogRef.close(this.result);
     }
@@ -175,8 +175,8 @@ export class TaskConfigDialogComponent implements OnInit {
      * Swaps a stored selection for the current object of the same id once the options are loaded, so a save
      * writes the current name. Silent: a device class change would otherwise reset the function.
      */
-    private refreshSelected(control: UntypedFormControl, options: { id: string }[]): void {
-        const selected = control.value;
+    private refreshSelected<T extends { id: string }>(control: FormControl<T | '' | null>, options: T[]): void {
+        const selected = control.value || null;
         const current = selected?.id ? options.find((o) => o.id === selected.id) : undefined;
         if (current && current !== selected) {
             control.setValue(current, { emitEvent: false });
@@ -184,7 +184,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     /** The stored selection if the control still holds it although the options leave it out. */
-    private unlistedOf<T extends { id: string }>(control: UntypedFormControl, stored: T | null | undefined, options: T[]): T | null {
+    private unlistedOf<T extends { id: string }>(control: { readonly value: unknown }, stored: T | null | undefined, options: T[]): T | null {
         return stored && control.value === stored && !options.some((o) => o.id === stored.id) ? stored : null;
     }
 
@@ -261,7 +261,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private setAspects(): void {
-        const offered = new Set([...(this.listedAspectIds[this.optionsFormControl.value] || []), ...this.selectionAspectIds]);
+        const offered = new Set([...(this.listedAspectIds[this.optionsFormControl.value ?? ''] || []), ...this.selectionAspectIds]);
         const nodes = [...offered]
             .map((id) => this.aspectNodes.get(id))
             .filter((node): node is DeviceTypeAspectNodeModel => node !== undefined);
@@ -270,14 +270,14 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private initFunctions(): void {
-        this.functionFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func: DeviceTypeFunctionModel) => {
+        this.functionFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func) => {
             this.getBaseCharacteristics(func);
             if (this.unlistedFunction && func !== this.unlistedFunction) {
                 this.functions = this.functions.filter((f) => f !== this.unlistedFunction);
                 this.unlistedFunction = null;
             }
         });
-        this.deviceClassFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deviceClass: DeviceTypeDeviceClassModel) => {
+        this.deviceClassFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deviceClass) => {
             if (this.unlistedDeviceClass && deviceClass !== this.unlistedDeviceClass) {
                 this.deviceClasses = this.deviceClasses.filter((c) => c !== this.unlistedDeviceClass);
                 this.unlistedDeviceClass = null;
@@ -334,7 +334,7 @@ export class TaskConfigDialogComponent implements OnInit {
         this.functionFormControl.enable();
     }
 
-    private getBaseCharacteristics(func: DeviceTypeFunctionModel): void {
+    private getBaseCharacteristics(func: DeviceTypeFunctionModel | '' | null): void {
         if (func && func.concept_id !== '') {
             this.conceptsService
                 .getConceptWithCharacteristics(func.concept_id)

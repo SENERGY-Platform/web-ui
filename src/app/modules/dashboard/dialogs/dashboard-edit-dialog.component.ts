@@ -16,7 +16,7 @@
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { UntypedFormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DashboardModel } from '../shared/dashboard.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -35,7 +35,7 @@ export class DashboardEditDialogComponent {
     private dialogRef = inject<MatDialogRef<DashboardEditDialogComponent>>(MatDialogRef);
 
     dashboard: DashboardModel;
-    formControl = new UntypedFormControl('', [Validators.required, Validators.minLength(1)]);
+    formControl = new FormControl<string | null>('', [Validators.required, Validators.minLength(1)]);
 
     constructor() {
         const data = inject<{
@@ -51,7 +51,7 @@ export class DashboardEditDialogComponent {
     }
 
     save(): void {
-        this.dashboard.name = this.formControl.value;
+        this.dashboard.name = this.formControl.value as string;
         this.dialogRef.close(this.dashboard);
     }
 }

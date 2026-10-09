@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, UntypedFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -35,7 +35,7 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
-import { SingleValueAggregations, ValueHighlightConfig } from '../shared/single-value.model';
+import { SingleValueAggregations, SingleValuePropertiesModel, ValueHighlightConfig } from '../shared/single-value.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -48,6 +48,43 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { ThresholdComponent } from './threshold/threshold.component';
 import { MatButton } from '@angular/material/button';
 
+/** The form uses '' or {} for "nothing selected" next to the model. */
+type Picked<T> = T | string | Record<string, never> | null | undefined;
+
+type SingleValueForm = FormGroup<{
+    vAxis: FormControl<Picked<ExportValueModel>>;
+    vAxisLabel: FormControl<string | null | undefined>;
+    name: FormControl<string | null>;
+    type: FormControl<string | null | undefined>;
+    format: FormControl<string | null | undefined>;
+    threshold: FormControl<number | null | undefined>;
+    math: FormControl<string | null | undefined>;
+    measurement: FormControl<Picked<ChartsExportMeasurementModel>>;
+    group: FormGroup<{
+        time: FormControl<string | null | undefined>;
+        type: FormControl<string | null | undefined>;
+    }>;
+    sourceType: FormControl<string | null | undefined>;
+    device: FormControl<Picked<DeviceInstanceModel>>;
+    service: FormControl<Picked<DeviceTypeServiceModel>>;
+    deviceGroupId: FormControl<string | null | undefined>;
+    deviceGroupCriteria: FormControl<Picked<DeviceGroupCriteriaModel>>;
+    deviceGroupAggregation: FormControl<SingleValueAggregations | null | undefined>;
+    targetCharacteristic: FormControl<string | null | undefined>;
+    timestampConfig: FormGroup<{
+        showTimestamp: FormControl<boolean | null>;
+        highlightTimestamp: FormControl<boolean | null>;
+        warningTimeLevel: FormControl<string | null>;
+        warningAge: FormControl<number | null>;
+        problemTimeLevel: FormControl<string | null>;
+        problemAge: FormControl<number | null>;
+    }>;
+    valueHighlightConfig: FormGroup<{
+        highlight: FormControl<boolean | null>;
+        thresholds: FormControl<ValueHighlightConfig[] | null>;
+    }>;
+}>;
+
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
@@ -59,7 +96,7 @@ export class SingleValueEditDialogComponent implements OnInit {
     private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
-    private fb = inject(UntypedFormBuilder);
+    private fb = inject(FormBuilder);
     private deviceTypeService = inject(DeviceTypeService);
     private deviceInstancesService = inject(DeviceInstancesService);
     private deviceGroupsService = inject(DeviceGroupsService);
@@ -104,7 +141,8 @@ export class SingleValueEditDialogComponent implements OnInit {
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     concept?: ConceptsCharacteristicsModel | null;
 
-    form: FormGroup = new FormGroup({});
+    // Replaced by initForm() in ngOnInit before anything reads it.
+    form = new FormGroup({}) as unknown as SingleValueForm;
 
     userHasUpdateNameAuthorization = false;
     userHasUpdatePropertiesAuthorization = false;
@@ -141,25 +179,25 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     initForm() {
         this.form = this.fb.group({
-            vAxis: {},
-            vAxisLabel: '',
+            vAxis: this.fb.control<Picked<ExportValueModel>>({}),
+            vAxisLabel: this.fb.control<string | null | undefined>(''),
             name: ['', Validators.required],
-            type: '',
-            format: '',
-            threshold: 128,
-            math: '',
-            measurement: '',
+            type: this.fb.control<string | null | undefined>(''),
+            format: this.fb.control<string | null | undefined>(''),
+            threshold: this.fb.control<number | null | undefined>(128),
+            math: this.fb.control<string | null | undefined>(''),
+            measurement: this.fb.control<Picked<ChartsExportMeasurementModel>>(''),
             group: this.fb.group({
-                time: '',
-                type: '',
+                time: this.fb.control<string | null | undefined>(''),
+                type: this.fb.control<string | null | undefined>(''),
             }),
-            sourceType: '',
-            device: {},
-            service: {},
-            deviceGroupId: '',
-            deviceGroupCriteria: {},
-            deviceGroupAggregation: 'latest',
-            targetCharacteristic: '',
+            sourceType: this.fb.control<string | null | undefined>(''),
+            device: this.fb.control<Picked<DeviceInstanceModel>>({}),
+            service: this.fb.control<Picked<DeviceTypeServiceModel>>({}),
+            deviceGroupId: this.fb.control<string | null | undefined>(''),
+            deviceGroupCriteria: this.fb.control<Picked<DeviceGroupCriteriaModel>>({}),
+            deviceGroupAggregation: this.fb.control<SingleValueAggregations | null | undefined>(SingleValueAggregations.Latest),
+            targetCharacteristic: this.fb.control<string | null | undefined>(''),
             timestampConfig: this.fb.group({
                 showTimestamp: new FormControl<boolean>(false),
                 highlightTimestamp: new FormControl<boolean>(false),
@@ -170,7 +208,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             }),
             valueHighlightConfig: this.fb.group({
                 highlight: new FormControl<boolean>(false),
-                thresholds: new FormControl([])
+                thresholds: new FormControl<ValueHighlightConfig[] | null>([])
             })
         });
     }
@@ -193,7 +231,8 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     listenForDeviceSelectionChange() {
         this.form.get('device')?.valueChanges.pipe(
-            concatMap((device: DeviceInstanceModel) => {
+            concatMap((deviceValue) => {
+                const device = deviceValue as DeviceInstanceModel;
                 this.dataSourceFieldsReady = false;
                 this.paths = [];
                 this.services = [];
@@ -221,7 +260,8 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     listenForServiceSelectionChange() {
-        this.form.get('service')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((service: DeviceTypeServiceModel) => {
+        this.form.get('service')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((serviceValue) => {
+            const service = serviceValue as DeviceTypeServiceModel;
             this.paths = [];
             this.form.get('vAxis')?.patchValue('');
             if (service === undefined || service == null) {
@@ -236,7 +276,8 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     listenForDeviceGroupCriteriaSelectionChange() {
-        this.form.get('deviceGroupCriteria')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(criteria => {
+        this.form.get('deviceGroupCriteria')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(criteriaValue => {
+            const criteria = criteriaValue as DeviceGroupCriteriaModel;
             this.dataSourceFieldsReady = false;
             const conceptId = this.functions.find(f => f.id === criteria.function_id)?.concept_id;
             if (conceptId !== undefined) {
@@ -257,7 +298,7 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     listenForExportSelection() {
         this.form.get('measurement')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(exp => {
-            this.vAxisValues = exp?.values;
+            this.vAxisValues = (exp as ChartsExportMeasurementModel | null | undefined)?.values as ExportValueModel[];
         });
     }
 
@@ -269,7 +310,7 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     listenForDataSourceTypeChange() {
         this.form.get('sourceType')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(sourceType => {
-            this.loadDataSourceOptions(sourceType).subscribe();
+            this.loadDataSourceOptions(sourceType as string).subscribe();
         });
     }
 
@@ -319,7 +360,7 @@ export class SingleValueEditDialogComponent implements OnInit {
                 });
 
                 if (this.widget.properties.timestampConfig !== undefined) {
-                    this.form.get('timestampConfig')?.patchValue({
+                    this.form.controls.timestampConfig.patchValue({
                         showTimestamp: this.widget.properties.timestampConfig.showTimestamp,
                         highlightTimestamp: this.widget.properties.timestampConfig.highlightTimestamp,
                         warningTimeLevel: this.widget.properties.timestampConfig.warningTimeLevel,
@@ -334,7 +375,9 @@ export class SingleValueEditDialogComponent implements OnInit {
                     type: widget.properties.group?.type,
                 });
 
-                this.form.get('valueHighlightConfig')?.patchValue(widget.properties.valueHighlightConfig);
+                if (widget.properties.valueHighlightConfig !== undefined) {
+                    this.form.controls.valueHighlightConfig.patchValue(widget.properties.valueHighlightConfig);
+                }
 
                 return true;
             }),
@@ -441,11 +484,12 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
+        const measurement = this.form.get('measurement')?.value as (ChartsExportMeasurementModel & { ExportDatabaseId?: string }) | null | undefined;
         this.widget.properties.measurement = {
-            id: this.form.get('measurement')?.value?.id,
-            name: this.form.get('measurement')?.value?.name,
-            values: this.form.get('measurement')?.value?.values,
-            exportDatabaseId: this.form.get('measurement')?.value?.ExportDatabaseId,
+            id: measurement?.id as string,
+            name: measurement?.name as string,
+            values: measurement?.values as ExportValueModel[],
+            exportDatabaseId: measurement?.ExportDatabaseId,
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value as ExportValueModel || undefined;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value || undefined;
@@ -458,11 +502,11 @@ export class SingleValueEditDialogComponent implements OnInit {
         this.widget.properties.service = this.form.get('service')?.value as DeviceTypeServiceModel || undefined;
         this.widget.properties.sourceType = this.form.get('sourceType')?.value || undefined;
         this.widget.properties.deviceGroupId = this.form.get('deviceGroupId')?.value || undefined;
-        this.widget.properties.deviceGroupCriteria = this.form.get('deviceGroupCriteria')?.value || undefined;
+        this.widget.properties.deviceGroupCriteria = this.form.get('deviceGroupCriteria')?.value as DeviceGroupCriteriaModel || undefined;
         this.widget.properties.targetCharacteristic = this.form.get('targetCharacteristic')?.value || undefined;
         this.widget.properties.deviceGroupAggregation = this.form.get('deviceGroupAggregation')?.value || undefined;
-        this.widget.properties.timestampConfig = this.form.get('timestampConfig')?.value || undefined;
-        this.widget.properties.valueHighlightConfig = this.form.get('valueHighlightConfig')?.value || undefined;
+        this.widget.properties.timestampConfig = this.form.get('timestampConfig')?.value as SingleValuePropertiesModel['timestampConfig'] || undefined;
+        this.widget.properties.valueHighlightConfig = this.form.get('valueHighlightConfig')?.value as SingleValuePropertiesModel['valueHighlightConfig'] || undefined;
         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
     }
 
