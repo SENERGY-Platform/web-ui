@@ -22,10 +22,8 @@ import { ParseModel } from '../shared/parse.model';
 import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import {
-    compareAspectIds,
     criteriaAspectFields,
     criteriaAspectIds,
-    deprecatedAspectAlias,
     DeviceTypeAspectClassModel,
     DeviceTypeAspectModel, DeviceTypeCharacteristicsModel,
     DeviceTypeFunctionModel,
@@ -34,7 +32,8 @@ import {
 } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { FlowEngineService } from '../shared/flow-engine.service';
-import { NodeConfig, NodeModel, NodeValue, PipelineInputSelectionModel, PipelineRequestModel } from './shared/pipeline-request.model';
+import { PipelineInputSelectionModel } from './shared/pipeline-request.model';
+import { buildPipelineRequest, IMPORT_PREFIX, PipelineFormValue, sortedAspectIds } from './shared/pipeline-request.builder';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { concatMap, first, map, tap } from 'rxjs/operators';
 import { forkJoin, Observable, of, Subscription } from 'rxjs';
@@ -70,12 +69,6 @@ interface CustomSelectable {
     id: string;
     name: string;
     groupName?: string;
-}
-
-interface DeviceServicePath {
-    devicesOrImports: string[];
-    values: NodeValue[];
-    topic: string;
 }
 
 type ConfigGroup = FormGroup<{
@@ -160,7 +153,7 @@ export class DeployFlowComponent implements OnInit {
     static GROUP_KEY = 'Device Groups';
     static IMPORT_KEY = 'Imports';
     static GROUP_PREFIX = 'urn:infai:ses:device-group:';
-    static IMPORT_PREFIX = 'urn:infai:ses:import:';
+    static IMPORT_PREFIX = IMPORT_PREFIX;
 
     ready = false;
     flowId = '';
@@ -209,7 +202,7 @@ export class DeployFlowComponent implements OnInit {
     }
 
     private static sortedAspectIds(aspectIds: string[] | null | undefined): string[] {
-        return [...new Set(aspectIds || [])].sort(compareAspectIds);
+        return sortedAspectIds(aspectIds);
     }
 
     ngOnInit() {
@@ -796,244 +789,7 @@ export class DeployFlowComponent implements OnInit {
     startPipeline() {
         if (this.form.valid) {
             this.ready = false;
-            const pipeReq: PipelineRequestModel = {
-                flowId: this.flowId,
-            } as PipelineRequestModel;
-            pipeReq.id = this.editMode ? this.pipelineId : null;
-            pipeReq.name = this.form.get('name')?.value as string;
-            pipeReq.description = this.form.get('description')?.value as string;
-            pipeReq.consumeAllMessages = this.form.get('consume_all_msgs')?.value as boolean;
-            pipeReq.metrics = this.form.get('enable_metrics')?.value as boolean;
-            pipeReq.windowTime = JSON.parse(this.form.get('windowTime')?.value as string);
-            pipeReq.mergeStrategy = this.form.get('mergeStrategy')?.value as string;
-            pipeReq.nodes = [];
-            this.getSubElementAsGroupArray(this.form, 'nodes').forEach((node) => {
-                const nodeModel: NodeModel = {
-                    inputSelections: [],
-                    inputs: [],
-                    config: [],
-                    deploymentType: node.get('deploymentType')?.value as string,
-                    nodeId: node.get('id')?.value as string,
-                    persistData: node.get('persistData')?.value as boolean,
-                };
-                this.getSubElementAsGroupArray(node, 'configs').forEach((config) => {
-                    const nodeConfig: NodeConfig = {
-                        name: config.get('name')?.value as string,
-                        value: config.get('value')?.value as string,
-                    };
-                    nodeModel.config?.push(nodeConfig);
-                });
-                nodeModel.inputSelections = [];
-                const inputs = this.getSubElementAsGroupArray(node, 'inputs');
-                const flatFilters: DeviceServicePath[] = [];
-                const flatPipelineFilters: { topic: string; filters: { pipelineId: string; operatorId: string }[]; values: NodeValue[] }[] = [];
-                // Create a filter for each device/topic/value
-                inputs.forEach((input) => {
-                    const filters = input.get('filter')?.value as Map<string, { serviceId: string; path: string }[]>;
-                    filters.forEach((subfilters, deviceOrImportId) => {
-                        subfilters.forEach((filter) => {
-                            flatFilters.push({
-                                devicesOrImports: [deviceOrImportId],
-                                topic: filter.serviceId.replace(/:/g, '_'),
-                                values: [
-                                    {
-                                        name: input.get('name')?.value as string,
-                                        path: filter.path,
-                                    },
-                                ],
-                            });
-                        });
-                    });
-
-                    const aspectIds = DeployFlowComponent.sortedAspectIds(input.get('aspectIds')?.value);
-                    nodeModel.inputSelections?.push({
-                        inputName: input.get('name')?.value as string,
-                        // an input without aspect keeps the null it was saved with before the list existed
-                        aspectId: deprecatedAspectAlias(aspectIds) ?? null,
-                        ...(aspectIds.length > 0 ? { aspectIds } : {}),
-                        characteristicIds: input.get('characteristics')?.value as string[],
-                        functionId: input.get('functionId')?.value as string,
-                        selectableId: input.get('selectableId')?.value as string,
-                    });
-
-                    this.getSubElementAsGroupArray(input, 'pipelines').forEach((pipelineGroup) => {
-                        flatPipelineFilters.push({
-                            topic: pipelineGroup.get('topic')?.value as string,
-                            values: [
-                                {
-                                    name: input.get('name')?.value as string,
-                                    path: pipelineGroup.get('path')?.value as string,
-                                },
-                            ],
-                            filters: [
-                                {
-                                    pipelineId: pipelineGroup.get('pipelineId')?.value as string,
-                                    operatorId: pipelineGroup.get('operatorId')?.value as string,
-                                },
-                            ],
-                        });
-                    });
-                });
-                // Create a filter for each pipeline input
-                // Join all filters with same topic/value combination
-                const joinedOperatorFilters: {
-                    topic: string;
-                    filters: { pipelineId: string; operatorId: string }[];
-                    values: NodeValue[];
-                }[] = [];
-                flatPipelineFilters.forEach((filter) => {
-                    const idx = joinedOperatorFilters.findIndex((joined) => {
-                        if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
-                            return false;
-                        }
-
-                        let valuesEqual = true;
-                        joined.values.forEach((joinedVal) => {
-                            if (
-                                filter.values.findIndex(
-                                    (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                                ) === -1
-                            ) {
-                                valuesEqual = false;
-                            }
-                        });
-                        return valuesEqual;
-                    });
-
-                    if (idx === -1) {
-                        joinedOperatorFilters.push(filter);
-                    } else {
-                        const missingFilters = filter.filters.filter(
-                            (filterFilter) =>
-                                joinedOperatorFilters[idx].filters.findIndex(
-                                    (joinedFilter) =>
-                                        filterFilter.pipelineId === joinedFilter.pipelineId &&
-                                        filterFilter.operatorId === joinedFilter.operatorId,
-                                ) === -1,
-                        );
-                        joinedOperatorFilters[idx].filters.push(...missingFilters);
-                    }
-                });
-
-                // Join all filters with same topic/pipe/operator combination
-                const joinedPipelineFilters: {
-                    topic: string;
-                    filters: { pipelineId: string; operatorId: string }[];
-                    values: NodeValue[];
-                }[] = [];
-                joinedOperatorFilters.forEach((filter) => {
-                    const idx = joinedPipelineFilters.findIndex((joined) => {
-                        if (joined.topic !== filter.topic || joined.filters.length !== filter.filters.length) {
-                            return false;
-                        }
-
-                        let filtersEqual = true;
-                        joined.filters.forEach((joinedFilter) => {
-                            if (
-                                filter.filters.findIndex(
-                                    (filterFilter) =>
-                                        filterFilter.pipelineId === joinedFilter.pipelineId &&
-                                        filterFilter.operatorId === joinedFilter.operatorId,
-                                ) === -1
-                            ) {
-                                filtersEqual = false;
-                            }
-                        });
-                        return filtersEqual;
-                    });
-                    if (idx === -1) {
-                        joinedPipelineFilters.push(filter);
-                    } else {
-                        const missingValues = filter.values.filter(
-                            (filterVal) =>
-                                joinedPipelineFilters[idx].values.findIndex(
-                                    (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                                ) === -1,
-                        );
-                        joinedPipelineFilters[idx].values.push(...missingValues);
-                    }
-                });
-
-                joinedPipelineFilters.forEach((filter) =>
-                    nodeModel.inputs?.push({
-                        filterType: 'operatorId',
-                        filterIds: filter.filters.map((f) => f.operatorId + ':' + f.pipelineId).join(','),
-                        topicName: filter.topic,
-                        values: filter.values,
-                    }),
-                );
-
-                // Join all filters with same topic/value combination
-                const joinedDeviceFilters: DeviceServicePath[] = [];
-                flatFilters.forEach((filter) => {
-                    const idx = joinedDeviceFilters.findIndex((joined) => {
-                        if (joined.topic !== filter.topic || joined.values.length !== filter.values.length) {
-                            return false;
-                        }
-
-                        let valuesEqual = true;
-                        joined.values.forEach((joinedVal) => {
-                            if (
-                                filter.values.findIndex(
-                                    (filterVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                                ) === -1
-                            ) {
-                                valuesEqual = false;
-                            }
-                        });
-                        return valuesEqual;
-                    });
-
-                    if (idx === -1) {
-                        joinedDeviceFilters.push(filter);
-                    } else {
-                        const missingDevices = filter.devicesOrImports.filter(
-                            (filterDevice) =>
-                                joinedDeviceFilters[idx].devicesOrImports.findIndex((joinedDevice) => filterDevice === joinedDevice) === -1,
-                        );
-                        joinedDeviceFilters[idx].devicesOrImports.push(...missingDevices);
-                    }
-                });
-                // Join all filters with same topic/device combination
-                const joinedValueFilters: DeviceServicePath[] = [];
-                joinedDeviceFilters.forEach((filter) => {
-                    const idx = joinedValueFilters.findIndex((joined) => {
-                        if (joined.topic !== filter.topic || joined.devicesOrImports.length !== filter.devicesOrImports.length) {
-                            return false;
-                        }
-
-                        let devicesEqual = true;
-                        joined.devicesOrImports.forEach((joinedDevice) => {
-                            if (filter.devicesOrImports.findIndex((filterDevice) => filterDevice === joinedDevice) === -1) {
-                                devicesEqual = false;
-                            }
-                        });
-                        return devicesEqual;
-                    });
-                    if (idx === -1) {
-                        joinedValueFilters.push(filter);
-                    } else {
-                        const missingValues = filter.values.filter(
-                            (filterVal) =>
-                                joinedValueFilters[idx].values.findIndex(
-                                    (joinedVal) => filterVal.name === joinedVal.name && filterVal.path === joinedVal.path,
-                                ) === -1,
-                        );
-                        joinedValueFilters[idx].values.push(...missingValues);
-                    }
-                });
-
-                joinedValueFilters.forEach((filter) =>
-                    nodeModel.inputs?.push({
-                        filterType: filter.devicesOrImports[0].startsWith(DeployFlowComponent.IMPORT_PREFIX) ? 'ImportId' : 'deviceId',
-                        filterIds: filter.devicesOrImports.map(value => value.split('$')[0]).join(','), // trim id modifiers and join with ','
-                        topicName: filter.topic,
-                        values: filter.values,
-                    }),
-                );
-
-                pipeReq.nodes.push(nodeModel);
-            });
+            const pipeReq = buildPipelineRequest(this.requestFormValue(), this.flowId, this.editMode ? this.pipelineId : null);
 
             if (this.editMode) {
                 this.flowEngineService.updatePipeline(pipeReq).subscribe((_) => {
@@ -1060,6 +816,40 @@ export class DeployFlowComponent implements OnInit {
             }
         }
         this.form.markAllAsTouched();
+    }
+
+    private requestFormValue(): PipelineFormValue {
+        return {
+            name: this.form.get('name')?.value as string,
+            description: this.form.get('description')?.value as string,
+            consumeAllMessages: this.form.get('consume_all_msgs')?.value as boolean,
+            metrics: this.form.get('enable_metrics')?.value as boolean,
+            windowTime: this.form.get('windowTime')?.value as string,
+            mergeStrategy: this.form.get('mergeStrategy')?.value as string,
+            nodes: this.getSubElementAsGroupArray(this.form, 'nodes').map((node) => ({
+                id: node.get('id')?.value as string,
+                deploymentType: node.get('deploymentType')?.value as string,
+                persistData: node.get('persistData')?.value as boolean,
+                configs: this.getSubElementAsGroupArray(node, 'configs').map((config) => ({
+                    name: config.get('name')?.value as string,
+                    value: config.get('value')?.value as string,
+                })),
+                inputs: this.getSubElementAsGroupArray(node, 'inputs').map((input) => ({
+                    name: input.get('name')?.value as string,
+                    aspectIds: input.get('aspectIds')?.value,
+                    characteristics: input.get('characteristics')?.value as string[],
+                    functionId: input.get('functionId')?.value as string,
+                    selectableId: input.get('selectableId')?.value as string,
+                    filter: input.get('filter')?.value as Map<string, { serviceId: string; path: string }[]>,
+                    pipelines: this.getSubElementAsGroupArray(input, 'pipelines').map((pipelineGroup) => ({
+                        pipelineId: pipelineGroup.get('pipelineId')?.value as string,
+                        operatorId: pipelineGroup.get('operatorId')?.value as string,
+                        topic: pipelineGroup.get('topic')?.value as string,
+                        path: pipelineGroup.get('path')?.value as string,
+                    })),
+                })),
+            })),
+        };
     }
 
     switchToClassic() {
