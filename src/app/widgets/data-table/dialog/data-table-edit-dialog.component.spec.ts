@@ -41,7 +41,7 @@ import {
 } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import { DataTableHelperService } from '../shared/data-table-helper.service';
 import { WidgetModule } from '../../widget.module';
-import { DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
+import { DataTableAggregations, DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import {v4 as uuid} from 'uuid';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
@@ -561,4 +561,317 @@ describe('DataTableEditDialogComponent', () => {
                 },
             ]);
         });
+
+    describe('save orchestration', () => {
+        function open(): DataTableEditDialogComponent {
+            const fixture = TestBed.createComponent(DataTableEditDialogComponent);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+            flush();
+            return component;
+        }
+
+        function savedElement(): any {
+            return (dashboardServiceSpy.updateWidgetProperty.calls.mostRecent().args[3] as any).dataTable.elements[0];
+        }
+
+        it(
+            'saves an import element and starts the import export',
+            fakeAsync(() => {
+                dataTableHelperServiceSpy.getFullImportType.and.returnValue({ name: 'importTypeName' } as any);
+                dataTableHelperServiceSpy.getImportTypeValues.and.returnValue([{ Name: 'v', Path: 'value.v', Type: ExportValueTypes.FLOAT }] as any);
+                dataTableHelperServiceSpy.getImportInstancesOfType.and.returnValue([{ id: 'inst1', kafka_topic: 'topic1' }] as any);
+                dataTableHelperServiceSpy.getExportsOfImportInstance.and.returnValue([]);
+                dataTableHelperServiceSpy.getPreloadedExportById.and.returnValue({
+                    ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
+                } as ExportModel);
+                open();
+
+                const element = component.getElements().at(0);
+                element.controls.elementDetails.patchValue({ elementType: DataTableElementTypesEnum.IMPORT });
+                element.controls.elementDetails.controls.import.patchValue({ typeId: 'type1', instanceId: 'inst1' });
+                element.patchValue({ name: 'imp', exportValuePath: 'value.v', exportCreatedByWidget: true });
+                expect(element.get('exportValueName')?.value).toBe('v');
+                expect(element.get('valueType')?.value).toBe(ExportValueTypes.FLOAT);
+
+                component.save();
+
+                expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
+                expect(exportServiceSpy.startPipeline.calls.mostRecent().args).toEqual([
+                    {
+                        Name: 'Widget: test',
+                        Description: 'generated Export',
+                        TimePath: 'time',
+                        Values: [{ Name: 'v', Path: 'value.v', Type: ExportValueTypes.FLOAT }],
+                        EntityName: 'inst1',
+                        Filter: 'inst1',
+                        FilterType: 'import_id',
+                        ServiceName: 'importTypeName',
+                        Topic: 'topic1',
+                        Offset: 'smallest',
+                        Generated: true,
+                        TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
+                        ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
+                    } as ExportModel,
+                ]);
+                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
+
+                const saved = savedElement();
+                expect(saved.exportId).toBe('exportId');
+                expect(saved.exportCreatedByWidget).toBe(true);
+                expect(saved.exportDbId).toBe(environment.exportDatabaseIdInternalTimescaleDb);
+                expect(saved.elementDetails.elementType).toBe(DataTableElementTypesEnum.IMPORT);
+                expect(saved.elementDetails.import).toEqual({ typeId: 'type1', instanceId: 'inst1' });
+                expect(saved.elementDetails.device).toEqual({});
+                expect(matDialogRefSpy.close.calls.mostRecent().args).toEqual([component.widget]);
+            }),
+        );
+
+        it(
+            'does not start an import export when the import type is unknown',
+            fakeAsync(() => {
+                dataTableHelperServiceSpy.getFullImportType.and.returnValue(undefined);
+                dataTableHelperServiceSpy.getImportTypeValues.and.returnValue([]);
+                dataTableHelperServiceSpy.getImportInstancesOfType.and.returnValue([{ id: 'inst1', kafka_topic: 'topic1' }] as any);
+                dataTableHelperServiceSpy.getExportsOfImportInstance.and.returnValue([]);
+                open();
+
+                const element = component.getElements().at(0);
+                element.controls.elementDetails.patchValue({ elementType: DataTableElementTypesEnum.IMPORT });
+                element.controls.elementDetails.controls.import.patchValue({ typeId: 'type1', instanceId: 'inst1' });
+                element.patchValue({ exportCreatedByWidget: true });
+
+                expect(() => component.save()).toThrowError('undefined values');
+                expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
+                expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(0);
+            }),
+        );
+
+        it(
+            'saves a device-group element with the criteria, unit and target characteristic it resolved',
+            fakeAsync(() => {
+                deviceGroupServiceSpy.getDeviceGroups.and.returnValue(of({
+                    result: [{
+                        id: 'dg1',
+                        name: 'group',
+                        criteria: [{ interaction: 'request', function_id: 'f1', aspect_id: 'a1', device_class_id: 'dc1' }],
+                    }],
+                } as any));
+                deviceGroupServiceSpy.getFunctionListByIds.and.returnValue(of([{ id: 'f1', concept_id: 'c1', display_name: 'Temp' }] as any));
+                conceptsServiceSpy.getConceptWithCharacteristics.and.returnValue(of({
+                    id: 'c1',
+                    characteristics: [
+                        { id: 'ch1', name: 'celsius', display_unit: '\u00b0C', type: 'https://schema.org/Float' },
+                        { id: 'ch2', name: 'count', type: 'https://schema.org/Integer' },
+                    ],
+                } as any));
+                open();
+
+                const element = component.getElements().at(0);
+                element.controls.elementDetails.patchValue({ elementType: DataTableElementTypesEnum.DEVICE_GROUP });
+                const criteria = component.getCriteria(element);
+                expect(criteria).toEqual([]);
+                element.controls.elementDetails.controls.deviceGroup.patchValue({ deviceGroupId: 'dg1' });
+                const offered = component.getCriteria(element);
+                expect(offered).toEqual([{ interaction: '', function_id: 'f1', aspect_id: 'a1', device_class_id: 'dc1' }]);
+
+                element.controls.elementDetails.controls.deviceGroup.patchValue({
+                    deviceGroupCriteria: offered[0],
+                    deviceGroupAggregation: DataTableAggregations.Sum,
+                });
+                expect(conceptsServiceSpy.getConceptWithCharacteristics.calls.mostRecent().args).toEqual(['c1']);
+                expect(component.getConcept(element)?.id).toBe('c1');
+
+                element.patchValue({ name: 'grp', unit: 'count' });
+                expect(element.controls.elementDetails.controls.deviceGroup.value.targetCharacteristic).toBe('ch2');
+                expect(element.get('valueType')?.value).toBe(ExportValueTypes.INTEGER);
+
+                component.save();
+
+                expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
+                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+                const saved = savedElement();
+                expect(saved.name).toBe('grp');
+                expect(saved.unit).toBe('count');
+                expect(saved.valueType).toBe(ExportValueTypes.INTEGER);
+                expect(saved.elementDetails.elementType).toBe(DataTableElementTypesEnum.DEVICE_GROUP);
+                expect(saved.elementDetails.deviceGroup).toEqual({
+                    deviceGroupId: 'dg1',
+                    deviceGroupCriteria: { interaction: '', function_id: 'f1', aspect_id: 'a1', device_class_id: 'dc1' },
+                    targetCharacteristic: 'ch2',
+                    deviceGroupAggregation: DataTableAggregations.Sum,
+                });
+                // disabled controls do not reach the stored value
+                expect('exportId' in saved).toBeFalse();
+                expect(saved.elementDetails.device).toEqual({});
+                expect(matDialogRefSpy.close.calls.count()).toBe(1);
+            }),
+        );
+
+        function requestElements(count: number): void {
+            dataTableHelperServiceSpy.getMeasuringFunctionsOfAspect.and.returnValue([
+                { id: 'functionId', name: 'getTemperature', concept_id: 'concept1' },
+            ] as any);
+            open();
+            while (component.getElements().length < count) {
+                component.addNewMeasurement();
+            }
+            component.formGroup.patchValue({ valueAlias: 'alias' });
+            component.getElements().controls.forEach((element, i) => {
+                element.patchValue({ name: 'name' + i });
+                element.controls.elementDetails.controls.device.patchValue({
+                    aspectId: 'aspectId',
+                    functionId: 'functionId',
+                    deviceId: 'deviceId',
+                    serviceId: 'service_1',
+                    requestDevice: true,
+                });
+            });
+        }
+
+        it(
+            'spreads the start second of generated schedules over the refresh time',
+            fakeAsync(() => {
+                requestElements(3);
+                component.formGroup.patchValue({ refreshTime: 10 });
+
+                component.save();
+
+                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(3);
+                expect(processSchedulerServiceSpy.createSchedule.calls.allArgs().map((a) => a[0])).toEqual([
+                    { created_by: 'widgetId-1', process_deployment_id: 'deploymentId', cron: '0/10 * * * * *', id: '' },
+                    { created_by: 'widgetId-1', process_deployment_id: 'deploymentId', cron: '3/10 * * * * *', id: '' },
+                    { created_by: 'widgetId-1', process_deployment_id: 'deploymentId', cron: '7/10 * * * * *', id: '' },
+                ]);
+            }),
+        );
+
+        it(
+            'does not spread the schedule when the refresh time is a wildcard',
+            fakeAsync(() => {
+                requestElements(2);
+                component.formGroup.patchValue({ refreshTime: '*' });
+
+                component.save();
+
+                expect(processSchedulerServiceSpy.createSchedule.calls.allArgs().map((a) => a[0].cron)).toEqual([
+                    '* * * * * *',
+                    '* * * * * *',
+                ]);
+            }),
+        );
+
+        it(
+            'creates no deployment when the refresh time is 0',
+            fakeAsync(() => {
+                requestElements(1);
+                component.formGroup.patchValue({ refreshTime: 0 });
+
+                component.save();
+
+                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
+                expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+            }),
+        );
+
+        it(
+            'generates the deployment XML and SVG for a device element',
+            fakeAsync(() => {
+                requestElements(1);
+                component.formGroup.patchValue({ refreshTime: 10 });
+
+                component.save();
+
+                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(1);
+                const [xml, svg] = deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.mostRecent().args as [string, string];
+
+                expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions ')).toBeTrue();
+                expect(xml.endsWith('</bpmn:serviceTask></bpmn:process></bpmn:definitions>')).toBeTrue();
+                const doc = new DOMParser().parseFromString(xml, 'application/xml');
+                expect(doc.getElementsByTagName('parsererror').length).toBe(0);
+                const task = doc.getElementsByTagName('bpmn:serviceTask')[0];
+                expect(task.getAttribute('name')).toBe('getTemperature');
+                expect(task.getAttribute('camunda:type')).toBe('external');
+                expect(task.getAttribute('camunda:topic')).toBe('pessimistic');
+                const payload = JSON.parse(doc.getElementsByTagName('camunda:inputParameter')[0].textContent as string);
+                expect(payload).toEqual({
+                    function: {
+                        id: 'functionId',
+                        name: 'getTemperature',
+                        concept_id: 'concept1',
+                        rdf_type: 'https://senergy.infai.org/ontology/MeasuringFunction',
+                    },
+                    device_class: null,
+                    aspect: { id: 'aspectId', name: 'aspect', rdf_type: 'https://senergy.infai.org/ontology/Aspect' },
+                    label: 'getFunction',
+                    input: {},
+                    characteristic_id: 'urn:infai:ses:characteristic:7621686a-56bc-402d-b4cc-5b266d39736f',
+                    retries: 0,
+                });
+
+                expect(svg.startsWith('<?xml version="1.0" encoding="utf-8"?>\n<!-- created with bpmn-js / http://bpmn.io -->\n<!DOCTYPE svg ')).toBeTrue();
+                expect(svg).toContain('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="112" height="92" viewBox="254 74 112 92" version="1.1">');
+                expect(svg).toContain('<tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan>');
+                expect(svg.endsWith('</g></g></svg>')).toBeTrue();
+
+                const posted = deploymentsServiceSpy.v2postDeployments.calls.mostRecent().args as any[];
+                expect(posted[1]).toBe('generated');
+                expect(posted[0].name).toBe('test');
+                expect(posted[0].elements[0].task.selection).toEqual({ selected_device_id: 'deviceId', selected_service_id: 'service_1' });
+            }),
+        );
+
+        it(
+            'saves only the name when the user may not update the properties',
+            fakeAsync(() => {
+                TestBed.overrideProvider(MAT_DIALOG_DATA, {
+                    useValue: {
+                        widgetId: 'widgetId-1',
+                        dashboardId: 'dashboardId-1',
+                        userHasUpdateNameAuthorization: true,
+                        userHasUpdatePropertiesAuthorization: false,
+                    },
+                });
+                open();
+                component.formGroup.patchValue({ name: 'renamed' });
+
+                component.save();
+
+                expect(dashboardServiceSpy.updateWidgetName.calls.allArgs()).toEqual([['dashboardId-1', 'widgetId-1', 'renamed']]);
+                expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(0);
+                expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
+                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
+                expect(matDialogRefSpy.close.calls.allArgs()).toEqual([[component.widget]]);
+                expect(component.widget.name).toBe('renamed');
+            }),
+        );
+
+        it(
+            'keeps the dialog open when the property update reports an error',
+            fakeAsync(() => {
+                dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'error' }));
+                open();
+
+                component.save();
+
+                expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+                expect(matDialogRefSpy.close.calls.count()).toBe(0);
+                expect(component.saving).toBeFalse();
+            }),
+        );
+
+        it(
+            'keeps the dialog open when the name update reports an error',
+            fakeAsync(() => {
+                dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'error' }));
+                open();
+
+                component.save();
+
+                expect(matDialogRefSpy.close.calls.count()).toBe(0);
+                expect(component.saving).toBeFalse();
+            }),
+        );
+    });
 });
