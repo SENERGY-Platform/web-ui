@@ -136,3 +136,16 @@ export function buildImportExport(
         TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
     } as ExportModel;
 }
+
+/** A generated export, deployment or schedule that could not be created; the save must not store the widget. */
+export class SaveStepFailure {
+    constructor(
+        readonly step: 'export' | 'process deployment' | 'schedule',
+        readonly elementName: string,
+    ) {}
+}
+
+/** v2postDeployments answers 500 with an empty id when the request failed. */
+export function isFailedDeployment(deployment: { status: number; id: string }): boolean {
+    return deployment.status >= 400 || !deployment.id;
+}

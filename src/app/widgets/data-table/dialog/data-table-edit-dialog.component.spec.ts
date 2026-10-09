@@ -17,7 +17,7 @@
 import {fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
 import { CoreModule } from '../../../core/core.module';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { of } from 'rxjs';
@@ -873,5 +873,113 @@ describe('DataTableEditDialogComponent', () => {
                 expect(component.saving).toBeFalse();
             }),
         );
+
+        describe('failed generated resources', () => {
+            let snackOpen: jasmine.Spy;
+
+            beforeEach(() => {
+                snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+            });
+
+            function expectAborted(text: string): void {
+                expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(0);
+                expect(matDialogRefSpy.close.calls.count()).toBe(0);
+                expect(component.saving).toBeFalse();
+                expect(snackOpen.calls.mostRecent().args[0]).toContain(text);
+                expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+            }
+
+            it(
+                'does not store the widget when the process deployment cannot be created',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 500, id: '' }));
+
+                    component.save();
+
+                    expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+                    expectAborted('Could not create the process deployment for name0');
+                }),
+            );
+
+            it(
+                'does not store the widget when the prepared deployment cannot be loaded',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(of(null));
+
+                    component.save();
+
+                    expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                    expectAborted('Could not create the process deployment for name0');
+                }),
+            );
+
+            it(
+                'does not store the widget when the schedule cannot be created',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+
+                    component.save();
+
+                    expectAborted('Could not create the schedule for name0');
+                }),
+            );
+
+            it(
+                'names every failed element',
+                fakeAsync(() => {
+                    requestElements(2);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+
+                    component.save();
+
+                    expectAborted('Could not create the schedule for name0, the schedule for name1');
+                }),
+            );
+
+            it(
+                'does not store the widget when the export cannot be created',
+                fakeAsync(() => {
+                    dataTableHelperServiceSpy.getFullImportType.and.returnValue({ name: 'importTypeName' } as any);
+                    dataTableHelperServiceSpy.getImportTypeValues.and.returnValue([{ Name: 'v', Path: 'value.v', Type: ExportValueTypes.FLOAT }] as any);
+                    dataTableHelperServiceSpy.getImportInstancesOfType.and.returnValue([{ id: 'inst1', kafka_topic: 'topic1' }] as any);
+                    dataTableHelperServiceSpy.getExportsOfImportInstance.and.returnValue([]);
+                    dataTableHelperServiceSpy.getPreloadedExportById.and.returnValue({
+                        ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
+                    } as ExportModel);
+                    open();
+                    const element = component.getElements().at(0);
+                    element.controls.elementDetails.patchValue({ elementType: DataTableElementTypesEnum.IMPORT });
+                    element.controls.elementDetails.controls.import.patchValue({ typeId: 'type1', instanceId: 'inst1' });
+                    element.patchValue({ name: 'imp', exportValuePath: 'value.v', exportCreatedByWidget: true });
+                    exportServiceSpy.startPipeline.and.returnValue(of(null));
+
+                    component.save();
+
+                    expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
+                    expectAborted('Could not create the export for imp');
+                }),
+            );
+
+            it(
+                'stores the widget when every generated resource was created',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+
+                    component.save();
+
+                    expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+                    expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                    expect(snackOpen).not.toHaveBeenCalled();
+                }),
+            );
+        });
     });
 });

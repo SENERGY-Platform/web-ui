@@ -14,7 +14,28 @@
  * limitations under the License.
  */
 
-import { deploymentElementCriteria, pipelineInputCriteria } from './device-instances-replace-dialog.component';
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { defer, of } from 'rxjs';
+import {
+    DeviceInstancesReplaceDialogComponent,
+    deploymentElementCriteria,
+    pipelineInputCriteria,
+} from './device-instances-replace-dialog.component';
+import { DeviceInstancesService } from '../../shared/device-instances.service';
+import { DeviceInstanceModel } from '../../shared/device-instances.model';
+import { DeviceGroupsService } from '../../../device-groups/shared/device-groups.service';
+import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
+import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
+import { SmartServiceInstanceService } from 'src/app/modules/smart-services/instances/shared/instances.service';
+import { SmartServiceReleasesService } from 'src/app/modules/smart-services/releases/shared/release.service';
+import { NetworksService } from '../../../networks/shared/networks.service';
+import { DeploymentsFogFactory } from 'src/app/modules/processes/deployments/shared/deployments-fog.service';
+import { DeploymentsService } from 'src/app/modules/processes/deployments/shared/deployments.service';
 import { PipelineInputSelectionModel } from 'src/app/modules/data/flow-repo/deploy-flow/shared/pipeline-request.model';
 import { V2DeploymentsPreparedFilterCriteriaModel } from 'src/app/modules/processes/deployments/shared/deployments-prepared-v2.model';
 
@@ -61,5 +82,69 @@ describe('device replacement criteria', () => {
             aspect_ids: [air, water],
             device_class_id: undefined,
         });
+    });
+});
+
+describe('DeviceInstancesReplaceDialogComponent save', () => {
+    let component: DeviceInstancesReplaceDialogComponent;
+    let deviceInstancesServiceSpy: Spy<DeviceInstancesService>;
+    let matDialogRefSpy: Spy<MatDialogRef<DeviceInstancesReplaceDialogComponent>>;
+    let snackOpen: jasmine.Spy;
+    const oldDevice = { id: 'old', name: 'device', local_id: 'local', attributes: [] } as unknown as DeviceInstanceModel;
+    const newDevice = { id: 'new', name: 'device' } as DeviceInstanceModel;
+    let clonesCreated: number;
+
+    beforeEach(() => {
+        deviceInstancesServiceSpy = createSpyFromClass(DeviceInstancesService);
+        matDialogRefSpy = createSpyFromClass<MatDialogRef<DeviceInstancesReplaceDialogComponent>>(MatDialogRef);
+        clonesCreated = 0;
+        // the call only builds the request; the clone exists once it is subscribed
+        deviceInstancesServiceSpy.saveDeviceInstance.and.callFake(() => defer(() => {
+            clonesCreated++;
+            return of(newDevice);
+        }));
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: DeviceInstancesService, useValue: deviceInstancesServiceSpy },
+                { provide: MatDialogRef, useValue: matDialogRefSpy },
+                { provide: MAT_DIALOG_DATA, useValue: { device: JSON.parse(JSON.stringify(oldDevice)) } },
+                { provide: DeviceGroupsService, useValue: createSpyFromClass(DeviceGroupsService) },
+                { provide: DeviceTypeService, useValue: createSpyFromClass(DeviceTypeService) },
+                { provide: PipelineRegistryService, useValue: createSpyFromClass(PipelineRegistryService) },
+                { provide: SmartServiceInstanceService, useValue: createSpyFromClass(SmartServiceInstanceService) },
+                { provide: SmartServiceReleasesService, useValue: createSpyFromClass(SmartServiceReleasesService) },
+                { provide: NetworksService, useValue: createSpyFromClass(NetworksService) },
+                { provide: DeploymentsFogFactory, useValue: createSpyFromClass(DeploymentsFogFactory) },
+                { provide: DeploymentsService, useValue: createSpyFromClass(DeploymentsService) },
+                { provide: MatDialog, useValue: createSpyFromClass(MatDialog) },
+                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClientTesting(),
+            ],
+        });
+        snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+        // ngOnInit is not run: save() needs only the form defaults
+        component = TestBed.createComponent(DeviceInstancesReplaceDialogComponent).componentInstance;
+        component.form.patchValue({ groupAddition: component.groupAddNone });
+    });
+
+    it('closes the dialog with true when the old device was updated and the clone exists', () => {
+        deviceInstancesServiceSpy.updateDeviceInstance.and.returnValue(of(oldDevice));
+
+        component.save();
+
+        expect(clonesCreated).toBe(1);
+        expect(matDialogRefSpy.close.calls.allArgs()).toEqual([[true]]);
+        expect(snackOpen).not.toHaveBeenCalled();
+    });
+
+    it('stops when the old device could not be updated: no clone, dialog stays open, error snack', () => {
+        deviceInstancesServiceSpy.updateDeviceInstance.and.returnValue(of(null));
+
+        component.save();
+
+        expect(clonesCreated).toBe(0);
+        expect(matDialogRefSpy.close.calls.count()).toBe(0);
+        expect(snackOpen.calls.mostRecent().args[0]).toContain('the replaced device could not be updated');
+        expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
     });
 });

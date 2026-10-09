@@ -22,7 +22,7 @@ import { Attribute, DeviceFilterCriteriaModel, DeviceInstanceModel, DeviceSelect
 import { DeviceInstancesService } from '../../shared/device-instances.service';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DatePipe } from '@angular/common';
-import { catchError, concatMap, forkJoin, map, Observable, of, throwError } from 'rxjs';
+import { catchError, concatMap, EMPTY, forkJoin, map, Observable, of, throwError } from 'rxjs';
 import { DeviceGroupsService } from '../../../device-groups/shared/device-groups.service';
 import { DeviceGroupModel } from '../../../device-groups/shared/device-groups.model';
 import {
@@ -207,7 +207,13 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
     this.getDeviceGroupsToUpdate().pipe(
       map(dgs => deviceGroups = dgs), // remember device groups
       concatMap(_ => this.deviceInstancesService.updateDeviceInstance(this.data.device)),
-      concatMap(_ => newDevice), // materialize new device
+      concatMap(updated => {
+        if (updated === null) { // nothing may be moved to the new device while the old one is not marked inactive
+          this.errorHandlerService.showErrorInSnackBar('Error Saving: the replaced device could not be updated');
+          return EMPTY;
+        }
+        return newDevice; // materialize new device
+      }),
       concatMap(d => { // put new device in relevant groups
         const obs: Observable<unknown>[] = [of(null)];
         const pipelinesToBeUpdated: PipelineModel[] = [];

@@ -55,6 +55,8 @@ import { MatIcon } from '@angular/material/icon';
 import { NgStyle, NgClass } from '@angular/common';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../../core/services/snack-bar-messages';
 
 @Component({
     templateUrl: './device-status-edit-dialog.component.html',
@@ -73,6 +75,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     private processSchedulerService = inject(ProcessSchedulerService);
     private deviceInstanceService = inject(DeviceInstancesService);
     private destroyRef = inject(DestroyRef);
+    private snackBar = inject(MatSnackBar);
 
     aspects:  DeviceTypeAspectNodeModel[] = [];
     icons: string[] = [
@@ -319,23 +322,44 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     save(): void {
         this.deviceStatusService.deleteElements(this.widgetOld.properties.elements);
 
-        forkJoin(this.getExportArray()).subscribe((respExport: ExportModel[]) => {
-            respExport.forEach((exp: ExportModel, exportIndex: number) => {
-                this.getExportId(exportIndex).setValue(exp.ID);
+        forkJoin(this.getExportArray()).subscribe((respExport: (ExportModel | null)[]) => {
+            const failedExport = respExport.findIndex((exp) => exp === null);
+            if (failedExport !== -1) {
+                this.abortSave('export', failedExport);
+                return;
+            }
+            respExport.forEach((exp, exportIndex: number) => {
+                this.getExportId(exportIndex).setValue(exp?.ID);
             });
 
             forkJoin(this.getDeploymentArray()).subscribe((respDeployment: { status: number; id: string }[]) => {
+                // status 0 marks an element that needs no deployment; a failed post answers 500 with an empty id
+                const failedDeployment = respDeployment.findIndex((d) => d.status !== 0 && (d.status >= 400 || !d.id));
+                if (failedDeployment !== -1) {
+                    this.abortSave('process deployment', failedDeployment);
+                    return;
+                }
                 respDeployment.forEach((deployment: { status: number; id: string }, deploymentIndex: number) => {
                     this.getDeploymentId(deploymentIndex).setValue(deployment.id);
                 });
                 forkJoin(this.getScheduleArray()).subscribe((schedules) => {
-                    schedules.forEach((schedule, index) => {
-                        this.getScheduleId(index).setValue(schedule !== null ? schedule.id : null);
+                    const failedSchedule = schedules.findIndex((result) => result.failed);
+                    if (failedSchedule !== -1) {
+                        this.abortSave('schedule', failedSchedule);
+                        return;
+                    }
+                    schedules.forEach((result, index) => {
+                        this.getScheduleId(index).setValue(result.schedule !== null ? result.schedule.id : null);
                     });
                     this.saveWidget();
                 });
             });
         });
+    }
+
+    private abortSave(step: string, elementIndex: number): void {
+        const name = this.elements[elementIndex]?.name || 'element ' + (elementIndex + 1);
+        snackError(this.snackBar, 'Could not create the ' + step + ' for ' + name + ', the widget was not saved');
     }
 
     add() {
@@ -378,8 +402,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         return deploymentArray;
     }
 
-    private getExportArray(): Observable<ExportModel>[] {
-        const exportArray: Observable<ExportModel>[] = [];
+    private getExportArray(): Observable<ExportModel | null>[] {
+        const exportArray: Observable<ExportModel | null>[] = [];
         this.elements.forEach((element: DeviceStatusElementModel, elementIndex: number) => {
             if (element.selectable && element.service) {
                 const exports = this.exportService.prepareDeviceServiceExport(element.selectable.device, element.service);
@@ -388,16 +412,18 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                     return;
                 }
                 this.cleanExportModel(exports[0], this.getExportValues(elementIndex));
-                exportArray.push(this.exportService.startPipeline(exports[0]).pipe(map((exp) => exp ?? ({} as ExportModel))));
+                exportArray.push(this.exportService.startPipeline(exports[0]));
             }
         });
         return exportArray;
     }
 
-    private getScheduleArray(): Observable<ProcessSchedulerModel | null>[] {
-        const scheduleArray: Observable<ProcessSchedulerModel | null>[] = [];
+    // createSchedule answers null on failure, so a skipped schedule is told apart by failed: false.
+    private getScheduleArray(): Observable<{ schedule: ProcessSchedulerModel | null; failed: boolean }>[] {
+        const skipped = { schedule: null, failed: false };
+        const scheduleArray: Observable<{ schedule: ProcessSchedulerModel | null; failed: boolean }>[] = [];
         if ((this.formGroup.get('refreshTime') as FormControl).value === 0) {
-            this.elements.forEach(() => scheduleArray.push(of(null)));
+            this.elements.forEach(() => scheduleArray.push(of(skipped)));
             return scheduleArray;
         }
 
@@ -406,7 +432,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.elements.forEach((element: DeviceStatusElementModel, index: number) => {
             if (element.selectable) {
                 if (!element.requestDevice || this.getService(index).protocol_id === environment.mqttProtocolID) {
-                    scheduleArray.push(of(null));
+                    scheduleArray.push(of(skipped));
                 } else if (element.deploymentId !== null) {
                     // spread process starts
                     let cron =
@@ -415,12 +441,14 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                             : (Math.round((refreshTime / this.elements.length) * index) as unknown as string) + '/' + refreshTime;
                     cron += ' * * * * *';
                     scheduleArray.push(
-                        this.processSchedulerService.createSchedule({
-                            created_by: this.widgetId,
-                            process_deployment_id: element.deploymentId,
-                            cron,
-                            id: '',
-                        }),
+                        this.processSchedulerService
+                            .createSchedule({
+                                created_by: this.widgetId,
+                                process_deployment_id: element.deploymentId,
+                                cron,
+                                id: '',
+                            })
+                            .pipe(map((schedule) => ({ schedule, failed: schedule === null }))),
                     );
                 }
             }

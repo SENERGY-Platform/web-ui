@@ -52,8 +52,11 @@ import { V2DeploymentsPreparedModel } from '../../../modules/processes/deploymen
 import { forkJoin, Observable, of } from 'rxjs';
 import { flatMap, map, mergeMap } from 'rxjs/operators';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { ProcessSchedulerModel } from '../../process-scheduler/shared/process-scheduler.model';
 import { DataTableService } from '../shared/data-table.service';
-import { buildImportExport, buildPipelineOperatorExport, GENERATED_DEPLOYMENT_SVG, generatedDeploymentXml, generatedScheduleCron } from './data-table-edit-dialog.save';
+import { buildImportExport, buildPipelineOperatorExport, GENERATED_DEPLOYMENT_SVG, generatedDeploymentXml, generatedScheduleCron, isFailedDeployment, SaveStepFailure } from './data-table-edit-dialog.save';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { boundaryValidator, elementDetailsValidator, exportValidator } from './data-table-edit-dialog.validators';
 import { environment } from '../../../../environments/environment';
 import { v4 as uuid } from 'uuid';
@@ -156,6 +159,7 @@ export class DataTableEditDialogComponent implements OnInit {
     private deviceGroupsService = inject(DeviceGroupsService);
     private conceptsService = inject(ConceptsService);
     private destroyRef = inject(DestroyRef);
+    private snackBar = inject(MatSnackBar);
 
     dashboardId: string;
     widgetId: string;
@@ -570,7 +574,14 @@ export class DataTableEditDialogComponent implements OnInit {
 
             const obs = forkJoin(observables)
                 .pipe(
-                    flatMap(() => {
+                    flatMap((results) => {
+                        const failures = results.filter((r): r is SaveStepFailure => r instanceof SaveStepFailure);
+                        if (failures.length > 0) {
+                            const texts = failures.map((f) => 'the ' + f.step + ' for ' + f.elementName);
+                            snackError(this.snackBar, 'Could not create ' + texts.join(', ') + ', the widget was not saved');
+                            // not an 'OK' response, so the dialog stays open
+                            return of({ message: 'error' } as DashboardResponseMessageModel);
+                        }
                         this.widget.properties.dataTable = this.formGroup.value as DataTablePropertiesModel;
                         return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widgetId, [], this.widget.properties);
                     }),
@@ -1101,6 +1112,10 @@ export class DataTableEditDialogComponent implements OnInit {
         });
     }
 
+    private elementLabel(element: AbstractControl): string {
+        return element.get('name')?.value || 'a measurement without a name';
+    }
+
     private createExports(): Observable<any>[] {
         const elements = this.formGroup.controls.elements.controls;
         const observables: Observable<any>[] = [of(null)];
@@ -1139,7 +1154,11 @@ export class DataTableEditDialogComponent implements OnInit {
             observables.push(
                 this.exportService.startPipeline(preparedExport).pipe(
                     map((model) => {
-                        element.patchValue({ exportId: model?.ID });
+                        if (model === null) {
+                            return new SaveStepFailure('export', this.elementLabel(element));
+                        }
+                        element.patchValue({ exportId: model.ID });
+                        return null;
                     }),
                 ),
             );
@@ -1179,6 +1198,8 @@ export class DataTableEditDialogComponent implements OnInit {
 
                 const xml = generatedDeploymentXml(selectedFunction, aspectId);
                 const svg = GENERATED_DEPLOYMENT_SVG;
+                const label = this.elementLabel(element);
+                const deploymentFailure = new SaveStepFailure('process deployment', label);
                 observables.push(
                     this.deploymentsService
                         .v2getPreparedDeploymentsByXml(xml, svg)
@@ -1210,28 +1231,31 @@ export class DataTableEditDialogComponent implements OnInit {
                             }),
                         )
                         .pipe(
-                            flatMap((deployment) => {
-                                if (deployment !== null && deployment.status === 200) {
-                                    element.controls.elementDetails.controls.device.patchValue({ deploymentId: deployment.id });
-                                    // spread process starts
-                                    const cron = generatedScheduleCron(refreshTime, elements.length, index);
-                                    return this.processSchedulerService.createSchedule({
-                                        created_by: this.widgetId,
-                                        process_deployment_id: deployment.id,
-                                        cron,
-                                        id: '',
-                                    });
-                                } else {
-                                    return of(null);
+                            flatMap((deployment): Observable<ProcessSchedulerModel | SaveStepFailure | null> => {
+                                if (deployment === null || isFailedDeployment(deployment)) {
+                                    return of(deploymentFailure);
                                 }
+                                element.controls.elementDetails.controls.device.patchValue({ deploymentId: deployment.id });
+                                // spread process starts
+                                const cron = generatedScheduleCron(refreshTime, elements.length, index);
+                                return this.processSchedulerService.createSchedule({
+                                    created_by: this.widgetId,
+                                    process_deployment_id: deployment.id,
+                                    cron,
+                                    id: '',
+                                });
                             }),
                         )
                         .pipe(
-                            flatMap((schedule) => {
-                                if (schedule !== null) {
-                                    element.controls.elementDetails.controls.device.patchValue({ scheduleId: schedule.id });
+                            map((schedule) => {
+                                if (schedule instanceof SaveStepFailure) {
+                                    return schedule;
                                 }
-                                return of(null);
+                                if (schedule === null) {
+                                    return new SaveStepFailure('schedule', label);
+                                }
+                                element.controls.elementDetails.controls.device.patchValue({ scheduleId: schedule.id });
+                                return null;
                             }),
                         ),
                 );

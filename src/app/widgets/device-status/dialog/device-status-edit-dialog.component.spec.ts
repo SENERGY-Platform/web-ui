@@ -17,7 +17,8 @@ import {ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync} from '@
 import { DeviceStatusEditDialogComponent } from './device-status-edit-dialog.component';
 import { CoreModule } from '../../../core/core.module';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { of } from 'rxjs';
@@ -491,6 +492,96 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
         }),
     );
+
+    describe('save failure paths', () => {
+        let snackOpen: jasmine.Spy;
+
+        function prepareElement(requestDevice: boolean, name = 'living room'): void {
+            component.userHasUpdatePropertiesAuthorization = true;
+            component.addElement({} as DeviceStatusElementModel);
+            component.elementsControl.at(0).patchValue({ aspectId: component.aspects[0].id });
+            component.elementsControl.at(0).patchValue({ function: component.funcArray[0][0] });
+            component.elementsControl.at(0).patchValue({ selectable: component.selectablesArray[0][0] });
+            component.elementsControl.at(0).patchValue({ service: component.serviceExportValueArray[0][0].service });
+            component.elementsControl.at(0).patchValue({ exportValues: component.serviceExportValueArray[0][0].exportValues[0] });
+            component.elementsControl.at(0).patchValue({ requestDevice, name });
+            dashboardServiceSpy.updateWidgetProperty.calls.reset();
+            dashboardServiceSpy.updateWidgetName.calls.reset();
+            matDialogRefSpy.close.calls.reset();
+            deploymentsServiceSpy.v2postDeployments.calls.reset();
+        }
+
+        function expectNoWidgetSave(): void {
+            expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(0);
+            expect(matDialogRefSpy.close.calls.count()).toBe(0);
+        }
+
+        beforeEach(() => {
+            snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+        });
+
+        afterEach(() => {
+            exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
+            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+        });
+
+        it(
+            'saves the widget and closes when every step succeeded',
+            waitForAsync(() => {
+                prepareElement(true);
+                component.save();
+                expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+                expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                expect(snackOpen).not.toHaveBeenCalled();
+            }),
+        );
+
+        it(
+            'does not save the widget when the export cannot be created',
+            waitForAsync(() => {
+                prepareElement(true);
+                exportServiceSpy.startPipeline.and.returnValue(of(null));
+                component.save();
+                expectNoWidgetSave();
+                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the export for living room');
+                expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+            }),
+        );
+
+        it(
+            'does not save the widget when the process deployment cannot be created',
+            waitForAsync(() => {
+                prepareElement(true);
+                deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 500, id: '' }));
+                component.save();
+                expectNoWidgetSave();
+                expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the process deployment for living room');
+            }),
+        );
+
+        it(
+            'does not save the widget when the schedule cannot be created',
+            waitForAsync(() => {
+                prepareElement(true);
+                (component.formGroup.get('refreshTime') as FormControl).setValue(5);
+                spyOn(TestBed.inject(ProcessSchedulerService), 'createSchedule').and.returnValue(of(null));
+                component.save();
+                expectNoWidgetSave();
+                expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the schedule for living room');
+            }),
+        );
+
+        it(
+            'does not take a skipped deployment for a failed one',
+            waitForAsync(() => {
+                prepareElement(false);
+                component.save();
+                expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+                expect(snackOpen).not.toHaveBeenCalled();
+            }),
+        );
+    });
 
     it(
         'check if header exists',
