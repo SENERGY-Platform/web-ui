@@ -40,6 +40,7 @@ import { MtxSelect } from '@ng-matero/extensions/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton } from '@angular/material/button';
 import { SpinnerComponent } from '../../../../../core/components/spinner/spinner.component';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-deploy-flow-classic',
@@ -188,9 +189,7 @@ export class DeployFlowClassicComponent {
         this.ready = true;
         this.flowEngineService.startPipeline(this.pipeReq).subscribe(function() {
             self.router.navigate(['/data/pipelines']);
-            self.snackBar.open('Pipeline started', undefined, {
-                duration: 2000,
-            });
+            snackSuccess(self.snackBar, 'Pipeline started');
         });
     }
 

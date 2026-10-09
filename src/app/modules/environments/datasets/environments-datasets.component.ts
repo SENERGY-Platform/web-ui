@@ -28,6 +28,7 @@ import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-environments-datasets',
@@ -88,9 +89,9 @@ export class EnvironmentsDatasetsComponent implements OnInit {
                 if (confirmed && ds.id) {
                     this.environmentsService.deleteDataset(ds.id).subscribe((ok) => {
                         if (ok) {
-                            this.snackBar.open('Dataset deleted successfully.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Dataset deleted successfully.');
                         } else {
-                            this.snackBar.open('Error while deleting the dataset!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting the dataset!');
                         }
                         this.reload();
                     });

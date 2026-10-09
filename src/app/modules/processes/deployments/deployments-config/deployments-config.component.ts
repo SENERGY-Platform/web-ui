@@ -49,6 +49,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { DeploymentsConfigTimeEventComponent } from './components/time-event/deployments-config-time-event.component';
 import { MatButton } from '@angular/material/button';
 import { KeyValuePipe } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2DeploymentsPreparedSelectionOptionModel {
     group?: string;
@@ -151,7 +152,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     this.loadCharacteristicNames(deployment);
                     this.cd.detectChanges();
                 } else {
-                    this.snackBar.open('Error while copying the deployment! Probably old version', 'close', { panelClass: 'snack-bar-error' });
+                    snackError(this.snackBar, 'Error while copying the deployment! Probably old version');
                 }
             });
         } else {
@@ -186,9 +187,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         });
         this.deploymentsService.v2postDeployments(raw).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
-                this.snackBar.open('Deployment stored successfully.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'Deployment stored successfully.');
             } else {
-                this.snackBar.open('Error while storing the deployment!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while storing the deployment!');
             }
         });
     }

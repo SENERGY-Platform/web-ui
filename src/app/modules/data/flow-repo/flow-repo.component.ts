@@ -54,6 +54,7 @@ import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/mate
 import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 
 @Component({
@@ -178,14 +179,10 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
                     }
                     this.flowRepoService.deleteFlow(flow).subscribe({
                         next: _ => {
-                            this.snackBar.open('Flow deleted', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Flow deleted');
                         },
-                            error: err => {
-                                this.snackBar.open('Flow could not be deleted', err.status, {
-                                    duration: 2000,
-                                });
+                            error: _ => {
+                                snackError(this.snackBar, 'Flow could not be deleted');
                         }
                     });
                     this.getFlows(true);

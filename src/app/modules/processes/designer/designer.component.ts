@@ -40,6 +40,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /** Model text shown in the IoT-Info table; parameter names and values come from the user's model. */
 const escapeHtml = (text: string): string =>
@@ -256,10 +257,10 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
                     exportDiagram(this.modeler).then(
                         ({ xml, svg }) => {
                             this.processRepoService.saveProcess(this.id, xml, svg).subscribe(() => {
-                                this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                                snackSuccess(this.snackBar, 'Model saved.');
                             });
                         },
-                        (err: Error) => this.snackBar.open(err.message, 'close', { panelClass: 'snack-bar-error' }),
+                        (err: Error) => snackError(this.snackBar, err.message),
                     );
                 }
             });
@@ -271,11 +272,11 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 this.modeler.importXML(fileReader.result).catch(this.handleError);
-                this.snackBar.open('Import finished.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'Import finished.');
             };
             fileReader.readAsText(file);
         } else {
-            this.snackBar.open('Failed to load file!', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Failed to load file!');
         }
     }
 

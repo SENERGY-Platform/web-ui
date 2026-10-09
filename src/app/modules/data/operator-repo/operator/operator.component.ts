@@ -31,6 +31,7 @@ import { FormsModule } from '@angular/forms';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatTooltip } from '@angular/material/tooltip';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-operator',
@@ -130,9 +131,7 @@ export class OperatorComponent implements OnInit {
         const op = Object.assign({}, this.operator);
         this.operatorService.saveOperator(op).subscribe((resp) => {
             if (resp) {
-                    this.snackBar.open('Operator saved', undefined, {
-                        duration: 2000,
-                    });
+                    snackSuccess(this.snackBar, 'Operator saved');
             }
         });
     }

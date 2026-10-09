@@ -48,6 +48,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { DatePipe } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 const grids = new Map([
     ['xs', 1],
@@ -410,11 +411,11 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', 'close', { panelClass: 'snack-bar-error' });
+        snackError(this.snackBar, 'Error while ' + text + ' !');
     }
 
     private showSnackBarSuccess(text: string): void {
-        this.snackBar.open(text + ' successfully.', undefined, { duration: 2000 });
+        snackSuccess(this.snackBar, text + ' successfully.');
     }
 
     private get maxItemsDisplayed(): number {

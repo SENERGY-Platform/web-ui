@@ -22,6 +22,7 @@ import { PermissionsService } from './permissions.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin, Observable, of } from 'rxjs';
 import { concatMap, map } from 'rxjs/operators';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Injectable({
     providedIn: 'root',
@@ -90,13 +91,9 @@ export class PermissionsDialogService {
             map((results: boolean[]) => {
                 const failed = results.filter(ok => !ok).length;
                 if (failed === 0) {
-                    this.snackBar.open('Permissions saved successfully.', '', { duration: 2000 });
+                    snackSuccess(this.snackBar, 'Permissions saved successfully.');
                 } else {
-                    this.snackBar.open(
-                        'Error while saving permissions of ' + failed + ' of ' + results.length + '!',
-                        'close',
-                        { panelClass: 'snack-bar-error' },
-                    );
+                    snackError(this.snackBar, 'Error while saving permissions of ' + failed + ' of ' + results.length + '!');
                 }
                 return failed === 0;
             }),
@@ -106,9 +103,9 @@ export class PermissionsDialogService {
     private savePermV2DialogChanges(request: PermissionsV2ResourceBaseModel, topicID: string, ressourceID: string): void {
         this.permissionsService.setResourcePermissionsV2(topicID, ressourceID, request).subscribe(value => {
             if(value) {
-                this.snackBar.open('Permission saved successfully.', '', { duration: 2000 });
+                snackSuccess(this.snackBar, 'Permission saved successfully.');
             } else {
-                this.snackBar.open('Error while saving permission!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while saving permission!');
             }
         });
     }

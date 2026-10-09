@@ -32,6 +32,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MtxSelect } from '@ng-matero/extensions/select';
 import { MatDivider } from '@angular/material/divider';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 export interface ShareDialogData {
     id: string;
@@ -218,7 +219,7 @@ export class EnvironmentsShareDialogComponent implements OnInit {
                 return;
             }
             const count = result.devices ?? 0;
-            this.snackBar.open('Applied to ' + count + ' device' + (count === 1 ? '' : 's') + '.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Applied to ' + count + ' device' + (count === 1 ? '' : 's') + '.');
             this.dialogRef.close(result);
         });
     }

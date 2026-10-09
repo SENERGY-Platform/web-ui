@@ -42,6 +42,7 @@ import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyle
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { DatePipe } from '@angular/common';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 const grids = new Map([
     ['xs', 1],
@@ -277,7 +278,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', 'close', { panelClass: 'snack-bar-error' });
+        snackError(this.snackBar, 'Error while ' + text + ' !');
     }
 
     permission(release: SmartServiceReleaseModel): void {

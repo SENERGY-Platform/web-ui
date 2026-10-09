@@ -51,6 +51,7 @@ import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler } from '@angular/material/grid-list';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 const grids = new Map([
     ['xs', 1],
@@ -241,9 +242,9 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             } else {
                 this.deploymentsService.startDeployment(deploymentId).subscribe((resp) => {
                     if (resp === null) {
-                        this.snackBar.open('Error while starting the deployment!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while starting the deployment!');
                     } else {
-                        this.snackBar.open('Deployment started successfully.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, 'Deployment started successfully.');
                     }
                 });
             }
@@ -263,7 +264,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     copyEndpoint(id: string) {
         this.clipboardService.copyFromContent(environment.processServiceUrl + '/v2/deployments/' + id + '/start');
-        this.snackBar.open('URL copied to clipboard.', undefined, { duration: 2000 });
+        snackSuccess(this.snackBar, 'URL copied to clipboard.');
     }
 
     navigateToMonitorSection(deployment: DeploymentsModel, activeTab: number) {
@@ -539,17 +540,17 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                     }
                 });
                 if (notify && warnings.size === 0) {
-                    this.snackBar.open('No deployment references missing metadata.', undefined, { duration: 2000 });
+                    snackSuccess(this.snackBar, 'No deployment references missing metadata.');
                 }
             });
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', 'close', { panelClass: 'snack-bar-error' });
+        snackError(this.snackBar, 'Error while ' + text + ' !');
     }
 
     private showSnackBarSuccess(text: string): void {
-        this.snackBar.open(text + ' successfully.', undefined, { duration: 2000 });
+        snackSuccess(this.snackBar, text + ' successfully.');
     }
 
     private get maxItemsDisplayed(): number {

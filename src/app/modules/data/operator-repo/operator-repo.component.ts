@@ -44,6 +44,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
@@ -121,9 +122,7 @@ export class OperatorRepoComponent implements OnInit {
                 if (operatorDelete) {
                     this.ready = false;
                     this.operatorRepoService.deleteOperator(operator).subscribe(() => {
-                        this.snackBar.open('Operator deleted', undefined, {
-                            duration: 2000,
-                        });
+                        snackSuccess(this.snackBar, 'Operator deleted');
                         this.getOperators(true);
                     });
                 }

@@ -122,6 +122,7 @@ import { EnvironmentsFaultsEditorComponent } from './faults-editor/environments-
 import { EnvironmentsEffectsComponent } from './effects/environments-effects.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
 import { DatePipe } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /** One zone or asset row in the Live state tab: the suggested defaults, the working draft and which keys the user actually touched. */
 interface LiveStateEntry {
@@ -456,7 +457,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         }
         this.environmentsService.getEnvironment(this.id).subscribe((env) => {
             if (!env) {
-                this.snackBar.open('Error while loading the environment!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while loading the environment!');
                 this.dataReady = true;
                 return;
             }
@@ -521,12 +522,12 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         }
         const nonIntegerFields = findNonIntegerFields(this.environment);
         if (nonIntegerFields.length > 0) {
-            this.snackBar.open('These fields must be whole numbers: ' + nonIntegerFields.join(', '), 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'These fields must be whole numbers: ' + nonIntegerFields.join(', '));
             return;
         }
         const badWeights = findOutOfRangeMeterWeights(this.environment);
         if (badWeights.length > 0) {
-            this.snackBar.open('These meter parent weights must be whole numbers from 1 to 100: ' + badWeights.join(', '), 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'These meter parent weights must be whole numbers from 1 to 100: ' + badWeights.join(', '));
             return;
         }
         // Counted from the document as it is about to be sent, not from the server's answer:
@@ -539,7 +540,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             if (isValidationError(result)) {
                 this.problems = result.problems || [];
                 this.indexProblems();
-                this.snackBar.open('The environment could not be saved: see the problems below.', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'The environment could not be saved: see the problems below.');
                 return;
             }
             if (isApiError(result)) {
@@ -554,7 +555,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                 // Anything from a 500 to a plaintext 400 (e.g. a Go json.Unmarshal message)
                 // lands here -- it must never be mistaken for success, and the edit stays
                 // exactly as the user left it (no load(), nothing to re-confirm or redo).
-                this.snackBar.open(result.message, 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, result.message);
                 return;
             }
             // result is the saved Environment: a genuine success.
@@ -565,7 +566,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                 pendingDeviceCount > 0
                     ? ' · created ' + pendingDeviceCount + ' platform device' + (pendingDeviceCount === 1 ? '' : 's')
                     : '';
-            this.snackBar.open('Environment saved successfully.' + deviceSuffix, undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Environment saved successfully.' + deviceSuffix);
             this.load(true); // the server may have assigned ids to new nodes; keep the current selection -- also marks the effect graph stale, see load()
         });
     }
@@ -624,14 +625,14 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                 const message =
                     (result.problems || []).map((p) => (p.path ? p.path + ': ' : '') + (p.message || '')).join(' · ') ||
                     'The change was rejected.';
-                this.snackBar.open(message, 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, message);
                 return;
             }
             if (isApiError(result)) {
-                this.snackBar.open(result.message, 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, result.message);
                 return;
             }
-            this.snackBar.open('Applied - takes effect on the next tick.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Applied - takes effect on the next tick.');
             this.contextTouched = new Set();
             this.zoneStates.forEach((entry) => (entry.touched = new Set()));
             this.assetStates.forEach((entry) => (entry.touched = new Set()));

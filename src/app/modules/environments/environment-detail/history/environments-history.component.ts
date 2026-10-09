@@ -37,6 +37,7 @@ import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 const POLL_INTERVAL_MS = 5000;
 const MAX_WINDOW_DAYS = 366;
@@ -213,7 +214,7 @@ export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
             }
             this.showingFormAfterFinishedRun = false;
             this.status = result;
-            this.snackBar.open('History run started.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'History run started.');
             // Restarts polling under the new generation so a GET still in flight from the old
             // one cannot answer after this and overwrite the run just started.
             this.stop();
@@ -263,15 +264,15 @@ export class EnvironmentsHistoryComponent implements OnInit, OnDestroy {
             this.pollError = undefined;
             if (result.kind === 'none') {
                 this.status = null;
-                this.snackBar.open('Nothing is known about a run any more.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'Nothing is known about a run any more.');
                 return;
             }
             this.status = result.status;
             // moses answers cancelled when it closed a stored run itself: that is an accepted abort too.
             if (result.status.state === 'running' || result.status.state === 'cancelled') {
-                this.snackBar.open('Abort accepted.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'Abort accepted.');
             } else {
-                this.snackBar.open('The run had already ended.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'The run had already ended.');
             }
         });
     }

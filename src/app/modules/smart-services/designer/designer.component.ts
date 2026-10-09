@@ -47,6 +47,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-smart-service-designer',
@@ -205,7 +206,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     saveAndRelease(): void {
         this.saveThen((design: SmartServiceDesignModel | null) => {
             if (design) {
-                this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'Model saved.');
                 this.releaseDesign(design, ()=>{
                     if(this.id === '') {
                         this.router.navigate(['/smart-services/designer/'+design.id]);
@@ -218,7 +219,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     save(): void {
         this.saveThen((design: SmartServiceDesignModel | null) => {
             if (design) {
-                this.snackBar.open('Model saved.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'Model saved.');
                 if(this.id === '') {
                     this.router.navigate(['/smart-services/designer/'+design.id]);
                 }
@@ -240,7 +241,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                         }
                     });
             },
-            (err: Error) => this.snackBar.open(err.message, 'close', { panelClass: 'snack-bar-error' }),
+            (err: Error) => snackError(this.snackBar, err.message),
         );
     }
 
@@ -251,9 +252,9 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                 if (result) {
                     this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
                         if(value) {
-                            this.snackBar.open('Release created.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Release created.');
                         } else {
-                            this.snackBar.open('Error while creating a release !', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while creating a release !');
                         }
                         then();
                     });
@@ -269,11 +270,11 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 this.modeler.importXML(fileReader.result).catch(this.handleError);
-                this.snackBar.open('Import finished.', undefined, { duration: 2000 });
+                snackSuccess(this.snackBar, 'Import finished.');
             };
             fileReader.readAsText(file);
         } else {
-            this.snackBar.open('Failed to load file!', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Failed to load file!');
         }
     }
 }

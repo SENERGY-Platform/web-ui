@@ -35,6 +35,7 @@ import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLin
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatFabButton } from '@angular/material/button';
 import { DatePipe } from '@angular/common';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-flow-designer',
@@ -181,9 +182,7 @@ export class FlowDesignerComponent implements AfterViewInit {
                     break;
             }
         } else {
-            this.snackBar.open('Could not add operator', undefined, {
-                duration: 2000,
-            });
+            snackSuccess(this.snackBar, 'Could not add operator');
         }
     }
 
@@ -224,9 +223,7 @@ export class FlowDesignerComponent implements AfterViewInit {
             if (resp == null) {
                 return;
             }
-            this.snackBar.open('Flow saved', undefined, {
-                duration: 2000,
-            });
+            snackSuccess(this.snackBar, 'Flow saved');
             // Only the create response carries the id of the new flow. Keeping it
             // makes every following save update that flow instead of creating another one.
             const id = resp.body?._id;

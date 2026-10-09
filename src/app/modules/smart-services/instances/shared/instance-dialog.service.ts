@@ -29,6 +29,7 @@ import {
 import { SmartServiceInstanceModel } from './instances.model';
 import { SmartServiceInstanceService } from './instances.service';
 import { initParameterValues, parametersSatisfied, pruneInvalidValues, toSmartServiceParameters } from './parameters';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /** The bit of a release the parameter dialog shows as its heading */
 export interface SmartServiceReleaseRef {
@@ -173,7 +174,7 @@ export class SmartServiceInstanceDialogService {
         return this.releasesService.getReleaseParameters(releaseId).pipe(
             map((parameters) => {
                 if (parameters === null) {
-                    this.snackBar.open('Could not load the smart service parameters!', 'close', { panelClass: 'snack-bar-error' });
+                    snackError(this.snackBar, 'Could not load the smart service parameters!');
                 }
                 return parameters;
             }),
@@ -203,7 +204,7 @@ export class SmartServiceInstanceDialogService {
         if (updated === null) {
             return false;
         }
-        this.snackBar.open(message, undefined, { duration: 2000 });
+        snackSuccess(this.snackBar, message);
         return true;
     }
 }

@@ -64,6 +64,7 @@ import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 interface CustomSelectable {
     id: string;
@@ -239,9 +240,7 @@ export class DeployFlowComponent implements OnInit {
                 return this.pipelineRegistryService.getPipeline(id || '').pipe(map((pipeline: PipelineModel | null) => {
                     if (pipeline === null || pipeline.id.length === 0) {
                         // does not 404
-                        this.snackBar.open('Unknown pipeline', undefined, {
-                            duration: 2000,
-                        });
+                        snackSuccess(this.snackBar, 'Unknown pipeline');
                         return;
                     }
                     id = pipeline.flowId;
@@ -1046,23 +1045,17 @@ export class DeployFlowComponent implements OnInit {
                                 url += '?next=' + next.splice(1).join(',');
                             }
                             this.router.navigateByUrl(url);
-                            this.snackBar.open('Pipeline updated, preparing next update...', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Pipeline updated, preparing next update...');
                         } else {
                             this.router.navigate(['/data/pipelines']);
-                            this.snackBar.open('Pipeline updated', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Pipeline updated');
                         }
                     });
                 });
             } else {
                 this.flowEngineService.startPipeline(pipeReq).subscribe((_) => {
                     this.router.navigate(['/data/pipelines']);
-                    this.snackBar.open('Pipeline started', undefined, {
-                        duration: 2000,
-                    });
+                    snackSuccess(this.snackBar, 'Pipeline started');
                 });
             }
         }

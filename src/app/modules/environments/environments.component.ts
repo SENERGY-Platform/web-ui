@@ -35,6 +35,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../core/components/spinner/spinner.component';
 import { MatTooltip } from '@angular/material/tooltip';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
 export interface EnvironmentRow {
@@ -139,7 +140,7 @@ export class EnvironmentsComponent implements OnInit {
         }
         this.environmentsService.getEnvironment(env.id).subscribe(full => {
             if (!full) {
-                this.snackBar.open('Error while exporting the environment!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while exporting the environment!');
                 return;
             }
             const file = new Blob([JSON.stringify(full, null, 2)], { type: 'application/json' });
@@ -172,9 +173,9 @@ export class EnvironmentsComponent implements OnInit {
                 if (confirmed && env.id) {
                     this.environmentsService.deleteEnvironment(env.id).subscribe(ok => {
                         if (ok) {
-                            this.snackBar.open('Environment deleted successfully.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Environment deleted successfully.');
                         } else {
-                            this.snackBar.open('Error while deleting the environment!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting the environment!');
                         }
                         this.reload();
                     });
@@ -209,7 +210,7 @@ export class EnvironmentsComponent implements OnInit {
             try {
                 env = JSON.parse(reader.result as string) as Environment;
             } catch (_e) {
-                this.snackBar.open('Could not import environment: invalid JSON', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Could not import environment: invalid JSON');
                 input.value = '';
                 return;
             }
@@ -219,7 +220,7 @@ export class EnvironmentsComponent implements OnInit {
             input.value = '';
         };
         reader.onerror = () => {
-            this.snackBar.open('Could not import environment: file could not be read', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Could not import environment: file could not be read');
             input.value = '';
         };
         reader.readAsText(file);
@@ -234,17 +235,17 @@ export class EnvironmentsComponent implements OnInit {
         if (isValidationError(result)) {
             const first = (result.problems || [])[0];
             const detail = first ? first.path + ': ' + first.message : 'the document was rejected';
-            this.snackBar.open('Error while ' + verb + ' the environment - ' + detail, 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Error while ' + verb + ' the environment - ' + detail);
             return;
         }
         if (isApiError(result)) {
-            this.snackBar.open('Error while ' + verb + ' the environment - ' + result.message, 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Error while ' + verb + ' the environment - ' + result.message);
             return;
         }
         if (result.id) {
             this.router.navigate(['environments', result.id]);
             return;
         }
-        this.snackBar.open('Error while ' + verb + ' the environment!', 'close', { panelClass: 'snack-bar-error' });
+        snackError(this.snackBar, 'Error while ' + verb + ' the environment!');
     }
 }

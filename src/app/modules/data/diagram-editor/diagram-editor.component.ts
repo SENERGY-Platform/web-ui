@@ -25,6 +25,7 @@ import {NodeElementDefinition} from './shared/node-element-definition';
 import {LinkDefinition} from './shared/link-definition';
 import {PaperService} from './shared/paper.service';
 import {NodeFactory, NodePosition} from './shared/node-factory.service';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-diagram-editor',
@@ -99,9 +100,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
             evt.stopPropagation(); // stop any further actions with the element view (e.g. dragging)
             const model = elementView.model;
             this.clipboard.copy(model.id);
-            this.snackBar.open('Copied to clipboard', undefined, {
-                duration: 2000,
-            });
+            snackSuccess(this.snackBar, 'Copied to clipboard');
         });
     }
 

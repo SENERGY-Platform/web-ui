@@ -46,6 +46,7 @@ import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/mate
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -242,12 +243,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             ).subscribe({
                 next: (_) => {
                     this.reload();
-                    this.snackBar.open('Pipeline deleted', undefined, {
-                        duration: 2000,
-                    });
+                    snackSuccess(this.snackBar, 'Pipeline deleted');
                 },
                 error: (err) => {
-                    this.snackBar.open('Error while deleting pipeline!: ' + err, 'close', {panelClass: 'snack-bar-error'});
+                    snackError(this.snackBar, 'Error while deleting pipeline!: ' + err);
                     this.reload();
                 }
             });
@@ -308,11 +307,11 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe(
                     {
                         next: (_) => {
-                            this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                            snackSuccess(this.snackBar, text + ' deleted successfully.');
                             this.reload();
                         },
                         error: (err) => {
-                            this.snackBar.open('Error while deleting ' + text + '!: ' + err, 'close', {panelClass: 'snack-bar-error'});
+                            snackError(this.snackBar, 'Error while deleting ' + text + '!: ' + err);
                             this.reload();
                         }
                     });

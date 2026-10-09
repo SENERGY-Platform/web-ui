@@ -38,6 +38,7 @@ import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 const grids = new Map([
     ['xs', 1],
@@ -262,7 +263,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
                 }
                 this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
                     if(value) {
-                        this.snackBar.open('Release created.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, 'Release created.');
                     } else {
                         this.showSnackBarError('creating a release');
                     }
@@ -271,6 +272,6 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
     }
 
     private showSnackBarError(text: string): void {
-        this.snackBar.open('Error while ' + text + ' !', 'close', { panelClass: 'snack-bar-error' });
+        snackError(this.snackBar, 'Error while ' + text + ' !');
     }
 }

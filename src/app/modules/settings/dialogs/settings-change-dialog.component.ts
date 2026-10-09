@@ -25,6 +25,7 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { MatButton } from '@angular/material/button';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 
 @Component({
@@ -78,9 +79,9 @@ export class SettingsChangeDialogComponent implements OnInit {
             })
             .subscribe((resp: null | { error: string }) => {
                 if (resp === null) {
-                    this.snackBar.open('Settings saved successfully.', undefined, { duration: 2000 });
+                    snackSuccess(this.snackBar, 'Settings saved successfully.');
                 } else {
-                    this.snackBar.open('Error while saving the settings!', 'close', { panelClass: 'snack-bar-error' });
+                    snackError(this.snackBar, 'Error while saving the settings!');
                 }
             });
     }

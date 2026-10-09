@@ -38,6 +38,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { ShortKeyPipe } from '../shared/short-key.pipe';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 
 
@@ -164,7 +165,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
             if (result) {
                 this.processIoService.set(result).subscribe(value => {
                     if(value.status >= 300){
-                        this.snackBar.open('Error while updating process-io variable!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while updating process-io variable!');
                     }else {
                         this.loadVariables();
                     }
@@ -196,18 +197,18 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
                 this.processIoService.get(result.key).subscribe(existing => {
                     if(existing){
                         if(existing.unix_timestamp_in_s > 0) {
-                            this.snackBar.open('process-io variable with this key already exists', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'process-io variable with this key already exists');
                         } else {
                             this.processIoService.set(result).subscribe(value => {
                                 if(value.status >= 300){
-                                    this.snackBar.open('Error while setting process-io variable!', 'close', { panelClass: 'snack-bar-error' });
+                                    snackError(this.snackBar, 'Error while setting process-io variable!');
                                 }else {
                                     this.loadVariables();
                                 }
                             });
                         }
                     } else {
-                        this.snackBar.open('Error while checking for existing process-io variable!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while checking for existing process-io variable!');
                     }
                 });
 
@@ -223,7 +224,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
                 if (variableDelete) {
                     this.processIoService.remove(key).subscribe(value => {
                         if(value.status >= 300){
-                            this.snackBar.open('Error while deleting process-io variable!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting process-io variable!');
                         }else {
                             this.dataSource.data = this.dataSource.data.filter(value1 => value1.key !== key);
                         }
@@ -269,9 +270,9 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                     if (ok) {
-                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, text + ' deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
                     }
                     this.reload();
                 });
