@@ -99,13 +99,16 @@ export class OperatorRepoService {
         }
     }
 
-    deleteOperator(operator: OperatorModel): Observable<unknown> {
-        return this.http
-            .delete(environment.operatorRepoUrl + '/operator/' + operator._id + '/')
-            .pipe(catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'deleteOperator: Error', {})));
+    /** Answers true when deleted and null when the request failed; the success body is empty. */
+    deleteOperator(operator: OperatorModel): Observable<true | null> {
+        return this.http.delete(environment.operatorRepoUrl + '/operator/' + operator._id + '/').pipe(
+            map((): true => true),
+            catchError(this.errorHandlerService.handleError<true | null>(OperatorRepoService.name, 'deleteOperator: Error', null)),
+        );
     }
 
-    deleteOperators(operators: string[]): Observable<{ status: number }> {
+    /** Answers null when the request failed. */
+    deleteOperators(operators: string[]): Observable<{ status: number } | null> {
         return this.http
             .request('DELETE', environment.operatorRepoUrl + '/operator', {
                 body: operators,
@@ -114,7 +117,7 @@ export class OperatorRepoService {
             })
             .pipe(
                 map((resp) => ({ status: resp.status })),
-                catchError(this.errorHandlerService.handleError(ExportService.name, 'deleteOperators: Error', { status: 404 })),
+                catchError(this.errorHandlerService.handleError<{ status: number } | null>(ExportService.name, 'deleteOperators: Error', null)),
             );
     }
 

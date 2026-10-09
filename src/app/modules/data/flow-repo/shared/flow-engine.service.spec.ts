@@ -68,4 +68,31 @@ describe('FlowEngineService', () => {
         expect(logged).toHaveBeenCalled();
         expect(snackOpen.calls.mostRecent().args[0]).toContain('request failed (502)');
     });
+
+    it('startPipeline answers null on a failed request and the body otherwise', () => {
+        const results: unknown[] = [];
+        service.startPipeline({} as never).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'POST', url: environment.flowEngineUrl + '/pipeline' }).flush('down', { status: 500, statusText: 'Error' });
+        service.startPipeline({} as never).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'POST', url: environment.flowEngineUrl + '/pipeline' }).flush({ id: 'p' });
+        expect(results).toEqual([null, { id: 'p' }]);
+    });
+
+    it('deletePipeline answers null on a failed request and true on an empty success', () => {
+        const results: unknown[] = [];
+        service.deletePipeline('p1').subscribe((r) => results.push(r));
+        http.expectOne({ method: 'DELETE', url: environment.flowEngineUrl + '/pipeline/p1' }).flush('down', { status: 500, statusText: 'Error' });
+        service.deletePipeline('p1').subscribe((r) => results.push(r));
+        http.expectOne({ method: 'DELETE', url: environment.flowEngineUrl + '/pipeline/p1' }).flush(null);
+        expect(results).toEqual([null, true]);
+    });
+
+    it('updatePipeline answers null on a failed request and true on an empty success', () => {
+        const results: unknown[] = [];
+        service.updatePipeline({} as never).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'PUT', url: environment.flowEngineUrl + '/pipeline' }).flush('down', { status: 500, statusText: 'Error' });
+        service.updatePipeline({} as never).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'PUT', url: environment.flowEngineUrl + '/pipeline' }).flush(null);
+        expect(results).toEqual([null, true]);
+    });
 });

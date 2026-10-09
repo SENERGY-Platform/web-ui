@@ -54,4 +54,22 @@ describe('OperatorRepoService', () => {
         expect(req.request.url).toBe(environment.operatorRepoUrl + '/operator?limit=0&offset=0&sort=name:asc&for_user=user-a');
         req.flush({ operators: [], totalCount: 0 });
     });
+
+    it('deleteOperator answers null on a failed request and true on an empty success', () => {
+        const results: unknown[] = [];
+        service.deleteOperator({ _id: 'o1' } as never).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator/o1/' }).flush('down', { status: 500, statusText: 'Error' });
+        service.deleteOperator({ _id: 'o1' } as never).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator/o1/' }).flush(null);
+        expect(results).toEqual([null, true]);
+    });
+
+    it('deleteOperators answers null on a failed request and the status otherwise', () => {
+        const results: unknown[] = [];
+        service.deleteOperators(['o1']).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator' }).flush('down', { status: 500, statusText: 'Error' });
+        service.deleteOperators(['o1']).subscribe((r) => results.push(r));
+        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator' }).flush('', { status: 200, statusText: 'OK' });
+        expect(results).toEqual([null, { status: 200 }]);
+    });
 });

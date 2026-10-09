@@ -44,7 +44,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
@@ -122,7 +122,12 @@ export class OperatorRepoComponent implements OnInit {
             .subscribe((operatorDelete: boolean | undefined) => {
                 if (operatorDelete) {
                     this.ready = false;
-                    this.operatorRepoService.deleteOperator(operator).subscribe(() => {
+                    this.operatorRepoService.deleteOperator(operator).subscribe((deleted) => {
+                        if (deleted === null) {
+                            this.ready = true;
+                            snackError(this.snackBar, 'Error while deleting operator!');
+                            return;
+                        }
                         snackSuccess(this.snackBar, 'Operator deleted');
                         this.getOperators(true);
                     });
@@ -218,7 +223,12 @@ export class OperatorRepoComponent implements OnInit {
                         }
                     });
 
-                    this.operatorRepoService.deleteOperators(operatorIDs).subscribe(() => {
+                    this.operatorRepoService.deleteOperators(operatorIDs).subscribe((result) => {
+                        if (result === null) {
+                            this.ready = true;
+                            snackError(this.snackBar, 'Error while deleting operators!');
+                            return;
+                        }
                         this.getOperators(true);
                         this.selectionClear();
                     });

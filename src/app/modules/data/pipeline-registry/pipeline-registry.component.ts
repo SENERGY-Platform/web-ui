@@ -50,6 +50,12 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
+/** The reason of a thrown error as ": reason", empty when there is none to show. */
+function errorSuffix(err: unknown): string {
+    const reason = typeof err === 'string' ? err : (err as { message?: unknown } | null | undefined)?.message;
+    return typeof reason === 'string' && reason !== '' ? ': ' + reason : '';
+}
+
 @Component({
     selector: 'senergy-pipeline-registry',
     templateUrl: './pipeline-registry.component.html',
@@ -223,12 +229,16 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                     return of();
                 })
             ).subscribe({
-                next: (_) => {
+                next: (deleted) => {
                     this.reload();
+                    if (deleted === null) {
+                        snackError(this.snackBar, 'Error while deleting pipeline!');
+                        return;
+                    }
                     snackSuccess(this.snackBar, 'Pipeline deleted');
                 },
                 error: (err) => {
-                    snackError(this.snackBar, 'Error while deleting pipeline!: ' + err);
+                    snackError(this.snackBar, 'Error while deleting pipeline!' + errorSuffix(err));
                     this.reload();
                 }
             });
@@ -273,8 +283,9 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                 this.ready = false;
             },
             jobs: () => this.selection.selected.map((pipeline: PipelineModel) => this.flowEngineService.deletePipeline(pipeline.id)),
+            isSuccess: (results) => results.every((deleted) => deleted !== null),
             successMessage: text + ' deleted successfully.',
-            errorMessage: (err) => 'Error while deleting ' + text + '!: ' + err,
+            errorMessage: (err) => 'Error while deleting ' + text + '!' + errorSuffix(err),
             after: () => this.reload(),
         });
     }

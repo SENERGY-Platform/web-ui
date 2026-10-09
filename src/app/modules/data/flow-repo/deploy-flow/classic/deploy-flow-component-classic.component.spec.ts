@@ -28,6 +28,13 @@ import { DialogsService } from '../../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { DeviceInstancesService } from '../../../../devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { ParserService } from '../../shared/parser.service';
+import { FlowEngineService } from '../../shared/flow-engine.service';
 
 describe('DeployFlowClassicComponent', () => {
     let component: DeployFlowClassicComponent;
@@ -76,5 +83,45 @@ describe('DeployFlowClassicComponent', () => {
 
     it('should parse inputs', () => {
         expect(component.selectedValues).toBeTruthy();
+    });
+});
+
+describe('DeployFlowClassicComponent start', () => {
+    let component: DeployFlowClassicComponent;
+    let flowEngine: jasmine.SpyObj<FlowEngineService>;
+    let router: jasmine.SpyObj<Router>;
+    let snackBar: { open: jasmine.Spy };
+
+    beforeEach(() => {
+        flowEngine = jasmine.createSpyObj<FlowEngineService>('FlowEngineService', ['startPipeline']);
+        router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+        snackBar = { open: jasmine.createSpy('open') };
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: FlowEngineService, useValue: flowEngine },
+                { provide: Router, useValue: router },
+                { provide: MatSnackBar, useValue: snackBar },
+                { provide: ParserService, useValue: { getInputs: () => of([]) } },
+                { provide: DeviceInstancesService, useValue: { getDeviceInstances: () => of({ result: [], total: 0 }) } },
+                { provide: DeviceTypeService, useValue: {} },
+                { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'flow' } } } },
+            ],
+        });
+        TestBed.overrideTemplate(DeployFlowClassicComponent, '');
+        component = TestBed.createComponent(DeployFlowClassicComponent).componentInstance;
+    });
+
+    it('goes to the pipeline list and reports success when the pipeline started', () => {
+        flowEngine.startPipeline.and.returnValue(of({}));
+        component.startPipeline();
+        expect(router.navigate).toHaveBeenCalledOnceWith(['/data/pipelines']);
+        expect(snackBar.open.calls.mostRecent().args[0]).toBe('Pipeline started');
+    });
+
+    it('stays and names the action when starting the pipeline failed', () => {
+        flowEngine.startPipeline.and.returnValue(of(null));
+        component.startPipeline();
+        expect(router.navigate).not.toHaveBeenCalled();
+        expect(snackBar.open).toHaveBeenCalledOnceWith('The pipeline could not be started', 'close', { panelClass: 'snack-bar-error' });
     });
 });

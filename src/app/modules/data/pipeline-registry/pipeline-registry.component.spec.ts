@@ -84,12 +84,27 @@ describe('PipelineRegistryComponent delete', () => {
 
         it('deletes by id, reloads and reports success', () => {
             answerDialog(true);
-            flowEngine.deletePipeline.and.returnValue(of({}));
+            flowEngine.deletePipeline.and.returnValue(of(true));
             component.deletePipeline(one);
             expect(flowEngine.deletePipeline).toHaveBeenCalledOnceWith(one.id);
             expect(registry.getPipelinesNew).toHaveBeenCalledTimes(1);
             expect(snackBar.open).toHaveBeenCalledOnceWith('Pipeline deleted', undefined, { duration: 2000 });
             expect(component.ready).toBeTrue();
+        });
+
+        it('reports an error and no success when the delete failed, and reloads', () => {
+            answerDialog(true);
+            flowEngine.deletePipeline.and.returnValue(of(null));
+            component.deletePipeline(one);
+            expect(snackBar.open).toHaveBeenCalledOnceWith('Error while deleting pipeline!', 'close', { panelClass: 'snack-bar-error' });
+            expect(registry.getPipelinesNew).toHaveBeenCalledTimes(1);
+        });
+
+        it('shows the message of a thrown error object and not [object Object]', () => {
+            answerDialog(true);
+            flowEngine.deletePipeline.and.returnValue(throwError(() => ({ message: 'denied' })));
+            component.deletePipeline(one);
+            expect(snackBar.open).toHaveBeenCalledOnceWith('Error while deleting pipeline!: denied', 'close', { panelClass: 'snack-bar-error' });
         });
 
         it('reports an error with its text appended and still reloads', () => {
@@ -128,7 +143,7 @@ describe('PipelineRegistryComponent delete', () => {
 
         it('deletes every selected id once, reports success, reloads and clears the selection', () => {
             answerDialog(true);
-            flowEngine.deletePipeline.and.returnValue(of({}));
+            flowEngine.deletePipeline.and.returnValue(of(true));
             component.selection.select(one, two);
             component.deleteMultipleItems();
             expect(flowEngine.deletePipeline.calls.allArgs()).toEqual([[one.id], [two.id]]);
@@ -140,11 +155,21 @@ describe('PipelineRegistryComponent delete', () => {
 
         it('reports an error with the count and its text appended, still reloads and clears the selection', () => {
             answerDialog(true);
-            flowEngine.deletePipeline.and.returnValues(of({}), throwError(() => 'boom'));
+            flowEngine.deletePipeline.and.returnValues(of(true), throwError(() => 'boom'));
             component.selection.select(one, two);
             component.deleteMultipleItems();
             expect(flowEngine.deletePipeline).toHaveBeenCalledTimes(2);
             expect(snackBar.open).toHaveBeenCalledOnceWith('Error while deleting 2 pipelines!: boom', 'close', { panelClass: 'snack-bar-error' });
+            expect(registry.getPipelinesNew).toHaveBeenCalledTimes(1);
+            expect(component.selection.isEmpty()).toBeTrue();
+        });
+
+        it('reports an error and no success when one delete failed, still reloads and clears the selection', () => {
+            answerDialog(true);
+            flowEngine.deletePipeline.and.returnValues(of(true), of(null));
+            component.selection.select(one, two);
+            component.deleteMultipleItems();
+            expect(snackBar.open).toHaveBeenCalledOnceWith('Error while deleting 2 pipelines!', 'close', { panelClass: 'snack-bar-error' });
             expect(registry.getPipelinesNew).toHaveBeenCalledTimes(1);
             expect(component.selection.isEmpty()).toBeTrue();
         });

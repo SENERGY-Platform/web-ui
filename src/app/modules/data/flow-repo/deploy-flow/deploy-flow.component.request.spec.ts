@@ -75,7 +75,7 @@ describe('DeployFlowComponent pipeline request', () => {
         deviceTypeService.getAspects.and.returnValue(of([]));
         flowEngineService = createSpyFromClass(FlowEngineService);
         flowEngineService.startPipeline.and.returnValue(of({}));
-        flowEngineService.updatePipeline.and.returnValue(of(undefined));
+        flowEngineService.updatePipeline.and.returnValue(of(true));
         router = createSpyFromClass(Router);
         snackBar = createSpyFromClass(MatSnackBar);
 
@@ -321,6 +321,25 @@ describe('DeployFlowComponent pipeline request', () => {
         expect(flowEngineService.updatePipeline).not.toHaveBeenCalled();
         expect(router.navigate).toHaveBeenCalledOnceWith(['/data/pipelines']);
         expect(snackBar.open.calls.mostRecent().args[0]).toBe('Pipeline started');
+    });
+
+    it('stays on the form and names the action when starting the pipeline failed', () => {
+        init();
+        flowEngineService.startPipeline.and.returnValue(of(null));
+        request();
+        expect(router.navigate).not.toHaveBeenCalled();
+        expect(snackBar.open).toHaveBeenCalledOnceWith('The pipeline could not be started', 'close', { panelClass: 'snack-bar-error' });
+        expect(component.ready).toBeTrue();
+    });
+
+    it('stays on the form and names the action when updating the pipeline failed', () => {
+        init({ edit: true, next: 'a,b' });
+        flowEngineService.updatePipeline.and.returnValue(of(null));
+        request();
+        expect(router.navigate).not.toHaveBeenCalled();
+        expect(router.navigateByUrl).not.toHaveBeenCalled();
+        expect(snackBar.open).toHaveBeenCalledOnceWith('The pipeline could not be updated', 'close', { panelClass: 'snack-bar-error' });
+        expect(component.ready).toBeTrue();
     });
 
     it('updates an edited pipeline under its id and goes to the pipeline list', () => {

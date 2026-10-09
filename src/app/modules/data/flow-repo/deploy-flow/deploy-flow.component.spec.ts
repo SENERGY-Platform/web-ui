@@ -152,7 +152,7 @@ describe('DeployFlowComponent aspects', () => {
         aspectClassesService.getAspectClasses.and.returnValue(of([{ id: 'urn:infai:ses:aspect-class:environment', name: 'Environment' }]));
         flowEngineService = createSpyFromClass(FlowEngineService);
         flowEngineService.startPipeline.and.returnValue(of({}));
-        flowEngineService.updatePipeline.and.returnValue(of(undefined));
+        flowEngineService.updatePipeline.and.returnValue(of(true));
         const editing = savedSelection !== undefined;
 
         TestBed.configureTestingModule({

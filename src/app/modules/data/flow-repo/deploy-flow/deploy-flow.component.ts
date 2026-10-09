@@ -63,7 +63,7 @@ import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
-import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 interface CustomSelectable {
     id: string;
@@ -792,7 +792,12 @@ export class DeployFlowComponent implements OnInit {
             const pipeReq = buildPipelineRequest(this.requestFormValue(), this.flowId, this.editMode ? this.pipelineId : null);
 
             if (this.editMode) {
-                this.flowEngineService.updatePipeline(pipeReq).subscribe((_) => {
+                this.flowEngineService.updatePipeline(pipeReq).subscribe((result) => {
+                    if (result === null) {
+                        this.ready = true;
+                        snackError(this.snackBar, 'The pipeline could not be updated');
+                        return;
+                    }
                     this.route.queryParams.pipe(first()).subscribe((params) => {
                         if (params.next !== undefined && params.next.length > 0) {
                             const next = (params.next as string).split(',');
@@ -809,7 +814,12 @@ export class DeployFlowComponent implements OnInit {
                     });
                 });
             } else {
-                this.flowEngineService.startPipeline(pipeReq).subscribe((_) => {
+                this.flowEngineService.startPipeline(pipeReq).subscribe((result) => {
+                    if (result === null) {
+                        this.ready = true;
+                        snackError(this.snackBar, 'The pipeline could not be started');
+                        return;
+                    }
                     this.router.navigate(['/data/pipelines']);
                     snackSuccess(this.snackBar, 'Pipeline started');
                 });

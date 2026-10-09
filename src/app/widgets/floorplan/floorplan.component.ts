@@ -17,6 +17,8 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog/floorplan-edit-dialog.component';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
@@ -50,7 +52,7 @@ import {
   TooltipCriteria,
   VoidTogglePair,
 } from './shared/floorplan.model';
-import { DeviceCommandModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
+import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import { ChartConfiguration, ChartData, ChartTypeRegistry, BubbleDataPoint, Chart, TooltipModel, Plugin, ChartDataset } from 'chart.js';
@@ -84,6 +86,7 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
 })
 export class FloorplanComponent implements OnInit, AfterViewInit {
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
   private dashboardService = inject(DashboardService);
   private deviceCommandService = inject(DeviceCommandService);
   private cd = inject(ChangeDetectorRef);
@@ -483,6 +486,11 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       const o: Observable<unknown>[] = [];
       if (commands.length > 0) {
         o?.push(this.deviceCommandService.runCommands(commands, true).pipe(map(res => {
+          // runCommands answers [] when the request failed; keep the values shown so far
+          if (res.length !== commands.length) {
+            snackError(this.snackBar, 'The floorplan values could not be read');
+            return;
+          }
           commands.forEach((com, i) => {
             // criteria differing only by interaction all report the same value
             this.deviceGroups.find(dg => dg.id === com.group_id)?.criteria
@@ -997,7 +1005,18 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       input: command.value,
     };
     // the devices need a moment before they report the new state
-    return this.deviceCommandService.runCommands([deviceCommand]).pipe(delay(750), concatMap(_ => this.refresh()));
+    return this.deviceCommandService.runCommands([deviceCommand]).pipe(concatMap(responses => {
+      // runCommands answers [] when the request failed; a command that did not run has a status other than 200
+      if (!this.allSucceeded(responses, 1)) {
+        snackError(this.snackBar, 'The command could not be sent to the device');
+        return of(null);
+      }
+      return of(null).pipe(delay(750), concatMap(_ => this.refresh()));
+    }));
+  }
+
+  private allSucceeded(responses: DeviceCommandResponseModel[], expected: number): boolean {
+    return responses.length === expected && responses.every(r => r.status_code === 200);
   }
 
   closeChartjsTooltip() {

@@ -17,6 +17,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { of } from 'rxjs';
 import { DeviceGroupCriteriaModel } from '../../modules/devices/device-groups/shared/device-groups.model';
@@ -435,7 +436,8 @@ describe('FloorplanComponent', () => {
         beforeEach(() => {
             dialogSpy.open.calls.reset();
             commandSpy.runCommands.calls.reset();
-            commandSpy.runCommands.and.returnValue(of([{ status_code: 200, message: false }]));
+            // one answer per command, as the backend gives
+            commandSpy.runCommands.and.callFake(commands => of(commands.map(() => ({ status_code: 200, message: false }))));
             component.deviceGroups = [{
                 id: 'deviceGroupId',
                 device_ids: [],
@@ -668,5 +670,57 @@ describe('FloorplanComponent', () => {
             const read = commandSpy.runCommands.calls.all()[1].args[0] as DeviceCommandModel[];
             expect(read.map(c => c.function_id)).toEqual([getOnOff]);
         }));
+
+        describe('when the command request fails', () => {
+            let snackOpen: jasmine.Spy;
+            const errorSnack = (text: string) => expect(snackOpen).toHaveBeenCalledOnceWith(text, 'close', { panelClass: 'snack-bar-error' });
+
+            beforeEach(() => {
+                snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+            });
+
+            it('names the action and does not read the state again when a control answers []', fakeAsync(() => {
+                commandSpy.runCommands.and.returnValue(of([]));
+                drawPlacements([placement({ tooltipCriteria: [criteria(setOn)] })], true);
+
+                component.performControl(0, { criteria: criteria(setOn), value: undefined });
+                tick(750);
+
+                errorSnack('The command could not be sent to the device');
+                expect(commandSpy.runCommands).toHaveBeenCalledTimes(1);
+            }));
+
+            it('names the action when the device answers a status other than 200', fakeAsync(() => {
+                commandSpy.runCommands.and.returnValue(of([{ status_code: 500, message: 'no' }]));
+                drawPlacements([placement({ tooltipCriteria: [criteria(setOn)] })], true);
+
+                component.performControl(0, { criteria: criteria(setOn), value: undefined });
+                tick(750);
+
+                errorSnack('The command could not be sent to the device');
+                expect(commandSpy.runCommands).toHaveBeenCalledTimes(1);
+            }));
+
+            it('does not report an error when the command ran', fakeAsync(() => {
+                drawPlacements([placement({ tooltipCriteria: [criteria(setOn)] })], true);
+
+                component.performControl(0, { criteria: criteria(setOn), value: undefined });
+                tick(750);
+
+                expect(snackOpen).not.toHaveBeenCalled();
+            }));
+
+            it('keeps the values shown and names the action when a refresh read answers []', fakeAsync(() => {
+                commandSpy.runCommands.and.returnValue(of([]));
+                const shown = { status_code: 200, message: [21] };
+                drawPlacements([placement({ criteria: { ...criteria(getTargetTemperature), value: shown } })], true);
+
+                (component as unknown as { refresh: () => any }).refresh().subscribe();
+                tick(750);
+
+                expect(component.widget.properties.floorplan?.placements[0].criteria.value).toBe(shown);
+                errorSnack('The floorplan values could not be read');
+            }));
+        });
     });
 });

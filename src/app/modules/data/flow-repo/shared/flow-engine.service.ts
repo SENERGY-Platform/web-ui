@@ -39,10 +39,11 @@ export class FlowEngineService {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.flowEngineUrl);
     }
 
-    startPipeline(data: PipelineRequestModel): Observable<unknown> {
+    /** Answers null when the request failed. */
+    startPipeline(data: PipelineRequestModel): Observable<unknown | null> {
         return this.http.post<unknown>(environment.flowEngineUrl + '/pipeline', data).pipe(
             map((resp) => resp || []),
-            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'startPipeline: Error', [])),
+            catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'startPipeline: Error', null)),
         );
     }
 
@@ -66,16 +67,20 @@ export class FlowEngineService {
         );
     }
 
-    deletePipeline(id: string): Observable<unknown> {
-        return this.http
-            .delete(environment.flowEngineUrl + '/pipeline/' + id)
-            .pipe(catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'deletePipeline: Error', {})));
+    /** Answers true when deleted and null when the request failed; the success body is empty. */
+    deletePipeline(id: string): Observable<true | null> {
+        return this.http.delete(environment.flowEngineUrl + '/pipeline/' + id).pipe(
+            map((): true => true),
+            catchError(this.errorHandlerService.handleError<true | null>(FlowEngineService.name, 'deletePipeline: Error', null)),
+        );
     }
 
-    updatePipeline(data: PipelineRequestModel): Observable<void> {
-        return this.http
-            .put<void>(environment.flowEngineUrl + '/pipeline', data)
-            .pipe(catchError(this.errorHandlerService.handleError(FlowEngineService.name, 'updatePipeline: Error', undefined)));
+    /** Answers true when updated and null when the request failed; the success body is empty. */
+    updatePipeline(data: PipelineRequestModel): Observable<true | null> {
+        return this.http.put<void>(environment.flowEngineUrl + '/pipeline', data).pipe(
+            map((): true => true),
+            catchError(this.errorHandlerService.handleError<true | null>(FlowEngineService.name, 'updatePipeline: Error', null)),
+        );
     }
 
     userHasDeleteAuthorization(): boolean {
