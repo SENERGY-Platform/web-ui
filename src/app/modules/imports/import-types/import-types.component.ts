@@ -28,7 +28,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { forkJoin, Observable, map, of, mergeMap, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
@@ -67,7 +67,8 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     pageSize = this.prefeencesService.pageSize;
     dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    selection = new SelectionModel<ImportTypeModel>(true, []);
+    listSelection = new ListSelection<ImportTypeModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     dataReady = false;
     sort = 'name.asc';
     searchText = '';
@@ -214,17 +215,11 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

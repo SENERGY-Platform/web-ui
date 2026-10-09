@@ -21,7 +21,7 @@ import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -78,7 +78,8 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
     displayedColumns: string[] = ['select', 'status','access', 'id', 'name','smartServiceInstanceId', 'createdat', 'updatedat', 'info'];
-    selection = new SelectionModel<PipelineModel>(true, []);
+    listSelection = new ListSelection<PipelineModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     totalCount = 0;
     sortBy = 'createdat';
     sortDirection: SortDirection = 'desc';
@@ -257,17 +258,11 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

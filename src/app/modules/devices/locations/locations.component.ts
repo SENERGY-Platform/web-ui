@@ -24,7 +24,7 @@ import { ExtendedLocationModel, LocationModel } from './shared/locations.model';
 import { LocationsService } from './shared/locations.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -63,7 +63,8 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     totalCount = 200;
     offset = 0;
     dataSource = new MatTableDataSource<ExtendedLocationModel>();
-    selection = new SelectionModel<ExtendedLocationModel>(true, []);
+    listSelection = new ListSelection<ExtendedLocationModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     searchText = '';
     sortBy = 'name';
@@ -188,17 +189,11 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

@@ -26,7 +26,7 @@ import { DeviceInstancesDialogService } from '../../devices/device-instances/sha
 import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-type.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -61,7 +61,8 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     deviceTypes: DeviceTypeModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     dataSource = new MatTableDataSource<DeviceTypeModel>();
-    selection = new SelectionModel<DeviceTypeModel>(true, []);
+    listSelection = new ListSelection<DeviceTypeModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     totalCount = 200;
     offset = 0;
     searchControl = new FormControl<string | null>('');
@@ -239,17 +240,11 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

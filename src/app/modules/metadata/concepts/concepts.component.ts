@@ -28,7 +28,7 @@ import {FunctionsService} from '../functions/shared/functions.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -64,7 +64,8 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     concepts: DeviceTypeConceptModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
-    selection = new SelectionModel<DeviceTypeConceptModel>(true, []);
+    listSelection = new ListSelection<DeviceTypeConceptModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     totalCount = 200;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -276,17 +277,11 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

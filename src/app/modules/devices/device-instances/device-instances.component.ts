@@ -33,7 +33,7 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { DeviceInstancesDialogService } from './shared/device-instances-dialog.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import { forkJoin, Observable, map, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -98,7 +98,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     maxShownAttributes = 3;
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
-    selection = new SelectionModel<DeviceInstanceModel>(true, []);
+    listSelection = new ListSelection<DeviceInstanceModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     totalCount = 200;
     offset = 0;
     ready = false;
@@ -509,17 +510,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

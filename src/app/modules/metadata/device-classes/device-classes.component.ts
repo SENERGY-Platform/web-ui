@@ -27,7 +27,7 @@ import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/devi
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import {
     UsedInDeviceTypeQuery,
@@ -66,7 +66,8 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     pageSize = this.preferencesService.pageSize;
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeDeviceClassModel>();
-    selection = new SelectionModel<DeviceTypeDeviceClassModel>(true, []);
+    listSelection = new ListSelection<DeviceTypeDeviceClassModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     totalCount = 200;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
@@ -221,17 +222,11 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

@@ -22,7 +22,7 @@ import { merge, Observable } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MonitorService } from './shared/monitor.service';
 import { MonitorProcessModel } from './shared/monitor-process.model';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
@@ -69,8 +69,10 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
     displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
     displayedColumnsRunning: string[] = ['select', 'definitionName', 'id', 'startTime', 'action'];
-    selection = new SelectionModel<MonitorProcessModel>(true, []);
-    selectionRunning = new SelectionModel<MonitorProcessModel>(true, []);
+    listSelection = new ListSelection<MonitorProcessModel>(() => this.dataSourceFinished.connect().value);
+    listSelectionRunning = new ListSelection<MonitorProcessModel>(() => this.dataSourceRunning.connect().value);
+    selection = this.listSelection.model;
+    selectionRunning = this.listSelectionRunning.model;
     activeIndex = 0;
     totalCountFinished = 0;
     totalCountRunning = 0;
@@ -189,31 +191,19 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSourceFinished.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     isAllSelectedRunning() {
-        const numSelected = this.selectionRunning.selected.length;
-        const currentViewed = this.dataSourceRunning.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelectionRunning.isAllSelected();
     }
 
     masterToggleRunning() {
-        if (this.isAllSelectedRunning()) {
-            this.selectionClearRunning();
-        } else {
-            this.dataSourceRunning.connect().value.forEach((row) => this.selectionRunning.select(row));
-        }
+        this.listSelectionRunning.masterToggle();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSourceFinished.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     animationDone(): void {

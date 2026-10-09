@@ -28,7 +28,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {ConceptsPermSearchModel} from '../concepts/shared/concepts-perm-search.model';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from '../device-types-overview/shared/used-in-device-type.model';
@@ -65,7 +65,8 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     pageSize = this.preferencesService.pageSize;
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeCharacteristicsModel>();
-    selection = new SelectionModel<DeviceTypeCharacteristicsModel>(true, []);
+    listSelection = new ListSelection<DeviceTypeCharacteristicsModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     totalCount = 200;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -279,17 +280,11 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

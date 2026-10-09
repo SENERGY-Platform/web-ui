@@ -26,7 +26,7 @@ import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.
 import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -68,7 +68,8 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     dataSource = new MatTableDataSource<HubModel>();
     sortBy = 'name';
     sortDirection: SortDirection = 'asc';
-    selection = new SelectionModel<HubModel>(true, []);
+    listSelection = new ListSelection<HubModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     searchText = '';
     totalCount = 200;
     offset = 0;
@@ -230,17 +231,11 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

@@ -23,7 +23,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeviceGroupsService } from './shared/device-groups.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { DeviceGroupModel } from './shared/device-groups.model';
@@ -61,7 +61,8 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
 
     displayedColumns = ['select', 'name', 'show'];
     pageSize = this.preferencesService.pageSize;
-    selection = new SelectionModel<DeviceGroupModel>(true, []);
+    listSelection = new ListSelection<DeviceGroupModel>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
     totalCount = 200;
     instances = [];
     dataSource = new MatTableDataSource<DeviceGroupModel>();
@@ -122,17 +123,11 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

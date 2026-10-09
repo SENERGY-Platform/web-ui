@@ -27,7 +27,7 @@ import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variab
 import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
 import {forkJoin, Observable} from 'rxjs';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { SearchbarComponent } from '../../../../core/components/searchbar/searchbar.component';
@@ -70,7 +70,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     userHasDeleteAuthorization = false;
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    selection = new SelectionModel<ProcessIoVariable>(true, []);
+    listSelection = new ListSelection<ProcessIoVariable>(() => this.dataSource.connect().value);
+    selection = this.listSelection.model;
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
     displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value'];
@@ -235,17 +236,11 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
 
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.dataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.dataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {

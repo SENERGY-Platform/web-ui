@@ -25,7 +25,7 @@ import {
 import {merge} from 'rxjs';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import {SelectionModel} from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeDelete, WaitingRoomEventTypeSet, WaitingRoomEventTypeUse} from './shared/waiting-room.model';
 import {startWith, switchMap} from 'rxjs/operators';
@@ -72,7 +72,9 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
-    selection = new SelectionModel<WaitingDeviceModel>(true, []);
+    listSelection = new ListSelection<WaitingDeviceModel>(() => this.devicesDataSource.connect().value);
+
+    selection = this.listSelection.model;
     displayedColumns: string[] = ['select', 'name', 'created_at', 'updated_at', 'edit', 'use', 'toggle_hide', 'delete'];
     totalCount = 0;
 
@@ -168,17 +170,11 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.devicesDataSource.connect().value.length;
-        return numSelected === currentViewed;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.devicesDataSource.connect().value.forEach((row) => this.selection.select(row));
-        }
+        this.listSelection.masterToggle();
     }
 
     openEditDialog(device: DeviceInstanceModel): void {
