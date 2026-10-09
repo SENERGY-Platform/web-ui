@@ -25,8 +25,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
 import { DeviceInstancesService } from '../device-instances/shared/device-instances.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -64,15 +65,12 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     private preferencesService = inject(PreferencesService);
 
     displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];
-    pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<HubModel>();
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.getNetworks(), { sortBy: 'name', sortDirection: 'asc' });
     listSelection = new ListSelection<HubModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     searchText = '';
     totalCount = 200;
-    offset = 0;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userHasUpdateAuthorization = false;
@@ -119,32 +117,13 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-
         // TODO Ingo suche connection
-        if (this.sortBy === 'connection') {
-            this.sortBy = 'annotations.connected';
-        } else if (this.sortBy === 'number_devices') {
-            this.sortBy = 'device_local_ids';
-        }
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event, { connection: 'annotations.connected', number_devices: 'device_local_ids' });
         this.reload();
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getNetworks().subscribe({
-                next: (_) => {
-                    this.ready = true;
-                },
-                error: (_) => {
-                    this.ready = true;
-                }
-            });
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     edit(network?: HubModel) {
@@ -165,7 +144,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     }
 
     delete(network: HubModel) {
-        this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: network.id }).subscribe((devices) => {
+        this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0, sortBy: this.list.sortBy, sortDesc: this.list.sortDirection === 'desc', hubId: network.id }).subscribe((devices) => {
             this.dialog
                 .open(NetworksDeleteDialogComponent, { data: { networkId: network.id, devices }, minWidth: '300px' })
                 .afterClosed()
@@ -188,7 +167,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
 
     private getNetworks(): Observable<HubModel[]> {
         return this.networksService
-            .listExtendedHubs({ limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDesc: this.sortDirection !== 'asc', searchText: this.searchText })
+            .listExtendedHubs({ limit: this.list.pageSize, offset: this.list.offset, sortBy: this.list.sortBy, sortDesc: this.list.sortDirection !== 'asc', searchText: this.searchText })
             .pipe(
                 map((networks: ExtendedHubTotalModel) => {
                     this.totalCount = networks.total;
@@ -216,11 +195,10 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     }
 
     reload() {
-        this.offset = 0;
         this.ready = false;
         this.selectionClear();
 
-        this.getNetworks().subscribe({
+        this.list.reload({
             next: (_) => {
                 this.ready = true;
             },
@@ -258,7 +236,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
 
                 allNetworkIDs.forEach((networkID) => {
                     getDevicesJobs.push(
-                        this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0, sortBy: this.sortBy, sortDesc: this.sortDirection === 'desc', hubId: networkID }).pipe(
+                        this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0, sortBy: this.list.sortBy, sortDesc: this.list.sortDirection === 'desc', hubId: networkID }).pipe(
                             map((devices) => {
                                 const deviceIds = devices.result.map((p) => p.id);
                                 allDeviceIds = allDeviceIds.concat(deviceIds);

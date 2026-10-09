@@ -52,8 +52,8 @@
 
   <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
     <div class="table-container" [style.max-height]="calcTableMaxHeight()">
-      <table mat-table [dataSource]="dataSource" [matSortActive]="sortBy" matSort matSortDisableClear
-        [matSortDirection]="sortDirection" (matSortChange)="matSortChange($event)">
+      <table mat-table [dataSource]="dataSource" [matSortActive]="list.sortBy" matSort matSortDisableClear
+        [matSortDirection]="list.sortDirection" (matSortChange)="matSortChange($event)">
 
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef class="button-column">
@@ -228,7 +228,7 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
     </div>
-    <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="list.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
     (page)="selectionClear()" showFirstLastButtons></mat-paginator>
   </div>
 

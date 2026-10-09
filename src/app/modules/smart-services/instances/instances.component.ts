@@ -22,7 +22,7 @@ import { SmartServiceInstanceModel } from './shared/instances.model';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -32,7 +32,9 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { SmartServiceModuleService } from './shared/modules.service';
 import { SmartServiceModuleModel } from './shared/modules.model';
 import { SmartServiceInstanceDialogService } from './shared/instance-dialog.service';
-import { finalize } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { finalize, tap } from 'rxjs/operators';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { environment } from 'src/environments/environment';
 import { smartServiceLogsUrl } from './shared/opensearch';
@@ -78,14 +80,11 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     ready = false;
 
     displayedColumns = ['pub', 'name', 'description', 'error', 'created_at', 'updated_at', 'release', 'edit', 'upgrade', 'share'];
-    pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
     totalCount = 200;
-    offset = 0;
     pageIndex = 0;
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.fetchInstances(), { sortBy: 'name', sortDirection: 'asc' });
     releaseId?: string;
     instanceId?: string;
     expandedInstance?: SmartServiceInstanceModel;
@@ -116,7 +115,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
             const pageParam = params.get('page');
             const parsedPageIndex = pageParam === null ? 0 : parseInt(pageParam, 10);
             this.pageIndex = Number.isNaN(parsedPageIndex) || parsedPageIndex < 0 ? 0 : parsedPageIndex;
-            this.offset = this.pageSize * this.pageIndex;
+            this.list.offset = this.list.pageSize * this.pageIndex;
 
             const scrollParam = params.get('scroll_top');
             const parsedScrollTop = scrollParam === null ? 0 : parseInt(scrollParam, 10);
@@ -131,25 +130,29 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
+        this.list.connect(this.paginator, this.destroyRef);
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.pageIndex = this.paginator.pageIndex;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
             this.updateQueryParams();
-            this.loadInstances();
         });
 
         this.restoreScrollPosition();
     }
 
+    /** Reloads the current page; only page changes go through `list`, which cancels the superseded one. */
     loadInstances(): void {
-        this.instancesService.getInstances({ limit: this.pageSize, offset: this.offset, sort: this.sortBy + '.' + this.sortDirection, releaseId: this.releaseId }).subscribe((instances) => {
-            this.dataSource.data = instances.instances;
-            this.totalCount = instances.total;
-            this.ready = true;
-            this.restoreStateFromQueryParams();
-        });
+        this.fetchInstances().subscribe();
+    }
+
+    private fetchInstances(): Observable<unknown> {
+        return this.instancesService.getInstances({ limit: this.list.pageSize, offset: this.list.offset, sort: this.list.sortBy + '.' + this.list.sortDirection, releaseId: this.releaseId }).pipe(
+            tap((instances) => {
+                this.dataSource.data = instances.instances;
+                this.totalCount = instances.total;
+                this.ready = true;
+                this.restoreStateFromQueryParams();
+            })
+        );
     }
 
     loadSingleInstance(id: string): void {
@@ -322,8 +325,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.loadInstances();
     }
 

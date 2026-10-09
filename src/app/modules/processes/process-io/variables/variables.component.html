@@ -25,7 +25,7 @@
 
   <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
     <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
-      <table #matSort="matSort" mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="sortBy" [matSortDirection]="sortDirection"
+      <table #matSort="matSort" mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection"
         matSortDirection="desc" matSortDisableClear>
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef class="button-column">
@@ -122,7 +122,7 @@
       </table>
     </div>
 
-    <mat-paginator #paginator [length]="totalCount" [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="list.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
     showFirstLastButtons></mat-paginator>
   </div>
 

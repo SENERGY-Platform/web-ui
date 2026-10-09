@@ -26,10 +26,11 @@ import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router, ActivatedRoute } from '@angular/router';
-import { forkJoin, Observable, map, concatMap } from 'rxjs';
+import { EMPTY, Observable, map, concatMap, tap, catchError, forkJoin } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { UtilService } from 'src/app/core/services/util.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
@@ -74,7 +75,6 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     searchText = '';
-    pageSize = this.preferencesService.pageSize;
     totalCount = 200;
     listSelection = new ListSelection<ImportInstancesModel>(
         () => this.dataSource.connect().value,
@@ -82,8 +82,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     );
     selection = this.listSelection.model;
     dataReady = false;
-    sort = 'updated_at.desc';
-    offset = 0;
+    list = new PagedListState(this.preferencesService, () => this.loadList(), { sortBy: 'updated_at', sortDirection: 'desc' });
     excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
@@ -131,18 +130,8 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.selectionClear();
-            this.load().subscribe({
-                next: () => {
-                    this.dataReady = true;
-                },
-                error: (err) => this.handleLoadError(err),
-            });
-        });
+        this.list.connect(this.paginator, this.destroyRef);
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.selectionClear());
     }
 
     checkAuthorization() {
@@ -197,7 +186,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sort = $event.active + '.' + $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
@@ -205,7 +194,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
         this.dataReady = false;
         const ids = this.instanceId ? [this.instanceId] : undefined;
         return this.importInstancesService
-            .listImportInstances(this.searchText, this.pageSize, this.offset, this.sort, this.excludeGenerated, ids)
+            .listImportInstances(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy + '.' + this.list.sortDirection, this.excludeGenerated, ids)
             .pipe(
                 map((inst: ImportInstancesModel[]) => {
                     this.dataSource.data = inst;
@@ -218,17 +207,27 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
             );
     }
 
+    private withCount = false;
+
+    // A reload waits for list and count together, a page change only for the list.
+    private loadList(): Observable<unknown> {
+        const request: Observable<unknown> = this.withCount ? forkJoin([this.load(), this.getTotalNumberOfTypes()]) : this.load();
+        this.withCount = false;
+        return request.pipe(
+            tap(() => this.dataReady = true),
+            catchError((err) => {
+                this.handleLoadError(err);
+                return EMPTY;
+            }),
+        );
+    }
+
     reload() {
-        this.offset = 0;
         this.selectionClear();
         this.dataReady = false;
 
-        forkJoin([this.load(), this.getTotalNumberOfTypes()]).subscribe({
-            next: () => {
-                this.dataReady = true;
-            },
-            error: (err) => this.handleLoadError(err),
-        });
+        this.withCount = true;
+        this.list.reload();
     }
 
     private handleLoadError(err: any) {

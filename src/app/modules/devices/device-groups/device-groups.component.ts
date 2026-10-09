@@ -23,8 +23,9 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import { DeviceGroupsService } from './shared/device-groups.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { DeviceGroupModel } from './shared/device-groups.model';
@@ -61,7 +62,6 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     private preferencesService = inject(PreferencesService);
 
     displayedColumns = ['select', 'name', 'show'];
-    pageSize = this.preferencesService.pageSize;
     listSelection = new ListSelection<DeviceGroupModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
@@ -69,10 +69,8 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     dataSource = new MatTableDataSource<DeviceGroupModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
-    offset = 0;
     searchText = '';
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.getDeviceGroups(), { sortBy: 'name', sortDirection: 'asc' });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -88,12 +86,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceGroups().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     checkAuthorization() {
@@ -111,8 +104,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
@@ -165,9 +157,9 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     private getDeviceGroups(): Observable<DeviceGroupModel[]> {
-        let query: Observable<{result: DeviceGroupModel[]; total: number}>  =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
+        let query: Observable<{result: DeviceGroupModel[]; total: number}>  =  this.deviceGroupsService.getDeviceGroups(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection);
         if(this.hideGenerated) {
-            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection);
+            query = this.deviceGroupsService.getDeviceGroupsWithoutGenerated(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection);
         }
 
         return query.pipe(
@@ -184,11 +176,10 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     public reload() {
-        this.offset = 0;
         this.ready = false;
         this.selectionClear();
 
-        this.getDeviceGroups().subscribe(_ => {
+        this.list.reload(() => {
             this.ready = true;
         });
     }

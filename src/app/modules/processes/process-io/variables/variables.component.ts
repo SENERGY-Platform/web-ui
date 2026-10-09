@@ -16,10 +16,11 @@
 
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, tap } from 'rxjs';
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import { bulkDelete, countLabel, noneNullOrServerError } from '../../../../core/services/delete-flows';
@@ -28,6 +29,7 @@ import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variab
 import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { SearchbarComponent } from '../../../../core/components/searchbar/searchbar.component';
@@ -59,11 +61,9 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     utilsService = inject(UtilService);
     private preferencesService = inject(PreferencesService);
 
-    pageSize = this.preferencesService.pageSize;
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
     ready = false;
-    offset = 0;
     totalCount = 0;
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -75,8 +75,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
     displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value'];
-    sortBy = 'unix_timestamp_in_s';
-    sortDirection: SortDirection = 'desc';
+    list = new PagedListState(this.preferencesService, () => this.fetchVariables(), { sortBy: 'unix_timestamp_in_s', sortDirection: 'desc' });
 
 
     constructor() {
@@ -100,17 +99,11 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.loadVariables();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
@@ -118,7 +111,6 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
         this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             if(this.keyRegex !== searchText) {
                 this.keyRegex = searchText;
-                this.offset = 0;
             }
             this.reload();
         });
@@ -126,9 +118,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
 
     reload(){
         this.selectionClear();
-        this.offset = 0;
         this.updateTotal();
-        this.loadVariables();
+        this.list.reload();
     }
 
     updateTotal(){
@@ -140,14 +131,20 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     }
 
     loadVariables(){
+        this.fetchVariables().subscribe();
+    }
+
+    private fetchVariables(): Observable<unknown> {
         this.ready = false;
-        const sort = this.sortBy + '.' + this.sortDirection;
-        this.processIoService.listVariables(this.pageSize, this.offset, sort, this.keyRegex).subscribe(value => {
-            if(value){
-                this.dataSource.data = value || [];
-            }
-            this.ready = true;
-        });
+        const sort = this.list.sortBy + '.' + this.list.sortDirection;
+        return this.processIoService.listVariables(this.list.pageSize, this.list.offset, sort, this.keyRegex).pipe(
+            tap(value => {
+                if(value){
+                    this.dataSource.data = value || [];
+                }
+                this.ready = true;
+            })
+        );
     }
 
     edit(variable: ProcessIoVariable){

@@ -38,7 +38,7 @@
 
     <div class="table-container" #tableContainer [style.max-height]="calcMaxHeight()" (scroll)="onTableScroll($event)">
       <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" multiTemplateDataRows
-        [matSortActive]="sortBy" [matSortDirection]="sortDirection">
+        [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection">
 
         <ng-container matColumnDef="pub">
           <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>

@@ -21,12 +21,13 @@ import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import {forkJoin, Observable, concatMap, of, map, finalize} from 'rxjs';
+import {forkJoin, Observable, concatMap, of, map, finalize, tap} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -74,16 +75,13 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     private router = inject(Router);
     private smartServiceModuleService = inject(SmartServiceModuleService);
 
-    pageSize = this.preferencesService.pageSize;
-    offset = 0;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
     displayedColumns: string[] = ['select', 'status','access', 'id', 'name','smartServiceInstanceId', 'createdat', 'updatedat', 'info'];
     listSelection = new ListSelection<PipelineModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 0;
-    sortBy = 'createdat';
-    sortDirection: SortDirection = 'desc';
+    list = new PagedListState(this.preferencesService, () => this.loadPipelines().pipe(tap(pipelines => this.setPipelines(pipelines))), { sortBy: 'createdat', sortDirection: 'desc' });
     search: string | undefined = undefined;
 
     userId: string | Error = '';
@@ -140,37 +138,22 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             } else {
                 this.search = undefined;
             }
-            this.loadPipelines().subscribe({
-                next: (pipelines) => {
-                    this.setPipelines(pipelines);
-                }
-            });
+            this.list.reload();
         });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
     ngAfterViewInit() {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageIndex*this.paginator.pageSize;
-
-            this.loadPipelines().subscribe({
-                next: (pipelines) => {
-                    this.setPipelines(pipelines);
-                }
-            });
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     loadPipelines(): Observable<PipelineModel[]> {
         this.ready = false;
-        const order = this.sortBy + ':' + this.sortDirection;
+        const order = this.list.sortBy + ':' + this.list.sortDirection;
 
         let filter = undefined;
         if (this.routerOperator != null && this.routerOperator.length > 0){
@@ -183,7 +166,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                 filter = 'flow:'+this.routerFlow!.toString();
             }
         }
-        return this.pipelineRegistryService.getPipelinesNew(order, this.pageSize, this.offset, this.search, undefined, filter)
+        return this.pipelineRegistryService.getPipelinesNew(order, this.list.pageSize, this.list.offset, this.search, undefined, filter)
             .pipe(
                 switchMap((pipelines) => {
                 this.totalCount = pipelines!.total;
@@ -221,10 +204,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     reload() {
         this.selectionClear();
-        this.loadPipelines().subscribe({
-            next: (pipelines) => {
-                this.setPipelines(pipelines);
-            },
+        this.list.reload({
             error: (_) => {
                 this.ready = true;
             }

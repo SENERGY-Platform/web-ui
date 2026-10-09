@@ -26,10 +26,11 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
-import { Observable, map, of, mergeMap, concatMap } from 'rxjs';
+import { Observable, map, of, mergeMap, concatMap, tap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
@@ -65,16 +66,14 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     private prefeencesService = inject(PreferencesService);
 
     displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
-    pageSize = this.prefeencesService.pageSize;
     dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     listSelection = new ListSelection<ImportTypeModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     dataReady = false;
-    sort = 'name.asc';
+    list = new PagedListState(this.prefeencesService, () => this.load().pipe(tap(() => this.dataReady = true)), { sortBy: 'name', sortDirection: 'asc' });
     searchText = '';
     totalCount = 200;
-    offset = 0;
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -86,12 +85,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
-            this.prefeencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.load().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     checkAuthorization() {
@@ -172,13 +166,13 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sort = $event.active + '.' + $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
     load(): Observable<ImportTypeModelWithCostEstimation[]> {
         this.dataReady = false;
-        return this.importTypesService.listImportTypes(this.searchText, this.pageSize, this.offset, this.sort).pipe(
+        return this.importTypesService.listImportTypes(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy + '.' + this.list.sortDirection).pipe(
             mergeMap((types) => {
                 this.totalCount = types.total;
                 if (this.costService.userMayGetImportCostEstimations()) {
@@ -202,13 +196,10 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     }
 
     reload() {
-        this.offset = 0;
         this.dataReady = false;
         this.selectionClear();
 
-        this.load().subscribe(_ => {
-            this.dataReady = true;
-        });
+        this.list.reload();
     }
 
     add() {

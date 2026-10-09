@@ -24,8 +24,9 @@ import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/
 import { ExtendedLocationModel, LocationModel } from './shared/locations.model';
 import { LocationsService } from './shared/locations.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -58,18 +59,15 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     private permissionsDialogService = inject(PermissionsDialogService);
 
     displayedColumns = ['select', 'name', 'show'];
-    pageSize = this.preferencesService.pageSize;
     ready = false;
     instances = [];
     totalCount = 200;
-    offset = 0;
     dataSource = new MatTableDataSource<ExtendedLocationModel>();
     listSelection = new ListSelection<ExtendedLocationModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     searchText = '';
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.getLocations(), { sortBy: 'name', sortDirection: 'asc' });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -81,12 +79,7 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getLocations().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     checkAuthorization() {
@@ -109,8 +102,7 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
@@ -158,7 +150,7 @@ export class LocationsComponent implements OnInit, AfterViewInit {
 
     private getLocations(): Observable<ExtendedLocationModel[]> {
         return this.locationsService
-            .getLocations({search: this.searchText, limit: this.pageSize, offset: this.offset, sortBy: this.sortBy, sortDirection: this.sortDirection})
+            .getLocations({search: this.searchText, limit: this.list.pageSize, offset: this.list.offset, sortBy: this.list.sortBy, sortDirection: this.list.sortDirection})
             .pipe(
                 map((locations) => {
                     this.dataSource.data = locations.result;
@@ -175,11 +167,10 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     }
 
     reload() {
-        this.offset = 0;
         this.ready = false;
         this.selectionClear();
 
-        this.getLocations().subscribe(_ => {
+        this.list.reload(() => {
             this.ready = true;
         });
     }

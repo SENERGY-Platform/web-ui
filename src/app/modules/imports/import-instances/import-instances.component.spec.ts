@@ -33,7 +33,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { WidgetModule } from '../../../widgets/widget.module';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { ImportInstancesService } from './shared/import-instances.service';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MatTableModule } from '@angular/material/table';
 import { ImportInstancesModel } from './shared/import-instances.model';
@@ -144,6 +144,17 @@ describe('ImportInstancesComponent', () => {
         searchbarSpy.currentSearchText.nextWith('search');
         expect(component).toBeTruthy();
         expect(importInstancesServiceSpy.listImportInstances).toHaveBeenCalled();
+    });
+
+    it('ends loading on reload only when list and count have both answered', () => {
+        const count = new Subject<number>();
+        importInstancesServiceSpy.getTotalCountOfInstances.and.returnValue(count);
+        component.reload();
+        expect(component.dataReady).toBeFalse();
+        count.next(3);
+        count.complete();
+        expect(component.dataReady).toBeTrue();
+        expect(component.totalCount).toBe(3);
     });
 
     it('should delete a instance', () => {
