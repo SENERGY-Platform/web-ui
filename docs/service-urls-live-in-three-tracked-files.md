@@ -50,8 +50,9 @@ Who generates which:
 
 ## The hardcoded permission list
 
-`ladon.service.ts` holds a `serviceEndpoints` list of URLs whose authorizations
-are checked against Ladon at startup. It is separate from the two files above
+`src/app/modules/admin/permissions/shared/services/ladom.service.ts` (class
+`LadonService`; the file name is spelled with an m) holds a `serviceEndpoints`
+list of URLs whose authorizations are checked against Ladon at startup. It is separate from the two files above
 and easy to forget:
 
 - a new service URL missing there gets **no permission preflight**
