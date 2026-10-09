@@ -19,6 +19,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -259,6 +260,79 @@ describe('DashboardComponent', () => {
             dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
             component.selectColumns(MAX_COLUMNS + 4);
             expect(component.isAutoColumns()).toBeTrue();
+        });
+    });
+    describe('failed saves', () => {
+        let snackOpen: jasmine.Spy;
+        const lastSnack = () => snackOpen.calls.mostRecent().args[0] as string;
+        const widgetIds = (dashboard: DashboardModel) => dashboard.widgets.map((widget) => widget.id);
+
+        beforeEach(() => {
+            snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+        });
+
+        it('keeps the refresh time and names the action', () => {
+            component.dashboards[0].refresh_time = 5;
+            dashboardServiceSpy.updateDashboard.and.returnValue(of(null));
+            component.refreshTime(30);
+            expect(component.dashboards[0].refresh_time).toBe(5);
+            expect(lastSnack()).toContain('Refresh time could not be saved');
+        });
+
+        it('keeps the layout mode and names the action', () => {
+            dashboardServiceSpy.updateDashboard.and.returnValue(of(null));
+            component.selectLayoutMode('scale');
+            expect(component.dashboards[0].layout_mode).toBeUndefined();
+            expect(lastSnack()).toContain('Layout mode could not be saved');
+        });
+
+        it('keeps the column count and names the action', () => {
+            dashboardServiceSpy.updateDashboard.and.returnValue(of(null));
+            component.selectColumns(3);
+            expect(component.dashboards[0].columns).toBeUndefined();
+            expect(component.isAutoColumns()).toBeTrue();
+            expect(lastSnack()).toContain('Column count could not be saved');
+        });
+
+        it('keeps the order of the tabs and their indices when one dashboard update fails', () => {
+            component.dashboards[0].index = 0;
+            component.dashboards[1].index = 1;
+            dashboardServiceSpy.updateDashboard.and.returnValues(of({} as DashboardModel), of(null));
+            component.moveDashboard(false);
+            expect(component.dashboards.map((d) => d.id)).toEqual(['dashboard-1', 'dashboard-2']);
+            expect(component.activeTabIndex).toBe(0);
+            expect(component.dashboards.map((d) => d.index)).toEqual([0, 1]);
+            expect(lastSnack()).toContain('Dashboard could not be moved');
+        });
+
+        it('swaps the tabs when both dashboard updates succeed', () => {
+            component.dashboards[0].index = 0;
+            component.dashboards[1].index = 1;
+            dashboardServiceSpy.updateDashboard.and.returnValue(of({} as DashboardModel));
+            component.moveDashboard(false);
+            expect(component.dashboards.map((d) => d.id)).toEqual(['dashboard-2', 'dashboard-1']);
+            expect(snackOpen).not.toHaveBeenCalled();
+        });
+
+        it('puts a widget back on its dashboard when the move failed', () => {
+            dashboardServiceSpy.updateWidgetPosition.and.returnValue(of(null));
+            let result: unknown = 'unset';
+            component.moveWidgetToDashboard('widget-1', 1).subscribe((r) => (result = r));
+            expect(result).toBeNull();
+            expect(widgetIds(component.dashboards[0])).toEqual(['widget-1', 'widget-2']);
+            expect(widgetIds(component.dashboards[1])).toEqual(['widget-3']);
+            expect(component.dashboards[0].widgets[0].x).toBe(0);
+            expect(lastSnack()).toContain('Widget could not be moved');
+        });
+
+        it('restores the position the widget had before a failed move', () => {
+            component.dashboards[0].widgets[1].x = 1;
+            component.dashboards[0].widgets[1].y = 4;
+            dashboardServiceSpy.updateWidgetPosition.and.returnValue(of(null));
+            component.moveWidgetToDashboard('widget-2', 1).subscribe();
+            expect(component.dashboards[0].widgets[1].id).toBe('widget-2');
+            expect(component.dashboards[0].widgets[1].x).toBe(1);
+            expect(component.dashboards[0].widgets[1].y).toBe(4);
         });
     });
 });

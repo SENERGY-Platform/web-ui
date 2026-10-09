@@ -59,12 +59,13 @@ export class SwitchService {
         return forkJoin(array);
     }
 
-    stopMultipleDeployments(instances: SwitchPropertiesInstancesModel[]): Observable<string[]> {
+    /** Answers null when a stop failed, so the caller does not start deployments on top of running instances. */
+    stopMultipleDeployments(instances: SwitchPropertiesInstancesModel[]): Observable<string[] | null> {
         const array: Observable<string>[] = [];
         instances.forEach((instance: SwitchPropertiesInstancesModel) => {
             array.push(this.http.delete(environment.processServiceUrl + '/v2/process-instances/' + instance.id, { responseType: 'text' }));
         });
 
-        return forkJoin(array).pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'stopMultipleDeployments', [])));
+        return forkJoin(array).pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'stopMultipleDeployments', null)));
     }
 }

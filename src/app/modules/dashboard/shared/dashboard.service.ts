@@ -33,6 +33,8 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DashboardEditDialogComponent } from '../dialogs/dashboard-edit-dialog.component';
 import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../../core/services/snack-bar-messages';
 
 @Injectable({
     providedIn: 'root',
@@ -43,6 +45,7 @@ export class DashboardService {
     private errorHandlerService = inject(ErrorHandlerService);
     private dialogsService = inject(DialogsService);
     private ladonService = inject(LadonService);
+    private snackBar = inject(MatSnackBar);
 
     private animationDoneSubject = new Subject<string>();
     private dashboardSubject = new Subject<DashboardManipulationModel>();
@@ -92,23 +95,24 @@ export class DashboardService {
         );
     }
 
-    createDashboard(dashboardName: string, index: number): Observable<DashboardModel> {
+    /** Write methods answer null on failure, so a caller never mistakes a fallback for the saved result. */
+    createDashboard(dashboardName: string, index: number): Observable<DashboardModel | null> {
         const dash: DashboardModel = { name: dashboardName, id: '', user_id: '', widgets: [], refresh_time: 0, index };
         return this.http
             .post<DashboardModel>(environment.dashboardServiceUrl + '/dashboards', dash)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'createDashboard', {} as DashboardModel)));
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'createDashboard', null)));
     }
 
-    deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel> {
+    deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel | null> {
         return this.http
             .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboards/' + dashboardId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteDashboard', { message: 'error delete' })));
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteDashboard', null)));
     }
 
-    updateDashboard(dashboard: DashboardModel): Observable<DashboardModel> {
+    updateDashboard(dashboard: DashboardModel): Observable<DashboardModel | null> {
         return this.http
             .put<DashboardModel>(environment.dashboardServiceUrl + '/dashboards/' + dashboard.id, dashboard)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateDashboard', {} as DashboardModel)));
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateDashboard', null)));
     }
 
     getWidget(dashboardId: string, widgetId: string): Observable<WidgetModel> {
@@ -135,16 +139,16 @@ export class DashboardService {
                 }));
     }
 
-    createWidget(dashboardId: string, widget: WidgetModel): Observable<WidgetModel> {
+    createWidget(dashboardId: string, widget: WidgetModel): Observable<WidgetModel | null> {
         return this.http
             .post<WidgetModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId, widget)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'createWidget', {} as WidgetModel)));
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'createWidget', null)));
     }
 
-    deleteWidget(dashboardId: string, widgetId: string): Observable<DashboardResponseMessageModel> {
+    deleteWidget(dashboardId: string, widgetId: string): Observable<DashboardResponseMessageModel | null> {
         return this.http
             .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId + '/' + widgetId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', { message: 'error delete' })));
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', null)));
     }
 
     updateWidgetProperty(dashboardId: string, widgetId: string, pathToProperty: string[], newValue: any): Observable<DashboardResponseMessageModel> {
@@ -164,10 +168,10 @@ export class DashboardService {
             .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetName', { message: 'error update' })));
     }
 
-    updateWidgetPosition(widgetPositions: WidgetUpdatePosition[]): Observable<DashboardResponseMessageModel> {
+    updateWidgetPosition(widgetPositions: WidgetUpdatePosition[]): Observable<DashboardResponseMessageModel | null> {
         return this.http
             .patch<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/positions', widgetPositions)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' })));
+            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', null)));
     }
 
     /** Dialog Services */
@@ -179,7 +183,11 @@ export class DashboardService {
 
         editDialogRef.afterClosed().subscribe((dashboardName: string) => {
             if (dashboardName !== undefined) {
-                this.createDashboard(dashboardName, nextIndex).subscribe((dashboard: DashboardModel) => {
+                this.createDashboard(dashboardName, nextIndex).subscribe((dashboard) => {
+                    if (dashboard === null) {
+                        snackError(this.snackBar, 'Dashboard could not be created');
+                        return;
+                    }
                     this.manipulateDashboard(DashboardManipulationEnum.Create, dashboard.id, dashboard);
                 });
             }
@@ -194,6 +202,10 @@ export class DashboardService {
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {
                 this.createWidget(dashboardId, widget).subscribe((widgetResp) => {
+                    if (widgetResp === null) {
+                        snackError(this.snackBar, 'Widget could not be created');
+                        return;
+                    }
                     this.manipulateWidget(DashboardManipulationEnum.Create, widgetResp.id, widgetResp);
                 });
             }
@@ -206,7 +218,11 @@ export class DashboardService {
             .afterClosed()
             .subscribe((deleteDashboard: boolean | undefined) => {
                 if (deleteDashboard === true) {
-                    this.deleteDashboard(dashboardId).subscribe(() => {
+                    this.deleteDashboard(dashboardId).subscribe((resp) => {
+                        if (resp === null) {
+                            snackError(this.snackBar, 'Dashboard could not be deleted');
+                            return;
+                        }
                         this.manipulateDashboard(DashboardManipulationEnum.Delete, dashboardId, null);
                     });
                 }
@@ -224,6 +240,10 @@ export class DashboardService {
         editDialogRef.afterClosed().subscribe((editedDashoard: DashboardModel) => {
             if (editedDashoard !== undefined) {
                 this.updateDashboard(editedDashoard).subscribe((dashboardResp) => {
+                    if (dashboardResp === null) {
+                        snackError(this.snackBar, 'Dashboard could not be updated');
+                        return;
+                    }
                     this.manipulateDashboard(DashboardManipulationEnum.Update, dashboard.id, dashboardResp);
                 });
             }

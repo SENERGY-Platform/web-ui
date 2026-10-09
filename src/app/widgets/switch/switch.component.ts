@@ -25,6 +25,8 @@ import { WidgetHeaderComponent } from '../components/widget-header/widget-header
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-switch',
@@ -37,6 +39,7 @@ export class SwitchComponent implements OnInit {
     private switchService = inject(SwitchService);
     private dashboardService = inject(DashboardService);
     private destroyRef = inject(DestroyRef);
+    private snackBar = inject(MatSnackBar);
 
     ready = false;
 
@@ -100,7 +103,13 @@ export class SwitchComponent implements OnInit {
                 }
             });
             if (instancesArray.length > 0) {
-                this.switchService.stopMultipleDeployments(instancesArray).subscribe(() => {
+                this.switchService.stopMultipleDeployments(instancesArray).subscribe((stopped) => {
+                    if (stopped === null) {
+                        // the toggle has already flipped; put it back, the old instances are still running
+                        this.widget.properties.active = !this.widget.properties.active;
+                        snackError(this.snackBar, 'Running deployments could not be stopped, the new ones were not started');
+                        return;
+                    }
                     this.triggerDeployments();
                 });
             } else {

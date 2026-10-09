@@ -16,6 +16,8 @@
 
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../../../core/services/snack-bar-messages';
 
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { DashboardManipulationEnum } from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
@@ -28,6 +30,7 @@ export class WidgetFooterService {
     private dialog = inject(MatDialog);
     private dashboardService = inject(DashboardService);
     private dialogsService = inject(DialogsService);
+    private snackBar = inject(MatSnackBar);
 
 
     openDeleteWidgetDialog(dashboardId: string, widgetId: string): void {
@@ -36,7 +39,11 @@ export class WidgetFooterService {
             .afterClosed()
             .subscribe((deleteWidget: boolean | undefined) => {
                 if (deleteWidget === true) {
-                    this.dashboardService.deleteWidget(dashboardId, widgetId).subscribe(() => {
+                    this.dashboardService.deleteWidget(dashboardId, widgetId).subscribe((resp) => {
+                        if (resp === null) {
+                            snackError(this.snackBar, 'Widget could not be deleted');
+                            return;
+                        }
                         this.dashboardService.manipulateWidget(DashboardManipulationEnum.Delete, widgetId, null);
                     });
                 }

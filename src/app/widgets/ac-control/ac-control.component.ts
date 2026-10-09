@@ -18,7 +18,7 @@ import { Component, Input, OnInit, ChangeDetectionStrategy, inject, DestroyRef }
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
-import { DeviceCommandModel, DeviceCommandService } from '../../core/services/device-command.service';
+import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from '../../core/services/device-command.service';
 import { AcControlElementModel } from './shared/ac-control.model';
 import { AcControlEditDialogComponent } from './dialog/ac-control-edit-dialog.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -32,6 +32,8 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { WidgetFooterComponent } from '../components/widget-footer/widget-footer.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-ac-control',
@@ -45,6 +47,7 @@ export class AcControlComponent implements OnInit {
     private deviceCommandService = inject(DeviceCommandService);
     private dialog = inject(MatDialog);
     private destroyRef = inject(DestroyRef);
+    private snackBar = inject(MatSnackBar);
 
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
@@ -237,7 +240,13 @@ export class AcControlComponent implements OnInit {
         if (e === undefined) {
             return;
         }
-        this.deviceCommandService.runCommands([this.toCommand(e, value)], true).subscribe(() => this.updateValue(e, value));
+        this.deviceCommandService.runCommands([this.toCommand(e, value)], true).subscribe((responses) => {
+            if (!this.allSucceeded(responses, 1)) {
+                snackError(this.snackBar, 'The command could not be sent to the device');
+                return;
+            }
+            this.updateValue(e, value);
+        });
     }
 
     set bufferedSetTemperature(value: number) {
@@ -274,10 +283,19 @@ export class AcControlComponent implements OnInit {
     setAllTargets(value: any) {
         const commands: DeviceCommandModel[] = [];
         this.widget.properties.acControl?.setTargetTemperature?.forEach(c => commands.push(this.toCommand(c, value)));
-        this.deviceCommandService.runCommands(commands, true).subscribe(() => {
+        this.deviceCommandService.runCommands(commands, true).subscribe((responses) => {
+            if (!this.allSucceeded(responses, commands.length)) {
+                snackError(this.snackBar, 'The target temperature could not be set');
+                return;
+            }
             this.updateValue(this.widget.properties.acControl?.setTargetTemperature?.[0], value);
             this.bufferedSetTemperature = value;
         });
+    }
+
+    /** runCommands answers [] when the request failed; a command that did not run has a status other than 200. */
+    private allSucceeded(responses: DeviceCommandResponseModel[], expected: number): boolean {
+        return responses.length === expected && responses.every((r) => r.status_code === 200);
     }
 
     private updateValue(e: AcControlElementModel | undefined, value: any) {

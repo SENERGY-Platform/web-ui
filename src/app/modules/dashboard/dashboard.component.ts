@@ -53,6 +53,8 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
 import { WidgetComponent } from '../../widgets/widget.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-dashboard',
@@ -73,6 +75,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router = inject(Router);
     private errorHandlerService = inject(ErrorHandlerService);
     private cd = inject(ChangeDetectorRef);
+    private snackBar = inject(MatSnackBar);
     private injector = inject(Injector);
 
     dashboards: DashboardModel[] = [];
@@ -200,8 +203,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     refreshTime(time: number): void {
         const dashboard = this.dashboards[this.activeTabIndex];
+        const previous = dashboard.refresh_time;
         dashboard.refresh_time = time;
-        this.persistDashboard(dashboard).subscribe(() => this.refreshAllWidgets());
+        this.persistDashboard(dashboard, 'Refresh time could not be saved', () => {
+            dashboard.refresh_time = previous;
+        }).subscribe((updated) => {
+            if (updated !== null) {
+                this.refreshAllWidgets();
+            }
+        });
     }
 
     toggleDragMode() {
@@ -221,14 +231,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
             console.error('Cant move dashboard to position ' + newIndex);
             return;
         }
-        const observables: Observable<DashboardModel>[] = [];
-        let dashboard = this.dashboards[this.activeTabIndex];
-        dashboard.index = newIndex;
-        observables.push(this.dashboardService.updateDashboard(dashboard));
-        dashboard = this.dashboards[newIndex];
-        dashboard.index = this.activeTabIndex;
-        observables.push(this.dashboardService.updateDashboard(dashboard));
-        forkJoin(observables).subscribe(() => {
+        const observables: Observable<DashboardModel | null>[] = [];
+        const moved = this.dashboards[this.activeTabIndex];
+        const movedIndex = moved.index;
+        moved.index = newIndex;
+        observables.push(this.dashboardService.updateDashboard(moved));
+        const neighbour = this.dashboards[newIndex];
+        const neighbourIndex = neighbour.index;
+        neighbour.index = this.activeTabIndex;
+        observables.push(this.dashboardService.updateDashboard(neighbour));
+        forkJoin(observables).subscribe((responses) => {
+            if (responses.some((response) => response === null)) {
+                moved.index = movedIndex;
+                neighbour.index = neighbourIndex;
+                snackError(this.snackBar, 'Dashboard could not be moved');
+                return;
+            }
             moveItemInArray(this.dashboards, this.activeTabIndex, newIndex);
             this.setTabIndex(newIndex);
         });
@@ -250,11 +268,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (dashboard === undefined || mode === this.layoutMode()) {
             return;
         }
+        const previous = dashboard.layout_mode;
         dashboard.layout_mode = mode;
         this.refreshGridOptions();
         this.applyColumnCount();
         this.applyRepack();
-        this.persistDashboard(dashboard).subscribe();
+        this.persistDashboard(dashboard, 'Layout mode could not be saved', () => {
+            dashboard.layout_mode = previous;
+            this.refreshGridOptions();
+            this.applyColumnCount();
+            this.applyRepack();
+        }).subscribe();
     }
 
     /** Columns the active dashboard is pinned to, or AUTO_COLUMNS while the count follows the width. */
@@ -277,10 +301,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (dashboard === undefined || wanted === this.fixedColumns()) {
             return;
         }
+        const previous = dashboard.columns;
         dashboard.columns = wanted;
         this.refreshGridOptions();
         this.applyColumnCount();
-        this.persistDashboard(dashboard).subscribe();
+        this.persistDashboard(dashboard, 'Column count could not be saved', () => {
+            dashboard.columns = previous;
+            this.refreshGridOptions();
+            this.applyColumnCount();
+        }).subscribe();
     }
 
     /**
@@ -303,12 +332,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     /**
      * Saves the dashboard and takes the fresh updatedAt from the response - the service versions a
      * dashboard by that stamp and refuses a write carrying a stale one, so without this only the first
-     * change of a session is accepted.
+     * change of a session is accepted. A failed save (null) reports the action and runs revert, so the
+     * dashboard keeps the state the backend has.
      */
-    private persistDashboard(dashboard: DashboardModel): Observable<DashboardModel> {
+    private persistDashboard(dashboard: DashboardModel, failureText: string, revert: () => void): Observable<DashboardModel | null> {
         return this.dashboardService.updateDashboard(dashboard).pipe(
             tap((updated) => {
-                if (updated?.updatedAt !== undefined) {
+                if (updated === null) {
+                    revert();
+                    snackError(this.snackBar, failureText);
+                } else if (updated?.updatedAt !== undefined) {
                     dashboard.updatedAt = updated.updatedAt;
                 }
             }),
@@ -374,6 +407,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     saveWidgetPositions() {
         const dashboard = this.dashboards[this.activeTabIndex];
         const widgetPositionUpdates: WidgetUpdatePosition[] = [];
+        const previousPositions: { widget: WidgetModel; x?: number; y?: number; w?: number; h?: number }[] = [];
         const nodes = this.grid?.engine.nodes;
         if (nodes === undefined) {
             return;
@@ -384,6 +418,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 return;
             }
             if ((node.x || 0) !== widget.x || (node.y || 0) !== widget.y || node.w !== widget.w || node.h !== widget.h) {
+                previousPositions.push({ widget, x: widget.x, y: widget.y, w: widget.w, h: widget.h });
                 widget.x = node.x || 0;
                 widget.y = node.y || 0;
                 widget.w = node.w;
@@ -403,8 +438,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (widgetPositionUpdates.length > 0) {
             this.cd.detectChanges();
             this.dashboardService.updateWidgetPosition(widgetPositionUpdates).pipe(
-                catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
-            ).subscribe();
+                catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', null))
+            ).subscribe((resp) => {
+                if (resp === null) {
+                    // the stored positions stay the saved ones, so the next save sends the difference again
+                    previousPositions.forEach(({ widget, x, y, w, h }) => Object.assign(widget, { x, y, w, h }));
+                    snackError(this.snackBar, 'Widget position could not be saved');
+                }
+            });
         }
 
     }
@@ -613,7 +654,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             console.error('Can\'t find widget with id ' + id + ' on current dashboard');
             return of(null);
         }
-        const widgets = this.dashboards[this.activeTabIndex].widgets.splice(index, 1);
+        const fromIndex = this.activeTabIndex;
+        const widgets = this.dashboards[fromIndex].widgets.splice(index, 1);
         if (widgets.length !== 1) {
             console.error('Unexpected number of widgets spliced');
             return of(null);
@@ -625,6 +667,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // widget downwards, so the first free spot from the top is where this lands, and the tab we switch
         // to shows it. Placing it past the last widget put it below the fold on any dashboard with a few
         // widgets on it - far enough that the move looked like it had not happened at all.
+        const previousPosition = { x: widgets[0].x, y: widgets[0].y };
         widgets[0].x = 0;
         widgets[0].y = 0;
         const widgetPositionUpdates: WidgetUpdatePosition[] = [{
@@ -638,7 +681,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }];
         this.dashboards[toIndex].widgets.push(widgets[0]);
         return this.dashboardService.updateWidgetPosition(widgetPositionUpdates).pipe(
-            catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', { message: 'error update' }))
+            catchError(this.errorHandlerService.handleError(DashboardService.name, 'updateWidgetPosition', null)),
+            tap((resp) => {
+                if (resp === null) {
+                    // back to where the backend has it
+                    this.dashboards[toIndex].widgets.splice(this.dashboards[toIndex].widgets.indexOf(widgets[0]), 1);
+                    Object.assign(widgets[0], previousPosition);
+                    this.dashboards[fromIndex].widgets.splice(index, 0, widgets[0]);
+                    snackError(this.snackBar, 'Widget could not be moved to the other dashboard');
+                }
+            }),
         );
     }
     private moveWidgetToDashboardIfNeeded(item: any, $event: any): boolean {
@@ -657,9 +709,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 // tabs tears down the grid that handler belongs to, and gridstack goes on to use its
                 // engine and element after we return - both of which destroy() has deleted by then
                 setTimeout(() => {
-                    this.moveWidgetToDashboard(item.id, i).subscribe();
-                    this.setTabIndex(i);
-                    this.cd.detectChanges();
+                    this.moveWidgetToDashboard(item.id, i).subscribe((resp) => {
+                        if (resp !== null) {
+                            this.setTabIndex(i);
+                        }
+                        this.cd.detectChanges();
+                    });
                 }, 0);
                 return true;
             }
