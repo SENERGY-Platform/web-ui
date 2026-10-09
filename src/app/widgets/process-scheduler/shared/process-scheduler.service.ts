@@ -15,10 +15,9 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { forkJoin, Observable } from 'rxjs';
 import { ProcessSchedulerModel } from './process-scheduler.model';
 import { ProcessRepoService } from '../../../modules/processes/process-repo/shared/process-repo.service';
@@ -42,22 +41,12 @@ export class ProcessSchedulerService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.minHeight = '235px';
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, ProcessSchedulerScheduleEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(ProcessSchedulerScheduleEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
-        });
+        }, { minHeight: '235px' });
     }
 
     getSchedules(createdBy: string | null): Observable<ProcessSchedulerModel[]> {

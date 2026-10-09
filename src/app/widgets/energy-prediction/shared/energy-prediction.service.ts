@@ -17,11 +17,11 @@
 import { Injectable, inject } from '@angular/core';
 import {Observable} from 'rxjs';
 import {EnergyPredictionColumnModel, EnergyPredictionModel} from './energy-prediction.model';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
+import {openWidgetEditDialog} from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import {EnergyPredictionEditDialogComponent} from '../dialog/energy-prediction-edit-dialog.component';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {ExportDataService} from '../../shared/export-data.service';
 import {
@@ -42,22 +42,12 @@ export class EnergyPredictionService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.minWidth = '450px';
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, EnergyPredictionEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(EnergyPredictionEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
-        });
+        }, { minWidth: '450px' });
     }
 
     getPrediction(widget: WidgetModel): Observable<EnergyPredictionModel> {

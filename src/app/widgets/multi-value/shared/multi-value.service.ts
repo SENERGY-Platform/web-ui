@@ -17,11 +17,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { MultiValueMeasurement } from './multi-value.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { MultiValueEditDialogComponent } from '../dialog/multi-value-edit-dialog.component';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { LastValuesRequestElementInfluxModel } from '../../shared/export-data.model';
 import { ExportDataService } from '../../shared/export-data.service';
@@ -37,22 +37,12 @@ export class MultiValueService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, MultiValueEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        dialogConfig.minWidth = '675px';
-        const editDialogRef = this.dialog.open(MultiValueEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
-        });
+        }, { minWidth: '675px' });
     }
 
     getValues(widget: WidgetModel): Observable<WidgetModel> {

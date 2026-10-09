@@ -15,12 +15,11 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { concatMap, Observable, throwError, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
-import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from 'src/app/modules/dashboard/shared/open-widget-edit-dialog';
 import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleModel } from '../../shared/export-data.model';
 import { ExportDataService } from '../../shared/export-data.service';
 import { PVLoadRecommendationEditComponent } from '../dialog/edit/edit.component';
@@ -37,22 +36,12 @@ export class PvLoadService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.minWidth = '450px';
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, PVLoadRecommendationEditComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(PVLoadRecommendationEditComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
-        });
+        }, { minWidth: '450px' });
     }
 
     getPVLoadRecommendation(exportID: string): Observable<PVLoadRecommendationResult> {

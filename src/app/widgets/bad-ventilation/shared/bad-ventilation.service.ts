@@ -15,12 +15,11 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { concatMap, of, throwError } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
-import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from 'src/app/modules/dashboard/shared/open-widget-edit-dialog';
 import { environment } from 'src/environments/environment';
 import { ChartsExportRangeTimeTypeEnum } from '../../charts/export/shared/charts-export-range-time-type.enum';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
@@ -146,21 +145,11 @@ export class BadVentilationService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.minWidth = '450px';
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, EditVentilationWidgetComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(EditVentilationWidgetComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
-        });
+        }, { minWidth: '450px' });
     }
 }

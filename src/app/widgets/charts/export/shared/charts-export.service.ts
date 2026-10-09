@@ -19,11 +19,11 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { ElementSizeService } from '../../../../core/services/element-size.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ChartDataTableModel } from '../../../../core/model/chart/chart-data-table.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from '../../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { ChartsExportEditDialogComponent } from '../dialog/charts-export-edit-dialog.component';
 import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { ErrorModel } from '../../../../core/model/error.model';
 import {
     ChartsExportDeviceGroupMergingStrategy,
@@ -63,22 +63,12 @@ export class ChartsExportService {
     devices = new Map<string, DeviceInstanceWithDeviceTypeModel>();
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.minWidth = '600px';
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, ChartsExportEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(ChartsExportEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
-        });
+        }, { minWidth: '600px' });
     }
 
     getData(properties: WidgetPropertiesModels, fromTime?: string, toTime?: string, groupInterval?: string, lastOverride?: string): Observable<{ data: any[][][][] | null | ErrorModel; metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] }> {
