@@ -103,7 +103,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     selection = this.listSelection.model;
     totalCount = 200;
     ready = false;
-    init = false;
     searchText = '';
     usage: {
         deviceId: string;
@@ -338,11 +337,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     reload() {
-        if (this.init && !this.ready) {
-            return;
-        }
-        this.init = true;
-        
         this.ready = false;
         this.selectionClear();
         this.usage = [];
@@ -519,11 +513,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             isSuccess: noneNullOrServerError,
             successMessage: 'Devices deleted successfully.',
             errorMessage: 'Error while deleting devices!',
-            after: () => {
-                // reload() returns while the page is not ready
-                this.ready = true;
-                this.reload();
-            },
+            after: () => this.reload(),
         });
     }
 

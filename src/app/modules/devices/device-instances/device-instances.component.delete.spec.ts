@@ -19,7 +19,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { DeviceInstancesComponent } from './device-instances.component';
 import { DeviceInstancesService } from './shared/device-instances.service';
@@ -165,7 +165,6 @@ describe('DeviceInstancesComponent delete', () => {
         it('reloads and clears the selection once the page has loaded', () => {
             answerDialog(true);
             service.deleteDeviceInstance.and.returnValues(of(one));
-            component.init = true;
             component.ready = true;
             component.selection.select(one);
             component.deleteMultipleItems();
@@ -187,6 +186,20 @@ describe('DeviceInstancesComponent delete', () => {
                 expect(component.ready).toBeTrue();
                 expect(component.selection.selected.length).toBe(2);
             });
+        });
+    });
+
+    describe('reload while loading', () => {
+        it('starts a new load and drops the answer of the earlier one', () => {
+            const earlier = new Subject<{ result: DeviceInstanceModel[]; total: number }>();
+            service.getDeviceInstances.and.returnValues(earlier, of({ result: [two], total: 1 }));
+            component.reload();
+            expect(component.ready).toBeFalse();
+            component.reload();
+            expect(service.getDeviceInstances).toHaveBeenCalledTimes(2);
+            expect(component.ready).toBeTrue();
+            earlier.next({ result: [one], total: 1 });
+            expect(component.dataSource.data).toEqual([two]);
         });
     });
 });
