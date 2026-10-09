@@ -256,7 +256,11 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
                 } else {
                     exportDiagram(this.modeler).then(
                         ({ xml, svg }) => {
-                            this.processRepoService.saveProcess(this.id, xml, svg).subscribe(() => {
+                            this.processRepoService.saveProcess(this.id, xml, svg).subscribe((saved) => {
+                                if (saved === null) {
+                                    snackError(this.snackBar, 'Error while saving the model!');
+                                    return;
+                                }
                                 snackSuccess(this.snackBar, 'Model saved.');
                             });
                         },

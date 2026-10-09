@@ -364,7 +364,11 @@ export class NewExportComponent implements OnInit {
                 const obs = (
                     this.exportForm.get('targetSelector')?.value === this.targetDb ? this.exportService : this.brokerExportService
                 ).startPipeline(this.export);
-                obs.subscribe(function() {
+                obs.subscribe((created) => {
+                    if (created === null) {
+                        snackError(self.snackBar, 'Error while creating the export!');
+                        return;
+                    }
                     self.router.navigate(['/exports', self.exportForm.get('targetSelector')?.value === self.targetDb ? 'db' : 'broker']);
                     snackSuccess(self.snackBar, 'Export created');
                 });

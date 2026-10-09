@@ -21,6 +21,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { NewExportComponent } from './new-export.component';
 import { ExportModel } from '../shared/export.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
@@ -174,7 +175,74 @@ const openForEditing = (exp: ExportModel = existingExport()): Harness => {
     return {component, saved: () => saved};
 };
 
+interface CreateHarness {
+    component: NewExportComponent;
+    navigate: jasmine.Spy;
+    snackOpen: jasmine.Spy;
+}
+
+// Opens the form for a new export of a device, with the given answer of the export service.
+const openForCreating = (startPipeline: () => Observable<ExportModel | null>): CreateHarness => {
+    const navigate = jasmine.createSpy('navigate');
+    const snackOpen = jasmine.createSpy('open');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+        providers: [
+            { provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => null}}} },
+            { provide: Location, useValue: {} },
+            { provide: PipelineRegistryService, useValue: {getPipelines: () => of([])} },
+            { provide: DeviceInstancesService, useValue: {getDeviceInstances: () => of({result: [], total: 0})} },
+            { provide: DeviceTypeService, useValue: {getDeviceType: () => of(null)} },
+            {
+                provide: ExportService,
+                useValue: {
+                    getTimestampFormats: () => [],
+                    getExportDatabases: () => of([]),
+                    startPipeline,
+                },
+            },
+            { provide: BrokerExportService, useValue: {} },
+            { provide: OperatorRepoService, useValue: {} },
+            { provide: Router, useValue: {navigate} },
+            { provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} },
+            { provide: MatSnackBar, useValue: {open: snackOpen} },
+            { provide: ImportInstancesService, useValue: {listImportInstances: () => of([])} },
+            { provide: ImportTypesService, useValue: {} },
+            { provide: FormBuilder, useValue: new FormBuilder() },
+            { provide: PreferencesService, useValue: {pageSize: 20} },
+        ],
+    });
+    const component = TestBed.runInInjectionContext(() => new NewExportComponent());
+    component.ngOnInit();
+    tick(200);
+    component.exportForm.patchValue({name: 'an export', selector: 'device', targetSelector: component.targetDb});
+    component.exportForm.patchValue({device: {id: 'device-1', name: 'a device'} as any});
+    component.exportForm.patchValue({service: {id: 'urn:service:1', name: 'a service', outputs: []} as any});
+    // Whether the form is valid is not what is under test; only the answer of the service is.
+    Object.defineProperty(component.exportForm, 'valid', {get: () => true});
+    return {component, navigate, snackOpen};
+};
+
 describe('NewExportComponent', () => {
+    it('creates an export, navigates to the list and reports success', fakeAsync(() => {
+        const {component, navigate, snackOpen} = openForCreating(() => of({ID: 'new-1'} as ExportModel));
+
+        component.onSubmit();
+
+        expect(navigate).toHaveBeenCalledWith(['/exports', 'db']);
+        expect(snackOpen).toHaveBeenCalledWith('Export created', undefined, {duration: 2000});
+    }));
+
+    it('stays on the form and reports an error when the export could not be created', fakeAsync(() => {
+        const {component, navigate, snackOpen} = openForCreating(() => of(null));
+
+        component.onSubmit();
+
+        expect(navigate).not.toHaveBeenCalled();
+        expect(snackOpen).not.toHaveBeenCalledWith('Export created', undefined, jasmine.anything());
+        expect(snackOpen).toHaveBeenCalledWith('Error while creating the export!', 'close', {panelClass: 'snack-bar-error'});
+    }));
+
     it('selects the exported operator in the pipeline image when an existing export is opened', fakeAsync(() => {
         const {component} = openForEditing();
 

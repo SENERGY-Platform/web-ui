@@ -211,7 +211,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                         if (response.status < 300) {
                             snackSuccess(this.snackBar, 'Device deleted');
                         } else {
-                            snackSuccess(this.snackBar, 'Device could not be deleted');
+                            snackError(this.snackBar, 'Device could not be deleted');
                         }
                     });
                 }

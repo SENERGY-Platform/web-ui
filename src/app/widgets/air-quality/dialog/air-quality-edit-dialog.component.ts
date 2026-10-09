@@ -1116,7 +1116,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
                     TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
                     Generated: true,
-                } as ExportModel),
+                } as ExportModel).pipe(map((exp) => exp ?? ({} as ExportModel))),
             ),
         );
     }

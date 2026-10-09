@@ -78,10 +78,10 @@ export class BrokerExportService {
         );
     }
 
-    startPipeline(exp: ExportModel): Observable<ExportModel> {
+    startPipeline(exp: ExportModel): Observable<ExportModel | null> {
         return this.http
             .post<ExportModel>(environment.brokerExportServiceUrl + '/instances', exp)
-            .pipe(catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'startPipeline: Error', {} as ExportModel)));
+            .pipe(catchError(this.errorHandlerService.handleError(BrokerExportService.name, 'startPipeline: Error', null)));
     }
 
     editExport(id: string, exp: ExportModel): Observable<{ status: number }> {

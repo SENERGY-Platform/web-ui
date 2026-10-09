@@ -36,6 +36,7 @@ import {
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import { ExportModel, ExportValueCharacteristicModel } from '../../../modules/exports/shared/export.model';
 import { forkJoin, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { DeviceStatusService } from '../shared/device-status.service';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
@@ -387,7 +388,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                     return;
                 }
                 this.cleanExportModel(exports[0], this.getExportValues(elementIndex));
-                exportArray.push(this.exportService.startPipeline(exports[0]));
+                exportArray.push(this.exportService.startPipeline(exports[0]).pipe(map((exp) => exp ?? ({} as ExportModel))));
             }
         });
         return exportArray;

@@ -27,7 +27,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -266,5 +266,24 @@ describe('ImportInstanceExportDialogComponent', () => {
             TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
         });
         expect(r).toBeDefined();
+    });
+
+    it('closes the dialog with the created export', () => {
+        r = undefined;
+        exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export-1' } as any));
+        component.create();
+        expect(r).toEqual({ ID: 'export-1' });
+        exportServiceSpy.startPipeline.and.returnValue(of(true));
+    });
+
+    it('keeps the dialog open and reports an error when the export could not be created', () => {
+        r = undefined;
+        const snackBar = TestBed.inject(MatSnackBar);
+        const open = spyOn(snackBar, 'open').and.callThrough();
+        exportServiceSpy.startPipeline.and.returnValue(of(null));
+        component.create();
+        exportServiceSpy.startPipeline.and.returnValue(of(true));
+        expect(r).toBeUndefined();
+        expect(open).toHaveBeenCalledWith('Error creating export', 'close', { panelClass: 'snack-bar-error' });
     });
 });

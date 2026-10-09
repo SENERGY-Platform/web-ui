@@ -100,6 +100,10 @@ export class ImportInstanceExportDialogComponent implements OnInit {
         } as ExportModel;
         this.exportService.startPipeline(exp).subscribe(
             (res) => {
+                if (res === null) {
+                    snackError(this.snackBar, 'Error creating export');
+                    return;
+                }
                 this.dialogRef.close(res);
             },
             (err) => {

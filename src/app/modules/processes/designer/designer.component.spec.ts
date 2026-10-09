@@ -94,6 +94,18 @@ describe('ProcessDesignerComponent load and save', () => {
         expect(snackBar.open).toHaveBeenCalledWith('Model saved.', undefined, { duration: 2000 });
     });
 
+    it('reports an error and not success when the model could not be saved', async () => {
+        saveProcess.and.returnValue(of(null));
+        component.loadProcessDiagram('model-1');
+        await until(() => !!element('Task_device'));
+
+        component.save();
+        await until(() => snackBar.open.calls.count() > 0);
+
+        expect(snackBar.open).toHaveBeenCalledWith('Error while saving the model!', 'close', { panelClass: 'snack-bar-error' });
+        expect(snackBar.open).not.toHaveBeenCalledWith('Model saved.', undefined, jasmine.anything());
+    });
+
     it('reports an export error instead of saving', async () => {
         mounted.modeler.saveXML = () => Promise.reject(new Error('broken'));
 

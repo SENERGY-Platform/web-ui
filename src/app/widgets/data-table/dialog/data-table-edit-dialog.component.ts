@@ -1139,7 +1139,7 @@ export class DataTableEditDialogComponent implements OnInit {
             observables.push(
                 this.exportService.startPipeline(preparedExport).pipe(
                     map((model) => {
-                        element.patchValue({ exportId: model.ID });
+                        element.patchValue({ exportId: model?.ID });
                     }),
                 ),
             );
