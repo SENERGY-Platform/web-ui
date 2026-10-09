@@ -44,6 +44,7 @@ import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { NgClass, DatePipe } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -182,7 +183,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
                         },
                         (err) => {
                             console.error(err);
-                            this.snackBar.open('Error deleting', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error deleting');
                         },
                     );
                     this.reload();
@@ -227,7 +228,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
 
     private handleLoadError(err: any) {
         console.error(err);
-        this.snackBar.open('Error loading imports', 'close', { panelClass: 'snack-bar-error' });
+        snackError(this.snackBar, 'Error loading imports');
         this.dataReady = true;
     }
 
@@ -306,12 +307,12 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
 
                 forkJoin(deletionJobs).subscribe({
                     next: () => {
-                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, text + ' deleted successfully.');
                         this.reload();
                     },
                     error: (err) => {
                         console.error(err);
-                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
                         this.reload();
                     },
                 });

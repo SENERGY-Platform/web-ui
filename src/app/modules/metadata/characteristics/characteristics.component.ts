@@ -41,6 +41,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-characteristic',
@@ -141,9 +142,9 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
             if (resp !== undefined) {
                 this.characteristicsService.createCharacteristic(resp.characteristic).subscribe((characteristic) => {
                     if (characteristic === null) {
-                        this.snackBar.open('Error while creating the characteristic!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while creating the characteristic!');
                     } else {
-                        this.snackBar.open('Characteristic created successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, 'Characteristic created successfully.');
                     }
                     this.reload();
                 });
@@ -168,9 +169,9 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
                         .deleteCharacteristic(characteristic.id)
                         .subscribe((resp: boolean) => {
                             if (resp === true) {
-                                this.snackBar.open('Characteristic deleted successfully.', undefined, {duration: 2000});
+                                snackSuccess(this.snackBar, 'Characteristic deleted successfully.');
                             } else {
-                                this.snackBar.open('Error while deleting the characteristic!', 'close', {panelClass: 'snack-bar-error'});
+                                snackError(this.snackBar, 'Error while deleting the characteristic!');
                             }
                             this.reload();
                         });
@@ -197,9 +198,9 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
                     .updateConcept(newCharacteristic)
                     .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
                         if (characteristic === null) {
-                            this.snackBar.open('Error while updating the characteristic!', 'close', {panelClass: 'snack-bar-error'});
+                            snackError(this.snackBar, 'Error while updating the characteristic!');
                         } else {
-                            this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});
+                            snackSuccess(this.snackBar, 'Characteristic updated successfully.');
                         }
                         this.reload();
                     });
@@ -227,9 +228,9 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
                     .updateConcept(newCharacteristic)
                     .subscribe((characteristic: DeviceTypeCharacteristicsModel | null) => {
                         if (characteristic === null) {
-                            this.snackBar.open('Error while updating the characteristic!', 'close', {panelClass: 'snack-bar-error'});
+                            snackError(this.snackBar, 'Error while updating the characteristic!');
                         } else {
-                            this.snackBar.open('Characteristic updated successfully.', undefined, {duration: 2000});
+                            snackSuccess(this.snackBar, 'Characteristic updated successfully.');
                         }
                         this.reload();
                     });
@@ -313,9 +314,9 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.every((r: boolean) => r === true);
                     if (ok) {
-                        this.snackBar.open('Characteristics deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, 'Characteristics deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting characteristics!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting characteristics!');
                     }
                     this.reload();
                 });

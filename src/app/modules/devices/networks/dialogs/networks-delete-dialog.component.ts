@@ -28,6 +28,7 @@ import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/clo
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatButton } from '@angular/material/button';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-device-groups-pipeline-helper-dialog',
@@ -64,12 +65,10 @@ export class NetworksDeleteDialogComponent implements OnInit {
         forkJoin(obs).subscribe((resps) => {
             const ok = resps.findIndex((r: any) => r === null || r.status === 500) === -1;
             if (ok) {
-                this.snackBar.open('Hub ' + (ids.length > 0 ? 'and devices ' : '') + 'deleted successfully.', undefined, {
-                    duration: 2000,
-                });
+                snackSuccess(this.snackBar, 'Hub ' + (ids.length > 0 ? 'and devices ' : '') + 'deleted successfully.');
                 this.close(true);
             } else {
-                this.snackBar.open('Error while deleting the hub' + (ids.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while deleting the hub' + (ids.length > 0 ? ' and devices' : '') + '!');
                 this.ready = true;
             }
         });

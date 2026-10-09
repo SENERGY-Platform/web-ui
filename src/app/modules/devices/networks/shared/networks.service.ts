@@ -38,6 +38,7 @@ import {
     DeviceInstancesRouterStateTabEnum
 } from '../../device-instances/shared/device-instances.model';
 import { NetworksLoraCertsDialogComponent } from '../dialogs/networks-loracerts-dialog.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Injectable({
     providedIn: 'root',
@@ -153,9 +154,9 @@ export class NetworksService {
                 this.update({ id: network.id, name: network.name, hash: '', device_local_ids: [], owner_id: network.owner_id, device_ids: [] }).subscribe(
                     (respMessage: HubModel | null) => {
                         if (respMessage) {
-                            this.snackBar.open('Hub cleared successfully.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Hub cleared successfully.');
                         } else {
-                            this.snackBar.open('Error while clearing the hub!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while clearing the hub!');
                         }
                     },
                 );

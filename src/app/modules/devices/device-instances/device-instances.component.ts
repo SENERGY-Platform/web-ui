@@ -54,6 +54,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { StateIconComponent } from '../../../core/components/state-icon/state-icon.component';
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from '@angular/material/menu';
 import { NgClass } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -414,9 +415,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                     this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstanceModel | null) => {
                         this.ready = true;
                         if (resp !== null) {
-                            this.snackBar.open('Device deleted successfully.', '', { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Device deleted successfully.');
                         } else {
-                            this.snackBar.open('Error while deleting device!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting device!');
                         }
                         // do deletion on the client instead of reloading, because of caching/slow deletion
                         const index = this.dataSource.data.findIndex(element => element.id === device.id);
@@ -440,7 +441,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     shareMultipleDevices(): void {
         const devices = this.administrableSelection();
         if (devices.length === 0) {
-            this.snackBar.open('You may only share devices you administrate.', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'You may only share devices you administrate.');
             return;
         }
         const skipped = this.selection.selected.length - devices.length;
@@ -542,9 +543,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
                     if (ok) {
-                        this.snackBar.open('Devices deleted successfully.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, 'Devices deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting devices!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while deleting devices!');
                     }
                     this.reload();
                 });

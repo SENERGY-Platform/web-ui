@@ -33,6 +33,7 @@ import { forkJoin, Observable } from 'rxjs';
 import { LastValuesRequestElementTimescaleModel } from '../../../../widgets/shared/export-data.model';
 import { map, concatMap } from 'rxjs/operators';
 import { DeviceInstancesReplaceDialogComponent } from '../dialogs/device-instances-replace-dialog/device-instances-replace-dialog.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Injectable({
     providedIn: 'root',
@@ -168,10 +169,10 @@ export class DeviceInstancesDialogService {
                             setSpinnerState(false);
                         }
                         if(errorOccured) {
-                            this.snackBar.open('Error while updating the device instance!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while updating the device instance!');
                             return device;
                         }
-                        this.snackBar.open('Device instance updated successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, 'Device instance updated successfully.');
                         return newDevice;
                     })
                 );
@@ -206,9 +207,9 @@ export class DeviceInstancesDialogService {
                     .saveDeviceInstance(deviceOut)
                     .subscribe((deviceResp: DeviceInstanceModel | null) => {
                         if (deviceResp === null) {
-                            this.snackBar.open('Error while saving the device instance!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while saving the device instance!');
                         } else {
-                            this.snackBar.open('Device instance saved successfully.', undefined, {duration: 2000});
+                            snackSuccess(this.snackBar, 'Device instance saved successfully.');
                         }
                     });
             }

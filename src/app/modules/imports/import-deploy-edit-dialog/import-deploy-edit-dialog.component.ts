@@ -32,6 +32,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 type ConfigGroup = FormGroup<{
     name: FormControl<string | null>;
@@ -127,7 +128,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error loading import type', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error loading import type');
                 this.dialogRef.close();
             },
         );
@@ -172,10 +173,10 @@ export class ImportDeployEditDialogComponent implements OnInit {
             () => this.dialogRef.close(true),
             (err) => {
                 if (err !== undefined && err !== null && err.status !== undefined && err.status === 402) {
-                    this.snackBar.open('Insufficient budget', 'close', {panelClass: 'snack-bar-error'});
+                    snackError(this.snackBar, 'Insufficient budget');
                 } else {
                     console.error(err);
-                    this.snackBar.open('Error saving', 'close', {panelClass: 'snack-bar-error'});
+                    snackError(this.snackBar, 'Error saving');
                 }
             },
         );

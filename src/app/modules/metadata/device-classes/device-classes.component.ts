@@ -42,6 +42,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-device-classes',
@@ -149,9 +150,9 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
                     this.ready = false;
                     this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.snackBar.open('Device class deleted successfully.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Device class deleted successfully.');
                         } else {
-                            this.snackBar.open('Error while deleting the device class!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting the device class!');
                         }
                         this.reload();
                     });
@@ -212,9 +213,9 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
 
     private reloadAndShowSnackbar(deviceClass: DeviceTypeDeviceClassModel | null, text: string) {
         if (deviceClass === null) {
-            this.snackBar.open('Error while ' + text + 'ing the device class!', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Error while ' + text + 'ing the device class!');
         } else {
-            this.snackBar.open('Device class ' + text + 'ed successfully.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Device class ' + text + 'ed successfully.');
         }
         this.reload();
     }
@@ -254,9 +255,9 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.every((r: boolean) => r === true);
                     if (ok) {
-                        this.snackBar.open('Device classes deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, 'Device classes deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting device classes!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting device classes!');
                     }
                     this.reload();
                 });

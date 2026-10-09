@@ -41,6 +41,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-import-types',
@@ -161,7 +162,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
                         },
                         (err) => {
                             console.error(err);
-                            this.snackBar.open('Error deleting import type', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error deleting import type');
                         },
                     );
                 }
@@ -247,12 +248,12 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
 
                 forkJoin(deletionJobs).subscribe({
                     next: () => {
-                        this.snackBar.open(text + ' deleted successfully.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, text + ' deleted successfully.');
                         this.reload();
                     },
                     error: (err) => {
                         console.error(err);
-                        this.snackBar.open('Error while deleting ' + text + '!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
                         this.reload();
                     },
                 });

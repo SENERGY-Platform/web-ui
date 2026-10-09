@@ -37,6 +37,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-device-types',
@@ -117,9 +118,9 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
                         if (deleted) {
                             const index = this.deviceTypes.indexOf(deviceTypeInput);
                             this.deviceTypes.splice(index, 1);
-                            this.snackBar.open('Device type deleted successfully.', '', { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Device type deleted successfully.');
                         } else {
-                            this.snackBar.open('Error while deleting device type!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting device type!');
                         }
                         this.reload();
                     });
@@ -228,9 +229,9 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.every((r: boolean) => r === true);
                     if (ok) {
-                        this.snackBar.open(text + ' deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, text + ' deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting ' + text + '!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
                     }
                     this.reload();
                 });

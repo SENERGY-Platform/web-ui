@@ -50,6 +50,7 @@ import { MatIcon } from '@angular/material/icon';
 import { NgClass, DatePipe } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../core/components/spinner/spinner.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /** The bulk DELETE deletes one export after the other and keeps going after a gateway timeout. */
 export function bulkDeleteOutcome(status: number, count: number): { message: string; failed: boolean; pending: boolean } {
@@ -220,16 +221,14 @@ export class ExportComponent implements OnInit, AfterViewInit {
                     const obs = this.brokerMode ? this.brokerExportService.stopPipeline(exp) : this.exportService.stopPipeline(exp);
                     obs.subscribe((response) => {
                         if (response.status === 204) {
-                            this.snackBar.open('Export deleted', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Export deleted');
                             // do deletion on the client instead of reloading, because of caching/slow deletion
                             const index = this.exportsDataSource.data.findIndex(element => element.ID === exp.ID);
                             const data = this.exportsDataSource.data.slice();
                             data.splice(index, 1);
                             this.exportsDataSource.data = data;
                         } else {
-                            this.snackBar.open('Export could not be deleted', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Export could not be deleted');
                         }
                         this.ready = true;
                     });
@@ -370,7 +369,7 @@ export class ExportComponent implements OnInit, AfterViewInit {
                     obs.subscribe((response) => {
                         const outcome = bulkDeleteOutcome(response.status, exportIDs.length);
                         if (outcome.failed) {
-                            this.snackBar.open(outcome.message, 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, outcome.message);
                         } else {
                             this.snackBar.open(outcome.message, 'close', { duration: outcome.pending ? undefined : 2000 });
                         }

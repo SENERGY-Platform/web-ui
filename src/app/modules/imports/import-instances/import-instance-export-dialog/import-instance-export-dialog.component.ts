@@ -33,6 +33,7 @@ import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MatSort } from '@angular/material/sort';
 import { MatButton } from '@angular/material/button';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-import-instance-export-dialog',
@@ -73,7 +74,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error loading import type', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error loading import type');
                 this.dialogRef.close();
             },
         );
@@ -103,7 +104,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             },
             (err) => {
                 console.error(err);
-                this.snackBar.open('Error creating export', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error creating export');
             },
         );
     }

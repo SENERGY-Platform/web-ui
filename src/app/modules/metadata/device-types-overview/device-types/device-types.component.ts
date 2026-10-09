@@ -70,6 +70,7 @@ import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button
 import { MatIcon } from '@angular/material/icon';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -739,9 +740,9 @@ export class DeviceTypesComponent implements OnInit {
 
     private showMessage(deviceTypeSaved: DeviceTypeModel | null) {
         if (deviceTypeSaved) {
-            this.snackBar.open('Device type saved successfully.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Device type saved successfully.');
         } else {
-            this.snackBar.open('Error while saving the device type!', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Error while saving the device type!');
         }
     }
 

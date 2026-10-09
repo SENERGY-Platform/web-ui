@@ -47,6 +47,7 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
 import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-functions',
@@ -231,9 +232,9 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.ready = false;
                     this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.snackBar.open('Function deleted successfully.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Function deleted successfully.');
                         } else {
-                            this.snackBar.open('Error while deleting the function!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting the function!');
                         }
                         this.reload();
                     });
@@ -280,10 +281,10 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private reloadAndShowSnackbar(func: DeviceTypeFunctionModel | null, text: string) {
         if (func === null) {
-            this.snackBar.open('Error while ' + text + 'ing the function!', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Error while ' + text + 'ing the function!');
             this.reload();
         } else {
-            this.snackBar.open('Function ' + text + 'ed successfully.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Function ' + text + 'ed successfully.');
             this.reload();
         }
     }
@@ -323,9 +324,9 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.every((r: boolean) => r === true);
                     if (ok) {
-                        this.snackBar.open('Functions deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, 'Functions deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting functions!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting functions!');
                     }
                     this.reload();
                 });

@@ -61,6 +61,7 @@ import { MatInput } from '@angular/material/input';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 type ExportValueGroup = FormGroup<{
     Name: FormControl<string | null>;
@@ -353,11 +354,9 @@ export class NewExportComponent implements OnInit {
                 obs.subscribe((response) => {
                     if (response.status === 200) {
                         self.router.navigate(['/exports', self.id?.startsWith(BrokerExportService.ID_PREFIX) ? 'broker' : 'db']);
-                        self.snackBar.open('Export updated', undefined, {
-                            duration: 2000,
-                        });
+                        snackSuccess(self.snackBar, 'Export updated');
                     } else {
-                        this.snackBar.open('Export could not be updated', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Export could not be updated');
                     }
                     this.ready = true;
                 });
@@ -367,9 +366,7 @@ export class NewExportComponent implements OnInit {
                 ).startPipeline(this.export);
                 obs.subscribe(function() {
                     self.router.navigate(['/exports', self.exportForm.get('targetSelector')?.value === self.targetDb ? 'db' : 'broker']);
-                    self.snackBar.open('Export created', undefined, {
-                        duration: 2000,
-                    });
+                    snackSuccess(self.snackBar, 'Export created');
                 });
             }
         }

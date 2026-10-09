@@ -36,6 +36,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 
 @Component({
@@ -137,10 +138,10 @@ export class LocationsComponent implements OnInit, AfterViewInit {
                     this.ready = false;
                     this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.snackBar.open('Location deleted successfully.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Location deleted successfully.');
                             this.reloadLocations();
                         } else {
-                            this.snackBar.open('Error while deleting the location!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting the location!');
                         }
                     });
                 }
@@ -221,9 +222,9 @@ export class LocationsComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.every((r: boolean) => r === true);
                     if (ok) {
-                        this.snackBar.open('Locations deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, 'Locations deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting locations!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting locations!');
                     }
                     this.reload();
                 });

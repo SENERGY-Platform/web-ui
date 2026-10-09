@@ -56,6 +56,7 @@ import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /**
  * A row that stands for an aspect class rather than an aspect. It is shaped like an aspect so the
@@ -138,13 +139,13 @@ export class AspectsComponent implements OnInit {
         return new Promise((resolve, reject) => {
             this.aspectClassesService.createAspectClass(name.trim()).subscribe((created) => {
                 if (created === null) {
-                    this.snackBar.open('Error while creating the aspect class!', 'close', { panelClass: 'snack-bar-error' });
+                    snackError(this.snackBar, 'Error while creating the aspect class!');
                     // ng-select swallows a rejected promise, so the message above is the only report
                     reject();
                     return;
                 }
                 this.addToAspectClassList(created);
-                this.snackBar.open('Aspect class created successfully.', undefined, {duration: 2000});
+                snackSuccess(this.snackBar, 'Aspect class created successfully.');
                 resolve(created);
             });
         });
@@ -182,9 +183,9 @@ export class AspectsComponent implements OnInit {
             this.aspectsService.deleteAspects(node.id).subscribe((resp: boolean) => {
                 if (resp === true) {
                     this.setTree(this.rootAspects().filter(root => root !== node));
-                    this.snackBar.open('Aspect deleted successfully.', undefined, {duration: 2000});
+                    snackSuccess(this.snackBar, 'Aspect deleted successfully.');
                 } else {
-                    this.snackBar.open('Error while deleting the aspect!', 'close', { panelClass: 'snack-bar-error' });
+                    snackError(this.snackBar, 'Error while deleting the aspect!');
                 }
             });
         };
@@ -236,12 +237,12 @@ export class AspectsComponent implements OnInit {
 
         obs.subscribe((resp: DeviceTypeAspectModel | null) => {
             if (resp === null) {
-                this.snackBar.open('Error while saving the aspect!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while saving the aspect!');
             } else {
                 // regrouping rather than replacing in place: a class the user just changed puts the
                 // hierarchy under a different group row
                 this.setTree(this.rootAspects().map(root => root === node ? resp : root));
-                this.snackBar.open('Aspect saved successfully.', undefined, {duration: 2000});
+                snackSuccess(this.snackBar, 'Aspect saved successfully.');
             }
         });
     }
@@ -249,15 +250,15 @@ export class AspectsComponent implements OnInit {
     dropped($event: any, target?: DeviceTypeAspectModel) {
         const node = $event.item.data as DeviceTypeAspectModel;
         if (node === target) {
-            this.snackBar.open('Can\'t move aspect into itself', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Can\'t move aspect into itself');
             return;
         }
         if (target !== undefined && !this.isAspectClassGroup(target) && !this.nodeValid(target)) {
-            this.snackBar.open('Can\'t move into invalid aspect', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Can\'t move into invalid aspect');
             return;
         }
         if (target !== undefined && this.hasDescendant(node, target)) {
-            this.snackBar.open('Can\'t move into descendant aspect', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Can\'t move into descendant aspect');
             return;
         }
         this.dialogsService.openConfirmDialog('Move Aspect', 'Do you want to move this aspect? Changes will be saved immediately').afterClosed().subscribe(move => {
@@ -287,7 +288,7 @@ export class AspectsComponent implements OnInit {
         } else {
             const targetRoot = this.isRootNode(target) ? target : this.findRoot(target);
             if (targetRoot === undefined) {
-                this.snackBar.open('Can\'t find the root of the target aspect', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Can\'t find the root of the target aspect');
                 return;
             }
             const withNode = this.withSubAspect(targetRoot, target, clone);
@@ -297,9 +298,9 @@ export class AspectsComponent implements OnInit {
         this.ready = false;
         this.aspectsService.updateAspects(this.aspectWriteRequest(request)).subscribe((resp) => {
             if (resp === null) {
-                this.snackBar.open('Error while moving the aspect!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while moving the aspect!');
             } else {
-                this.snackBar.open('Aspect moved successfully.', undefined, {duration: 2000});
+                snackSuccess(this.snackBar, 'Aspect moved successfully.');
             }
             this.getAspects();
         });
@@ -401,7 +402,7 @@ export class AspectsComponent implements OnInit {
         const isRoot = this.isRootNode(node);
         const parentRoot = isRoot ? undefined : this.findRoot(node);
         if (!isRoot && parentRoot === undefined) {
-            this.snackBar.open('Can\'t find the root of this aspect', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Can\'t find the root of this aspect');
             return;
         }
 
@@ -410,17 +411,13 @@ export class AspectsComponent implements OnInit {
             .pipe(concatMap(aspectClass => this.conversionSteps(node, aspectClass, result.fate, parentRoot)))
             .subscribe({
                 next: () => {
-                    this.snackBar.open('Aspect converted to aspect class.', undefined, {duration: 2000});
+                    snackSuccess(this.snackBar, 'Aspect converted to aspect class.');
                     this.getAspects();
                 },
                 error: (err: Error) => {
                     // no rollback exists: every step is a request of its own, so say what got as far
                     // as the repository instead of implying the tree is unchanged
-                    this.snackBar.open(
-                        'Conversion failed while ' + err.message + '. Earlier steps are already stored.',
-                        'close',
-                        { panelClass: 'snack-bar-error' },
-                    );
+                    snackError(this.snackBar, 'Conversion failed while ' + err.message + '. Earlier steps are already stored.');
                     this.getAspects();
                 },
             });
@@ -580,17 +577,13 @@ export class AspectsComponent implements OnInit {
                 this.aspectClassesService.deleteAspectClass(group.id).subscribe((resp) => {
                     if (!resp.deleted) {
                         // the 400 names the aspects still carrying the class, and nothing else can
-                        this.snackBar.open(
-                            resp.error ? 'Could not delete the aspect class: ' + resp.error
-                                : 'Error while deleting the aspect class!',
-                            'close',
-                            { panelClass: 'snack-bar-error' },
-                        );
+                        snackError(this.snackBar, resp.error ? 'Could not delete the aspect class: ' + resp.error
+                                : 'Error while deleting the aspect class!');
                         return;
                     }
                     this.aspectClasses = this.aspectClasses.filter(c => c.id !== group.id);
                     this.setTree(this.rootAspects());
-                    this.snackBar.open('Aspect class deleted successfully.', undefined, {duration: 2000});
+                    snackSuccess(this.snackBar, 'Aspect class deleted successfully.');
                 });
             });
     }
@@ -604,7 +597,7 @@ export class AspectsComponent implements OnInit {
         const name = (group.name || '').trim();
         this.aspectClassesService.updateAspectClass({id: group.id, name}).subscribe((saved) => {
             if (saved === null) {
-                this.snackBar.open('Error while saving the aspect class!', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error while saving the aspect class!');
                 return;
             }
             this.aspectClasses = this.aspectClasses
@@ -612,7 +605,7 @@ export class AspectsComponent implements OnInit {
                 .sort((a, b) => a.name.localeCompare(b.name));
             // the group rows are labelled from that list and sorted by name, so both follow the rename
             this.setTree(this.rootAspects());
-            this.snackBar.open('Aspect class saved successfully.', undefined, {duration: 2000});
+            snackSuccess(this.snackBar, 'Aspect class saved successfully.');
         });
     }
 

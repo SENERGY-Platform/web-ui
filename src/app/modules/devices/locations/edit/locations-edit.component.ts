@@ -36,6 +36,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-locations-edit',
@@ -262,9 +263,9 @@ export class LocationsEditComponent implements OnInit {
 
     private showMessage(locationSaved: LocationModel | null) {
         if (locationSaved) {
-            this.snackBar.open('Location saved successfully.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Location saved successfully.');
         } else {
-            this.snackBar.open('Error while saving the device group!', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Error while saving the location!');
         }
     }
 

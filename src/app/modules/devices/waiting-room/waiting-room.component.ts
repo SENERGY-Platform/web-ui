@@ -46,6 +46,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { DatePipe } from '@angular/common';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -194,10 +195,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
             if (deviceOut !== undefined) {
                 this.waitingRoomService.updateDevice(deviceOut).subscribe((deviceResp: WaitingDeviceModel | null) => {
                     if (deviceResp === null) {
-                        this.snackBar.open('Error while updating the device!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while updating the device!');
                     } else {
                         Object.assign(device, deviceOut);
-                        this.snackBar.open('Device updated successfully.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, 'Device updated successfully.');
                     }
                 });
             }
@@ -212,13 +213,9 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                 if (deleteDevice) {
                     this.waitingRoomService.deleteDevice(localId).subscribe((response) => {
                         if (response.status < 300) {
-                            this.snackBar.open('Device deleted', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Device deleted');
                         } else {
-                            this.snackBar.open('Device could not be deleted', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Device could not be deleted');
                         }
                     });
                 }
@@ -239,16 +236,14 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
             if (deviceOut !== undefined) {
                 this.waitingRoomService.updateDevice(deviceOut).subscribe((deviceResp: WaitingDeviceModel | null) => {
                     if (deviceResp === null) {
-                        this.snackBar.open('Error while updating the device!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while updating the device!');
                     } else {
                         Object.assign(device, deviceOut);
                         this.waitingRoomService.useDevice(device.local_id).subscribe((response) => {
                             if (response.status < 300) {
-                                this.snackBar.open('Device used', undefined, {
-                                    duration: 2000,
-                                });
+                                snackSuccess(this.snackBar, 'Device used');
                             } else {
-                                this.snackBar.open('Device could not be used', 'close', { panelClass: 'snack-bar-error' });
+                                snackError(this.snackBar, 'Device could not be used');
                             }
                         });
                     }
@@ -306,7 +301,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.waitingRoomService.updateMultipleDevices(devices).subscribe((devicesResp: WaitingDeviceModel[] | null) => {
                     if (devicesResp === null) {
                         this.ready = true;
-                        this.snackBar.open('Error while updating and using the devices!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while updating and using the devices!');
                     } else {
                         const deviceIds: string[] = [];
                         this.selection.selected.forEach((device: WaitingDeviceModel) => {
@@ -366,12 +361,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.ready = false;
                     this.waitingRoomService.hideDevice(localId).subscribe((response) => {
                         if (response.status < 300) {
-                            this.snackBar.open('Device hidden', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Device hidden');
                             this.getDevices(true);
                         } else {
-                            this.snackBar.open('Device could not be hidden', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Device could not be hidden');
                         }
                         this.ready = true;
                     });
@@ -419,12 +412,10 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.ready = false;
                     this.waitingRoomService.showDevice(localId).subscribe((response) => {
                         if (response.status < 300) {
-                            this.snackBar.open('Device shown', undefined, {
-                                duration: 2000,
-                            });
+                            snackSuccess(this.snackBar, 'Device shown');
                             this.getDevices(true);
                         } else {
-                            this.snackBar.open('Device could not be shown', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Device could not be shown');
                         }
                         this.ready = true;
                     });

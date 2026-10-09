@@ -38,6 +38,7 @@ import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 
 @Component({
@@ -146,9 +147,9 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
                 if (deleteDeviceClass) {
                     this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
                         if (resp === true) {
-                            this.snackBar.open('Device-Group deleted successfully.', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Device-Group deleted successfully.');
                         } else {
-                            this.snackBar.open('Error while deleting the device-group!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while deleting the device-group!');
                         }
                         this.reload();
                     });
@@ -218,9 +219,9 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
                 forkJoin(deletionJobs).subscribe((deletionJobResults) => {
                     const ok = deletionJobResults.every((r: boolean) => r === true);
                     if (ok) {
-                        this.snackBar.open('Device group deleted successfully.', undefined, {duration: 2000});
+                        snackSuccess(this.snackBar, deletionJobs.length > 1 ? 'Device groups deleted successfully.' : 'Device group deleted successfully.');
                     } else {
-                        this.snackBar.open('Error while deleting the device group!', 'close', {panelClass: 'snack-bar-error'});
+                        snackError(this.snackBar, 'Error while deleting the device group!');
                     }
                     this.reload();
                 });
@@ -230,7 +231,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     showDevices(group: DeviceGroupModel) {
         this.deviceGroupsService.getDeviceGroup(group.id).subscribe((deviceGroup: DeviceGroupModel | null) => {
             if(!deviceGroup?.device_ids || deviceGroup.device_ids.length == 0) {
-                this.snackBar.open('Device group has no devices', 'close', {panelClass: 'snack-bar-error'});
+                snackError(this.snackBar, 'Device group has no devices');
                 return;
             }
 

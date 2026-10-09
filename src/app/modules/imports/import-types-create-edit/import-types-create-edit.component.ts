@@ -51,6 +51,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 type ConfigGroup = FormGroup<{
     name: FormControl<string | null | undefined>;
@@ -202,7 +203,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                     },
                     (err) => {
                         console.log(err);
-                        this.snackBar.open('Error loading import type', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error loading import type');
                         this.navigateToList();
                     },
                 );
@@ -214,7 +215,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             },
             (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading functions', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error loading functions');
                 this.navigateToList();
             },
         );
@@ -222,7 +223,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             (aspects) => (this.aspects = aspects),
             (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading aspects', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error loading aspects');
                 this.navigateToList();
             },
         );
@@ -243,7 +244,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 }),
             (err) => {
                 console.log(err);
-                this.snackBar.open('Error loading characteristics', 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error loading characteristics');
                 this.navigateToList();
             },
         );
@@ -280,7 +281,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
             () => this.navigateToList(),
             (err: any) => {
                 console.error(err);
-                this.snackBar.open('Error saving: ' + err.error, 'close', { panelClass: 'snack-bar-error' });
+                snackError(this.snackBar, 'Error saving: ' + err.error);
                 this.ready = true;
             },
         );

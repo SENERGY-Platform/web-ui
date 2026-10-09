@@ -44,6 +44,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
 import { MtxSelect } from '@ng-matero/extensions/select';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-device-groups-edit',
@@ -249,9 +250,9 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     private showMessage(deviceGroupSaved: DeviceGroupModel | null) {
         if (deviceGroupSaved) {
-            this.snackBar.open('Device-Group saved successfully.', undefined, { duration: 2000 });
+            snackSuccess(this.snackBar, 'Device-Group saved successfully.');
         } else {
-            this.snackBar.open('Error while saving the device group!', 'close', { panelClass: 'snack-bar-error' });
+            snackError(this.snackBar, 'Error while saving the device group!');
         }
     }
 

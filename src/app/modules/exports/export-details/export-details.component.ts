@@ -40,6 +40,7 @@ import { MatList, MatListItem, MatListItemIcon, MatListItemLine } from '@angular
 import { MatDivider } from '@angular/material/divider';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-export-details',
@@ -166,8 +167,6 @@ export class ExportDetailsComponent implements OnInit {
 
     copyClipboard(element: ExportValueBaseModel) {
         this.clipboardService.copyFromContent(((this.baseTopic || '').length > 0 ? this.baseTopic + '/' : '') + element.Name);
-        this.snackBar.open('Topic copied to clipboard', undefined, {
-            duration: 2000,
-        });
+        snackSuccess(this.snackBar, 'Topic copied to clipboard');
     }
 }

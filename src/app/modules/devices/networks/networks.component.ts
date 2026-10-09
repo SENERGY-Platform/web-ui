@@ -41,6 +41,7 @@ import { StateIconComponent } from '../../../core/components/state-icon/state-ic
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-networks',
@@ -281,11 +282,9 @@ export class NetworksComponent implements OnInit, AfterViewInit {
                         forkJoin(deletionJobs).subscribe((resps) => {
                             const ok = resps.findIndex((r: any) => r === null || r.status === 500) === -1;
                             if (ok) {
-                                this.snackBar.open('Hub ' + (allDeviceIds.length > 0 ? 'and devices ' : '') + 'deleted successfully.', undefined, {
-                                    duration: 2000,
-                                });
+                                snackSuccess(this.snackBar, 'Hub ' + (allDeviceIds.length > 0 ? 'and devices ' : '') + 'deleted successfully.');
                             } else {
-                                this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
+                                snackError(this.snackBar, 'Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!');
                                 this.ready = true;
                             }
 
@@ -293,7 +292,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
                         });
                     },
                     error: (_) => {
-                        this.snackBar.open('Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while deleting the hub' + (allDeviceIds.length > 0 ? ' and devices' : '') + '!');
                         this.reload();
                     }
                 });

@@ -39,6 +39,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-concepts',
@@ -117,9 +118,9 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
             if (newConcept !== undefined) {
                 this.conceptsService.createConcept(newConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while creating the concept!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while creating the concept!');
                     } else {
-                        this.snackBar.open('Concept created successfully.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, 'Concept created successfully.');
                     }
                     this.reload();
                 });
@@ -139,9 +140,9 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
             if (editConcept !== undefined) {
                 this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while updating the concept!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while updating the concept!');
                     } else {
-                        this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, 'Concept updated successfully.');
                     }
                     this.reload();
                 });
@@ -162,9 +163,9 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
             if (editConcept !== undefined) {
                 this.conceptsService.updateConcept(editConcept).subscribe((concept: DeviceTypeConceptModel | null) => {
                     if (concept === null) {
-                        this.snackBar.open('Error while updating the concept!', 'close', { panelClass: 'snack-bar-error' });
+                        snackError(this.snackBar, 'Error while updating the concept!');
                     } else {
-                        this.snackBar.open('Concept updated successfully.', undefined, { duration: 2000 });
+                        snackSuccess(this.snackBar, 'Concept updated successfully.');
                     }
                     this.reload();
                 });
@@ -188,9 +189,9 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
                         this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
                             if (resp === true) {
                                 this.concepts.splice(this.concepts.indexOf(concept), 1);
-                                this.snackBar.open('Concept deleted successfully.', undefined, { duration: 2000 });
+                                snackSuccess(this.snackBar, 'Concept deleted successfully.');
                             } else {
-                                this.snackBar.open('Error while deleting the concept!', 'close', { panelClass: 'snack-bar-error' });
+                                snackError(this.snackBar, 'Error while deleting the concept!');
                             }
                             this.reload();
                         });
@@ -315,7 +316,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
                         if (blocked.length > 0 || failedCount > 0) {
                             this.reportBlockedDeletes(blocked, failedCount);
                         } else {
-                            this.snackBar.open('Concepts deleted successfully.', undefined, {duration: 2000});
+                            snackSuccess(this.snackBar, 'Concepts deleted successfully.');
                         }
                         this.reload();
                     });
