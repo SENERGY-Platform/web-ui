@@ -21,7 +21,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DeviceStatusElementModel } from '../shared/device-status-properties.model';
@@ -458,14 +458,14 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.elements[0].exportId).toBeNull();
             expect(component.elements[0].deploymentId).toBeNull();
             exportServiceSpy.startPipeline.calls.reset();
-            exportServiceSpy.stopPipeline.calls.reset();
+            exportServiceSpy.stopPipelineByIdIfExists.calls.reset();
             deploymentsServiceSpy.v2postDeployments.calls.reset();
             component.save();
             expect(component.elements[0].exportId).not.toBeNull();
             expect(component.elements[0].deploymentId).not.toBeNull();
             expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(1);
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
-            expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
+            expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
         }),
     );
 
@@ -482,14 +482,14 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.elements[0].exportId).toBeNull();
             expect(component.elements[0].deploymentId).toBeNull();
             exportServiceSpy.startPipeline.calls.reset();
-            exportServiceSpy.stopPipeline.calls.reset();
+            exportServiceSpy.stopPipelineByIdIfExists.calls.reset();
             deploymentsServiceSpy.v2postDeployments.calls.reset();
             component.save();
             expect(component.elements[0].exportId).not.toBeNull();
             expect(component.elements[0].deploymentId).not.toBeNull();
             expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
-            expect(exportServiceSpy.stopPipeline.calls.count()).toBe(0);
+            expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
         }),
     );
 
@@ -523,6 +523,7 @@ describe('DeviceStatusEditDialogComponent', () => {
         afterEach(() => {
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
             deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+            dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'OK' }));
         });
 
         it(
@@ -581,6 +582,195 @@ describe('DeviceStatusEditDialogComponent', () => {
                 expect(snackOpen).not.toHaveBeenCalled();
             }),
         );
+
+        describe('cleanup of the old generated resources', () => {
+            let order: string[];
+            let deleteSchedule: jasmine.Spy;
+
+            function storeOldElement(element: Partial<DeviceStatusElementModel>): void {
+                (component as unknown as { persistedElements: Partial<DeviceStatusElementModel>[] }).persistedElements = [element];
+            }
+
+            beforeEach(() => {
+                order = [];
+                dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
+                dashboardServiceSpy.updateWidgetProperty.and.callFake(() => {
+                    order.push('save');
+                    return of({ message: 'OK' });
+                });
+                exportServiceSpy.stopPipelineByIdIfExists.calls.reset();
+                exportServiceSpy.stopPipelineByIdIfExists.and.callFake(() => {
+                    order.push('delete export');
+                    return of({ status: 200 });
+                });
+                deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.reset();
+                deploymentsServiceSpy.v2deleteDeploymentIfExists.and.callFake(() => {
+                    order.push('delete deployment');
+                    return of({ status: 200 });
+                });
+                deleteSchedule = spyOn(TestBed.inject(ProcessSchedulerService), 'deleteScheduleIfExists').and.callFake(() => {
+                    order.push('delete schedule');
+                    return of({ status: 200 });
+                });
+            });
+
+            afterEach(() => {
+                exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 200 }));
+                deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
+            });
+
+            const oldElement = { name: 'old element', exportId: 'old_export', deploymentId: 'old_deployment', scheduleId: 'old_schedule' };
+
+            it(
+                'deletes nothing when a new resource cannot be created',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    storeOldElement(oldElement);
+                    exportServiceSpy.startPipeline.and.returnValue(of(null));
+                    component.save();
+                    expect(order).toEqual([]);
+                    expect(deleteSchedule.calls.count()).toBe(0);
+                }),
+            );
+
+            it(
+                'deletes the old resources after the widget was saved',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    storeOldElement(oldElement);
+                    component.save();
+                    expect(order).toEqual(['save', 'delete export', 'delete deployment', 'delete schedule']);
+                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.mostRecent().args[0]).toBe('old_export');
+                    expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                }),
+            );
+
+            it(
+                'does not delete a resource the saved widget still uses',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+                    storeOldElement({ ...oldElement, exportId: 'export_id_123', deploymentId: 'deployment_id_1' });
+                    component.save();
+                    expect(order).toEqual(['save', 'delete schedule']);
+                }),
+            );
+
+            it(
+                'keeps the saved widget and reports a delete that failed',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    storeOldElement(oldElement);
+                    exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 500 }));
+                    component.save();
+                    expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+                    expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                    expect(snackOpen.calls.mostRecent().args[0]).toContain('old export of old element could not be deleted');
+                    expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+                }),
+            );
+
+            it(
+                'deletes what a failed attempt created once a retry was saved',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    storeOldElement(oldElement);
+                    let n = 0;
+                    exportServiceSpy.startPipeline.and.callFake(() => of({ ID: 'export' + ++n } as ExportModel));
+                    deploymentsServiceSpy.v2postDeployments.and.returnValues(of({ status: 500, id: '' }), of({ status: 200, id: 'deployment_retry' }));
+
+                    component.save();
+                    expect(order).toEqual([]);
+                    component.save();
+
+                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export'], ['export1']]);
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                }),
+            );
+
+            it(
+                'deletes the old resources although the name update failed',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    component.userHasUpdateNameAuthorization = true;
+                    dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'error' }));
+                    storeOldElement(oldElement);
+
+                    component.save();
+
+                    expect(order).toContain('delete export');
+                    expect(matDialogRefSpy.close.calls.count()).toBe(0);
+                }),
+            );
+
+            it(
+                'takes a 404 for a resource that is already gone',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    storeOldElement(oldElement);
+                    exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 404 }));
+
+                    component.save();
+
+                    expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                    expect(snackOpen).not.toHaveBeenCalled();
+                }),
+            );
+
+            it(
+                'keeps the resources of the element list that was sent when an element is deleted during the request',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    storeOldElement(oldElement);
+                    const response = new Subject<{ message: string }>();
+                    dashboardServiceSpy.updateWidgetProperty.and.returnValue(response);
+
+                    component.save();
+                    component.deleteElement(0);
+                    response.next({ message: 'OK' });
+                    response.complete();
+
+                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                }),
+            );
+
+            it(
+                'ignores a second save while one is running and accepts one afterwards',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    const response = new Subject<{ message: string }>();
+                    dashboardServiceSpy.updateWidgetProperty.and.returnValue(response);
+                    exportServiceSpy.startPipeline.calls.reset();
+
+                    component.save();
+                    component.save();
+
+                    expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
+                    expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+
+                    response.next({ message: 'error' });
+                    response.complete();
+                    component.save();
+
+                    expect(exportServiceSpy.startPipeline.calls.count()).toBe(2);
+                }),
+            );
+
+            it(
+                'accepts a new save after a step failed',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    exportServiceSpy.startPipeline.and.returnValue(of(null));
+                    component.save();
+                    exportServiceSpy.startPipeline.calls.reset();
+
+                    component.save();
+
+                    expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
+                }),
+            );
+        });
     });
 
     it(

@@ -31,7 +31,7 @@ import { UBAStation } from '../shared/uba.model';
 import { GeonamesService } from '../shared/geonames.service';
 import { Geoname } from '../shared/geonames.model';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { catchError, debounceTime, map } from 'rxjs/operators';
+import { catchError, debounceTime, map, tap } from 'rxjs/operators';
 import { forkJoin, from, Observable, of, Subscriber, concatMap } from 'rxjs';
 import { NameValuePair } from '../shared/dwd-pollen.model';
 import { ImportInstancesService } from '../../../modules/imports/import-instances/shared/import-instances.service';
@@ -394,6 +394,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     searchFormControl = new FormControl();
     importInstances: ImportInstancesModel[] = [];
     ready = false;
+    private pendingCleanup: { kind: 'export' | 'import instance'; id: string; provider: string }[] = [];
     devices: DeviceInstanceModel[] = [];
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
 
@@ -523,7 +524,14 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.widget.properties.location = this.location;
                 this.widget.properties.formatted_address = this.formatted_address;
                 this.widget.properties.pollen = this.pollen;
-                return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties);
+                return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).pipe(
+                    tap((response) => {
+                        // independent of the name update: once the properties are persisted the old resources are unused
+                        if (response.message === 'OK') {
+                            this.runPendingCleanup();
+                        }
+                    }),
+                );
             })
         );
     }
@@ -559,10 +567,45 @@ export class AirQualityEditDialogComponent implements OnInit {
         });
     }
 
-    private deleteOldImportInstance(id: string, provider: string): void {
-        this.importInstancesService.deleteImportInstance(id).subscribe({
-            error: () => snackError(this.snackBar, 'Could not delete the old import instance for ' + provider),
-        });
+    // Old generated resources are deleted only after the new ones exist and the widget was saved.
+    private queueCleanup(kind: 'export' | 'import instance', id: string, provider: string): void {
+        if (!this.pendingCleanup.some((c) => c.kind === kind && c.id === id)) {
+            this.pendingCleanup.push({ kind, id, provider });
+        }
+    }
+
+    private runPendingCleanup(): void {
+        const info = this.widget.properties;
+        const stillUsed = new Set(
+            [info.ubaInfo, info.dwdPollenInfo, info.yrInfo].flatMap((i) => [i?.exportId, i?.importInstanceId]).filter((id) => !!id),
+        );
+        const failed: string[] = [];
+        this.pendingCleanup
+            .filter((c) => !stillUsed.has(c.id))
+            .forEach((c) => {
+                const text = c.kind + ' for ' + c.provider;
+                const request: Observable<{ status: number } | void> =
+                    c.kind === 'export' ? this.exportService.stopPipelineByIdIfExists(c.id) : this.importInstancesService.deleteImportInstance(c.id);
+                request.subscribe({
+                    next: (resp) => {
+                        if (resp && resp.status >= 400 && resp.status !== 404) {
+                            this.reportFailedCleanup(failed, text);
+                        }
+                    },
+                    // a 404 means the resource is already gone
+                    error: (err: unknown) => {
+                        if ((err as { status?: number })?.status !== 404) {
+                            this.reportFailedCleanup(failed, text);
+                        }
+                    },
+                });
+            });
+        this.pendingCleanup = [];
+    }
+
+    private reportFailedCleanup(failed: string[], text: string): void {
+        failed.push(text);
+        snackError(this.snackBar, 'Could not delete the old ' + failed.join(', ') + ', the widget was saved');
     }
 
     displayFn(input?: ChartsExportMeasurementModel): string | undefined {
@@ -852,7 +895,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.widget.properties.ubaInfo.importGenerated === true &&
                     this.widget.properties.ubaInfo.importInstanceId !== undefined
                 ) {
-                    this.deleteOldImportInstance(this.widget.properties.ubaInfo.importInstanceId, 'UBA');
+                    this.queueCleanup('import instance', this.widget.properties.ubaInfo.importInstanceId, 'UBA');
                 }
                 this.generateUbaImportInstance(this.widget.properties.ubaInfo.stationId).subscribe({
                     next: (instance) => {
@@ -876,7 +919,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                         this.widget.properties.ubaInfo.importGenerated === true &&
                         this.widget.properties.ubaInfo.importInstanceId !== undefined
                     ) {
-                        this.deleteOldImportInstance(this.widget.properties.ubaInfo.importInstanceId, 'UBA');
+                        this.queueCleanup('import instance', this.widget.properties.ubaInfo.importInstanceId, 'UBA');
                     }
                     instance = ubaInstances[0];
                 }
@@ -899,7 +942,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                             this.widget.properties.ubaInfo?.exportId !== undefined
                         ) {
                             this.cleanMeasurementsExportInfo(this.widget.properties.ubaInfo?.exportId);
-                            this.exportService.stopPipelineById(this.widget.properties.ubaInfo.exportId).subscribe();
+                            this.queueCleanup('export', this.widget.properties.ubaInfo.exportId, 'UBA');
                         }
                         exp = matchingExports[0];
                     }
@@ -924,7 +967,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         // clean old export if needed
         if (this.widget.properties.ubaInfo?.exportGenerated === true && this.widget.properties.ubaInfo?.exportId !== undefined) {
             this.cleanMeasurementsExportInfo(this.widget.properties.ubaInfo?.exportId);
-            this.exportService.stopPipelineById(this.widget.properties.ubaInfo.exportId).subscribe();
+            this.queueCleanup('export', this.widget.properties.ubaInfo.exportId, 'UBA');
         }
         this.generateExportOfImport(instance, environment.importTypeIdUbaStation).subscribe((exp) => {
             if (exp === null) {
@@ -971,7 +1014,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.widget.properties.dwdPollenInfo.importGenerated === true &&
                     this.widget.properties.dwdPollenInfo.importInstanceId !== undefined
                 ) {
-                    this.deleteOldImportInstance(this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
+                    this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
                 }
                 this.widget.properties.dwdPollenInfo.importGenerated = undefined;
                 this.widget.properties.dwdPollenInfo.importInstanceId = undefined;
@@ -980,7 +1023,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.widget.properties.dwdPollenInfo.exportGenerated === true &&
                     this.widget.properties.dwdPollenInfo.exportId !== undefined
                 ) {
-                    this.exportService.stopPipelineById(this.widget.properties.dwdPollenInfo.exportId).subscribe();
+                    this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
                 }
                 this.widget.properties.dwdPollenInfo.exportGenerated = undefined;
                 this.widget.properties.dwdPollenInfo.exportId = undefined;
@@ -1005,7 +1048,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                         this.widget.properties.dwdPollenInfo?.importGenerated === true &&
                         this.widget.properties.dwdPollenInfo.importInstanceId !== undefined
                     ) {
-                        this.deleteOldImportInstance(this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
+                        this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
                     }
                     this.generateDwdImportInstance(this.location.latitude, this.location.longitude, selectedPollen).subscribe({
                         next: (instance) => {
@@ -1034,7 +1077,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                             this.widget.properties.dwdPollenInfo.importGenerated === true &&
                             this.widget.properties.dwdPollenInfo.importInstanceId !== undefined
                         ) {
-                            this.deleteOldImportInstance(this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
+                            this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
                         }
                         instance = matchingImportInstances[0];
                     }
@@ -1053,7 +1096,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                                 this.widget.properties.dwdPollenInfo?.exportGenerated === true &&
                                 this.widget.properties.dwdPollenInfo?.exportId !== undefined
                             ) {
-                                this.exportService.stopPipelineById(this.widget.properties.dwdPollenInfo.exportId).subscribe();
+                                this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
                             }
                             exp = matchingExports[0];
                         }
@@ -1102,7 +1145,7 @@ export class AirQualityEditDialogComponent implements OnInit {
             this.widget.properties.dwdPollenInfo?.exportGenerated === true &&
             this.widget.properties.dwdPollenInfo?.exportId !== undefined
         ) {
-            this.exportService.stopPipelineById(this.widget.properties.dwdPollenInfo.exportId).subscribe();
+            this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
         }
         this.generateExportOfImport(instance, environment.importTypeIdDwdPollen).subscribe((exp) => {
             if (exp === null) {
@@ -1180,7 +1223,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     this.widget.properties.yrInfo.importGenerated === true &&
                     this.widget.properties.yrInfo.importInstanceId !== undefined
                 ) {
-                    this.deleteOldImportInstance(this.widget.properties.yrInfo.importInstanceId, 'Yr');
+                    this.queueCleanup('import instance', this.widget.properties.yrInfo.importInstanceId, 'Yr');
                 }
                 this.generateYrImportInstance().subscribe({
                     next: (instance) => {
@@ -1204,7 +1247,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                         this.widget.properties.yrInfo.importGenerated === true &&
                         this.widget.properties.yrInfo.importInstanceId !== undefined
                     ) {
-                        this.deleteOldImportInstance(this.widget.properties.yrInfo.importInstanceId, 'Yr');
+                        this.queueCleanup('import instance', this.widget.properties.yrInfo.importInstanceId, 'Yr');
                     }
                     instance = yrInstances[0];
                 }
@@ -1227,7 +1270,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                             this.widget.properties.yrInfo?.exportId !== undefined
                         ) {
                             this.cleanMeasurementsExportInfo(this.widget.properties.yrInfo?.exportId);
-                            this.exportService.stopPipelineById(this.widget.properties.yrInfo.exportId).subscribe();
+                            this.queueCleanup('export', this.widget.properties.yrInfo.exportId, 'Yr');
                         }
                         exp = matchingExports[0];
                     }
@@ -1252,7 +1295,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         // clean old export if needed
         if (this.widget.properties.yrInfo?.exportGenerated === true && this.widget.properties.yrInfo?.exportId !== undefined) {
             this.cleanMeasurementsExportInfo(this.widget.properties.yrInfo?.exportId);
-            this.exportService.stopPipelineById(this.widget.properties.yrInfo.exportId).subscribe();
+            this.queueCleanup('export', this.widget.properties.yrInfo.exportId, 'Yr');
         }
         this.generateExportOfImport(instance, environment.importTypeIdYrForecast).subscribe((exp) => {
             if (exp === null) {

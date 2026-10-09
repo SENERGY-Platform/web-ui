@@ -23,6 +23,7 @@ import { DeploymentsService } from '../../../modules/processes/deployments/share
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { DataTableElementModel } from './data-table.model';
 import { Observable } from 'rxjs';
+import { deleteGeneratedResources, GeneratedResource } from '../../shared/generated-resources';
 
 @Injectable({
     providedIn: 'root',
@@ -44,15 +45,35 @@ export class DataTableService {
         });
     }
 
-    deleteElementsAndObserve(elements: DataTableElementModel[] | undefined): Observable<any>[] {
-        const observables: Observable<any>[] = [];
-        if (elements === undefined) {
-            return observables;
-        }
-        elements.forEach((element) => {
-            observables.push(...this.deleteElement(element, false));
+    /**
+     * The generated resources the given elements refer to. An export counts only when the widget created it
+     * (`exportCreatedByWidget`); other exports belong to the user.
+     */
+    generatedResources(elements: DataTableElementModel[] | undefined): GeneratedResource[] {
+        const resources: GeneratedResource[] = [];
+        (elements || []).forEach((element) => {
+            const label = element.name || 'a measurement without a name';
+            const device = element.elementDetails?.device;
+            if (element.exportCreatedByWidget && element.exportId) {
+                resources.push({ kind: 'export', id: element.exportId, label });
+            }
+            if (device?.deploymentId) {
+                resources.push({ kind: 'process deployment', id: device.deploymentId, label });
+            }
+            if (device?.scheduleId) {
+                resources.push({ kind: 'schedule', id: device.scheduleId, label });
+            }
         });
-        return observables;
+        return resources;
+    }
+
+    /** Deletes the candidates that `stillUsed` does not contain; answers the descriptions of the deletes that failed. */
+    deleteGeneratedResources(candidates: GeneratedResource[], stillUsed: GeneratedResource[]): Observable<string[]> {
+        return deleteGeneratedResources(candidates, stillUsed, {
+            export: (id) => this.exportService.stopPipelineByIdIfExists(id),
+            deployment: (id) => this.deploymentsService.v2deleteDeploymentIfExists(id),
+            schedule: (id) => this.processSchedulerService.deleteScheduleIfExists(id),
+        });
     }
 
     deleteElement(element: DataTableElementModel, shouldSubscribe: boolean = true): Observable<any>[] {

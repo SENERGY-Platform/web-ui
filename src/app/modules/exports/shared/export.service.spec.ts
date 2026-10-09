@@ -16,7 +16,7 @@
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { ExportService } from './export.service';
 import { BrokerExportService } from './broker-export.service';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
@@ -57,6 +57,56 @@ describe('stopPipelines', () => {
         service.stopPipelines(['e1', 'e2']).subscribe(result => {
             expect(result).toEqual({ status: 504 });
             done();
+        });
+    });
+});
+
+describe('stopPipelineByIdIfExists', () => {
+    const ladon = { getUserAuthorizationsForURI: () => ({}) } as unknown as LadonService;
+    let reported: string[];
+    const errorHandler = {
+        handleErrorQuietly: (_s: string, _m: string, result: unknown) => () => {
+            reported.push('quiet');
+            return of(result);
+        },
+        handleError: (_s: string, _m: string, result: unknown) => () => {
+            reported.push('snack');
+            return of(result);
+        },
+    } as unknown as ErrorHandlerService;
+
+    beforeEach(() => (reported = []));
+
+    function serviceFailingWith(status: number): ExportService {
+        const http = { delete: () => throwError(() => new HttpErrorResponse({ status })) } as unknown as HttpClient;
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: HttpClient, useValue: http },
+                { provide: ErrorHandlerService, useValue: errorHandler },
+                { provide: LadonService, useValue: ladon },
+                { provide: DeviceInstancesService, useValue: {} },
+            ],
+        });
+        return TestBed.runInInjectionContext(() => new ExportService());
+    }
+
+    it('answers 404 for an export that is already gone', (done) => {
+        serviceFailingWith(404).stopPipelineByIdIfExists('e1').subscribe((result) => {
+            expect(result).toEqual({ status: 404 });
+            expect(reported).toEqual(['quiet']);
+            done();
+        });
+    });
+
+    it('answers the real status of another failure, and 500 when there is none', (done) => {
+        serviceFailingWith(502).stopPipelineByIdIfExists('e1').subscribe((result) => {
+            expect(result).toEqual({ status: 502 });
+            expect(reported).toEqual(['snack']);
+            TestBed.resetTestingModule();
+            serviceFailingWith(0).stopPipelineByIdIfExists('e1').subscribe((noStatus) => {
+                expect(noStatus).toEqual({ status: 500 });
+                done();
+            });
         });
     });
 });

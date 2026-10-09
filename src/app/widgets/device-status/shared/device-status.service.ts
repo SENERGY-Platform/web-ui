@@ -23,6 +23,8 @@ import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { HttpClient } from '@angular/common/http';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { Observable } from 'rxjs';
+import { deleteGeneratedResources, GeneratedResource } from '../../shared/generated-resources';
 
 @Injectable({
     providedIn: 'root',
@@ -50,5 +52,32 @@ export class DeviceStatusService {
                 }
             });
         }
+    }
+
+    /** The generated resources the given elements refer to. */
+    generatedResources(elements: DeviceStatusElementModel[] | undefined): GeneratedResource[] {
+        const resources: GeneratedResource[] = [];
+        (elements || []).forEach((element, index) => {
+            const label = element.name || 'element ' + (index + 1);
+            if (element.exportId) {
+                resources.push({ kind: 'export', id: element.exportId, label });
+            }
+            if (element.deploymentId) {
+                resources.push({ kind: 'process deployment', id: element.deploymentId, label });
+            }
+            if (element.scheduleId) {
+                resources.push({ kind: 'schedule', id: element.scheduleId, label });
+            }
+        });
+        return resources;
+    }
+
+    /** Deletes the candidates that `stillUsed` does not contain; answers the descriptions of the deletes that failed. */
+    deleteGeneratedResources(candidates: GeneratedResource[], stillUsed: GeneratedResource[]): Observable<string[]> {
+        return deleteGeneratedResources(candidates, stillUsed, {
+            export: (id) => this.exportService.stopPipelineByIdIfExists(id),
+            deployment: (id) => this.deploymentsService.v2deleteDeploymentIfExists(id),
+            schedule: (id) => this.processSchedulerService.deleteScheduleIfExists(id),
+        });
     }
 }

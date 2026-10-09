@@ -981,5 +981,233 @@ describe('DataTableEditDialogComponent', () => {
                 }),
             );
         });
+
+        describe('cleanup of the old generated resources', () => {
+            let snackOpen: jasmine.Spy;
+            let order: string[];
+
+            beforeEach(() => {
+                snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+                order = [];
+                dashboardServiceSpy.updateWidgetProperty.and.callFake(() => {
+                    order.push('save');
+                    return of({ message: 'OK' });
+                });
+                exportServiceSpy.stopPipelineByIdIfExists.and.callFake(() => {
+                    order.push('delete export');
+                    return of({ status: 200 });
+                });
+                deploymentsServiceSpy.v2deleteDeploymentIfExists.and.callFake(() => {
+                    order.push('delete deployment');
+                    return of({ status: 200 });
+                });
+                processSchedulerServiceSpy.deleteScheduleIfExists.and.callFake(() => {
+                    order.push('delete schedule');
+                    return of({ status: 200 });
+                });
+            });
+
+            function storeOldElement(deploymentId: string, scheduleId: string): void {
+                component.widget.properties.dataTable = {
+                    elements: [
+                        {
+                            id: 'old',
+                            name: 'old element',
+                            exportId: 'old_export',
+                            exportCreatedByWidget: true,
+                            elementDetails: { elementType: DataTableElementTypesEnum.DEVICE, device: { deploymentId, scheduleId } },
+                        },
+                    ],
+                } as any;
+            }
+
+            it(
+                'deletes nothing when a new resource cannot be created',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    storeOldElement('old_deployment', 'old_schedule');
+                    processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+
+                    component.save();
+
+                    expect(order).toEqual([]);
+                    expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the schedule for name0');
+                }),
+            );
+
+            it(
+                'deletes the old resources after the widget properties were saved',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    storeOldElement('old_deployment', 'old_schedule');
+
+                    component.save();
+
+                    expect(order).toEqual(['save', 'delete export', 'delete deployment', 'delete schedule']);
+                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.mostRecent().args[0]).toBe('old_export');
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    expect(snackOpen).not.toHaveBeenCalled();
+                }),
+            );
+
+            it(
+                'does not delete a resource the saved widget still uses',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    storeOldElement('deploymentId', 'scheduleId');
+
+                    component.save();
+
+                    expect(order).toEqual(['save', 'delete export']);
+                }),
+            );
+
+            it(
+                'keeps the saved widget and reports a delete that failed',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    storeOldElement('old_deployment', 'old_schedule');
+                    exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 500 }));
+
+                    component.save();
+
+                    expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+                    expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                    expect(snackOpen.calls.mostRecent().args[0]).toContain('old export of old element could not be deleted');
+                    expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+                }),
+            );
+
+            function oldElement(id: string, deploymentId: string, scheduleId: string): any {
+                return {
+                    id,
+                    name: 'old ' + id,
+                    exportId: 'old_export_' + id,
+                    exportCreatedByWidget: true,
+                    elementDetails: { elementType: DataTableElementTypesEnum.DEVICE, device: { deploymentId, scheduleId } },
+                };
+            }
+
+            function keepOldIdsInForm(): void {
+                component.getElements().at(0).controls.elementDetails.controls.device.patchValue({
+                    deploymentId: 'old_deployment',
+                    scheduleId: 'old_schedule',
+                });
+            }
+
+            it(
+                'clears and deletes the deployment and schedule of an element that no longer refreshes',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 0 });
+                    component.widget.properties.dataTable = { elements: [oldElement('old', 'old_deployment', 'old_schedule')] } as any;
+                    keepOldIdsInForm();
+
+                    component.save();
+
+                    expect(order).toEqual(['save', 'delete export', 'delete deployment', 'delete schedule']);
+                    const device = (dashboardServiceSpy.updateWidgetProperty.calls.mostRecent().args[3] as any).dataTable.elements[0].elementDetails.device;
+                    expect(device.deploymentId).toBeFalsy();
+                    expect(device.scheduleId).toBeFalsy();
+                }),
+            );
+
+            it(
+                'clears and deletes the deployment and schedule of an element that no longer requests the device',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    component.getElements().at(0).controls.elementDetails.controls.device.patchValue({ requestDevice: false });
+                    component.widget.properties.dataTable = { elements: [oldElement('old', 'old_deployment', 'old_schedule')] } as any;
+                    keepOldIdsInForm();
+
+                    component.save();
+
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                }),
+            );
+
+            it(
+                'keeps the persisted widget as the base of the clean-up while a save attempt fails',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    const persisted = { elements: [oldElement('old', 'old_deployment', 'old_schedule')] } as any;
+                    component.widget.properties.dataTable = persisted;
+                    let n = 0;
+                    deploymentsServiceSpy.v2postDeployments.and.callFake(() => of({ status: 200, id: 'deployment' + ++n }));
+                    let m = 0;
+                    processSchedulerServiceSpy.createSchedule.and.callFake(() => of({ id: 'schedule' + ++m }) as any);
+                    dashboardServiceSpy.updateWidgetProperty.and.callFake(() => {
+                        order.push('save');
+                        return of({ message: order.filter((o) => o === 'save').length === 1 ? 'error' : 'OK' });
+                    });
+
+                    component.save();
+                    expect(component.widget.properties.dataTable).toBe(persisted);
+                    expect(order).toEqual(['save']);
+
+                    component.save();
+
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment1']]);
+                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule'], ['schedule1']]);
+                    expect(component.widget.properties.dataTable).not.toBe(persisted);
+                }),
+            );
+
+            it(
+                'deletes the old resources although the name update failed',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    storeOldElement('old_deployment', 'old_schedule');
+                    dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'error' }));
+
+                    component.save();
+
+                    expect(order).toEqual(['save', 'delete export', 'delete deployment', 'delete schedule']);
+                    expect(matDialogRefSpy.close.calls.count()).toBe(0);
+                }),
+            );
+
+            it(
+                'deletes a resource listed by several elements once',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    component.widget.properties.dataTable = {
+                        elements: [oldElement('a', 'shared_deployment', 'shared_schedule'), oldElement('b', 'shared_deployment', 'shared_schedule')],
+                    } as any;
+
+                    component.save();
+
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['shared_deployment']]);
+                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['shared_schedule']]);
+                }),
+            );
+
+            it(
+                'takes a 404 for a resource that is already gone',
+                fakeAsync(() => {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    storeOldElement('old_deployment', 'old_schedule');
+                    exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 404 }));
+                    deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 404 }));
+
+                    component.save();
+
+                    expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                    expect(snackOpen).not.toHaveBeenCalled();
+                }),
+            );
+        });
     });
 });

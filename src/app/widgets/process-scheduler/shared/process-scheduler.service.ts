@@ -23,7 +23,7 @@ import { ProcessSchedulerModel } from './process-scheduler.model';
 import { ProcessRepoService } from '../../../modules/processes/process-repo/shared/process-repo.service';
 import { environment } from '../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import { HttpClient, HttpResponseBase } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponseBase } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProcessSchedulerScheduleEditDialogComponent } from '../dialogs/process-scheduler-schedule-edit-dialog.component';
@@ -66,6 +66,22 @@ export class ProcessSchedulerService {
             .pipe(
                 map((resp) => ({ status: resp.status })),
                 catchError(this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteSchedule', { status: 500 })),
+            );
+    }
+
+    /** For clean-ups: a 404 means the schedule is already gone (answered quietly); other failures answer their real status. */
+    deleteScheduleIfExists(scheduleId: string): Observable<{ status: number }> {
+        return this.http
+            .delete<HttpResponseBase>(environment.processSchedulerUrl + '/schedules/' + scheduleId, { observe: 'response' })
+            .pipe(
+                map((resp) => ({ status: resp.status })),
+                catchError((error: HttpErrorResponse) =>
+                    error?.status === 404
+                        ? this.errorHandlerService.handleErrorQuietly(ProcessRepoService.name, 'deleteScheduleIfExists: already gone', { status: 404 })(error)
+                        : this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteScheduleIfExists', {
+                              status: error?.status >= 400 ? error.status : 500,
+                          })(error),
+                ),
             );
     }
 

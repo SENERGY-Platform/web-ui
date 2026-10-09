@@ -141,6 +141,23 @@ export class ExportService {
         );
     }
 
+    /**
+     * For clean-ups: a 404 means the export is already gone and is answered quietly with status 404; any other
+     * failure answers its real status (500 without one), unlike stopPipelineById whose fallback 404 hides errors.
+     */
+    stopPipelineByIdIfExists(id: string): Observable<{ status: number }> {
+        return this.http.delete(environment.exportService + '/instance/' + id, { responseType: 'text', observe: 'response' }).pipe(
+            map((resp) => ({ status: resp.status })),
+            catchError((error: HttpErrorResponse) =>
+                error?.status === 404
+                    ? this.errorHandlerService.handleErrorQuietly(ExportService.name, 'stopPipelineByIdIfExists: already gone', { status: 404 })(error)
+                    : this.errorHandlerService.handleError(ExportService.name, 'stopPipelineByIdIfExists: Error', {
+                          status: error?.status >= 400 ? error.status : 500,
+                      })(error),
+            ),
+        );
+    }
+
     stopPipelines(exp: string[]): Observable<{ status: number }> {
         return this.http
             .request('DELETE', environment.exportService + '/instances', { body: exp, responseType: 'text', observe: 'response' })

@@ -52,6 +52,7 @@ describe('AirQualityEditDialogComponent save', () => {
         dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
         importInstancesServiceSpy.saveImportInstance.and.returnValue(of(instance));
         importInstancesServiceSpy.deleteImportInstance.and.returnValue(of(undefined));
+        exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 200 }));
         importTypesServiceSpy.getImportType.and.returnValue(of({ name: 'type' } as ImportTypeModel));
         importTypesServiceSpy.parseImportTypeExportValues.and.returnValue([]);
         exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export1', Values: [] } as unknown as ExportModel));
@@ -172,5 +173,98 @@ describe('AirQualityEditDialogComponent save', () => {
         expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
         expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
         expect(matDialogRefSpy.close.calls.count()).toBe(1);
+    });
+
+    describe('cleanup of the old generated resources', () => {
+        let order: string[];
+
+        beforeEach(() => {
+            order = [];
+            component.widget.properties.yrInfo = {
+                importGenerated: true,
+                importInstanceId: 'old',
+                exportGenerated: true,
+                exportId: 'old_export',
+            } as any;
+            dashboardServiceSpy.updateWidgetProperty.and.callFake(() => {
+                order.push('save');
+                return of({ message: 'OK' });
+            });
+            importInstancesServiceSpy.deleteImportInstance.and.callFake(() => {
+                order.push('delete import instance');
+                return of(undefined);
+            });
+            exportServiceSpy.stopPipelineByIdIfExists.and.callFake(() => {
+                order.push('delete export');
+                return of({ status: 200 });
+            });
+        });
+
+        it('deletes nothing when the new export cannot be created', () => {
+            exportServiceSpy.startPipeline.and.returnValue(of(null));
+
+            component.save();
+
+            expectAborted('Could not create the export for Yr');
+            expect(order).toEqual([]);
+        });
+
+        it('deletes nothing when the new import instance cannot be saved', () => {
+            importInstancesServiceSpy.saveImportInstance.and.returnValue(throwError(() => new Error('500')));
+
+            component.save();
+
+            expectAborted('Could not create the import instance for Yr');
+            expect(order).toEqual([]);
+        });
+
+        it('deletes the old import instance and export after the widget was saved', () => {
+            component.save();
+
+            expect(order).toEqual(['save', 'delete import instance', 'delete export']);
+            expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old']]);
+            expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+            expect(snackOpen).not.toHaveBeenCalled();
+        });
+
+        it('does not delete a resource the saved widget still uses', () => {
+            importInstancesServiceSpy.saveImportInstance.and.returnValue(of({ ...instance, id: 'old' }));
+
+            component.save();
+
+            expect(order).toEqual(['save', 'delete export']);
+        });
+
+        it('stores the widget and names the old export that could not be deleted', () => {
+            exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 500 }));
+
+            component.save();
+
+            expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+            expect(matDialogRefSpy.close.calls.count()).toBe(1);
+            expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not delete the old export for Yr');
+            expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+        });
+
+        it('deletes the old resources although the name update failed', () => {
+            component.userHasUpdateNameAuthorization = true;
+            dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'error' }));
+
+            component.save();
+
+            expect(order).toEqual(['save', 'delete import instance', 'delete export']);
+            expect(matDialogRefSpy.close.calls.count()).toBe(0);
+        });
+
+        it('takes a 404 for a resource that is already gone', () => {
+            exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 404 }));
+            importInstancesServiceSpy.deleteImportInstance.and.returnValue(throwError(() => ({ status: 404 })));
+
+            component.save();
+
+            expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(1);
+            expect(matDialogRefSpy.close.calls.count()).toBe(1);
+            expect(snackOpen).not.toHaveBeenCalled();
+        });
     });
 });
