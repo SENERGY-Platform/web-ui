@@ -26,6 +26,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ProcessSchedulerScheduleDialogComponent } from './dialogs/process-scheduler-schedule-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
+import { snackError, snackSuccess } from '../../core/services/snack-bar-messages';
 import { CronConverterService } from './shared/cron-converter.service';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
@@ -101,19 +102,19 @@ export class ProcessSchedulerComponent implements OnInit {
                 if (schedule.id === '') {
                     this.processSchedulerService.createSchedule(schedule).subscribe((resp: ProcessSchedulerModel | null) => {
                         if (resp !== null) {
-                            this.snackBar.open('Schedule saved!', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Schedule saved!');
                             this.reload();
                         } else {
-                            this.snackBar.open('Error while saving schedule!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while saving schedule!');
                         }
                     });
                 } else {
                     this.processSchedulerService.updateSchedule(schedule).subscribe((resp: ProcessSchedulerModel | null) => {
                         if (resp !== null) {
-                            this.snackBar.open('Schedule updated!', undefined, { duration: 2000 });
+                            snackSuccess(this.snackBar, 'Schedule updated!');
                             this.reload();
                         } else {
-                            this.snackBar.open('Error while updating schedule!', 'close', { panelClass: 'snack-bar-error' });
+                            snackError(this.snackBar, 'Error while updating schedule!');
                         }
                     });
                 }
