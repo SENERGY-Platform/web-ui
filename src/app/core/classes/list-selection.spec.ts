@@ -96,6 +96,16 @@ describe('ListSelection', () => {
             expect(empty.isAllSelected()).toBeFalse();
         });
 
+        it('does not count more selected than shown rows as all; toggle then selects the shown rows', () => {
+            rows = [1, 2, 3];
+            const s = create({ mode: 'any' });
+            s.masterToggle();
+            rows = [1, 2];
+            expect(s.isAllSelected()).toBeFalse();
+            s.masterToggle();
+            expect(s.selected.length).toBe(3);
+        });
+
         it('toggle selects every row when none is selected, clears when some is selected', () => {
             rows = [1, 2, 3];
             const s = create({ mode: 'any' });

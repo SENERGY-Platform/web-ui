@@ -39,7 +39,7 @@ import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {PreferencesService} from '../../../core/services/preferences.service';
-import {SelectionModel} from '@angular/cdk/collections';
+import {ListSelection} from 'src/app/core/classes/list-selection';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import {startWith, switchMap} from 'rxjs/operators';
 import { FlexibleConnectedPositionStrategy, Overlay, OverlayRef, CdkOverlayOrigin } from '@angular/cdk/overlay';
@@ -100,7 +100,8 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
 
     flowsDataSource = new MatTableDataSource<FlowModel>();
     flowEstimations: CostEstimationModel [] = [];
-    selection = new SelectionModel<FlowModel>(true, []);
+    listSelection = new ListSelection<FlowModel>(() => this.flowsDataSource.connect().value, { mode: 'any' });
+    selection = this.listSelection.model;
     ready = false;
     userHasDeleteAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -324,19 +325,11 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.flowsDataSource.connect().value.forEach((row) => {
-                this.selection.select(row);
-            });
-        }
+        this.listSelection.masterToggle();
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.flowsDataSource.connect().value.length;
-        return numSelected <= currentViewed && numSelected !== 0;
+        return this.listSelection.isAllSelected();
     }
 
     selectionClear($event: PageEvent | undefined = undefined): void {

@@ -22,7 +22,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { map, Observable } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
@@ -96,7 +96,11 @@ export class ExportComponent implements OnInit, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
-    selection = new SelectionModel<ExportModel>(true, []);
+    listSelection = new ListSelection<ExportModel>(
+        () => this.exportsDataSource.connect().value,
+        { selectable: (row) => this.userHasAdministratePermission(row.ID || '') },
+    );
+    selection = this.listSelection.model;
     displayedColumns: string[] = [
         'select',
         'filter_type',
@@ -319,26 +323,11 @@ export class ExportComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        return numSelected === this.getAllDeleteableExports().length;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.selection.select(...this.getAllDeleteableExports());
-        }
-    }
-
-    private getAllDeleteableExports(): ExportModel[] {
-        const res: ExportModel[] = [];
-        this.exportsDataSource.connect().value.forEach((row) => {
-            if (this.userHasAdministratePermission(row.ID || '')) {
-                res.push(row);
-            }
-        });
-        return res;
+        this.listSelection.masterToggle();
     }
 
     selectionClear($event: PageEvent | undefined = undefined): void {

@@ -19,7 +19,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 export interface ListSelectionOptions<T> {
     /** Rows that can be selected; the master toggle and the "all" check only consider these. */
     selectable?: (row: T) => boolean;
-    /** 'all': every row selected. 'any': one selected row already counts as all. */
+    /** 'all': every row selected. 'any': a selection of one up to the number of rows counts as all. */
     mode?: 'all' | 'any';
 }
 
@@ -38,7 +38,8 @@ export class ListSelection<T> {
 
     isAllSelected(): boolean {
         if (this.options.mode === 'any') {
-            return this.model.selected.length > 0;
+            const numSelected = this.model.selected.length;
+            return numSelected > 0 && numSelected <= this.getRows().length;
         }
         return this.model.selected.length === this.selectableRows().length;
     }

@@ -14,7 +14,20 @@
  * limitations under the License.
  */
 
-import { bulkDeleteOutcome } from './export.component';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { bulkDeleteOutcome, ExportComponent } from './export.component';
+import { ExportModel } from './shared/export.model';
+import { ExportService } from './shared/export.service';
+import { BrokerExportService } from './shared/broker-export.service';
+import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
+import { PermissionsDialogService } from '../permissions/shared/permissions-dialog.service';
+import { PermissionsService } from '../permissions/shared/permissions.service';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { DialogsService } from '../../core/services/dialogs.service';
+import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 
 describe('bulkDeleteOutcome', () => {
     it('should report a full delete as done', () => {
@@ -38,5 +51,73 @@ describe('bulkDeleteOutcome', () => {
 
     it('should report any other status as a failure', () => {
         expect(bulkDeleteOutcome(500, 2)).toEqual({ message: 'The exports could not be deleted', failed: true, pending: false });
+    });
+});
+
+describe('ExportComponent header checkbox', () => {
+    let component: ExportComponent;
+    const row = (id: string) => ({ ID: id } as ExportModel);
+    const setRows = (ids: string[]) => (component.exportsDataSource.data = ids.map(row));
+    const administrate = (...ids: string[]) =>
+        (component.permissionsPerExports = ids.map((id) => ({ id, administrate: true, read: true, write: true, execute: true })));
+    const selectedIds = () => component.selection.selected.map((e) => e.ID).sort();
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            imports: [MatSnackBarModule, MatDialogModule],
+            providers: [
+                provideRouter([]),
+                { provide: ExportService, useValue: {} },
+                { provide: BrokerExportService, useValue: {} },
+                { provide: ExportDataService, useValue: {} },
+                { provide: PermissionsDialogService, useValue: {} },
+                { provide: PermissionsService, useValue: {} },
+                { provide: AuthorizationService, useValue: {} },
+                { provide: DialogsService, useValue: {} },
+                { provide: SearchbarService, useValue: {} },
+            ],
+        }).overrideComponent(ExportComponent, { set: { template: '', imports: [] } });
+        component = TestBed.createComponent(ExportComponent).componentInstance;
+    });
+
+    it('counts no rows as all selected; toggle selects nothing and then clears', () => {
+        setRows([]);
+        expect(component.isAllSelected()).toBeTrue();
+        component.masterToggle();
+        expect(component.selection.selected).toEqual([]);
+    });
+
+    it('counts a list without administrable rows as all selected and selects nothing', () => {
+        setRows(['a', 'b']);
+        expect(component.isAllSelected()).toBeTrue();
+        component.masterToggle();
+        expect(component.selection.selected).toEqual([]);
+    });
+
+    it('selects only administrable rows and counts them as all', () => {
+        setRows(['a', 'b', 'c']);
+        administrate('a', 'c');
+        expect(component.isAllSelected()).toBeFalse();
+        component.masterToggle();
+        expect(selectedIds()).toEqual(['a', 'c']);
+        expect(component.isAllSelected()).toBeTrue();
+    });
+
+    it('does not count a partial selection as all and clears a full one on toggle', () => {
+        setRows(['a', 'b', 'c']);
+        administrate('a', 'c');
+        component.selection.select(component.exportsDataSource.data[0]);
+        expect(component.isAllSelected()).toBeFalse();
+        component.masterToggle();
+        expect(selectedIds()).toEqual(['a', 'c']);
+        component.masterToggle();
+        expect(component.selection.selected).toEqual([]);
+    });
+
+    it('counts a non-administrable row in the selection towards the number of selected rows', () => {
+        setRows(['a', 'b', 'c']);
+        administrate('a', 'c');
+        component.selection.select(component.exportsDataSource.data[0], component.exportsDataSource.data[1]);
+        expect(component.isAllSelected()).toBeTrue();
     });
 });

@@ -29,6 +29,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { OperatorModel } from './shared/operator.model';
 
 class MockOperatorRepoService {}
 
@@ -59,5 +60,47 @@ describe('OperatorRepoComponent', () => {
 
     it('should create', () => {
         expect(fixture).toBeTruthy();
+    });
+
+    describe('header checkbox', () => {
+        let component: OperatorRepoComponent;
+        const row = (id: string) => ({ _id: id } as OperatorModel);
+        const setRows = (ids: string[]) => (component.operatorsDataSource.data = ids.map(row));
+
+        beforeEach(() => {
+            component = fixture.componentInstance;
+        });
+
+        it('is not all selected with no rows and nothing selected; toggle selects nothing', () => {
+            setRows([]);
+            expect(component.isAllSelected()).toBeFalse();
+            component.masterToggle();
+            expect(component.selection.selected).toEqual([]);
+        });
+
+        it('counts one selected row as all and clears on toggle', () => {
+            setRows(['a', 'b', 'c']);
+            expect(component.isAllSelected()).toBeFalse();
+            component.selection.select(component.operatorsDataSource.data[1]);
+            expect(component.isAllSelected()).toBeTrue();
+            component.masterToggle();
+            expect(component.selection.selected).toEqual([]);
+        });
+
+        it('selects every shown row when nothing is selected', () => {
+            setRows(['a', 'b', 'c']);
+            component.masterToggle();
+            expect(component.selection.selected.map((o) => o._id).sort()).toEqual(['a', 'b', 'c']);
+            expect(component.isAllSelected()).toBeTrue();
+        });
+
+        it('does not count more selected rows than shown as all; toggle then selects the shown rows', () => {
+            setRows(['a', 'b', 'c']);
+            component.masterToggle();
+            component.operatorsDataSource.data = component.operatorsDataSource.data.slice(0, 2);
+            expect(component.isAllSelected()).toBeFalse();
+            component.masterToggle();
+            expect(component.selection.selected.length).toBe(3);
+        });
     });
 });

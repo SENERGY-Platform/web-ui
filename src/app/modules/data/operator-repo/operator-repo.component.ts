@@ -25,7 +25,7 @@ import { merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { startWith, switchMap } from 'rxjs/operators';
@@ -69,7 +69,8 @@ export class OperatorRepoComponent implements OnInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
-    selection = new SelectionModel<OperatorModel>(true, []);
+    listSelection = new ListSelection<OperatorModel>(() => this.operatorsDataSource.connect().value, { mode: 'any' });
+    selection = this.listSelection.model;
     displayedColumns: string[] = ['select', 'pub', 'name', 'image'];
     totalCount = 0;
 
@@ -194,19 +195,11 @@ export class OperatorRepoComponent implements OnInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const currentViewed = this.operatorsDataSource.connect().value.length;
-        return numSelected <= currentViewed && numSelected !== 0;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.operatorsDataSource.connect().value.forEach((row) => {
-                this.selection.select(row);
-            });
-        }
+        this.listSelection.masterToggle();
     }
 
     deleteMultipleItems(): void {

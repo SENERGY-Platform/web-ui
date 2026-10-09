@@ -170,4 +170,57 @@ describe('ImportInstancesComponent', () => {
         component.export(testInstance);
         expect(dialogSpy.open).toHaveBeenCalled();
     });
+
+    describe('header checkbox', () => {
+        const row = (id: string) => ({ ...testInstance, id });
+        const setRows = (ids: string[]) => (component.dataSource.data = ids.map(row));
+        const administrate = (...ids: string[]) =>
+            (component.permissionsPerInstance = ids.map((id) => ({ id, administrate: true, read: true, write: true, execute: true })));
+        const selectedIds = () => component.selection.selected.map((e) => e.id).sort();
+
+        beforeEach(() => {
+            component.permissionsPerInstance = [];
+        });
+
+        it('counts no rows as all selected; toggle selects nothing', () => {
+            setRows([]);
+            expect(component.isAllSelected()).toBeTrue();
+            component.masterToggle();
+            expect(component.selection.selected).toEqual([]);
+        });
+
+        it('counts a list without administrable rows as all selected and selects nothing', () => {
+            setRows(['a', 'b']);
+            expect(component.isAllSelected()).toBeTrue();
+            component.masterToggle();
+            expect(component.selection.selected).toEqual([]);
+        });
+
+        it('selects only administrable rows and counts them as all', () => {
+            setRows(['a', 'b', 'c']);
+            administrate('a', 'c');
+            expect(component.isAllSelected()).toBeFalse();
+            component.masterToggle();
+            expect(selectedIds()).toEqual(['a', 'c']);
+            expect(component.isAllSelected()).toBeTrue();
+        });
+
+        it('does not count a partial selection as all and clears a full one on toggle', () => {
+            setRows(['a', 'b', 'c']);
+            administrate('a', 'c');
+            component.selection.select(component.dataSource.data[0]);
+            expect(component.isAllSelected()).toBeFalse();
+            component.masterToggle();
+            expect(selectedIds()).toEqual(['a', 'c']);
+            component.masterToggle();
+            expect(component.selection.selected).toEqual([]);
+        });
+
+        it('counts a non-administrable row in the selection towards the number of selected rows', () => {
+            setRows(['a', 'b', 'c']);
+            administrate('a', 'c');
+            component.selection.select(component.dataSource.data[0], component.dataSource.data[1]);
+            expect(component.isAllSelected()).toBeTrue();
+        });
+    });
 });

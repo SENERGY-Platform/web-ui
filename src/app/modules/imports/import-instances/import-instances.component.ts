@@ -28,7 +28,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
+import { ListSelection } from 'src/app/core/classes/list-selection';
 import { UtilService } from 'src/app/core/services/util.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
@@ -75,7 +75,11 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     searchText = '';
     pageSize = this.preferencesService.pageSize;
     totalCount = 200;
-    selection = new SelectionModel<ImportInstancesModel>(true, []);
+    listSelection = new ListSelection<ImportInstancesModel>(
+        () => this.dataSource.connect().value,
+        { selectable: (row) => this.userHasAdministratePermission(row.id || '') },
+    );
+    selection = this.listSelection.model;
     dataReady = false;
     sort = 'updated_at.desc';
     offset = 0;
@@ -264,26 +268,11 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     }
 
     isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        return numSelected === this.getAllDeleteableInstances().length;
+        return this.listSelection.isAllSelected();
     }
 
     masterToggle() {
-        if (this.isAllSelected()) {
-            this.selectionClear();
-        } else {
-            this.selection.select(...this.getAllDeleteableInstances());
-        }
-    }
-
-    private getAllDeleteableInstances(): ImportInstancesModel[] {
-        const res: ImportInstancesModel[] = [];
-        this.dataSource.connect().value.forEach((row) => {
-            if (this.userHasAdministratePermission(row.id || '')) {
-                res.push(row);
-            }
-        });
-        return res;
+        this.listSelection.masterToggle();
     }
 
     selectionClear(): void {
