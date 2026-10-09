@@ -53,11 +53,14 @@ export interface BulkDeleteConfig<T> {
     jobs: () => Observable<T>[];
     /** Runs after the confirmation, before the first request. */
     before?: () => void;
-    /** Decides success from the results; without it the outcome is next (success) or error (failure). */
+    /**
+     * Decides success from the results. Required for jobs whose service answers a failure with a fallback value
+     * instead of an error; without it only an error counts as failure and any emitted result as success.
+     */
     isSuccess?: (results: T[]) => boolean;
     successMessage: string;
     errorMessage: string | ((err: unknown) => string);
-    /** Runs on a failed forkJoin, before the error snack bar (only without isSuccess). */
+    /** Runs on a failed forkJoin, before the error snack bar. */
     onError?: (err: unknown) => void;
     /** Runs after the snack bar, in success and failure. */
     after: () => void;
@@ -80,16 +83,13 @@ export function bulkDelete<T>(dialogs: DialogsService, snackBar: MatSnackBar, co
     confirmDelete(dialogs, config.text).subscribe(() => {
         config.before?.();
         const isSuccess = config.isSuccess;
-        forkJoin(config.jobs()).subscribe(
-            isSuccess
-                ? { next: (results) => finish(isSuccess(results)) }
-                : {
-                      next: () => finish(true),
-                      error: (err) => {
-                          config.onError?.(err);
-                          finish(false, err);
-                      },
-                  },
-        );
+        const onError = (err: unknown): void => {
+            config.onError?.(err);
+            finish(false, err);
+        };
+        forkJoin(config.jobs()).subscribe({
+            next: (results) => finish(isSuccess ? isSuccess(results) : true),
+            error: onError,
+        });
     });
 }

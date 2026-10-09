@@ -15,11 +15,12 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { EMPTY } from 'rxjs';
 
 import { FlowRepoService } from './flow-repo.service';
 import { FlowCreateResponse, FlowModel } from './flow.model';
@@ -76,5 +77,18 @@ describe('FlowRepoService', () => {
         expect(req.request.body._id).toBeUndefined();
         expect(req.request.body.name).toEqual('my flow');
         req.flush(null, { status: 200, statusText: 'OK' });
+    });
+
+    it('deleteFlow logs and reports a failed request and still rethrows it', () => {
+        const snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open').and.returnValue({ afterDismissed: () => EMPTY } as never);
+        const logged = spyOn(console, 'error');
+        let failure: unknown;
+        service.deleteFlow({ _id: 'f1' } as FlowModel).subscribe({ error: (err) => (failure = err) });
+
+        http.expectOne(environment.flowRepoUrl + '/flow/f1/').flush('nope', { status: 503, statusText: 'Service Unavailable' });
+
+        expect((failure as HttpErrorResponse).status).toBe(503);
+        expect(logged).toHaveBeenCalled();
+        expect(snackOpen.calls.mostRecent().args[0]).toContain('request failed (503)');
     });
 });

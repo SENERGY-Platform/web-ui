@@ -19,6 +19,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { ErrorHandlerService } from './error-handler.service';
+import { snackError, snackSuccess, ERROR_SNACK_WINDOW_MS } from './snack-bar-messages';
 import { environment } from '../../../environments/environment';
 
 describe('ErrorHandlerService', () => {
@@ -135,6 +136,81 @@ describe('ErrorHandlerService', () => {
             expect(snackBar.open).not.toHaveBeenCalled();
             expect(console.error).toHaveBeenCalled();
             done();
+        });
+    });
+
+    describe('backend message', () => {
+        const message = (body: unknown) => {
+            service.handleError('Svc', 'm')(new HttpErrorResponse({ url: 'http://devices.test/x', status: 400, error: body }));
+            return snackBar.open.calls.mostRecent().args[0];
+        };
+
+        it('appends a string body', () => {
+            expect(message('  device type is invalid \n')).toBe('device-repo: request failed (400): device type is invalid');
+        });
+
+        it('appends the error string of an object body', () => {
+            expect(message({ error: 'name taken', message: 'ignored' })).toBe('device-repo: request failed (400): name taken');
+        });
+
+        it('appends the message string of an object body', () => {
+            expect(message({ message: 'name taken' })).toBe('device-repo: request failed (400): name taken');
+        });
+
+        it('cuts the message at 200 characters', () => {
+            expect(message('x'.repeat(300))).toBe('device-repo: request failed (400): ' + 'x'.repeat(200));
+        });
+
+        it('adds nothing for an empty, null or non-string body', () => {
+            expect(message('   ')).toBe('device-repo: request failed (400)');
+            expect(message(null)).toBe('device-repo: request failed (400)');
+            expect(message({ error: { code: 1 } })).toBe('device-repo: request failed (400)');
+        });
+
+        it('keeps "is not reachable" for status 0', () => {
+            service.handleError('Svc', 'm')(new HttpErrorResponse({ url: 'http://devices.test/x', status: 0, error: 'boom' }));
+            expect(snackBar.open.calls.mostRecent().args[0]).toBe('device-repo is not reachable');
+        });
+    });
+
+    describe('with success and component notices', () => {
+        let now: number;
+        beforeEach(() => {
+            now = 5000;
+            spyOn(Date, 'now').and.callFake(() => now);
+        });
+
+        it('keeps the error text open when a success notice follows, until the window is over', () => {
+            service.handleError('Svc', 'm')(httpError('http://devices.test/x', 503));
+            snackSuccess(snackBar, 'Saved');
+            expect(snackBar.open).toHaveBeenCalledTimes(1);
+
+            now += ERROR_SNACK_WINDOW_MS;
+            snackSuccess(snackBar, 'Saved');
+            expect(snackBar.open.calls.mostRecent().args[0]).toBe('Saved');
+        });
+
+        it('opens success normally after the error notice was dismissed', () => {
+            service.handleError('Svc', 'm')(httpError('http://devices.test/x', 503));
+            dismissed[0].next();
+            snackSuccess(snackBar, 'Saved');
+            expect(snackBar.open.calls.mostRecent().args[0]).toBe('Saved');
+        });
+
+        it('merges a component error within the window and still does not repeat the central text', () => {
+            const handler = service.handleError('Svc', 'm');
+            handler(httpError('http://devices.test/x', 503));
+            snackError(snackBar, 'Could not save');
+            expect(snackBar.open.calls.mostRecent().args[0]).toBe('Could not save (device-repo: request failed (503))');
+
+            handler(httpError('http://devices.test/y', 503));
+            expect(snackBar.open).toHaveBeenCalledTimes(2);
+        });
+
+        it('handleErrorWithSnackBar merges with a central text of the same failure', () => {
+            service.handleError('Svc', 'm')(httpError('http://devices.test/x', 503));
+            service.handleErrorWithSnackBar('Could not save', 'Svc', 'm2')(httpError('http://devices.test/x', 503));
+            expect(snackBar.open.calls.mostRecent().args[0]).toBe('Could not save (device-repo: request failed (503))');
         });
     });
 });

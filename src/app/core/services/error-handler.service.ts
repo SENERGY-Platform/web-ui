@@ -18,7 +18,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ErrorModel } from '../model/error.model';
-import {MatSnackBar, MatSnackBarRef, TextOnlySnackBar} from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackCentralError, snackError } from './snack-bar-messages';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -26,8 +27,6 @@ import { environment } from '../../../environments/environment';
 })
 export class ErrorHandlerService {
     private snackBar = inject(MatSnackBar);
-
-    private reportedSnackBar?: { ref: MatSnackBarRef<TextOnlySnackBar>; text: string };
 
     logError(service: string, method: string, error: any) {
         console.error('Error =>> Service: ' + service + ' =>> Method: ' + method);
@@ -67,7 +66,7 @@ export class ErrorHandlerService {
     }
 
     showErrorInSnackBar(snackbarMessage: string) {
-        this.snackBar.open(snackbarMessage, 'close', { panelClass: 'snack-bar-error' });
+        snackError(this.snackBar, snackbarMessage);
     }
 
     private reportHttpError(service: string, error?: HttpErrorResponse) {
@@ -78,18 +77,23 @@ export class ErrorHandlerService {
         const text = error.status === 0
             ? backend + ' is not reachable'
             // statusText is not shown: over HTTP/2 it is empty and Angular's XHR backend fills in 'OK'
-            : backend + ': request failed (' + error.status + ')';
+            : backend + ': request failed (' + error.status + ')' + ErrorHandlerService.bodyMessage(error);
         // polling widgets hit the same dead backend repeatedly; one open message is enough
-        if (this.reportedSnackBar?.text === text) {
-            return;
+        snackCentralError(this.snackBar, text);
+    }
+
+    /** ': <message>' from a string body or the `error`/`message` string of an object body, at most 200 characters. */
+    private static bodyMessage(error: HttpErrorResponse): string {
+        const body: unknown = error.error;
+        let message: unknown = body;
+        if (typeof body === 'object' && body !== null) {
+            const fields = body as { error?: unknown; message?: unknown };
+            message = typeof fields.error === 'string' && fields.error.trim() !== '' ? fields.error : fields.message;
         }
-        const ref = this.snackBar.open(text, 'close', { panelClass: 'snack-bar-error' });
-        this.reportedSnackBar = { ref, text };
-        ref.afterDismissed().subscribe(() => {
-            if (this.reportedSnackBar?.ref === ref) {
-                this.reportedSnackBar = undefined;
-            }
-        });
+        if (typeof message !== 'string' || message.trim() === '') {
+            return '';
+        }
+        return ': ' + message.trim().slice(0, 200);
     }
 
     /** Key of the longest `environment` URL that prefixes `url`, kebab-cased without its Url suffix. */

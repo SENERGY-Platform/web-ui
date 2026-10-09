@@ -101,7 +101,7 @@ export class FlowRepoService {
                         FlowRepoService.name,
                         'deleteFlow: Error',
                         err
-                    );
+                    )(err);
                     return throwError(() => err);
                 })
             );

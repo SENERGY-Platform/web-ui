@@ -173,6 +173,22 @@ describe('delete-flows', () => {
             expect(after).toHaveBeenCalledTimes(1);
         });
 
+        it('with a predicate: a failed job reports the error and runs onError and after', () => {
+            answer(true);
+            jobs.and.returnValue([throwError(() => 'boom')]);
+            run({ isSuccess: everyTrue });
+            expect(onError).toHaveBeenCalledOnceWith('boom');
+            expect(snackBar.open).toHaveBeenCalledOnceWith('Error while deleting things!', 'close', { panelClass: 'snack-bar-error' });
+            expect(after).toHaveBeenCalledTimes(1);
+        });
+
+        it('a job that ended in a fallback value is no success when the caller passes a predicate for it', () => {
+            answer(true);
+            jobs.and.returnValue([of(true), of(false)]);
+            run({ isSuccess: everyTrue });
+            expect(snackBar.open).not.toHaveBeenCalledWith('Things deleted successfully.', undefined, { duration: 2000 });
+        });
+
         it('an empty job list reports nothing, as forkJoin([]) did', () => {
             answer(true);
             jobs.and.returnValue([]);

@@ -50,7 +50,7 @@ export class FlowEngineService {
         return this.http.get<PipelineStatus>(environment.flowEngineUrl + '/pipeline/' + pipelineId).pipe(
             map((resp) => resp || []),
             catchError((err) => {
-                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelineStatus: Error', undefined);
+                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelineStatus: Error', undefined)(err);
                 return throwError(() => err);
             }),
         );
@@ -60,7 +60,7 @@ export class FlowEngineService {
         return this.http.post<PipelineStatus[]>(environment.flowEngineUrl + '/pipelines', req).pipe(
             map((resp) => resp || []),
             catchError((err) => {
-                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelinesStatus: Error', undefined);
+                this.errorHandlerService.handleError(FlowEngineService.name, 'getPipelinesStatus: Error', undefined)(err);
                 return throwError(() => err);
             }),
         );

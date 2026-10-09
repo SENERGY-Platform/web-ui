@@ -18,7 +18,10 @@ the same value as before. They differ only in what the user sees:
 
 - `handleError(service, method, fallback)` opens an error snack bar naming the
   backend and the status: `device-repo: request failed (503)`, or
-  `device-repo is not reachable` for status 0. The backend is the
+  `device-repo is not reachable` for status 0. When the error body carries a
+  message (a string body, or a string `error` or `message` field), it is
+  appended trimmed and cut at 200 characters:
+  `device-repo: request failed (400): name already taken`. The backend is the
   `environment` key whose URL is the longest prefix of the request URL, without
   its `Url` suffix and in kebab case; without a match it is the host. The text
   leaves out the HTTP status text on purpose: over HTTP/2 there is none and
@@ -38,6 +41,23 @@ same `catchError` (a `TypeError` in a `map`) is logged as before.
 While a snack bar with the same text is open, the same failure does not open it
 again; polling widgets against a dead backend would otherwise flood it. After
 the user closes it, the next failure opens it again.
+
+The snack bar shows one message at a time and a new one replaces the open one.
+`snackSuccess` and `snackError` (`snack-bar-messages.ts`) and the central
+handler therefore share the state of the open error snack bar:
+
+- `snackSuccess` does not open while an error snack bar opened less than 1500 ms
+  ago is still open, so a success message after a failed call cannot hide the
+  error. An older open error, for example from a polling widget, does not block it.
+- `snackError` within that window after the central text opens one merged snack
+  bar, `<component text> (<central text>)`, instead of replacing it. The central
+  handler merges the same way after a component error. The dedupe above still
+  holds after a merge.
+
+A service that answers a failure with a fallback must not let its caller report
+success: the caller checks the fallback (`null`, `false`, `isSuccess` in
+`bulkDelete`) and reports an error itself. `bulkDelete` without `isSuccess`
+counts any emitted result as success and only an error as failure.
 
 ## Choosing
 
