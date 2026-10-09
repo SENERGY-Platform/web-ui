@@ -19,6 +19,7 @@ import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angu
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from 'src/app/modules/dashboard/shared/save-widget-edits';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
@@ -210,11 +211,8 @@ export class EditComponent implements OnInit {
         if(this.userHasUpdatePropertiesAuthorization) {
             obs.push(this.updateProperties());
         }
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message !== 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 

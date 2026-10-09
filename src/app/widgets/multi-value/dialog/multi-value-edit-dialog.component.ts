@@ -24,10 +24,11 @@ import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../mod
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import { MultiValueMeasurement, MultiValueOrderEnum } from '../shared/multi-value.model';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { emptyObjectValidator } from '../../../core/validators/empty-object.validator';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -321,11 +322,8 @@ export class MultiValueEditDialogComponent implements OnInit {
             obs.push(this.updateProperties());
         }
 
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 

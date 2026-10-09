@@ -21,9 +21,10 @@ import { DeploymentsService } from '../../../modules/processes/deployments/share
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import { MatTable } from '@angular/material/table';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -112,11 +113,8 @@ export class RankingListEditDialogComponent implements OnInit {
             obs.push(this.updateProperties());
         }
 
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 }

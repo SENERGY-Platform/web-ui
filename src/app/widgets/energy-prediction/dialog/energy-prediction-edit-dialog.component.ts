@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { AbstractControl, FormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
@@ -25,6 +25,7 @@ import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../mod
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import { chartsExportMeasurementModelValidator } from '../../charts/export/shared/chartsExportMeasurementModel.validator';
 import { EnergyPredictionRequirementsService } from '../shared/energy-prediction-requirements.service';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -173,11 +174,8 @@ export class EnergyPredictionEditDialogComponent implements OnInit {
         if(this.userHasUpdatePropertiesAuthorization) {
             obs.push(this.updateProperties());
         }
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 

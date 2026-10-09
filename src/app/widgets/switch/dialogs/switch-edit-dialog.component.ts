@@ -17,13 +17,14 @@
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DeploymentsModel } from '../../../modules/processes/deployments/shared/deployments.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import { SwitchPropertiesDeploymentsModel } from '../shared/switch-properties.model';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatFooterCellDef, MatFooterCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFooterRowDef, MatFooterRow } from '@angular/material/table';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
@@ -160,11 +161,8 @@ export class SwitchEditDialogComponent implements OnInit {
             obs.push(this.updateSwitchProperties());
         }
 
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 

@@ -17,8 +17,9 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { concatMap, forkJoin, Observable, map } from 'rxjs';
+import { concatMap, Observable, map } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from 'src/app/modules/dashboard/shared/save-widget-edits';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { ExportModel } from 'src/app/modules/exports/shared/export.model';
@@ -130,11 +131,8 @@ export class ConsumptionProfileEditComponent implements OnInit {
         if(this.userHasUpdatePropertiesAuthorization) {
             obs.push(this.updateProperties());
         }
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 

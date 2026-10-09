@@ -22,6 +22,7 @@ import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { ExportModel, ExportResponseModel, ExportValueModel } from '../../../modules/exports/shared/export.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
@@ -519,11 +520,8 @@ export class SingleValueEditDialogComponent implements OnInit {
             obs.push(this.updateProperties());
         }
 
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if (!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 

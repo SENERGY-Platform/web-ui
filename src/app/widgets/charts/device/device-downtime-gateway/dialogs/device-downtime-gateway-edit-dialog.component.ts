@@ -21,8 +21,9 @@ import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-w
 import { DeploymentsService } from '../../../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
 import { DashboardResponseMessageModel } from '../../../../../modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from '../../../../../modules/dashboard/shared/save-widget-edits';
 import { MatTable } from '@angular/material/table';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -97,11 +98,8 @@ export class DeviceDowntimeGatewayEditDialogComponent implements OnInit {
             obs.push(this.updateProperties());
         }
 
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 }

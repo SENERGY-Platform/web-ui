@@ -24,9 +24,10 @@ import {MatTable} from '@angular/material/table';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
+import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import {CamundaVariable} from '../../../modules/processes/deployments/shared/deployments-definition.model';
 import {checkValueValidator} from './range-slider-edit-dialog.validators';
-import {forkJoin, Observable } from 'rxjs';
+import {Observable } from 'rxjs';
 import {rangeValidator} from '../../../core/validators/range.validator';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -153,11 +154,8 @@ export class RangeSliderEditDialogComponent implements OnInit {
             obs.push(this.updateProperties());
         }
 
-        forkJoin(obs).subscribe(responses => {
-            const errorOccured = responses.find((response) => response.message != 'OK');
-            if(!errorOccured) {
-                this.dialogRef.close(this.widget);
-            }
+        saveWidgetEdits(obs).subscribe(() => {
+            this.dialogRef.close(this.widget);
         });
     }
 
