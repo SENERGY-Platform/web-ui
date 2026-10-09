@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {forkJoin, Observable, Subscription, map, skip} from 'rxjs';
+import {forkJoin, Observable, map, skip} from 'rxjs';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {MatDialogConfig} from '@angular/material/dialog';
@@ -29,8 +29,9 @@ import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.compo
 import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import {ConceptsService} from '../concepts/shared/concepts.service';
@@ -57,7 +58,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTooltip, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
 })
-export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
+export class FunctionsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
     private searchbarService = inject(SearchbarService);
     private functionsService = inject(FunctionsService);
@@ -72,20 +73,15 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     private destroyRef = inject(DestroyRef);
 
     displayedColumns = ['select', 'name'];
-    pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceTypeFunctionModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     listSelection = new ListSelection<DeviceTypeFunctionModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
-    offset = 0;
     ready = false;
     userIsAdmin = false;
-    // one listing in flight at a time: a slower, superseded answer must not overwrite a newer one
-    private loadSub: Subscription = new Subscription();
+    list = new PagedListState(this.preferencesService, () => this.getFunctions(), { sortBy: 'name', sortDirection: 'asc' });
     searchText = '';
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -107,16 +103,11 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=> {
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.load();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
-    ngOnDestroy() {
-        this.loadSub.unsubscribe();
+    get offset(): number {
+        return this.list.offset;
     }
 
     /** Takes the `concept_ids` query parameter as the active filter and reports whether it changed. */
@@ -241,7 +232,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private getFunctions(): Observable<DeviceTypeFunctionModel[]> {
         return this.functionsService
-            .getFunctions(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection, this.conceptIds)
+            .getFunctions(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection, this.conceptIds)
             .pipe(
                 map(functions => {
                     this.totalCount = functions.total;
@@ -254,25 +245,14 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     reload() {
         this.ready = false;
-        this.offset = 0;
-        // reload starts at the first page, so the paginator has to say so too
-        if (this.paginator) {
-            this.paginator.pageIndex = 0;
-        }
         this.selectionClear();
-        this.load(() => {
+        this.list.reload(() => {
             this.ready = true;
         });
     }
 
-    private load(done?: () => void): void {
-        this.loadSub.unsubscribe();
-        this.loadSub = this.getFunctions().subscribe(() => done?.());
-    }
-
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 

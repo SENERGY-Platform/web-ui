@@ -33,8 +33,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { DeviceInstancesDialogService } from './shared/device-instances-dialog.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { Observable, map, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -97,12 +98,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'attributes', 'info'];
     maxShownAttributes = 3;
-    pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     listSelection = new ListSelection<DeviceInstanceModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
-    offset = 0;
     ready = false;
     init = false;
     searchText = '';
@@ -128,8 +127,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     routerAttributeValues: string[] = [];
     DeviceInstancesRouterStateTabEnum = DeviceInstancesRouterStateTabEnum;
 
-    sortBy = 'display_name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.load(), { sortBy: 'display_name', sortDirection: 'asc' });
 
     userHasDeleteAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -149,12 +147,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     ngAfterViewInit(): void {
         this.getRouterParams();
         this.initSearch(); // does automatically load data on first page load
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.load().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     checkAuthorization() {
@@ -200,19 +193,14 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-
-        if (this.sortBy === 'log_state') {
-            this.sortBy = 'annotations.connected';
-        }
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event, { log_state: 'annotations.connected' });
         this.reload();
     }
 
     private loadDevicesByIds(): Observable<DeviceInstanceModel[]> {
         // Only called when beeing redirected from device group page
         if (this.routerDeviceIds) {
-            return this.deviceInstancesService.getDeviceInstances({ deviceIds: this.routerDeviceIds, limit: this.pageSize, offset: this.offset }).pipe(
+            return this.deviceInstancesService.getDeviceInstances({ deviceIds: this.routerDeviceIds, limit: this.list.pageSize, offset: this.list.offset }).pipe(
                 map(result => {
                     this.setDevicesAndTotal(result);
                     return result.result;
@@ -277,10 +265,10 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         } else {
             return this.deviceInstancesService
                 .getDeviceInstances({
-                    limit: this.pageSize,
-                    offset: this.offset,
-                    sortBy: this.sortBy,
-                    sortDesc: this.sortDirection === 'desc',
+                    limit: this.list.pageSize,
+                    offset: this.list.offset,
+                    sortBy: this.list.sortBy,
+                    sortDesc: this.list.sortDirection === 'desc',
                     searchText: this.searchText,
                     locationId: this.routerLocation,
                     hubId: this.routerNetwork,
@@ -355,12 +343,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         }
         this.init = true;
         
-        this.offset = 0;
         this.ready = false;
         this.selectionClear();
         this.usage = [];
 
-        this.load().subscribe({
+        this.list.reload({
             error: (err) => {
                 console.log(err);
                 this.ready = true;
@@ -532,7 +519,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             isSuccess: noneNullOrServerError,
             successMessage: 'Devices deleted successfully.',
             errorMessage: 'Error while deleting devices!',
-            after: () => this.reload(),
+            after: () => {
+                // reload() returns while the page is not ready
+                this.ready = true;
+                this.reload();
+            },
         });
     }
 

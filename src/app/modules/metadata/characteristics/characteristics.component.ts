@@ -27,9 +27,10 @@ import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-sear
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ConceptsPermSearchModel} from '../concepts/shared/concepts-perm-search.model';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from '../device-types-overview/shared/used-in-device-type.model';
@@ -63,19 +64,16 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     private preferencesService = inject(PreferencesService);
 
     displayedColumns = ['select', 'name'];
-    pageSize = this.preferencesService.pageSize;
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeCharacteristicsModel>();
     listSelection = new ListSelection<DeviceTypeCharacteristicsModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
-    offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     routerConcept: ConceptsPermSearchModel | null = null;
     selectedTag = '';
     searchText = '';
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.getCharacteristics(), { sortBy: 'name', sortDirection: 'asc' });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -92,8 +90,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
@@ -120,12 +117,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getCharacteristics().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     private initSearch() {
@@ -240,7 +232,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
             this.selectedTag = this.routerConcept.name;
         }
         return this.characteristicsService
-            .getCharacteristics(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection, this.routerConcept?.characteristic_ids || [])
+            .getCharacteristics(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection, this.routerConcept?.characteristic_ids || [])
             .pipe(
                 map((characteristics) => {
                     this.totalCount = characteristics.total;
@@ -267,10 +259,9 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
 
     reload() {
         this.ready = false;
-        this.offset = 0;
         this.selectionClear();
 
-        this.getCharacteristics().subscribe(_ => {
+        this.list.reload(() => {
             this.ready = true;
         });
     }

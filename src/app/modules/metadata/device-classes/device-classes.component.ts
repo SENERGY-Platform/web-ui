@@ -26,9 +26,10 @@ import { DeviceClassesService } from './shared/device-classes.service';
 import { DeviceClassesEditDialogComponent } from './dialog/device-classes-edit-dialog.component';
 import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/device-type.model';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import {
     UsedInDeviceTypeQuery,
@@ -64,7 +65,6 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     private preferencesService = inject(PreferencesService);
 
     displayedColumns = ['select', 'name'];
-    pageSize = this.preferencesService.pageSize;
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeDeviceClassModel>();
     listSelection = new ListSelection<DeviceTypeDeviceClassModel>(() => this.dataSource.connect().value);
@@ -73,9 +73,7 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
     searchText = '';
-    offset = 0;
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.getDeviceClasses(), { sortBy: 'name', sortDirection: 'asc' });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -89,12 +87,7 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceClasses().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     checkAuthorization() {
@@ -181,7 +174,7 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
 
     private getDeviceClasses(): Observable<DeviceTypeDeviceClassModel[]> {
         return this.deviceClassesService
-            .getDeviceClasses(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
+            .getDeviceClasses(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection)
             .pipe(
                 map((deviceClasses) => {
                     this.totalCount = deviceClasses.total;
@@ -193,18 +186,16 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     }
 
     reload() {
-        this.offset = 0;
         this.ready = false;
         this.selectionClear();
 
-        this.getDeviceClasses().subscribe(_ => {
+        this.list.reload(() => {
             this.ready = true;
         });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 

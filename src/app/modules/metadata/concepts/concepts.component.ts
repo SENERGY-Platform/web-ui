@@ -27,8 +27,9 @@ import {DeviceTypeConceptModel, DeviceTypeFunctionModel} from '../device-types-o
 import {FunctionsService} from '../functions/shared/functions.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -60,18 +61,15 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     private preferencesService = inject(PreferencesService);
 
     displayedColumns = ['select', 'name', 'info', 'characteristic'];
-    pageSize = this.preferencesService.pageSize;
     concepts: DeviceTypeConceptModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
     listSelection = new ListSelection<DeviceTypeConceptModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
-    offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     searchText = '';
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesService, () => this.getConcepts(), { sortBy: 'name', sortDirection: 'asc' });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -95,12 +93,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesService.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getConcepts().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     private initSearch() {
@@ -250,7 +243,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
 
     private getConcepts(): Observable<DeviceTypeConceptModel[]> {
         return this.conceptsService
-            .getConcepts(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
+            .getConcepts(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection)
             .pipe(
                 map(concepts => {
                     this.totalCount = concepts.total;
@@ -262,17 +255,15 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
 
     reload() {
         this.ready = false;
-        this.offset = 0;
         this.selectionClear();
 
-        this.getConcepts().subscribe(_ => {
+        this.list.reload(() => {
             this.ready = true;
         });
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 

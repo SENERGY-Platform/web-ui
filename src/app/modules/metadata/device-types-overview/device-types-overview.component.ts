@@ -26,8 +26,9 @@ import { Router } from '@angular/router';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
 import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-type.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
+import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
+import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -58,20 +59,17 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     private preferencesSerivce = inject(PreferencesService);
 
     displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];
-    pageSize = this.preferencesSerivce.pageSize;
     deviceTypes: DeviceTypeModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     dataSource = new MatTableDataSource<DeviceTypeModel>();
     listSelection = new ListSelection<DeviceTypeModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
-    offset = 0;
     searchControl = new FormControl<string | null>('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     searchText = '';
-    sortBy = 'name';
-    sortDirection: SortDirection = 'asc';
+    list = new PagedListState(this.preferencesSerivce, () => this.getDeviceTypes(), { sortBy: 'name', sortDirection: 'asc' });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -83,8 +81,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.sortBy = $event.active;
-        this.sortDirection = $event.direction;
+        this.list.sortChanged($event);
         this.reload();
     }
 
@@ -101,12 +98,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit(): void {
-        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e)=>{
-            this.preferencesSerivce.pageSize = e.pageSize;
-            this.pageSize = this.paginator.pageSize;
-            this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.getDeviceTypes().subscribe();
-        });
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
     delete(deviceTypeInput: DeviceTypeModel) {
@@ -181,7 +173,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
 
     private getDeviceTypes(): Observable<DeviceTypeModel[]> {
         return this.deviceTypeService
-            .getDeviceTypes(this.searchText, this.pageSize, this.offset, this.sortBy, this.sortDirection)
+            .getDeviceTypes(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection)
             .pipe(
                 map(deviceTypes => {
                     this.totalCount = deviceTypes.total;
@@ -193,11 +185,10 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
 
 
     private reload() {
-        this.offset = 0;
         this.ready = false;
         this.selectionClear();
 
-        this.getDeviceTypes().subscribe(_ => {
+        this.list.reload(() => {
             this.ready = true;
         });
     }

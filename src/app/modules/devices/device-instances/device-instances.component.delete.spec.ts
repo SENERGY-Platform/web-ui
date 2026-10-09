@@ -162,7 +162,7 @@ describe('DeviceInstancesComponent delete', () => {
             expect(snackBar.open).toHaveBeenCalledOnceWith('Devices deleted successfully.', undefined, { duration: 2000 });
         });
 
-        it('does not reload once the page has loaded, because reload() returns while not ready', () => {
+        it('reloads and clears the selection once the page has loaded', () => {
             answerDialog(true);
             service.deleteDeviceInstance.and.returnValues(of(one));
             component.init = true;
@@ -170,9 +170,9 @@ describe('DeviceInstancesComponent delete', () => {
             component.selection.select(one);
             component.deleteMultipleItems();
             expect(snackBar.open).toHaveBeenCalledOnceWith('Devices deleted successfully.', undefined, { duration: 2000 });
-            expect(service.getDeviceInstances).not.toHaveBeenCalled();
-            expect(component.ready).toBeFalse();
-            expect(component.selection.selected.length).toBe(1);
+            expect(service.getDeviceInstances).toHaveBeenCalledTimes(1);
+            expect(component.ready).toBeTrue();
+            expect(component.selection.isEmpty()).toBeTrue();
         });
 
         [false, undefined].forEach((answer) => {
