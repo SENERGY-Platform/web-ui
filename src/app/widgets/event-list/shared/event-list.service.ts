@@ -15,11 +15,10 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { EventListEditDialogComponent } from '../dialogs/event-list-edit-dialog.component';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 
 @Injectable({
     providedIn: 'root',
@@ -30,19 +29,10 @@ export class EventListService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, EventListEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        };
-        const editDialogRef = this.dialog.open(EventListEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 }

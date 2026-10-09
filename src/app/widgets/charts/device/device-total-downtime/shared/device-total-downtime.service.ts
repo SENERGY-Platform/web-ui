@@ -18,10 +18,9 @@ import { Injectable, inject } from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {MonitorService} from '../../../../../modules/processes/monitor/shared/monitor.service';
 import {ElementSizeService} from '../../../../../core/services/element-size.service';
-import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {DashboardService} from '../../../../../modules/dashboard/shared/dashboard.service';
-import {WidgetModel} from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import {DashboardManipulationEnum} from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import {openWidgetEditDialog} from '../../../../../modules/dashboard/shared/open-widget-edit-dialog';
 import {DeviceTotalDowntimeEditDialogComponent} from '../dialogs/device-total-downtime-edit-dialog.component';
 import {DeviceInstancesService} from '../../../../../modules/devices/device-instances/shared/device-instances.service';
 import {
@@ -42,19 +41,10 @@ export class DeviceTotalDowntimeService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, DeviceTotalDowntimeEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        };
-        const editDialogRef = this.dialog.open(DeviceTotalDowntimeEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 

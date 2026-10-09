@@ -18,10 +18,9 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
-import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { openWidgetEditDialog } from '../../../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { ErrorHandlerService } from '../../../../../core/services/error-handler.service';
 import { DeviceGatewayEditDialogComponent } from '../dialogs/device-gateway-edit-dialog.component';
 import { Observable } from 'rxjs';
@@ -43,19 +42,10 @@ export class DeviceGatewayService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, DeviceGatewayEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        };
-        const editDialogRef = this.dialog.open(DeviceGatewayEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 

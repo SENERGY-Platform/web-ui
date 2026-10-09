@@ -19,10 +19,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from '../../../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { DeviceDowntimeGatewayEditDialogComponent } from '../dialogs/device-downtime-gateway-edit-dialog.component';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
 import { downtimePerGateway, GatewayDowntime } from './device-downtime-gateway-chart';
@@ -39,20 +39,11 @@ export class DeviceDowntimeGatewayService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, DeviceDowntimeGatewayEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(DeviceDowntimeGatewayEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 

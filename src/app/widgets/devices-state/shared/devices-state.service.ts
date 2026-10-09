@@ -18,11 +18,10 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DevicesStateModel, DevicesStatePropertiesModel } from './devices-state.model';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { DevicesStateEditDialogComponent } from '../dialog/devices-state-edit-dialog.component';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { map } from 'rxjs/operators';
 import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 
@@ -36,20 +35,11 @@ export class DevicesStateService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, DevicesStateEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
-            userHasUpdatePropertiesAuthorization,
-        };
-        const editDialogRef = this.dialog.open(DevicesStateEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
+            userHasUpdatePropertiesAuthorization
         });
     }
 

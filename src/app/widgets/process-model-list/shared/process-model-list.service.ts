@@ -15,11 +15,10 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { ProcessModelListEditDialogComponent } from '../dialogs/process-model-list-edit-dialog.component';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { Observable } from 'rxjs';
 import { ProcessModelListModel } from './process-model-list.model';
 import { ProcessModel } from '../../../modules/processes/process-repo/shared/process.model';
@@ -35,19 +34,10 @@ export class ProcessModelListService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, ProcessModelListEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        };
-        const editDialogRef = this.dialog.open(ProcessModelListEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 

@@ -19,10 +19,9 @@ import { Observable } from 'rxjs';
 import { MonitorProcessModel } from '../../../../../modules/processes/monitor/shared/monitor-process.model';
 import { MonitorService } from '../../../../../modules/processes/monitor/shared/monitor.service';
 import { ElementSizeService } from '../../../../../core/services/element-size.service';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../../../modules/dashboard/shared/dashboard.service';
-import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../../../modules/dashboard/shared/dashboard-manipulation.enum';
+import { openWidgetEditDialog } from '../../../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { ChartsProcessDeploymentsEditDialogComponent } from '../dialogs/charts-process-deployments-edit-dialog.component';
 import { map } from 'rxjs/operators';
 import { DeploymentsPerDay, deploymentsPerDay } from './charts-process-deployments-chart';
@@ -38,20 +37,11 @@ export class ChartsProcessDeploymentsService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, ChartsProcessDeploymentsEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(ChartsProcessDeploymentsEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 

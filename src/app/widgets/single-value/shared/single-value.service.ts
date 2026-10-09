@@ -29,20 +29,19 @@ import {
     DashboardService
 } from '../../../modules/dashboard/shared/dashboard.service';
 import {
+    openWidgetEditDialog
+} from '../../../modules/dashboard/shared/open-widget-edit-dialog';
+import {
     SingleValueEditDialogComponent
 } from '../dialog/single-value-edit-dialog.component';
 import {
     WidgetModel
 } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {
-    DashboardManipulationEnum
-} from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import {
     ErrorHandlerService
 } from '../../../core/services/error-handler.service';
 import {
-    MatDialog,
-    MatDialogConfig
+    MatDialog
 } from '@angular/material/dialog';
 import {
     ExportDataService
@@ -67,20 +66,11 @@ export class SingleValueService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, SingleValueEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(SingleValueEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 

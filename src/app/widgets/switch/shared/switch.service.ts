@@ -21,12 +21,11 @@ import { environment } from '../../../../environments/environment';
 import { forkJoin, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
+import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { catchError } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { SwitchPropertiesDeploymentsModel, SwitchPropertiesInstancesModel } from './switch-properties.model';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root',
@@ -39,23 +38,11 @@ export class SwitchService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        // dialogConfig.autoFocus = true;
-        dialogConfig.disableClose = false;
-        // dialogConfig.minWidth = '800px';
-        // dialogConfig.minHeight = '600px';
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, SwitchEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(SwitchEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 

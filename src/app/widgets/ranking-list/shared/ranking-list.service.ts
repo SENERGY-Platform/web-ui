@@ -16,10 +16,9 @@
 
 import { Injectable, inject } from '@angular/core';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { RankingListEditDialogComponent } from '../dialogs/ranking-list-edit-dialog.component';
-import { DashboardManipulationEnum } from '../../../modules/dashboard/shared/dashboard-manipulation.enum';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 
 @Injectable({
     providedIn: 'root',
@@ -30,20 +29,11 @@ export class RankingListService {
 
 
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
-        const dialogConfig = new MatDialogConfig();
-        dialogConfig.disableClose = false;
-        dialogConfig.data = {
+        openWidgetEditDialog(this.dialog, this.dashboardService, RankingListEditDialogComponent, {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        };
-        const editDialogRef = this.dialog.open(RankingListEditDialogComponent, dialogConfig);
-
-        editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
-            if (widget !== undefined) {
-                this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
-            }
         });
     }
 }
