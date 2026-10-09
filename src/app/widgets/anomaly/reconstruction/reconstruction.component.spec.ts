@@ -19,6 +19,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { AnomalyReconstructionComponent } from './reconstruction.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { provideAppCharts } from '../../../core/charts/provide-app-charts';
 
 describe('AnomalyReconstructionComponent', () => {
   let component: AnomalyReconstructionComponent;
@@ -31,6 +32,7 @@ describe('AnomalyReconstructionComponent', () => {
         providers: [
             { provide: MAT_DIALOG_DATA, useValue: { anomaly: { original_reconstructed_curves: [] } } },
             { provide: MatDialogRef, useValue: {} },
+            provideAppCharts(),
         ],
     })
     .compileComponents();
