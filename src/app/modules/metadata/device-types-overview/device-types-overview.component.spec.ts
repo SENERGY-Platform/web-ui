@@ -110,13 +110,12 @@ describe('DeviceTypesOverviewComponent delete', () => {
             expect(dialogs.openDeleteDialog).toHaveBeenCalledOnceWith('2 device types');
         });
 
-        // Today the bulk path passes the raw id, unlike the single delete.
-        it('deletes every selected id once without URL-encoding, reports success, reloads and clears the selection', () => {
+        it('deletes every selected id once, URL-encoded like the single delete, reports success, reloads and clears the selection', () => {
             answerDialog(true);
             service.deleteDeviceType.and.returnValue(of(true));
             component.selection.select(one, two);
             component.deleteMultipleItems();
-            expect(service.deleteDeviceType.calls.allArgs()).toEqual([[one.id], [two.id]]);
+            expect(service.deleteDeviceType.calls.allArgs()).toEqual([[encodeURIComponent(one.id)], [encodeURIComponent(two.id)]]);
             expect(snackBar.open).toHaveBeenCalledOnceWith('2 device types deleted successfully.', undefined, { duration: 2000 });
             expect(service.getDeviceTypes).toHaveBeenCalledTimes(1);
             expect(component.selection.isEmpty()).toBeTrue();

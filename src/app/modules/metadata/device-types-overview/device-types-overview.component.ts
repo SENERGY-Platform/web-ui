@@ -16,11 +16,12 @@
 
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, Observable, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DeviceTypeService } from './shared/device-type.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import { Router } from '@angular/router';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
 import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-type.model';
@@ -109,24 +110,19 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     }
 
     delete(deviceTypeInput: DeviceTypeModel) {
-        this.dialogsService
-            .openDeleteDialog('device type: ' + deviceTypeInput.name)
-            .afterClosed()
-            .subscribe((deviceTypeDelete: boolean | undefined) => {
-                if (deviceTypeDelete) {
-                    this.ready = false;
-                    this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((deleted: boolean) => {
-                        if (deleted) {
-                            const index = this.deviceTypes.indexOf(deviceTypeInput);
-                            this.deviceTypes.splice(index, 1);
-                            snackSuccess(this.snackBar, 'Device type deleted successfully.');
-                        } else {
-                            snackError(this.snackBar, 'Error while deleting device type!');
-                        }
-                        this.reload();
-                    });
+        confirmDelete(this.dialogsService, 'device type: ' + deviceTypeInput.name).subscribe(() => {
+            this.ready = false;
+            this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((deleted: boolean) => {
+                if (deleted) {
+                    const index = this.deviceTypes.indexOf(deviceTypeInput);
+                    this.deviceTypes.splice(index, 1);
+                    snackSuccess(this.snackBar, 'Device type deleted successfully.');
+                } else {
+                    snackError(this.snackBar, 'Error while deleting device type!');
                 }
+                this.reload();
             });
+        });
     }
 
     copyDeviceType(deviceTypeId: string): void {
@@ -213,30 +209,18 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     }
 
     public deleteMultipleItems(): void {
-        const deletionJobs: Observable<any>[] = [];
-        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' device types' : ' device type');
-
-        this.dialogsService
-            .openDeleteDialog(text)
-            .afterClosed()
-            .subscribe((deletePipelines: boolean | undefined) => {
-                if (deletePipelines) {
-                    this.ready = false;
-                    this.selection.selected.forEach((deviceType: DeviceTypeModel) => {
-                        deletionJobs.push(this.deviceTypeService.deleteDeviceType(deviceType.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.every((r: boolean) => r === true);
-                    if (ok) {
-                        snackSuccess(this.snackBar, text + ' deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
-                    }
-                    this.reload();
-                });
-            });
+        const text = countLabel(this.selection.selected.length, 'device type', 'device types');
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text,
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((deviceType: DeviceTypeModel) => this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceType.id))),
+            isSuccess: everyTrue,
+            successMessage: text + ' deleted successfully.',
+            errorMessage: 'Error while deleting ' + text + '!',
+            after: () => this.reload(),
+        });
     }
 
     isAllSelected() {

@@ -22,6 +22,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -44,7 +45,7 @@ import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { NgClass, DatePipe } from '@angular/common';
-import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -280,32 +281,18 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import instances' : ' import instance');
-
-        this.deleteDialog
-            .openDeleteDialog(text)
-            .afterClosed()
-            .subscribe((deletePipelines: boolean | undefined) => {
-                if (deletePipelines) {
-                    this.dataReady = false;
-                    this.selection.selected.forEach((importInstance: ImportInstancesModel) => {
-                        deletionJobs.push(this.importInstancesService.deleteImportInstance(importInstance.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe({
-                    next: () => {
-                        snackSuccess(this.snackBar, text + ' deleted successfully.');
-                        this.reload();
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
-                        this.reload();
-                    },
-                });
-            });
+        const text = countLabel(this.selection.selected.length, 'import instance', 'import instances');
+        bulkDelete(this.deleteDialog, this.snackBar, {
+            text,
+            before: () => {
+                this.dataReady = false;
+            },
+            jobs: () => this.selection.selected.map((importInstance: ImportInstancesModel) => this.importInstancesService.deleteImportInstance(importInstance.id)),
+            successMessage: text + ' deleted successfully.',
+            errorMessage: 'Error while deleting ' + text + '!',
+            onError: (err) => console.error(err),
+            after: () => this.reload(),
+        });
     }
 
     userHasEditPermission(instanceId: string) {

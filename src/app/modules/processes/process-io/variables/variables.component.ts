@@ -22,11 +22,11 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DialogsService} from '../../../../core/services/dialogs.service';
+import { bulkDelete, countLabel, noneNullOrServerError } from '../../../../core/services/delete-flows';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {ProcessIoVariableEditDialogComponent} from '../dialogs/process-io-variable-edit-dialog.component';
 import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
-import {forkJoin, Observable} from 'rxjs';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -38,7 +38,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { ShortKeyPipe } from '../shared/short-key.pipe';
-import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 
 
@@ -248,30 +248,18 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     }
 
     deleteMultipleItems(): void {
-        const deletionJobs: Observable<any>[] = [];
-        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' processes' : ' process');
-
-        this.dialogsService
-            .openDeleteDialog(text)
-            .afterClosed()
-            .subscribe((deletePipelines: boolean | undefined) => {
-                if (deletePipelines) {
-                    this.ready = false;
-                    this.selection.selected.forEach((variable: ProcessIoVariable) => {
-                        deletionJobs.push(this.processIoService.remove(variable.key));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                    if (ok) {
-                        snackSuccess(this.snackBar, text + ' deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
-                    }
-                    this.reload();
-                });
-            });
+        const text = countLabel(this.selection.selected.length, 'process', 'processes');
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text,
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((variable: ProcessIoVariable) => this.processIoService.remove(variable.key)),
+            isSuccess: noneNullOrServerError,
+            successMessage: text + ' deleted successfully.',
+            errorMessage: 'Error while deleting ' + text + '!',
+            after: () => this.reload(),
+        });
     }
 
 

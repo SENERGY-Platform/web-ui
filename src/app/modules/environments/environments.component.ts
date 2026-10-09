@@ -22,7 +22,7 @@ import { Router } from '@angular/router';
 import { saveAs } from 'file-saver';
 import { EnvironmentsService } from './shared/environments.service';
 import { DialogsService } from '../../core/services/dialogs.service';
-import { DeleteDialogResponse } from '../../core/dialogs/delete-dialog.component';
+import { confirmDelete } from '../../core/services/delete-flows';
 import { ApiError, Environment, ValidationError, environmentTypeLabel, isApiError, isValidationError } from './shared/environments.model';
 import { countEnvironmentEntities, countManagedPlatformDevices, EnvironmentEntityCounts } from './shared/environments-count';
 import { ownerDisplay } from './shared/environments-format';
@@ -165,22 +165,18 @@ export class EnvironmentsComponent implements OnInit {
                   (managedDeviceCount === 1 ? '' : 's') +
                   ' the simulation created (linked existing devices are kept).'
                 : undefined;
-        this.dialogsService
-            .openDeleteDialog('environment ' + (env.name || env.id), note ? { note } : undefined)
-            .afterClosed()
-            .subscribe((result: boolean | DeleteDialogResponse | undefined) => {
-                const confirmed = typeof result === 'boolean' ? result : result?.confirmed;
-                if (confirmed && env.id) {
-                    this.environmentsService.deleteEnvironment(env.id).subscribe(ok => {
-                        if (ok) {
-                            snackSuccess(this.snackBar, 'Environment deleted successfully.');
-                        } else {
-                            snackError(this.snackBar, 'Error while deleting the environment!');
-                        }
-                        this.reload();
-                    });
-                }
-            });
+        confirmDelete(this.dialogsService, 'environment ' + (env.name || env.id), note ? { note } : undefined).subscribe(() => {
+            if (env.id) {
+                this.environmentsService.deleteEnvironment(env.id).subscribe(ok => {
+                    if (ok) {
+                        snackSuccess(this.snackBar, 'Environment deleted successfully.');
+                    } else {
+                        snackError(this.snackBar, 'Error while deleting the environment!');
+                    }
+                    this.reload();
+                });
+            }
+        });
     }
 
     newEnvironment(): void {

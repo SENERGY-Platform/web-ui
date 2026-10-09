@@ -25,7 +25,8 @@ import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/im
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { forkJoin, Observable, map, of, mergeMap, concatMap } from 'rxjs';
+import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
+import { Observable, map, of, mergeMap, concatMap } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
@@ -41,7 +42,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
     selector: 'senergy-import-types',
@@ -227,32 +228,18 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' import types' : ' import type');
-
-        this.deleteDialog
-            .openDeleteDialog(text)
-            .afterClosed()
-            .subscribe((deletePipelines: boolean | undefined) => {
-                if (deletePipelines) {
-                    this.dataReady = false;
-                    this.selection.selected.forEach((importType: ImportTypeModel) => {
-                        deletionJobs.push(this.importTypesService.deleteImportInstance(importType.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe({
-                    next: () => {
-                        snackSuccess(this.snackBar, text + ' deleted successfully.');
-                        this.reload();
-                    },
-                    error: (err) => {
-                        console.error(err);
-                        snackError(this.snackBar, 'Error while deleting ' + text + '!');
-                        this.reload();
-                    },
-                });
-            });
+        const text = countLabel(this.selection.selected.length, 'import type', 'import types');
+        bulkDelete(this.deleteDialog, this.snackBar, {
+            text,
+            before: () => {
+                this.dataReady = false;
+            },
+            jobs: () => this.selection.selected.map((importType: ImportTypeModel) => this.importTypesService.deleteImportInstance(importType.id)),
+            successMessage: text + ' deleted successfully.',
+            errorMessage: 'Error while deleting ' + text + '!',
+            onError: (err) => console.error(err),
+            after: () => this.reload(),
+        });
     }
 
     hasWPermission(m: ImportTypeModel): boolean {

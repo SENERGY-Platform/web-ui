@@ -20,6 +20,7 @@ import {FilterSelection, PipelineModel} from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -285,32 +286,17 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-        const text = this.selection.selected.length + (this.selection.selected.length > 1 ? ' pipelines' : ' pipeline');
-
-        this.dialogsService
-            .openDeleteDialog(text)
-            .afterClosed()
-            .subscribe((deletePipelines: boolean | undefined) => {
-                if (deletePipelines) {
-                    this.ready = false;
-                    this.selection.selected.forEach((pipeline: PipelineModel) => {
-                        deletionJobs.push(this.flowEngineService.deletePipeline(pipeline.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe(
-                    {
-                        next: (_) => {
-                            snackSuccess(this.snackBar, text + ' deleted successfully.');
-                            this.reload();
-                        },
-                        error: (err) => {
-                            snackError(this.snackBar, 'Error while deleting ' + text + '!: ' + err);
-                            this.reload();
-                        }
-                    });
-            });
+        const text = countLabel(this.selection.selected.length, 'pipeline', 'pipelines');
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text,
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((pipeline: PipelineModel) => this.flowEngineService.deletePipeline(pipeline.id)),
+            successMessage: text + ' deleted successfully.',
+            errorMessage: (err) => 'Error while deleting ' + text + '!: ' + err,
+            after: () => this.reload(),
+        });
     }
 
     openFilterDialog() {

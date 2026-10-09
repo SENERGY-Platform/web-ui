@@ -20,8 +20,9 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {DeviceTypeCharacteristicsModel} from '../device-types-overview/shared/device-type.model';
 import {Navigation, Router} from '@angular/router';
 import {CharacteristicsService} from './shared/characteristics.service';
-import {forkJoin, Observable, map} from 'rxjs';
+import {Observable, map} from 'rxjs';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import {CharacteristicsPermSearchModel} from './shared/characteristics-perm-search.model';
 import {CharacteristicsEditDialogComponent} from './dialogs/characteristics-edit-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -160,24 +161,19 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     }
 
     deleteCharacteristic(characteristic: CharacteristicsPermSearchModel): void {
-        this.dialogsService
-            .openDeleteDialog('characteristic ' + characteristic.name)
-            .afterClosed()
-            .subscribe((deleteCharacteristic: boolean | undefined) => {
-                if (deleteCharacteristic) {
-                    this.ready = false;
-                    this.characteristicsService
-                        .deleteCharacteristic(characteristic.id)
-                        .subscribe((resp: boolean) => {
-                            if (resp === true) {
-                                snackSuccess(this.snackBar, 'Characteristic deleted successfully.');
-                            } else {
-                                snackError(this.snackBar, 'Error while deleting the characteristic!');
-                            }
-                            this.reload();
-                        });
-                }
-            });
+        confirmDelete(this.dialogsService, 'characteristic ' + characteristic.name).subscribe(() => {
+            this.ready = false;
+            this.characteristicsService
+                .deleteCharacteristic(characteristic.id)
+                .subscribe((resp: boolean) => {
+                    if (resp === true) {
+                        snackSuccess(this.snackBar, 'Characteristic deleted successfully.');
+                    } else {
+                        snackError(this.snackBar, 'Error while deleting the characteristic!');
+                    }
+                    this.reload();
+                });
+        });
     }
 
     editCharacteristic(inputCharacteristic: CharacteristicsPermSearchModel): void {
@@ -292,30 +288,17 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-
-        this.dialogsService
-            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' characteristics' : ' characteristic'))
-            .afterClosed()
-            .subscribe((deleteConcepts: boolean | undefined) => {
-                if (deleteConcepts) {
-                    this.ready = false;
-                    this.selection.selected.forEach((characteristic: DeviceTypeCharacteristicsModel) => {
-                        const job = this.characteristicsService.deleteCharacteristic(characteristic.id || '');
-                        deletionJobs.push(job);
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.every((r: boolean) => r === true);
-                    if (ok) {
-                        snackSuccess(this.snackBar, 'Characteristics deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting characteristics!');
-                    }
-                    this.reload();
-                });
-            });
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text: countLabel(this.selection.selected.length, 'characteristic', 'characteristics'),
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((characteristic: DeviceTypeCharacteristicsModel) => this.characteristicsService.deleteCharacteristic(characteristic.id || '')),
+            isSuccess: everyTrue,
+            successMessage: 'Characteristics deleted successfully.',
+            errorMessage: 'Error while deleting characteristics!',
+            after: () => this.reload(),
+        });
     }
 
     private updateCharacteristicInDeviceTypes(list: DeviceTypeCharacteristicsModel[]) {

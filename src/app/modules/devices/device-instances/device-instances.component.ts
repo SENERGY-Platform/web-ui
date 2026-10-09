@@ -27,6 +27,7 @@ import {
 } from './shared/device-instances.model';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { bulkDelete, countLabel, noneNullOrServerError } from '../../../core/services/delete-flows';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -35,7 +36,7 @@ import { DeviceTypeService } from '../../metadata/device-types-overview/shared/d
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatPaginator } from '@angular/material/paginator';
-import { forkJoin, Observable, map, of } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { DeviceInstancesFilterDialogComponent } from './dialogs/device-instances-filter-dialog/device-instances-filter-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -522,29 +523,17 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-
-        this.dialogsService
-            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device'))
-            .afterClosed()
-            .subscribe((deleteConcepts: boolean | undefined) => {
-                if (deleteConcepts) {
-                    this.ready = false;
-                    this.selection.selected.forEach((device: DeviceInstanceModel) => {
-                        deletionJobs.push(this.deviceInstancesService.deleteDeviceInstance(device.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.findIndex((r: any) => r === null || r.status === 500) === -1;
-                    if (ok) {
-                        snackSuccess(this.snackBar, 'Devices deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting devices!');
-                    }
-                    this.reload();
-                });
-            });
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text: countLabel(this.selection.selected.length, 'device', 'devices'),
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((device: DeviceInstanceModel) => this.deviceInstancesService.deleteDeviceInstance(device.id)),
+            isSuccess: noneNullOrServerError,
+            successMessage: 'Devices deleted successfully.',
+            errorMessage: 'Error while deleting devices!',
+            after: () => this.reload(),
+        });
     }
 
     getUsage(d: DeviceInstanceModel) {

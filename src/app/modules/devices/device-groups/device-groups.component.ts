@@ -16,10 +16,11 @@
 
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, Observable, map, concatMap } from 'rxjs';
+import { Observable, map, concatMap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import { DeviceGroupsService } from './shared/device-groups.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, SortDirection, MatSort, MatSortHeader } from '@angular/material/sort';
@@ -135,21 +136,16 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     deleteDeviceGroup(deviceGroup: DeviceGroupModel): boolean {
-        this.dialogsService
-            .openDeleteDialog('device group ' + deviceGroup.name)
-            .afterClosed()
-            .subscribe((deleteDeviceClass: boolean | undefined) => {
-                if (deleteDeviceClass) {
-                    this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
-                        if (resp === true) {
-                            snackSuccess(this.snackBar, 'Device-Group deleted successfully.');
-                        } else {
-                            snackError(this.snackBar, 'Error while deleting the device-group!');
-                        }
-                        this.reload();
-                    });
+        confirmDelete(this.dialogsService, 'device group ' + deviceGroup.name).subscribe(() => {
+            this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
+                if (resp === true) {
+                    snackSuccess(this.snackBar, 'Device-Group deleted successfully.');
+                } else {
+                    snackError(this.snackBar, 'Error while deleting the device-group!');
                 }
+                this.reload();
             });
+        });
         return false;
     }
 
@@ -198,29 +194,18 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-
-        this.dialogsService
-            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device groups' : ' device group'))
-            .afterClosed()
-            .subscribe((deleteConcepts: boolean | undefined) => {
-                if (deleteConcepts) {
-                    this.ready = false;
-                    this.selection.selected.forEach((deviceGroup: DeviceGroupModel) => {
-                        deletionJobs.push(this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.every((r: boolean) => r === true);
-                    if (ok) {
-                        snackSuccess(this.snackBar, deletionJobs.length > 1 ? 'Device groups deleted successfully.' : 'Device group deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting the device group!');
-                    }
-                    this.reload();
-                });
-            });
+        const count = this.selection.selected.length;
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text: countLabel(count, 'device group', 'device groups'),
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((deviceGroup: DeviceGroupModel) => this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id)),
+            isSuccess: everyTrue,
+            successMessage: count > 1 ? 'Device groups deleted successfully.' : 'Device group deleted successfully.',
+            errorMessage: 'Error while deleting the device group!',
+            after: () => this.reload(),
+        });
     }
 
     showDevices(group: DeviceGroupModel) {

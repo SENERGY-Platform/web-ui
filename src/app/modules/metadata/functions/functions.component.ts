@@ -22,6 +22,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatDialogConfig} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import {FunctionsService} from './shared/functions.service';
 import {DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
 import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
@@ -225,22 +226,17 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     deleteFunction(func: DeviceTypeFunctionModel): void {
-        this.dialogsService
-            .openDeleteDialog('function ' + func.name)
-            .afterClosed()
-            .subscribe((deleteFunction: boolean | undefined) => {
-                if (deleteFunction) {
-                    this.ready = false;
-                    this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
-                        if (resp === true) {
-                            snackSuccess(this.snackBar, 'Function deleted successfully.');
-                        } else {
-                            snackError(this.snackBar, 'Error while deleting the function!');
-                        }
-                        this.reload();
-                    });
+        confirmDelete(this.dialogsService, 'function ' + func.name).subscribe(() => {
+            this.ready = false;
+            this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
+                if (resp === true) {
+                    snackSuccess(this.snackBar, 'Function deleted successfully.');
+                } else {
+                    snackError(this.snackBar, 'Error while deleting the function!');
                 }
+                this.reload();
             });
+        });
     }
 
     private getFunctions(): Observable<DeviceTypeFunctionModel[]> {
@@ -303,29 +299,17 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-
-        this.dialogsService
-            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' functions' : ' function'))
-            .afterClosed()
-            .subscribe((deleteExports: boolean | undefined) => {
-                if (deleteExports) {
-                    this.ready = false;
-                    this.selection.selected.forEach((func: DeviceTypeFunctionModel) => {
-                        deletionJobs.push(this.functionsService.deleteFunction(func.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.every((r: boolean) => r === true);
-                    if (ok) {
-                        snackSuccess(this.snackBar, 'Functions deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting functions!');
-                    }
-                    this.reload();
-                });
-            });
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text: countLabel(this.selection.selected.length, 'function', 'functions'),
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((func: DeviceTypeFunctionModel) => this.functionsService.deleteFunction(func.id)),
+            isSuccess: everyTrue,
+            successMessage: 'Functions deleted successfully.',
+            errorMessage: 'Error while deleting functions!',
+            after: () => this.reload(),
+        });
     }
 
     private updateFunctionUsedInDeviceTypes(functions: DeviceTypeFunctionModel[]) {

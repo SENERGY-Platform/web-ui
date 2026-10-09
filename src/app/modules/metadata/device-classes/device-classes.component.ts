@@ -16,11 +16,12 @@
 
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, Observable, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import { DeviceClassesService } from './shared/device-classes.service';
 import { DeviceClassesEditDialogComponent } from './dialog/device-classes-edit-dialog.component';
 import { DeviceTypeDeviceClassModel } from '../device-types-overview/shared/device-type.model';
@@ -143,22 +144,17 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     }
 
     deleteDeviceClass(deviceClass: DeviceTypeDeviceClassModel): void {
-        this.dialogsService
-            .openDeleteDialog('device class ' + deviceClass.name)
-            .afterClosed()
-            .subscribe((deleteDeviceClass: boolean | undefined) => {
-                if (deleteDeviceClass) {
-                    this.ready = false;
-                    this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
-                        if (resp === true) {
-                            snackSuccess(this.snackBar, 'Device class deleted successfully.');
-                        } else {
-                            snackError(this.snackBar, 'Error while deleting the device class!');
-                        }
-                        this.reload();
-                    });
+        confirmDelete(this.dialogsService, 'device class ' + deviceClass.name).subscribe(() => {
+            this.ready = false;
+            this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
+                if (resp === true) {
+                    snackSuccess(this.snackBar, 'Device class deleted successfully.');
+                } else {
+                    snackError(this.snackBar, 'Error while deleting the device class!');
                 }
+                this.reload();
             });
+        });
     }
 
     newDeviceClass(): void {
@@ -234,29 +230,17 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-
-        this.dialogsService
-            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device classes' : ' device class'))
-            .afterClosed()
-            .subscribe((deleteDeviceClass: boolean | undefined) => {
-                if (deleteDeviceClass) {
-                    this.ready = false;
-                    this.selection.selected.forEach((deviceClass: DeviceTypeDeviceClassModel) => {
-                        deletionJobs.push(this.deviceClassesService.deleteDeviceClasses(deviceClass.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.every((r: boolean) => r === true);
-                    if (ok) {
-                        snackSuccess(this.snackBar, 'Device classes deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting device classes!');
-                    }
-                    this.reload();
-                });
-            });
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text: countLabel(this.selection.selected.length, 'device class', 'device classes'),
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((deviceClass: DeviceTypeDeviceClassModel) => this.deviceClassesService.deleteDeviceClasses(deviceClass.id)),
+            isSuccess: everyTrue,
+            successMessage: 'Device classes deleted successfully.',
+            errorMessage: 'Error while deleting device classes!',
+            after: () => this.reload(),
+        });
     }
 
     private updateDeviceClassInDeviceTypes(list: DeviceTypeDeviceClassModel[]) {

@@ -16,10 +16,11 @@
 
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, Observable, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import { ExtendedLocationModel, LocationModel } from './shared/locations.model';
 import { LocationsService } from './shared/locations.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -131,22 +132,17 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     }
 
     deleteLocation(location: LocationModel): boolean {
-        this.dialogsService
-            .openDeleteDialog('location ' + location.name)
-            .afterClosed()
-            .subscribe((deleteDeviceClass: boolean | undefined) => {
-                if (deleteDeviceClass) {
-                    this.ready = false;
-                    this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
-                        if (resp === true) {
-                            snackSuccess(this.snackBar, 'Location deleted successfully.');
-                            this.reloadLocations();
-                        } else {
-                            snackError(this.snackBar, 'Error while deleting the location!');
-                        }
-                    });
+        confirmDelete(this.dialogsService, 'location ' + location.name).subscribe(() => {
+            this.ready = false;
+            this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
+                if (resp === true) {
+                    snackSuccess(this.snackBar, 'Location deleted successfully.');
+                    this.reloadLocations();
+                } else {
+                    snackError(this.snackBar, 'Error while deleting the location!');
                 }
             });
+        });
         return false;
     }
 
@@ -201,29 +197,17 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        const deletionJobs: Observable<any>[] = [];
-
-        this.dialogsService
-            .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' locations' : ' location'))
-            .afterClosed()
-            .subscribe((deleteConcepts: boolean | undefined) => {
-                if (deleteConcepts) {
-                    this.ready = false;
-                    this.selection.selected.forEach((location: LocationModel) => {
-                        deletionJobs.push(this.locationsService.deleteLocation(location.id));
-                    });
-                }
-
-                forkJoin(deletionJobs).subscribe((deletionJobResults) => {
-                    const ok = deletionJobResults.every((r: boolean) => r === true);
-                    if (ok) {
-                        snackSuccess(this.snackBar, 'Locations deleted successfully.');
-                    } else {
-                        snackError(this.snackBar, 'Error while deleting locations!');
-                    }
-                    this.reload();
-                });
-            });
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text: countLabel(this.selection.selected.length, 'location', 'locations'),
+            before: () => {
+                this.ready = false;
+            },
+            jobs: () => this.selection.selected.map((location: LocationModel) => this.locationsService.deleteLocation(location.id)),
+            isSuccess: everyTrue,
+            successMessage: 'Locations deleted successfully.',
+            errorMessage: 'Error while deleting locations!',
+            after: () => this.reload(),
+        });
     }
 
     shareLocation(location: ExtendedLocationModel): void {
