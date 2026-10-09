@@ -84,7 +84,7 @@ export class EnvironmentsDatasetsComponent implements OnInit {
                 'Delete "' + (ds.name || ds.id) + '"? Channels still referencing this dataset stop playing on their next reload.',
             )
             .afterClosed()
-            .subscribe((confirmed: boolean) => {
+            .subscribe((confirmed: boolean | undefined) => {
                 if (confirmed && ds.id) {
                     this.environmentsService.deleteDataset(ds.id).subscribe((ok) => {
                         if (ok) {

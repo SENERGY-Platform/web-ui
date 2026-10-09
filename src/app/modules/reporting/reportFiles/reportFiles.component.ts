@@ -140,7 +140,7 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dialogsService
             .openDeleteDialog('report file ' + reportFile.id)
             .afterClosed()
-            .subscribe((deleteFile: boolean) => {
+            .subscribe((deleteFile: boolean | undefined) => {
                 if (!deleteFile) {
                     return;
                 }

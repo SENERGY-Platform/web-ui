@@ -275,7 +275,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('instance')
             .afterClosed()
-            .subscribe((del: boolean) => {
+            .subscribe((del: boolean | undefined) => {
                 if (del) {
                     this.instancesService.deleteInstance(instance.id, force).subscribe(() => {
                         this.loadInstances();

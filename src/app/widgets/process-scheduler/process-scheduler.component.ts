@@ -78,7 +78,7 @@ export class ProcessSchedulerComponent implements OnInit {
         this.dialogsService
             .openDeleteDialog('schedule')
             .afterClosed()
-            .subscribe((deleteDashboard: boolean) => {
+            .subscribe((deleteDashboard: boolean | undefined) => {
                 if (deleteDashboard === true) {
                     this.processSchedulerService.deleteSchedule(scheduleId).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {

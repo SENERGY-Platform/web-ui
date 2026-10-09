@@ -240,7 +240,7 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('process (' + element.id + ')')
             .afterClosed()
-            .subscribe((processDelete: boolean) => {
+            .subscribe((processDelete: boolean | undefined) => {
                 if (processDelete) {
                     this.isLoadingResultsFinished = true;
                     this.monitorService.deleteInstances(element.id).subscribe((resp: string) => {
@@ -257,7 +257,7 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + ' process(es)')
             .afterClosed()
-            .subscribe((processesDelete: boolean) => {
+            .subscribe((processesDelete: boolean | undefined) => {
                 if (processesDelete) {
                     this.isLoadingResultsFinished = true;
                     this.monitorService.deleteMultipleInstances(this.selection.selected).subscribe(() => {
@@ -273,7 +273,7 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selectionRunning.selected.length + ' process(es)')
             .afterClosed()
-            .subscribe((processesDelete: boolean) => {
+            .subscribe((processesDelete: boolean | undefined) => {
                 if (processesDelete) {
                     this.isLoadingResultsRunning = true;
                     this.monitorService.stopMultipleInstances(this.selectionRunning.selected).subscribe(() => {

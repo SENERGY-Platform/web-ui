@@ -171,7 +171,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.dialogsService
       .openDeleteDialog('notification')
       .afterClosed()
-      .subscribe((deleteNotification: boolean) => {
+      .subscribe((deleteNotification: boolean | undefined) => {
         if (deleteNotification) {
           this.notificationService.deleteNotification(notification).subscribe(() => {
             this.selection.deselect(notification);
@@ -188,7 +188,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.dialogsService
       .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' notifications' : ' notification'))
       .afterClosed()
-      .subscribe((deleteNotifications: boolean) => {
+      .subscribe((deleteNotifications: boolean | undefined) => {
         if (deleteNotifications) {
           const ids = this.selection.selected.map((n) => n._id);
           this.notificationService.deleteNotifications(ids).subscribe(() => {
@@ -238,7 +238,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     this.dialogsService
       .openDeleteDialog('notifications')
       .afterClosed()
-      .subscribe((deleteNotifications: boolean) => {
+      .subscribe((deleteNotifications: boolean | undefined) => {
         if (deleteNotifications) {
           this.notificationService.deleteNotifications(this.notifications.map(n => n._id)).subscribe(() => {
             this.selection.clear();

@@ -177,7 +177,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dialogsService
             .openDeleteDialog('process')
             .afterClosed()
-            .subscribe((deleteProcess: boolean) => {
+            .subscribe((deleteProcess: boolean | undefined) => {
                 if (deleteProcess) {
                     this.processRepoService.deleteProcess(process._id).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
@@ -235,7 +235,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.dialogsService
             .openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' process' : ' processes'))
             .afterClosed()
-            .subscribe((deleteProcess: boolean) => {
+            .subscribe((deleteProcess: boolean | undefined) => {
                 if (deleteProcess) {
                     // clear repoItems and ready, that spinner occurs
                     this.repoItems.clear();

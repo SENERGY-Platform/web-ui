@@ -219,7 +219,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
         this.dialogsService
             .openDeleteDialog('Process-IO Variable')
             .afterClosed()
-            .subscribe((variableDelete: boolean) => {
+            .subscribe((variableDelete: boolean | undefined) => {
                 if (variableDelete) {
                     this.processIoService.remove(key).subscribe(value => {
                         if(value.status >= 300){
@@ -258,7 +258,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
         this.dialogsService
             .openDeleteDialog(text)
             .afterClosed()
-            .subscribe((deletePipelines: boolean) => {
+            .subscribe((deletePipelines: boolean | undefined) => {
                 if (deletePipelines) {
                     this.ready = false;
                     this.selection.selected.forEach((variable: ProcessIoVariable) => {

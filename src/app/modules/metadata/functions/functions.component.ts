@@ -226,7 +226,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('function ' + func.name)
             .afterClosed()
-            .subscribe((deleteFunction: boolean) => {
+            .subscribe((deleteFunction: boolean | undefined) => {
                 if (deleteFunction) {
                     this.ready = false;
                     this.functionsService.deleteFunction(func.id).subscribe((resp: boolean) => {
@@ -312,7 +312,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' functions' : ' function'))
             .afterClosed()
-            .subscribe((deleteExports: boolean) => {
+            .subscribe((deleteExports: boolean | undefined) => {
                 if (deleteExports) {
                     this.ready = false;
                     this.selection.selected.forEach((func: DeviceTypeFunctionModel) => {

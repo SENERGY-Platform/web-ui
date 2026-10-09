@@ -16,7 +16,7 @@
 
 import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { DeleteDialogComponent, DeleteDialogOptions } from '../dialogs/delete-dialog.component';
+import { DeleteDialogComponent, DeleteDialogOptions, DeleteDialogResponse } from '../dialogs/delete-dialog.component';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog.component';
 import {InputDialogComponent} from '../dialogs/input-dialog.component';
 
@@ -27,7 +27,11 @@ export class DialogsService {
     private dialog = inject(MatDialog);
 
 
-    openDeleteDialog(text: string, options?: DeleteDialogOptions): MatDialogRef<DeleteDialogComponent> {
+    // Without options the dialog closes with a boolean, with options with a DeleteDialogResponse; undefined on Esc/backdrop.
+    openDeleteDialog(text: string): MatDialogRef<DeleteDialogComponent, boolean>;
+    openDeleteDialog(text: string, options: DeleteDialogOptions): MatDialogRef<DeleteDialogComponent, DeleteDialogResponse>;
+    openDeleteDialog(text: string, options: DeleteDialogOptions | undefined): MatDialogRef<DeleteDialogComponent, boolean | DeleteDialogResponse>;
+    openDeleteDialog(text: string, options?: DeleteDialogOptions): MatDialogRef<DeleteDialogComponent, boolean | DeleteDialogResponse> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -38,7 +42,7 @@ export class DialogsService {
         return this.dialog.open(DeleteDialogComponent, dialogConfig);
     }
 
-    openConfirmDialog(title: string, text: string): MatDialogRef<ConfirmDialogComponent> {
+    openConfirmDialog(title: string, text: string): MatDialogRef<ConfirmDialogComponent, boolean> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
@@ -49,7 +53,7 @@ export class DialogsService {
         return this.dialog.open(ConfirmDialogComponent, dialogConfig);
     }
 
-    openInputDialog(title: string, fields: {[key: string]: string}, required: string[]): MatDialogRef<InputDialogComponent> {
+    openInputDialog(title: string, fields: {[key: string]: string}, required: string[]): MatDialogRef<InputDialogComponent, {[key: string]: string} | null> {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = {

@@ -231,7 +231,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
             ({ xml, svg }) => {
                 this.dialogService.openInputDialog('Design Name and Description', {name: this.name, description: this.description}, ['name'])
                     .afterClosed()
-                    .subscribe((result: {name: string; description: string}) => {
+                    .subscribe((result: {[key: string]: string} | null | undefined) => {
                         if(result){
                             this.name = result.name;
                             this.description = result.description;
@@ -247,7 +247,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     releaseDesign(design: SmartServiceDesignModel, then: () => void): void {
         this.dialogService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
             .afterClosed()
-            .subscribe((result: {name: string; description: string}) => {
+            .subscribe((result: {[key: string]: string} | null | undefined) => {
                 if (result) {
                     this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
                         if(value) {

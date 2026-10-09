@@ -167,7 +167,7 @@ export class AspectsComponent implements OnInit {
      * top level of the displayed tree — a classified hierarchy sits under its group row.
      */
     deleteNode(node: DeviceTypeAspectModel, skipDialog = false) {
-        const del = (confirmed: boolean) => {
+        const del = (confirmed: boolean | undefined) => {
             if (!confirmed) {
                 return;
             }
@@ -573,7 +573,7 @@ export class AspectsComponent implements OnInit {
         this.dialogsService
             .openDeleteDialog('aspect class ' + group.name)
             .afterClosed()
-            .subscribe((confirmed: boolean) => {
+            .subscribe((confirmed: boolean | undefined) => {
                 if (!confirmed) {
                     return;
                 }

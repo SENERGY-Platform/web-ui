@@ -214,7 +214,7 @@ export class ExportComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('export')
             .afterClosed()
-            .subscribe((deleteExport: boolean) => {
+            .subscribe((deleteExport: boolean | undefined) => {
                 if (deleteExport) {
                     this.ready = false;
                     const obs = this.brokerMode ? this.brokerExportService.stopPipeline(exp) : this.exportService.stopPipeline(exp);
@@ -353,7 +353,7 @@ export class ExportComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' exports' : ' export'))
             .afterClosed()
-            .subscribe((deleteExports: boolean) => {
+            .subscribe((deleteExports: boolean | undefined) => {
                 if (deleteExports) {
                     this.ready = false;
 

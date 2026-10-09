@@ -182,7 +182,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
             this.dialogsService
                 .openDeleteDialog('concept ' + concept.name)
                 .afterClosed()
-                .subscribe((deleteConcept: boolean) => {
+                .subscribe((deleteConcept: boolean | undefined) => {
                     if (deleteConcept) {
                         this.ready = false;
                         this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
@@ -298,7 +298,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(selected.length + (selected.length > 1 ? ' concepts' : ' concept'))
             .afterClosed()
-            .subscribe((deleteConcepts: boolean) => {
+            .subscribe((deleteConcepts: boolean | undefined) => {
                 if (!deleteConcepts) {
                     return;
                 }

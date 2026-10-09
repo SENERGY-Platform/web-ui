@@ -286,7 +286,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.dialogsService
             .openDeleteDialog('deployment ' + deployment.name)
             .afterClosed()
-            .subscribe((deleteDeployment: boolean) => {
+            .subscribe((deleteDeployment: boolean | undefined) => {
                 if (deleteDeployment) {
                     this.deploymentsService.v2deleteDeployment(deployment.id).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
@@ -340,7 +340,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.dialogsService
             .openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' deployment' : ' deployments'))
             .afterClosed()
-            .subscribe((deleteProcess: boolean) => {
+            .subscribe((deleteProcess: boolean | undefined) => {
                 if (deleteProcess) {
                     // clear repoItems and ready, that spinner occurs
                     this.repoItems.clear();

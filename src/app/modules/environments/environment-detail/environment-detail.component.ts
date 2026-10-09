@@ -768,7 +768,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.dialogsService
             .openDeleteDialog('meter group "' + (group.name || group.id) + '"', note ? { note } : undefined)
             .afterClosed()
-            .subscribe((result: boolean | DeleteDialogResponse) => {
+            .subscribe((result: boolean | DeleteDialogResponse | undefined) => {
                 const confirmed = typeof result === 'boolean' ? result : result?.confirmed;
                 if (!confirmed) {
                     return;
@@ -882,12 +882,12 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.dialogsService
             .openDeleteDialog(node.kind + ' "' + name + '"', options)
             .afterClosed()
-            .subscribe((result: boolean | DeleteDialogResponse) => {
+            .subscribe((result: boolean | DeleteDialogResponse | undefined) => {
                 const confirmed = typeof result === 'boolean' ? result : result?.confirmed;
                 if (!confirmed) {
                     return;
                 }
-                const alsoDeleteDevice = deviceId && typeof result !== 'boolean' && result.checkboxChecked;
+                const alsoDeleteDevice = deviceId && typeof result !== 'boolean' && result?.checkboxChecked;
                 // Always land on the deleted node's parent: relying on "keep selectedKey,
                 // fall back to root if it no longer resolves" silently moves the selection
                 // to whatever now occupies the old key when a *different*, earlier sibling

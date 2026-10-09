@@ -167,7 +167,7 @@ export class EnvironmentsComponent implements OnInit {
         this.dialogsService
             .openDeleteDialog('environment ' + (env.name || env.id), note ? { note } : undefined)
             .afterClosed()
-            .subscribe((result: boolean | DeleteDialogResponse) => {
+            .subscribe((result: boolean | DeleteDialogResponse | undefined) => {
                 const confirmed = typeof result === 'boolean' ? result : result?.confirmed;
                 if (confirmed && env.id) {
                     this.environmentsService.deleteEnvironment(env.id).subscribe(ok => {

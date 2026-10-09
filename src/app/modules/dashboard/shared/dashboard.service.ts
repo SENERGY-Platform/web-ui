@@ -204,7 +204,7 @@ export class DashboardService {
         this.dialogsService
             .openDeleteDialog('dashboard')
             .afterClosed()
-            .subscribe((deleteDashboard: boolean) => {
+            .subscribe((deleteDashboard: boolean | undefined) => {
                 if (deleteDashboard === true) {
                     this.deleteDashboard(dashboardId).subscribe(() => {
                         this.manipulateDashboard(DashboardManipulationEnum.Delete, dashboardId, null);

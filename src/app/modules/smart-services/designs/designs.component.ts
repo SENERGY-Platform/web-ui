@@ -240,7 +240,7 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('design')
             .afterClosed()
-            .subscribe((deleteProcess: boolean) => {
+            .subscribe((deleteProcess: boolean | undefined) => {
                 if (deleteProcess) {
                     this.designsService.deleteDesign(design.id).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
@@ -256,7 +256,10 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
     releaseDesign(design: SmartServiceDesignModel): void {
         this.dialogsService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
             .afterClosed()
-            .subscribe((result: {name: string; description: string}) => {
+            .subscribe((result: {[key: string]: string} | null | undefined) => {
+                if (!result) {
+                    return;
+                }
                 this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
                     if(value) {
                         this.snackBar.open('Release created.', undefined, { duration: 2000 });

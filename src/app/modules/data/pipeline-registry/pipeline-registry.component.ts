@@ -233,7 +233,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             .openDeleteDialog('pipeline')
             .afterClosed()
             .pipe(
-                concatMap((deletePipeline: boolean) => {
+                concatMap((deletePipeline: boolean | undefined) => {
                     if (deletePipeline) {
                         return this.flowEngineService.deletePipeline(pipe.id);
                     }
@@ -297,7 +297,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(text)
             .afterClosed()
-            .subscribe((deletePipelines: boolean) => {
+            .subscribe((deletePipelines: boolean | undefined) => {
                 if (deletePipelines) {
                     this.ready = false;
                     this.selection.selected.forEach((pipeline: PipelineModel) => {

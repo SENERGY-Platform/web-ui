@@ -110,7 +110,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('device type: ' + deviceTypeInput.name)
             .afterClosed()
-            .subscribe((deviceTypeDelete: boolean) => {
+            .subscribe((deviceTypeDelete: boolean | undefined) => {
                 if (deviceTypeDelete) {
                     this.ready = false;
                     this.deviceTypeService.deleteDeviceType(encodeURIComponent(deviceTypeInput.id)).subscribe((deleted: boolean) => {
@@ -217,7 +217,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(text)
             .afterClosed()
-            .subscribe((deletePipelines: boolean) => {
+            .subscribe((deletePipelines: boolean | undefined) => {
                 if (deletePipelines) {
                     this.ready = false;
                     this.selection.selected.forEach((deviceType: DeviceTypeModel) => {

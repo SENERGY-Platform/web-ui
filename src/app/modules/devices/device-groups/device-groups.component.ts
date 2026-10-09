@@ -142,7 +142,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('device group ' + deviceGroup.name)
             .afterClosed()
-            .subscribe((deleteDeviceClass: boolean) => {
+            .subscribe((deleteDeviceClass: boolean | undefined) => {
                 if (deleteDeviceClass) {
                     this.deviceGroupsService.deleteDeviceGroup(deviceGroup.id).subscribe((resp: boolean) => {
                         if (resp === true) {
@@ -207,7 +207,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device groups' : ' device group'))
             .afterClosed()
-            .subscribe((deleteConcepts: boolean) => {
+            .subscribe((deleteConcepts: boolean | undefined) => {
                 if (deleteConcepts) {
                     this.ready = false;
                     this.selection.selected.forEach((deviceGroup: DeviceGroupModel) => {

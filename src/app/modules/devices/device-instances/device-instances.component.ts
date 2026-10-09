@@ -408,7 +408,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('device')
             .afterClosed()
-            .subscribe((deviceDelete: boolean) => {
+            .subscribe((deviceDelete: boolean | undefined) => {
                 if (deviceDelete) {
                     this.ready = false;
                     this.deviceInstancesService.deleteDeviceInstance(device.id).subscribe((resp: DeviceInstanceModel | null) => {
@@ -531,7 +531,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device'))
             .afterClosed()
-            .subscribe((deleteConcepts: boolean) => {
+            .subscribe((deleteConcepts: boolean | undefined) => {
                 if (deleteConcepts) {
                     this.ready = false;
                     this.selection.selected.forEach((device: DeviceInstanceModel) => {

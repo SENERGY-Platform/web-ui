@@ -161,7 +161,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('characteristic ' + characteristic.name)
             .afterClosed()
-            .subscribe((deleteCharacteristic: boolean) => {
+            .subscribe((deleteCharacteristic: boolean | undefined) => {
                 if (deleteCharacteristic) {
                     this.ready = false;
                     this.characteristicsService
@@ -301,7 +301,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' characteristics' : ' characteristic'))
             .afterClosed()
-            .subscribe((deleteConcepts: boolean) => {
+            .subscribe((deleteConcepts: boolean | undefined) => {
                 if (deleteConcepts) {
                     this.ready = false;
                     this.selection.selected.forEach((characteristic: DeviceTypeCharacteristicsModel) => {

@@ -117,7 +117,7 @@ export class OperatorRepoComponent implements OnInit {
         this.dialogsService
             .openDeleteDialog('operator')
             .afterClosed()
-            .subscribe((operatorDelete: boolean) => {
+            .subscribe((operatorDelete: boolean | undefined) => {
                 if (operatorDelete) {
                     this.ready = false;
                     this.operatorRepoService.deleteOperator(operator).subscribe(() => {
@@ -214,7 +214,7 @@ export class OperatorRepoComponent implements OnInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' operators' : ' operator'))
             .afterClosed()
-            .subscribe((deleteOperators: boolean) => {
+            .subscribe((deleteOperators: boolean | undefined) => {
                 if (deleteOperators) {
                     this.ready = false;
 

@@ -263,8 +263,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('release', {checkboxText: 'Delete all previous releases'})
             .afterClosed()
-            .subscribe((deleteResponse: DeleteDialogResponse) => {
-                if (deleteResponse.confirmed) {
+            .subscribe((deleteResponse: DeleteDialogResponse | undefined) => {
+                if (deleteResponse?.confirmed) {
                     this.releasesService.deleteRelease(release.id, deleteResponse.checkboxChecked).subscribe((resp: { status: number }) => {
                         if (resp.status === 200) {
                             this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => release.id === item._id));

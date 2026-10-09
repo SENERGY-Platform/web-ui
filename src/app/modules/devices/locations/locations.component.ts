@@ -132,7 +132,7 @@ export class LocationsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('location ' + location.name)
             .afterClosed()
-            .subscribe((deleteDeviceClass: boolean) => {
+            .subscribe((deleteDeviceClass: boolean | undefined) => {
                 if (deleteDeviceClass) {
                     this.ready = false;
                     this.locationsService.deleteLocation(location.id).subscribe((resp: boolean) => {
@@ -210,7 +210,7 @@ export class LocationsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' locations' : ' location'))
             .afterClosed()
-            .subscribe((deleteConcepts: boolean) => {
+            .subscribe((deleteConcepts: boolean | undefined) => {
                 if (deleteConcepts) {
                     this.ready = false;
                     this.selection.selected.forEach((location: LocationModel) => {

@@ -250,7 +250,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' networks' : ' network'))
             .afterClosed()
-            .subscribe((deleteNetworks: boolean) => {
+            .subscribe((deleteNetworks: boolean | undefined) => {
                 if (!deleteNetworks) {
                     return;
                 }
@@ -328,7 +328,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
             );
         };
         if (new Date(expires).valueOf() - new Date().valueOf() > 30 * 24 * 3600 * 1000) {
-            this.dialogsService.openConfirmDialog('LoRaWAN Certificates', 'The current certificates will NOT expire soon. If you\'ve lost access to the current certificates, it is recommended to first change the EUI of the gateway and then retrieve new certs. Do you still want to generate new certificates?').afterClosed().subscribe((generate: boolean) => {
+            this.dialogsService.openConfirmDialog('LoRaWAN Certificates', 'The current certificates will NOT expire soon. If you\'ve lost access to the current certificates, it is recommended to first change the EUI of the gateway and then retrieve new certs. Do you still want to generate new certificates?').afterClosed().subscribe((generate: boolean | undefined) => {
                 if (generate) {
                     showDialog();
                 }

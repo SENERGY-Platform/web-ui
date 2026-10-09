@@ -237,7 +237,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
         this.deleteDialog
             .openDeleteDialog(text)
             .afterClosed()
-            .subscribe((deletePipelines: boolean) => {
+            .subscribe((deletePipelines: boolean | undefined) => {
                 if (deletePipelines) {
                     this.dataReady = false;
                     this.selection.selected.forEach((importType: ImportTypeModel) => {

@@ -144,7 +144,7 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('device class ' + deviceClass.name)
             .afterClosed()
-            .subscribe((deleteDeviceClass: boolean) => {
+            .subscribe((deleteDeviceClass: boolean | undefined) => {
                 if (deleteDeviceClass) {
                     this.ready = false;
                     this.deviceClassesService.deleteDeviceClasses(deviceClass.id).subscribe((resp: boolean) => {
@@ -243,7 +243,7 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' device classes' : ' device class'))
             .afterClosed()
-            .subscribe((deleteDeviceClass: boolean) => {
+            .subscribe((deleteDeviceClass: boolean | undefined) => {
                 if (deleteDeviceClass) {
                     this.ready = false;
                     this.selection.selected.forEach((deviceClass: DeviceTypeDeviceClassModel) => {

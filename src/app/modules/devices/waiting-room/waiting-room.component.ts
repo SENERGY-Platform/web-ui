@@ -208,7 +208,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('device')
             .afterClosed()
-            .subscribe((deleteDevice: boolean) => {
+            .subscribe((deleteDevice: boolean | undefined) => {
                 if (deleteDevice) {
                     this.waitingRoomService.deleteDevice(localId).subscribe((response) => {
                         if (response.status < 300) {
@@ -261,7 +261,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openDeleteDialog(this.selection.selected.length + (this.selection.selected.length > 1 ? ' devices' : ' device'))
             .afterClosed()
-            .subscribe((deleteDevice: boolean) => {
+            .subscribe((deleteDevice: boolean | undefined) => {
                 if (deleteDevice) {
                     this.ready = false;
 
@@ -335,7 +335,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openConfirmDialog('Use Devices', text)
             .afterClosed()
-            .subscribe((useDevice: boolean) => {
+            .subscribe((useDevice: boolean | undefined) => {
                 if (useDevice) {
                     this.ready = false;
 
@@ -361,7 +361,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openConfirmDialog('Hide Device', 'Do you really want to hide this device?')
             .afterClosed()
-            .subscribe((hideDevice: boolean) => {
+            .subscribe((hideDevice: boolean | undefined) => {
                 if (hideDevice) {
                     this.ready = false;
                     this.waitingRoomService.hideDevice(localId).subscribe((response) => {
@@ -388,7 +388,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openConfirmDialog('Hide Devices', text)
             .afterClosed()
-            .subscribe((ok: boolean) => {
+            .subscribe((ok: boolean | undefined) => {
                 if (ok) {
                     this.ready = false;
 
@@ -414,7 +414,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openConfirmDialog('Show Device', 'Do you really want to show this device?')
             .afterClosed()
-            .subscribe((showDevice: boolean) => {
+            .subscribe((showDevice: boolean | undefined) => {
                 if (showDevice) {
                     this.ready = false;
                     this.waitingRoomService.showDevice(localId).subscribe((response) => {
@@ -441,7 +441,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.dialogsService
             .openConfirmDialog('Show Devices', text)
             .afterClosed()
-            .subscribe((ok: boolean) => {
+            .subscribe((ok: boolean | undefined) => {
                 if (ok) {
                     this.ready = false;
 

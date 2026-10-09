@@ -98,7 +98,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('report ' + report.name)
             .afterClosed()
-            .subscribe((deleteReport: boolean) => {
+            .subscribe((deleteReport: boolean | undefined) => {
                 if (!deleteReport) {
                     return;
                 }

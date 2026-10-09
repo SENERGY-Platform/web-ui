@@ -169,7 +169,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
         this.dialogsService
             .openDeleteDialog('flow ' + flow.name)
             .afterClosed()
-            .subscribe((deleteFlow: boolean) => {
+            .subscribe((deleteFlow: boolean | undefined) => {
                 if (deleteFlow) {
                     const index = this.flows.indexOf(flow);
                     if (index > -1) {

@@ -294,7 +294,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     }
 
     public askfordelete(policy: PermissionModel) {
-        this.dialogsService.openDeleteDialog('policy').afterClosed().subscribe((del: boolean) => {
+        this.dialogsService.openDeleteDialog('policy').afterClosed().subscribe((del: boolean | undefined) => {
             if (del) {
                 this.deletePolicy(policy);
             }
@@ -396,7 +396,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     }
 
     deleteMultipleItems() {
-        this.dialogsService.openDeleteDialog('policies').afterClosed().subscribe((del: boolean) => {
+        this.dialogsService.openDeleteDialog('policies').afterClosed().subscribe((del: boolean | undefined) => {
             if (del) {
                 this.ladonService.deletePolicies(this.selection.selected).subscribe(() => {
                     this.loadPolicies();
