@@ -21,7 +21,9 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { CertificatesService } from './shared/certificates.service';
-import { concatMap, map, Observable } from 'rxjs';
+import { concatMap, map, Observable, of } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
@@ -46,6 +48,7 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
   private certificatesService = inject(CertificatesService);
   private searchbarService = inject(SearchbarService);
   private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
 
   dataReady = false;
@@ -80,7 +83,13 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(CertificateRevokeDialogComponent);
     dialogRef.afterClosed().subscribe((res: Rfc5280Reason | null | undefined) => {
       if (res !== null && res !== undefined) {
-        this.certificatesService.revoke(cert, res).pipe(concatMap(_ => this.reload())).subscribe();
+        this.certificatesService.revoke(cert, res).pipe(concatMap(ok => {
+          if (ok) {
+            return this.reload();
+          }
+          snackError(this.snackBar, 'Could not revoke the certificate');
+          return of(undefined);
+        })).subscribe();
       }
     });
   }

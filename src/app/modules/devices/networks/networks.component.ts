@@ -295,9 +295,12 @@ export class NetworksComponent implements OnInit, AfterViewInit {
         });
         const showDialog = () => {
             this.networksService.getLoraCerts(network).subscribe(certs => {
+                if (certs === null) {
+                    snackError(this.snackBar, 'Could not generate the LoRaWAN certificates');
+                    return;
+                }
                 this.networksService.openLoraCertsDialog(network, certs);
-            }
-            );
+            });
         };
         if (new Date(expires).valueOf() - new Date().valueOf() > 30 * 24 * 3600 * 1000) {
             this.dialogsService.openConfirmDialog('LoRaWAN Certificates', 'The current certificates will NOT expire soon. If you\'ve lost access to the current certificates, it is recommended to first change the EUI of the gateway and then retrieve new certs. Do you still want to generate new certificates?').afterClosed().subscribe((generate: boolean | undefined) => {

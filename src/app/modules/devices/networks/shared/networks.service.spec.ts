@@ -15,11 +15,13 @@
  */
 
 import { TestBed, inject } from '@angular/core/testing';
+import { HttpTestingController } from '@angular/common/http/testing';
 
 import { NetworksService } from './networks.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { HubModel } from './networks.model';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
@@ -34,4 +36,20 @@ describe('NetworksService', () => {
     it('should be created', inject([NetworksService], (service: NetworksService) => {
         expect(service).toBeTruthy();
     }));
+
+    it('getLoraCerts answers null and names the backend when the request fails', () => {
+        const snackBar = TestBed.inject(MatSnackBar);
+        const open = spyOn(snackBar, 'open');
+        spyOn(console, 'error');
+        const service = TestBed.inject(NetworksService);
+        const http = TestBed.inject(HttpTestingController);
+        let result: unknown = 'unset';
+
+        service.getLoraCerts({ id: 'n1' } as HubModel).subscribe((r) => result = r);
+        http.expectOne((r) => r.method === 'POST' && r.url.endsWith('/gateways/n1/cert'))
+            .flush('boom', { status: 500, statusText: 'Internal Server Error' });
+
+        expect(result).toBeNull();
+        expect(open.calls.mostRecent().args[0]).toContain('request failed (500)');
+    });
 });

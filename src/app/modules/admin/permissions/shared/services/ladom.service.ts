@@ -18,9 +18,11 @@
 
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { AllowedMethods, AuthorizationRequest, AuthorizationRequestResponse, PermissionApiModel, permissionApiToPermission, PermissionModel, PermissionTestResponse, permissionToPermissionApi } from '../permission.model';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 
 
 @Injectable({
@@ -28,6 +30,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class LadonService {
     private http = inject(HttpClient);
+    private errorHandlerService = inject(ErrorHandlerService);
 
 
     public baseUrl: string = environment.ladonUrl;
@@ -44,12 +47,19 @@ export class LadonService {
         return apiPolicies;
     }
 
-    public postPolicies(policies: PermissionModel[]): Observable<unknown> {
-        return this.http.post(this.baseUrl + '/policies', LadonService.handlePolicies(policies));
+    /** The three write methods answer true on success and false after reporting a failure. */
+    public postPolicies(policies: PermissionModel[]): Observable<boolean> {
+        return this.http.post(this.baseUrl + '/policies', LadonService.handlePolicies(policies)).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('LadonService', 'postPolicies', false)),
+        );
     }
 
-    public putPolicies(policies: PermissionModel[]): Observable<unknown> {
-        return this.http.put(this.baseUrl + '/policies', LadonService.handlePolicies(policies));
+    public putPolicies(policies: PermissionModel[]): Observable<boolean> {
+        return this.http.put(this.baseUrl + '/policies', LadonService.handlePolicies(policies)).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('LadonService', 'putPolicies', false)),
+        );
     }
 
     public getAllPolicies(): Observable<PermissionModel[]> {
@@ -64,10 +74,13 @@ export class LadonService {
         });
     }
 
-    public deletePolicies(policies: PermissionModel[]): Observable<unknown> {
+    public deletePolicies(policies: PermissionModel[]): Observable<boolean> {
         const ids: string[] = [];
         policies.forEach((p) => ids.push(p.id));
-        return this.http.request('delete', this.baseUrl + '/policies', { body: ids });
+        return this.http.request('delete', this.baseUrl + '/policies', { body: ids }).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('LadonService', 'deletePolicies', false)),
+        );
     }
 
     public test(test: { clientID: string; userId: string; roles: string[]; username: string; target_method: string; target_uri: string }):

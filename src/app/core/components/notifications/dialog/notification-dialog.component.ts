@@ -36,6 +36,8 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { environment } from '../../../../../environments/environment';
 import { AuthorizationService } from '../../../services/authorization.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../../services/snack-bar-messages';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../directives/close-mtx-select-on-scroll.directive';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
@@ -67,6 +69,7 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
     private dialogRef = inject<MatDialogRef<NotificationDialogComponent>>(MatDialogRef);
     private fb = inject(FormBuilder);
     private authorizationService = inject(AuthorizationService);
+    private snackBar = inject(MatSnackBar);
     preferencesService = inject(PreferencesService);
 
     modes = Modes;
@@ -257,8 +260,11 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
 
     private registerPlatformBrokerSaver() {
         this.platformBrokerActive.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(v =>
-            this.notificationService.updatePlatformBrokerConfig({ enabled: v as boolean }).subscribe({
-                error: () => this.platformBrokerActive.setValue(!v, { emitEvent: false }),
+            this.notificationService.updatePlatformBrokerConfig({ enabled: v as boolean }).subscribe((ok) => {
+                if (!ok) {
+                    this.platformBrokerActive.setValue(!v, { emitEvent: false });
+                    snackError(this.snackBar, 'Could not update the platform broker setting');
+                }
             }),
         );
     }
@@ -269,7 +275,13 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
     }
 
     deleteBroker(element: NotificationBrokerModel) {
-        this.notificationService.deleteBroker(element.id).subscribe(() => this.moveBrokerPage(this.lastBrokerPageEvent));
+        this.notificationService.deleteBroker(element.id).subscribe((ok) => {
+            if (ok) {
+                this.moveBrokerPage(this.lastBrokerPageEvent);
+            } else {
+                snackError(this.snackBar, 'Could not delete the broker');
+            }
+        });
     }
 
     addBroker() {
@@ -292,9 +304,13 @@ export class NotificationDialogComponent implements OnInit, OnDestroy {
         const save = broker.id === ''
             ? this.notificationService.createBroker(broker)
             : this.notificationService.updateBroker(broker);
-        save.subscribe(() => {
-            this.gotoBrokerList();
-            this.moveBrokerPage(this.lastBrokerPageEvent);
+        save.subscribe((ok) => {
+            if (ok) {
+                this.gotoBrokerList();
+                this.moveBrokerPage(this.lastBrokerPageEvent);
+            } else {
+                snackError(this.snackBar, 'Could not save the broker');
+            }
         });
     }
 }

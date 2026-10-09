@@ -172,8 +172,10 @@ export class NetworksService {
         this.dialog.open(NetworksLoraCertsDialogComponent, dialogConfig);
     }
 
-    getLoraCerts(network: HubModel): Observable<LoraCertsModel> {
-        return this.http.post<LoraCertsModel>(environment.lorawanConnectorUrl + '/gateways/' + network.id + '/cert', {});
+    getLoraCerts(network: HubModel): Observable<LoraCertsModel | null> {
+        return this.http.post<LoraCertsModel>(environment.lorawanConnectorUrl + '/gateways/' + network.id + '/cert', {}).pipe(
+            catchError(this.errorHandlerService.handleError<LoraCertsModel | null>(NetworksService.name, 'getLoraCerts', null)),
+        );
     }
 
     getExtendedHub(id: string): Observable<ExtendedHubModel|null> {

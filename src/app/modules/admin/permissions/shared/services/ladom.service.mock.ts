@@ -28,20 +28,20 @@ export class LadomServiceMock {
     constructor() {
     }
 
-    public postPolicies(_: PermissionModel[]): Observable<unknown> {
-        return of(null);
+    public postPolicies(_: PermissionModel[]): Observable<boolean> {
+        return of(true);
     }
 
-    public putPolicies(_: PermissionModel[]): Observable<unknown> {
-        return of(null);
+    public putPolicies(_: PermissionModel[]): Observable<boolean> {
+        return of(true);
     }
 
     public getAllPolicies(): Observable<PermissionModel[]> {
         return of([] as PermissionModel[]);
     }
 
-    public deletePolicies(_: PermissionModel[]): Observable<unknown> {
-        return of(null);
+    public deletePolicies(_: PermissionModel[]): Observable<boolean> {
+        return of(true);
 
     }
 }

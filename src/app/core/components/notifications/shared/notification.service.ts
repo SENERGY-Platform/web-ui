@@ -16,6 +16,7 @@
 
 import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import {
     NotificationBrokerListModel,
     NotificationBrokerModel,
@@ -81,19 +82,26 @@ export class NotificationService implements OnDestroy {
         return this.notificationEmitter.asObservable();
     }
 
-    deleteNotification(notification: NotificationModel): Observable<unknown> {
-        return this.http.delete(environment.notificationsUrl + '/notifications/' + notification._id);
+    /** The write methods below answer true on success and false after reporting a failure. */
+    deleteNotification(notification: NotificationModel): Observable<boolean> {
+        return this.http.delete(environment.notificationsUrl + '/notifications/' + notification._id).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('NotificationService', 'deleteNotification', false)),
+        );
     }
 
-    deleteNotifications(ids: string[]): Observable<unknown> {
+    deleteNotifications(ids: string[]): Observable<boolean> {
         return this.http.request('DELETE', environment.notificationsUrl + '/notifications', {
             body: ids,
             responseType: 'text',
             observe: 'response',
-        });
+        }).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('NotificationService', 'deleteNotifications', false)),
+        );
     }
 
-    updateNotification(notification: NotificationModel): Observable<unknown> {
+    updateNotification(notification: NotificationModel): Observable<boolean> {
         const n: NotificationUpdateModel = {
             isRead: notification.isRead,
             message: notification.message,
@@ -101,23 +109,35 @@ export class NotificationService implements OnDestroy {
             userId: notification.userId,
             created_at: notification.created_at,
         };
-        return this.http.post(environment.notificationsUrl + '/notifications/' + notification._id, n);
+        return this.http.post(environment.notificationsUrl + '/notifications/' + notification._id, n).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('NotificationService', 'updateNotification', false)),
+        );
     }
 
     listBrokers(limit: number, offset: number): Observable<NotificationBrokerListModel> {
         return this.http.get<NotificationBrokerListModel>(environment.notificationsUrl + '/brokers?limit=' + limit + '&offset=' + offset);
     }
 
-    createBroker(broker: NotificationBrokerModel): Observable<NotificationBrokerModel> {
-        return this.http.post<NotificationBrokerModel>(environment.notificationsUrl + '/brokers', broker);
+    createBroker(broker: NotificationBrokerModel): Observable<boolean> {
+        return this.http.post<NotificationBrokerModel>(environment.notificationsUrl + '/brokers', broker).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('NotificationService', 'createBroker', false)),
+        );
     }
 
-    updateBroker(broker: NotificationBrokerModel): Observable<NotificationBrokerModel> {
-        return this.http.put<NotificationBrokerModel>(environment.notificationsUrl + '/brokers/' + broker.id, broker);
+    updateBroker(broker: NotificationBrokerModel): Observable<boolean> {
+        return this.http.put<NotificationBrokerModel>(environment.notificationsUrl + '/brokers/' + broker.id, broker).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('NotificationService', 'updateBroker', false)),
+        );
     }
 
-    deleteBroker(id: string): Observable<unknown> {
-        return this.http.delete(environment.notificationsUrl + '/brokers/' + id);
+    deleteBroker(id: string): Observable<boolean> {
+        return this.http.delete(environment.notificationsUrl + '/brokers/' + id).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('NotificationService', 'deleteBroker', false)),
+        );
     }
 
     deleteBrokers(ids: string[]): Observable<unknown> {
@@ -132,8 +152,11 @@ export class NotificationService implements OnDestroy {
         return this.http.get<NotificationPlatformBrokerModel>(environment.notificationsUrl + '/platform-broker');
     }
 
-    updatePlatformBrokerConfig(config: NotificationPlatformBrokerModel): Observable<NotificationPlatformBrokerModel> {
-        return this.http.put<NotificationPlatformBrokerModel>(environment.notificationsUrl + '/platform-broker', config);
+    updatePlatformBrokerConfig(config: NotificationPlatformBrokerModel): Observable<boolean> {
+        return this.http.put<NotificationPlatformBrokerModel>(environment.notificationsUrl + '/platform-broker', config).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError<boolean>('NotificationService', 'updatePlatformBrokerConfig', false)),
+        );
     }
 
     getSettings(): Observable<NotificationSettingsModel> {

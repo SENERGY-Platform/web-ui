@@ -24,6 +24,8 @@ import {MatDialog} from '@angular/material/dialog';
 import { MatSort, Sort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {DomSanitizer} from '@angular/platform-browser';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 import {interval, Observable} from 'rxjs';
 import {debounce, map, startWith} from 'rxjs/operators';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
@@ -65,6 +67,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     private sanitizer = inject(DomSanitizer);
     private kongService = inject(KongService);
     private dialogsService = inject(DialogsService);
+    private snackBar = inject(MatSnackBar);
     preferencesService = inject(PreferencesService);
 
 
@@ -244,8 +247,12 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     }
 
     public deletePolicy(policy: PermissionModel) {
-        this.ladonService.deletePolicies([policy]).subscribe(() => {
-            this.loadPolicies();
+        this.ladonService.deletePolicies([policy]).subscribe((ok) => {
+            if (ok) {
+                this.loadPolicies();
+            } else {
+                snackError(this.snackBar, 'Could not delete the policy');
+            }
         });
     }
 
@@ -320,13 +327,28 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
                 const filteredPolicies = result.policies.filter((p) => p.id !== 'admin-all');
                 if (result.overwrite) {
                     const currentPolicies = this.policies.filter((p) => p.id !== 'admin-all');
-                    this.ladonService.deletePolicies(currentPolicies).subscribe(() => this.ladonService.postPolicies(filteredPolicies)
-                        .subscribe(() => {
+                    this.ladonService.deletePolicies(currentPolicies).subscribe((deleted) => {
+                        if (!deleted) {
+                            this.failImport();
+                            return;
+                        }
+                        this.ladonService.postPolicies(filteredPolicies).subscribe((ok) => {
+                            if (!ok) {
+                                // the old policies are already gone, so the list has to be reloaded
+                                this.failImport();
+                                this.loadPolicies();
+                                return;
+                            }
                             this.importing = false;
                             this.loadPolicies();
-                        }));
+                        });
+                    });
                 } else {
-                    this.ladonService.putPolicies(filteredPolicies).subscribe(() => {
+                    this.ladonService.putPolicies(filteredPolicies).subscribe((ok) => {
+                        if (!ok) {
+                            this.failImport();
+                            return;
+                        }
                         this.importing = false;
                         this.loadPolicies();
                     });
@@ -334,6 +356,12 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
 
             }
         });
+    }
+
+    private failImport() {
+        this.importing = false;
+        this.ready = true;
+        snackError(this.snackBar, 'Could not import the policies');
     }
 
     filter(_: any) {
@@ -398,8 +426,12 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     deleteMultipleItems() {
         this.dialogsService.openDeleteDialog('policies').afterClosed().subscribe((del: boolean | undefined) => {
             if (del) {
-                this.ladonService.deletePolicies(this.selection.selected).subscribe(() => {
-                    this.loadPolicies();
+                this.ladonService.deletePolicies(this.selection.selected).subscribe((ok) => {
+                    if (ok) {
+                        this.loadPolicies();
+                    } else {
+                        snackError(this.snackBar, 'Could not delete the selected policies');
+                    }
                 });
             }
         });

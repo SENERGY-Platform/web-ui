@@ -20,6 +20,7 @@ import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/cor
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import { snackError } from 'src/app/core/services/snack-bar-messages';
 import {ActivatedRoute} from '@angular/router';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
@@ -148,19 +149,20 @@ export class PermissionsEditComponent implements OnInit {
     }
 
     public yes() {
-        this.pushPolicy().subscribe(() => this.dialogRef.close('yes'),
-            () => {
-                this.snackBar.open('Could not update policy', undefined, {
-                    duration: 3 * 1000,
-                });
-            });
+        this.pushPolicy().subscribe((ok) => {
+            if (ok) {
+                this.dialogRef.close('yes');
+            } else {
+                snackError(this.snackBar, 'Could not update policy');
+            }
+        });
     }
 
     public no() {
         this.dialogRef.close();
     }
 
-    public pushPolicy(): Observable<unknown> {
+    public pushPolicy(): Observable<boolean> {
         const policy: PermissionModel = {
             subject: this.permission.subject,
             actions: [],

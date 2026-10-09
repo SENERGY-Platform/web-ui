@@ -18,6 +18,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Observable, of, throwError } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { NotificationDialogComponent } from './notification-dialog.component';
 import { AuthorizationService } from '../../../services/authorization.service';
@@ -37,6 +38,8 @@ class NotificationServiceStub {
     };
     saved: NotificationChannelTopicConfig[] = [];
     failNextSave = false;
+    writesSucceed = true;
+    brokerWrites: string[] = [];
 
     getSettings(): Observable<NotificationSettingsModel> {
         return of(this.settingsResponse as NotificationSettingsModel);
@@ -55,8 +58,23 @@ class NotificationServiceStub {
         return of({ enabled: false });
     }
 
-    updatePlatformBrokerConfig(config: { enabled: boolean }) {
-        return of(config);
+    updatePlatformBrokerConfig(_: { enabled: boolean }) {
+        return of(this.writesSucceed);
+    }
+
+    createBroker() {
+        this.brokerWrites.push('create');
+        return of(this.writesSucceed);
+    }
+
+    updateBroker() {
+        this.brokerWrites.push('update');
+        return of(this.writesSucceed);
+    }
+
+    deleteBroker() {
+        this.brokerWrites.push('delete');
+        return of(this.writesSucceed);
     }
 
     listBrokers() {
@@ -68,9 +86,11 @@ describe('NotificationDialogComponent', () => {
     let component: NotificationDialogComponent;
     let fixture: ComponentFixture<NotificationDialogComponent>;
     let service: NotificationServiceStub;
+    let snackBar: jasmine.SpyObj<MatSnackBar>;
 
     beforeEach(async () => {
         service = new NotificationServiceStub();
+        snackBar = jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']);
 
         await TestBed.configureTestingModule({
             imports: [NotificationDialogComponent],
@@ -79,6 +99,7 @@ describe('NotificationDialogComponent', () => {
                 { provide: MatDialogRef, useValue: { close: () => undefined } },
                 { provide: AuthorizationService, useValue: { getUserId: () => 'user-1' } },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
+                { provide: MatSnackBar, useValue: snackBar },
                 {
                     provide: MAT_DIALOG_DATA,
                     useValue: { notificationService: service as unknown as NotificationService },
@@ -175,4 +196,61 @@ describe('NotificationDialogComponent', () => {
 
         expect(component.isTopicUnreachable(notificationTopicUnknown)).toBeFalse();
     }));
+
+    describe('broker writes', () => {
+        const element = {
+            id: 'b1', address: 'a', enabled: true, user: '', password: '', topic: '', qos: 0
+        };
+
+        beforeEach(() => {
+            component.ngOnInit();
+            service.writesSucceed = false;
+        });
+
+        it('rolls the platform broker toggle back and names the action when saving fails', () => {
+            component.platformBrokerActive.setValue(true);
+
+            expect(component.platformBrokerActive.value).toBeFalse();
+            expect(snackBar.open.calls.mostRecent().args[0]).toContain('Could not update the platform broker setting');
+        });
+
+        it('keeps the platform broker toggle when saving succeeds', () => {
+            service.writesSucceed = true;
+            component.platformBrokerActive.setValue(true);
+
+            expect(component.platformBrokerActive.value).toBeTrue();
+            expect(snackBar.open).not.toHaveBeenCalled();
+        });
+
+        it('stays in the edit form and names the action when saving a broker fails', () => {
+            component.mode = component.modes.BROKER_EDIT;
+            component.brokerEditGroup.patchValue(element as any);
+
+            component.saveBroker();
+
+            expect(service.brokerWrites).toEqual(['update']);
+            expect<unknown>(component.mode).toBe(component.modes.BROKER_EDIT);
+            expect(snackBar.open.calls.mostRecent().args[0]).toContain('Could not save the broker');
+        });
+
+        it('leaves the edit form after a successful save', () => {
+            service.writesSucceed = true;
+            component.mode = component.modes.BROKER_EDIT;
+            component.brokerEditGroup.patchValue(element as any);
+
+            component.saveBroker();
+
+            expect<unknown>(component.mode).toBe(component.modes.BROKER_LIST);
+            expect(snackBar.open).not.toHaveBeenCalled();
+        });
+
+        it('does not reload the broker list and names the action when deleting a broker fails', () => {
+            const reload = spyOn(service, 'listBrokers').and.callThrough();
+
+            component.deleteBroker(element as any);
+
+            expect(reload).not.toHaveBeenCalled();
+            expect(snackBar.open.calls.mostRecent().args[0]).toContain('Could not delete the broker');
+        });
+    });
 });

@@ -88,4 +88,32 @@ describe('PermissionsEditComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    describe('saving', () => {
+        let close: jasmine.Spy;
+
+        beforeEach(() => {
+            close = jasmine.createSpy('close');
+            (component as any).dialogRef = { close };
+            snackBarMock.open.calls.reset();
+        });
+
+        it('stays open and shows an error snack bar that waits for the user when saving fails', () => {
+            spyOn(component, 'pushPolicy').and.returnValue(of(false));
+
+            component.yes();
+
+            expect(close).not.toHaveBeenCalled();
+            expect(snackBarMock.open).toHaveBeenCalledWith('Could not update policy', 'close', { panelClass: 'snack-bar-error' });
+        });
+
+        it('closes with yes and shows no snack bar when saving succeeds', () => {
+            spyOn(component, 'pushPolicy').and.returnValue(of(true));
+
+            component.yes();
+
+            expect(close).toHaveBeenCalledWith('yes');
+            expect(snackBarMock.open).not.toHaveBeenCalled();
+        });
+    });
 });

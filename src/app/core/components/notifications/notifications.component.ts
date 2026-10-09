@@ -34,6 +34,8 @@ import { NotificationService } from './shared/notification.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ConnectionHistoryDialogComponent } from 'src/app/widgets/shared/connection-history-dialog/connection-history-dialog.component';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../services/snack-bar-messages';
 import { SearchbarComponent } from '../searchbar/searchbar.component';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -72,6 +74,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   preferencesService = inject(PreferencesService);
   dialog = inject(MatDialog);
   router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   private readonly destroy$ = new Subject<void>();
   private _paginator?: MatPaginator;
@@ -163,8 +166,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   }
 
   toggleReadStatus(notification: NotificationModel): void {
-    notification.isRead = !notification.isRead;
-    this.notificationService.updateNotification(notification).subscribe();
+    const previous = notification.isRead;
+    notification.isRead = !previous;
+    this.notificationService.updateNotification(notification).subscribe((ok) => {
+      if (!ok) {
+        notification.isRead = previous;
+        snackError(this.snackBar, 'Could not mark the notification as ' + (previous ? 'unread' : 'read'));
+      }
+    });
   }
 
   deleteNotification(notification: NotificationModel): void {
@@ -173,8 +182,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       .afterClosed()
       .subscribe((deleteNotification: boolean | undefined) => {
         if (deleteNotification) {
-          this.notificationService.deleteNotification(notification).subscribe(() => {
-            this.selection.deselect(notification);
+          this.notificationService.deleteNotification(notification).subscribe((ok) => {
+            if (ok) {
+              this.selection.deselect(notification);
+            } else {
+              snackError(this.snackBar, 'Could not delete the notification');
+            }
           });
         }
       });
@@ -191,8 +204,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       .subscribe((deleteNotifications: boolean | undefined) => {
         if (deleteNotifications) {
           const ids = this.selection.selected.map((n) => n._id);
-          this.notificationService.deleteNotifications(ids).subscribe(() => {
-            this.selection.clear();
+          this.notificationService.deleteNotifications(ids).subscribe((ok) => {
+            if (ok) {
+              this.selection.clear();
+            } else {
+              snackError(this.snackBar, 'Could not delete the selected notifications');
+            }
           });
         }
       });
@@ -230,7 +247,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   markAllRead() {
     this.notifications.filter((n) => !n.isRead).forEach((n) => {
       n.isRead = true;
-      this.notificationService.updateNotification(n).subscribe();
+      this.notificationService.updateNotification(n).subscribe((ok) => {
+        if (!ok) {
+          n.isRead = false;
+          snackError(this.snackBar, 'Could not mark all notifications as read');
+        }
+      });
     });
   }
 
@@ -240,8 +262,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       .afterClosed()
       .subscribe((deleteNotifications: boolean | undefined) => {
         if (deleteNotifications) {
-          this.notificationService.deleteNotifications(this.notifications.map(n => n._id)).subscribe(() => {
-            this.selection.clear();
+          this.notificationService.deleteNotifications(this.notifications.map(n => n._id)).subscribe((ok) => {
+            if (ok) {
+              this.selection.clear();
+            } else {
+              snackError(this.snackBar, 'Could not delete all notifications');
+            }
           });
         }
       });

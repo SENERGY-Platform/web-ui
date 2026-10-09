@@ -16,7 +16,8 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable } from 'rxjs';
+import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { environment } from 'src/environments/environment';
@@ -29,6 +30,7 @@ import { CertificateInfo, Rfc5280Reason, rfc5280ReasonString } from './certifica
 export class CertificatesService {
   private http = inject(HttpClient);
   private ladonService = inject(LadonService);
+  private errorHandlerService = inject(ErrorHandlerService);
 
   listAuthorizations: PermissionTestResponse;
   revokeAuthorizations: PermissionTestResponse;
@@ -60,11 +62,15 @@ export class CertificatesService {
     );
   }
 
-  revoke(cert: CertificateInfo, reason: Rfc5280Reason): Observable<unknown> {
+  /** Answers true on success and false after reporting a failure. */
+  revoke(cert: CertificateInfo, reason: Rfc5280Reason): Observable<boolean> {
     return this.http.post(environment.certAuthorityUrl + '/revoke', {
       serial: cert.serial_number,
       authority_key_id: cert.authority_key_identifier,
       reason: rfc5280ReasonString(reason),
-    });
+    }).pipe(
+      map(() => true),
+      catchError(this.errorHandlerService.handleError<boolean>('CertificatesService', 'revoke', false)),
+    );
   }
 }
