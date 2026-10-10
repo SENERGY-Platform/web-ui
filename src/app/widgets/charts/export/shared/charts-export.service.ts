@@ -354,7 +354,7 @@ export class ChartsExportService {
                     const titles = tableData.table.data[0].slice(1).map(title => String(title || ''));
                     tableData.colors = this.getThemeColorsForTitles(titles);
                 }
-                return forkJoin(obs).pipe(map(_ => this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat)));
+                return forkJoin(obs).pipe(map(_ => this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat, tableData.columnAxes)));
             }
         }));
     }
@@ -424,8 +424,8 @@ export class ChartsExportService {
         return unique.length > 0 ? unique : [chartsExportDefaultColor];
     }
 
-    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsExportChart {
-        return chartsExportChart(widget, dataTable, colorOverride, hAxisFormat);
+    private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string, columnAxes?: number[]): ChartsExportChart {
+        return chartsExportChart(widget, dataTable, colorOverride, hAxisFormat, columnAxes);
     }
 
     private getComputedThemeColor(className: string, property: 'color' | 'backgroundColor'): string | undefined {

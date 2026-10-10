@@ -32,7 +32,7 @@ import { DataTableService } from '../../widgets/data-table/shared/data-table.ser
 import { AirQualityService } from '../../widgets/air-quality/shared/air-quality.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
-import { removeWidgetStorage } from '../../widgets/charts/shared/widget-storage';
+import { cleanupStaleViewState, removeWidgetStorage } from '../../widgets/charts/shared/widget-storage';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { elementCB, GridstackComponent, GridstackItemComponent } from 'gridstack/dist/angular';
 import { GridStack, GridStackOptions, Responsive } from 'gridstack';
@@ -563,6 +563,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const i = this.dashboards[this.activeTabIndex].widgets.findIndex(w => w.id === widgetManipulationModel.widgetId);
         if (i !== -1 && widgetManipulationModel.widget !== null) {
             const w = this.dashboards[this.activeTabIndex].widgets[i];
+            if (w.type === DashboardTypesEnum.ChartExport) {
+                cleanupStaleViewState(w.id, w.properties, widgetManipulationModel.widget.properties);
+            }
             w.name = widgetManipulationModel.widget.name;
             w.properties = widgetManipulationModel.widget.properties;
         }

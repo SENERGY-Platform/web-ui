@@ -38,6 +38,7 @@ import {
     columnDateFormat,
     DetailLevel,
     detailLevel,
+    finerDetailLevel,
     gapAnnotations,
     groupTimeFromDetailLevel,
     chartDateLabel,
@@ -50,7 +51,7 @@ import {
 } from './charts-export-chartjs';
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { findLabel, getLabelHitBoxes } from './chartjs-axis-click';
-import { bucketTimes } from './chartjs-bucket-gaps';
+import { bucketTimes, clickedBucket } from './chartjs-bucket-gaps';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../../components/widget-header/widget-header.component';
 import { TimelineComponent } from '../shared/chart-types/timeline/timeline.component';
@@ -94,7 +95,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     timelineHeight = 0;
     ready = false;
     refreshing = false;
-    disableBreaking = false;
     configureWidget = false;
     errorHasOccured = false;
     errorMessage = '';
@@ -114,6 +114,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         plugins: Plugin<keyof ChartTypeRegistry, AnyObject>[];
         cursorLocked: boolean;
         datasetColors: string[];
+        /** vAxis index per dataset; a dataset index is not an axis index once axes yield zero or several columns. */
+        datasetAxes: number[];
     } = {
             options: {},
             data: undefined,
@@ -122,6 +124,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             tooltipDisplay: 'none',
             tooltipDatasets: [],
             datasetColors: [],
+            datasetAxes: [],
             plugins: [{
                 id: 'chartClickXLabel',
                 events: ['click'],
@@ -132,14 +135,24 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     switch (evt.type) {
                         case 'click': // zoom in
                             if (labelInfo !== null && currentDetailLevel < DetailLevel.ms) {
-                                const newDetailLevel = currentDetailLevel + 1;
+                                const ticks = chart.scales['x']?.ticks || [];
+                                const tick = ticks[labelInfo.index];
+                                if (tick === undefined) {
+                                    return;
+                                }
+                                // the bucket under the label, not the span to the next tick: ticks skip gaps and pad single buckets by 1 ms
+                                const grouped = (this.widget.properties.group?.type || '') !== '';
+                                const bucket = grouped ? clickedBucket(tick.value, this.chartjsDataTimes(chart), this.groupTime) : null;
+                                const newDetailLevel = finerDetailLevel(currentDetailLevel);
                                 this.groupTime = this.groupTimeFromDetailLevel(newDetailLevel);
                                 this.hAxisFormat = this.xAxisFormat(newDetailLevel);
-                                this.from = new Date(this.chartjsChart?.scales['x'].ticks[labelInfo.index].value as number);
-                                if (this.chartjsChart?.scales['x'].ticks !== undefined && this.chartjsChart?.scales['x'].ticks.length > labelInfo.index + 1) {
-                                    this.to = new Date(this.chartjsChart?.scales['x'].ticks[labelInfo.index + 1].value as number);
+                                if (bucket !== null) {
+                                    this.from = new Date(bucket.from);
+                                    this.to = new Date(bucket.to);
                                 } else {
-                                    this.to = new Date(this.chartjs.nextDateMs || 0);
+                                    // without a grouping interval there is no bucket, so the zoom keeps spanning to the next tick
+                                    this.from = new Date(tick.value);
+                                    this.to = new Date(ticks[labelInfo.index + 1]?.value ?? (this.chartjs.nextDateMs || 0));
                                 }
                                 this.ready = false;
                                 this.cd.detectChanges();
@@ -207,7 +220,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.timelineChartData = this.initialWidgetData;
                 this.resizeTimeline();
             } else if (this.widget.properties.chartType === 'ColumnChart') {
-                this.chartjs = this.initialWidgetData;
+                // a copy with this instance's own plugin: the handed-over one belongs to the destroyed grid instance
+                this.chartjs = { ...this.initialWidgetData, plugins: this.chartjs.plugins };
                 this.resizeChart();
             } else {
                 this.chartExportData = this.initialWidgetData;
@@ -426,6 +440,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         Chart.getChart(canvas)?.resetZoom();
     }
 
+    private chartjsDataTimes(chart: Chart): number[] {
+        return chart.data.datasets.flatMap(ds => ds.data.map(p => (p as { x?: number } | null)?.x)).filter((x): x is number => typeof x === 'number');
+    }
+
     get chartjsChart(): Chart | undefined {
         return Chart.getChart('chartjs-' + this.widget.id);
     }
@@ -515,13 +533,15 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     if (this.chartExportData?.dataTable.length < 2) {
                         this.chartjs.data = undefined;
                         this.chartjs.datasetColors = [];
+                        this.chartjs.datasetAxes = [];
                         this.hoveredDatasetIndex = null;
                         this.ready = true;
                         this.refreshing = false;
                         return;
                     }
                     this.hoveredDatasetIndex = null;
-                    const columns = columnDatasets(this.chartExportData.dataTable, this.chartExportData.colors.length > 0 ? this.chartExportData.colors : undefined, this.modifiedVaxes || this.widget.properties.vAxes,
+                    this.chartjs.datasetAxes = this.chartExportData.columnAxes || [];
+                    const columns = columnDatasets(this.chartExportData.dataTable, this.chartExportData.colors.length > 0 ? this.chartExportData.colors : undefined, this.modifiedVaxes || this.widget.properties.vAxes, this.chartjs.datasetAxes,
                         () => window.getComputedStyle(document.getElementsByClassName('color-lookup-accent')[0], null).getPropertyValue('color'));
                     const datasets = columns.datasets;
                     this.chartjs.datasetColors = columns.datasetColors;
@@ -588,13 +608,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             && this.widget.properties.group?.type !== '' && rgxRes?.length === 3 && Number(rgxRes[1]) === 1 && rgxRes[2] !== 'y' && this.widget.properties.time?.last !== null && this.widget.properties.time?.last !== '';
     }
 
-    drillable(axisIndex: number): boolean {
+    private axisOfDataset(datasetIndex: number): ChartsExportVAxesModel | undefined {
         const axes = this.modifiedVaxes || this.widget.properties.vAxes;
-        if (axes === undefined || axes.length < axisIndex) {
-            return false;
-        }
+        const axisIndex = this.chartjs.datasetAxes[datasetIndex];
+        return axes === undefined || axisIndex === undefined ? undefined : axes[axisIndex];
+    }
 
-        const axis = axes[axisIndex];
+    drillable(datasetIndex: number): boolean {
+        const axis = this.axisOfDataset(datasetIndex);
         if (axis === undefined) {
             return false;
         }
@@ -606,12 +627,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         return false;
     }
 
-    drillDown(axisIndex: number) {
+    drillDown(datasetIndex: number) {
         const axes = this.modifiedVaxes || this.widget.properties.vAxes;
-        if (axes === undefined || axes.length < axisIndex) {
+        const axis = this.axisOfDataset(datasetIndex);
+        if (axes === undefined || axis === undefined) {
             return;
         }
-        const axis = axes[axisIndex];
         let newAxes: ChartsExportVAxesModel[] = [];
         if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
             const cpy = JSON.parse(JSON.stringify(axis.subAxes)) as ChartsExportVAxesModel[];
@@ -632,7 +653,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.modifiedVaxes = newAxes;
         this.drillStackPush(axes, this.stacked);
         this.stacked = true;
-        this.disableBreaking = true;
         this.ready = false;
         this.chartjs.tooltipDisplay = 'none';
         this.cd.detectChanges();
@@ -646,7 +666,6 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         } else {
             this.chooseColors = null;
             this.modifiedVaxes = null;
-            this.disableBreaking = false;
         }
         this.ready = false;
         this.chartjs.tooltipDisplay = 'none';
@@ -687,6 +706,16 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             o['left.px'] = (this.chartjs.tooltipContext?.chart.canvas?.offsetLeft || 0) + (this.chartjs.tooltipContext?.tooltip.caretX || 0);
         }
         return o;
+    }
+
+    /** A difference grouping also answers nothing for an interval whose predecessor has no value, which plain "No data" hides. */
+    get noDataMessage(): string {
+        return this.widget.properties.group?.type?.startsWith('difference') ? 'No data. A difference also needs a value in the interval before.' : 'No data';
+    }
+
+    /** Derived from the stored drill stack, so it survives a reload and ends with a reset. */
+    get disableBreaking(): boolean {
+        return this.drillStackPeek() !== null;
     }
 
     private get groupTime(): string | null {

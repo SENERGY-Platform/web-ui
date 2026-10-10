@@ -18,8 +18,10 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from 'rxjs';
 import { ChartsExportService } from './charts-export.service';
-import { ChartsExportMeasurementModel, ChartsExportPropertiesModel } from './charts-export-properties.model';
+import { ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportPropertiesModel, ChartsExportVAxesModel } from './charts-export-properties.model';
 import { ExportDataService } from '../../../shared/export-data.service';
 import { QueriesRequestV2ElementTimescaleModel } from '../../../shared/export-data.model';
 import { LadonService } from '../../../../modules/admin/permissions/shared/services/ladom.service';
@@ -28,6 +30,8 @@ import { ErrorHandlerService } from '../../../../core/services/error-handler.ser
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { DeviceInstancesService } from '../../../../modules/devices/device-instances/shared/device-instances.service';
 import { environment } from '../../../../../environments/environment';
+import { ChartsExportChart } from './charts-export-table';
+import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 
 class MockLadonService {
     getUserAuthorizationsForURI(_uri: string): any {
@@ -45,11 +49,19 @@ describe('ChartsExportService', () => {
                 ChartsExportService,
                 ExportDataService,
                 { provide: LadonService, useClass: MockLadonService },
-                { provide: ElementSizeService, useValue: {} },
-                { provide: ErrorHandlerService, useValue: {} },
+                ElementSizeService,
+                ErrorHandlerService,
+                { provide: MatSnackBar, useValue: {} },
                 { provide: MatDialog, useValue: {} },
                 { provide: DashboardService, useValue: {} },
-                { provide: DeviceInstancesService, useValue: {} },
+                {
+                    provide: DeviceInstancesService, useValue: {
+                        getDeviceInstancesWithDeviceType: (o: { deviceIds: string[] }) => of({
+                            result: o.deviceIds.map(id => ({ id, name: 'name of ' + id, display_name: 'Device ' + id, device_type: { services: [] } })),
+                            total: o.deviceIds.length,
+                        }),
+                    },
+                },
                 provideHttpClient(withXhr(), withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
@@ -141,5 +153,57 @@ describe('ChartsExportService', () => {
             { column: 'station_id', type: '=', value: '02932' },
             { column: 'global_irradiance_wm2', type: '>', value: 5 },
         ]);
+    });
+    describe('chart data of a column chart', () => {
+        const axis = (alias: string, extra: Partial<ChartsExportVAxesModel> = {}): ChartsExportVAxesModel => ({
+            deviceId: 'dev-' + alias,
+            serviceId: 'svc-' + alias,
+            exportName: alias,
+            valueName: alias,
+            valueAlias: alias,
+            valueType: 'float',
+            valuePath: 'value',
+            math: '',
+            color: '#00000' + alias.length,
+            ...extra,
+        });
+        const separate = (alias: string): ChartsExportVAxesModel => axis(alias, {
+            deviceId: undefined,
+            deviceGroupId: 'group-' + alias,
+            deviceGroupMergingStrategy: ChartsExportDeviceGroupMergingStrategy.Separate,
+        });
+
+        function widgetWith(vAxes: ChartsExportVAxesModel[]): WidgetModel {
+            return {
+                id: 'w', name: 'w', type: 'charts_export',
+                properties: { chartType: 'ColumnChart', vAxes, group: { time: '1months', type: 'difference-last' }, timeRangeType: 'relative', time: { last: '24months' } } as any,
+            };
+        }
+
+        /** One answer element per device: [requestIndex, deviceId, rows]. */
+        function load(widget: WidgetModel, answer: [number, string, [string, number | null][]][], chooseColors = false): ChartsExportChart {
+            let chart: ChartsExportChart | undefined;
+            service.getChartData(widget, undefined, undefined, '1months', undefined, undefined, chooseColors).subscribe(c => chart = c as ChartsExportChart);
+            httpMock.expectOne(environment.timescaleAPIURL + '/queries/v2').flush(answer.map(([requestIndex, deviceId, rows]) => ({
+                requestIndex, deviceId, serviceId: 'svc', columnNames: ['value'], data: [rows],
+            })));
+            expect(chart).withContext('chart').toBeDefined();
+            return chart as ChartsExportChart;
+        }
+
+        const t = (month: number) => new Date(2026, month - 1, 1).toISOString();
+
+        it('hands the source axis of every column on with the chart', () => {
+            const chart = load(widgetWith([separate('G'), axis('B')]), [[0, 'd1', [[t(10), 1]]], [0, 'd2', [[t(10), 2]]], [1, 'dev-B', [[t(10), 3]]]]);
+            expect(chart.dataTable[0]).toEqual(['time', 'G - Device d1', 'G - Device d2', 'B']);
+            expect(chart.columnAxes).toEqual([0, 0, 1]);
+        });
+
+        it('chooses different colours for the devices of a separate group axis that follows other axes', () => {
+            const chart = load(widgetWith([axis('A'), axis('B'), separate('G')]),
+                [[0, 'dev-A', [[t(10), 5]]], [1, 'dev-B', [[t(10), 6]]], [2, 'd1', [[t(10), 1]]], [2, 'd2', [[t(10), 2]]]], true);
+            expect(chart.colors.length).toBe(4);
+            expect(chart.colors[2]).not.toBe(chart.colors[3]);
+        });
     });
 });

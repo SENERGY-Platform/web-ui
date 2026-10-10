@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,10 +35,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
+import { DatePipe } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { DashboardTypesEnum } from './shared/dashboard-types.enum';
+import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -92,6 +95,8 @@ describe('DashboardComponent', () => {
                     MatButtonModule, DashboardComponent],
                 providers: [
                     provideRouter([]),
+                    // the chart widget a test edits is rendered by the real widget, which gets it from the widget module
+                    DatePipe,
                     { provide: DashboardService, useValue: dashboardServiceSpy },
                     { provide: ResponsiveService, useValue: responsiveServiceSpy },
                     { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
@@ -333,6 +338,44 @@ describe('DashboardComponent', () => {
             expect(component.dashboards[0].widgets[1].id).toBe('widget-2');
             expect(component.dashboards[0].widgets[1].x).toBe(1);
             expect(component.dashboards[0].widgets[1].y).toBe(4);
+        });
+    });
+    describe('editing a chart widget', () => {
+        const drillKey = 'widget-1_modifiedvAxes';
+        const zoomKey = 'widget-1_from';
+
+        function chartWidget() {
+            const widget = component.dashboards[0].widgets[0];
+            widget.type = DashboardTypesEnum.ChartExport;
+            widget.name = 'chart';
+            widget.properties = { chartType: 'ColumnChart', stacked: false, vAxes: [], group: { time: '1months', type: 'difference-last' } } as any;
+            return widget;
+        }
+
+        beforeEach(() => {
+            // the edited widget is rendered by the real chart component, which listens for refreshes
+            (dashboardServiceSpy as any).initWidgetObservable = new Subject<string>();
+            localStorage.setItem(drillKey, '[]');
+            localStorage.setItem(zoomKey, '2026-10-01T00:00:00.000Z');
+        });
+
+        afterEach(() => localStorage.clear());
+
+        it('keeps the drill and zoom state on a refresh, which sends the widget unchanged', () => {
+            const widget = chartWidget();
+            dashboardServiceSpy.dashboardWidgetObservable.nextWith({ manipulation: DashboardManipulationEnum.Update, widgetId: widget.id, widget, reloadAfterZoom: true, initialWidgetData: null });
+            expect(localStorage.getItem(drillKey)).toBe('[]');
+            expect(localStorage.getItem(zoomKey)).not.toBeNull();
+        });
+
+        it('drops the drill state an edit of the axes contradicts and keeps the zoom', () => {
+            const widget = chartWidget();
+            const edited = JSON.parse(JSON.stringify(widget));
+            edited.properties.vAxes = [{ exportName: 'B', valueName: 'B', valueType: 'float', math: '', color: '#000' }];
+            dashboardServiceSpy.dashboardWidgetObservable.nextWith({ manipulation: DashboardManipulationEnum.Update, widgetId: widget.id, widget: edited, reloadAfterZoom: true, initialWidgetData: null });
+            expect(localStorage.getItem(drillKey)).toBeNull();
+            expect(localStorage.getItem(zoomKey)).not.toBeNull();
+            expect(component.dashboards[0].widgets[0].properties.vAxes?.[0].exportName).toBe('B');
         });
     });
 });

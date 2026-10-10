@@ -64,7 +64,7 @@
                     <senergy-annotation-chart [series]="annotation.series" [width]="annotation.width" [height]="annotation.height"
                     [zoomStart]="annotation.zoomStart"></senergy-annotation-chart>
                   }
-                  <senergy-no-data
+                  <senergy-no-data [message]="noDataMessage"
                   [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
                 </div>
               }
@@ -74,7 +74,7 @@
                     <canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="bar"
                     id="chartjs-{{widget.id}}" (contextmenu)="resetChartjsZoom($event); false" [plugins]="chartjs.plugins"></canvas>
                   }
-                  <senergy-no-data
+                  <senergy-no-data [message]="noDataMessage"
                   [showIf]="configureWidget === false && chartjs.data === undefined"></senergy-no-data>
                   @if (chartjs.tooltipAllowed && chartjs.tooltipContext !== undefined) {
                     <div id="chartjs-tooltip"

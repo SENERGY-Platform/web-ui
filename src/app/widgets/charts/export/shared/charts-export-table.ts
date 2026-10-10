@@ -88,6 +88,7 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
 ): {
     table: ChartDataTableModel;
     colors?: string[];
+    columnAxes?: number[];
 } {
     // data[] -> requests/vAxis
     // data[][] -> number of columns within request
@@ -106,18 +107,13 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
     let offset = 1;
     data.forEach(req => {
         req.forEach((series, seriesIndex) => {
-            let previousColumnsWithoutData = 0;
-            for (let i = 1; i < seriesIndex; i++) { // skip time column
-                if (!columnHasData[i]) {
-                    previousColumnsWithoutData++;
-                }
-            }
             series.forEach(row => {
                 if (row[1] === null || row[1] === undefined) {
                     return;
                 }
                 const tableRow: any[] = [row[0]]; // using timestamp, duplicate timestamps are ok for Google charts
-                while (offset + seriesIndex > tableRow.length - previousColumnsWithoutData) {
+                // every series keeps its own column; columns without data are dropped below through indices
+                while (offset + seriesIndex > tableRow.length) {
                     tableRow.push(null); // insert leading null column values
                 }
                 tableRow.push(row[1]); // actual data
@@ -145,6 +141,7 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
         type: string;
     }[] = [];
     const header: string[] = ['time'];
+    const columnAxes: number[] = [];
     let colors = getColorArray(vAxes);
     if (vAxes) {
         const colors2: string[] = [];
@@ -161,7 +158,8 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
                         conversionDefault: vAxis.conversionDefault,
                         type: vAxis.valueType,
                     });
-                    const metadataIndex = offset2 + i;
+                    // metadata is kept per request, so the series index within the request finds it
+                    const metadataIndex = i;
                     let head = vAxis.valueAlias || vAxis.valueName;
 
                     if (repeats[index] > 1) {
@@ -188,6 +186,7 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
                     }
                     header.push(head);
                     colors2.push(colors[index]);
+                    columnAxes.push(index);
                 }
             }
         });
@@ -320,12 +319,12 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
             } else if (groupInterval.endsWith('months')) {
                 breakInterval = 'y';
             }
-            const res = splitTableOnDate(dataTable.data, colors, breakInterval as 'h' | 'd' | 'm' | 'y' | 'months');
+            const res = splitTableOnDate(dataTable.data, colors, breakInterval as 'h' | 'd' | 'm' | 'y' | 'months', columnAxes);
             dataTable.data = res.table;
-            return { table: dataTable, colors: res.colors };
+            return { table: dataTable, colors: res.colors, columnAxes: res.columnAxes };
         }
     }
-    return { table: dataTable, colors };
+    return { table: dataTable, colors, columnAxes };
 }
 
 /** What a charts export widget draws, independent of the chart library. */
@@ -346,10 +345,12 @@ export interface ChartsExportChart {
     secondAxis: boolean[];
     /** pie: the share below which slices are grouped; undefined for Google's default */
     sliceThreshold?: number;
+    /** column chart: the index of the vAxis each table column after the first comes from */
+    columnAxes?: number[];
 }
 
 /** The chart of a charts export widget: the colours of the series present in the table and the axis settings. */
-export function chartsExportChart(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsExportChart {
+export function chartsExportChart(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string, columnAxes?: number[]): ChartsExportChart {
     const chartType = widget.properties.chartType === undefined || widget.properties.chartType === '' ? 'LineChart' : widget.properties.chartType;
 
     // Remove all elements from color array that are missing in the dataTable
@@ -379,6 +380,7 @@ export function chartsExportChart(widget: WidgetModel, dataTable: ChartDataTable
         stacked: chartType === 'ColumnChart' ? widget.properties.stacked : undefined,
         secondAxis: secondAxis.includes(true) ? secondAxis : secondAxis.map(() => false),
         sliceThreshold: chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
+        columnAxes,
     };
 }
 
@@ -452,12 +454,13 @@ function transformTableForTimeline(dat: any[][], vAxes: ChartsExportVAxesModel[]
     return { table, colors };
 }
 
-function splitTableOnDate(dat: any[][], colors: string[], breakUnit: 'h' | 'd' | 'm' | 'y' | 'months'): {
+function splitTableOnDate(dat: any[][], colors: string[], breakUnit: 'h' | 'd' | 'm' | 'y' | 'months', columnAxes: number[]): {
     table: any[][];
     colors: string[];
+    columnAxes: number[];
 } {
     if (dat.length === 0) {
-        return { table: dat, colors: colors };
+        return { table: dat, colors: colors, columnAxes };
     }
     const initialHeaderLength = dat[0].length;
     const addedRows: any[] = [];
@@ -501,6 +504,7 @@ function splitTableOnDate(dat: any[][], colors: string[], breakUnit: 'h' | 'd' |
                         color = color.fade(0.5);
                     }
                     colors.push(color.hexa());
+                    columnAxes.push(columnAxes[j]);
                     addedHeaders.push(head + ' -' + diff + breakUnit);
                     addedColumns++;
                 });
@@ -533,11 +537,11 @@ function splitTableOnDate(dat: any[][], colors: string[], breakUnit: 'h' | 'd' |
 
     }
     dat.push(...addedRows);
-    return sortColumnsByFirstRow(dat, colors);
+    return sortColumnsByFirstRow(dat, colors, columnAxes);
 }
 
-function sortColumnsByFirstRow(table: any[][], colors: string[]): { table: any[][], colors: string[] } {
-    if (!table.length || table[0].length <= 1) return { table, colors };
+function sortColumnsByFirstRow(table: any[][], colors: string[], columnAxes: number[]): { table: any[][], colors: string[], columnAxes: number[] } {
+    if (!table.length || table[0].length <= 1) return { table, colors, columnAxes };
 
     // Create array of column indices (excluding first column)
     const columnIndices = table[0]
@@ -554,6 +558,7 @@ function sortColumnsByFirstRow(table: any[][], colors: string[]): { table: any[]
         table: table.map(row => [
             row[0], // keep first column fixed
             ...columnIndices.map(i => row[i])
-        ]), colors: columnIndices.map(i => colors[i - 1])
+        ]), colors: columnIndices.map(i => colors[i - 1]),
+        columnAxes: columnIndices.map(i => columnAxes[i - 1]),
     };
 }

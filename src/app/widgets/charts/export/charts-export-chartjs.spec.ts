@@ -21,6 +21,7 @@ import {
     columnDateFormat,
     DetailLevel,
     detailLevel,
+    finerDetailLevel,
     gapAnnotations,
     groupTimeFromDetailLevel,
     chartDateLabel,
@@ -42,7 +43,8 @@ describe('detail levels', () => {
         expect(['1ms', '5s', '15m', '1h', '1d', '1months', '1y'].map(detailLevel)).toEqual([
             DetailLevel.ms, DetailLevel.s, DetailLevel.m, DetailLevel.h, DetailLevel.d, DetailLevel.months, DetailLevel.y,
         ]);
-        expect(detailLevel('1w')).toBe(DetailLevel.unknown);
+        expect(detailLevel('1w')).toBe(DetailLevel.w);
+        expect(detailLevel('1x')).toBe(DetailLevel.unknown);
         expect(detailLevel(null)).toBe(DetailLevel.unknown);
     });
 
@@ -52,6 +54,13 @@ describe('detail levels', () => {
 
     it('has a stored axis format per level', () => {
         expect([6, 5, 4, 3, 2, 1, 0, -1].map(xAxisFormat)).toEqual(['ss', 'ss', 'mm', 'HH', 'dd.MM.', 'MMM', 'yyyy', '']);
+    });
+
+    it('puts weeks between days and months and zooms into days from there', () => {
+        expect(groupTimeFromDetailLevel(DetailLevel.w)).toBe('1w');
+        expect(xAxisFormat(DetailLevel.w)).toBe('dd.MM.');
+        expect(finerDetailLevel(DetailLevel.w)).toBe(DetailLevel.d);
+        expect([DetailLevel.y, DetailLevel.months, DetailLevel.d, DetailLevel.h].map(finerDetailLevel)).toEqual([DetailLevel.months, DetailLevel.d, DetailLevel.h, DetailLevel.m]);
     });
 });
 
@@ -129,7 +138,7 @@ describe('columnDatasets', () => {
 
     it('has one dataset per column with its label, axis and colour', () => {
         const table = [['time', 'Energy', 'Share'], [local(10, 5, 1), 1, 0.5], [local(10, 5, 2), 2, 0.25]];
-        const result = columnDatasets(table, ['#111111', '#222222'], axes, () => 'unused');
+        const result = columnDatasets(table, ['#111111', '#222222'], axes, [0, 1], () => 'unused');
         expect(result.datasets.map((d) => [d.label, (d as any).yAxisID, d.backgroundColor])).toEqual([
             ['Energy', 'y', '#111111'],
             ['Share', 'y2', '#222222'],
@@ -140,14 +149,22 @@ describe('columnDatasets', () => {
         expect(result.maxDateMs).toBe(local(10, 5, 2).valueOf());
     });
 
+    it('puts a column on the value axis of the axis it comes from, not of the axis at its own position', () => {
+        const table = [['time', 'a', 'b', 'c'], [local(10, 5, 1), 1, 2, 3]];
+        const three = [{ displayOnSecondVAxis: false }, { displayOnSecondVAxis: true }, { displayOnSecondVAxis: false }] as ChartsExportVAxesModel[];
+        // axis 0 has no data, axis 1 yields two columns, axis 2 one
+        const result = columnDatasets(table, undefined, three, [1, 1, 2], () => '');
+        expect(result.datasets.map((d) => (d as any).yAxisID)).toEqual(['y2', 'y2', 'y']);
+    });
+
     it('keeps 0 but leaves null values out', () => {
         const table = [['time', 'a'], [local(10, 5, 1), 0], [local(10, 5, 2), null]];
-        expect(columnDatasets(table, ['#111111'], undefined, () => '').datasets[0].data).toEqual([{ x: local(10, 5, 1).valueOf(), y: 0 }]);
+        expect(columnDatasets(table, ['#111111'], undefined, [0], () => '').datasets[0].data).toEqual([{ x: local(10, 5, 1).valueOf(), y: 0 }]);
     });
 
     it('takes the fallback colour only for columns without one, on the first axis without axes', () => {
         const fallback = jasmine.createSpy('fallback').and.returnValue('rgb(1, 2, 3)');
-        const result = columnDatasets([['time', 'a', 'b'], [local(10, 5, 1), 1, 2]], ['#111111'], undefined, fallback);
+        const result = columnDatasets([['time', 'a', 'b'], [local(10, 5, 1), 1, 2]], ['#111111'], undefined, [0, 1], fallback);
         expect(result.datasetColors).toEqual(['#111111', 'rgb(1, 2, 3)']);
         expect(result.datasets.map((d) => (d as any).yAxisID)).toEqual(['y', 'y']);
         expect(fallback).toHaveBeenCalledTimes(1);

@@ -17,7 +17,7 @@
 import { ChartDataTableModel } from '../../../../core/model/chart/chart-data-table.model';
 import { WidgetModel } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
-import { ChartsExportPropertiesModel, ChartsExportVAxesModel } from './charts-export-properties.model';
+import { ChartsExportDeviceGroupMergingStrategy, ChartsExportPropertiesModel, ChartsExportVAxesModel } from './charts-export-properties.model';
 import {
     chartsExportChart,
     chartsExportTable,
@@ -171,6 +171,63 @@ describe('chartsExportTable', () => {
             const props: ChartsExportPropertiesModel = { chartType: 'ColumnChart', break: true, vAxes: [axis('Temp')] };
             expect(table([[[[day2, 1], [day1, 2]]]], props).table.data[0]).toEqual(['time', 'Temp']);
             expect(chartsExportTable([[[[day2, 1], [day1, 2]]]], props as any, [], noDevices, '1h', true).table.data[0]).toEqual(['time', 'Temp']);
+        });
+    });
+});
+
+describe('chartsExportTable of a ColumnChart', () => {
+    const devices = new Map<string, DeviceInstanceWithDeviceTypeModel>(['d1', 'd2', 'd3', 'd4', 'dev-A', 'dev-B'].map(id => [id, { id, name: 'name of ' + id, display_name: 'Device ' + id, device_type: { services: [] } } as unknown as DeviceInstanceWithDeviceTypeModel]));
+    // monthly buckets at local midnight, whatever zone the spec runs in
+    const t = (month: number, year = 2026) => new Date(year, month - 1, 1).toISOString();
+    const dev = (...ids: string[]) => ids.map(deviceId => ({ deviceId }));
+    const separate = (alias: string) => axis(alias, { deviceGroupId: 'group-' + alias, deviceGroupMergingStrategy: ChartsExportDeviceGroupMergingStrategy.Separate });
+    const column = (data: any[][][][], vAxes: ChartsExportVAxesModel[], metadata: any[][], extra: Partial<ChartsExportPropertiesModel> = {}, groupInterval = '1months') =>
+        chartsExportTable(data, { chartType: 'ColumnChart', vAxes, ...extra } as any, metadata, devices, groupInterval);
+    const values = (result: { table: { data: any[][] } }): any[][] => result.table.data.slice(1).map(r => [(r[0] as Date).toISOString(), ...r.slice(1)]);
+    const byTime = (rows: any[][]) => rows.sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+
+    it('drops the column of an axis without data and names the axis of the remaining one', () => {
+        const result = column([[[]], [[[t(10), 5]]]], [axis('A'), axis('B')], [dev('dev-A'), dev('dev-B')]);
+        expect(result.table.data[0]).toEqual(['time', 'B']);
+        expect(values(result)).toEqual([[t(10), 5]]);
+        expect(result.columnAxes).toEqual([1]);
+    });
+
+    it('splits a separate group axis into one column per device and names the axis of each', () => {
+        const result = column([[[[t(10), 1]], [[t(10), 2]]], [[[t(10), 3]]]], [separate('G'), axis('B')], [dev('d1', 'd2'), dev('dev-B')]);
+        expect(result.table.data[0]).toEqual(['time', 'G - Device d1', 'G - Device d2', 'B']);
+        expect(values(result)).toEqual([[t(10), 1, 2, 3]]);
+        expect(result.columnAxes).toEqual([0, 0, 1]);
+    });
+
+    it('keeps every device on its own values when an earlier device reported only nulls', () => {
+        const result = column([[[[t(10), null]], [[t(10), 2]], [[t(10), 3]], [[t(9), 4]]]], [separate('G')], [dev('d1', 'd2', 'd3', 'd4')]);
+        expect(result.table.data[0]).toEqual(['time', 'G - Device d2', 'G - Device d3', 'G - Device d4']);
+        expect(byTime(values(result))).toEqual([[t(9), null, null, 4], [t(10), 2, 3, null]]);
+    });
+
+    it('keeps every device on its own values after an axis that reported only nulls', () => {
+        const result = column([[[[t(10), null]]], [[[t(10), 1]], [[t(10), 2]], [[t(10), 3]]]], [axis('A'), separate('G')], [dev('dev-A'), dev('d1', 'd2', 'd3')]);
+        expect(values(result)).toEqual([[t(10), 1, 2, 3]]);
+    });
+
+    it('names the devices of a separate group axis that follows another axis', () => {
+        const result = column([[[[t(10), 5]]], [[[t(10), 1]], [[t(10), 2]]]], [axis('A'), separate('G')], [dev('dev-A'), dev('d1', 'd2')]);
+        expect(result.table.data[0]).toEqual(['time', 'A', 'G - Device d1', 'G - Device d2']);
+    });
+
+    describe('with break', () => {
+        const data = [[[[t(10), 1], [t(10, 2025), 2]]], [[[t(10), 3], [t(10, 2025), 4]]]];
+        const broken = () => column(data, [axis('A'), axis('B')], [dev('dev-A'), dev('dev-B')], { break: true });
+
+        it('adds a column per earlier year and sorts the columns by name, descending', () => {
+            const result = broken();
+            expect(result.table.data[0]).toEqual(['time', 'B -1y', 'B', 'A -1y', 'A']);
+            expect(values(result)).toEqual([[t(10), undefined, 3, undefined, 1], [t(10), 4, null, 2, null]]);
+        });
+
+        it('keeps the source axis with every column through the sort', () => {
+            expect(broken().columnAxes).toEqual([1, 1, 0, 0]);
         });
     });
 });

@@ -32,6 +32,8 @@ export enum DetailLevel {
     m = 4,
     h = 3,
     d = 2,
+    // between days and months; zooming in from weeks goes to days, see finerDetailLevel
+    w = 1.5,
     months = 1,
     y = 0,
     unknown = -1,
@@ -50,10 +52,16 @@ export function detailLevel(groupTime: string | null): DetailLevel {
         case 'm': return DetailLevel.m;
         case 'h': return DetailLevel.h;
         case 'd': return DetailLevel.d;
+        case 'w': return DetailLevel.w;
         case 'months': return DetailLevel.months;
         case 'y': return DetailLevel.y;
         default: return DetailLevel.unknown;
     }
+}
+
+/** The level a label click zooms into: weeks go to days, every other level to the next finer one. */
+export function finerDetailLevel(level: DetailLevel): DetailLevel {
+    return level === DetailLevel.w ? DetailLevel.d : level + 1;
 }
 
 export function groupTimeFromDetailLevel(level: DetailLevel): string {
@@ -63,6 +71,7 @@ export function groupTimeFromDetailLevel(level: DetailLevel): string {
         case DetailLevel.m: return '1m';
         case DetailLevel.h: return '1h';
         case DetailLevel.d: return '1d';
+        case DetailLevel.w: return '1w';
         case DetailLevel.months: return '1months';
         case DetailLevel.y: return '1y';
         default: return '';
@@ -81,6 +90,7 @@ export function xAxisFormat(level: DetailLevel): string {
         case DetailLevel.h:
             return 'HH';
         case DetailLevel.d:
+        case DetailLevel.w:
             return 'dd.MM.';
         case DetailLevel.months:
             return 'MMM';
@@ -176,17 +186,22 @@ export function chartDateLabel(ms: number, dateFormat: string): string {
     return format(ms, dateFormat, { locale: chartDateLocale });
 }
 
-/** One bar dataset per table column, on the second y axis where its axis says so; missing (null) values are left out. */
+/**
+ * One bar dataset per table column, on the second y axis where the axis it comes from (columnAxes, an index into axes)
+ * says so; missing (null) values are left out.
+ */
 export function columnDatasets(
     dataTable: (Date | string | number | null)[][],
     colors: string[] | undefined,
     axes: ChartsExportVAxesModel[] | undefined,
+    columnAxes: number[],
     fallbackColor: () => string,
 ): { datasets: ChartDataset[]; datasetColors: string[]; minDateMs?: number; maxDateMs?: number } {
     const datasets: ChartDataset[] = new Array(dataTable[0].length - 1).fill({});
     const datasetColors: string[] = [];
     dataTable[0].slice(1).forEach((label, i) => {
-        const axis = axes === undefined ? undefined : axes[i];
+        const axisIndex = columnAxes[i];
+        const axis = axes === undefined || axisIndex === undefined ? undefined : axes[axisIndex];
         datasets[i] = { data: [], label: '' + label, yAxisID: axis === undefined ? 'y' : (axis.displayOnSecondVAxis ? 'y2' : 'y') };
         if (colors !== undefined && colors.length > i) {
             datasets[i].backgroundColor = colors[i];
