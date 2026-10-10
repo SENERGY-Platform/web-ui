@@ -15,6 +15,9 @@
  */
 
 export class ChartsModel {
+    /** Index of the vAxis each data column (after the time column) comes from. */
+    columnAxes?: number[];
+
     constructor(
         public chartType: string,
         public dataTable: (Date | string | number | { role: string } | null)[][],

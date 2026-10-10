@@ -39,6 +39,8 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { DashboardTypesEnum } from './shared/dashboard-types.enum';
+import { DashboardManipulationEnum } from './shared/dashboard-manipulation.enum';
 
 describe('DashboardComponent', () => {
     let component: DashboardComponent;
@@ -261,6 +263,42 @@ describe('DashboardComponent', () => {
             dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);
             component.selectColumns(MAX_COLUMNS + 4);
             expect(component.isAutoColumns()).toBeTrue();
+        });
+    });
+    describe('editing a chart widget', () => {
+        const drillKey = 'widget-1_modifiedvAxes';
+        const zoomKey = 'widget-1_from';
+
+        function chartWidget() {
+            const widget = component.dashboards[0].widgets[0];
+            widget.type = DashboardTypesEnum.ChartExport;
+            widget.name = 'chart';
+            widget.properties = { chartType: 'ColumnChart', stacked: false, vAxes: [], group: { time: '1months', type: 'difference-last' } } as any;
+            return widget;
+        }
+
+        beforeEach(() => {
+            localStorage.setItem(drillKey, '[]');
+            localStorage.setItem(zoomKey, '2026-10-01T00:00:00.000Z');
+        });
+
+        afterEach(() => localStorage.clear());
+
+        it('keeps the drill and zoom state on a refresh, which sends the widget unchanged', () => {
+            const widget = chartWidget();
+            dashboardServiceSpy.dashboardWidgetObservable.nextWith({ manipulation: DashboardManipulationEnum.Update, widgetId: widget.id, widget, reloadAfterZoom: true, initialWidgetData: null });
+            expect(localStorage.getItem(drillKey)).toBe('[]');
+            expect(localStorage.getItem(zoomKey)).not.toBeNull();
+        });
+
+        it('drops the drill state an edit of the axes contradicts and keeps the zoom', () => {
+            const widget = chartWidget();
+            const edited = JSON.parse(JSON.stringify(widget));
+            edited.properties.vAxes = [{ exportName: 'B', valueName: 'B', valueType: 'float', math: '', color: '#000' }];
+            dashboardServiceSpy.dashboardWidgetObservable.nextWith({ manipulation: DashboardManipulationEnum.Update, widgetId: widget.id, widget: edited, reloadAfterZoom: true, initialWidgetData: null });
+            expect(localStorage.getItem(drillKey)).toBeNull();
+            expect(localStorage.getItem(zoomKey)).not.toBeNull();
+            expect(component.dashboards[0].widgets[0].properties.vAxes?.[0].exportName).toBe('B');
         });
     });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { BucketGap, bucketTimes, describeBucketGap, findBucketGaps } from './chartjs-bucket-gaps';
+import { BucketGap, bucketTimes, clickedBucket, describeBucketGap, findBucketGaps, snapToData } from './chartjs-bucket-gaps';
 
 const gapOf = (count: number, truncated = false): BucketGap => ({ from: 0, to: 1, count, truncated });
 
@@ -133,6 +133,88 @@ describe('chartjs bucket gaps', () => {
         it('falls back to a bare statement when the grouping interval cannot be read', () => {
             expect(describeBucketGap(gapOf(2), null)).toBe('no data');
             expect(describeBucketGap(gapOf(2), 'weekly')).toBe('no data');
+        });
+    });
+    describe('clickedBucket', () => {
+        const at = (y: number, m: number, d = 1, h = 0, min = 0, sec = 0, ms = 0) => new Date(y, m - 1, d, h, min, sec, ms).valueOf();
+        const range = (from: number, to: number) => ({ from, to });
+
+        it('starts at the clicked data point and spans a month by the calendar', () => {
+            const data = [at(2026, 9), at(2026, 10)];
+            expect(clickedBucket(at(2026, 10), data, '1months')).toEqual(range(at(2026, 10), at(2026, 11)));
+            expect(clickedBucket(at(2026, 12), [at(2026, 12)], '1months')).toEqual(range(at(2026, 12), at(2027, 1)));
+        });
+
+        it('takes the padding ticks of a single data point as that point', () => {
+            const data = [at(2026, 10)];
+            expect(clickedBucket(at(2026, 10) - 1, data, '1months')).toEqual(range(at(2026, 10), at(2026, 11)));
+            expect(clickedBucket(at(2026, 10) + 1, data, '1months')).toEqual(range(at(2026, 10), at(2026, 11)));
+        });
+
+        it('keeps the backend alignment of week buckets, Thursday at midnight UTC as well as Monday at local midnight', () => {
+            const thursday = Date.UTC(2026, 6, 9);
+            expect(clickedBucket(thursday, [Date.UTC(2026, 6, 2), thursday], '1w')).toEqual(range(thursday, Date.UTC(2026, 6, 16)));
+            expect(clickedBucket(at(2026, 7, 13), [at(2026, 7, 6), at(2026, 7, 13)], '1w')).toEqual(range(at(2026, 7, 13), at(2026, 7, 20)));
+        });
+
+        it('spans a whole bucket of a multiple interval', () => {
+            expect(clickedBucket(at(2026, 4), [at(2026, 4)], '3months')).toEqual(range(at(2026, 4), at(2026, 7)));
+            expect(clickedBucket(at(2026, 8, 3, 14, 15), [at(2026, 8, 3, 14, 15)], '15m')).toEqual(range(at(2026, 8, 3, 14, 15), at(2026, 8, 3, 14, 30)));
+        });
+
+        it('spans a day by the calendar, 25 hours on the day daylight saving ends', () => {
+            expect(clickedBucket(at(2026, 10, 25), [at(2026, 10, 25)], '1d')).toEqual(range(at(2026, 10, 25), at(2026, 10, 26)));
+        });
+
+        it('spans one real hour in the hour daylight saving repeats', () => {
+            // 00:00 and 01:00 UTC on 2026-10-25 are the first and the second 02:00 in Central Europe
+            [Date.UTC(2026, 9, 25, 0), Date.UTC(2026, 9, 25, 1)].forEach(t => {
+                expect(clickedBucket(t, [t], '1h')).toEqual(range(t, t + 3600 * 1000));
+            });
+        });
+
+        it('takes a tick between data points as the bucket it lies in, and a tick in a gap as its own start', () => {
+            const data = [at(2026, 8, 3), at(2026, 8, 10)];
+            expect(clickedBucket(at(2026, 8, 5), data, '1w')).toEqual(range(at(2026, 8, 3), at(2026, 8, 10)));
+            expect(clickedBucket(at(2026, 8, 20), data, '1w')).toEqual(range(at(2026, 8, 20), at(2026, 8, 27)));
+        });
+
+        // UTC-aligned day buckets on the days daylight saving starts and ends in Central Europe
+        [[2, 29], [9, 25]].forEach(([month, dstDay]) => {
+            it('ends a UTC-aligned day bucket at the next bucket the backend returned on ' + (month + 1) + '/' + dstDay, () => {
+                const data = [dstDay - 1, dstDay, dstDay + 1].map(d => Date.UTC(2026, month, d));
+                expect(clickedBucket(data[1], data, '1d')).toEqual(range(data[1], data[2]));
+            });
+        });
+
+        it('keeps the calendar end when the next bucket has no data', () => {
+            const data = [at(2026, 8, 3), at(2026, 8, 5)];
+            expect(clickedBucket(at(2026, 8, 3), data, '1d')).toEqual(range(at(2026, 8, 3), at(2026, 8, 4)));
+        });
+
+        it('keeps the millisecond end of a short interval when the next bucket has no data', () => {
+            const data = [at(2026, 8, 3, 14, 0), at(2026, 8, 3, 14, 30)];
+            expect(clickedBucket(at(2026, 8, 3, 14, 0), data, '15m')).toEqual(range(at(2026, 8, 3, 14, 0), at(2026, 8, 3, 14, 15)));
+        });
+
+        it('has no bucket without a readable grouping interval', () => {
+            expect(clickedBucket(at(2026, 10), [at(2026, 10)], null)).toBeNull();
+            expect(clickedBucket(at(2026, 10), [at(2026, 10)], 'monthly')).toBeNull();
+            expect(clickedBucket(at(2026, 10), [at(2026, 10)], '0d')).toBeNull();
+            expect(clickedBucket(NaN, [], '1d')).toBeNull();
+        });
+    });
+
+    describe('snapToData', () => {
+        it('moves a time within the tolerance onto the nearest data time', () => {
+            expect(snapToData(999, [1000, 5000], 1)).toBe(1000);
+            expect(snapToData(1001, [1000, 5000], 1)).toBe(1000);
+            expect(snapToData(1001, [1000, 1002], 1)).toBe(1000);
+        });
+
+        it('keeps a time that no data time is close to', () => {
+            expect(snapToData(998, [1000], 1)).toBe(998);
+            expect(snapToData(998, [], 1)).toBe(998);
         });
     });
 });

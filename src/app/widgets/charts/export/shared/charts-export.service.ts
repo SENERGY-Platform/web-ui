@@ -368,7 +368,11 @@ export class ChartsExportService {
                     const titles = tableData.table.data[0].slice(1).map(title => String(title || ''));
                     tableData.colors = this.getThemeColorsForTitles(titles);
                 }
-                return forkJoin(obs).pipe(map(_ => this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat)));
+                return forkJoin(obs).pipe(map(_ => {
+                    const chartModel = this.setProcessInstancesStatusValues(widget, tableData.table, tableData.colors, hAxisFormat);
+                    chartModel.columnAxes = tableData.columnAxes;
+                    return chartModel;
+                }));
             }
         }));
     }
@@ -509,6 +513,7 @@ export class ChartsExportService {
     ): {
         table: ChartDataTableModel;
         colors?: string[];
+        columnAxes?: number[];
     } {
         // data[] -> requests/vAxis
         // data[][] -> number of columns within request
@@ -527,18 +532,13 @@ export class ChartsExportService {
         let offset = 1;
         data.forEach(req => {
             req.forEach((series, seriesIndex) => {
-                let previousColumnsWithoutData = 0;
-                for (let i = 1; i < seriesIndex; i++) { // skip time column
-                    if (!columnHasData[i]) {
-                        previousColumnsWithoutData++;
-                    }
-                }
                 series.forEach(row => {
                     if (row[1] === null || row[1] === undefined) {
                         return;
                     }
                     const tableRow: any[] = [row[0]]; // using timestamp, duplicate timestamps are ok for Google charts
-                    while (offset + seriesIndex > tableRow.length - previousColumnsWithoutData) {
+                    // every series keeps its own column; columns without data are dropped below through indices
+                    while (offset + seriesIndex > tableRow.length) {
                         tableRow.push(null); // insert leading null column values
                     }
                     tableRow.push(row[1]); // actual data
@@ -566,6 +566,7 @@ export class ChartsExportService {
             type: string;
         }[] = [];
         const header: string[] = ['time'];
+        const columnAxes: number[] = [];
         let colors = this.getColorArray(vAxes);
         if (vAxes) {
             const colors2: string[] = [];
@@ -582,7 +583,8 @@ export class ChartsExportService {
                             conversionDefault: vAxis.conversionDefault,
                             type: vAxis.valueType,
                         });
-                        const metadataIndex = offset2 + i;
+                        // metadata is kept per request, so the series index within the request finds it
+                        const metadataIndex = i;
                         let head = vAxis.valueAlias || vAxis.valueName;
 
                         if (repeats[index] > 1) {
@@ -609,6 +611,7 @@ export class ChartsExportService {
                         }
                         header.push(head);
                         colors2.push(colors[index]);
+                        columnAxes.push(index);
                     }
                 }
             });
@@ -740,12 +743,12 @@ export class ChartsExportService {
                 } else if (groupInterval.endsWith('months')) {
                     breakInterval = 'y';
                 }
-                const res = this.splitTableOnDate(dataTable.data, colors, breakInterval as 'h' | 'd' | 'm' | 'y' | 'months');
+                const res = this.splitTableOnDate(dataTable.data, colors, breakInterval as 'h' | 'd' | 'm' | 'y' | 'months', columnAxes);
                 dataTable.data = res.table;
-                return { table: dataTable, colors: res.colors };
+                return { table: dataTable, colors: res.colors, columnAxes: res.columnAxes };
             }
         }
-        return { table: dataTable, colors };
+        return { table: dataTable, colors, columnAxes };
     }
 
     private setProcessInstancesStatusValues(widget: WidgetModel, dataTable: ChartDataTableModel, colorOverride?: string[], hAxisFormat?: string): ChartsModel {
@@ -897,12 +900,13 @@ export class ChartsExportService {
         return { table, colors };
     }
 
-    private splitTableOnDate(dat: any[][], colors: string[], breakUnit: 'h' | 'd' | 'm' | 'y' | 'months'): {
+    private splitTableOnDate(dat: any[][], colors: string[], breakUnit: 'h' | 'd' | 'm' | 'y' | 'months', columnAxes: number[]): {
         table: any[][];
         colors: string[];
+        columnAxes: number[];
     } {
         if (dat.length === 0) {
-            return { table: dat, colors: colors };
+            return { table: dat, colors: colors, columnAxes };
         }
         const initialHeaderLength = dat[0].length;
         const addedRows: any[] = [];
@@ -946,6 +950,7 @@ export class ChartsExportService {
                             color = color.fade(0.5);
                         }
                         colors.push(color.hexa());
+                        columnAxes.push(columnAxes[j]);
                         addedHeaders.push(head + ' -' + diff + breakUnit);
                         addedColumns++;
                     });
@@ -978,11 +983,11 @@ export class ChartsExportService {
 
         }
         dat.push(...addedRows);
-        return this.sortColumnsByFirstRow(dat, colors);
+        return this.sortColumnsByFirstRow(dat, colors, columnAxes);
     }
 
-    private sortColumnsByFirstRow(table: any[][], colors: string[]): { table: any[][], colors: string[] } {
-        if (!table.length || table[0].length <= 1) return { table, colors };
+    private sortColumnsByFirstRow(table: any[][], colors: string[], columnAxes: number[]): { table: any[][], colors: string[], columnAxes: number[] } {
+        if (!table.length || table[0].length <= 1) return { table, colors, columnAxes };
 
         // Create array of column indices (excluding first column)
         const columnIndices = table[0]
@@ -999,7 +1004,8 @@ export class ChartsExportService {
             table: table.map(row => [
                 row[0], // keep first column fixed
                 ...columnIndices.map(i => row[i])
-            ]), colors: columnIndices.map(i => colors[i - 1])
+            ]), colors: columnIndices.map(i => colors[i - 1]),
+            columnAxes: columnIndices.map(i => columnAxes[i - 1]),
         };
     }
 }

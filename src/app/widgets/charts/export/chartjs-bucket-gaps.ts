@@ -107,6 +107,67 @@ export function describeBucketGap(gap: BucketGap, groupTime: string | null): str
     return 'no data for ' + (gap.truncated ? 'over ' : '') + missing + ' ' + (missing === 1 ? unit : unit + 's');
 }
 
+/** Chart.js widens the zero-width range of a single data time by this much on each side and puts a tick on each end. */
+export const chartjsPaddingMs = 1;
+
+/** The data time nearest to the given time when it lies within the tolerance, otherwise the time itself. */
+export function snapToData(time: number, dataTimes: number[], toleranceMs: number): number {
+    let best = time;
+    let bestDistance = Infinity;
+    dataTimes.forEach(t => {
+        const distance = Math.abs(t - time);
+        if (distance <= toleranceMs && distance < bestDistance) {
+            best = t;
+            bestDistance = distance;
+        }
+    });
+    return best;
+}
+
+const fixedUnitMs: { [unit: string]: number } = { ms: 1, s: 1000, m: 60 * 1000, h: 60 * 60 * 1000 };
+const dstShiftMs = 60 * 60 * 1000;
+
+/**
+ * The bucket a clicked tick stands for, as [from, to) in milliseconds. It starts at the bucket start the backend returned,
+ * since exports and devices align buckets differently, and spans one grouping interval: by the local calendar for
+ * d/w/months/y, in milliseconds below.
+ */
+export function clickedBucket(tick: number, dataTimes: number[], groupTime: string | null): { from: number; to: number } | null {
+    const rgxRes = timeRgx.exec(groupTime || '');
+    if (rgxRes === null || isNaN(tick)) {
+        return null;
+    }
+    const amount = Number(rgxRes[1]);
+    const unit = rgxRes[2];
+    if (isNaN(amount) || amount <= 0) {
+        return null;
+    }
+    const end = (start: number): number => {
+        const unitMs = fixedUnitMs[unit];
+        if (unitMs !== undefined) {
+            return start + amount * unitMs;
+        }
+        const d = new Date(start);
+        addInterval(d, amount, unit);
+        return d.valueOf();
+    };
+    let from = snapToData(tick, dataTimes, chartjsPaddingMs);
+    if (!dataTimes.includes(from)) {
+        // Chart.js puts ticks on data points; should one fall between them, it stands for the bucket it lies in
+        const containing = dataTimes.filter(t => t <= tick && tick < end(t));
+        from = containing.length > 0 ? containing.reduce((latest, t) => Math.max(latest, t), -Infinity) : tick;
+    }
+    let to = end(from);
+    if (fixedUnitMs[unit] === undefined) {
+        // a next bucket within the DST hour of the calendar end is the backend's own boundary, e.g. of UTC-aligned buckets
+        const next = dataTimes.filter(t => t > from).reduce((earliest, t) => Math.min(earliest, t), Infinity);
+        if (Math.abs(next - to) <= dstShiftMs) {
+            to = next;
+        }
+    }
+    return { from, to };
+}
+
 function addInterval(date: Date, amount: number, unit: string): void {
     switch (unit) {
         case 'ms':

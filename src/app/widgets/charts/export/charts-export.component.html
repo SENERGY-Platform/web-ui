@@ -43,13 +43,13 @@
                         *ngIf="widget.properties.chartType !== 'Timeline' && widget.properties.chartType !== 'ColumnChart'" class="maximized">
                         <google-chart [hidden]="configureWidget && chartExportData.dataTable !== undefined && chartExportData.dataTable[0].length !== 0"
                             #chartExport [data]="chartExportData"></google-chart>
-                        <senergy-no-data
+                        <senergy-no-data [message]="noDataMessage"
                             [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
                     </div>
                     <div *ngIf="widget.properties.chartType === 'ColumnChart'" class="maximized">
                         <canvas *ngIf="chartjs.data !== undefined" baseChart [data]="chartjs.data" [options]="chartjs.options" type="bar"
                             id="chartjs-{{widget.id}}" (contextmenu)="resetChartjsZoom($event); false" [plugins]="chartjs.plugins"></canvas>
-                        <senergy-no-data
+                        <senergy-no-data [message]="noDataMessage"
                             [showIf]="configureWidget === false && chartjs.data === undefined"></senergy-no-data>
                         <div *ngIf="chartjs.tooltipAllowed && chartjs.tooltipContext !== undefined" id="chartjs-tooltip"
                             class="mat-elevation-z4" [ngStyle]="chartjsTooltipStyle">

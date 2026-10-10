@@ -514,6 +514,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const i = this.dashboards[this.activeTabIndex].widgets.findIndex(w => w.id === widgetManipulationModel.widgetId);
         if (i !== -1 && widgetManipulationModel.widget !== null) {
             const w = this.dashboards[this.activeTabIndex].widgets[i];
+            if (w.type === DashboardTypesEnum.ChartExport) {
+                this.chartsService.cleanupStaleViewState(w.id, w.properties, widgetManipulationModel.widget.properties);
+            }
             w.name = widgetManipulationModel.widget.name;
             w.properties = widgetManipulationModel.widget.properties;
         }

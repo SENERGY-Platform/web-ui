@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { GoogleChartComponent } from 'ng2-google-charts';
-import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
+import {WidgetModel, WidgetPropertiesModels} from '../../../modules/dashboard/shared/dashboard-widget.model';
 
 @Injectable({
     providedIn: 'root',
@@ -71,4 +71,43 @@ export class ChartsService {
             }
         }
     }
+
+    /**
+     * Drops the drill and zoom state an export chart keeps in localStorage when an edit changed the properties it overrides.
+     * A refresh sends the widget unchanged, so the state survives it.
+     */
+    cleanupStaleViewState(widgetId: string, before: WidgetPropertiesModels | undefined, after: WidgetPropertiesModels | undefined) {
+        const changed = (...keys: (keyof WidgetPropertiesModels)[]) => keys.some(k => JSON.stringify(settingValue(before?.[k])) !== JSON.stringify(settingValue(after?.[k])));
+        const remove = (...keys: string[]) => keys.forEach(k => localStorage.removeItem(widgetId + k));
+        if (changed('vAxes', 'stacked')) {
+            remove('_modifiedvAxes', '_drillStack', '_chooseColors', '_stacked');
+        }
+        if (changed('group', 'time', 'timeRangeType', 'hAxisFormat', 'chartType')) {
+            remove('_groupTime', '_hAxisFormat', '_from', '_to');
+        }
+    }
+}
+
+/**
+ * A property value in a canonical form: sorted keys, and null, undefined and '' dropped as unset. The edit dialog turns
+ * missing values into null (or '' for a missing time range) and orders keys differently than the server.
+ */
+function settingValue(value: any): any {
+    if (value === null || value === undefined || value === '') {
+        return undefined;
+    }
+    if (Array.isArray(value)) {
+        return value.map(settingValue);
+    }
+    if (typeof value === 'object') {
+        const res: { [key: string]: any } = {};
+        Object.keys(value).sort().forEach(key => {
+            const v = settingValue(value[key]);
+            if (v !== undefined) {
+                res[key] = v;
+            }
+        });
+        return Object.keys(res).length === 0 ? undefined : res;
+    }
+    return value;
 }
