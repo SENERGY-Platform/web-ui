@@ -26,20 +26,18 @@ import { ExportService } from '../../../modules/exports/shared/export.service';
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { AirQualityExternalProvider, Location, MeasurementModel } from '../shared/air-quality.model';
 import { createMeasurementCatalogue, createPollenCatalogue } from '../shared/air-quality-catalogue';
+import { AirQualityProvisioningService, AirQualitySaveStepError } from '../shared/air-quality-provisioning.service';
 import { UBAService } from '../shared/uba.service';
 import { DWDPollenService } from '../shared/dwd-pollen.service';
 import { UBAStation } from '../shared/uba.model';
 import { GeonamesService } from '../shared/geonames.service';
 import { Geoname } from '../shared/geonames.model';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { catchError, debounceTime, map, tap } from 'rxjs/operators';
-import { forkJoin, from, Observable, of, Subscriber, concatMap } from 'rxjs';
+import { debounceTime, map, tap } from 'rxjs/operators';
+import { forkJoin, from, Observable, of, concatMap } from 'rxjs';
 import { NameValuePair } from '../shared/dwd-pollen.model';
 import { ImportInstancesService } from '../../../modules/imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../modules/imports/import-instances/shared/import-instances.model';
-import { environment } from '../../../../environments/environment';
-import { ImportTypesService } from '../../../modules/imports/import-types/shared/import-types.service';
-import { mergeMap } from 'rxjs/operators';
 import { DeviceInstanceModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import {
     DeviceTypeModel,
@@ -68,20 +66,11 @@ import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from '../../../core/services/snack-bar-messages';
 
-/** A generated import instance or export that could not be created; the widget must not be saved. */
-export class AirQualitySaveStepError extends Error {
-    constructor(
-        readonly step: 'import instance' | 'export',
-        readonly provider: string,
-    ) {
-        super('could not create the ' + step + ' for ' + provider);
-    }
-}
-
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
     styleUrls: ['./air-quality-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
+    providers: [AirQualityProvisioningService],
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatStepper, MatStep, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MatButton, MatStepperNext, MatIconButton, MatIcon, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatHint, MatTooltip, MatStepperPrevious, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatDivider, MatSlideToggle, MatSuffix, MatList, MatListItem, MatDialogActions, AsyncPipe, DecimalPipe]
 })
 export class AirQualityEditDialogComponent implements OnInit {
@@ -94,11 +83,11 @@ export class AirQualityEditDialogComponent implements OnInit {
     private dwdPollenService = inject(DWDPollenService);
     private geonamesService = inject(GeonamesService);
     private importInstancesService = inject(ImportInstancesService);
-    private importTypesService = inject(ImportTypesService);
     private deviceInstancesService = inject(DeviceInstancesService);
     private deviceTypeService = inject(DeviceTypeService);
     private destroyRef = inject(DestroyRef);
     private snackBar = inject(MatSnackBar);
+    private provisioning = inject(AirQualityProvisioningService);
 
     constructor() {
         const dwdPollenService = this.dwdPollenService;
@@ -115,6 +104,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
         this.geonamesSearchResults = from([]);
         this.pollenLevel = dwdPollenService.getNameValuePairs();
+        this.provisioning.bind(this);
     }
 
     userHasUpdateNameAuthorization = false;
@@ -152,7 +142,6 @@ export class AirQualityEditDialogComponent implements OnInit {
     searchFormControl = new FormControl();
     importInstances: ImportInstancesModel[] = [];
     ready = false;
-    private pendingCleanup: { kind: 'export' | 'import instance'; id: string; provider: string }[] = [];
     devices: DeviceInstanceModel[] = [];
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
 
@@ -263,11 +252,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        const observables: Observable<any>[] = [];
-        observables.push(this.prepareDWDSave());
-        observables.push(this.prepareUbaSave());
-        observables.push(this.prepareYrSave());
-        return forkJoin(observables).pipe(
+        return this.provisioning.prepareSave().pipe(
             concatMap((_) => {
                 this.widget.properties.version = 4; // can use devices and queries timescale
                 this.widget.properties.measurements = this.measurements;
@@ -278,7 +263,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                     tap((response) => {
                         // independent of the name update: once the properties are persisted the old resources are unused
                         if (response.message === 'OK') {
-                            this.runPendingCleanup();
+                            this.provisioning.runPendingCleanup();
                         }
                     }),
                 );
@@ -315,47 +300,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                 }
             },
         });
-    }
-
-    // Old generated resources are deleted only after the new ones exist and the widget was saved.
-    private queueCleanup(kind: 'export' | 'import instance', id: string, provider: string): void {
-        if (!this.pendingCleanup.some((c) => c.kind === kind && c.id === id)) {
-            this.pendingCleanup.push({ kind, id, provider });
-        }
-    }
-
-    private runPendingCleanup(): void {
-        const info = this.widget.properties;
-        const stillUsed = new Set(
-            [info.ubaInfo, info.dwdPollenInfo, info.yrInfo].flatMap((i) => [i?.exportId, i?.importInstanceId]).filter((id) => !!id),
-        );
-        const failed: string[] = [];
-        this.pendingCleanup
-            .filter((c) => !stillUsed.has(c.id))
-            .forEach((c) => {
-                const text = c.kind + ' for ' + c.provider;
-                const request: Observable<{ status: number } | void> =
-                    c.kind === 'export' ? this.exportService.stopPipelineByIdIfExists(c.id) : this.importInstancesService.deleteImportInstance(c.id);
-                request.subscribe({
-                    next: (resp) => {
-                        if (resp && resp.status >= 400 && resp.status !== 404) {
-                            this.reportFailedCleanup(failed, text);
-                        }
-                    },
-                    // a 404 means the resource is already gone
-                    error: (err: unknown) => {
-                        if ((err as { status?: number })?.status !== 404) {
-                            this.reportFailedCleanup(failed, text);
-                        }
-                    },
-                });
-            });
-        this.pendingCleanup = [];
-    }
-
-    private reportFailedCleanup(failed: string[], text: string): void {
-        failed.push(text);
-        snackError(this.snackBar, 'Could not delete the old ' + failed.join(', ') + ', the widget was saved');
     }
 
     displayFn(input?: ChartsExportMeasurementModel): string | undefined {
@@ -578,514 +522,6 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.autoLocationFailed = true;
             },
         );
-    }
-
-    private getImportInstancesOfType(typeId: string): ImportInstancesModel[] {
-        return this.importInstances.filter((i) => i.import_type_id === typeId);
-    }
-
-    private filterImportInstancesByConfigValue(
-        importInstances: ImportInstancesModel[],
-        configName: string,
-        configValue: any,
-        moreAllowed = true,
-    ) {
-        return importInstances.filter(
-            (i) =>
-                i.configs.findIndex((c) => {
-                    if (c.name !== configName) {
-                        return false;
-                    }
-                    if (moreAllowed && Array.isArray(c.value)) {
-                        return c.value.findIndex((v) => v === configValue) !== -1;
-                    }
-                    return configValue === c.value;
-                }) !== -1,
-        );
-    }
-
-    private getExportsOfImports(importInstances: ImportInstancesModel[]): ExportModel[] {
-        const ids = importInstances.map((i) => i.id);
-        return this.exports.filter((e) => e.FilterType === 'import_id' && ids.indexOf(e.Filter) !== -1);
-    }
-
-    private generateUbaImportInstance(stationId: string): Observable<ImportInstancesModel> {
-        return this.importInstancesService.saveImportInstance({
-            name: 'AirQuality Widget: ' + this.name + ' (station ' + stationId + ')',
-            configs: [
-                {
-                    name: 'FilterStationIds',
-                    value: ['' + +this.ubaStationSelected.station_id],
-                },
-            ],
-            import_type_id: environment.importTypeIdUbaStation,
-            generated: true,
-        } as ImportInstancesModel);
-    }
-
-    private prepareUbaSave(): Observable<null> {
-        if (!this.hasValidUBAStation()) {
-            // no station -> nothing to do
-            return of(null);
-        }
-        return new Observable<null>((obs) => {
-            if (this.widget.properties.ubaInfo === undefined) {
-                this.widget.properties.ubaInfo = {};
-            }
-            this.widget.properties.ubaInfo.stationId = '' + this.ubaStationSelected.station_id;
-            let ubaInstances = this.getImportInstancesOfType(environment.importTypeIdUbaStation);
-            ubaInstances = this.filterImportInstancesByConfigValue(
-                ubaInstances,
-                'FilterStationIds',
-                '' + this.ubaStationSelected.station_id,
-            );
-            if (ubaInstances.length === 0) {
-                // no matching import instance, generate import and export
-                if (
-                    this.widget.properties.ubaInfo.importGenerated === true &&
-                    this.widget.properties.ubaInfo.importInstanceId !== undefined
-                ) {
-                    this.queueCleanup('import instance', this.widget.properties.ubaInfo.importInstanceId, 'UBA');
-                }
-                this.generateUbaImportInstance(this.widget.properties.ubaInfo.stationId).subscribe({
-                    next: (instance) => {
-                        if (this.widget.properties.ubaInfo === undefined) {
-                            this.widget.properties.ubaInfo = {};
-                        }
-                        this.widget.properties.ubaInfo.importInstanceId = instance.id;
-                        this.widget.properties.ubaInfo.importGenerated = true;
-                        this.helperGenerateUbaExport(instance, obs);
-                    },
-                    error: () => obs.error(new AirQualitySaveStepError('import instance', 'UBA')),
-                });
-            } else {
-                // matching import instance found, might need to generate export
-                const oldInstance = ubaInstances.find((i) => i.id === this.widget.properties.ubaInfo?.importInstanceId);
-                let instance: ImportInstancesModel;
-                if (oldInstance !== undefined) {
-                    instance = oldInstance;
-                } else {
-                    if (
-                        this.widget.properties.ubaInfo.importGenerated === true &&
-                        this.widget.properties.ubaInfo.importInstanceId !== undefined
-                    ) {
-                        this.queueCleanup('import instance', this.widget.properties.ubaInfo.importInstanceId, 'UBA');
-                    }
-                    instance = ubaInstances[0];
-                }
-                if (this.widget.properties.ubaInfo === undefined) {
-                    this.widget.properties.ubaInfo = {};
-                }
-                this.widget.properties.ubaInfo.importInstanceId = instance.id;
-                const matchingExports = this.getExportsOfImports(ubaInstances);
-                if (matchingExports.length === 0) {
-                    this.helperGenerateUbaExport(instance, obs);
-                } else {
-                    // matching export found, no need to generate anything
-                    const oldExport = matchingExports.find((e) => e.ID === this.widget.properties.ubaInfo?.exportId);
-                    let exp: ExportModel;
-                    if (oldExport !== undefined) {
-                        exp = oldExport;
-                    } else {
-                        if (
-                            this.widget.properties.ubaInfo?.exportGenerated === true &&
-                            this.widget.properties.ubaInfo?.exportId !== undefined
-                        ) {
-                            this.cleanMeasurementsExportInfo(this.widget.properties.ubaInfo?.exportId);
-                            this.queueCleanup('export', this.widget.properties.ubaInfo.exportId, 'UBA');
-                        }
-                        exp = matchingExports[0];
-                    }
-                    this.widget.properties.ubaInfo.exportId = exp.ID;
-                    this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
-                    this.fillMeasurementsUbaInfo(exp);
-                    obs.next(null);
-                    obs.complete();
-                }
-            }
-        });
-    }
-
-    /**
-     * Cleans measurements from old uba export (if needed), creates a new export and fills measurements
-     *
-     * @param instance
-     * @param obs
-     * @private
-     */
-    private helperGenerateUbaExport(instance: ImportInstancesModel, obs: Subscriber<null>) {
-        // clean old export if needed
-        if (this.widget.properties.ubaInfo?.exportGenerated === true && this.widget.properties.ubaInfo?.exportId !== undefined) {
-            this.cleanMeasurementsExportInfo(this.widget.properties.ubaInfo?.exportId);
-            this.queueCleanup('export', this.widget.properties.ubaInfo.exportId, 'UBA');
-        }
-        this.generateExportOfImport(instance, environment.importTypeIdUbaStation).subscribe((exp) => {
-            if (exp === null) {
-                obs.error(new AirQualitySaveStepError('export', 'UBA'));
-                return;
-            }
-            if (this.widget.properties.ubaInfo === undefined) {
-                this.widget.properties.ubaInfo = {};
-            }
-            this.widget.properties.ubaInfo.exportId = exp.ID;
-            this.widget.properties.ubaInfo.exportGenerated = true;
-            this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
-            this.fillMeasurementsUbaInfo(exp);
-            obs.next(null);
-            obs.complete();
-        });
-    }
-
-    private fillMeasurementsUbaInfo(exp: ExportModel) {
-        this.measurements.forEach((m) => {
-            if (m.provider === AirQualityExternalProvider.UBA && !m.has_outside) {
-                m.outsideExport = exp;
-                m.outsideData.column = exp.Values.find(
-                    (v) => v.Path === 'value.measurements.' + m.short_name + '.' + m.short_name + '_value',
-                );
-            }
-        });
-    }
-
-    private cleanMeasurementsExportInfo(exportId: string) {
-        this.measurements.forEach((m) => {
-            if (m.outsideExport?.ID === exportId) {
-                m.outsideExport = undefined;
-                m.outsideData.column = undefined;
-            }
-        });
-    }
-
-    private prepareDWDSave(): Observable<any> {
-        const selectedPollen = this.pollen.filter((p) => p.is_enabled);
-        if (selectedPollen.length === 0) {
-            if (this.widget.properties.dwdPollenInfo !== undefined) {
-                if (
-                    this.widget.properties.dwdPollenInfo.importGenerated === true &&
-                    this.widget.properties.dwdPollenInfo.importInstanceId !== undefined
-                ) {
-                    this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
-                }
-                this.widget.properties.dwdPollenInfo.importGenerated = undefined;
-                this.widget.properties.dwdPollenInfo.importInstanceId = undefined;
-
-                if (
-                    this.widget.properties.dwdPollenInfo.exportGenerated === true &&
-                    this.widget.properties.dwdPollenInfo.exportId !== undefined
-                ) {
-                    this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
-                }
-                this.widget.properties.dwdPollenInfo.exportGenerated = undefined;
-                this.widget.properties.dwdPollenInfo.exportId = undefined;
-                this.widget.properties.dwdPollenInfo.exportDatabaseId = undefined;
-            }
-            return of(null);
-        } else {
-            return new Observable<any>((obs) => {
-                let matchingImportInstances = this.getImportInstancesOfType(environment.importTypeIdDwdPollen);
-                matchingImportInstances = this.filterImportInstancesByConfigValue(matchingImportInstances, 'lat', this.location.latitude);
-                matchingImportInstances = this.filterImportInstancesByConfigValue(matchingImportInstances, 'long', this.location.longitude);
-                selectedPollen.forEach(
-                    (p) =>
-                        (matchingImportInstances = this.filterImportInstancesByConfigValue(
-                            matchingImportInstances,
-                            'FilterPollen',
-                            p.short_name,
-                        )),
-                );
-                if (matchingImportInstances.length === 0) {
-                    if (
-                        this.widget.properties.dwdPollenInfo?.importGenerated === true &&
-                        this.widget.properties.dwdPollenInfo.importInstanceId !== undefined
-                    ) {
-                        this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
-                    }
-                    this.generateDwdImportInstance(this.location.latitude, this.location.longitude, selectedPollen).subscribe({
-                        next: (instance) => {
-                            if (this.widget.properties.dwdPollenInfo === undefined) {
-                                this.widget.properties.dwdPollenInfo = {};
-                            }
-                            this.widget.properties.dwdPollenInfo.importInstanceId = instance.id;
-                            this.widget.properties.dwdPollenInfo.importGenerated = true;
-                            this.helperGenerateDWDExport(instance, obs);
-                        },
-                        error: () => obs.error(new AirQualitySaveStepError('import instance', 'DWD pollen')),
-                    });
-                } else {
-                    if (this.widget.properties.dwdPollenInfo === undefined) {
-                        this.widget.properties.dwdPollenInfo = {};
-                    }
-                    // matching import instance found, might need to generate export
-                    const oldInstance = matchingImportInstances.find(
-                        (i) => i.id === this.widget.properties.dwdPollenInfo?.importInstanceId,
-                    );
-                    let instance: ImportInstancesModel;
-                    if (oldInstance !== undefined) {
-                        instance = oldInstance;
-                    } else {
-                        if (
-                            this.widget.properties.dwdPollenInfo.importGenerated === true &&
-                            this.widget.properties.dwdPollenInfo.importInstanceId !== undefined
-                        ) {
-                            this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
-                        }
-                        instance = matchingImportInstances[0];
-                    }
-                    this.widget.properties.dwdPollenInfo.importInstanceId = instance.id;
-                    const matchingExports = this.getExportsOfImports(matchingImportInstances);
-                    if (matchingExports.length === 0) {
-                        this.helperGenerateDWDExport(instance, obs);
-                    } else {
-                        // matching export found, no need to generate anything
-                        const oldExport = matchingExports.find((e) => e.ID === this.widget.properties.dwdPollenInfo?.exportId);
-                        let exp: ExportModel;
-                        if (oldExport !== undefined) {
-                            exp = oldExport;
-                        } else {
-                            if (
-                                this.widget.properties.dwdPollenInfo?.exportGenerated === true &&
-                                this.widget.properties.dwdPollenInfo?.exportId !== undefined
-                            ) {
-                                this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
-                            }
-                            exp = matchingExports[0];
-                        }
-                        this.widget.properties.dwdPollenInfo.exportId = exp.ID;
-                        this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
-                        obs.next(null);
-                        obs.complete();
-                    }
-                }
-            });
-        }
-    }
-
-    private generateDwdImportInstance(lat: number, long: number, pollen: MeasurementModel[]): Observable<ImportInstancesModel> {
-        return this.importInstancesService.saveImportInstance({
-            name: 'AirQuality Widget: ' + this.name + ' (lat: ' + lat + ', long: ' + long + ')',
-            configs: [
-                {
-                    name: 'lat',
-                    value: lat,
-                },
-                {
-                    name: 'long',
-                    value: long,
-                },
-                {
-                    name: 'FilterPollen',
-                    value: pollen.map((p) => p.short_name),
-                },
-            ],
-            import_type_id: environment.importTypeIdDwdPollen,
-            generated: true,
-        } as ImportInstancesModel);
-    }
-
-    /**
-     * Cleans measurements from old dwd export (if needed), creates a new export and fills measurements
-     *
-     * @param instance
-     * @param obs
-     * @private
-     */
-    private helperGenerateDWDExport(instance: ImportInstancesModel, obs: Subscriber<null>) {
-        // clean old export if needed
-        if (
-            this.widget.properties.dwdPollenInfo?.exportGenerated === true &&
-            this.widget.properties.dwdPollenInfo?.exportId !== undefined
-        ) {
-            this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
-        }
-        this.generateExportOfImport(instance, environment.importTypeIdDwdPollen).subscribe((exp) => {
-            if (exp === null) {
-                obs.error(new AirQualitySaveStepError('export', 'DWD pollen'));
-                return;
-            }
-            if (this.widget.properties.dwdPollenInfo === undefined) {
-                this.widget.properties.dwdPollenInfo = {};
-            }
-            this.widget.properties.dwdPollenInfo.exportId = exp.ID;
-            this.widget.properties.dwdPollenInfo.exportGenerated = true;
-            this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
-            obs.next(null);
-            obs.complete();
-        });
-    }
-
-    private generateYrImportInstance(): Observable<ImportInstancesModel> {
-        return this.importInstancesService.saveImportInstance({
-            name: 'AirQuality Widget: ' + this.name + ' (lat: ' + this.location.latitude + ', long: ' + this.location.longitude + ')',
-            configs: [
-                {
-                    name: 'lat',
-                    value: this.location.latitude,
-                },
-                {
-                    name: 'long',
-                    value: this.location.longitude,
-                },
-                {
-                    name: 'max_forecasts',
-                    value: 1,
-                },
-            ],
-            import_type_id: environment.importTypeIdYrForecast,
-            generated: true,
-        } as ImportInstancesModel);
-    }
-
-    /** Answers null when the import type cannot be loaded or the export cannot be started. */
-    private generateExportOfImport(importInstance: ImportInstancesModel, typeId: string): Observable<ExportModel | null> {
-        return this.importTypesService.getImportType(typeId).pipe(
-            mergeMap((type) =>
-                this.exportService.startPipeline({
-                    Offset: 'smallest',
-                    Name: 'AirQuality Widget: ' + this.name,
-                    Filter: importInstance.id,
-                    FilterType: 'import_id',
-                    ServiceName: type.name,
-                    Values: this.importTypesService.parseImportTypeExportValues(type),
-                    EntityName: importInstance.name,
-                    Topic: importInstance.kafka_topic,
-                    TimePath: 'time',
-                    ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
-                    TimestampFormat: '%Y-%m-%dT%H:%M:%SZ',
-                    Generated: true,
-                } as ExportModel),
-            ),
-            catchError(() => of(null)),
-        );
-    }
-
-    private prepareYrSave(): Observable<null> {
-        return new Observable<null>((obs) => {
-            if (this.widget.properties.yrInfo === undefined) {
-                this.widget.properties.yrInfo = {};
-            }
-            let yrInstances = this.getImportInstancesOfType(environment.importTypeIdYrForecast);
-            yrInstances = this.filterImportInstancesByConfigValue(yrInstances, 'lat', this.location.latitude);
-            yrInstances = this.filterImportInstancesByConfigValue(yrInstances, 'long', this.location.longitude);
-            yrInstances = this.filterImportInstancesByConfigValue(yrInstances, 'max_forecasts', 1);
-            if (yrInstances.length === 0) {
-                // no matching import instance, generate import and export
-                if (
-                    this.widget.properties.yrInfo.importGenerated === true &&
-                    this.widget.properties.yrInfo.importInstanceId !== undefined
-                ) {
-                    this.queueCleanup('import instance', this.widget.properties.yrInfo.importInstanceId, 'Yr');
-                }
-                this.generateYrImportInstance().subscribe({
-                    next: (instance) => {
-                        if (this.widget.properties.yrInfo === undefined) {
-                            this.widget.properties.yrInfo = {};
-                        }
-                        this.widget.properties.yrInfo.importInstanceId = instance.id;
-                        this.widget.properties.yrInfo.importGenerated = true;
-                        this.helperGenerateYrExport(instance, obs);
-                    },
-                    error: () => obs.error(new AirQualitySaveStepError('import instance', 'Yr')),
-                });
-            } else {
-                // matching import instance found, might need to generate export
-                const oldInstance = yrInstances.find((i) => i.id === this.widget.properties.yrInfo?.importInstanceId);
-                let instance: ImportInstancesModel;
-                if (oldInstance !== undefined) {
-                    instance = oldInstance;
-                } else {
-                    if (
-                        this.widget.properties.yrInfo.importGenerated === true &&
-                        this.widget.properties.yrInfo.importInstanceId !== undefined
-                    ) {
-                        this.queueCleanup('import instance', this.widget.properties.yrInfo.importInstanceId, 'Yr');
-                    }
-                    instance = yrInstances[0];
-                }
-                if (this.widget.properties.yrInfo === undefined) {
-                    this.widget.properties.yrInfo = {};
-                }
-                this.widget.properties.yrInfo.importInstanceId = instance.id;
-                const matchingExports = this.getExportsOfImports(yrInstances);
-                if (matchingExports.length === 0) {
-                    this.helperGenerateYrExport(instance, obs);
-                } else {
-                    // matching export found, no need to generate anything
-                    const oldExport = matchingExports.find((e) => e.ID === this.widget.properties.yrInfo?.exportId);
-                    let exp: ExportModel;
-                    if (oldExport !== undefined) {
-                        exp = oldExport;
-                    } else {
-                        if (
-                            this.widget.properties.yrInfo?.exportGenerated === true &&
-                            this.widget.properties.yrInfo?.exportId !== undefined
-                        ) {
-                            this.cleanMeasurementsExportInfo(this.widget.properties.yrInfo?.exportId);
-                            this.queueCleanup('export', this.widget.properties.yrInfo.exportId, 'Yr');
-                        }
-                        exp = matchingExports[0];
-                    }
-                    this.widget.properties.yrInfo.exportId = exp.ID;
-                    this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;
-                    this.fillMeasurementsYrInfo(exp);
-                    obs.next(null);
-                    obs.complete();
-                }
-            }
-        });
-    }
-
-    /**
-     * Cleans measurements from old uba export (if needed), creates a new export and fills measurements
-     *
-     * @param instance
-     * @param obs
-     * @private
-     */
-    private helperGenerateYrExport(instance: ImportInstancesModel, obs: Subscriber<null>) {
-        // clean old export if needed
-        if (this.widget.properties.yrInfo?.exportGenerated === true && this.widget.properties.yrInfo?.exportId !== undefined) {
-            this.cleanMeasurementsExportInfo(this.widget.properties.yrInfo?.exportId);
-            this.queueCleanup('export', this.widget.properties.yrInfo.exportId, 'Yr');
-        }
-        this.generateExportOfImport(instance, environment.importTypeIdYrForecast).subscribe((exp) => {
-            if (exp === null) {
-                obs.error(new AirQualitySaveStepError('export', 'Yr'));
-                return;
-            }
-            if (this.widget.properties.yrInfo === undefined) {
-                this.widget.properties.yrInfo = {};
-            }
-            this.widget.properties.yrInfo.exportId = exp.ID;
-            this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;
-            this.widget.properties.yrInfo.exportGenerated = true;
-            this.fillMeasurementsYrInfo(exp);
-            obs.next(null);
-            obs.complete();
-        });
-    }
-
-    private fillMeasurementsYrInfo(exp: ExportModel) {
-        this.measurements.forEach((m) => {
-            if (m.provider === AirQualityExternalProvider.Yr && !m.has_outside) {
-                m.outsideExport = exp;
-                let path = '';
-                switch (m.short_name) {
-                case 'Temp.':
-                    path = 'value.instant_air_temperature';
-                    break;
-                case 'Pressure':
-                    path = 'value.instant_air_pressure_at_sea_level';
-                    break;
-                case 'Hum.':
-                    path = 'value.instant_relative_humidity';
-                    break;
-                case 'Precipitation':
-                    path = 'value.1_hours_precipitation_amount';
-                    break;
-                }
-                m.outsideData.column = exp.Values.find((v) => v.Path === path);
-            }
-        });
     }
 
     private patchNewMeasurements() {
