@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -40,6 +40,7 @@ import {
   readCommands,
   ServiceGroupFunctionModel,
   serviceGroupFunctions,
+  TooltipCriteria,
   VoidTogglePair,
 } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
@@ -70,7 +71,7 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     selector: 'senergy-floorplan',
     templateUrl: './floorplan.component.html',
     styleUrl: './floorplan.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, NgClass, NgStyle, MatIconButton, MatIcon, MatTooltip, CapabilityControlComponent, WidgetFooterComponent]
 })
 export class FloorplanComponent implements OnInit, AfterViewInit {
@@ -78,7 +79,6 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   private snackBar = inject(MatSnackBar);
   private dashboardService = inject(DashboardService);
   private deviceCommandService = inject(DeviceCommandService);
-  private cd = inject(ChangeDetectorRef);
   private deviceGroupsService = inject(DeviceGroupsService);
   private conceptsService = inject(ConceptsService);
   private deviceClassService = inject(DeviceClassesService);
@@ -86,20 +86,20 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   private el = inject(ElementRef);
   private destroyRef = inject(DestroyRef);
 
-  @Input() dashboardId = '';
-  @Input() widget: WidgetModel = {} as WidgetModel;
-  @Input() zoom = false;
-  @Input() userHasDeleteAuthorization = false;
-  @Input() userHasUpdatePropertiesAuthorization = false;
-  @Input() userHasUpdateNameAuthorization = false;
+  readonly dashboardId = input('');
+  readonly widget = input<WidgetModel>({} as WidgetModel);
+  readonly zoom = input(false);
+  readonly userHasDeleteAuthorization = input(false);
+  readonly userHasUpdatePropertiesAuthorization = input(false);
+  readonly userHasUpdateNameAuthorization = input(false);
 
   @ViewChild('imageWrapper', { static: true }) imageWrapper!: ElementRef<HTMLDivElement>;
 
-  ready = true;
-  refreshing = false;
+  readonly ready = signal(true);
+  readonly refreshing = signal(false);
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   img: HTMLImageElement | undefined;
-  draws = 0;
+  readonly draws = signal(0);
   functionIdToUnit = new Map<string, string>();
   /** base characteristic of the function's concept, undefined for functions without input */
   functionIdToCharacteristic = new Map<string, DeviceTypeCharacteristicsModel | undefined>();
@@ -107,9 +107,9 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   aspects: DeviceTypeAspectNodeModel[] = [];
   functions: DeviceTypeFunctionModel[] = [];
   deviceClasses: DeviceTypeDeviceClassModel[] = [];
-  unplacedRows: { index: number; alias: string; icon: string; color: string; value: string }[] = [];
+  readonly unplacedRows = signal<{ index: number; alias: string; icon: string; color: string; value: string }[]>([]);
   /** the controlling functions of each placement, by the same index as the datasets */
-  controls: FloorplanControlModel[][] = [];
+  readonly controls = signal<FloorplanControlModel[][]>([]);
   /** functions per service group, per device type, of a device group - only loaded when it is needed */
   deviceGroupServiceGroups = new Map<string, ServiceGroupFunctionModel[][]>();
   /** controls are resolved on every redraw, so an ambiguity is only reported the first time */
@@ -120,33 +120,49 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
 
   private resolver = new FloorplanControlResolver(this);
 
-  chartjs: FloorplanChartState = {
-    options: buildFloorplanChartOptions(this, () => this.cd.detectChanges()),
-    data: undefined,
-    tooltipContext: undefined,
-    tooltipDatasets: [],
-    plugins: buildFloorplanChartPlugins(this),
-    showValueWhenZoomed: [],
-    showValue: [],
-    icons: [],
-    tooltipCriteria: [],
-    tooltipDisplay: 'none',
-    tooltipAllowed: false,
-  };
+  private readonly chartData = signal<FloorplanChartState['data']>(undefined);
+  /** chart.js mutates the tooltip model it hands in, so every write counts as a change */
+  private readonly tooltipContext = signal<FloorplanChartState['tooltipContext']>(undefined, { equal: () => false });
+  private readonly tooltipDatasets = signal<FloorplanChartState['tooltipDatasets']>([]);
+  private readonly tooltipCriteria = signal<TooltipCriteria[]>([]);
+  private readonly tooltipDisplay = signal('none');
+  private readonly tooltipAllowed = signal(false);
+
+  /** The chart.js state; the fields the template reads are signals behind these accessors. */
+  readonly chartjs: FloorplanChartState = this.createChartjsState();
+
+  private createChartjsState(): FloorplanChartState {
+    const state = {
+      options: buildFloorplanChartOptions(this),
+      plugins: buildFloorplanChartPlugins(this),
+      showValueWhenZoomed: [] as boolean[],
+      showValue: [] as boolean[],
+      icons: [] as string[],
+    } as FloorplanChartState;
+    Object.defineProperties(state, {
+      data: { get: () => this.chartData(), set: (v: FloorplanChartState['data']) => this.chartData.set(v), enumerable: true },
+      tooltipContext: { get: () => this.tooltipContext(), set: (v: FloorplanChartState['tooltipContext']) => this.tooltipContext.set(v), enumerable: true },
+      tooltipDatasets: { get: () => this.tooltipDatasets(), set: (v: FloorplanChartState['tooltipDatasets']) => this.tooltipDatasets.set(v), enumerable: true },
+      tooltipCriteria: { get: () => this.tooltipCriteria(), set: (v: TooltipCriteria[]) => this.tooltipCriteria.set(v), enumerable: true },
+      tooltipDisplay: { get: () => this.tooltipDisplay(), set: (v: string) => this.tooltipDisplay.set(v), enumerable: true },
+      tooltipAllowed: { get: () => this.tooltipAllowed(), set: (v: boolean) => this.tooltipAllowed.set(v), enumerable: true },
+    });
+    return state;
+  }
 
   ngOnInit(): void {
-    migrateColoring(this.widget.properties);
-    this.img = image(this.widget.properties);
+    migrateColoring(this.widget().properties);
+    this.img = image(this.widget().properties);
     const obs: Observable<unknown>[] = [];
     obs.push(this.deviceGroupsService.getAspectListByIds(undefined).pipe(map(a => this.aspects = a)));
     obs.push(this.deviceClassService.getDeviceClasses('', 9999, 0, 'name', 'asc').pipe(map(c => this.deviceClasses = c.result)));
     // the aspects have to be known before the first refresh, it pairs the criteria along the aspect tree
     forkJoin(obs).pipe(concatMap(_ => this.refresh())).subscribe(_ => {
       this.draw();
-      this.ready = true;
+      this.ready.set(true);
     });
     this.dashboardService.initWidgetObservable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: string) => {
-      if (event === 'reloadAll' || event === this.widget.id) {
+      if (event === 'reloadAll' || event === this.widget().id) {
         this.refresh().subscribe();
       }
     });
@@ -159,7 +175,6 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => {
         this.draw();
-        this.cd.detectChanges();
       }, 30);
     }));
     ro.observe(this.el.nativeElement);
@@ -176,14 +191,15 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       this.chartjs.options.elements.point.radius = this.dotSize;
       this.chartjs.options.elements.point.hoverRadius = this.dotSize;
     }
-    const datasets: ChartDataset[] = new Array(Math.max((this.widget.properties.floorplan?.placements || []).length - 1, 0)).fill({});
+    const datasets: ChartDataset[] = new Array(Math.max((this.widget().properties.floorplan?.placements || []).length - 1, 0)).fill({});
     const showValue: boolean[] = [];
     const showValueWhenZoomed: boolean[] = [];
     const icons: string[] = [];
     const controls: FloorplanControlModel[][] = [];
     const unplacedRows: { index: number; alias: string; icon: string; color: string; value: string }[] = [];
-    this.widget.properties.floorplan?.placements.forEach((p, i) => {
-      if (this.widget.properties.floorplan === undefined || this.widget.properties.floorplan.placements === null || this.img === undefined) {
+    const floorplan = this.widget().properties.floorplan;
+    floorplan?.placements.forEach((p, i) => {
+      if (floorplan === undefined || floorplan.placements === null || this.img === undefined) {
         return;
       }
       const { x, y } = placementPosition(p, this.img, this.drawShift);
@@ -195,15 +211,15 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       if (!isPlaced(p)) {
         // keep the dataset to preserve index alignment with the placements, but draw nothing
         datasets[i] = { data: [], label, backgroundColor: color };
-        if (this.widget.properties.floorplan.showUnplacedTable) {
+        if (floorplan.showUnplacedTable) {
           unplacedRows.push({ index: i, alias: p.alias, icon, color, value: label });
         }
         return;
       }
       datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color };
     });
-    this.unplacedRows = unplacedRows;
-    this.controls = controls;
+    this.unplacedRows.set(unplacedRows);
+    this.controls.set(controls);
     this.chartjs.data = { datasets };
     this.chartjs.icons = icons;
     this.chartjs.showValueWhenZoomed = showValueWhenZoomed;
@@ -214,16 +230,16 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     }
     chart.resize(this.imageWrapper.nativeElement.offsetWidth, this.imageWrapper.nativeElement.offsetHeight);
     this.chartjsChart?.draw();
-    this.draws++;
+    this.draws.update(n => n + 1);
   }
 
 
   private refresh(): Observable<unknown> {
-    if (this.widget.properties.floorplan === undefined) {
+    if (this.widget().properties.floorplan === undefined) {
       return of(null);
     }
-    this.refreshing = true;
-    this.img = image(this.widget.properties);
+    this.refreshing.set(true);
+    this.img = image(this.widget().properties);
     let commands: DeviceCommandModel[] = [];
     let idsToCheckOnline: string[] = [];
 
@@ -231,11 +247,12 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       concatMap(_ => this.loadMissingFunctionInfo()),
       concatMap(_ => this.loadMissingServiceGroups()),
       concatMap(_ => {
-      if (this.widget.properties.floorplan === undefined) {
+      const floorplan = this.widget().properties.floorplan;
+      if (floorplan === undefined) {
         return of(null);
       }
 
-      const reads = readCommands(this.widget.properties.floorplan.placements, this.stateSources());
+      const reads = readCommands(floorplan.placements, this.stateSources());
       commands = reads.commands;
       idsToCheckOnline = reads.onlineDeviceGroupIds;
       const o: Observable<unknown>[] = [];
@@ -252,7 +269,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
               ?.filter(crit => this.compareCriteriaWithoutInteraction(crit, com as DeviceGroupCriteriaModel))
               .forEach(crit => crit.value = res[i]);
 
-            this.widget.properties.floorplan?.placements.forEach(p => {
+            this.widget().properties.floorplan?.placements.forEach(p => {
               if (p.deviceGroupId !== com.group_id) {
                 return;
               }
@@ -274,7 +291,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       }
       if (idsToCheckOnline.length > 0) {
         o.push(this.deviceInstancesService.getCurrentDeviceConnectionStatusMap(idsToCheckOnline, []).pipe(map(statusMap => {
-          this.widget.properties.floorplan?.placements.forEach(p => {
+          this.widget().properties.floorplan?.placements.forEach(p => {
               if (!statusMap.has(p.deviceGroupId || '')) {
                 return;
               }
@@ -299,8 +316,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       }
       return forkJoin(o).pipe(map(_1 => {
         this.draw();
-        this.refreshing = false;
-        this.cd.detectChanges();
+        this.refreshing.set(false);
       }));
     }));
   }
@@ -314,7 +330,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     dialogConfig.width = '75vw';
     dialogConfig.disableClose = false;
     dialogConfig.data = {
-      widgetId: this.widget.id,
+      widgetId: this.widget().id,
       dashboardId: this.dashboardId,
       userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization,
       userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization,
@@ -329,11 +345,13 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     });
   }
 
-  @ViewChild('chartjsTooltip') chartjsTooltipElement: ElementRef | undefined;
+  /** A signal query, so the style is evaluated again once the tooltip exists and can be measured. */
+  private readonly chartjsTooltipElement = viewChild<ElementRef>('chartjsTooltip');
   get chartjsTooltipStyle(): any {
+    const tooltipElement = this.chartjsTooltipElement();
     let top = (this.chartjs.tooltipContext?.chart.canvas?.offsetTop || 0) + (this.chartjs.tooltipContext?.tooltip.caretY || 0);
-    if (this.chartjsTooltipElement !== undefined) {
-      const oversize = top + this.chartjsTooltipElement?.nativeElement.offsetHeight - (this.chartjs.tooltipContext?.chart.canvas?.offsetHeight || 0) + 12; // 12px as extra margin
+    if (tooltipElement !== undefined) {
+      const oversize = top + tooltipElement.nativeElement.offsetHeight - (this.chartjs.tooltipContext?.chart.canvas?.offsetHeight || 0) + 12; // 12px as extra margin
       if (oversize > 0) {
         top -= oversize;
       }
@@ -361,17 +379,17 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   }
 
   get chartjsChart(): Chart | undefined {
-    return Chart.getChart('chartjs-' + this.widget.id);
+    return Chart.getChart('chartjs-' + this.widget().id);
   }
 
   get dotSize(): number {
-    return Math.sqrt(this.el.nativeElement.clientHeight * this.el.nativeElement.clientWidth) * (this.widget.properties?.floorplan?.dotSize || 5) / 350;
+    return Math.sqrt(this.el.nativeElement.clientHeight * this.el.nativeElement.clientWidth) * (this.widget().properties?.floorplan?.dotSize || 5) / 350;
   }
 
   loadMissingFunctionInfo(): Observable<null> {
     const obs: Observable<any>[] = [of(null)];
     let functionIds: string[] = [];
-    this.widget.properties.floorplan?.placements.forEach(p => {
+    this.widget().properties.floorplan?.placements.forEach(p => {
       functionIds.push(p.criteria.function_id);
       functionIds.push(...(p.tooltipCriteria || []).map(c => c.function_id));
     });
@@ -410,7 +428,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   }
 
   loadMissingDeviceGroups(): Observable<null> {
-    const deviceGroupIds = this.widget.properties.floorplan?.placements.map(p => p.deviceGroupId).filter(dId => dId !== null).filter(dId => this.deviceGroups.find(dg => dg.id === dId) === undefined).filter((v, i, a) => a.indexOf(v) === i);
+    const deviceGroupIds = this.widget().properties.floorplan?.placements.map(p => p.deviceGroupId).filter(dId => dId !== null).filter(dId => this.deviceGroups.find(dg => dg.id === dId) === undefined).filter((v, i, a) => a.indexOf(v) === i);
     if (deviceGroupIds !== undefined && deviceGroupIds?.length > 0) {
       return this.deviceGroupsService.getDeviceGroupListByIds(deviceGroupIds as string[], true).pipe(map(dgs => {
         dgs.forEach(dg => dg.criteria = dg.criteria
@@ -450,7 +468,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
    * reached through a displayed measurement need nothing, that value is read for the tooltip anyway.
    */
   private stateSources(): DeviceGroupCriteriaModel[][] {
-    return (this.widget.properties.floorplan?.placements || []).map(p => {
+    return (this.widget().properties.floorplan?.placements || []).map(p => {
       const deviceGroup = this.deviceGroups.find(dg => dg.id === p.deviceGroupId);
       if (deviceGroup === undefined) {
         return [];
@@ -473,7 +491,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
    */
   loadMissingServiceGroups(): Observable<null> {
     const groupIds: string[] = [];
-    this.widget.properties.floorplan?.placements.forEach(p => {
+    this.widget().properties.floorplan?.placements.forEach(p => {
       const deviceGroup = this.deviceGroups.find(dg => dg.id === p.deviceGroupId);
       if (deviceGroup === undefined || this.deviceGroupServiceGroups.has(deviceGroup.id) || groupIds.indexOf(deviceGroup.id) !== -1) {
         return;
@@ -514,7 +532,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
 
   /** Whether clicking the dot or the table row of the placement does anything */
   hasAction(datasetIndex: number): boolean {
-    return (this.controls[datasetIndex] || []).length > 0;
+    return (this.controls()[datasetIndex] || []).length > 0;
   }
 
   /**
@@ -525,12 +543,12 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     if (criteria === undefined) {
       return undefined;
     }
-    return (this.controls[datasetIndex] || []).find(c => c.via !== undefined && this.compareCriteriaWithoutInteraction(c.via, criteria));
+    return (this.controls()[datasetIndex] || []).find(c => c.via !== undefined && this.compareCriteriaWithoutInteraction(c.via, criteria));
   }
 
   /** The controls that are not reachable through a displayed value and need a row of their own */
   standaloneControls(datasetIndex: number): FloorplanControlModel[] {
-    return (this.controls[datasetIndex] || []).filter(c => c.via === undefined);
+    return (this.controls()[datasetIndex] || []).filter(c => c.via === undefined);
   }
 
   /** The standalone controls that fit into a tooltip or table row */
@@ -544,7 +562,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   }
 
   performRowAction(datasetIndex: number) {
-    const controls = this.controls[datasetIndex] || [];
+    const controls = this.controls()[datasetIndex] || [];
     if (controls.length === 0) {
       return;
     }
@@ -583,7 +601,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   }
 
   openControlDialog(datasetIndex: number) {
-    const placement = this.widget.properties.floorplan?.placements[datasetIndex];
+    const placement = this.widget().properties.floorplan?.placements[datasetIndex];
     if (placement === undefined) {
       return;
     }
@@ -591,14 +609,14 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     dialogConfig.disableClose = false;
     dialogConfig.data = {
       alias: placement.alias,
-      controls: this.controls[datasetIndex] || [],
+      controls: this.controls()[datasetIndex] || [],
       run: (command: CapabilityCommandModel) => this.runControl(placement.deviceGroupId, command),
     } as FloorplanControlDialogData;
     this.dialog.open(FloorplanControlDialogComponent, dialogConfig);
   }
 
   performControl(datasetIndex: number, command: CapabilityCommandModel) {
-    const placement = this.widget.properties.floorplan?.placements[datasetIndex];
+    const placement = this.widget().properties.floorplan?.placements[datasetIndex];
     if (placement === undefined) {
       return;
     }
@@ -644,7 +662,6 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
 
   closeChartjsTooltip() {
     this.chartjs.tooltipDisplay = 'none';
-    this.cd.detectChanges();
   }
 
   forbidChartjsTooltip() {

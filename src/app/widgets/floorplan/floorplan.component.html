@@ -15,19 +15,19 @@
   -->
 
 <mat-card appearance="outlined" (mouseleave)="forbidChartjsTooltip()" (mouseenter)="allowChartjsTooltip()">
-  <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"></senergy-widget-header>
+  <senergy-widget-header [widget]="widget()" [zoom]="zoom()" [refreshing]="refreshing()"></senergy-widget-header>
   <mat-card-content>
-    @if (ready && widget.properties.floorplan === undefined) {
+    @if (ready() && widget().properties.floorplan === undefined) {
       <div class="content">
         <div>Please configure widget!</div>
       </div>
     }
     <senergy-widget-spinner
-    [show]="widget.properties.floorplan !== undefined && (!ready || draws < 2)"></senergy-widget-spinner>
-    <div [hidden]="!ready || !widget.properties.floorplan === undefined" class="content">
+    [show]="widget().properties.floorplan !== undefined && (!ready() || draws() < 2)"></senergy-widget-spinner>
+    <div [hidden]="!ready() || !widget().properties.floorplan === undefined" class="content">
       <div class="image-wrapper" #imageWrapper>
         <canvas #canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="scatter"
-        id="chartjs-{{widget.id}}" [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws < 2}"></canvas>
+        id="chartjs-{{widget().id}}" [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws() < 2}"></canvas>
         @if (chartjs.tooltipAllowed && chartjs.tooltipContext !== undefined) {
           <div id="chartjs-tooltip" #chartjsTooltip class="mat-elevation-z4"
             [ngStyle]="chartjsTooltipStyle">
@@ -48,9 +48,9 @@
                       </td>
                       <!-- a measurement that operates a control shows its value as the button doing so -->
                       <td colspan="2"
-                        [ngClass]="{'value-link': linkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget.properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria) !== undefined}"
-                        [matTooltip]="linkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget.properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria)?.label || ''"
-                        (click)="performLinkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget.properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria)">
+                        [ngClass]="{'value-link': linkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget().properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria) !== undefined}"
+                        [matTooltip]="linkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget().properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria)?.label || ''"
+                        (click)="performLinkedControl(chartjs.tooltipDatasets[i].datasetIndex, widget().properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria)">
                         {{this.chartjs.tooltipDatasets[i].label}}
                       </td>
                     </tr>
@@ -90,16 +90,16 @@
               </table>
             </div>
           }
-          @if (unplacedRows.length > 0) {
+          @if (unplacedRows().length > 0) {
             <table class="unplaced-table mat-elevation-z4">
-              @for (row of unplacedRows; track row) {
+              @for (row of unplacedRows(); track row) {
                 <tr>
                   <td><mat-icon [style.color]="row.color" class="unplaced-icon">{{row.icon}}</mat-icon></td>
                   <td class="unplaced-alias">{{row.alias}}</td>
                   <td class="unplaced-value"
-                    [ngClass]="{'value-link': linkedControl(row.index, widget.properties.floorplan!.placements[row.index].criteria) !== undefined}"
-                    [matTooltip]="linkedControl(row.index, widget.properties.floorplan!.placements[row.index].criteria)?.label || ''"
-                  (click)="performLinkedControl(row.index, widget.properties.floorplan!.placements[row.index].criteria)">{{row.value}}</td>
+                    [ngClass]="{'value-link': linkedControl(row.index, widget().properties.floorplan!.placements[row.index].criteria) !== undefined}"
+                    [matTooltip]="linkedControl(row.index, widget().properties.floorplan!.placements[row.index].criteria)?.label || ''"
+                  (click)="performLinkedControl(row.index, widget().properties.floorplan!.placements[row.index].criteria)">{{row.value}}</td>
                   <td class="unplaced-action">
                     @for (control of compactControls(row.index); track control) {
                       <senergy-capability-control [control]="control"
@@ -121,10 +121,10 @@
     </mat-card-content>
     <div>
       <senergy-widget-footer [widgetHasUpdateableProperties]="true"
-        [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization"
-        [userHasDeleteAuthorization]="userHasDeleteAuthorization"
-        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-        [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()" [refreshing]="refreshing">
+        [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization()"
+        [userHasDeleteAuthorization]="userHasDeleteAuthorization()"
+        [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization()" [dashboardId]="dashboardId()"
+        [widget]="widget()" [optionZoom]="true" [zoom]="zoom()" (editEvent)="edit()" [refreshing]="refreshing()">
       </senergy-widget-footer>
     </div>
   </mat-card>

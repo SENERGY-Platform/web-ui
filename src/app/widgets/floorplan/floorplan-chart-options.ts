@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Signal } from '@angular/core';
 import { Point } from '@angular/cdk/drag-drop';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
 import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartTypeRegistry, Plugin, TooltipModel } from 'chart.js';
@@ -41,8 +42,8 @@ export interface FloorplanChartState {
 /** What the chart callbacks read from, and write back to, the widget component. */
 export interface FloorplanChartHost {
   chartjs: FloorplanChartState;
-  widget: WidgetModel;
-  zoom: boolean;
+  readonly widget: Signal<WidgetModel>;
+  readonly zoom: Signal<boolean>;
   img: HTMLImageElement | undefined;
   drawShift: { centerShiftX: number; centerShiftY: number; ratio: number };
   readonly dotSize: number;
@@ -54,14 +55,14 @@ export interface FloorplanChartHost {
 }
 
 /** The chart.js options; the callbacks look the host up when they run, so only the radius is fixed at build time. */
-export function buildFloorplanChartOptions(host: FloorplanChartHost, detectChanges: () => void): ChartConfiguration['options'] {
+export function buildFloorplanChartOptions(host: FloorplanChartHost): ChartConfiguration['options'] {
   return {
   
     animation: false,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: host.zoom,
+        display: host.zoom(),
       },
       tooltip: {
         enabled: false,
@@ -79,7 +80,7 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost, detectChang
             host.chartjs.tooltipCriteria = [];
             host.chartjs.tooltipDatasets.forEach(x => {
               const tc: TooltipCriteria = { matchDsIndex: x.datasetIndex, values: [] };
-              const placement = host.widget.properties.floorplan?.placements[x.datasetIndex];
+              const placement = host.widget().properties.floorplan?.placements[x.datasetIndex];
               placement?.tooltipCriteria?.forEach(c => {
                 if (isControllingFunction(c.function_id)) {
                   // controlling criteria have no value to display, they are rendered as controls
@@ -108,10 +109,9 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost, detectChang
             // until the pointer leaves the widget or it is closed.
             return;
           }
-          context.tooltip.title = context.tooltip.dataPoints.map(x => host.widget.properties.floorplan?.placements[x.datasetIndex].alias || '');
+          context.tooltip.title = context.tooltip.dataPoints.map(x => host.widget().properties.floorplan?.placements[x.datasetIndex].alias || '');
           host.chartjs.tooltipContext = context;
           host.chartjs.tooltipDisplay = 'initial';
-          detectChanges();
         },
       },
     },
@@ -163,7 +163,7 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost, detectChang
           if (ds === undefined) {
             return def;
           }
-          const placement = host.widget.properties.floorplan?.placements[dsIndex];
+          const placement = host.widget().properties.floorplan?.placements[dsIndex];
           if (placement === undefined) {
             return def;
           }
@@ -186,7 +186,7 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost, detectChang
           canvasCtx.fillStyle = ds.backgroundColor as string;
 
 
-          const text = markerText(placement, ds.label || '', host.zoom, host.chartjs.showValue[dsIndex], host.chartjs.showValueWhenZoomed[dsIndex]);
+          const text = markerText(placement, ds.label || '', host.zoom(), host.chartjs.showValue[dsIndex], host.chartjs.showValueWhenZoomed[dsIndex]);
 
           if (text.length > 0) {
             const originWidth = canvas.width;

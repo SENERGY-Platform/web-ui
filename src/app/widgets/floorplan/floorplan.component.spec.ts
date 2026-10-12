@@ -89,12 +89,12 @@ describe('FloorplanComponent', () => {
 
     /** prepares the component as if the image was loaded and draws the given placements */
     const drawPlacements = (placements: FloorplanWidgetCapabilityModel[], showUnplacedTable = false) => {
-        component.widget = {
+        fixture.componentRef.setInput('widget', {
             id: 'widgetId',
             name: 'widget',
             type: 'floorplan',
             properties: { floorplan: { image: null, dotSize: 10, placements, showUnplacedTable } },
-        } as WidgetModel;
+        } as WidgetModel);
         component.img = { naturalWidth: 100, naturalHeight: 100 } as HTMLImageElement;
         component.drawShift = { centerShiftX: 0, centerShiftY: 0, ratio: 1 };
         component.draw();
@@ -135,17 +135,17 @@ describe('FloorplanComponent', () => {
                 true,
             );
 
-            expect(component.unplacedRows.length).toBe(1);
-            expect(component.unplacedRows[0].alias).toBe('unplaced');
-            expect(component.unplacedRows[0].index).toBe(1);
-            expect(component.unplacedRows[0].icon).toBe('lightbulb');
-            expect(component.unplacedRows[0].color).toBe('#ff0000');
+            expect(component.unplacedRows().length).toBe(1);
+            expect(component.unplacedRows()[0].alias).toBe('unplaced');
+            expect(component.unplacedRows()[0].index).toBe(1);
+            expect(component.unplacedRows()[0].icon).toBe('lightbulb');
+            expect(component.unplacedRows()[0].color).toBe('#ff0000');
         });
 
         it('are not listed when the option is disabled', () => {
             drawPlacements([placement({ alias: 'unplaced', position: { x: null, y: null } })], false);
 
-            expect(component.unplacedRows).toEqual([]);
+            expect(component.unplacedRows()).toEqual([]);
         });
 
         it('show their value including the unit', () => {
@@ -167,13 +167,13 @@ describe('FloorplanComponent', () => {
                 true,
             );
 
-            expect(component.unplacedRows[0].value).toBe('21 °C');
+            expect(component.unplacedRows()[0].value).toBe('21 °C');
         });
 
         it('show no value while the criteria has none', () => {
             drawPlacements([placement({ alias: 'unplaced', position: { x: null, y: null } })], true);
 
-            expect(component.unplacedRows[0].value).toBe('');
+            expect(component.unplacedRows()[0].value).toBe('');
         });
     });
 
@@ -202,7 +202,7 @@ describe('FloorplanComponent', () => {
         });
 
         it('shows the alias of a maximized widget only when configured for it', () => {
-            component.zoom = true;
+            fixture.componentRef.setInput('zoom', true);
             drawPlacements([placement({ alias: 'Kitchen', showAlias: true, showAliasWhenZoomed: false })]);
             expect((pointStyle({ parsed: { x: 50, y: 50 } }) as HTMLCanvasElement).width).toBe(DOT_SIZE);
 
@@ -238,7 +238,7 @@ describe('FloorplanComponent', () => {
         it('are performed for the placement behind the table row', () => {
             drawPlacements([connectionStatus], true);
 
-            component.performRowAction(component.unplacedRows[0].index);
+            component.performRowAction(component.unplacedRows()[0].index);
 
             expect(dialogSpy.open).toHaveBeenCalled();
         });
@@ -304,10 +304,10 @@ describe('FloorplanComponent', () => {
         const setTemperature = 'urn:infai:ses:controlling-function:set-temperature';
 
         const withPlacements = (placements: FloorplanWidgetCapabilityModel[]) => {
-            component.widget = {
+            fixture.componentRef.setInput('widget', {
                 id: 'widgetId', name: 'widget', type: 'floorplan',
                 properties: { floorplan: { image: null, dotSize: 10, placements } },
-            } as WidgetModel;
+            } as WidgetModel);
             component.deviceGroups = [];
         };
 
@@ -465,23 +465,23 @@ describe('FloorplanComponent', () => {
         it('offers a slider for a clamped controlling criteria selected for the placement', () => {
             drawPlacements([placement({ tooltipCriteria: [criteria(setTargetTemperature)] })]);
 
-            expect(component.controls[0].length).toBe(1);
-            expect(component.controls[0][0].input).toBe(FloorplanControlInput.Slider);
-            expect(component.controls[0][0].characteristic?.max_value).toBe(30);
+            expect(component.controls()[0].length).toBe(1);
+            expect(component.controls()[0][0].input).toBe(FloorplanControlInput.Slider);
+            expect(component.controls()[0][0].characteristic?.max_value).toBe(30);
         });
 
         it('offers a plain button for a controlling criteria without an input', () => {
             drawPlacements([placement({ tooltipCriteria: [criteria(setOn)] })]);
 
-            expect(component.controls[0][0].input).toBe(FloorplanControlInput.Action);
+            expect(component.controls()[0][0].input).toBe(FloorplanControlInput.Action);
         });
 
         it('merges a selected set on and set off into a single switch', () => {
             drawPlacements([placement({ tooltipCriteria: [criteria(setOn), criteria(setOff)] })]);
 
-            expect(component.controls[0].length).toBe(1);
-            expect(component.controls[0][0].input).toBe(FloorplanControlInput.Toggle);
-            expect(component.controls[0][0].offCriteria?.function_id).toBe(setOff);
+            expect(component.controls()[0].length).toBe(1);
+            expect(component.controls()[0][0].input).toBe(FloorplanControlInput.Toggle);
+            expect(component.controls()[0][0].offCriteria?.function_id).toBe(setOff);
         });
 
         it('takes the state of the switch from the on off function of the group', () => {
@@ -489,7 +489,7 @@ describe('FloorplanComponent', () => {
 
             drawPlacements([placement({ tooltipCriteria: [criteria(setOn), criteria(setOff)] })]);
 
-            expect(component.controls[0][0].state).toBeTrue();
+            expect(component.controls()[0][0].state).toBeTrue();
         });
 
         it('takes the state of a slider from the measuring function of the same concept', () => {
@@ -498,7 +498,7 @@ describe('FloorplanComponent', () => {
 
             drawPlacements([placement({ tooltipCriteria: [criteria(setTargetTemperature)] })]);
 
-            expect(component.controls[0][0].state).toBe(21.5);
+            expect(component.controls()[0][0].state).toBe(21.5);
         });
 
         it('has no state while the value could not be read', () => {
@@ -510,7 +510,7 @@ describe('FloorplanComponent', () => {
 
             drawPlacements([placement({ tooltipCriteria: [criteria(setTargetTemperature)] })]);
 
-            expect(component.controls[0][0].state).toBeUndefined();
+            expect(component.controls()[0][0].state).toBeUndefined();
         });
 
         it('takes the state of a control from the measurement it is reached through', () => {
@@ -519,7 +519,7 @@ describe('FloorplanComponent', () => {
                 criteria: { ...criteria(getTargetTemperature), value: { status_code: 200, message: [100] } },
             })]);
 
-            const control = component.controls[0][0];
+            const control = component.controls()[0][0];
             expect(control.criteria.function_id).toBe(setTargetTemperature);
             expect(control.via?.function_id).toBe(getTargetTemperature);
             expect(control.state).toBe(100);
@@ -541,7 +541,7 @@ describe('FloorplanComponent', () => {
                 tooltipCriteria: [criteria(setTargetTemperature)],
             })]);
 
-            expect(component.controls[0].length).toBe(1);
+            expect(component.controls()[0].length).toBe(1);
         });
 
         it('turns an on off measurement into a toggle reached through its value', () => {
@@ -549,7 +549,7 @@ describe('FloorplanComponent', () => {
                 criteria: { ...criteria(getOnOff), value: { status_code: 200, message: [true] } },
             })]);
 
-            const control = component.controls[0][0];
+            const control = component.controls()[0][0];
             expect(control.input).toBe(FloorplanControlInput.Toggle);
             expect(control.offCriteria?.function_id).toBe(setOff);
             expect(control.state).toBeTrue();
@@ -593,8 +593,8 @@ describe('FloorplanComponent', () => {
                 criteria: { ...criteria(getTargetTemperature), value: { status_code: 200, message: 21.5 } },
             })]);
 
-            expect(component.controls[0].length).toBe(1);
-            expect(component.controls[0][0].criteria.function_id).toBe(setTargetTemperature);
+            expect(component.controls()[0].length).toBe(1);
+            expect(component.controls()[0][0].criteria.function_id).toBe(setTargetTemperature);
         });
 
         it('opens the dialog when a value has to be entered first', () => {
@@ -718,7 +718,7 @@ describe('FloorplanComponent', () => {
                 (component as unknown as { refresh: () => any }).refresh().subscribe();
                 tick(750);
 
-                expect(component.widget.properties.floorplan?.placements[0].criteria.value).toBe(shown);
+                expect(component.widget().properties.floorplan?.placements[0].criteria.value).toBe(shown);
                 errorSnack('The floorplan values could not be read');
             }));
         });
