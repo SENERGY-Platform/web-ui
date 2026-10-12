@@ -68,6 +68,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { DesignerSnackBarComponent } from './designer/snack-bar/designer-snack-bar.component';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DeploymentsStartParameterDialogComponent } from './deployments/dialogs/deployments-start-parameter-dialog.component';
 import {ProcessIoDesignerDialogComponent} from './designer/dialogs/process-io-designer-dialog/process-io-designer-dialog.component';
 import {MatExpansionModule} from '@angular/material/expansion';
@@ -165,6 +166,7 @@ const processIo: Route = {
         MatTabsModule,
         MatChipsModule,
         MatBadgeModule,
+        MatSlideToggleModule,
         MatExpansionModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
