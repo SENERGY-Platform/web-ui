@@ -17,8 +17,8 @@
 import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, Subscriber, forkJoin, of } from 'rxjs';
-import { catchError, mergeMap } from 'rxjs/operators';
-import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
+import { WidgetModel, WidgetPropertiesModels } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { ImportInstancesModel } from '../../../modules/imports/import-instances/shared/import-instances.model';
@@ -28,6 +28,7 @@ import { UBAStation } from './uba.model';
 import { snackError } from '../../../core/services/snack-bar-messages';
 import { environment } from '../../../../environments/environment';
 import { AirQualityExternalProvider, Location, MeasurementModel } from './air-quality.model';
+import { deleteResources, GeneratedResource, UnsavedGeneratedResources } from '../../shared/generated-resources';
 
 /** A generated import instance or export that could not be created; the widget must not be saved. */
 export class AirQualitySaveStepError extends Error {
@@ -61,6 +62,29 @@ export class AirQualityProvisioningService {
     private snackBar = inject(MatSnackBar);
     private state!: AirQualityProvisioningState;
     private pendingCleanup: { kind: 'export' | 'import instance'; id: string; provider: string }[] = [];
+    // created by this dialog and matched like the loaded ones, so a retry reuses them instead of creating them again
+    private createdInstances: ImportInstancesModel[] = [];
+    private createdExports: ExportModel[] = [];
+    // deleted by a clean-up of this dialog, so no later save may adopt them from the lists loaded at open
+    private deletedIds = new Set<string>();
+
+    /** Import instances and exports of attempts not yet saved; deleted after a save that does not use them or on close. */
+    readonly unsaved = new UnsavedGeneratedResources({
+        delete: (resources) =>
+            deleteResources(resources, {
+                export: (id) => this.exportService.stopPipelineByIdIfExists(id),
+                importInstance: (id) =>
+                    this.importInstancesService.deleteImportInstance(id).pipe(
+                        map(() => ({ status: 200 })),
+                        catchError((err: unknown) => of({ status: (err as { status?: number })?.status === 404 ? 404 : 500 })),
+                    ),
+            }),
+        reportNotDeleted: (notDeleted) =>
+            snackError(
+                this.snackBar,
+                'Could not delete the ' + notDeleted.map((r) => r.kind + ' for ' + r.label).join(', ') + ' generated for the unsaved changes',
+            ),
+    });
 
     bind(state: AirQualityProvisioningState): void {
         this.state = state;
@@ -110,15 +134,29 @@ export class AirQualityProvisioningService {
         }
     }
 
-    runPendingCleanup(): void {
-        const info = this.widget.properties;
-        const stillUsed = new Set(
-            [info.ubaInfo, info.dwdPollenInfo, info.yrInfo].flatMap((i) => [i?.exportId, i?.importInstanceId]).filter((id) => !!id),
-        );
+    /** The import instances and exports the given widget properties refer to, including the exports measurements read from. */
+    referencesOf(properties: WidgetPropertiesModels): GeneratedResource[] {
+        const infos = [properties.ubaInfo, properties.dwdPollenInfo, properties.yrInfo].flatMap((i): GeneratedResource[] => [
+            ...(i?.exportId ? [{ kind: 'export' as const, id: i.exportId, label: '' }] : []),
+            ...(i?.importInstanceId ? [{ kind: 'import instance' as const, id: i.importInstanceId, label: '' }] : []),
+        ]);
+        // any export the user may pick, a generated one included, can feed a measurement
+        const measurementExports = [...(properties.measurements || []), ...(properties.pollen || [])]
+            .flatMap((m) => [m.export?.ID, m.outsideExport?.ID])
+            .filter((id): id is string => !!id)
+            .map((id) => ({ kind: 'export' as const, id, label: '' }));
+        return [...infos, ...measurementExports];
+    }
+
+    /** Runs after the property update answered OK; `sent` are the references of the properties that update carried. */
+    runPendingCleanup(sent: GeneratedResource[]): void {
+        this.unsaved.takeForSave().forEach((r) => (r.kind === 'export' || r.kind === 'import instance') && this.queueCleanup(r.kind, r.id, r.label));
+        const stillUsed = new Set([...sent, ...this.unsaved.possiblyStored()].map((r) => r.id));
         const failed: string[] = [];
         this.pendingCleanup
             .filter((c) => !stillUsed.has(c.id))
             .forEach((c) => {
+                this.deletedIds.add(c.id);
                 const text = c.kind + ' for ' + c.provider;
                 const request: Observable<{ status: number } | void> =
                     c.kind === 'export' ? this.exportService.stopPipelineByIdIfExists(c.id) : this.importInstancesService.deleteImportInstance(c.id);
@@ -145,7 +183,7 @@ export class AirQualityProvisioningService {
     }
 
     private getImportInstancesOfType(typeId: string): ImportInstancesModel[] {
-        return this.importInstances.filter((i) => i.import_type_id === typeId);
+        return [...this.importInstances, ...this.createdInstances].filter((i) => i.import_type_id === typeId && !this.deletedIds.has(i.id));
     }
 
     private filterImportInstancesByConfigValue(
@@ -170,7 +208,9 @@ export class AirQualityProvisioningService {
 
     private getExportsOfImports(importInstances: ImportInstancesModel[]): ExportModel[] {
         const ids = importInstances.map((i) => i.id);
-        return this.exports.filter((e) => e.FilterType === 'import_id' && ids.indexOf(e.Filter) !== -1);
+        return [...this.exports, ...this.createdExports].filter(
+            (e) => e.FilterType === 'import_id' && ids.indexOf(e.Filter) !== -1 && !this.deletedIds.has(e.ID || ''),
+        );
     }
 
     private generateUbaImportInstance(stationId: string): Observable<ImportInstancesModel> {
@@ -184,7 +224,7 @@ export class AirQualityProvisioningService {
             ],
             import_type_id: environment.importTypeIdUbaStation,
             generated: true,
-        } as ImportInstancesModel);
+        } as ImportInstancesModel).pipe(tap((instance) => this.recordInstance(instance, 'UBA')));
     }
 
     private prepareUbaSave(): Observable<null> {
@@ -213,6 +253,10 @@ export class AirQualityProvisioningService {
                 }
                 this.generateUbaImportInstance(this.widget.properties.ubaInfo.stationId).subscribe({
                     next: (instance) => {
+                        if (obs.closed) {
+                            return;
+                        }
+                        this.adoptCreatedInstance(instance);
                         if (this.widget.properties.ubaInfo === undefined) {
                             this.widget.properties.ubaInfo = {};
                         }
@@ -236,6 +280,8 @@ export class AirQualityProvisioningService {
                         this.queueCleanup('import instance', this.widget.properties.ubaInfo.importInstanceId, 'UBA');
                     }
                     instance = ubaInstances[0];
+                    // adopted from the loaded list: generated only if this dialog created it, else it belongs to others
+                    this.widget.properties.ubaInfo.importGenerated = this.isCreatedHere(instance.id);
                 }
                 if (this.widget.properties.ubaInfo === undefined) {
                     this.widget.properties.ubaInfo = {};
@@ -259,6 +305,7 @@ export class AirQualityProvisioningService {
                             this.queueCleanup('export', this.widget.properties.ubaInfo.exportId, 'UBA');
                         }
                         exp = matchingExports[0];
+                        this.widget.properties.ubaInfo.exportGenerated = this.isCreatedHere(exp.ID);
                     }
                     this.widget.properties.ubaInfo.exportId = exp.ID;
                     this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
@@ -283,11 +330,15 @@ export class AirQualityProvisioningService {
             this.cleanMeasurementsExportInfo(this.widget.properties.ubaInfo?.exportId);
             this.queueCleanup('export', this.widget.properties.ubaInfo.exportId, 'UBA');
         }
-        this.generateExportOfImport(instance, environment.importTypeIdUbaStation).subscribe((exp) => {
+        this.generateExportOfImport(instance, environment.importTypeIdUbaStation, 'UBA').subscribe((exp) => {
+            if (obs.closed) {
+                return;
+            }
             if (exp === null) {
                 obs.error(new AirQualitySaveStepError('export', 'UBA'));
                 return;
             }
+            this.createdExports.push(exp);
             if (this.widget.properties.ubaInfo === undefined) {
                 this.widget.properties.ubaInfo = {};
             }
@@ -366,6 +417,10 @@ export class AirQualityProvisioningService {
                     }
                     this.generateDwdImportInstance(this.location.latitude, this.location.longitude, selectedPollen).subscribe({
                         next: (instance) => {
+                            if (obs.closed) {
+                                return;
+                            }
+                            this.adoptCreatedInstance(instance);
                             if (this.widget.properties.dwdPollenInfo === undefined) {
                                 this.widget.properties.dwdPollenInfo = {};
                             }
@@ -394,6 +449,8 @@ export class AirQualityProvisioningService {
                             this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
                         }
                         instance = matchingImportInstances[0];
+                        // adopted from the loaded list: generated only if this dialog created it, else it belongs to others
+                        this.widget.properties.dwdPollenInfo.importGenerated = this.isCreatedHere(instance.id);
                     }
                     this.widget.properties.dwdPollenInfo.importInstanceId = instance.id;
                     const matchingExports = this.getExportsOfImports(matchingImportInstances);
@@ -413,6 +470,7 @@ export class AirQualityProvisioningService {
                                 this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
                             }
                             exp = matchingExports[0];
+                            this.widget.properties.dwdPollenInfo.exportGenerated = this.isCreatedHere(exp.ID);
                         }
                         this.widget.properties.dwdPollenInfo.exportId = exp.ID;
                         this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
@@ -443,7 +501,7 @@ export class AirQualityProvisioningService {
             ],
             import_type_id: environment.importTypeIdDwdPollen,
             generated: true,
-        } as ImportInstancesModel);
+        } as ImportInstancesModel).pipe(tap((instance) => this.recordInstance(instance, 'DWD pollen')));
     }
 
     /**
@@ -461,11 +519,15 @@ export class AirQualityProvisioningService {
         ) {
             this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
         }
-        this.generateExportOfImport(instance, environment.importTypeIdDwdPollen).subscribe((exp) => {
+        this.generateExportOfImport(instance, environment.importTypeIdDwdPollen, 'DWD pollen').subscribe((exp) => {
+            if (obs.closed) {
+                return;
+            }
             if (exp === null) {
                 obs.error(new AirQualitySaveStepError('export', 'DWD pollen'));
                 return;
             }
+            this.createdExports.push(exp);
             if (this.widget.properties.dwdPollenInfo === undefined) {
                 this.widget.properties.dwdPollenInfo = {};
             }
@@ -496,11 +558,27 @@ export class AirQualityProvisioningService {
             ],
             import_type_id: environment.importTypeIdYrForecast,
             generated: true,
-        } as ImportInstancesModel);
+        } as ImportInstancesModel).pipe(tap((instance) => this.recordInstance(instance, 'Yr')));
+    }
+
+    private recordInstance(instance: ImportInstancesModel, provider: string): void {
+        this.unsaved.record({ kind: 'import instance', id: instance.id, label: provider });
+    }
+
+    // Only an attempt still running adopts what it created; a late answer to an aborted one is left to the clean-up.
+    private adoptCreatedInstance(instance: ImportInstancesModel): void {
+        // without its configs the instance cannot be matched again, a retry then creates a new one
+        if (Array.isArray(instance.configs)) {
+            this.createdInstances.push(instance);
+        }
+    }
+
+    private isCreatedHere(id: string | undefined): boolean {
+        return this.createdInstances.some((i) => i.id === id) || this.createdExports.some((e) => e.ID === id);
     }
 
     /** Answers null when the import type cannot be loaded or the export cannot be started. */
-    private generateExportOfImport(importInstance: ImportInstancesModel, typeId: string): Observable<ExportModel | null> {
+    private generateExportOfImport(importInstance: ImportInstancesModel, typeId: string, provider: string): Observable<ExportModel | null> {
         return this.importTypesService.getImportType(typeId).pipe(
             mergeMap((type) =>
                 this.exportService.startPipeline({
@@ -518,6 +596,7 @@ export class AirQualityProvisioningService {
                     Generated: true,
                 } as ExportModel),
             ),
+            tap((exp) => exp !== null && this.unsaved.record({ kind: 'export', id: exp.ID || '', label: provider })),
             catchError(() => of(null)),
         );
     }
@@ -541,6 +620,10 @@ export class AirQualityProvisioningService {
                 }
                 this.generateYrImportInstance().subscribe({
                     next: (instance) => {
+                        if (obs.closed) {
+                            return;
+                        }
+                        this.adoptCreatedInstance(instance);
                         if (this.widget.properties.yrInfo === undefined) {
                             this.widget.properties.yrInfo = {};
                         }
@@ -564,6 +647,8 @@ export class AirQualityProvisioningService {
                         this.queueCleanup('import instance', this.widget.properties.yrInfo.importInstanceId, 'Yr');
                     }
                     instance = yrInstances[0];
+                    // adopted from the loaded list: generated only if this dialog created it, else it belongs to others
+                    this.widget.properties.yrInfo.importGenerated = this.isCreatedHere(instance.id);
                 }
                 if (this.widget.properties.yrInfo === undefined) {
                     this.widget.properties.yrInfo = {};
@@ -587,6 +672,7 @@ export class AirQualityProvisioningService {
                             this.queueCleanup('export', this.widget.properties.yrInfo.exportId, 'Yr');
                         }
                         exp = matchingExports[0];
+                        this.widget.properties.yrInfo.exportGenerated = this.isCreatedHere(exp.ID);
                     }
                     this.widget.properties.yrInfo.exportId = exp.ID;
                     this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;
@@ -611,11 +697,15 @@ export class AirQualityProvisioningService {
             this.cleanMeasurementsExportInfo(this.widget.properties.yrInfo?.exportId);
             this.queueCleanup('export', this.widget.properties.yrInfo.exportId, 'Yr');
         }
-        this.generateExportOfImport(instance, environment.importTypeIdYrForecast).subscribe((exp) => {
+        this.generateExportOfImport(instance, environment.importTypeIdYrForecast, 'Yr').subscribe((exp) => {
+            if (obs.closed) {
+                return;
+            }
             if (exp === null) {
                 obs.error(new AirQualitySaveStepError('export', 'Yr'));
                 return;
             }
+            this.createdExports.push(exp);
             if (this.widget.properties.yrInfo === undefined) {
                 this.widget.properties.yrInfo = {};
             }

@@ -33,7 +33,7 @@ import { UBAStation } from '../shared/uba.model';
 import { GeonamesService } from '../shared/geonames.service';
 import { Geoname } from '../shared/geonames.model';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, map, tap } from 'rxjs/operators';
+import { debounceTime, finalize, map, tap } from 'rxjs/operators';
 import { forkJoin, from, Observable, of, concatMap } from 'rxjs';
 import { NameValuePair } from '../shared/dwd-pollen.model';
 import { ImportInstancesService } from '../../../modules/imports/import-instances/shared/import-instances.service';
@@ -105,6 +105,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.geonamesSearchResults = from([]);
         this.pollenLevel = dwdPollenService.getNameValuePairs();
         this.provisioning.bind(this);
+        this.destroyRef.onDestroy(() => this.provisioning.unsaved.close());
     }
 
     userHasUpdateNameAuthorization = false;
@@ -259,11 +260,15 @@ export class AirQualityEditDialogComponent implements OnInit {
                 this.widget.properties.location = this.location;
                 this.widget.properties.formatted_address = this.formatted_address;
                 this.widget.properties.pollen = this.pollen;
+                // taken when the request is made: what the server may store is the body sent now, not the widget at answer time
+                const sent = this.provisioning.referencesOf(this.widget.properties);
                 return this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties).pipe(
                     tap((response) => {
                         // independent of the name update: once the properties are persisted the old resources are unused
                         if (response.message === 'OK') {
-                            this.provisioning.runPendingCleanup();
+                            this.provisioning.runPendingCleanup(sent);
+                        } else {
+                            this.provisioning.unsaved.propertiesNotSaved(sent);
                         }
                     }),
                 );
@@ -273,6 +278,7 @@ export class AirQualityEditDialogComponent implements OnInit {
 
     save(): void {
         this.ready = false;
+        this.provisioning.unsaved.startAttempt();
         const obs = [];
         if(this.userHasUpdateNameAuthorization) {
             obs.push(this.updateName());
@@ -281,7 +287,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         if(this.userHasUpdatePropertiesAuthorization) {
             obs.push(this.updateProperties());
         }
-        forkJoin(obs).subscribe({
+        forkJoin(obs).pipe(finalize(() => this.provisioning.unsaved.endAttempt())).subscribe({
             next: (responses) => {
                 const errorOccured = responses.find((response) => response.message != 'OK');
                 if(!errorOccured) {

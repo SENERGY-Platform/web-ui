@@ -23,7 +23,7 @@ import { DeploymentsService } from '../../../modules/processes/deployments/share
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { DataTableElementModel } from './data-table.model';
 import { Observable } from 'rxjs';
-import { deleteGeneratedResources, GeneratedResource } from '../../shared/generated-resources';
+import { deleteGeneratedResources, deleteResources, GeneratedResource, GeneratedResourceDeleters } from '../../shared/generated-resources';
 
 @Injectable({
     providedIn: 'root',
@@ -69,11 +69,20 @@ export class DataTableService {
 
     /** Deletes the candidates that `stillUsed` does not contain; answers the descriptions of the deletes that failed. */
     deleteGeneratedResources(candidates: GeneratedResource[], stillUsed: GeneratedResource[]): Observable<string[]> {
-        return deleteGeneratedResources(candidates, stillUsed, {
+        return deleteGeneratedResources(candidates, stillUsed, this.deleters());
+    }
+
+    /** Deletes the resources; answers those whose delete failed. */
+    deleteResources(resources: GeneratedResource[]): Observable<GeneratedResource[]> {
+        return deleteResources(resources, this.deleters());
+    }
+
+    private deleters(): GeneratedResourceDeleters {
+        return {
             export: (id) => this.exportService.stopPipelineByIdIfExists(id),
             deployment: (id) => this.deploymentsService.v2deleteDeploymentIfExists(id),
             schedule: (id) => this.processSchedulerService.deleteScheduleIfExists(id),
-        });
+        };
     }
 
     deleteElement(element: DataTableElementModel, shouldSubscribe: boolean = true): Observable<any>[] {

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
 import { CoreModule } from '../../../core/core.module';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -43,6 +43,7 @@ import { DataTableHelperService } from '../shared/data-table-helper.service';
 import { WidgetModule } from '../../widget.module';
 import { DataTableAggregations, DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { ProcessSchedulerModel } from '../../process-scheduler/shared/process-scheduler.model';
 import {v4 as uuid} from 'uuid';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
@@ -98,6 +99,10 @@ describe('DataTableEditDialogComponent', () => {
             conceptsServiceSpy = createSpyFromClass<ConceptsService>(ConceptsService);
 
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
+            // the dialog deletes unsaved resources when the fixture is destroyed after a test
+            exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 200 }));
+            deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
+            processSchedulerServiceSpy.deleteScheduleIfExists.and.returnValue(of({ status: 200 }));
             const exampleExport: ExportModel = {
                 Name: 'device_service_1',
                 Values: [
@@ -563,8 +568,10 @@ describe('DataTableEditDialogComponent', () => {
         });
 
     describe('save orchestration', () => {
+        let fixture: ComponentFixture<DataTableEditDialogComponent>;
+
         function open(): DataTableEditDialogComponent {
-            const fixture = TestBed.createComponent(DataTableEditDialogComponent);
+            fixture = TestBed.createComponent(DataTableEditDialogComponent);
             component = fixture.componentInstance;
             fixture.detectChanges();
             flush();
@@ -1156,8 +1163,9 @@ describe('DataTableEditDialogComponent', () => {
 
                     component.save();
 
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment1']]);
-                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule'], ['schedule1']]);
+                    // deployment1 and schedule1 went out with the property update that answered 'error' and may still be stored
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
                     expect(component.widget.properties.dataTable).not.toBe(persisted);
                 }),
             );
@@ -1208,6 +1216,205 @@ describe('DataTableEditDialogComponent', () => {
                     expect(snackOpen).not.toHaveBeenCalled();
                 }),
             );
+
+            describe('resources of an attempt that was not saved', () => {
+                function closeDialog(): void {
+                    component.close();
+                    fixture.destroy();
+                }
+
+                // one element that generates an export, a deployment and a schedule
+                function generatingElement(): void {
+                    requestElements(1);
+                    component.formGroup.patchValue({ refreshTime: 10 });
+                    component.getElements().at(0).patchValue({ exportCreatedByWidget: true });
+                    storeOldElement('old_deployment', 'old_schedule');
+                    let e = 0;
+                    exportServiceSpy.startPipeline.and.callFake(() => {
+                        order.push('create export');
+                        return of({ ID: 'export' + ++e } as ExportModel);
+                    });
+                    let d = 0;
+                    deploymentsServiceSpy.v2postDeployments.and.callFake(() => {
+                        order.push('create deployment');
+                        return of({ status: 200, id: 'deployment' + ++d });
+                    });
+                }
+
+                it(
+                    'deletes exactly what the failed attempt created when the dialog is closed',
+                    fakeAsync(() => {
+                        generatingElement();
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        component.save();
+                        expect(order).toEqual(['create export', 'create deployment']);
+
+                        closeDialog();
+
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export1']]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
+                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.count()).toBe(0);
+                        expect(snackOpen.calls.count()).toBe(1);
+                    }),
+                );
+
+                it(
+                    'deletes what a failed attempt created after the retry was saved and leaves nothing behind',
+                    fakeAsync(() => {
+                        generatingElement();
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        component.save();
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'schedule_retry' } as ProcessSchedulerModel));
+
+                        component.save();
+                        closeDialog();
+
+                        // startPipeline is called while the attempt is assembled, the deployment is posted on subscription
+                        expect(order).toEqual([
+                            'create export',
+                            'create deployment',
+                            'create export',
+                            'create deployment',
+                            'save',
+                            'delete export',
+                            'delete deployment',
+                            'delete schedule',
+                            'delete deployment',
+                            'delete export',
+                        ]);
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export'], ['export1']]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment1']]);
+                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                        const saved = savedElement();
+                        expect(saved.exportId).toBe('export2');
+                        expect(saved.elementDetails.device).toEqual(
+                            jasmine.objectContaining({ deploymentId: 'deployment2', scheduleId: 'schedule_retry' }),
+                        );
+                    }),
+                );
+
+                it(
+                    'deletes nothing new after a successful save, also when the dialog closes',
+                    fakeAsync(() => {
+                        generatingElement();
+
+                        component.save();
+                        closeDialog();
+
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    }),
+                );
+
+                it(
+                    'waits for a running attempt before deleting and keeps what it saved',
+                    fakeAsync(() => {
+                        generatingElement();
+                        const response = new Subject<{ message: string }>();
+                        dashboardServiceSpy.updateWidgetProperty.and.returnValue(response);
+
+                        component.save();
+                        closeDialog();
+                        expect(order).toEqual(['create export', 'create deployment']);
+                        response.next({ message: 'OK' });
+                        response.complete();
+
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    }),
+                );
+
+                it(
+                    'deletes what a running attempt created once it ended without a save',
+                    fakeAsync(() => {
+                        generatingElement();
+                        const schedule = new Subject<ProcessSchedulerModel | null>();
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(schedule);
+
+                        component.save();
+                        closeDialog();
+                        expect(order).toEqual(['create export', 'create deployment']);
+                        schedule.next(null);
+                        schedule.complete();
+
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export1']]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
+                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.count()).toBe(0);
+                    }),
+                );
+
+                it(
+                    'keeps and names what a property update without OK sent when the dialog closes',
+                    fakeAsync(() => {
+                        generatingElement();
+                        dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'error update' }));
+                        dashboardServiceSpy.getWidget.calls.reset();
+
+                        component.save();
+                        closeDialog();
+
+                        expect(dashboardServiceSpy.getWidget.calls.count()).toBe(0);
+                        expect(order).toEqual(['create export', 'create deployment']);
+                        expect(snackOpen.calls.mostRecent().args[0]).toBe(
+                            'Could not delete the process deployment of name0, schedule of name0, export of name0 generated for the unsaved changes',
+                        );
+                    }),
+                );
+
+                it(
+                    'never deletes what a property update without OK sent, not even after a later save',
+                    fakeAsync(() => {
+                        generatingElement();
+                        let n = 0;
+                        processSchedulerServiceSpy.createSchedule.and.callFake(() => of({ id: 'schedule' + ++n } as ProcessSchedulerModel));
+                        dashboardServiceSpy.updateWidgetProperty.and.returnValues(of({ message: 'error update' }), of({ message: 'OK' }));
+
+                        component.save();
+                        component.save();
+                        closeDialog();
+
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    }),
+                );
+
+                it(
+                    'keeps a resource of a failed attempt that the retry saves again',
+                    fakeAsync(() => {
+                        generatingElement();
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        component.save();
+                        // the retry skips creating the export, the element keeps the id from the failed attempt
+                        exportServiceSpy.prepareDeviceServiceExport.and.returnValue([]);
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'schedule_retry' } as ProcessSchedulerModel));
+
+                        component.save();
+
+                        expect(savedElement().exportId).toBe('export1');
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).not.toContain(['export1']);
+                    }),
+                );
+
+                it(
+                    'reports a delete that failed after the dialog was closed',
+                    fakeAsync(() => {
+                        generatingElement();
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
+                        component.save();
+
+                        closeDialog();
+
+                        expect(snackOpen.calls.mostRecent().args[0]).toBe(
+                            'Could not delete the process deployment of name0 generated for the unsaved changes',
+                        );
+                        expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+                    }),
+                );
+            });
         });
     });
 });

@@ -15,7 +15,7 @@
  */
 
 import { of } from 'rxjs';
-import { deleteGeneratedResources, GeneratedResource } from './generated-resources';
+import { deleteGeneratedResources, deleteResources, GeneratedResource, UnsavedGeneratedResources } from './generated-resources';
 
 describe('deleteGeneratedResources', () => {
     const exp = (id: string, label = 'a'): GeneratedResource => ({ kind: 'export', id, label });
@@ -62,5 +62,112 @@ describe('deleteGeneratedResources', () => {
             expect(failed).toEqual([]);
             done();
         });
+    });
+});
+
+describe('deleteResources', () => {
+    const res = (kind: GeneratedResource['kind'], id: string): GeneratedResource => ({ kind, id, label: 'a' });
+
+    it('uses the deleter of each kind and takes a kind without one for a failed delete', (done) => {
+        const calls: string[] = [];
+        const ok = (name: string) => (id: string) => {
+            calls.push(name + ':' + id);
+            return of({ status: 200 });
+        };
+        deleteResources(
+            [res('import instance', 'i1'), res('export', 'e1'), res('schedule', 's1'), res('process deployment', 'd1')],
+            { importInstance: ok('instance'), export: ok('export') },
+        ).subscribe((failed) => {
+            expect(calls).toEqual(['instance:i1', 'export:e1']);
+            expect(failed.map((r) => r.id)).toEqual(['s1', 'd1']);
+            done();
+        });
+    });
+});
+
+describe('UnsavedGeneratedResources', () => {
+    const exp = (id: string): GeneratedResource => ({ kind: 'export', id, label: 'a' });
+    let deleted: string[];
+    let failing: Set<string>;
+    let reported: GeneratedResource[][];
+    let unsaved: UnsavedGeneratedResources;
+
+    beforeEach(() => {
+        deleted = [];
+        failing = new Set();
+        reported = [];
+        unsaved = new UnsavedGeneratedResources({
+            delete: (resources) => {
+                deleted.push(...resources.map((r) => r.id));
+                return of(resources.filter((r) => failing.has(r.id)));
+            },
+            reportNotDeleted: (notDeleted) => reported.push(notDeleted),
+        });
+    });
+
+    it('deletes what was recorded when it is closed outside an attempt and reports what failed', () => {
+        failing.add('e2');
+        unsaved.record(exp('e1'));
+        unsaved.record(exp('e2'));
+
+        unsaved.close();
+
+        expect(deleted).toEqual(['e1', 'e2']);
+        expect(reported).toEqual([[exp('e2')]]);
+    });
+
+    it('waits for a running attempt before it deletes on close', () => {
+        unsaved.startAttempt();
+        unsaved.record(exp('e1'));
+        unsaved.close();
+        unsaved.record(exp('e2'));
+        expect(deleted).toEqual([]);
+
+        unsaved.endAttempt();
+
+        expect(deleted).toEqual(['e1', 'e2']);
+    });
+
+    it('hands everything recorded over to a save and deletes nothing of it on close', () => {
+        unsaved.startAttempt();
+        unsaved.record(exp('e1'));
+        expect(unsaved.takeForSave()).toEqual([exp('e1')]);
+        unsaved.endAttempt();
+
+        unsaved.close();
+
+        expect(deleted).toEqual([]);
+    });
+
+    it('deletes a resource recorded after it was closed at once', () => {
+        unsaved.close();
+
+        unsaved.record(exp('late'));
+
+        expect(deleted).toEqual(['late']);
+    });
+
+    it('keeps and names on close what a property update without OK sent, and deletes the rest', () => {
+        unsaved.record(exp('sent'));
+        unsaved.propertiesNotSaved([exp('sent'), exp('old')]);
+        unsaved.record(exp('later'));
+
+        unsaved.close();
+
+        expect(deleted).toEqual(['later']);
+        expect(reported).toEqual([[exp('sent')]]);
+    });
+
+    it('does not hand what a property update without OK sent over to a later save and lists it as possibly stored', () => {
+        unsaved.record(exp('sent'));
+        unsaved.propertiesNotSaved([exp('sent'), exp('old')]);
+        unsaved.record(exp('retry'));
+
+        expect(unsaved.takeForSave()).toEqual([exp('retry')]);
+        expect(unsaved.possiblyStored()).toEqual([exp('sent'), exp('old')]);
+
+        unsaved.close();
+        expect(deleted).toEqual([]);
+        expect(reported).toEqual([[exp('sent')]]);
     });
 });

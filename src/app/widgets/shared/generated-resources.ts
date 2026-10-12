@@ -15,9 +15,9 @@
  */
 
 import { forkJoin, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
-export type GeneratedResourceKind = 'export' | 'process deployment' | 'schedule';
+export type GeneratedResourceKind = 'export' | 'process deployment' | 'schedule' | 'import instance';
 
 /** A resource a widget dialog generated, with the element it belongs to for messages. */
 export interface GeneratedResource {
@@ -26,10 +26,18 @@ export interface GeneratedResource {
     label: string;
 }
 
+/** A kind without a deleter cannot be deleted; its resources count as failed deletes. */
 export interface GeneratedResourceDeleters {
-    export: (id: string) => Observable<{ status: number }>;
-    deployment: (id: string) => Observable<{ status: number }>;
-    schedule: (id: string) => Observable<{ status: number }>;
+    export?: (id: string) => Observable<{ status: number }>;
+    deployment?: (id: string) => Observable<{ status: number }>;
+    schedule?: (id: string) => Observable<{ status: number }>;
+    importInstance?: (id: string) => Observable<{ status: number }>;
+}
+
+const resourceKey = (r: GeneratedResource) => r.kind + '|' + r.id;
+
+export function describeGeneratedResource(r: GeneratedResource): string {
+    return r.kind + ' of ' + r.label;
 }
 
 /**
@@ -41,16 +49,112 @@ export function deleteGeneratedResources(
     stillUsed: GeneratedResource[],
     deleters: GeneratedResourceDeleters,
 ): Observable<string[]> {
-    const key = (r: GeneratedResource) => r.kind + '|' + r.id;
-    const skip = new Set(stillUsed.map(key));
+    const skip = new Set(stillUsed.map(resourceKey));
+    return deleteResources(
+        candidates.filter((r) => !skip.has(resourceKey(r))),
+        deleters,
+    ).pipe(map((failed) => failed.map(describeGeneratedResource)));
+}
+
+/** Deletes every resource once per kind and id and answers those whose delete failed; status 404 counts as done. */
+export function deleteResources(resources: GeneratedResource[], deleters: GeneratedResourceDeleters): Observable<GeneratedResource[]> {
     const unique = new Map<string, GeneratedResource>();
-    candidates.filter((r) => !!r.id && !skip.has(key(r))).forEach((r) => unique.set(key(r), r));
+    resources.filter((r) => !!r.id).forEach((r) => unique.set(resourceKey(r), r));
     const deletes = [...unique.values()].map((r) => {
-        const request = r.kind === 'export' ? deleters.export(r.id) : r.kind === 'schedule' ? deleters.schedule(r.id) : deleters.deployment(r.id);
-        return request.pipe(map((resp) => (resp.status >= 400 && resp.status !== 404 ? r.kind + ' of ' + r.label : null)));
+        const deleter =
+            r.kind === 'export'
+                ? deleters.export
+                : r.kind === 'schedule'
+                  ? deleters.schedule
+                  : r.kind === 'process deployment'
+                    ? deleters.deployment
+                    : deleters.importInstance;
+        const request = deleter ? deleter(r.id) : of({ status: 500 });
+        return request.pipe(map((resp) => (resp.status >= 400 && resp.status !== 404 ? r : null)));
     });
     if (deletes.length === 0) {
         return of([]);
     }
-    return forkJoin(deletes).pipe(map((results) => results.filter((r): r is string => r !== null)));
+    return forkJoin(deletes).pipe(map((results) => results.filter((r): r is GeneratedResource => r !== null)));
+}
+
+export interface UnsavedResourceHandlers {
+    /** Deletes the resources and answers those whose delete failed. */
+    delete: (resources: GeneratedResource[]) => Observable<GeneratedResource[]>;
+    reportNotDeleted: (notDeleted: GeneratedResource[]) => void;
+}
+
+/**
+ * Resources one widget dialog created in save attempts that have not ended in saved widget properties. They are
+ * deleted when the dialog closes, but never while an attempt runs, because that attempt may still save them.
+ */
+export class UnsavedGeneratedResources {
+    private created: GeneratedResource[] = [];
+    private attemptRunning = false;
+    private closed = false;
+    // sent by a property update that did not answer OK: after a timeout the write can still land, even after a later one
+    private unconfirmed = new Map<string, GeneratedResource>();
+
+    constructor(private readonly handlers: UnsavedResourceHandlers) {}
+
+    startAttempt(): void {
+        this.attemptRunning = true;
+    }
+
+    record(resource: GeneratedResource): void {
+        this.created.push(resource);
+        if (this.closed && !this.attemptRunning) {
+            this.flush();
+        }
+    }
+
+    /**
+     * The property update answered OK: what was created so far becomes a clean-up candidate of that save, except what
+     * an unconfirmed update sent, which stays listed and is never deleted.
+     */
+    takeForSave(): GeneratedResource[] {
+        const taken = this.created.filter((r) => !this.unconfirmed.has(resourceKey(r)));
+        this.created = this.created.filter((r) => this.unconfirmed.has(resourceKey(r)));
+        return taken;
+    }
+
+    /** Everything a property update without OK sent; a clean-up must treat it as still used. */
+    possiblyStored(): GeneratedResource[] {
+        return [...this.unconfirmed.values()];
+    }
+
+    propertiesNotSaved(sent: GeneratedResource[]): void {
+        sent.forEach((r) => this.unconfirmed.set(resourceKey(r), r));
+    }
+
+    endAttempt(): void {
+        this.attemptRunning = false;
+        if (this.closed) {
+            this.flush();
+        }
+    }
+
+    close(): void {
+        this.closed = true;
+        if (!this.attemptRunning) {
+            this.flush();
+        }
+    }
+
+    private flush(): void {
+        const kept = this.created.filter((r) => this.unconfirmed.has(resourceKey(r)));
+        const deletable = this.created.filter((r) => !this.unconfirmed.has(resourceKey(r)));
+        this.created = [];
+        if (kept.length === 0 && deletable.length === 0) {
+            return;
+        }
+        this.handlers
+            .delete(deletable)
+            .pipe(catchError(() => of(deletable)))
+            .subscribe((failed) => {
+                if (failed.length + kept.length > 0) {
+                    this.handlers.reportNotDeleted([...failed, ...kept]);
+                }
+            });
+    }
 }
