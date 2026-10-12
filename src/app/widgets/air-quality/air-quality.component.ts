@@ -24,7 +24,7 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { Observable, of } from 'rxjs';
 import { UBAService } from './shared/uba.service';
 import { DWDPollenService } from './shared/dwd-pollen.service';
-import { map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
 import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
@@ -199,8 +199,9 @@ export class AirQualityComponent implements OnInit {
             return of(null);
         }
         return this.airRecommendationService.readAllData(this.widget).pipe(
+            // the loader fills the object it was given; an answer for a widget the dashboard has replaced since is stale
+            filter((widget) => widget === this.widget),
             map((widget) => {
-                this.widget = widget;
                 widget.properties.measurements?.forEach((m, index) => {
                     if (this.widget.properties.measurements) {
                         this.widget.properties.measurements[index].is_critical = false;

@@ -17,65 +17,65 @@
 
 
 <mat-card appearance="outlined" (mouseleave)="forbidChartjsTooltip()" (mouseenter)="allowChartjsTooltip()">
-  <senergy-widget-header [widget]="widget" [zoom]="zoom" [refreshing]="refreshing"
-    [optionCustomIcon]="getCustomIcons(true).icons" [optionCustomTooltip]="getCustomIcons(true).tooltips"
-        (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(true).disabled" [warnText]="(chartExportData?.dataTable?.length || 0) > 0 &&
-                            (chartExportData?.dataTable?.length || 0) * ((chartExportData?.dataTable?.[0]?.length || 0)-1) > sizeLimit ?
+  <senergy-widget-header [widget]="widget()" [zoom]="zoom()" [refreshing]="refreshing()"
+    [optionCustomIcon]="headerIcons().icons" [optionCustomTooltip]="headerIcons().tooltips"
+        (customEvent)="customEvent($event)" [optionCustomDisabled]="headerIcons().disabled" [warnText]="(chartExportData()?.dataTable?.length || 0) > 0 &&
+                            (chartExportData()?.dataTable?.length || 0) * ((chartExportData()?.dataTable?.[0]?.length || 0)-1) > sizeLimit ?
                             'This widgets displays many data points and impacts performance. Try reducing the displayed' +
                              ' interval or use an aggregation function!' : ''"></senergy-widget-header>
   <mat-card-content>
 
-    @if (widget.properties.chartType === 'Timeline' && ready) {
+    @if (widget().properties.chartType === 'Timeline' && ready()) {
       <timeline-chart
-        [data]="timelineChartData" [hAxisLabel]="widget?.properties?.hAxisLabel || ''"
-        [vAxisLabel]="widget?.properties?.vAxisLabel || ''"
-        [vAxes]="widget?.properties?.vAxes || []" [width]="timelineWidth" [height]="timelineHeight">
+        [data]="timelineChartData()" [hAxisLabel]="widget()?.properties?.hAxisLabel || ''"
+        [vAxisLabel]="widget()?.properties?.vAxisLabel || ''"
+        [vAxes]="widget()?.properties?.vAxes || []" [width]="timelineWidth()" [height]="timelineHeight()">
       </timeline-chart>
     }
 
-    <div id="{{widget.id}}" class="ly-fill ly-row ly-align-center-center">
-      <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
-      @if (ready) {
+    <div id="{{widget().id}}" class="ly-fill ly-row ly-align-center-center">
+      <senergy-widget-spinner [show]="!ready()"></senergy-widget-spinner>
+      @if (ready()) {
         <div class="maximized">
-          @if (errorHasOccured) {
+          @if (errorHasOccured()) {
             <div>
-              <div>{{errorMessage}}</div>
+              <div>{{errorMessage()}}</div>
             </div>
           }
-          @if (!errorHasOccured) {
+          @if (!errorHasOccured()) {
             <div class="maximized">
-              @if (configureWidget === true) {
+              @if (configureWidget() === true) {
                 <div class="maximized">Please configure widget!</div>
               }
-              @if (widget.properties.chartType !== 'Timeline' && widget.properties.chartType !== 'ColumnChart') {
+              @if (widget().properties.chartType !== 'Timeline' && widget().properties.chartType !== 'ColumnChart') {
                 <div
                   class="maximized">
-                  @if (configureWidget === false && framedChart !== undefined) {
-                    <div class="framed-chart" [style.width.px]="framedChart.config.frame.width" [style.height.px]="framedChart.config.frame.height">
-                      @if (framedChart.kind === 'pie') {
-                        <canvas baseChart type="pie" [data]="framedChart.config.data" [options]="framedChart.config.options" [plugins]="piePlugins"></canvas>
+                  @if (configureWidget() === false && framedChart(); as framed) {
+                    <div class="framed-chart" [style.width.px]="framed.config.frame.width" [style.height.px]="framed.config.frame.height">
+                      @if (framed.kind === 'pie') {
+                        <canvas baseChart type="pie" [data]="framed.config.data" [options]="framed.config.options" [plugins]="piePlugins"></canvas>
                       } @else {
-                        <canvas #lineCanvas baseChart type="line" [data]="framedChart.config.data" [options]="framedChart.config.options" [plugins]="linePlugins"
+                        <canvas #lineCanvas baseChart type="line" [data]="framed.config.data" [options]="framed.config.options" [plugins]="linePlugins"
                         (contextmenu)="resetGoogleZoom($event, lineCanvas)"></canvas>
                       }
                     </div>
                   }
-                  @if (configureWidget === false && annotation !== undefined) {
-                    <senergy-annotation-chart [series]="annotation.series" [width]="annotation.width" [height]="annotation.height"
-                    [zoomStart]="annotation.zoomStart"></senergy-annotation-chart>
+                  @if (configureWidget() === false && annotation(); as zoomed) {
+                    <senergy-annotation-chart [series]="zoomed.series" [width]="zoomed.width" [height]="zoomed.height"
+                    [zoomStart]="zoomed.zoomStart"></senergy-annotation-chart>
                   }
                   <senergy-no-data [message]="noDataMessage"
-                  [showIf]="configureWidget === false && (chartExportData.dataTable === undefined || chartExportData.dataTable[0].length === 0)"></senergy-no-data>
+                  [showIf]="configureWidget() === false && (chartExportData().dataTable === undefined || chartExportData().dataTable[0].length === 0)"></senergy-no-data>
                 </div>
               }
-              @if (widget.properties.chartType === 'ColumnChart') {
+              @if (widget().properties.chartType === 'ColumnChart') {
                 <div class="maximized">
                   @if (chartjs.data !== undefined) {
                     <canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="bar"
-                    id="chartjs-{{widget.id}}" (contextmenu)="resetChartjsZoom($event); false" [plugins]="chartjs.plugins"></canvas>
+                    id="chartjs-{{widget().id}}" (contextmenu)="resetChartjsZoom($event); false" [plugins]="chartjs.plugins"></canvas>
                   }
                   <senergy-no-data [message]="noDataMessage"
-                  [showIf]="configureWidget === false && chartjs.data === undefined"></senergy-no-data>
+                  [showIf]="configureWidget() === false && chartjs.data === undefined"></senergy-no-data>
                   @if (chartjs.tooltipAllowed && chartjs.tooltipContext !== undefined) {
                     <div id="chartjs-tooltip"
                       class="mat-elevation-z4" [ngStyle]="chartjsTooltipStyle">
@@ -123,11 +123,11 @@
           </div>
         </mat-card-content>
         <senergy-widget-footer [widgetHasUpdateableProperties]="true"
-          [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization"
-          [userHasDeleteAuthorization]="userHasDeleteAuthorization"
-          [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
-          [widget]="widget" [optionZoom]="true" [zoom]="zoom" (editEvent)="edit()" [refreshing]="refreshing"
-          [optionCustomIcon]="getCustomIcons(false).icons" [optionCustomTooltip]="getCustomIcons(false).tooltips"
-          (customEvent)="customEvent($event)" [optionCustomDisabled]="getCustomIcons(false).disabled"
+          [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization()"
+          [userHasDeleteAuthorization]="userHasDeleteAuthorization()"
+          [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization()" [dashboardId]="dashboardId()"
+          [widget]="widget()" [optionZoom]="true" [zoom]="zoom()" (editEvent)="edit()" [refreshing]="refreshing()"
+          [optionCustomIcon]="footerIcons().icons" [optionCustomTooltip]="footerIcons().tooltips"
+          (customEvent)="customEvent($event)" [optionCustomDisabled]="footerIcons().disabled"
         [reloadAfterZoom]="changesTimeframeOnZoom()" [getInitialWidgetData]="getChartData"></senergy-widget-footer>
       </mat-card>

@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { DatePipe, NgStyle } from '@angular/common';
-import { ChangeDetectorRef, ElementRef, NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { BaseChartDirective } from 'ng2-charts';
@@ -101,7 +101,8 @@ function monthlyWidget(): WidgetModel {
     };
 }
 
-describe('ChartsExportComponent', () => {
+// every spec runs with zone.js change detection and again without it: the component must not depend on the zone
+[false, true].forEach(zoneless => describe('ChartsExportComponent' + (zoneless ? ' under zoneless change detection' : ''), () => {
     let fixture: ComponentFixture<ChartsExportComponent>;
     let component: ChartsExportComponent;
     let httpMock: HttpTestingController;
@@ -114,6 +115,7 @@ describe('ChartsExportComponent', () => {
         localStorage.clear();
         TestBed.configureTestingModule({
             providers: [
+                ...(zoneless ? [provideZonelessChangeDetection()] : []),
                 provideAppCharts(),
                 ChartsExportService,
                 ExportDataService,
@@ -143,7 +145,7 @@ describe('ChartsExportComponent', () => {
         httpMock = TestBed.inject(HttpTestingController);
         fixture = TestBed.createComponent(ChartsExportComponent);
         component = fixture.componentInstance;
-        component.widget = widget;
+        fixture.componentRef.setInput('widget', widget);
         (fixture.nativeElement as HTMLElement).style.display = 'block';
         (fixture.nativeElement as HTMLElement).style.width = '800px';
         (fixture.nativeElement as HTMLElement).style.height = '400px';
@@ -505,7 +507,7 @@ describe('ChartsExportComponent', () => {
             req.flush([{ requestIndex: 0, data: [[]], deviceId: FAN, serviceId: FAN_SERVICE, columnNames: ['root.aenergy.total'] }]);
             fixture.detectChanges();
             // the backend has no previous month to take a difference from, so there is nothing to show
-            expect(component.errorHasOccured).toBeFalse();
+            expect(component.errorHasOccured()).toBeFalse();
             expect(component.chartjs.data).toBeUndefined();
             expect(fixture.nativeElement.querySelector('senergy-no-data')).not.toBeNull();
         });
@@ -584,7 +586,7 @@ describe('ChartsExportComponent', () => {
             fixture.destroy();
             fixture = TestBed.createComponent(ChartsExportComponent);
             component = fixture.componentInstance;
-            component.widget = widget;
+            fixture.componentRef.setInput('widget', widget);
             fixture.detectChanges();
 
             initWidget.next(widget.id);
@@ -647,9 +649,9 @@ describe('ChartsExportComponent', () => {
             fixture.destroy();
             fixture = TestBed.createComponent(ChartsExportComponent);
             component = fixture.componentInstance;
-            component.widget = widget;
-            component.zoom = true;
-            component.initialWidgetData = initialWidgetData;
+            fixture.componentRef.setInput('widget', widget);
+            fixture.componentRef.setInput('zoom', true);
+            fixture.componentRef.setInput('initialWidgetData', initialWidgetData);
             (fixture.nativeElement as HTMLElement).style.display = 'block';
             (fixture.nativeElement as HTMLElement).style.width = '800px';
             (fixture.nativeElement as HTMLElement).style.height = '400px';
@@ -664,12 +666,12 @@ describe('ChartsExportComponent', () => {
             await maximize(months);
             const maximized = component;
             await clickXLabel(ticks().indexOf(local(2026, 9).valueOf()));
-            expect(maximized.ready).withContext('spinner while loading').toBeFalse();
+            expect(maximized.ready()).withContext('spinner while loading').toBeFalse();
             const req = httpMock.expectOne(QUERIES);
             expect(req.request.body[0].time).toEqual({ start: local(2026, 9).toISOString(), end: local(2026, 10).toISOString() });
             req.flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [[1, 2, 3].map(d => [local(2026, 9, d).toISOString(), d])] }]);
             fixture.detectChanges();
-            expect(maximized.ready).toBeTrue();
+            expect(maximized.ready()).toBeTrue();
             expect(maximized.chartjs.data?.datasets[0].data.length).toBe(3);
         });
 
@@ -681,7 +683,7 @@ describe('ChartsExportComponent', () => {
             fixture.detectChanges();
             layout();
             (chart().options.onClick as any)(null, [{ datasetIndex: 0 }], chart());
-            expect(maximized.ready).withContext('spinner while loading').toBeFalse();
+            expect(maximized.ready()).withContext('spinner while loading').toBeFalse();
             const req = httpMock.expectOne(QUERIES);
             expect(req.request.body.map((e: any) => e.deviceId)).toEqual([FAN]);
             req.flush([{ requestIndex: 0, data: [[]] }]);
@@ -698,7 +700,107 @@ describe('ChartsExportComponent', () => {
             expect(component.chartjs.data?.datasets.map(d => d.label)).toEqual(['Badlüfter kWh']);
         });
     });
-});
+
+    if (zoneless) {
+        // nothing here calls fixture.detectChanges(): what the component shows must follow from its own state
+        describe('without an explicit change detection', () => {
+            const months = [8, 9, 10].map(m => [local(2026, m).toISOString(), m] as [string, number]);
+            const tooltipText = () => (fixture.nativeElement.querySelector('#chartjs-tooltip') as HTMLElement | null)?.textContent?.replace(/\s+/g, ' ').trim();
+
+            /** What the footer was handed as icons: the chrome is stubbed, so the binding lands on the element as a property. */
+            const footerIcons = () => (fixture.nativeElement.querySelector('senergy-widget-footer') as { optionCustomIcon: string[] }).optionCustomIcon;
+
+            async function rendered() {
+                initWidget.next(widget.id);
+                respondSeries([{ rows: months }]);
+                await fixture.whenStable();
+            }
+
+            /** What chart.js hands the external tooltip handler while the pointer is over the first column. */
+            function hover() {
+                (fixture.nativeElement.querySelector('mat-card') as HTMLElement).dispatchEvent(new Event('mouseenter'));
+                const tooltip = chart().options.plugins?.tooltip as any;
+                tooltip.callbacks.afterBody([{ datasetIndex: 0, formattedValue: '9', dataset: { label: 'Verbrauch kWh', data: [1, 2, 3] }, dataIndex: 0 }]);
+                tooltip.external({
+                    chart: chart(),
+                    tooltip: { dataPoints: [{ raw: { x: local(2026, 9).valueOf() } }], title: [], body: [{ lines: ['9'] }], labelColors: [{ backgroundColor: 'red' }], caretX: 10, caretY: 10 },
+                });
+            }
+
+            it('draws the answer', async () => {
+                await rendered();
+                expect(chart().data.datasets.map(d => d.label)).toEqual(['Verbrauch kWh']);
+                expect(chart().data.datasets[0].data.length).toBe(3);
+            });
+
+            it('draws the zoomed answer after a label click', async () => {
+                await rendered();
+                await clickXLabel(ticks().indexOf(local(2026, 9).valueOf()));
+                const req = httpMock.expectOne(QUERIES);
+                req.flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [[1, 2].map(d => [local(2026, 9, d).toISOString(), d])] }]);
+                await fixture.whenStable();
+                expect(chart().data.datasets[0].data.length).toBe(2);
+            });
+
+            it('shows the tooltip of the hovered column and closes it with its button', async () => {
+                await rendered();
+                layout();
+                hover();
+                await fixture.whenStable();
+                expect(tooltipText()).toContain('Verbrauch kWh: 9');
+                expect((fixture.nativeElement.querySelector('#chartjs-tooltip') as HTMLElement).style.display).toBe('initial');
+                (fixture.nativeElement.querySelector('#chartjs-tooltip button') as HTMLElement).click();
+                await fixture.whenStable();
+                expect((fixture.nativeElement.querySelector('#chartjs-tooltip') as HTMLElement).style.display).toBe('none');
+            });
+
+            it('shows no tooltip after the pointer left the widget', async () => {
+                await rendered();
+                layout();
+                hover();
+                (fixture.nativeElement.querySelector('mat-card') as HTMLElement).dispatchEvent(new Event('mouseleave'));
+                await fixture.whenStable();
+                expect(tooltipText()).toBeUndefined();
+            });
+
+            it('offers drill up after a drill and drops it after drilling up', async () => {
+                await rendered();
+                component.drillDown(0);
+                httpMock.expectOne(QUERIES).flush([{ requestIndex: 0, deviceId: FAN, serviceId: FAN_SERVICE, columnNames: ['value'], data: [months] }]);
+                await fixture.whenStable();
+                expect(chart().data.datasets.map(d => d.label)).toEqual(['Badlüfter kWh']);
+                expect(component.getCustomIcons(false).icons).toContain('arrow_upward');
+                expect(footerIcons()).toContain('arrow_upward');
+                component.drillUp();
+                httpMock.expectOne(QUERIES).flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [months] }]);
+                await fixture.whenStable();
+                expect(chart().data.datasets.map(d => d.label)).toEqual(['Verbrauch kWh']);
+                expect(component.getCustomIcons(false).icons).not.toContain('arrow_upward');
+                expect(footerIcons()).not.toContain('arrow_upward');
+            });
+
+            it('offers the reset icon as soon as view state is stored, and not before', async () => {
+                await rendered();
+                expect(footerIcons()).not.toContain('undo');
+                (component as any).hAxisFormat = 'MM';
+                await fixture.whenStable();
+                expect(footerIcons()).toContain('undo');
+            });
+
+            it('reads the edited widget after the dashboard replaced the widget object', async () => {
+                await rendered();
+                const replaced = { ...widget, properties: { ...widget.properties, vAxes: [{ ...widget.properties.vAxes![0], subAxes: undefined, deviceId: FAN, serviceId: FAN_SERVICE, valueAlias: 'Edited' }] } } as WidgetModel;
+                fixture.componentRef.setInput('widget', replaced);
+                initWidget.next(widget.id);
+                const req = httpMock.expectOne(QUERIES);
+                expect(req.request.body.map((e: any) => e.deviceId)).toEqual([FAN]);
+                req.flush([{ requestIndex: 0, deviceId: FAN, serviceId: FAN_SERVICE, columnNames: ['value'], data: [months] }]);
+                await fixture.whenStable();
+                expect(chart().data.datasets.map(d => d.label)).toEqual(['Edited']);
+            });
+        });
+    }
+}));
 
 describe('ChartsExportComponent timeline', () => {
     // SNRGY-4848: the timeline passed the axis format as the time range override, e.g. last 'HH:mm'.
@@ -713,12 +815,13 @@ describe('ChartsExportComponent timeline', () => {
                 { provide: DashboardService, useValue: {} },
                 { provide: ErrorHandlerService, useValue: {} },
                 { provide: DatePipe, useValue: {} },
-                { provide: ChangeDetectorRef, useValue: {} },
-                { provide: ElementRef, useValue: {} },
             ],
         });
-        const component = TestBed.runInInjectionContext(() => new ChartsExportComponent());
-        component.widget = { id: 'w', name: 'w', type: 'charts_export', properties: { chartType: 'Timeline', hAxisFormat: 'HH:mm', time: { last: '6h' } } } as WidgetModel;
+        // never rendered: the timeline request does not depend on the template
+        TestBed.overrideComponent(ChartsExportComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } });
+        const fixture = TestBed.createComponent(ChartsExportComponent);
+        const component = fixture.componentInstance;
+        fixture.componentRef.setInput('widget', { id: 'w', name: 'w', type: 'charts_export', properties: { chartType: 'Timeline', hAxisFormat: 'HH:mm', time: { last: '6h' } } } as WidgetModel);
         (component as any).hAxisFormat = 'HH:mm';
 
         component.getTimelineData();

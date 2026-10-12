@@ -442,7 +442,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             ).subscribe((resp) => {
                 if (resp === null) {
                     // the stored positions stay the saved ones, so the next save sends the difference again
-                    previousPositions.forEach(({ widget, x, y, w, h }) => Object.assign(widget, { x, y, w, h }));
+                    // by id: an edit while the save ran replaced the widget object
+                    previousPositions.forEach(({ widget, x, y, w, h }) => Object.assign(dashboard.widgets.find(current => current.id === widget.id) ?? widget, { x, y, w, h }));
                     snackError(this.snackBar, 'Widget position could not be saved');
                 }
             });
@@ -566,8 +567,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             if (w.type === DashboardTypesEnum.ChartExport) {
                 cleanupStaleViewState(w.id, w.properties, widgetManipulationModel.widget.properties);
             }
-            w.name = widgetManipulationModel.widget.name;
-            w.properties = widgetManipulationModel.widget.properties;
+            // a new object, so a widget that reacts to its input changing sees the edit; position and type stay
+            this.dashboards[this.activeTabIndex].widgets[i] = { ...w, name: widgetManipulationModel.widget.name, properties: widgetManipulationModel.widget.properties };
         }
         this.cd.detectChanges();
         this.refreshWidget(widgetManipulationModel);

@@ -79,7 +79,6 @@ export class AcControlComponent implements OnInit {
 
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {
-                this.widget = widget;
                 this.dashboardService.manipulateWidget(DashboardManipulationEnum.Update, widget.id, widget);
             }
         });

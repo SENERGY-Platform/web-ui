@@ -87,7 +87,10 @@ export class MultiValueComponent implements OnInit {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.dataReady = false;
                 this.multiValueService.getValues(this.widget).subscribe((result) => {
-                    this.widget = result;
+                    // the loader fills the object it was given; an answer for a widget the dashboard has replaced since is stale
+                    if (result !== this.widget) {
+                        return;
+                    }
                     this.dataReady = true;
                     this.orderValues(this.widget.properties.order || 0);
                 });

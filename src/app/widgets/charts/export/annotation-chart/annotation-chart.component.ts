@@ -105,6 +105,8 @@ export class AnnotationChartComponent implements OnChanges, OnDestroy {
         if (this.drag !== undefined) {
             this.drag = undefined;
             this.build();
+            // runs from a window listener: without this an OnPush parent is not checked and the rebuilt config stays unpainted
+            this.cd.markForCheck();
         }
     }
 

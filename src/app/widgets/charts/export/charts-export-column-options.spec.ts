@@ -27,7 +27,6 @@ function host(overrides: Partial<ChartsExportColumnOptionsHost> = {}): ChartsExp
         drillable: () => true,
         drillDown: () => undefined,
         onLegendClick: () => () => undefined,
-        detectChanges: () => undefined,
         ...overrides,
     };
 }

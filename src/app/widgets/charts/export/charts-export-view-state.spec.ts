@@ -15,7 +15,7 @@
  */
 
 import { DatePipe } from '@angular/common';
-import { ChangeDetectorRef, ElementRef } from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
@@ -44,12 +44,13 @@ function componentAccess(widget: WidgetModel): ViewStateAccess {
             { provide: DashboardService, useValue: {} },
             { provide: ErrorHandlerService, useValue: {} },
             { provide: DatePipe, useValue: {} },
-            { provide: ChangeDetectorRef, useValue: {} },
-            { provide: ElementRef, useValue: {} },
         ],
     });
-    const component = TestBed.runInInjectionContext(() => new ChartsExportComponent());
-    component.widget = widget;
+    // never rendered: the view state does not depend on the template
+    TestBed.overrideComponent(ChartsExportComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(ChartsExportComponent);
+    const component = fixture.componentInstance;
+    fixture.componentRef.setInput('widget', widget);
     const state = component as any;
     return {
         state,

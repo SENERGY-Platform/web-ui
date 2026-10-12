@@ -40,7 +40,6 @@ export interface ChartsExportColumnOptionsHost {
     drillable: (datasetIndex: number) => boolean;
     drillDown: (datasetIndex: number) => void;
     onLegendClick: () => (e: ChartEvent, legendItem: LegendItem, legend: LegendElement<any>) => void;
-    detectChanges: () => void;
 }
 
 /** The chart.js options of the column chart; the host supplies the state and callbacks they read when an event fires. */
@@ -101,7 +100,6 @@ export function buildColumnChartOptions(host: ChartsExportColumnOptionsHost): Ch
                     }
                     host.chartjs.tooltipContext = context;
                     host.chartjs.tooltipDisplay = 'initial';
-                    host.detectChanges();
                 },
             },
             zoom: {
