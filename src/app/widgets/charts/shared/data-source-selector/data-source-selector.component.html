@@ -59,7 +59,7 @@
     @if (!waitingForDataSourceChange) {
       <span>
         @if (enableFieldSelection) {
-          <span [hidden]="(form.get('exports')?.value || '').length === 0">
+          <span [hidden]="!hasExports()">
             <h2>Select the Exported Fields</h2>
             <mat-form-field appearance="outline" color="accent">
               <mat-label>Fields</mat-label>
@@ -88,7 +88,7 @@
                   <mat-error senergyError [label]="'Time Range Type'"></mat-error>
                 </mat-form-field>
               </div>
-              @if (form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative) {
+              @if (timeRangeType() === timeRangeEnum.RelativeAhead || timeRangeType() === timeRangeEnum.Relative) {
                 <div
                   >
                   <mat-form-field color="accent" class="full-width" appearance="outline">
@@ -100,7 +100,7 @@
                   </mat-form-field>
                 </div>
               }
-              @if (form.get('timeRange.type')?.value === timeRangeEnum.RelativeAhead || form.get('timeRange.type')?.value === timeRangeEnum.Relative) {
+              @if (timeRangeType() === timeRangeEnum.RelativeAhead || timeRangeType() === timeRangeEnum.Relative) {
                 <div
                   >
                   <mat-form-field color="accent" class="full-width" appearance="outline">
@@ -117,7 +117,7 @@
                   </mat-form-field>
                 </div>
               }
-              @if (form.get('timeRange.type')?.value === timeRangeEnum.Absolute) {
+              @if (timeRangeType() === timeRangeEnum.Absolute) {
                 <div>
                   <mat-form-field color="accent" class="full-width" appearance="outline">
                     <mat-label>Start</mat-label>
@@ -126,7 +126,7 @@
                   </mat-form-field>
                 </div>
               }
-              @if (form.get('timeRange.type')?.value === timeRangeEnum.Absolute) {
+              @if (timeRangeType() === timeRangeEnum.Absolute) {
                 <div>
                   <mat-form-field color="accent" class="full-width" appearance="outline">
                     <mat-label>End</mat-label>
