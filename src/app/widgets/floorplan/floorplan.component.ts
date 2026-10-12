@@ -25,38 +25,25 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, of, forkJoin, concatMap, delay } from 'rxjs';
 import {
-  aspectDistance,
-  controlIcon,
-  controlState,
   defaultVoidTogglePairs,
   DeviceGroupCriteriaWithValueModel,
   DeviceGroupWithValueModel,
-  findStateSource,
-  impliedControllingCriteria,
   FloorplanControlInput,
   FloorplanControlModel,
   FloorplanWidgetCapabilityModel,
   fpCriteriaConnectionStatus,
   image,
-  isControllingFunction,
   isOneClickControl,
   isPlaced,
-  mergeVoidToggles,
   migrateColoring,
   needsServiceGroups,
   readCommands,
-  resolveControlInput,
   ServiceGroupFunctionModel,
   serviceGroupFunctions,
-  StateSourceContextModel,
-  TooltipCriteria,
   VoidTogglePair,
 } from './shared/floorplan.model';
 import { DeviceCommandModel, DeviceCommandResponseModel, DeviceCommandService } from 'src/app/core/services/device-command.service';
-import { Point } from '@angular/cdk/drag-drop';
-import { AnnotationOptions } from 'chartjs-plugin-annotation';
-import { ChartConfiguration, ChartData, ChartTypeRegistry, BubbleDataPoint, Chart, TooltipModel, Plugin, ChartDataset } from 'chart.js';
-import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
+import { Chart, ChartDataset } from 'chart.js';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
@@ -66,7 +53,9 @@ import { DeviceInstancesService } from 'src/app/modules/devices/device-instances
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
 import { FloorplanControlDialogComponent, FloorplanControlDialogData } from './floorplan-control-dialog/floorplan-control-dialog.component';
 import { CapabilityCommandModel, CapabilityControlComponent } from './shared/capability-control/capability-control.component';
-import { markerText, placementMarker, placementPosition, tooltipValueLabel } from './shared/floorplan-markers';
+import { placementMarker, placementPosition } from './shared/floorplan-markers';
+import { FloorplanControlResolver } from './floorplan-control-resolver';
+import { buildFloorplanChartOptions, buildFloorplanChartPlugins, FloorplanChartState } from './floorplan-chart-options';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
 import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
@@ -129,255 +118,21 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   /** function triples that read and switch a state without ever taking an input */
   voidTogglePairs: VoidTogglePair[] = defaultVoidTogglePairs();
 
-  chartjs: {
-    options: ChartConfiguration['options'];
-    data: ChartData<keyof ChartTypeRegistry, (number | [number, number] | Point | BubbleDataPoint | null)[], unknown> | undefined;
-    tooltipContext: { chart: Chart; tooltip: TooltipModel<any> } | undefined;
-    tooltipDatasets: { datasetIndex: number, label: string, formattedValue: string, drawToLeft: boolean }[];
-    annotations?: AnnotationOptions[];
-    plugins: Plugin<keyof ChartTypeRegistry, AnyObject>[];
-    showValue: boolean[];
-    showValueWhenZoomed: boolean[];
-    icons: string[];
-    tooltipCriteria: TooltipCriteria[];
-    tooltipDisplay: string;
-    tooltipAllowed: boolean;
-  } = {
-      options: {
-        animation: false,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: this.zoom,
-          },
-          tooltip: {
-            enabled: false,
-            callbacks: {
-              afterBody: (tooltipItems) => {
-                this.chartjs.tooltipDatasets = tooltipItems.map(x => {
-                  return {
-                    datasetIndex: x.datasetIndex,
-                    formattedValue: x.formattedValue,
-                    label: x.dataset.label || '',
-                    // @ts-expect-error x axis is always defined
-                    drawToLeft: (x.raw as { x: number }).x > (this.chartjs.options.scales['x'].max || 0) / 2,
-                  };
-                });
-                this.chartjs.tooltipCriteria = [];
-                this.chartjs.tooltipDatasets.forEach(x => {
-                  const tc: TooltipCriteria = { matchDsIndex: x.datasetIndex, values: [] };
-                  const placement = this.widget.properties.floorplan?.placements[x.datasetIndex];
-                  placement?.tooltipCriteria?.forEach(c => {
-                    if (isControllingFunction(c.function_id)) {
-                      // controlling criteria have no value to display, they are rendered as controls
-                      return;
-                    }
-                    if (this.compareCriteriaWithoutInteraction(placement.criteria, c)) {
-                      // This criteria is selected for the placement, do not show again in tooltip
-                      return;
-                    }
-                    if (c.value === undefined || c.value === null || c.value.status_code !== 200) {
-                      return;
-                    }
-                    const label = tooltipValueLabel(c.value.message, this.unitOf(c.function_id));
-                    tc.values.push({ label, description: this.describeCriteria(c), criteria: c });
-                  });
-                  this.chartjs.tooltipCriteria.push(tc);
-                });
-                return [];
-              }
-            },
-            external: (context) => {
-              if (context.tooltip.dataPoints === undefined || context.tooltip.dataPoints.length === 0) {
-                // chart.js clears the tooltip as soon as the pointer sits on the tooltip instead of the
-                // dot. Taking that over would empty the tooltip, hand the pointer back to the canvas and
-                // show it again - the loop that makes the widget flicker. The last tooltip stays instead,
-                // until the pointer leaves the widget or it is closed.
-                return;
-              }
-              context.tooltip.title = context.tooltip.dataPoints.map(x => this.widget.properties.floorplan?.placements[x.datasetIndex].alias || '');
-              this.chartjs.tooltipContext = context;
-              this.chartjs.tooltipDisplay = 'initial';
-              this.cd.detectChanges();
-            },
-          },
-        },
-        scales: {
-          'y': {
-            grid: {
-              display: false,
-            },
-            border: {
-              display: false,
-            },
-            ticks: {
-              display: false,
-            },
-            reverse: true,
-            min: 0,
-          },
-          'x': {
-            grid: {
-              display: false,
-            },
-            border: {
-              display: false,
-            },
-            ticks: {
-              display: false,
-            },
-            min: 0,
-          },
-        },
-        elements: {
-          point: {
-            radius: this.dotSize,
-            hoverRadius: this.dotSize,
-            pointStyle: (ctx) => {
-              const def = 'circle';
-              if (ctx.parsed === undefined) {
-                // chart.js resolves the options of datasets without data points against a dataset context, which has no parsed values
-                return def;
-              }
-              const dsIndex = this.chartjs.data?.datasets.findIndex(d => {
-                const data = d.data[0] as { x: number, y: number } | undefined; // unplaced placements have no data
-                return data?.x === ctx.parsed.x && data?.y === ctx.parsed.y;
-              });
-              if (dsIndex === undefined) {
-                return def;
-              }
-              const ds = this.chartjs.data?.datasets[dsIndex];
-              if (ds === undefined) {
-                return def;
-              }
-              const placement = this.widget.properties.floorplan?.placements[dsIndex];
-              if (placement === undefined) {
-                return def;
-              }
-              const icon = this.chartjs.icons[dsIndex];
-              if (icon === undefined) {
-                return def;
-              }
-              const canvas = document.createElement('canvas');
-              const size = this.dotSize;
-              canvas.width = size;
-              canvas.height = canvas.width;
-              const canvasCtx = canvas.getContext('2d');
-              if (canvasCtx == null) {
-                return def;
-              }
-              const fontSize = canvas.width * .75 + 'px';
-              canvasCtx.font = fontSize + ' Material Symbols Outlined';
-              canvasCtx.textBaseline = 'middle';
-              canvasCtx.textAlign = 'center';
-              canvasCtx.fillStyle = ds.backgroundColor as string;
+  private resolver = new FloorplanControlResolver(this);
 
-
-              const text = markerText(placement, ds.label || '', this.zoom, this.chartjs.showValue[dsIndex], this.chartjs.showValueWhenZoomed[dsIndex]);
-
-              if (text.length > 0) {
-                const originWidth = canvas.width;
-                const iconWidth = canvasCtx.measureText(icon).width;
-                canvasCtx.font = fontSize + ' Arial';
-                const right = iconWidth + canvasCtx.measureText(text).width;
-                canvas.width += right;
-
-                canvasCtx.beginPath();
-                canvasCtx.arc(originWidth / 2, originWidth / 2, originWidth / 2, Math.PI * .5, Math.PI * 1.5);
-                canvasCtx.lineTo(originWidth + right, 0);
-                canvasCtx.arc(originWidth / 2 + right, originWidth / 2, originWidth / 2, Math.PI * 1.5, Math.PI * .5);
-                canvasCtx.lineTo(0, originWidth);
-                canvasCtx.fillStyle = ds.backgroundColor as string;
-                canvasCtx.fill();
-
-                canvasCtx.fillStyle = 'white';
-                canvasCtx.textBaseline = 'middle';
-                canvasCtx.textAlign = 'center';
-                canvasCtx.font = fontSize + ' Material Symbols Outlined';
-                canvasCtx.fillText(icon, originWidth / 2, originWidth / 2 + originWidth / size);
-
-                canvasCtx.font = fontSize + ' Roboto, sans-serif';
-                canvasCtx.textAlign = 'left';
-                canvasCtx.fillText(text, originWidth / 2 + iconWidth, originWidth / 2 + originWidth / size);
-
-              } else {
-                canvasCtx.beginPath();
-                canvasCtx.arc(canvas.width / 2, canvas.width / 2, canvas.width / 2, 0, 2 * Math.PI);
-                canvasCtx.fill();
-
-                canvasCtx.fillStyle = 'white';
-
-                canvasCtx.fillText(icon, canvas.width / 2, canvas.width / 2 + canvas.width / size);
-              }
-              return canvas;
-            },
-          },
-        },
-        events: ['click', 'mousemove'],
-        onHover: (_, elements, chart) => {
-          const style = (chart.canvas?.parentNode as any)?.style;
-          if (style === null) {
-            return;
-          }
-          let ok = elements !== undefined && elements.length === 1;
-          if (ok) {
-            ok = this.hasAction(elements[0].datasetIndex);
-          }
-          if (ok) {
-            style.cursor = 'pointer';
-          } else {
-            style.cursor = 'default';
-          }
-        },
-        onClick: (_, elements) => {
-          if (elements !== undefined && elements.length === 1) {
-            this.performRowAction(elements[0].datasetIndex);
-          }
-        }
-      },
-      data: undefined,
-      tooltipContext: undefined,
-      tooltipDatasets: [],
-      plugins: [{
-        id: 'customCanvasBackgroundImage',
-        beforeDraw: (chart: Chart) => {
-
-          if (this.img === undefined) {
-            return false;
-          }
-
-          if (this.img.complete) {
-            const ctx = chart.ctx;
-            const width = chart.chartArea.width;
-            const height = chart.chartArea.height;
-
-            const hRatio = width / this.img.naturalWidth;
-            const vRatio = height / this.img.naturalHeight;
-
-            const ratio = Math.min(hRatio, vRatio);
-
-            const centerShiftX = (width - this.img.naturalWidth * ratio) / 2;
-            const centerShiftY = (height - this.img.naturalHeight * ratio) / 2;
-            ctx.drawImage(this.img, 0, 0, this.img.naturalWidth, this.img.naturalHeight, centerShiftX, centerShiftY, this.img.naturalWidth * ratio, this.img.naturalHeight * ratio);
-
-            // @ts-expect-error x axis always exists
-            this.chartjs.options.scales['x'].max = width;
-            // @ts-expect-error y axis always exists
-            this.chartjs.options.scales['y'].max = height;
-            this.drawShift = { centerShiftX: centerShiftX - chart.chartArea.left, centerShiftY: centerShiftY - chart.chartArea.top, ratio };
-          } else {
-            this.img.onload = () => chart.draw();
-          }
-          return true;
-        }
-      }],
-      showValueWhenZoomed: [],
-      showValue: [],
-      icons: [],
-      tooltipCriteria: [],
-      tooltipDisplay: 'none',
-      tooltipAllowed: false,
-    };
+  chartjs: FloorplanChartState = {
+    options: buildFloorplanChartOptions(this, () => this.cd.detectChanges()),
+    data: undefined,
+    tooltipContext: undefined,
+    tooltipDatasets: [],
+    plugins: buildFloorplanChartPlugins(this),
+    showValueWhenZoomed: [],
+    showValue: [],
+    icons: [],
+    tooltipCriteria: [],
+    tooltipDisplay: 'none',
+    tooltipAllowed: false,
+  };
 
   ngOnInit(): void {
     migrateColoring(this.widget.properties);
@@ -550,14 +305,8 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     }));
   }
 
-  private unitOf(functionId: string): string | undefined {
+  unitOf(functionId: string): string | undefined {
     return this.functionIdToUnit.has(functionId) ? this.functionIdToUnit.get(functionId) : undefined;
-  }
-
-  /** Names a function by its display name, falling back to its name before showing the raw id */
-  private describeFunction(functionId: string): string {
-    const f = this.functions.find(f2 => f2.id === functionId);
-    return f?.display_name || f?.name || functionId;
   }
 
   edit() {
@@ -677,149 +426,23 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   }
 
   compareCriteria(a: DeviceGroupCriteriaModel, b: DeviceGroupCriteriaModel): boolean {
-    return this.compareCriteriaWithoutInteraction(a, b) &&
-      a.interaction === b.interaction;
+    return this.resolver.compareCriteria(a, b);
   }
 
   compareCriteriaWithoutInteraction(a: DeviceGroupCriteriaModel, b: DeviceGroupCriteriaModel): boolean {
-    return a.function_id === b.function_id &&
-      a.device_class_id === b.device_class_id &&
-      a.aspect_id === b.aspect_id;
+    return this.resolver.compareCriteriaWithoutInteraction(a, b);
   }
 
-
-  /** Names a criteria by its function, narrowed down by whichever of device class and aspect it carries */
   describeCriteria(criteria: DeviceGroupCriteriaModel | null): string {
-    if (criteria == null) {
-      return '';
-    }
-    return [
-      this.describeFunction(criteria.function_id),
-      criteria.device_class_id === '' ? '' : this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '',
-      criteria.aspect_id === '' ? '' : this.aspects.find(a => a.id === criteria.aspect_id)?.name || '',
-    ].filter(part => part !== '').join(' ');
+    return this.resolver.describeCriteria(criteria);
   }
 
-  /** The measuring criteria a placement displays, in the order the tooltip lists them */
   displayedCriteria(placement: FloorplanWidgetCapabilityModel): DeviceGroupCriteriaWithValueModel[] {
-    return [placement.criteria, ...(placement.tooltipCriteria || [])]
-      .filter(c => !isControllingFunction(c.function_id))
-      .filter((c, i, a) => a.findIndex(c2 => this.compareCriteriaWithoutInteraction(c, c2)) === i);
+    return this.resolver.displayedCriteria(placement);
   }
 
-  /** The controlling criteria selected for a placement on their own */
-  private selectedControllingCriteria(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel): DeviceGroupCriteriaModel[] {
-    return (placement.tooltipCriteria || [])
-      .filter(c => isControllingFunction(c.function_id))
-      // a criteria the group lost, e.g. because a device left it, can no longer be executed
-      .filter(c => (deviceGroup.criteria || []).some(c2 => this.compareCriteriaWithoutInteraction(c, c2)))
-      .filter((c, i, a) => a.findIndex(c2 => this.compareCriteriaWithoutInteraction(c, c2)) === i);
-  }
-
-  /**
-   * The controls of a placement. A displayed measurement that has a controlling counterpart is operated
-   * through its own value, so it brings its control along; the remaining controls are the ones selected
-   * on their own.
-   */
   resolveControls(placement: FloorplanWidgetCapabilityModel): FloorplanControlModel[] {
-    const deviceGroup = this.deviceGroups.find(dg => dg.id === placement.deviceGroupId);
-    if (deviceGroup === undefined) {
-      return [];
-    }
-    const controls: FloorplanControlModel[] = [];
-    this.displayedCriteria(placement).forEach(measuring => {
-      const control = this.controlVia(placement, deviceGroup, measuring);
-      if (control !== undefined) {
-        controls.push(control);
-      }
-    });
-    const covered = (criteria: DeviceGroupCriteriaModel) => controls.some(c =>
-      this.compareCriteriaWithoutInteraction(c.criteria, criteria) ||
-      (c.offCriteria !== undefined && this.compareCriteriaWithoutInteraction(c.offCriteria, criteria)));
-    const standalone = this.selectedControllingCriteria(placement, deviceGroup).filter(c => !covered(c));
-    return [
-      ...controls,
-      ...mergeVoidToggles(standalone.map(c => this.newControl(placement, deviceGroup, c)), this.voidTogglePairs),
-    ];
-  }
-
-  /** The control a displayed measurement gives access to, operated through the value shown for it */
-  private controlVia(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel, measuring: DeviceGroupCriteriaWithValueModel): FloorplanControlModel | undefined {
-    if (measuring.function_id === fpCriteriaConnectionStatus) {
-      return {
-        criteria: { function_id: fpCriteriaConnectionStatus, interaction: '', aspect_id: '', device_class_id: '' },
-        label: 'Connection Status', icon: 'history', input: FloorplanControlInput.Action, via: measuring,
-      };
-    }
-    const implied = impliedControllingCriteria(measuring, this.stateSourceContext(placement, deviceGroup), this.voidTogglePairs);
-    if (implied.length === 0) {
-      return undefined;
-    }
-    // the value shown for the measurement is the state of its control, so both always agree
-    const value = measuring.value?.status_code === 200 ? measuring.value.message : undefined;
-    const pair = this.voidTogglePairs.find(p => p.state === measuring.function_id);
-    const on = pair === undefined ? undefined : implied.find(c => c.function_id === pair.on);
-    const off = pair === undefined ? undefined : implied.find(c => c.function_id === pair.off);
-    if (on !== undefined && off !== undefined) {
-      return {
-        criteria: on, offCriteria: off, label: this.describeCriteria(measuring),
-        icon: controlIcon(FloorplanControlInput.Toggle), input: FloorplanControlInput.Toggle,
-        via: measuring, state: controlState(value, FloorplanControlInput.Toggle),
-      };
-    }
-    const criteria = implied[0];
-    const characteristic = this.functionIdToCharacteristic.get(criteria.function_id);
-    const input = resolveControlInput(characteristic);
-    return {
-      criteria,
-      label: this.describeCriteria(criteria),
-      icon: controlIcon(input),
-      input,
-      characteristic,
-      via: measuring,
-      state: controlState(value, input),
-    };
-  }
-
-  private newControl(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel, criteria: DeviceGroupCriteriaModel): FloorplanControlModel {
-    if (criteria.function_id === fpCriteriaConnectionStatus) {
-      return { criteria, label: 'Connection Status', icon: 'history', input: FloorplanControlInput.Action };
-    }
-    const characteristic = this.functionIdToCharacteristic.get(criteria.function_id);
-    const input = resolveControlInput(characteristic);
-    const source = this.stateSourceOf(placement, deviceGroup, criteria) as DeviceGroupCriteriaWithValueModel | undefined;
-    return {
-      criteria,
-      label: this.describeCriteria(criteria),
-      icon: controlIcon(input),
-      input,
-      characteristic,
-      state: source?.value?.status_code === 200 ? controlState(source.value.message, input) : undefined,
-    };
-  }
-
-  /** The measuring criteria of the device group reporting what the control currently is set to */
-  private stateSourceOf(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel, criteria: DeviceGroupCriteriaModel): DeviceGroupCriteriaModel | undefined {
-    const pair = this.voidTogglePairs.find(p => p.on === criteria.function_id || p.off === criteria.function_id);
-    if (pair !== undefined) {
-      // functions without input have no concept to pair them up, the semantic keys name their state
-      return (deviceGroup.criteria || []).find(c => c.function_id === pair.state &&
-        aspectDistance(c.aspect_id, criteria.aspect_id, this.aspects) !== undefined);
-    }
-    return findStateSource(criteria, this.stateSourceContext(placement, deviceGroup));
-  }
-
-  private stateSourceContext(placement: FloorplanWidgetCapabilityModel, deviceGroup: DeviceGroupWithValueModel): StateSourceContextModel {
-    return {
-      criteria: deviceGroup.criteria || [],
-      configured: [placement.criteria, ...(placement.tooltipCriteria || [])],
-      aspects: this.aspects,
-      conceptOf: (functionId: string) => this.functions.find(f => f.id === functionId)?.concept_id,
-      serviceGroups: this.deviceGroupServiceGroups.get(deviceGroup.id) || [],
-      serviceGroupsLoaded: this.deviceGroupServiceGroups.has(deviceGroup.id),
-      describe: c => this.describeCriteria(c),
-      reportedAmbiguities: this.reportedAmbiguities,
-    };
+    return this.resolver.resolveControls(placement);
   }
 
   /**
@@ -834,7 +457,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       }
       const sources: DeviceGroupCriteriaModel[] = [];
       this.resolveControls(p).filter(c => c.via === undefined).forEach(c => {
-        const source = this.stateSourceOf(p, deviceGroup, c.criteria);
+        const source = this.resolver.stateSourceOf(p, deviceGroup, c.criteria);
         if (source !== undefined) {
           sources.push(source);
         }
@@ -855,9 +478,9 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       if (deviceGroup === undefined || this.deviceGroupServiceGroups.has(deviceGroup.id) || groupIds.indexOf(deviceGroup.id) !== -1) {
         return;
       }
-      const context = this.stateSourceContext(p, deviceGroup);
+      const context = this.resolver.stateSourceContext(p, deviceGroup);
       const ambiguous = this.displayedCriteria(p).some(c => needsServiceGroups(c, context, true)) ||
-        this.selectedControllingCriteria(p, deviceGroup).some(c => needsServiceGroups(c, context, false));
+        this.resolver.selectedControllingCriteria(p, deviceGroup).some(c => needsServiceGroups(c, context, false));
       if (ambiguous) {
         groupIds.push(deviceGroup.id);
       }
