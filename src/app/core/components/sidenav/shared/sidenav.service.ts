@@ -24,7 +24,7 @@ import { WaitingRoomEventTypeAuthOk } from '../../../../modules/devices/waiting-
 import { environment } from '../../../../../environments/environment';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { SwaggerService } from 'src/app/modules/api-doc/shared/swagger/swagger.service';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { FlowRepoService } from 'src/app/modules/data/flow-repo/shared/flow-repo.service';
 import { OperatorRepoService } from 'src/app/modules/data/operator-repo/shared/operator-repo.service';
 import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/shared/pipeline-registry.service';
@@ -93,14 +93,12 @@ export class SidenavService implements OnDestroy {
 
     private isToggled = false;
     private section = '';
-    private waitingRoomEventCloser?: () => void;
+    private waitingRoomEventSubscription?: Subscription;
     private sections: SidenavSectionModel[] = [];
     private sectionsSubject: Subject<SidenavSectionModel[]> = new Subject();
 
     ngOnDestroy() {
-        if (this.waitingRoomEventCloser) {
-            this.waitingRoomEventCloser();
-        }
+        this.waitingRoomEventSubscription?.unsubscribe();
     }
 
     toggle(sidenavOpen: boolean | undefined = undefined): void {
@@ -222,15 +220,11 @@ export class SidenavService implements OnDestroy {
             });
         };
 
-        this.waitingRoomService
-            .events(
-                (closer) => {
-                    this.waitingRoomEventCloser = closer;
-                },
-                () => {
-                    refreshWaitingRoom();
-                },
-            )
+        this.waitingRoomEventSubscription?.unsubscribe();
+        this.waitingRoomEventSubscription = this.waitingRoomService
+            .events(() => {
+                refreshWaitingRoom();
+            })
             .pipe(debounceTime(1000))
             .subscribe((msg) => {
                 if (msg.type === WaitingRoomEventTypeAuthOk || this.waitingRoomService.eventIsUpdate(msg)) {

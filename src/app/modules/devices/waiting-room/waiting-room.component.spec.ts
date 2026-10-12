@@ -18,7 +18,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -54,5 +54,59 @@ describe('WaitingRoomComponent delete', () => {
         const snackOpen = deleteWith(404);
         expect(snackOpen).toHaveBeenCalledWith('Device could not be deleted', 'close', { panelClass: 'snack-bar-error' });
         expect(snackOpen).not.toHaveBeenCalledWith('Device could not be deleted', undefined, jasmine.anything());
+    });
+});
+
+describe('WaitingRoomComponent searches', () => {
+    const setup = () => {
+        const searchDevices = jasmine.createSpy('searchDevices').and.returnValue(of(null));
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: MatDialog, useValue: {} },
+                { provide: ChangeDetectorRef, useValue: { detectChanges: () => undefined } },
+                { provide: SearchbarService, useValue: {} },
+                { provide: WaitingRoomService, useValue: { searchDevices } },
+                { provide: MatSnackBar, useValue: {} },
+                { provide: DialogsService, useValue: {} },
+                { provide: PreferencesService, useValue: { pageSize: 20 } },
+            ],
+        });
+        const component = TestBed.runInInjectionContext(() => new WaitingRoomComponent());
+        const sortChange = new Subject<unknown>();
+        component.sort = { active: 'name', direction: 'asc', sortChange, initialized: of(undefined) } as any;
+        component.paginator = { pageSize: 20, pageIndex: 0, page: new Subject() } as any;
+        return { component, sortChange, searchDevices };
+    };
+
+    it('keeps one sort subscription per listener however often it searches', () => {
+        const { component, sortChange } = setup();
+        (component as any).getDevices(true);
+        const afterFirst = sortChange.observers.length;
+        (component as any).getDevices(true);
+        (component as any).getDevices(true);
+        expect(sortChange.observers.length).toBe(afterFirst);
+    });
+
+    it('loads once per sort change after repeated searches', () => {
+        const { component, sortChange, searchDevices } = setup();
+        (component as any).getDevices(true);
+        (component as any).getDevices(true);
+        (component as any).getDevices(true);
+        searchDevices.calls.reset();
+        sortChange.next({});
+        expect(searchDevices).toHaveBeenCalledTimes(1);
+    });
+
+    it('ends the sort subscriptions when the component is destroyed', () => {
+        const { component, sortChange } = setup();
+        // The table data source keeps its own listener on the sort; it is not the component's.
+        component.devicesDataSource.sort = component.sort;
+        const dataSourceOnly = sortChange.observers.length;
+        (component as any).getDevices(true);
+        (component as any).getDevices(true);
+        expect(sortChange.observers.length).toBeGreaterThan(dataSourceOnly);
+        TestBed.resetTestingModule();
+        expect(sortChange.observers.length).toBe(dataSourceOnly);
     });
 });

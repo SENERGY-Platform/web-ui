@@ -19,13 +19,12 @@ import { HttpClient } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, share } from 'rxjs/operators';
 import {
     WaitingDeviceListModel,
     WaitingDeviceModel,
     WaitingRoomEvent,
     WaitingRoomEventTypeAuth,
-    WaitingRoomEventTypeAuthOk,
     WaitingRoomEventTypeAuthRequest,
     WaitingRoomEventTypeError,
     WaitingRoomEventTypeSet,
@@ -47,7 +46,7 @@ export class WaitingRoomService {
     private ladonService = inject(LadonService);
 
     authorizations: PermissionTestResponse;
-    waitingRoomEventRS: ReplaySubject<WaitingRoomEvent> | undefined;
+    private waitingRoomEvents: Observable<WaitingRoomEvent> | undefined;
 
     constructor() {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.waitingRoomUrl);
@@ -173,77 +172,89 @@ export class WaitingRoomService {
             );
     }
 
-    events(closerSetter?: (closer: () => void) => void, fallback?: () => void): Observable<WaitingRoomEvent> {
-        if (this.waitingRoomEventRS !== undefined) {
-            return this.waitingRoomEventRS.asObservable();
-        }
-        this.waitingRoomEventRS = new ReplaySubject(1);
+    /**
+     * Shared event stream. The websocket is opened by the first subscriber and closed, together with
+     * its pending reconnect timer, when the last one leaves; `fallback` is taken from the first call.
+     */
+    events(fallback?: () => void): Observable<WaitingRoomEvent> {
+        this.waitingRoomEvents ??= this.openEvents(fallback).pipe(
+            share({ connector: () => new ReplaySubject<WaitingRoomEvent>(1), resetOnRefCountZero: true }),
+        );
+        return this.waitingRoomEvents;
+    }
 
-        if (environment.waitingRoomWsUrl === '') {
-            if (fallback) {
-                fallback();
+    protected openSocket(url: string): WebSocketSubject<WaitingRoomEvent> {
+        return webSocket<WaitingRoomEvent>(url);
+    }
+
+    private openEvents(fallback?: () => void): Observable<WaitingRoomEvent> {
+        return new Observable<WaitingRoomEvent>((subscriber) => {
+            if (environment.waitingRoomWsUrl === '') {
+                fallback?.();
+                return undefined;
             }
-            return this.waitingRoomEventRS.asObservable();
-        }
 
-        let fallbackUsed = false;
+            let fallbackUsed = false;
+            let closed = false;
+            let ws: WebSocketSubject<WaitingRoomEvent> | undefined;
+            let subscription: Subscription | undefined;
+            let timer: number | undefined;
 
-        let ws: WebSocketSubject<WaitingRoomEvent>;
-
-        const auth = () => {
-            this.authorizationService.getToken().then((token) => ws?.next({ type: WaitingRoomEventTypeAuth, payload: token }));
-        };
-
-        const useFallback = () => {
-            if (!fallbackUsed && fallback) {
-                fallbackUsed = true;
-                fallback();
-            }
-        };
-
-        let subscription: Subscription | null;
-        const init = () => {
-            subscription?.unsubscribe();
-            subscription = null;
-            ws?.complete();
-            ws = webSocket<WaitingRoomEvent>(environment.waitingRoomWsUrl);
-            if (closerSetter !== undefined) {
-                closerSetter(() => {
-                    subscription?.unsubscribe();
-                    subscription = null;
-                    ws?.complete();
-                });
-            }
-            subscription = ws.subscribe(
-                (msg: WaitingRoomEvent) => {
-                    switch (msg.type) {
-                    case WaitingRoomEventTypeAuthRequest:
-                        auth();
-                        break;
-                    case WaitingRoomEventTypeAuthOk:
-                        this.waitingRoomEventRS?.next(msg);
-                        break;
-                    case WaitingRoomEventTypeError:
-                        console.error('ERROR:', msg);
-                        useFallback();
-                        break;
-                    default:
-                        this.waitingRoomEventRS?.next(msg);
+            const auth = () => {
+                this.authorizationService.getToken().then((token) => {
+                    if (!closed) {
+                        ws?.next({ type: WaitingRoomEventTypeAuth, payload: token });
                     }
-                },
-                (err: any) => {
-                    console.error('ERROR:', err);
-                    useFallback();
-                    setTimeout(() => {
-                        init();
-                    }, 5000);
-                },
-                () => setTimeout(() => init(), 5000),
-            );
-            auth();
-        };
-        init();
-        return this.waitingRoomEventRS.asObservable();
+                });
+            };
+
+            const useFallback = () => {
+                if (!fallbackUsed && fallback) {
+                    fallbackUsed = true;
+                    fallback();
+                }
+            };
+
+            const reconnect = () => {
+                timer = window.setTimeout(init, 5000);
+            };
+
+            const init = () => {
+                subscription?.unsubscribe();
+                ws?.complete();
+                ws = this.openSocket(environment.waitingRoomWsUrl);
+                subscription = ws.subscribe(
+                    (msg: WaitingRoomEvent) => {
+                        switch (msg.type) {
+                        case WaitingRoomEventTypeAuthRequest:
+                            auth();
+                            break;
+                        case WaitingRoomEventTypeError:
+                            console.error('ERROR:', msg);
+                            useFallback();
+                            break;
+                        default:
+                            subscriber.next(msg);
+                        }
+                    },
+                    (err: any) => {
+                        console.error('ERROR:', err);
+                        useFallback();
+                        reconnect();
+                    },
+                    () => reconnect(),
+                );
+                auth();
+            };
+            init();
+
+            return () => {
+                closed = true;
+                clearTimeout(timer);
+                subscription?.unsubscribe();
+                ws?.complete();
+            };
+        });
     }
 
     eventIsUpdate(msg: WaitingRoomEvent) {

@@ -22,7 +22,7 @@ import {
     MatSnackBar,
     MatSnackBarRef
 } from '@angular/material/snack-bar';
-import {merge} from 'rxjs';
+import {merge, Subscription} from 'rxjs';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
@@ -87,6 +87,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
 
     public searchText = '';
     private snackBarInstance?: MatSnackBarRef<ClosableSnackBarComponent>;
+    private sortAndPageSubscription?: Subscription;
 
     ngOnInit() {
         this.initSearchAndGetDevices();
@@ -127,11 +128,15 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
             this.reset();
         }
         this.devicesDataSource.sort = this.sort;
-        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        // Every search re-enters here; end the previous subscriptions so they do not accumulate.
+        this.sortAndPageSubscription?.unsubscribe();
+        const subscription = new Subscription();
+        this.sortAndPageSubscription = subscription;
+        subscription.add(this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginator.pageIndex = 0;
             this.selectionClear();
-        });
-        merge(this.sort.sortChange, this.paginator.page)
+        }));
+        subscription.add(merge(this.sort.sortChange, this.paginator.page)
             .pipe(
                 startWith({}),
                 switchMap(() => {
@@ -159,7 +164,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                 this.ready = true;
                 this.cd.detectChanges();
                 this.animate = true;
-            });
+            }));
     }
 
     private initSearchAndGetDevices() {
