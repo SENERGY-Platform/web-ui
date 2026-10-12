@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { provideHttpClient, withXhr } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
@@ -39,7 +39,7 @@ describe('KeycloakConfidentialService', () => {
     const refreshed = { access_token: 'new', refresh_token: 'r2', expires_in: 300, refresh_expires_in: 1800 };
 
     beforeEach(() => {
-        TestBed.configureTestingModule({ providers: [provideHttpClient(withXhr()), provideHttpClientTesting()] });
+        TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
         http = TestBed.inject(HttpTestingController);
         service = TestBed.inject(KeycloakConfidentialService);
     });

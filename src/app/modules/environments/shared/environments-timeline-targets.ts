@@ -87,8 +87,8 @@ export function collectTimelineTargets(environment: Environment): TimelineTarget
             add(prefix + '.profile.base', key + ' -- base', 'Context source');
             add(prefix + '.profile.spread_percent', key + ' -- spread %', 'Context source');
         } else if (source.kind === 'dataset' && !source.dataset?.cumulative) {
-            //the server refuses a scale on a cumulative replay for a context
-            //source too: it would restate everything the meter already counted
+            // the server refuses a scale on a cumulative replay for a context
+            // source too: it would restate everything the meter already counted
             add(prefix + '.dataset.scale', key + ' -- scale', 'Context source');
         }
     });

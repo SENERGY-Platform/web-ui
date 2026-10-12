@@ -17,7 +17,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -89,7 +89,7 @@ describe('DashboardComponent updating a widget', () => {
             imports: [CoreModule, MatSnackBarModule, MatDialogModule, MatIconModule, MatMenuModule, MatTabsModule, MatDividerModule, MatButtonModule, NoopAnimationsModule, DashboardComponent],
             providers: [
                 provideRouter([]),
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
                 { provide: DashboardService, useValue: dashboardServiceSpy },
                 { provide: ResponsiveService, useValue: responsiveServiceSpy },

@@ -384,7 +384,7 @@ export class DeviceTypeService {
         // because the import-repository folds a non-empty aspect_id into aspect_ids
         const aspectIds = criteriaAspectIds(contentVariable);
         const criteria: { function_id?: string; aspect_id?: string }[] = (aspectIds.length > 0 ? aspectIds : [undefined])
-            .map((aspect_id) => ({ function_id: contentVariable.function_id, aspect_id }));
+            .map((aspectId) => ({ function_id: contentVariable.function_id, aspect_id: aspectId }));
         return criteria.concat((contentVariable.sub_content_variables || []).flatMap((sub) => this.contentVariableCriteria(sub)));
     }
 

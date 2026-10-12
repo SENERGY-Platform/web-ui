@@ -16,7 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -46,7 +46,7 @@ describe('DeviceTypeService delete', () => {
             providers: [
                 DeviceTypeService,
                 { provide: LadonService, useClass: MockLadonService },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
         });
@@ -119,7 +119,7 @@ describe('DeviceTypeService import-type criteria', () => {
                 DeviceTypeService,
                 { provide: LadonService, useClass: MockLadonService },
                 { provide: ImportTypesService, useValue: importTypesService },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
         });
@@ -182,7 +182,7 @@ describe('DeviceTypeService aspect-nodes of both function types', () => {
             providers: [
                 DeviceTypeService,
                 { provide: LadonService, useClass: MockLadonService },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
         });

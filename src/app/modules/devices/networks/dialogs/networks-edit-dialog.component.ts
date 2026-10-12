@@ -166,15 +166,15 @@ export class NetworksEditDialogComponent implements OnInit {
                 if (!this.network.attributes) {
                     this.network.attributes = [];
                 }
-                const latAttr = this.network.attributes.find(a => a.key === 'location-lat');
-                const lonAttr = this.network.attributes.find(a => a.key === 'location-lon');
-                if (latAttr) {
-                    latAttr.value = String(lat);
+                const storedLat = this.network.attributes.find(a => a.key === 'location-lat');
+                const storedLon = this.network.attributes.find(a => a.key === 'location-lon');
+                if (storedLat) {
+                    storedLat.value = String(lat);
                 } else {
                     this.network.attributes.push({ key: 'location-lat', value: String(lat), origin: 'web-ui' });
                 }
-                if (lonAttr) {
-                    lonAttr.value = String(lon);
+                if (storedLon) {
+                    storedLon.value = String(lon);
                 } else {
                     this.network.attributes.push({ key: 'location-lon', value: String(lon), origin: 'web-ui' });
                 }

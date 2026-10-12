@@ -16,7 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -55,7 +55,7 @@ describe('DashboardComponent first load with animations enabled', () => {
             imports: [CoreModule, MatTabsModule, MatDialogModule, MatSnackBarModule, MatMenuModule, MatIconModule, MatButtonModule, MatDividerModule, DashboardComponent],
             providers: [
                 provideRouter([]),
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
                 { provide: DashboardService, useValue: dashboardServiceSpy },
                 { provide: ResponsiveService, useValue: responsiveServiceSpy },

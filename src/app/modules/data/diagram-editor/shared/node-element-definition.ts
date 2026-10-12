@@ -19,6 +19,7 @@ import { dia, util } from '@joint/core';
 /**
  * Custom JointJS Element Definition for Senergy Nodes
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention -- JointJS cell definitions are constructors, named like classes
 export const NodeElementDefinition = dia.Element.define(
     'senergy.NodeElement',
     {

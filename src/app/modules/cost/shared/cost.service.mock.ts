@@ -15,13 +15,8 @@
  */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
-import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
-import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
-import { environment } from 'src/environments/environment';
-import {Observable, catchError, map, of} from 'rxjs';
-import { CostEstimationModel, CostModel } from './cost.model';
+import {Observable, of} from 'rxjs';
+import { CostEstimationModel } from './cost.model';
 
 
 @Injectable({

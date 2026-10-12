@@ -46,7 +46,7 @@ import { DeviceInstancesService } from '../../../modules/devices/device-instance
 import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
 import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import {provideRouter} from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('DeviceStatusEditDialogComponent', () => {
@@ -194,7 +194,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                     { provide: ExportService, useValue: exportServiceSpy },
                     { provide: MatDialogRef, useValue: matDialogRefSpy },
                     { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
-                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClient(withInterceptorsFromDi()),
                     provideHttpClientTesting(),
                 ],
             }).compileComponents();

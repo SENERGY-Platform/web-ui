@@ -28,7 +28,7 @@ export default [{
         sourceType: "script",
 
         parserOptions: {
-            project: ["tsconfig.app.json", "tsconfig.spec.json", "e2e/tsconfig.json"],
+            project: ["tsconfig.app.json", "tsconfig.spec.json", "tsconfig.eslint.json"],
             createDefaultProgram: true,
         },
     },
@@ -36,7 +36,7 @@ export default [{
     rules: {
         "@typescript-eslint/consistent-type-definitions": "error",
         "@typescript-eslint/dot-notation": "off",
-        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-explicit-any": "warn",
 
         "@typescript-eslint/explicit-member-accessibility": ["off", {
             accessibility: "explicit",

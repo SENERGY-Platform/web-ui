@@ -16,7 +16,7 @@
 
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -49,7 +49,7 @@ describe('DashboardService write failures', () => {
         dialogResult = undefined;
         TestBed.configureTestingModule({
             providers: [
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
                 { provide: LadonService, useValue: { getUserAuthorizationsForURI: () => ({}) } },
                 { provide: MatSnackBar, useValue: { open: (snackOpen = jasmine.createSpy('open').and.returnValue({ afterDismissed: () => EMPTY })) } },

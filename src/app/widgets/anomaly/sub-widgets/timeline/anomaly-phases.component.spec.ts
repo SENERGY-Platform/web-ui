@@ -20,7 +20,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AnomalyPhasesComponent } from './anomaly-phases.component';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('AnomalyPhasesComponent', () => {
@@ -32,7 +32,7 @@ describe('AnomalyPhasesComponent', () => {
         schemas: [NO_ERRORS_SCHEMA],
         imports: [MatDialogModule,
             MatSnackBarModule, AnomalyPhasesComponent],
-        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+        providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
     })
     .compileComponents();
 

@@ -36,7 +36,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {v4 as uuid} from 'uuid';
 import {MatTreeModule} from '@angular/material/tree';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
@@ -177,7 +177,7 @@ describe('DeviceTypesComponent', () => {
                 },
                 { provide: DeviceTypeService, useValue: deviceTypeServiceSpy },
                 { provide: AspectClassesService, useValue: aspectClassesServiceSpy },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
         }).compileComponents();

@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -154,7 +154,7 @@ describe('FlowDesignerComponent with the diagram editor', () => {
             providers: [
                 provideRouter([]),
                 { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => routeId } } } },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
         }).compileComponents();

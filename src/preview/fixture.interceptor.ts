@@ -277,7 +277,7 @@ export class FixtureInterceptor implements HttpInterceptor {
             const id = decodeURIComponent(url.substring(url.lastIndexOf('/') + 1));
             return answer(extendedDevices[id] || null);
         }
-        //platform device/device-type lookups of the dataset editor and anything else
+        // platform device/device-type lookups of the dataset editor and anything else
         return answer([]);
     }
 }

@@ -112,7 +112,7 @@ export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
         if (this.destroyed) {
             return; // the view was torn down while the chunk was still downloading
         }
-        const { loadMonaco, javascriptDefaults, ScriptTarget } = loader;
+        const { loadMonaco, javascriptDefaults, ScriptTarget: scriptTarget } = loader;
         const monaco = loadMonaco();
 
         // Monaco attaches a lot of dom listeners; keeping them out of the angular
@@ -124,7 +124,7 @@ export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
             // read the uri back off the model: the provider looks it up the same way,
             // so this cannot drift from whatever monaco normalised it to
             this.modelUri = this.model.uri.toString();
-            this.applyScriptEnvironment(javascriptDefaults, ScriptTarget);
+            this.applyScriptEnvironment(javascriptDefaults, scriptTarget);
             this.registerCompletions(monaco);
             this.editor = monaco.editor.create(this.host.nativeElement, {
                 model: this.model,

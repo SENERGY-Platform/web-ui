@@ -24,7 +24,7 @@ import { PermissionsUserModel } from './permissions-user.model';
 })
 export class PermissionsMockService {
     constructor() {}
-    getResourcePermissionsV2(_: string, __: string): Observable<PermissionsV2ResourceModel> {
+    getResourcePermissionsV2(_topicId: string, _resourceId: string): Observable<PermissionsV2ResourceModel> {
         console.log('Using mock permission class');
         return of({} as PermissionsV2ResourceModel);
     }

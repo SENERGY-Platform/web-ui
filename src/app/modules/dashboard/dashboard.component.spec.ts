@@ -37,7 +37,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatButtonModule } from '@angular/material/button';
 import { DatePipe } from '@angular/common';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import { DashboardTypesEnum } from './shared/dashboard-types.enum';
@@ -100,7 +100,7 @@ describe('DashboardComponent', () => {
                     { provide: DashboardService, useValue: dashboardServiceSpy },
                     { provide: ResponsiveService, useValue: responsiveServiceSpy },
                     { provide: DeviceStatusService, useValue: deviceStatusServiceSpy },
-                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClient(withInterceptorsFromDi()),
                     provideHttpClientTesting(),
                 ],
             }).compileComponents();

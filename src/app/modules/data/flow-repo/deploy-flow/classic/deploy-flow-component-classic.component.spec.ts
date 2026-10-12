@@ -26,7 +26,7 @@ import { AuthorizationService } from '../../../../../core/services/authorization
 import { AuthorizationServiceMock } from '../../../../../core/services/authorization.service.mock';
 import { DialogsService } from '../../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { DeviceInstancesService } from '../../../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
@@ -64,7 +64,7 @@ describe('DeployFlowClassicComponent', () => {
                             },
                         },
                     },
-                    provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                    provideHttpClient(withInterceptorsFromDi()),
                     provideHttpClientTesting(),
                 ],
             }).compileComponents();

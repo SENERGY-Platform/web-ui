@@ -126,8 +126,8 @@ export class SidenavComponent implements OnInit, AfterViewInit {
             this.sidenav.toggle(state);
             this.cd.detectChanges();
         });
-        this.sidenavService.sectionChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((section: any) => {
-            this.openSection = section.state;
+        this.sidenavService.sectionChanged.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((section) => {
+            this.openSection = section;
         });
         this.sidenav.openedChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(o => this.sidenavService.toggle(o));
     }

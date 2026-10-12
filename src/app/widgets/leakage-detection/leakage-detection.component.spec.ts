@@ -20,7 +20,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { LeakageDetectionComponent } from './leakage-detection.component';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('LeakageDetectionComponent', () => {
@@ -32,7 +32,7 @@ describe('LeakageDetectionComponent', () => {
         schemas: [NO_ERRORS_SCHEMA],
         imports: [MatDialogModule,
             MatSnackBarModule, LeakageDetectionComponent],
-        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+        providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
     })
     .compileComponents();
 

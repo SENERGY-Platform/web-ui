@@ -20,7 +20,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AnomalyService } from './anomaly.service';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { AnomalyResultModel } from './anomaly.model';
@@ -32,7 +32,7 @@ describe('AnomalyService', () => {
         TestBed.configureTestingModule({schemas: [NO_ERRORS_SCHEMA],
     imports: [MatDialogModule,
         MatSnackBarModule],
-    providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()]
+    providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
         service = TestBed.inject(AnomalyService);
     });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import Keycloak from 'keycloak-js';
@@ -121,7 +121,7 @@ describe('KeycloakPublicClient', () => {
             providers: [
                 { provide: Keycloak, useValue: keycloak },
                 { provide: AUTH_CLIENT, useExisting: KeycloakPublicClient },
-                provideHttpClient(withXhr(), withInterceptors([authInterceptor])),
+                provideHttpClient(withInterceptors([authInterceptor])),
                 provideHttpClientTesting(),
             ],
         });

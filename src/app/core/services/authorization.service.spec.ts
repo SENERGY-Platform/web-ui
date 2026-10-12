@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClient, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import Keycloak, { KeycloakLoginOptions } from 'keycloak-js';
@@ -223,7 +223,7 @@ describe('AuthorizationService', () => {
 
         function clientFor(flag: string): AuthClient {
             environment.keyCloakConfidential = flag;
-            TestBed.configureTestingModule({ providers: [provideAuth(), provideHttpClient(withXhr()), provideHttpClientTesting()] });
+            TestBed.configureTestingModule({ providers: [provideAuth(), provideHttpClient(), provideHttpClientTesting()] });
             return TestBed.inject(AUTH_CLIENT);
         }
 
@@ -257,7 +257,7 @@ describe('AuthorizationService', () => {
             TestBed.configureTestingModule({
                 providers: [
                     { provide: AUTH_CLIENT, useExisting: KeycloakConfidentialService },
-                    provideHttpClient(withXhr(), withInterceptors([authInterceptor])),
+                    provideHttpClient(withInterceptors([authInterceptor])),
                     provideHttpClientTesting(),
                 ],
             });

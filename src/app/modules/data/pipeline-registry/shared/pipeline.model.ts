@@ -16,7 +16,6 @@
 
 import { SafeHtml } from '@angular/platform-browser';
 import { PipelineInputSelectionModel } from '../../flow-repo/deploy-flow/shared/pipeline-request.model';
-import {DeviceInstancesRouterStateTabEnum} from "../../../devices/device-instances/shared/device-instances.model";
 
 export interface PipelineStatus {
     running: boolean;

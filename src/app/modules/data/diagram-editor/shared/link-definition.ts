@@ -23,6 +23,7 @@ const SHORT_LINK_LENGTH = 105;
  * Link between two operator ports. Keeps the type `link` the flow parser and the designer look for,
  * and is drawn like the default link of JointJS 3, which @joint/core no longer has.
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention -- JointJS cell definitions are constructors, named like classes
 export const LinkDefinition = dia.Link.define('link', {
     attrs: {
         // fill, line joins and the wide hover strip come from joint.css, so the saved flow image keeps plain paths
@@ -52,6 +53,7 @@ function shortLinkScale(view: dia.LinkView): number {
     return view.getConnectionLength() < SHORT_LINK_LENGTH ? 0.5 : 1;
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention -- JointJS cell definitions are constructors, named like classes
 const RemoveButton = linkTools.Remove.extend({
     children: [
         { tagName: 'circle', selector: 'button', attributes: { r: 11, fill: '#FF0000', cursor: 'pointer' } },
@@ -77,9 +79,12 @@ function legacyArrowhead(base: any, d: string) {
 }
 
 // Both tips sit on the link end and point away from the link.
+// eslint-disable-next-line @typescript-eslint/naming-convention -- JointJS cell definitions are constructors, named like classes
 const TargetArrowhead = legacyArrowhead(linkTools.TargetArrowhead, 'M -26 -13 L 0 0 L -26 13 z');
+// eslint-disable-next-line @typescript-eslint/naming-convention -- JointJS cell definitions are constructors, named like classes
 const SourceArrowhead = legacyArrowhead(linkTools.SourceArrowhead, 'M 26 -13 L 0 0 L 26 13 z');
 
+// eslint-disable-next-line @typescript-eslint/naming-convention -- JointJS cell definitions are constructors, named like classes
 const VertexHandle = linkTools.Vertices.VertexHandle.extend({
     tagName: 'g',
     className: 'marker-vertex-group',

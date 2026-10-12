@@ -20,7 +20,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { PvPredictionComponent } from './pv-prediction.component';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('PvPredictionComponent', () => {
@@ -32,7 +32,7 @@ describe('PvPredictionComponent', () => {
         schemas: [NO_ERRORS_SCHEMA],
         imports: [MatDialogModule,
             MatSnackBarModule, PvPredictionComponent],
-        providers: [provideHttpClient(withXhr(), withInterceptorsFromDi()), provideHttpClientTesting()],
+        providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()],
     })
     .compileComponents();
 

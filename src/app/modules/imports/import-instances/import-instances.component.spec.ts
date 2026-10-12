@@ -19,7 +19,7 @@ import { ImportInstancesComponent } from './import-instances.component';
 import { CoreModule } from '../../../core/core.module';
 import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -129,7 +129,7 @@ describe('ImportInstancesComponent', () => {
                 { provide: MatDialog, useValue: dialogSpy },
                 { provide: PermissionsService, useValue: permissionsServiceSpy },
                 { provide: AuthorizationService, useValue: authorizationServiceSpy },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
             ],
         }).compileComponents();
     });

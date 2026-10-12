@@ -19,7 +19,7 @@ import {ImportTypesComponent} from './import-types.component';
 import {CoreModule} from '../../../core/core.module';
 import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -117,7 +117,7 @@ describe('ImportTypesComponent', () => {
                 { provide: MatDialog, useValue: dialogSpy },
                 { provide: CostService, useValue: costServiceSpy },
                 { provide: PermissionsService, useValue: permissionsServiceSpy },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
             ],
         }).compileComponents();
     });

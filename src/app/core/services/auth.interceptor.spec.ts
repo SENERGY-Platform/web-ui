@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
@@ -36,7 +36,7 @@ describe('authInterceptor', () => {
         TestBed.configureTestingModule({
             providers: [
                 { provide: AUTH_CLIENT, useValue: client },
-                provideHttpClient(withXhr(), withInterceptors([authInterceptor])),
+                provideHttpClient(withInterceptors([authInterceptor])),
                 provideHttpClientTesting(),
             ],
         });

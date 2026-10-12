@@ -29,7 +29,7 @@ import { DeviceTypeService } from '../../../metadata/device-types-overview/share
 import { forkJoin, Observable } from 'rxjs';
 import { selectedAspectNodes } from '../bpmn-js/properties-provider/aspects';
 
-type DeviceTypeFilter = { function_id: string; device_class_id: string; aspect_id: string; aspect_ids?: string[] };
+interface DeviceTypeFilter { function_id: string; device_class_id: string; aspect_id: string; aspect_ids?: string[] }
 
 @Injectable({
     providedIn: 'root',

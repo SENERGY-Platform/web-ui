@@ -28,11 +28,11 @@ import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { DeployFlowComponent } from '../flow-repo/deploy-flow/deploy-flow.component';
-import {PipelineFilterDialogComponent} from "./pipeline-filter-dialog/pipeline-filter-dialog.component";
-import {CloseMtxSelectOnScrollDirective} from "../../../core/directives/close-mtx-select-on-scroll.directive";
-import {MatDialogActions, MatDialogContent, MatDialogTitle} from "@angular/material/dialog";
-import {MatError, MatFormField, MatLabel, MatPrefix} from "@angular/material/form-field";
-import {MtxSelect} from "@ng-matero/extensions/select";
+import {PipelineFilterDialogComponent} from './pipeline-filter-dialog/pipeline-filter-dialog.component';
+import {CloseMtxSelectOnScrollDirective} from '../../../core/directives/close-mtx-select-on-scroll.directive';
+import {MatDialogActions, MatDialogContent, MatDialogTitle} from '@angular/material/dialog';
+import {MatError, MatFormField, MatLabel, MatPrefix} from '@angular/material/form-field';
+import {MtxSelect} from '@ng-matero/extensions/select';
 
 const details: Route = {
     path: 'data/pipelines/details/:id',

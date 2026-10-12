@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -36,7 +36,7 @@ describe('AppRoutingModule', () => {
             providers: [
                 provideRouter([]),
                 { provide: AuthorizationServiceMock, useClass: AuthorizationServiceMock },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting()
             ],
         }).compileComponents();

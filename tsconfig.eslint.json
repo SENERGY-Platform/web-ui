@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/eslint",
+    "types": []
+  },
+  "include": [
+    "./src/**/*.mock.ts",
+    "./src/environments/environment.prod.ts",
+    "./src/app/core/validators/json.validator.ts",
+    "./src/app/modules/metadata/device-types-overview/device-types/content-variable.validator.ts"
+  ]
+}

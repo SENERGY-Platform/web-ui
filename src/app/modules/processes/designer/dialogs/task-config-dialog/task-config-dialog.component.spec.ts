@@ -22,7 +22,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatInputModule } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { By } from '@angular/platform-browser';
 import { Observable, of, Subject } from 'rxjs';
@@ -95,7 +95,7 @@ describe('TaskConfigDialogComponent', () => {
                 { provide: MAT_DIALOG_DATA, useValue: { selection } },
                 { provide: DeviceTypeService, useValue: deviceTypeService },
                 { provide: ConceptsService, useValue: conceptsService },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(TaskConfigDialogComponent);
@@ -421,7 +421,7 @@ describe('TaskConfigDialogComponent', () => {
                 await settle();
                 expect((component.functionFormControl.value as DeviceTypeFunctionModel).id).toBe(setColor.id);
                 expect(functionIds()).toEqual([setTemperature.id, setColor.id]);
-                //the aspect select sits between device class and function
+                // the aspect select sits between device class and function
                 expect(label(2)).toBe('Set-Color (no longer offered for this device class)');
                 expect(hints()).toEqual(['A deployment will probably find no devices for this combination.']);
                 expect(savedResult().function.id).toBe(setColor.id);
@@ -439,7 +439,7 @@ describe('TaskConfigDialogComponent', () => {
             it('drops the marked device class and its function once another device class is picked', async () => {
                 init(measuringSelection({ function: setColor, device_class: lamp }), {}, [air, water], [heater], [setTemperature]);
                 await settle();
-                //the aspect select sits between device class and function
+                // the aspect select sits between device class and function
                 expect(label(2)).toBe('Set-Color (no longer offered for this device class)');
                 component.deviceClassFormControl.setValue(heater);
                 await settle();

@@ -15,7 +15,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -117,7 +117,7 @@ describe('DeviceInstancesReplaceDialogComponent save', () => {
                 { provide: DeploymentsFogFactory, useValue: createSpyFromClass(DeploymentsFogFactory) },
                 { provide: DeploymentsService, useValue: createSpyFromClass(DeploymentsService) },
                 { provide: MatDialog, useValue: createSpyFromClass(MatDialog) },
-                provideHttpClient(withXhr(), withInterceptorsFromDi()),
+                provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
             ],
         });
