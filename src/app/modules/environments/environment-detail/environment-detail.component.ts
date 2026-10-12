@@ -22,9 +22,8 @@ import { MatTabChangeEvent, MatTabGroup, MatTab, MatTabContent } from '@angular/
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatTreeNodeToggle, MatTreeNodeOutlet } from '@angular/material/tree';
-import { Subscription, timer } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { switchMap } from 'rxjs/operators';
 import { EnvironmentsService } from '../shared/environments.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -49,7 +48,6 @@ import {
     Environment,
     ENVIRONMENT_TYPES,
     environmentTypeLabel,
-    EnvironmentState,
     Fault,
     isApiError,
     isValidationError,
@@ -61,7 +59,6 @@ import {
     SOURCE_KINDS,
     sourceKindDescription,
     sourceKindLabel,
-    StateChange,
     Zone,
     ZONE_TYPES,
     zoneTypeLabel,
@@ -81,15 +78,6 @@ import {
 import { collectFormulaReferences, FormulaReferenceOption } from '../shared/environments-formula-refs';
 import { collectTimelineTargets, TimelineTargetOption } from '../shared/environments-timeline-targets';
 import { mondayStartWeekday } from '../shared/environments-profile-preview';
-import {
-    buildStateChange,
-    diffTouchedKeys,
-    flattenAssetTargets,
-    flattenZoneTargets,
-    NamedStateTarget,
-    pickTouched,
-    pickUntouched,
-} from '../shared/environments-live-state';
 import { PlatformDeviceLookup } from './platform-device-lookup.service';
 import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
@@ -119,16 +107,9 @@ import { MatDivider } from '@angular/material/divider';
 import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
 import { EnvironmentsFaultsEditorComponent } from './faults-editor/environments-faults-editor.component';
 import { EnvironmentsEffectsComponent } from './effects/environments-effects.component';
-import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
-import { DatePipe } from '@angular/common';
+import { EnvironmentsLiveStateTabComponent } from './live-state/environments-live-state-tab.component';
+import { EnvironmentsLiveState } from './live-state/environments-live-state.service';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
-
-/** One zone or asset row in the Live state tab: the suggested defaults, the working draft and which keys the user actually touched. */
-interface LiveStateEntry {
-    target: NamedStateTarget;
-    draft: Record<string, unknown>;
-    touched: Set<string>;
-}
 
 /**
  * Editor for a single environment: a tree of its zones/assets/channels on the left,
@@ -140,8 +121,8 @@ interface LiveStateEntry {
     templateUrl: './environment-detail.component.html',
     styleUrls: ['./environment-detail.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    providers: [PlatformDeviceLookup],
-    imports: [SpinnerComponent, MatButton, MatIcon, MatTabGroup, MatTab, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatIconButton, MatTreeNodeToggle, MatBadge, MatTooltip, MatTreeNodeOutlet, FormsModule, MatFormField, MatLabel, MatInput, MtxSelect, MtxOption, MatHint, MatSuffix, EnvironmentsKeyValueEditorComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, EnvironmentsProfileEditorComponent, EnvironmentsDatasetEditorComponent, EnvironmentsTimelineEditorComponent, EnvironmentsMeterParentsEditorComponent, RouterLink, MatButtonToggleGroup, MatButtonToggle, MatDivider, EnvironmentsScheduleEditorComponent, EnvironmentsFaultsEditorComponent, MatTabContent, EnvironmentsEffectsComponent, EnvironmentsLiveStateTilesComponent, EnvironmentsHistoryComponent, DatePipe]
+    providers: [PlatformDeviceLookup, EnvironmentsLiveState],
+    imports: [SpinnerComponent, MatButton, MatIcon, MatTabGroup, MatTab, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatIconButton, MatTreeNodeToggle, MatBadge, MatTooltip, MatTreeNodeOutlet, FormsModule, MatFormField, MatLabel, MatInput, MtxSelect, MtxOption, MatHint, MatSuffix, EnvironmentsKeyValueEditorComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, EnvironmentsProfileEditorComponent, EnvironmentsDatasetEditorComponent, EnvironmentsTimelineEditorComponent, EnvironmentsMeterParentsEditorComponent, RouterLink, MatButtonToggleGroup, MatButtonToggle, MatDivider, EnvironmentsScheduleEditorComponent, EnvironmentsFaultsEditorComponent, MatTabContent, EnvironmentsEffectsComponent, EnvironmentsLiveStateTabComponent, EnvironmentsHistoryComponent]
 })
 export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
@@ -151,6 +132,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     private snackBar = inject(MatSnackBar);
     private dialog = inject(MatDialog);
     private platformDevices = inject(PlatformDeviceLookup);
+    private liveState = inject(EnvironmentsLiveState);
     private exportService = inject(ExportService);
     private changeDetectorRef = inject(ChangeDetectorRef);
 
@@ -224,13 +206,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     readonly noOptions: SubmeteringOption[] = [];
     /** For an aggregate channel: every asset that sums into it. Same recompute discipline as submeteringOptions. */
     selectedAggregateChildren: SubmeteredChild[] = [];
-    /**
-     * Context keys the timeline governs (its context.<key> targets) -- PATCH .../state rejects
-     * an actual change to one of these, so the Live state tab locks their tile and excludes them
-     * from pendingChange rather than letting the user provoke that 400. Recomputed alongside the
-     * timeline target options and on every timeline edit (see onTimelineChange).
-     */
-    lockedContextKeys: ReadonlySet<string> = new Set();
 
     /** The device catalog a machine can be built from, loaded once; also used to show a readable name for external_type_id. */
     deviceTypes: CatalogDeviceType[] = [];
@@ -264,32 +239,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     directionLabel = directionLabel;
     SOURCE_KINDS = SOURCE_KINDS;
     sourceKindLabel = sourceKindLabel;
-
-    // Live state tab: draft values to PATCH onto the running simulation. Prefilled from
-    // the definition's initial_states as a starting suggestion, not as the current live
-    // value -- the API has no read path for that, see the hint text in the template.
-    contextDraft: Record<string, unknown> = {};
-    contextTouched = new Set<string>();
-    zoneStates: LiveStateEntry[] = [];
-    assetStates: LiveStateEntry[] = [];
-    liveStateApplying = false;
-    /** Undefined (nothing touched) drives the Apply button's disabled state; recomputed on every touch, not read as a method from the template. */
-    pendingChange: StateChange | undefined;
-    /**
-     * When the drafts above were last (re)seeded from the loaded definition. Only the
-     * fallback status line's timestamp while the simulation is not running or not yet
-     * polled -- see liveStateAsOf for the genuinely live one.
-     */
-    liveStateLastRefreshed: Date | undefined;
-    /**
-     * Whether the simulation is running, per the last GET .../state poll -- undefined before
-     * the first poll answers (e.g. right after opening the tab). Drives which status line and
-     * which hint the template shows; see startLiveStatePolling.
-     */
-    liveStateRunning: boolean | undefined;
-    /** The server's as_of from the last poll while running -- what the "Live · as of ..." status line shows. */
-    liveStateAsOf: Date | undefined;
-    private liveStatePollSub: Subscription | undefined;
 
     /** Present only while the History tab has been visited at least once (see the tab's default lazy-render behaviour). */
     @ViewChild(EnvironmentsHistoryComponent) historyComponent: EnvironmentsHistoryComponent | undefined;
@@ -337,7 +286,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.stopLiveStatePolling();
         this.effectsSub?.unsubscribe();
     }
 
@@ -345,9 +293,9 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     onTabChange(event: MatTabChangeEvent): void {
         this.effectsTabActive = event.tab.textLabel === 'Effects';
         if (event.tab.textLabel === 'Live state') {
-            this.startLiveStatePolling();
+            this.liveState.startPolling();
         } else {
-            this.stopLiveStatePolling();
+            this.liveState.stopPolling();
         }
         if (event.tab.textLabel === 'History') {
             this.historyComponent?.start();
@@ -466,7 +414,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             this.problems = [];
             this.rebuildTree();
             this.indexProblems();
-            this.resetLiveState();
+            this.liveState.reset(env);
             this.clampTimelinePage();
             this.loadUserNames([env.owner]);
             this.dataReady = true;
@@ -567,75 +515,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
                     : '';
             snackSuccess(this.snackBar, 'Environment saved successfully.' + deviceSuffix);
             this.load(true); // the server may have assigned ids to new nodes; keep the current selection -- also marks the effect graph stale, see load()
-        });
-    }
-
-    onContextChange(record: Record<string, unknown>): void {
-        this.contextTouched = diffTouchedKeys(this.contextDraft, record, this.contextTouched);
-        this.contextDraft = record;
-        this.recomputePendingChange();
-    }
-
-    onZoneStateChange(entry: LiveStateEntry, record: Record<string, unknown>): void {
-        entry.touched = diffTouchedKeys(entry.draft, record, entry.touched);
-        entry.draft = record;
-        this.recomputePendingChange();
-    }
-
-    onAssetStateChange(entry: LiveStateEntry, record: Record<string, unknown>): void {
-        entry.touched = diffTouchedKeys(entry.draft, record, entry.touched);
-        entry.draft = record;
-        this.recomputePendingChange();
-    }
-
-    zoneKeyHint(entry: LiveStateEntry): (key: string) => string | undefined {
-        return (key: string) =>
-            entry.target.timeConstantKeys.includes(key)
-                ? 'This value follows its set point gradually over this zone\'s time constant instead of jumping to it immediately.'
-                : undefined;
-    }
-
-    /** Whether there is anything on the Live state tab to show at all -- an unsaved environment has nothing running, and a saved one might still have no context/zones/assets. */
-    get liveStateIsEmpty(): boolean {
-        return !this.environment?.id || (!this.hasEntries(this.contextDraft) && this.zoneStates.length === 0 && this.assetStates.length === 0);
-    }
-
-    /**
-     * Re-derives the Live state drafts from the currently loaded definition, discarding any
-     * unsent edits -- the visible, on-demand form of what already happens automatically
-     * right after every load()/save() (see resetLiveState). Bound to the tab's "Reload
-     * current values" button.
-     */
-    reloadLiveStateDefaults(): void {
-        this.resetLiveState();
-    }
-
-    applyLiveState(): void {
-        const change = this.pendingChange;
-        if (!change || !this.environment?.id || this.liveStateApplying) {
-            return;
-        }
-        this.liveStateApplying = true;
-        this.environmentsService.setStateChecked(this.environment.id, change).subscribe((result) => {
-            this.liveStateApplying = false;
-            if (isValidationError(result)) {
-                // e.g. "context.energy_price: driven by the timeline, cannot be changed here" --
-                // the reason the server rejected it, not a bare "Http failure response ... 400".
-                const message =
-                    (result.problems || []).map((p) => (p.path ? p.path + ': ' : '') + (p.message || '')).join(' · ') ||
-                    'The change was rejected.';
-                snackError(this.snackBar, message);
-                return;
-            }
-            if (isApiError(result)) {
-                snackError(this.snackBar, result.message);
-                return;
-            }
-            snackSuccess(this.snackBar, 'Applied - takes effect on the next tick.');
-            this.contextTouched = new Set();
-            this.zoneStates.forEach((entry) => (entry.touched = new Set()));
-            this.assetStates.forEach((entry) => (entry.touched = new Set()));
-            this.recomputePendingChange();
         });
     }
 
@@ -912,6 +791,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 
     setEnvironmentContext(env: Environment, record: Record<string, unknown>): void {
         env.context = record;
+        this.liveState.contextBaseline.set(record);
         this.markDirty();
     }
 
@@ -1271,93 +1151,6 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             });
     }
 
-    /**
-     * Polls GET .../state every 10s while the Live state tab is active (see onTabChange), so
-     * the tab can show the simulation's actual current values instead of only the definition's
-     * reference ones. Fires immediately on activation (timer's 0 due time), not just after the
-     * first 10s. Any single failed poll (transient network hiccup, environment not running/not
-     * migrated) just leaves the tab showing whatever it showed before -- see getEnvironmentState.
-     */
-    private startLiveStatePolling(): void {
-        this.stopLiveStatePolling();
-        const id = this.environment?.id;
-        if (!id) {
-            return;
-        }
-        this.liveStatePollSub = timer(0, 10000)
-            .pipe(switchMap(() => this.environmentsService.getEnvironmentState(id)))
-            .subscribe((state) => this.applyLiveStatePoll(state));
-    }
-
-    private stopLiveStatePolling(): void {
-        this.liveStatePollSub?.unsubscribe();
-        this.liveStatePollSub = undefined;
-    }
-
-    /**
-     * Merges one poll's answer into the drafts -- only into untouched keys (see pickUntouched),
-     * so a value the user is mid-edit on but has not applied yet keeps their local value
-     * instead of being overwritten from underneath them. No merge at all while not running:
-     * the drafts keep showing the definition's reference values as seeded by resetLiveState.
-     */
-    private applyLiveStatePoll(state: EnvironmentState | null): void {
-        if (!state) {
-            return;
-        }
-        this.liveStateRunning = state.running;
-        if (!state.running) {
-            return;
-        }
-        this.liveStateAsOf = new Date(state.as_of);
-        this.contextDraft = { ...this.contextDraft, ...pickUntouched(state.context || {}, this.contextTouched) };
-        this.zoneStates.forEach((entry) => {
-            const values = (state.zones || {})[entry.target.id];
-            if (values) {
-                entry.draft = { ...entry.draft, ...pickUntouched(values, entry.touched) };
-            }
-        });
-        this.assetStates.forEach((entry) => {
-            const values = (state.assets || {})[entry.target.id];
-            if (values) {
-                entry.draft = { ...entry.draft, ...pickUntouched(values, entry.touched) };
-            }
-        });
-    }
-
-    /** (Re)seeds the Live state tab's drafts from the definition's initial_states, discarding any unsent edits. */
-    private resetLiveState(): void {
-        if (!this.environment) {
-            return;
-        }
-        this.contextDraft = { ...(this.environment.context || {}) };
-        this.contextTouched = new Set();
-        this.zoneStates = flattenZoneTargets(this.environment.zones).map((target) => ({
-            target,
-            draft: { ...target.initialStates },
-            touched: new Set<string>(),
-        }));
-        this.assetStates = flattenAssetTargets(this.environment.zones).map((target) => ({
-            target,
-            draft: { ...target.initialStates },
-            touched: new Set<string>(),
-        }));
-        this.liveStateLastRefreshed = new Date();
-        this.recomputePendingChange();
-    }
-
-    private recomputePendingChange(): void {
-        const zonesById: Record<string, Record<string, unknown>> = {};
-        this.zoneStates.forEach((entry) => (zonesById[entry.target.id] = pickTouched(entry.draft, entry.touched)));
-        const assetsById: Record<string, Record<string, unknown>> = {};
-        this.assetStates.forEach((entry) => (assetsById[entry.target.id] = pickTouched(entry.draft, entry.touched)));
-        // Belt and braces alongside the tiles' locked keys (see lockedContextKeys): a
-        // timeline-governed key must never reach the PATCH body, or the Apply button provokes
-        // exactly the 400 it exists to avoid.
-        const context = pickTouched(this.contextDraft, this.contextTouched);
-        this.lockedContextKeys.forEach((key) => delete context[key]);
-        this.pendingChange = buildStateChange(context, zonesById, assetsById);
-    }
-
     private refreshFormulaEntries(): void {
         const inputs = this.selectedChannel?.source?.formula?.inputs || {};
         this.formulaEntries = Object.entries(inputs).map(([name, ref]) => ({ name, ref }));
@@ -1395,13 +1188,15 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.revealSelection();
     }
 
-    /** Context keys targeted by a context.<key> timeline entry -- see lockedContextKeys. Not context_source.<key>: that prefix never matches. */
+    /** Context keys targeted by a context.<key> timeline entry -- see EnvironmentsLiveState.lockedContextKeys. Not context_source.<key>: that prefix never matches. */
     private refreshLockedContextKeys(): void {
         const prefix = 'context.';
-        this.lockedContextKeys = new Set(
-            (this.environment?.timeline || [])
-                .filter((change) => change.target?.startsWith(prefix))
-                .map((change) => change.target!.slice(prefix.length)),
+        this.liveState.lockedContextKeys.set(
+            new Set(
+                (this.environment?.timeline || [])
+                    .filter((change) => change.target?.startsWith(prefix))
+                    .map((change) => change.target!.slice(prefix.length)),
+            ),
         );
     }
 

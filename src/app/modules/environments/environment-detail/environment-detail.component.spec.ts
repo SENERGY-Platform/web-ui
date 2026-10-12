@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
@@ -55,6 +55,8 @@ import { EnvironmentsMeterParentsEditorComponent } from './meter-parents-editor/
 import { EnvironmentsFactorBarsComponent } from './factor-bars/environments-factor-bars.component';
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsLiveStateTilesComponent } from './live-state/environments-live-state-tiles.component';
+import { EnvironmentsLiveStateTabComponent } from './live-state/environments-live-state-tab.component';
+import { EnvironmentsLiveState } from './live-state/environments-live-state.service';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
 import { EnvironmentsEffectsComponent } from './effects/environments-effects.component';
 import { EnvironmentsService } from '../shared/environments.service';
@@ -1927,7 +1929,7 @@ describe('EnvironmentDetailComponent', () => {
             component.onTimelineChange();
 
             expect(component.isDirty).toBe(true);
-            expect(component.lockedContextKeys.has('energy_price')).toBe(true);
+            expect(fixture.debugElement.injector.get(EnvironmentsLiveState).lockedContextKeys().has('energy_price')).toBe(true);
         });
 
         it('excludes a timeline-governed context key from pendingChange even if touched, while leaving an untouched-by-timeline key in', () => {
@@ -1938,9 +1940,10 @@ describe('EnvironmentDetailComponent', () => {
             };
             loadWith(env);
 
-            component.onContextChange({ energy_price: 0.99, other: 2 });
+            const liveState = fixture.debugElement.injector.get(EnvironmentsLiveState);
+            liveState.changeContext({ energy_price: 0.99, other: 2 });
 
-            expect(component.pendingChange).toEqual({ context: { other: 2 } });
+            expect(liveState.pendingChange()).toEqual({ context: { other: 2 } });
         });
 
         it('renders the Timeline section on the environment node', () => {
@@ -2319,231 +2322,80 @@ describe('EnvironmentDetailComponent', () => {
         });
     });
 
-    describe('Live state tab', () => {
-        // z1 also carries initial_states/time_constants and a1 initial_states, so the
-        // live-state drafts have something to seed from and to touch.
+    describe('Live state tab: wiring into the tab group', () => {
+        // The drafts, the poll and the Apply call are pinned in the tab component's own spec; this pins that
+        // the editor hands it the loaded document and starts and stops the poll with the tab.
         const envWithState: Environment = JSON.parse(JSON.stringify(nestedEnvironment));
-        envWithState.zones![0].initial_states = { occupied: true };
-        envWithState.zones![0].time_constants = { occupied: 900 };
-        envWithState.zones![0].assets![0].initial_states = { power: 0 };
-
-        it('seeds context/zone/asset drafts from initial_states but starts with nothing pending', () => {
-            loadWith(envWithState);
-
-            expect(component.zoneStates.length).toBe(1);
-            expect(component.zoneStates[0].draft).toEqual({ occupied: true });
-            expect(component.assetStates.length).toBe(1);
-            expect(component.assetStates[0].draft).toEqual({ power: 0 });
-            expect(component.pendingChange).toBeUndefined(); // nothing touched yet -- Apply stays disabled
-        });
-
-        it('only includes a key in the pending change once it has actually been edited', () => {
-            loadWith(envWithState);
-
-            const zoneEntry = component.zoneStates[0];
-            // untouched re-emit of the same values (e.g. a sibling row's edit) must not appear
-            component.onZoneStateChange(zoneEntry, { occupied: true });
-            expect(component.pendingChange).toBeUndefined();
-
-            component.onZoneStateChange(zoneEntry, { occupied: false });
-            expect(component.pendingChange).toEqual({ zones: { z1: { occupied: false } } });
-        });
-
-        it('combines touched context, zone and asset keys into one StateChange sent via setStateChecked', () => {
-            loadWith(envWithState);
-
-            component.onContextChange({ outdoor_temp: 5 });
-            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
-            component.onAssetStateChange(component.assetStates[0], { power: 42 });
-
-            component.applyLiveState();
-
-            const req = httpMock.expectOne(environmentsUrl + '/e1/state');
-            expect(req.request.method).toBe('PATCH');
-            expect(req.request.body).toEqual({
-                context: { outdoor_temp: 5 },
-                zones: { z1: { occupied: false } },
-                assets: { a1: { power: 42 } },
-            });
-            req.flush(null, { status: 204, statusText: 'No Content' });
-        });
-
-        it('clears the touched keys after a successful apply, disabling Apply again', () => {
-            loadWith(envWithState);
-            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
-
-            component.applyLiveState();
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush(null, { status: 204, statusText: 'No Content' });
-
-            expect(component.pendingChange).toBeUndefined();
-        });
-
-        it('shows the API message on a 404 (environment not running) instead of silently failing', () => {
-            loadWith(envWithState);
-            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
-            const snackBarSpy = spyOn((component as any).snackBar, 'open');
-
-            component.applyLiveState();
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
-
-            expect(snackBarSpy).toHaveBeenCalledWith('environment e1 is not running', 'close', { panelClass: 'snack-bar-error' });
-        });
-
-        it('shows the server-given reason on a 400 ValidationError (e.g. a timeline-governed key) instead of a generic error', () => {
-            loadWith(envWithState);
-            component.onZoneStateChange(component.zoneStates[0], { occupied: false });
-            const snackBarSpy = spyOn((component as any).snackBar, 'open');
-
-            component.applyLiveState();
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush(
-                { problems: [{ path: 'context.energy_price', message: 'driven by the timeline, cannot be changed here' }] },
-                { status: 400, statusText: 'Bad Request' },
-            );
-
-            expect(snackBarSpy).toHaveBeenCalledWith(
-                'context.energy_price: driven by the timeline, cannot be changed here',
-                'close',
-                { panelClass: 'snack-bar-error' },
-            );
-        });
-
-        it('does not call the API when nothing is touched', () => {
-            loadWith(envWithState);
-
-            expect(component.pendingChange).toBeUndefined();
-            component.applyLiveState();
-
-            httpMock.expectNone(environmentsUrl + '/e1/state');
-        });
-    });
-
-    describe('Live state tab: real-time polling', () => {
-        const envWithState: Environment = JSON.parse(JSON.stringify(nestedEnvironment));
+        envWithState.context = { outdoor_temp: 3 };
         envWithState.zones![0].initial_states = { occupied: true };
         envWithState.zones![0].assets![0].initial_states = { power: 0 };
-
-        function activateLiveStateTab(): void {
-            component.onTabChange({ tab: { textLabel: 'Live state' } } as any);
-        }
-
-        function leaveLiveStateTab(): void {
-            component.onTabChange({ tab: { textLabel: 'Editor' } } as any);
-        }
+        const stateBody = { running: true, as_of: '2026-08-27T10:00:00Z', context: {}, zones: {}, assets: {} };
 
         it('does not poll while the Editor tab is active', () => {
             loadWith(envWithState);
             httpMock.expectNone(environmentsUrl + '/e1/state');
         });
 
-        it('polls GET .../state immediately on activating the Live state tab, and again every 10s while it stays active', pollingFakeAsync(() => {
+        it('starts polling when the Live state tab is activated and stops when another tab is, and on destroy', pollingFakeAsync(() => {
             loadWith(envWithState);
-            activateLiveStateTab();
-            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
 
-            const req1 = httpMock.expectOne(environmentsUrl + '/e1/state');
-            expect(req1.request.method).toBe('GET');
-            req1.flush({ running: true, as_of: '2026-08-27T10:00:00Z', context: {}, zones: {}, assets: {} });
-
-            httpMock.expectNone(environmentsUrl + '/e1/state'); // nothing again before 10s pass
+            component.onTabChange({ tab: { textLabel: 'Live state' } } as any);
+            tick();
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush(stateBody);
             tick(10000);
-            const req2 = httpMock.expectOne(environmentsUrl + '/e1/state');
-            req2.flush({ running: true, as_of: '2026-08-27T10:00:10Z', context: {}, zones: {}, assets: {} });
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush(stateBody);
 
-            discardPeriodicTasks();
-        }));
-
-        it('stops polling once the tab is left, and does not resume on its own', pollingFakeAsync(() => {
-            loadWith(envWithState);
-            activateLiveStateTab();
-            tick();
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush({ running: true, as_of: '2026-08-27T10:00:00Z', context: {}, zones: {}, assets: {} });
-
-            leaveLiveStateTab();
+            component.onTabChange({ tab: { textLabel: 'Editor' } } as any);
             tick(20000);
-
             httpMock.expectNone(environmentsUrl + '/e1/state');
-            discardPeriodicTasks();
-        }));
 
-        it('stops polling on destroy', pollingFakeAsync(() => {
-            loadWith(envWithState);
-            activateLiveStateTab();
+            component.onTabChange({ tab: { textLabel: 'Live state' } } as any);
             tick();
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush({ running: true, as_of: '2026-08-27T10:00:00Z', context: {}, zones: {}, assets: {} });
-
+            httpMock.expectOne(environmentsUrl + '/e1/state').flush(stateBody);
             fixture.destroy();
             tick(20000);
-
             httpMock.expectNone(environmentsUrl + '/e1/state');
         }));
 
-        it('shows the real runtime values when running, updating liveStateRunning/liveStateAsOf', pollingFakeAsync(() => {
+        it('shows a context edited on the Editor tab as the tile baseline when the Live state tab is opened again, with no poll answering', async () => {
+            loadWith({ ...envWithState, context: { outdoor_temp: 5 } });
+            const clickTab = async (label: string) => {
+                const labels = fixture.debugElement.queryAll(By.css('.mdc-tab__text-label')).map((de) => de.nativeElement.textContent.trim());
+                fixture.debugElement.queryAll(By.css('.mdc-tab'))[labels.indexOf(label)].triggerEventHandler('click', {});
+                fixture.detectChanges();
+                await new Promise((resolve) => setTimeout(resolve, 800));
+                fixture.detectChanges();
+                httpMock.match(environmentsUrl + '/e1/state').forEach((req) => req.flush(null, { status: 404, statusText: 'Not Found' }));
+            };
+            await clickTab('Live state');
+            await clickTab('Editor');
+
+            component.setEnvironmentContext(component.environment!, { outdoor_temp: 10 });
+            await clickTab('Live state');
+
+            const tile = fixture.debugElement.query(By.css('.live-state-section .live-tile'));
+            expect(tile.nativeElement.classList).toContain('changed');
+            expect(tile.nativeElement.textContent).toContain('was 10');
+        });
+
+        it('shows the tab component with the loaded document and its drafts after a real tab click', async () => {
             loadWith(envWithState);
-            activateLiveStateTab();
-            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
+            const labels = fixture.debugElement.queryAll(By.css('.mdc-tab__text-label')).map((de) => de.nativeElement.textContent.trim());
+            fixture.debugElement.queryAll(By.css('.mdc-tab'))[labels.indexOf('Live state')].triggerEventHandler('click', {});
+            fixture.detectChanges();
+            await new Promise((resolve) => setTimeout(resolve, 800));
+            fixture.detectChanges();
+            httpMock.match(environmentsUrl + '/e1/state').forEach((req) => req.flush(null, { status: 404, statusText: 'Not Found' }));
 
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush({
-                running: true,
-                as_of: '2026-08-27T10:00:00Z',
-                context: {},
-                zones: { z1: { occupied: false } },
-                assets: { a1: { power: 42 } },
-            });
-
-            expect(component.liveStateRunning).toBe(true);
-            expect(component.liveStateAsOf).toEqual(new Date('2026-08-27T10:00:00Z'));
-            expect(component.zoneStates[0].draft).toEqual({ occupied: false });
-            expect(component.assetStates[0].draft).toEqual({ power: 42 });
-
-            discardPeriodicTasks();
-        }));
-
-        it('falls back to the reference values and flags not-running when the simulation is not running', pollingFakeAsync(() => {
-            loadWith(envWithState);
-            activateLiveStateTab();
-            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
-
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush({ running: false, as_of: '2026-08-27T10:00:00Z' });
-
-            expect(component.liveStateRunning).toBe(false);
-            // untouched by the (running:false) poll -- still the definition's initial_states
-            expect(component.zoneStates[0].draft).toEqual({ occupied: true });
-            expect(component.assetStates[0].draft).toEqual({ power: 0 });
-
-            discardPeriodicTasks();
-        }));
-
-        it('does not overwrite a touched (edited but not yet applied) key with a poll update, but does refresh untouched ones', pollingFakeAsync(() => {
-            loadWith(envWithState);
-            component.onZoneStateChange(component.zoneStates[0], { occupied: false }); // user edit, not yet applied
-            activateLiveStateTab();
-            tick(); // flushes timer(0, ...)'s immediate (0ms due) first emission
-
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush({
-                running: true,
-                as_of: '2026-08-27T10:00:00Z',
-                context: {},
-                zones: { z1: { occupied: true } }, // server disagrees with the untouched-from-server-POV edit
-                assets: { a1: { power: 7 } }, // untouched -- must be applied
-            });
-
-            expect(component.zoneStates[0].draft).toEqual({ occupied: false }); // kept: still touched, not applied
-            expect(component.assetStates[0].draft).toEqual({ power: 7 }); // refreshed: was untouched
-
-            discardPeriodicTasks();
-        }));
-
-        it('leaves the drafts alone on a failed poll (null from the service) instead of clearing them', pollingFakeAsync(() => {
-            loadWith(envWithState);
-            activateLiveStateTab();
-            tick();
-            httpMock.expectOne(environmentsUrl + '/e1/state').flush('environment e1 is not running', { status: 404, statusText: 'Not Found' });
-
-            expect(component.liveStateRunning).toBeUndefined();
-            expect(component.zoneStates[0].draft).toEqual({ occupied: true });
-
-            discardPeriodicTasks();
-        }));
+            const tab = fixture.debugElement.query(By.directive(EnvironmentsLiveStateTabComponent));
+            expect(tab).not.toBeNull();
+            const sections = (tab.nativeElement as HTMLElement).querySelectorAll('.live-state-section h3');
+            expect(Array.from(sections).map((h) => h.textContent!.trim())).toEqual(['Context', 'Zone: Building', 'Asset: Meter 1']);
+            // the host element must not become a flex item or box of its own between the tab body and the panel
+            expect(getComputedStyle(tab.nativeElement).display).toBe('contents');
+            expect(tab.nativeElement.parentElement.className).toContain('mat-mdc-tab-body-content');
+            expect(Array.from(tab.nativeElement.children).map((c) => (c as Element).className)).toEqual(['live-state-panel']);
+        });
     });
 
     describe('History tab', () => {
