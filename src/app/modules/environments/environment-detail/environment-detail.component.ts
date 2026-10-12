@@ -30,8 +30,6 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeleteDialogOptions, DeleteDialogResponse } from '../../../core/dialogs/delete-dialog.component';
 import { DeviceInstancesSelectDialogComponent } from '../../devices/device-instances/dialogs/device-instances-select-dialog.component';
-import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
-import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import { ExportService } from '../../exports/shared/export.service';
 import { ExportModel } from '../../exports/shared/export.model';
@@ -92,6 +90,7 @@ import {
     pickTouched,
     pickUntouched,
 } from '../shared/environments-live-state';
+import { PlatformDeviceLookup } from './platform-device-lookup.service';
 import { EnvironmentsVersionConflictDialogComponent } from './dialogs/environments-version-conflict-dialog.component';
 import { EnvironmentsHistoryComponent } from './history/environments-history.component';
 import { submeteredChildren, SubmeteredChild, submeteringTargets, SubmeteringOption } from '../shared/environments-submetering';
@@ -141,6 +140,7 @@ interface LiveStateEntry {
     templateUrl: './environment-detail.component.html',
     styleUrls: ['./environment-detail.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
+    providers: [PlatformDeviceLookup],
     imports: [SpinnerComponent, MatButton, MatIcon, MatTabGroup, MatTab, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatIconButton, MatTreeNodeToggle, MatBadge, MatTooltip, MatTreeNodeOutlet, FormsModule, MatFormField, MatLabel, MatInput, MtxSelect, MtxOption, MatHint, MatSuffix, EnvironmentsKeyValueEditorComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, EnvironmentsProfileEditorComponent, EnvironmentsDatasetEditorComponent, EnvironmentsTimelineEditorComponent, EnvironmentsMeterParentsEditorComponent, RouterLink, MatButtonToggleGroup, MatButtonToggle, MatDivider, EnvironmentsScheduleEditorComponent, EnvironmentsFaultsEditorComponent, MatTabContent, EnvironmentsEffectsComponent, EnvironmentsLiveStateTilesComponent, EnvironmentsHistoryComponent, DatePipe]
 })
 export class EnvironmentDetailComponent implements OnInit, OnDestroy {
@@ -150,8 +150,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     private dialogsService = inject(DialogsService);
     private snackBar = inject(MatSnackBar);
     private dialog = inject(MatDialog);
-    private deviceInstancesService = inject(DeviceInstancesService);
-    private platformDeviceTypeService = inject(PlatformDeviceTypeService);
+    private platformDevices = inject(PlatformDeviceLookup);
     private exportService = inject(ExportService);
     private changeDetectorRef = inject(ChangeDetectorRef);
 
@@ -242,13 +241,13 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
      * (the source's `ref`). Looked up on demand as the corresponding channel is shown, not
      * eagerly for the whole document -- most environments reference at most a handful.
      */
-    platformDeviceNames = new Map<string, string>();
-    platformDeviceTypes = new Map<string, DeviceTypeModel>();
-    private loadingPlatformDevices = new Set<string>();
-    /** Bumped whenever platformDeviceTypes gains an entry, so platformServiceOptions/platformColumnOptions know a cached "no services yet" answer is stale. */
-    private platformDeviceTypesVersion = 0;
-    private serviceOptionsCache = new WeakMap<DatasetSource, { ref?: string; version: number; options: DeviceTypeModel['services'] }>();
-    private columnOptionsCache = new WeakMap<DatasetSource, { ref?: string; serviceRef?: string; version: number; options: string[] }>();
+    get platformDeviceNames(): ReadonlyMap<string, string> {
+        return this.platformDevices.names();
+    }
+
+    get platformDeviceTypes(): ReadonlyMap<string, DeviceTypeModel> {
+        return this.platformDevices.types();
+    }
 
     /** Today's weekday, for every profile editor's 24-hour preview (they all preview "today"). */
     readonly todayWeekday = mondayStartWeekday(new Date());
@@ -647,7 +646,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.refreshFormulaEntries();
         this.refreshSubmeteringData();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
-        this.ensureDeviceNameLoaded(this.selectedAsset?.external_ref);
+        this.platformDevices.ensureLoaded(this.selectedAsset?.external_ref);
     }
 
     get selectedEnvironment(): Environment | undefined {
@@ -693,7 +692,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         if (!id) {
             return undefined;
         }
-        return this.platformDeviceNames.get(id) || id;
+        return this.platformDevices.names().get(id) || id;
     }
 
     /** The service name behind the selected channel's external_ref, resolved through its own asset's device type. */
@@ -1036,79 +1035,22 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             });
     }
 
-    /**
-     * Every service of the device a platform-origin dataset source points at, for the Service
-     * select. Cached per dataset object (there is one per channel/context source, all bound
-     * into the same template on every change-detection pass) and revalidated against dataset.ref
-     * and platformDeviceTypesVersion rather than rebuilt on every read -- a fresh array on every
-     * call gave the Service select a fresh [items] identity on every pass.
-     */
+    /** Every service of the device a platform-origin dataset source points at, for the Service select. */
     platformServiceOptions(dataset: DatasetSource): DeviceTypeModel['services'] {
-        const cached = this.serviceOptionsCache.get(dataset);
-        if (cached && cached.ref === dataset.ref && cached.version === this.platformDeviceTypesVersion) {
-            return cached.options;
-        }
-        const deviceType = dataset.ref ? this.platformDeviceTypes.get(dataset.ref) : undefined;
-        const options = deviceType?.services || [];
-        this.serviceOptionsCache.set(dataset, { ref: dataset.ref, version: this.platformDeviceTypesVersion, options });
-        return options;
+        return this.platformDevices.serviceOptions(dataset);
     }
 
-    /** Every value path of the chosen service's outputs, for the Column select. Cached the same way as platformServiceOptions, keyed additionally on dataset.service_ref. */
+    /** Every value path of the chosen service's outputs, for the Column select. */
     platformColumnOptions(dataset: DatasetSource): string[] {
-        const cached = this.columnOptionsCache.get(dataset);
-        if (
-            cached &&
-            cached.ref === dataset.ref &&
-            cached.serviceRef === dataset.service_ref &&
-            cached.version === this.platformDeviceTypesVersion
-        ) {
-            return cached.options;
-        }
-        const service = this.platformServiceOptions(dataset).find((s) => s.id === dataset.service_ref);
-        const paths: string[] = [];
-        (service?.outputs || []).forEach((output) => {
-            this.platformDeviceTypeService.getValuePathsAndContentVariables(output.content_variable).forEach((p) => paths.push(p.path));
-        });
-        this.columnOptionsCache.set(dataset, { ref: dataset.ref, serviceRef: dataset.service_ref, version: this.platformDeviceTypesVersion, options: paths });
-        return paths;
+        return this.platformDevices.columnOptions(dataset);
     }
 
     /**
-     * Loads the display name and device type of a platform-origin dataset's device, once,
-     * so the read-only Device field shows something meaningful for a document loaded from
-     * the server (not only for one just picked in this session). No-op for any other origin
-     * or an unset ref. Public: also called from the template for a driven context source's
-     * dataset panel on expand.
+     * Loads the display name and device type of a platform-origin dataset's device, once.
+     * Public: also called from the template for a driven context source's dataset panel on expand.
      */
     ensurePlatformDeviceLoaded(dataset: DatasetSource | undefined): void {
-        this.ensureDeviceNameLoaded(dataset?.origin === 'platform' ? dataset.ref : undefined);
-    }
-
-    /**
-     * Loads the display name and device type of a platform device by id, once -- the common
-     * core of ensurePlatformDeviceLoaded (a dataset source's device) and the selected asset's
-     * own external_ref (its Platform device block). No-op for an unset id or one already
-     * loaded/loading.
-     */
-    private ensureDeviceNameLoaded(id: string | undefined): void {
-        if (!id || this.platformDeviceNames.has(id) || this.loadingPlatformDevices.has(id)) {
-            return;
-        }
-        this.loadingPlatformDevices.add(id);
-        this.deviceInstancesService.getDeviceInstance(id).subscribe((device) => {
-            this.loadingPlatformDevices.delete(id);
-            if (!device) {
-                return;
-            }
-            this.platformDeviceNames.set(id, device.display_name || id);
-            this.platformDeviceTypeService.getDeviceType(device.device_type_id).subscribe((deviceType) => {
-                if (deviceType) {
-                    this.platformDeviceTypes.set(id, deviceType);
-                    this.platformDeviceTypesVersion++;
-                }
-            });
-        });
+        this.platformDevices.ensureLoadedForDataset(dataset);
     }
 
     addFormulaInput(): void {
@@ -1475,7 +1417,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         this.refreshFormulaEntries();
         this.refreshSubmeteringData();
         this.ensurePlatformDeviceLoaded(this.selectedChannel?.source?.dataset);
-        this.ensureDeviceNameLoaded(this.selectedAsset?.external_ref);
+        this.platformDevices.ensureLoaded(this.selectedAsset?.external_ref);
     }
 
     /**

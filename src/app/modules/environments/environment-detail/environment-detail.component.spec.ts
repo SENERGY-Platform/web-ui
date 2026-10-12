@@ -19,7 +19,7 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
@@ -2160,6 +2160,121 @@ describe('EnvironmentDetailComponent', () => {
             component.select(assetNode);
 
             expect(component.selectedAssetDeviceName).toBeUndefined();
+        });
+    });
+
+    describe('platform device lookup behind the dataset editor', () => {
+        const device = { id: 'd1', display_name: 'Boiler Meter', device_type_id: 'dt1' } as any;
+        const services = [
+            { id: 's1', name: 'Power', outputs: [{ content_variable: { name: 'cv1' } }] },
+            { id: 's2', name: 'Energy', outputs: [] },
+        ] as any[];
+        const deviceType = { id: 'dt1', name: 'Meter Type', services } as any;
+        let instances: DeviceInstancesService;
+        let types: PlatformDeviceTypeService;
+
+        function dataset(ref: string | undefined, origin: 'platform' | 'file' = 'platform'): any {
+            return { origin, ref };
+        }
+
+        beforeEach(() => {
+            loadWith(nestedEnvironment);
+            instances = TestBed.inject(DeviceInstancesService);
+            types = TestBed.inject(PlatformDeviceTypeService);
+        });
+
+        it('loads the display name and the device type of a platform device, once', () => {
+            const instanceSpy = spyOn(instances, 'getDeviceInstance').and.returnValue(of(device));
+            const typeSpy = spyOn(types, 'getDeviceType').and.returnValue(of(deviceType));
+
+            component.ensurePlatformDeviceLoaded(dataset('d1'));
+            component.ensurePlatformDeviceLoaded(dataset('d1'));
+
+            expect(instanceSpy).toHaveBeenCalledOnceWith('d1');
+            expect(typeSpy).toHaveBeenCalledOnceWith('dt1');
+            expect(component.platformDeviceNames.get('d1')).toBe('Boiler Meter');
+            expect(component.platformDeviceTypes.get('d1')).toBe(deviceType);
+        });
+
+        it('does nothing for another origin, an unset ref or no dataset', () => {
+            const instanceSpy = spyOn(instances, 'getDeviceInstance').and.returnValue(of(device));
+
+            component.ensurePlatformDeviceLoaded(dataset('d1', 'file'));
+            component.ensurePlatformDeviceLoaded(dataset(undefined));
+            component.ensurePlatformDeviceLoaded(undefined);
+
+            expect(instanceSpy).not.toHaveBeenCalled();
+        });
+
+        it('does not start a second request while the first is still in flight', () => {
+            const pending = new Subject<any>();
+            const instanceSpy = spyOn(instances, 'getDeviceInstance').and.returnValue(pending);
+
+            component.ensurePlatformDeviceLoaded(dataset('d1'));
+            component.ensurePlatformDeviceLoaded(dataset('d1'));
+
+            expect(instanceSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('stores nothing for an unknown device and asks again on the next call', () => {
+            const instanceSpy = spyOn(instances, 'getDeviceInstance').and.returnValue(of(null as any));
+
+            component.ensurePlatformDeviceLoaded(dataset('d1'));
+            component.ensurePlatformDeviceLoaded(dataset('d1'));
+
+            expect(instanceSpy).toHaveBeenCalledTimes(2);
+            expect(component.platformDeviceNames.has('d1')).toBeFalse();
+        });
+
+        it('falls back to the id as the name and keeps the name when the device type is unknown', () => {
+            spyOn(instances, 'getDeviceInstance').and.returnValue(of({ id: 'd1', device_type_id: 'dt1' } as any));
+            spyOn(types, 'getDeviceType').and.returnValue(of(null as any));
+
+            component.ensurePlatformDeviceLoaded(dataset('d1'));
+
+            expect(component.platformDeviceNames.get('d1')).toBe('d1');
+            expect(component.platformDeviceTypes.has('d1')).toBeFalse();
+        });
+
+        it('offers the services of the loaded device type, as the same array on every read', () => {
+            spyOn(instances, 'getDeviceInstance').and.returnValue(of(device));
+            spyOn(types, 'getDeviceType').and.returnValue(of(deviceType));
+            const ds = dataset('d1');
+            expect(component.platformServiceOptions(ds)).toEqual([]);
+
+            component.ensurePlatformDeviceLoaded(ds);
+
+            const options = component.platformServiceOptions(ds);
+            expect(options).toBe(services as any);
+            expect(component.platformServiceOptions(ds)).toBe(options);
+        });
+
+        it('keeps the empty answer stable until the device type arrives, and rebuilds it after the ref changes', () => {
+            const ds = dataset('d1');
+            const first = component.platformServiceOptions(ds);
+            expect(component.platformServiceOptions(ds)).toBe(first);
+
+            ds.ref = 'd2';
+            expect(component.platformServiceOptions(ds)).not.toBe(first);
+        });
+
+        it('lists the value paths of the chosen service and caches them per ref and service', () => {
+            spyOn(instances, 'getDeviceInstance').and.returnValue(of(device));
+            spyOn(types, 'getDeviceType').and.returnValue(of(deviceType));
+            const pathsSpy = spyOn(types, 'getValuePathsAndContentVariables').and.returnValue([{ path: 'a' }, { path: 'a.b' }] as any);
+            const ds = dataset('d1');
+            component.ensurePlatformDeviceLoaded(ds);
+
+            expect(component.platformColumnOptions(ds)).toEqual([]);
+
+            ds.service_ref = 's1';
+            const columns = component.platformColumnOptions(ds);
+            expect(columns).toEqual(['a', 'a.b']);
+            expect(pathsSpy).toHaveBeenCalledOnceWith({ name: 'cv1' } as any);
+            expect(component.platformColumnOptions(ds)).toBe(columns);
+
+            ds.service_ref = 's2';
+            expect(component.platformColumnOptions(ds)).toEqual([]);
         });
     });
 
