@@ -23,6 +23,8 @@ import { ChartsExportService } from './shared/charts-export.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
+import { buildColumnChartOptions } from './charts-export-column-options';
+import { ChartsExportDrillEntry, ChartsExportViewState } from './charts-export-view-state';
 import { removeWidgetStorage } from '../shared/widget-storage';
 import { googleFrame, googlePlugins } from '../../../core/charts/google-chartjs';
 import { googlePiePlugin } from '../../../core/charts/google-pie';
@@ -41,8 +43,6 @@ import {
     finerDetailLevel,
     gapAnnotations,
     groupTimeFromDetailLevel,
-    chartDateLabel,
-    chartDateLocale,
     periodAnnotations,
     withOpacityPercent,
     xAxisFormat,
@@ -81,6 +81,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     private el = inject(ElementRef);
     private zone = inject(NgZone);
     private destroyRef = inject(DestroyRef);
+    private viewState = new ChartsExportViewState(() => this.widget);
 
     chartExportData = {} as ChartsExportChart;
     /** Line, Scatter and Pie in the widget */
@@ -296,119 +297,18 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
         if (this.widget.properties.chartType === 'ColumnChart') {
             const dateFormat = columnDateFormat(this.hAxisFormat, this.groupTime);
-            this.chartjs.options = {
-                animation: false,
-                maintainAspectRatio: false,
-                events: ['click', 'mousemove'],
-                datasets: {
-                    // a bucket measured as 0 has no bar to draw, so give it a stub on the baseline
-                    // instead of letting it look like a bucket that has no value at all
-                    bar: { minBarLength: 2 },
-                },
-                onHover: (_, elements, chart) => {
-                    const hoveredIndex = elements !== undefined && elements.length > 0 ? elements[0].datasetIndex : null;
-                    this.updateDatasetHoverStyle(hoveredIndex, chart);
-                    const style = (chart.canvas?.parentNode as any)?.style;
-                    if (style === null) {
-                        return;
-                    }
-                    if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
-                        style.cursor = 'pointer';
-                        this.chartjs.cursorLocked = true;
-                    } else {
-                        style.cursor = 'default';
-                        this.chartjs.cursorLocked = false;
-                    }
-                },
-                onClick: (_, elements) => {
-                    if (elements !== undefined && elements.length === 1 && this.drillable(elements[0].datasetIndex)) {
-                        this.drillDown(elements[0].datasetIndex);
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: this.zoom,
-                        onClick: this.onLegendClick(),
-                    },
-                    tooltip: {
-                        enabled: false,
-                        callbacks: {
-                            afterBody: (tooltipItems) => {
-                                this.chartjs.tooltipDatasets = tooltipItems.map(x => {
-                                    return {
-                                        datasetIndex: x.datasetIndex,
-                                        formattedValue: x.formattedValue,
-                                        label: x.dataset.label || '',
-                                        drawToLeft: x.dataIndex > x.dataset.data.length / 2,
-                                    };
-                                });
-                                return [];
-                            }
-                        },
-                        external: (context) => {
-                            if (context.tooltip.dataPoints !== undefined && context.tooltip.dataPoints.length > 0) {
-                                context.tooltip.title = [chartDateLabel((context.tooltip.dataPoints[0].raw as { x: number }).x, dateFormat)];
-                            }
-                            this.chartjs.tooltipContext = context;
-                            this.chartjs.tooltipDisplay = 'initial';
-                            this.cd.detectChanges();
-                        },
-                    },
-                    zoom: {
-                        zoom: {
-                            drag: {
-                                enabled: true
-                            },
-                            mode: 'x',
-                        },
-                    },
-                    annotation: {
-                        annotations: this.chartjs.annotations,
-                    },
-                },
-                scales: {
-                    'y': {
-                        stacked: this.stacked,
-                        title: {
-                            text: this.widget.properties.vAxisLabel,
-                            display: (this.widget.properties.vAxisLabel || '').length > 0,
-                        },
-                    },
-                    'y2': {
-                        stacked: this.stacked,
-                        position: 'right',
-                        title: {
-                            text: this.widget.properties.secondVAxisLabel,
-                            display: (this.widget.properties.secondVAxisLabel || '').length > 0,
-                        },
-                        display: 'auto',
-                    },
-                    'x': {
-                        stacked: this.stacked,
-                        title: {
-                            text: this.widget.properties.hAxisLabel,
-                            display: (this.widget.properties.hAxisLabel || '').length > 0,
-                        },
-                        type: 'timeseries',
-                        adapters: { date: { locale: chartDateLocale } },
-                        min: this.chartjs.minDateMs,
-                        max: this.chartjs.maxDateMs,
-                        time: {
-                            displayFormats: {
-                                'millisecond': dateFormat,
-                                'second': dateFormat,
-                                'minute': dateFormat,
-                                'hour': dateFormat,
-                                'day': dateFormat,
-                                'week': dateFormat,
-                                'month': dateFormat,
-                                'quarter': dateFormat,
-                                'year': dateFormat,
-                            }
-                        }
-                    },
-                }
-            };
+            this.chartjs.options = buildColumnChartOptions({
+                zoom: this.zoom,
+                stacked: this.stacked,
+                dateFormat,
+                properties: this.widget.properties,
+                chartjs: this.chartjs,
+                updateDatasetHoverStyle: (hoveredIndex, chart) => this.updateDatasetHoverStyle(hoveredIndex, chart),
+                drillable: datasetIndex => this.drillable(datasetIndex),
+                drillDown: datasetIndex => this.drillDown(datasetIndex),
+                onLegendClick: () => this.onLegendClick(),
+                detectChanges: () => this.cd.detectChanges(),
+            });
             this.chartjsChart?.resize(element.width, element.height);
             this.chartjsChart?.draw();
         }
@@ -719,107 +619,59 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private get groupTime(): string | null {
-        return localStorage.getItem(this.widget.id + '_groupTime') || this.widget.properties.group?.time || null;
+        return this.viewState.groupTime;
     }
 
     private set groupTime(groupTime: string | null) {
-        if (groupTime === null) {
-            localStorage.removeItem(this.widget.id + '_groupTime');
-        } else {
-            localStorage.setItem(this.widget.id + '_groupTime', groupTime);
-        }
+        this.viewState.groupTime = groupTime;
     }
 
     private get hAxisFormat(): string | undefined {
-        return localStorage.getItem(this.widget.id + '_hAxisFormat') || this.widget.properties.hAxisFormat;
+        return this.viewState.hAxisFormat;
     }
 
     private set hAxisFormat(hAxisFormat: string | null) {
-        if (hAxisFormat === null) {
-            localStorage.removeItem(this.widget.id + '_hAxisFormat');
-        } else {
-            localStorage.setItem(this.widget.id + '_hAxisFormat', hAxisFormat);
-        }
+        this.viewState.hAxisFormat = hAxisFormat;
     }
 
     private get from(): Date | null {
-        const str = localStorage.getItem(this.widget.id + '_from');
-        if (str === null) {
-            return null;
-        }
-        return new Date(str);
+        return this.viewState.from;
     }
 
     private set from(from: Date | null) {
-        if (from === null) {
-            localStorage.removeItem(this.widget.id + '_from');
-        } else {
-            localStorage.setItem(this.widget.id + '_from', from.toISOString());
-        }
+        this.viewState.from = from;
     }
 
     private get to(): Date | null {
-        const str = localStorage.getItem(this.widget.id + '_to');
-        if (str === null) {
-            return null;
-        }
-        return new Date(str);
+        return this.viewState.to;
     }
 
     private set to(to: Date | null) {
-        if (to === null) {
-            localStorage.removeItem(this.widget.id + '_to');
-        } else {
-            localStorage.setItem(this.widget.id + '_to', to.toISOString());
-        }
+        this.viewState.to = to;
     }
 
     private get modifiedVaxes(): ChartsExportVAxesModel[] | null {
-        const str = localStorage.getItem(this.widget.id + '_modifiedvAxes');
-        if (str === null) {
-            return null;
-        }
-        return JSON.parse(str);
+        return this.viewState.modifiedVaxes;
     }
 
     private set modifiedVaxes(axes: ChartsExportVAxesModel[] | null) {
-        if (axes === null) {
-            localStorage.removeItem(this.widget.id + '_modifiedvAxes');
-        } else {
-            localStorage.setItem(this.widget.id + '_modifiedvAxes', JSON.stringify(axes));
-        }
+        this.viewState.modifiedVaxes = axes;
     }
 
     private get stacked(): boolean {
-        const str = localStorage.getItem(this.widget.id + '_stacked');
-        if (str === null) {
-            return this.widget.properties.stacked || false;
-        }
-        return JSON.parse(str);
+        return this.viewState.stacked;
     }
 
     private set stacked(stacked: boolean | null) {
-        if (stacked === null) {
-            localStorage.removeItem(this.widget.id + '_stacked');
-        } else {
-            localStorage.setItem(this.widget.id + '_stacked', '' + stacked);
-        }
+        this.viewState.stacked = stacked;
     }
 
     private get chooseColors(): boolean {
-        const str = localStorage.getItem(this.widget.id + '_chooseColors');
-        if (str === null) {
-            return false;
-        }
-        return JSON.parse(str);
+        return this.viewState.chooseColors;
     }
 
     private set chooseColors(chooseColors: boolean | null) {
-        if (chooseColors === null) {
-            localStorage.removeItem(this.widget.id + '_chooseColors');
-        } else {
-            localStorage.setItem(this.widget.id + '_chooseColors', '' + chooseColors);
-        }
+        this.viewState.chooseColors = chooseColors;
     }
 
     getCustomIcons(header: boolean): { icons: string[]; disabled: boolean[]; tooltips: string[] } {
@@ -836,13 +688,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             res.tooltips.push('Drill Up');
         }
         if ((this.zoom && header) || (!this.zoom && !header)) {
-            for (let i = 0; i < localStorage.length; i++) {
-                if (localStorage.key(i)?.startsWith(this.widget.id)) {
-                    res.icons.push('undo');
-                    res.disabled.push(!this.ready);
-                    res.tooltips.push('Reset');
-                    break;
-                }
+            if (this.viewState.hasStoredState()) {
+                res.icons.push('undo');
+                res.disabled.push(!this.ready);
+                res.tooltips.push('Reset');
             }
         }
         return res;
@@ -909,30 +758,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private drillStackPush(axes: ChartsExportVAxesModel[], stacked: boolean): void {
-        const stack = JSON.parse(localStorage.getItem(this.widget.id + '_drillStack') || '[]') as { axes: ChartsExportVAxesModel[], stacked: boolean }[];
-        stack.push({ axes, stacked });
-        localStorage.setItem(this.widget.id + '_drillStack', JSON.stringify(stack));
+        this.viewState.drillStackPush(axes, stacked);
     }
 
-    private drillStackPop(): ({ axes: ChartsExportVAxesModel[], stacked: boolean } | null) {
-        const stack = JSON.parse(localStorage.getItem(this.widget.id + '_drillStack') || '[]') as { axes: ChartsExportVAxesModel[], stacked: boolean }[];
-        if (stack.length === 0) {
-            return null;
-        }
-        const res = stack.pop();
-        if (stack.length === 0) {
-            localStorage.removeItem(this.widget.id + '_drillStack');
-        } else {
-            localStorage.setItem(this.widget.id + '_drillStack', JSON.stringify(stack));
-        }
-        return res || null;
+    private drillStackPop(): ChartsExportDrillEntry | null {
+        return this.viewState.drillStackPop();
     }
 
-    private drillStackPeek(): ({ axes: ChartsExportVAxesModel[], stacked: boolean } | null) {
-        const stack = JSON.parse(localStorage.getItem(this.widget.id + '_drillStack') || '[]') as { axes: ChartsExportVAxesModel[], stacked: boolean }[];
-        if (stack.length === 0) {
-            return null;
-        }
-        return stack[stack.length - 1];
+    private drillStackPeek(): ChartsExportDrillEntry | null {
+        return this.viewState.drillStackPeek();
     }
 }
