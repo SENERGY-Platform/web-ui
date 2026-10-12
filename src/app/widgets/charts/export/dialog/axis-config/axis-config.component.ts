@@ -46,7 +46,7 @@ export class AxisConfigComponent {
     @Input() groupTypeIsDifference = false;
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
-    @Input() groupType?: string;
+    @Input() groupType?: string | null;
     @Input() element: ChartsExportVAxesModel = {} as ChartsExportVAxesModel;
     @Input() treeControl: NestedTreeControl<ChartsExportVAxesModel> = new NestedTreeControl<ChartsExportVAxesModel>((node) => node.subAxes);
     @Input() enableDragDrop = false;

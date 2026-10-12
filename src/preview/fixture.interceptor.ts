@@ -227,7 +227,7 @@ export class FixtureInterceptor implements HttpInterceptor {
         // HttpResponse (above) is always a *successful* event as far as HttpClient is
         // concerned, whatever numeric status it carries -- an HttpErrorResponse is what
         // actually makes the request's Observable error out, the same way a real non-2xx
-        // response does when it comes back through HttpXhrBackend.
+        // response does when it comes back through the HTTP backend.
         const answerError = (body: unknown, status: number): Observable<HttpEvent<unknown>> =>
             throwError(() => new HttpErrorResponse({ status, error: body, url })).pipe(delay(80));
 

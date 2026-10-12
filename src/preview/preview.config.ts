@@ -1,6 +1,6 @@
 /* Preview harness providers - local only. */
 import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { LadonService } from '../app/modules/admin/permissions/shared/services/ladom.service';
@@ -27,7 +27,7 @@ export const previewConfig: ApplicationConfig = {
     providers: [
         provideZoneChangeDetection(),
         provideAnimations(),
-        provideHttpClient(withXhr(), withInterceptorsFromDi()),
+        provideHttpClient(withInterceptorsFromDi()),
         importProvidersFrom(EnvironmentsModule, ProcessesModule, SmartServicesModule, FlowDesignerModule, WidgetModule),
         provideRouter([
             { path: '', redirectTo: 'environments', pathMatch: 'full' },
