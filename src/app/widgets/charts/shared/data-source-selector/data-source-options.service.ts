@@ -222,7 +222,9 @@ export class DataSourceOptionsService {
                         ));
                 });
 
+                // a location without devices or groups gives no observables; forkJoin([]) completes without a value
                 return forkJoin(observables).pipe(
+                    defaultIfEmpty([]),
                     map(options => {
                         const res: { name: string; fieldOptions: ChartsExportVAxesModel[] } = {
                             name: location.name,

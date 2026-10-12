@@ -172,6 +172,13 @@ describe('DataSourceSelectorComponent', () => {
                 expect(component.waitingForDataSourceChange).toBeFalse();
             });
 
+            it('becomes ready with a preselected location that has no devices and no groups', () => {
+                create({ exports: [location() as any] }, { showLocationsAsSource: true });
+
+                expect(component.ready).toBeTrue();
+                expect(component.waitingForDataSourceChange).toBeFalse();
+            });
+
             it('becomes ready even when loading fails', () => {
                 spyOn(console, 'log');
                 exportService.getExports.and.returnValue(throwError(() => new Error('boom')));
@@ -633,15 +640,13 @@ describe('DataSourceSelectorComponent', () => {
                 expect(optionsOf([location(LOCATION_ID, { device_ids: [DEVICE_ID] })]).size).toBe(0);
             });
 
-            it('emits no options at all for a location without devices and groups, so the loading never finishes', () => {
+            it('emits empty options for a location without devices and groups, so the loading finishes', () => {
                 create();
                 const emitted = jasmine.createSpy('emitted');
-                const completed = jasmine.createSpy('completed');
 
-                component.loadFieldOptions([location() as any]).subscribe({ next: emitted, complete: completed });
+                component.loadFieldOptions([location() as any]).subscribe({ next: emitted });
 
-                expect(emitted).not.toHaveBeenCalled();
-                expect(completed).toHaveBeenCalled();
+                expect(emitted).toHaveBeenCalledOnceWith(new Map());
             });
 
             it('logs and rethrows when loading fails', () => {
