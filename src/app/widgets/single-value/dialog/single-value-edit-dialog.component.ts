@@ -428,7 +428,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             id: this.form.get('measurement')?.value?.id,
             name: this.form.get('measurement')?.value?.name,
             values: this.form.get('measurement')?.value?.values,
-            exportDatabaseId: this.form.get('measurement')?.value?.ExportDatabaseId,
+            exportDatabaseId: this.form.get('measurement')?.value?.exportDatabaseId,
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value as ExportValueModel || undefined;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value || undefined;
