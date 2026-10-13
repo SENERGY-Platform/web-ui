@@ -17,6 +17,7 @@
 import { fakeAsync, tick } from '@angular/core/testing';
 import { UntypedFormBuilder } from '@angular/forms';
 import { of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { NewExportComponent } from './new-export.component';
 import { ExportModel } from '../shared/export.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
@@ -114,21 +115,25 @@ interface Harness {
     saved: () => ExportModel | undefined;
 }
 
-const openForEditing = (exp: ExportModel = existingExport()): Harness => {
+const openForEditing = (exp: ExportModel = existingExport(), id: string | null = 'export-1'): Harness => {
     let saved: ExportModel | undefined;
     const component = new NewExportComponent(
-        {snapshot: {paramMap: {get: () => 'export-1'}}} as any,
+        {snapshot: {paramMap: {get: () => id}}} as any,
         {} as any,
         {getPipelines: () => of([pipeline])} as any,
         {getDeviceInstances: () => of({result: [], total: 0})} as any,
         {} as any,
         {
-            getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ'],
+            getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'],
             getExportDatabases: () => of([]),
             getExport: () => of(exp),
             editExport: (_id: string, edited: ExportModel) => {
                 saved = edited;
                 return of({status: 200});
+            },
+            startPipeline: (created: ExportModel) => {
+                saved = created;
+                return of(created);
             },
         } as any,
         {} as any,
@@ -140,7 +145,11 @@ const openForEditing = (exp: ExportModel = existingExport()): Harness => {
         {bypassSecurityTrustHtml: (html: string) => html} as any,
         {open: () => undefined} as any,
         {listImportInstances: () => of([importInstance])} as any,
-        {getImportType: () => of(importType)} as any,
+        {
+            // asynchronous like the HTTP call, so the form has recomputed its value when the answer arrives
+            getImportType: () => of(importType).pipe(delay(1)),
+            parseImportTypeExportValues: () => [{Name: 'value', Path: 'value', Type: 'float'}],
+        } as any,
         new UntypedFormBuilder(),
         {pageSize: 20} as any,
     );
@@ -215,5 +224,19 @@ describe('NewExportComponent', () => {
         expect(component.exportForm.getRawValue().timePath).toBe('time');
         expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
         expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
+    }));
+
+    it('sets the time path and the seconds format when an import is chosen', fakeAsync(() => {
+        const {component, saved} = openForEditing(existingImportExport(), null);
+        component.exportForm.patchValue({selector: 'import', name: 'a new export'});
+
+        component.exportForm.get('import')?.setValue(importInstance);
+        tick(10);
+
+        expect(component.exportForm.getRawValue().timePath).toBe('time');
+        expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
+        expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%SZ');
+        component.onSubmit();
+        expect(saved()?.TimestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
     }));
 });

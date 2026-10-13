@@ -704,7 +704,7 @@ export class NewExportComponent implements OnInit {
                     onlySelf: true,
                     emitEvent: false
                 });
-                this.formatControl.setValue('%Y-%m-%dT%H:%M:%S.%fZ');
+                this.formatControl.setValue('%Y-%m-%dT%H:%M:%SZ');
             } else if (this.exportForm.value.selector === 'device') {
                 this.exportForm.patchValue({timePath: this.timeSuggest, timestampFormat: null}, {
                     onlySelf: true,
