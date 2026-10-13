@@ -200,7 +200,10 @@ export class ChartsExportService {
         }
 
         if (timescaleElements.length > 0) {
-            obs.push(this.exportDataService.queryTimescaleV2(timescaleElements).pipe(map(values => {
+            // The chart builds its buckets in browser time, so grouped queries must be bucketed in that zone too.
+            const groupsByTime = timescaleElements.some(e => !!e.groupTime);
+            const timezone = groupsByTime ? Intl.DateTimeFormat().resolvedOptions().timeZone || undefined : undefined;
+            obs.push(this.exportDataService.queryTimescaleV2(timescaleElements, timezone).pipe(map(values => {
                 const max = values.reduce((p, m) => {
                     if (m.requestIndex > p.requestIndex) {
                         return m;
