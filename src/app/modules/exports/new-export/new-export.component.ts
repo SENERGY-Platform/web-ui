@@ -655,7 +655,8 @@ export class NewExportComponent implements OnInit {
             }
             this.paths.set('time', 'string');
             this.paths.set('analytics', this.typeStructure);
-            this.exportForm.patchValue({timePath: 'time'});
+            this.exportForm.patchValue({timePath: 'time', timestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ'});
+            this.formatControl.setValue('%Y-%m-%dT%H:%M:%S.%fZ');
             this.autofillValues();
         });
     }
