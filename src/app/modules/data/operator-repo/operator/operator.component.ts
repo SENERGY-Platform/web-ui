@@ -129,6 +129,28 @@ export class OperatorComponent implements OnInit {
         return newestVersionLabel(this.operator);
     }
 
+    private expanded = new Set<string>();
+
+    isExpanded(label: string): boolean {
+        return this.expanded.has(label);
+    }
+
+    toggleExpanded(label: string) {
+        if (!this.expanded.delete(label)) {
+            this.expanded.add(label);
+        }
+    }
+
+    isCurrent(version: OperatorVersionModel): boolean {
+        return version.version === this.currentVersion;
+    }
+
+    /** "Current" and "deprecated" can both apply, when every version is deprecated. */
+    versionState(version: OperatorVersionModel): string {
+        const states = [this.isCurrent(version) ? 'current' : '', version.deprecated ? 'deprecated' : ''].filter(state => state !== '');
+        return states.length === 0 ? 'active' : states.join(', ');
+    }
+
     portsSummary(version: OperatorVersionModel): string {
         return `${version.inputs?.length ?? 0} in, ${version.outputs?.length ?? 0} out, ${version.config_values?.length ?? 0} config`;
     }

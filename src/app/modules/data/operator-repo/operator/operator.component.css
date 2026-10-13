@@ -76,30 +76,43 @@
     opacity: 0.7;
 }
 
-.versions-table {
-    width: 100%;
-    border-collapse: collapse;
+.version-head,
+.version-row {
+    display: grid;
+    grid-template-columns: 40px minmax(150px, 1.2fr) minmax(0, 3fr) minmax(0, 1.6fr) 88px;
+    align-items: center;
+    column-gap: 8px;
 }
 
-.versions-table th {
-    text-align: left;
+.version-head {
+    padding: 8px 0;
     font-weight: 500;
-    padding: 8px;
     border-bottom: 1px solid rgba(128, 128, 128, 0.4);
 }
 
-.versions-table td {
-    padding: 4px 8px;
+.version-row {
+    height: 48px;
     border-bottom: 1px solid rgba(128, 128, 128, 0.2);
 }
 
-.versions-table .actions {
-    text-align: right;
+.version-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     white-space: nowrap;
 }
 
-.version-image-cell {
-    word-break: break-all;
+.version-image-cell,
+.version-ports {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .version-row.deprecated .version-name,
@@ -107,12 +120,43 @@
     opacity: 0.6;
 }
 
-.badge {
-    margin-left: 8px;
+.badge,
+.current-tag {
     padding: 1px 8px;
     border-radius: 10px;
     font-size: 12px;
     border: 1px solid rgba(128, 128, 128, 0.6);
+}
+
+.current-tag {
+    border-color: currentColor;
+    color: #2e7d32;
+}
+
+.version-details {
+    padding: 12px 16px 8px 48px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+    background: rgba(128, 128, 128, 0.06);
+}
+
+.detail-line {
+    display: flex;
+    gap: 12px;
+    padding: 2px 0;
+}
+
+.detail-label {
+    flex: 0 0 64px;
+    opacity: 0.7;
+}
+
+.detail-image {
+    word-break: break-all;
+}
+
+.version-details senergy-operator-ports {
+    display: block;
+    margin-top: 12px;
 }
 
 .save-bar {
@@ -142,7 +186,12 @@
         gap: 0;
     }
 
-    .versions-table .actions {
-        white-space: normal;
+    .version-head,
+    .version-row {
+        grid-template-columns: 40px minmax(120px, 1fr) minmax(0, 2fr) 88px;
+    }
+
+    .version-ports {
+        display: none;
     }
 }

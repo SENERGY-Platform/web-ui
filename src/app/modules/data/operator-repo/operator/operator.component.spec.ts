@@ -161,8 +161,8 @@ describe('OperatorComponent', () => {
             expect(rows().map(row => row.querySelector('.version-name')?.textContent?.trim().split(/\s+/)[0]))
                 .toEqual(['v1.10.0', 'v1.2.0', 'v1.0.0']);
             expect(rows().map(row => row.querySelector('.badge') !== null)).toEqual([false, true, false]);
-            expect(rows().map(row => row.querySelector('.toggle-deprecated')?.textContent?.trim()))
-                .toEqual(['Deprecate', 'Undeprecate', 'Deprecate']);
+            expect(rows().map(row => row.querySelector('.toggle-deprecated')?.getAttribute('aria-label')))
+                .toEqual(['Deprecate v1.10.0', 'Undeprecate v1.2.0', 'Deprecate v1.0.0']);
         });
 
         it('summarizes the ports of a version, zero for lists it does not carry', () => {
@@ -186,6 +186,13 @@ describe('OperatorComponent', () => {
             expect(image.disabled).toBeFalse();
         });
 
+        it('marks only the current version, which is not the highest one when that is deprecated', () => {
+            create(operatorWithVersions());
+            expect(rows().map(row => row.querySelector('.current-tag') !== null)).toEqual([true, false, false]);
+            create(operatorWithDeprecatedHighest());
+            expect(rows().map(row => row.querySelector('.current-tag') !== null)).toEqual([false, true, false]);
+        });
+
         it('hints at the first save for an operator without versions', () => {
             create(operatorWithoutVersions());
             expect(el().querySelector('.no-versions')?.textContent).toContain('saves the current state as v1.0.0');
@@ -194,6 +201,100 @@ describe('OperatorComponent', () => {
         it('has no versions section for a new operator', () => {
             create(null);
             expect(el().querySelector('.versions')).toBeNull();
+        });
+    });
+
+    describe('version rows', () => {
+        const longImage = 'registry.example.org/some/very/long/path/to/an/image/with/a/very/long/name/that/will/not/fit/in/the/row:v1.2.3-build.20260101';
+        const centre = (r: DOMRect) => r.top + r.height / 2;
+
+        function withLongImage(): OperatorModel {
+            const operator = operatorWithVersions();
+            operator.versions![0].image = longImage;
+            return operator;
+        }
+
+        it('lays every version out as one row of the same height, with or without badge and long image', async () => {
+            create(withLongImage());
+            await fixture.whenStable();
+            fixture.detectChanges();
+            const heights = rows().map(row => row.getBoundingClientRect().height);
+            expect(heights.length).toBe(3);
+            expect(heights.every(height => Math.abs(height - heights[0]) < 1)).withContext(heights.join()).toBeTrue();
+            const cell = rows()[2].querySelector('.version-image-cell') as HTMLElement;
+            expect(getComputedStyle(cell).textOverflow).toBe('ellipsis');
+            expect(getComputedStyle(cell).whiteSpace).toBe('nowrap');
+        });
+
+        it('puts the action buttons at the same size, column and vertical centre in every row', async () => {
+            create(withLongImage());
+            await fixture.whenStable();
+            fixture.detectChanges();
+            for (const selector of ['.toggle-deprecated', '.delete-version']) {
+                const buttons = rows().map(row => row.querySelector(selector)!.getBoundingClientRect());
+                expect(buttons.every(r => Math.abs(r.width - buttons[0].width) < 1 && Math.abs(r.height - buttons[0].height) < 1))
+                    .withContext(selector + ' size').toBeTrue();
+                expect(buttons.every(r => Math.abs(r.left - buttons[0].left) < 1)).withContext(selector + ' column').toBeTrue();
+            }
+            rows().forEach((row, index) => {
+                const rowBox = row.getBoundingClientRect();
+                for (const selector of ['.expand-version', '.version-name', '.version-image-cell', '.toggle-deprecated', '.delete-version']) {
+                    const box = row.querySelector(selector)!.getBoundingClientRect();
+                    expect(Math.abs(centre(box) - centre(rowBox))).withContext(`${selector} of row ${index}`).toBeLessThan(1);
+                }
+            });
+        });
+
+        it('shows nothing of a version but its row until it is expanded', () => {
+            create(operatorWithVersions());
+            expect(el().querySelector('.version-details')).toBeNull();
+            expect(rows().map(row => row.querySelector('.expand-version')?.getAttribute('aria-expanded'))).toEqual(['false', 'false', 'false']);
+        });
+
+        it('expands a version to its label, state, image, inputs, outputs and config values, read only', async () => {
+            create(operatorWithVersions());
+            click('.version-row:nth-child(1) .expand-version');
+            await fixture.whenStable();
+            fixture.detectChanges();
+
+            const details = el().querySelector('.version-details') as HTMLElement;
+            expect(details.textContent).toContain('v1.10.0');
+            expect(details.textContent).toContain('current');
+            expect(details.textContent).toContain('img:4');
+            const blocks = Array.from(details.querySelectorAll('senergy-operator-ports')) as HTMLElement[];
+            expect(blocks.map(block => block.querySelector('h3')?.textContent?.replace(/\s+/g, ' ').trim())).toEqual([
+                'Inputs (1)', 'Outputs (1)', 'Config values',
+            ]);
+            expect(Array.from(blocks[0].querySelectorAll('.readonly-row')).map(r =>
+                [r.querySelector('.port-name')?.textContent, r.querySelector('.port-type')?.textContent])).toEqual([['a', text]]);
+            expect(blocks[1].textContent).toContain('o');
+            expect(blocks[2].textContent).toContain('No config values defined.');
+            expect(details.querySelector('input, .add-button, .remove-button, mtx-select')).toBeNull();
+            expect(rows()[0].querySelector('.expand-version')?.getAttribute('aria-expanded')).toBe('true');
+            expect(component.dirty).toBeFalse();
+        });
+
+        it('shows the deprecated state of an older version and collapses again', async () => {
+            create(operatorWithVersions());
+            click('.version-row:nth-child(2) .expand-version');
+            await fixture.whenStable();
+            fixture.detectChanges();
+            expect((el().querySelector('.version-details') as HTMLElement).textContent).toContain('deprecated');
+            expect(el().querySelectorAll('.version-details').length).toBe(1);
+
+            click('.version-row:nth-child(2) .expand-version');
+            expect(el().querySelector('.version-details')).toBeNull();
+        });
+
+        it('keeps several versions open independently', async () => {
+            create(operatorWithVersions());
+            component.toggleExpanded('v1.0.0');
+            component.toggleExpanded('v1.10.0');
+            fixture.detectChanges();
+            expect(el().querySelectorAll('.version-details').length).toBe(2);
+            component.toggleExpanded('v1.0.0');
+            fixture.detectChanges();
+            expect(el().querySelectorAll('.version-details').length).toBe(1);
         });
     });
 

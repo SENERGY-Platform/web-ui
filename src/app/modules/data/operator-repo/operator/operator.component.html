@@ -99,36 +99,55 @@
                 Save or discard the changes to image, inputs, outputs and config before deprecating or deleting a version.
             </p>
 
-            <table class="versions-table" *ngIf="hasVersions">
-                <thead>
-                    <tr>
-                        <th>Version</th>
-                        <th>Image</th>
-                        <th>Ports</th>
-                        <th class="actions"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let version of versions" class="version-row" [class.deprecated]="version.deprecated">
-                        <td class="version-name">
-                            {{version.version}}
-                            <span class="badge" *ngIf="version.deprecated">deprecated</span>
-                        </td>
-                        <td class="version-image-cell">{{version.image}}</td>
-                        <td class="version-ports">{{portsSummary(version)}}</td>
-                        <td class="actions">
-                            <button mat-button type="button" class="toggle-deprecated" (click)="toggleDeprecated(version)"
-                                [disabled]="versionActionsBlocked">
-                                {{version.deprecated ? 'Undeprecate' : 'Deprecate'}}
+            <div class="versions-table" *ngIf="hasVersions">
+                <div class="version-head">
+                    <span></span>
+                    <span>Version</span>
+                    <span>Image</span>
+                    <span class="version-ports">Ports</span>
+                    <span></span>
+                </div>
+                <div class="versions-list">
+                    <ng-container *ngFor="let version of versions">
+                        <div class="version-row" [class.deprecated]="version.deprecated">
+                            <button mat-icon-button type="button" class="expand-version" (click)="toggleExpanded(version.version)"
+                                [attr.aria-expanded]="isExpanded(version.version)"
+                                [attr.aria-label]="(isExpanded(version.version) ? 'Hide details of ' : 'Show details of ') + version.version"
+                                [matTooltip]="isExpanded(version.version) ? 'Hide details' : 'Show details'">
+                                <mat-icon>{{isExpanded(version.version) ? 'expand_more' : 'chevron_right'}}</mat-icon>
                             </button>
-                            <button mat-icon-button type="button" class="delete-version" (click)="deleteVersion(version)"
-                                [disabled]="versionActionsBlocked" matTooltip="Delete version">
-                                <mat-icon color="warn">delete</mat-icon>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <span class="version-name">
+                                {{version.version}}
+                                <span class="current-tag" *ngIf="isCurrent(version)">current</span>
+                                <span class="badge" *ngIf="version.deprecated">deprecated</span>
+                            </span>
+                            <span class="version-image-cell" [matTooltip]="version.image">{{version.image}}</span>
+                            <span class="version-ports">{{portsSummary(version)}}</span>
+                            <span class="actions">
+                                <button mat-icon-button type="button" class="toggle-deprecated" (click)="toggleDeprecated(version)"
+                                    [disabled]="versionActionsBlocked" [matTooltip]="version.deprecated ? 'Undeprecate' : 'Deprecate'"
+                                    [attr.aria-label]="(version.deprecated ? 'Undeprecate ' : 'Deprecate ') + version.version">
+                                    <mat-icon>{{version.deprecated ? 'undo' : 'block'}}</mat-icon>
+                                </button>
+                                <button mat-icon-button type="button" class="delete-version" (click)="deleteVersion(version)"
+                                    [disabled]="versionActionsBlocked" matTooltip="Delete version"
+                                    [attr.aria-label]="'Delete ' + version.version">
+                                    <mat-icon color="warn">delete</mat-icon>
+                                </button>
+                            </span>
+                        </div>
+                        <div class="version-details" *ngIf="isExpanded(version.version)">
+                            <div class="detail-line"><span class="detail-label">Version</span>{{version.version}}</div>
+                            <div class="detail-line"><span class="detail-label">State</span>{{versionState(version)}}</div>
+                            <div class="detail-line"><span class="detail-label">Image</span><span class="detail-image">{{version.image}}</span></div>
+                            <senergy-operator-ports title="Inputs" noun="input" [ports]="version.inputs" [readonly]="true"></senergy-operator-ports>
+                            <senergy-operator-ports title="Outputs" noun="output" [ports]="version.outputs" [readonly]="true"></senergy-operator-ports>
+                            <senergy-operator-ports title="Config values" noun="config value" [ports]="version.config_values" [readonly]="true">
+                            </senergy-operator-ports>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
         </mat-card>
     </div>
 
