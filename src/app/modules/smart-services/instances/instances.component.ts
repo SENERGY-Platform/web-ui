@@ -32,6 +32,7 @@ import { SmartServiceModuleService } from './shared/modules.service';
 import { SmartServiceModuleModel } from './shared/modules.model';
 import { SmartServiceInstanceDialogService } from './shared/instance-dialog.service';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { environment } from 'src/environments/environment';
 import { smartServiceLogsUrl } from './shared/opensearch';
@@ -73,7 +74,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     modulesByInstanceId = new Map<string, SmartServiceModuleModel[]>();
     loadingModulesByInstanceId = new Set<string>();
     upgradingInstanceIds = new Set<string>();
-
+    private loadSubscription?: Subscription;
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('tableContainer', { static: false }) tableContainer?: ElementRef<HTMLDivElement>;
@@ -135,7 +136,9 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     loadInstances(): void {
-        this.instancesService.getInstances({ limit: this.pageSize, offset: this.offset, sort: this.sortBy + '.' + this.sortDirection, releaseId: this.releaseId }).subscribe((instances) => {
+        // only the newest request may fill the table, an older answer arriving later must not replace it
+        this.loadSubscription?.unsubscribe();
+        this.loadSubscription = this.instancesService.getInstances({ limit: this.pageSize, offset: this.offset, sort: this.sortBy + '.' + this.sortDirection, releaseId: this.releaseId }).subscribe((instances) => {
             this.dataSource.data = instances.instances;
             this.totalCount = instances.total;
             this.ready = true;
@@ -315,6 +318,11 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        // the order changed, so the current page now holds other rows
+        this.pageIndex = 0;
+        this.offset = 0;
+        this.paginator.pageIndex = 0;
+        this.updateQueryParams(true);
         this.loadInstances();
     }
 
@@ -371,6 +379,9 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.expandedInstance = undefined;
         this.expandedInstanceId = undefined;
         this.tableScrollTop = 0;
+        // the navigation resets the page only after this load has started
+        this.pageIndex = 0;
+        this.offset = 0;
         if (this.tableContainer?.nativeElement) {
             this.tableContainer.nativeElement.scrollTop = 0;
         }
