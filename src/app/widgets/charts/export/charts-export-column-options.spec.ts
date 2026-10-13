@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Chart, ChartOptions, registerables } from 'chart.js';
 import { buildColumnChartOptions, ChartsExportColumnOptionsHost } from './charts-export-column-options';
 
 function host(overrides: Partial<ChartsExportColumnOptionsHost> = {}): ChartsExportColumnOptionsHost {
@@ -82,5 +83,26 @@ describe('buildColumnChartOptions', () => {
             { datasetIndex: 0, label: 'A', formattedValue: '1', drawToLeft: false },
             { datasetIndex: 1, label: '', formattedValue: '2', drawToLeft: true },
         ]);
+    });
+
+    it('keeps both value axes starting at zero, so an all-zero series spans 0..1 and not -1..1', () => {
+        Chart.register(...registerables);
+        const canvas = document.createElement('canvas');
+        document.body.appendChild(canvas);
+        const options = buildColumnChartOptions(host()) as ChartOptions<'bar'>;
+        // The time axis needs a date adapter; the value axes are what this spec is about.
+        options.scales = { ...options.scales, x: { type: 'category' } };
+        const chart = new Chart(canvas, {
+            type: 'bar',
+            data: { labels: ['a', 'b'], datasets: [{ data: [0, 0], yAxisID: 'y' }, { data: [0, 0], yAxisID: 'y2' }] },
+            options: { ...options, animation: false, responsive: false },
+        });
+        try {
+            expect([chart.scales['y'].min, chart.scales['y'].max]).toEqual([0, 1]);
+            expect([chart.scales['y2'].min, chart.scales['y2'].max]).toEqual([0, 1]);
+        } finally {
+            chart.destroy();
+            canvas.remove();
+        }
     });
 });
