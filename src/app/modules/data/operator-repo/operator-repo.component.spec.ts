@@ -29,6 +29,10 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of, throwError } from 'rxjs';
+import { OperatorModel } from './shared/operator.model';
 
 class MockOperatorRepoService {}
 
@@ -59,5 +63,53 @@ describe('OperatorRepoComponent', () => {
 
     it('should create', () => {
         expect(fixture).toBeTruthy();
+    });
+
+    describe('deleting', () => {
+        let component: OperatorRepoComponent;
+        let service: any;
+        let snackOpen: jasmine.Spy;
+        let reload: jasmine.Spy;
+        const operator = {_id: 'a', name: 'Alpha'} as OperatorModel;
+
+        beforeEach(() => {
+            component = fixture.componentInstance;
+            service = TestBed.inject(OperatorRepoService);
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({afterClosed: () => of(true)} as any);
+            snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+            reload = spyOn(component as any, 'getOperators');
+        });
+
+        it('reloads and confirms after a successful delete', () => {
+            service.deleteOperator = () => of({});
+            component.deleteOperator(operator);
+            expect(snackOpen.calls.mostRecent().args[0]).toBe('Operator deleted');
+            expect(reload).toHaveBeenCalled();
+        });
+
+        it('names the users of an operator whose delete was refused and does not reload', () => {
+            service.deleteOperator = () => throwError(() => new HttpErrorResponse({status: 409, error: {error: 'in use', flows: 2, pipelines: 0}}));
+            component.deleteOperator(operator);
+            expect(snackOpen.calls.mostRecent().args[0]).toContain('2 flows');
+            expect(reload).not.toHaveBeenCalled();
+            expect(component.ready).toBeTrue();
+        });
+
+        it('keeps the selection and does not reload when a batch delete is refused', () => {
+            component.selection.select(operator);
+            service.deleteOperators = () => throwError(() => new HttpErrorResponse({status: 502, error: 'down'}));
+            component.deleteMultipleItems();
+            expect(snackOpen.calls.mostRecent().args[0]).toContain('nothing was deleted');
+            expect(reload).not.toHaveBeenCalled();
+            expect(component.selection.selected).toEqual([operator]);
+        });
+
+        it('reloads and clears the selection after a successful batch delete', () => {
+            component.selection.select(operator);
+            service.deleteOperators = () => of({status: 204});
+            component.deleteMultipleItems();
+            expect(reload).toHaveBeenCalled();
+            expect(component.selection.selected).toEqual([]);
+        });
     });
 });

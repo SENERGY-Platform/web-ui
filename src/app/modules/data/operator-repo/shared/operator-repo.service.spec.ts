@@ -47,6 +47,29 @@ describe('OperatorRepoService', () => {
         req.flush({ operators: [], totalCount: 0 });
     });
 
+    it('passes a refused single delete on to the caller', () => {
+        let status: number | undefined;
+        service.deleteOperator({_id: 'op-1'} as any).subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+
+        http.expectOne(environment.operatorRepoUrl + '/operator/op-1/').flush({error: 'in use', flows: 1, pipelines: 0}, {status: 409, statusText: 'Conflict'});
+
+        expect(status).toBe(409);
+    });
+
+    it('passes a refused batch delete on to the caller and succeeds on 204', () => {
+        let status: number | undefined;
+        service.deleteOperators(['a', 'b']).subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+        const refused = http.expectOne(environment.operatorRepoUrl + '/operator');
+        expect(refused.request.body).toEqual(['a', 'b']);
+        refused.flush({error: 'in use', operators: []}, {status: 409, statusText: 'Conflict'});
+        expect(status).toBe(409);
+
+        let ok: number | undefined;
+        service.deleteOperators(['a']).subscribe((resp) => (ok = resp.status));
+        http.expectOne(environment.operatorRepoUrl + '/operator').flush(null, {status: 204, statusText: 'No Content'});
+        expect(ok).toBe(204);
+    });
+
     it('passes the user filter through', () => {
         service.getAllOperators('user-a').subscribe();
 

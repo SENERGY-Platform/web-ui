@@ -36,6 +36,8 @@ import {PipelineOperatorUsage} from '../pipeline-registry/shared/pipeline.model'
 import {Router} from '@angular/router';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
+import {deleteErrorMessage} from './shared/operator-delete-error';
+import {HttpErrorResponse} from '@angular/common/http';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
@@ -118,14 +120,25 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
             .subscribe((operatorDelete: boolean) => {
                 if (operatorDelete) {
                     this.ready = false;
-                    this.operatorRepoService.deleteOperator(operator).subscribe(() => {
-                        this.snackBar.open('Operator deleted', undefined, {
-                            duration: 2000,
-                        });
-                        this.getOperators(true);
+                    this.operatorRepoService.deleteOperator(operator).subscribe({
+                        next: () => {
+                            this.snackBar.open('Operator deleted', undefined, {
+                                duration: 2000,
+                            });
+                            this.getOperators(true);
+                        },
+                        error: (error: HttpErrorResponse) => this.showDeleteError(error, [operator]),
                     });
                 }
             });
+    }
+
+    /** A refused delete leaves the list and the selection as they are. */
+    private showDeleteError(error: HttpErrorResponse, operators: OperatorModel[]) {
+        console.error('Error =>> Service: OperatorRepoComponent =>> Method: delete');
+        console.error(error);
+        this.ready = true;
+        this.snackBar.open(deleteErrorMessage(error, operators), 'close', {panelClass: 'snack-bar-error'});
     }
 
     getOperatorUser(id: string | undefined) {
@@ -223,9 +236,12 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
                         }
                     });
 
-                    this.operatorRepoService.deleteOperators(operatorIDs).subscribe(() => {
-                        this.getOperators(true);
-                        this.selectionClear();
+                    this.operatorRepoService.deleteOperators(operatorIDs).subscribe({
+                        next: () => {
+                            this.getOperators(true);
+                            this.selectionClear();
+                        },
+                        error: (error: HttpErrorResponse) => this.showDeleteError(error, this.selection.selected),
                     });
                 }
             });

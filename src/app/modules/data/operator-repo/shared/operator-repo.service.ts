@@ -21,7 +21,6 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
 import {IOModel, OperatorModel} from './operator.model';
 import { Observable } from 'rxjs';
-import { ExportService } from '../../../exports/shared/export.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -95,23 +94,19 @@ export class OperatorRepoService {
         }
     }
 
+    /** Errors are not swallowed: the caller has to tell a refused delete (409, 502) from a successful one. */
     deleteOperator(operator: OperatorModel): Observable<unknown> {
-        return this.http
-            .delete(environment.operatorRepoUrl + '/operator/' + operator._id + '/')
-            .pipe(catchError(this.errorHandlerService.handleError(OperatorRepoService.name, 'deleteOperator: Error', {})));
+        return this.http.delete(environment.operatorRepoUrl + '/operator/' + operator._id + '/');
     }
 
+    /** Errors are not swallowed, see deleteOperator. */
     deleteOperators(operators: string[]): Observable<{ status: number }> {
         return this.http
             .request('DELETE', environment.operatorRepoUrl + '/operator', {
                 body: operators,
-                responseType: 'text',
                 observe: 'response',
             })
-            .pipe(
-                map((resp) => ({ status: resp.status })),
-                catchError(this.errorHandlerService.handleError(ExportService.name, 'deleteOperators: Error', { status: 404 })),
-            );
+            .pipe(map((resp) => ({ status: resp.status })));
     }
 
     setPaths(om: OperatorModel | null): Map<string, string | undefined> {
