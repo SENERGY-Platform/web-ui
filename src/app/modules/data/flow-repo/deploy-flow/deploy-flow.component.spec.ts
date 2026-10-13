@@ -290,4 +290,16 @@ describe('DeployFlowComponent aspects', () => {
         expect(input().get('aspectIds')?.value).toEqual([air, water]);
         expect(input().get('functionId')?.value).toBe(temperature.id);
     });
+
+    it('keeps a selection the cached selectables still offer and resets one they do not', () => {
+        init({ [air]: [temperature] });
+        const key = air + temperature.id + 'c1';
+        component.selectablesCharacteristics.set(key, new Map([['devices', [{ id: 'd1', name: 'D1' }]], ['groups', [{ id: 'g1', name: 'G1' }]]]));
+        input().patchValue({ aspectIds: [air], functionId: temperature.id, characteristics: ['c1'], selectableId: 'g1' }, { emitEvent: false });
+        component.prepareSelectables(input()).subscribe();
+        expect(input().get('selectableId')?.value).toBe('g1');
+        input().patchValue({ selectableId: 'gone' }, { emitEvent: false });
+        component.prepareSelectables(input()).subscribe();
+        expect(input().get('selectableId')?.value).toBeNull();
+    });
 });
