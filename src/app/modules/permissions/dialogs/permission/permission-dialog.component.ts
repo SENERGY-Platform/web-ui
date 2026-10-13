@@ -187,7 +187,7 @@ export class PermissionDialogComponent implements OnInit {
     }
 
     addUser() {
-        if (this.userFormControl.value === '') {
+        if (!this.userFormControl.value) {
             return;
         }
 
@@ -204,7 +204,7 @@ export class PermissionDialogComponent implements OnInit {
     }
 
     addGroup() {
-        if (this.groupFormControl.value === '') {
+        if (!this.groupFormControl.value) {
             return;
         }
         this.permissions.group_permissions[this.groupFormControl.value as string] = {
@@ -220,7 +220,7 @@ export class PermissionDialogComponent implements OnInit {
     }
 
     addRole() {
-        if (this.roleFormControl.value === '') {
+        if (!this.roleFormControl.value) {
             return;
         }
         this.permissions.role_permissions[this.roleFormControl.value as string] = {
