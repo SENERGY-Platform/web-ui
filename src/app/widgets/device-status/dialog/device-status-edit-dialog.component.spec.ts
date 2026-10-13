@@ -492,6 +492,61 @@ describe('DeviceStatusEditDialogComponent', () => {
         }),
     );
 
+    describe('results of two elements of which the first is skipped', () => {
+        const addElementWithService = (index: number, serviceId: string) => {
+            component.addElement({} as DeviceStatusElementModel);
+            component.elementsControl.at(index).patchValue({ aspectId: component.aspects[0].id });
+            component.elementsControl.at(index).patchValue({ function: component.funcArray[index][0] });
+            component.elementsControl.at(index).patchValue({ selectable: component.selectablesArray[index][0] });
+            component.elementsControl.at(index).patchValue({ service: { ...component.serviceExportValueArray[index][0].service, id: serviceId } });
+            component.elementsControl.at(index).patchValue({ exportValues: component.serviceExportValueArray[index][0].exportValues[0] });
+        };
+
+        it('gives the export to the element it was started for', waitForAsync(() => {
+            addElementWithService(0, 'service_two_outputs');
+            addElementWithService(1, 'service_1');
+            exportServiceSpy.prepareDeviceServiceExport.and.callFake((_device, service) => {
+                const make = () => ({ Name: 'x', Values: [{ Name: 'Time', Path: 'value.struct.Time', Type: 'string', InstanceID: '0' }] } as ExportModel);
+                return service.id === 'service_two_outputs' ? [make(), make()] : [make()];
+            });
+            exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_of_b' } as ExportModel));
+
+            component.save();
+
+            expect(component.elements[0].exportId).toBeNull();
+            expect(component.elements[1].exportId).toBe('export_of_b');
+        }));
+
+        it('gives the deployment to the element it was created for', waitForAsync(() => {
+            addElementWithService(0, 'service_1');
+            addElementWithService(1, 'service_1');
+            component.elementsControl.at(1).patchValue({ requestDevice: true });
+            component.elementsControl.at(0).patchValue({ selectable: null });
+            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_of_b' }));
+
+            component.save();
+
+            expect(component.elements[0].deploymentId).toBeNull();
+            expect(component.elements[1].deploymentId).toBe('deployment_of_b');
+        }));
+
+        it('gives the schedule to the element it was created for', waitForAsync(() => {
+            addElementWithService(0, 'service_1');
+            addElementWithService(1, 'service_1');
+            component.elementsControl.at(1).patchValue({ requestDevice: true });
+            component.elementsControl.at(0).patchValue({ selectable: null });
+            component.formGroup.get('refreshTime')?.setValue(5);
+            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_of_b' }));
+            const scheduler = (component as any).processSchedulerService;
+            spyOn(scheduler, 'createSchedule').and.returnValue(of({ id: 'schedule_of_b' }));
+
+            component.save();
+
+            expect(component.elements[0].scheduleId).toBeNull();
+            expect(component.elements[1].scheduleId).toBe('schedule_of_b');
+        }));
+    });
+
     it(
         'check if header exists',
         waitForAsync(() => {
