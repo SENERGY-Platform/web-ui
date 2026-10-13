@@ -111,7 +111,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                                 }
                                 // the bucket under the label, not the span to the next tick: ticks skip gaps and pad single buckets by 1 ms
                                 const grouped = (this.widget.properties.group?.type || '') !== '';
-                                const bucket = grouped ? clickedBucket(tick.value, this.chartjsDataTimes(chart), this.groupTime) : null;
+                                const bucket = grouped ? clickedBucket(tick.value, this.chartjsDataTimes(chart), this.groupTime, this.influxOnly()) : null;
                                 const newDetailLevel = this.finerDetailLevel(currentDetailLevel);
                                 this.groupTime = this.groupTimeFromDetailLevel(newDetailLevel);
                                 this.hAxisFormat = this.xAxisFormat(newDetailLevel);
@@ -456,6 +456,11 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             this.chartjsChart?.resize(element.width, element.height);
             this.chartjsChart?.draw();
         }
+    }
+
+    private influxOnly(): boolean {
+        const axes = this.modifiedVaxes || this.widget.properties.vAxes || [];
+        return axes.length > 0 && axes.every(axis => this.chartsExportService.isInfluxAxis(this.widget.properties, axis));
     }
 
     private chartjsDataTimes(chart: Chart): number[] {

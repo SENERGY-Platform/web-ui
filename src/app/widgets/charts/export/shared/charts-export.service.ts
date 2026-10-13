@@ -66,6 +66,13 @@ export class ChartsExportService {
 
     devices = new Map<string, DeviceInstanceWithDeviceTypeModel>();
 
+    /** Whether the axis reads from the internal Influx database, whose buckets are fixed-length and UTC-aligned. */
+    isInfluxAxis(widgetProperties: ChartsExportPropertiesModel, vAxis: ChartsExportVAxesModel): boolean {
+        const exp = widgetProperties.exports?.find(x => x.id === vAxis.instanceId);
+        return exp !== undefined &&
+            ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb);
+    }
+
     openEditDialog(dashboardId: string, widgetId: string, userHasUpdateNameAuthorization: boolean, userHasUpdatePropertiesAuthorization: boolean): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.minWidth = '600px';
@@ -148,9 +155,7 @@ export class ChartsExportService {
                 };
                 filters.push(valueFilter);
             }
-            const exp = widgetProperties.exports?.find(x => x.id === vAxis.instanceId);
-            if (exp !== undefined &&
-                ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb)) {
+            if (this.isInfluxAxis(widgetProperties, vAxis)) {
                 (newField as QueriesRequestElementInfluxModel).measurement = vAxis.instanceId;
                 (newField as QueriesRequestElementInfluxModel).orderColumnIndex = 1;
                 if (filters.length > 0) {
