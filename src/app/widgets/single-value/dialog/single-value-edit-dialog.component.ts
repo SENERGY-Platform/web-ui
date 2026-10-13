@@ -485,12 +485,12 @@ export class SingleValueEditDialogComponent implements OnInit {
     }
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
-        const measurement = this.form.get('measurement')?.value as (ChartsExportMeasurementModel & { ExportDatabaseId?: string }) | null | undefined;
+        const measurement = this.form.get('measurement')?.value as ChartsExportMeasurementModel | null | undefined;
         this.widget.properties.measurement = {
             id: measurement?.id as string,
             name: measurement?.name as string,
             values: measurement?.values as ExportValueModel[],
-            exportDatabaseId: measurement?.ExportDatabaseId,
+            exportDatabaseId: measurement?.exportDatabaseId,
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value as ExportValueModel || undefined;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value || undefined;
