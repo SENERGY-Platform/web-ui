@@ -89,6 +89,14 @@ export const NodeElementDefinition = dia.Element.define(
                 refX: '-25%',
                 refY: '-25%',
             },
+            button3: {
+                cursor: 'pointer',
+                ref: 'buttonLabel3',
+                refWidth: '150%',
+                refHeight: '150%',
+                refX: '-25%',
+                refY: '-25%',
+            },
             buttonLabel: {
                 pointerEvents: 'none',
                 refX: '100%',
@@ -99,6 +107,13 @@ export const NodeElementDefinition = dia.Element.define(
             buttonLabel2: {
                 pointerEvents: 'none',
                 refX: '85%',
+                refY: '-5%',
+                textAnchor: 'middle',
+                textVerticalAnchor: 'middle',
+            },
+            buttonLabel3: {
+                pointerEvents: 'none',
+                refX: '65%',
                 refY: '-5%',
                 textAnchor: 'middle',
                 textVerticalAnchor: 'middle',
@@ -195,6 +210,14 @@ export const NodeElementDefinition = dia.Element.define(
             {
                 tagName: 'text',
                 selector: 'buttonLabel2',
+            },
+            {
+                tagName: 'rect',
+                selector: 'button3',
+            },
+            {
+                tagName: 'text',
+                selector: 'buttonLabel3',
             },
         ],
         portMarkup: [

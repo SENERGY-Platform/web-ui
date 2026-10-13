@@ -42,6 +42,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
 
     private linkAttrs = {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}};
 
+    /** A double click on a node or a click on its Version button. */
     @Output() nodeDoubleClick = new EventEmitter<string>();
 
     public dragStartPosition: { x: number; y: number } | null = null;
@@ -108,6 +109,10 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
             this.snackBar.open('Copied to clipboard', undefined, {
                 duration: 2000,
             });
+        });
+        this.paperService.getPaper().on('element:button3:pointerdown', (elementView: any, evt: any) => {
+            evt.stopPropagation();
+            this.nodeDoubleClick.emit(elementView.model.id);
         });
         this.paperService.getPaper().on('element:pointerdblclick', (elementView: any, evt: any) => {
             // The delete and copy buttons and the ports react to clicks themselves.

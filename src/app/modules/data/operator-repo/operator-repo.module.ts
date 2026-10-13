@@ -21,6 +21,7 @@ import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../../core/core.module';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import { OperatorComponent } from './operator/operator.component';
+import { OperatorPortsComponent } from './ports-editor/operator-ports.component';
 import { FormsModule } from '@angular/forms';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,6 +32,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
+import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
@@ -57,9 +59,10 @@ const operatorEdit: Route = { path: 'data/operator-repo/op/:id', pathMatch: 'ful
         MatInputModule,
         FormsModule,
         MatCheckboxModule,
+        MatCardModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
     ],
-    declarations: [OperatorComponent],
+    declarations: [OperatorComponent, OperatorPortsComponent],
 })
 export class OperatorRepoModule {}

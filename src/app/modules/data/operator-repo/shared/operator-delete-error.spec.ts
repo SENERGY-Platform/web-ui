@@ -16,7 +16,7 @@
 
 import {HttpErrorResponse} from '@angular/common/http';
 import {OperatorModel} from './operator.model';
-import {deleteErrorMessage, describeUsage} from './operator-delete-error';
+import {deleteErrorMessage, deleteVersionErrorMessage, describeUsage} from './operator-delete-error';
 
 const operators = [{_id: 'a', name: 'Alpha'}, {_id: 'b', name: 'Beta'}] as OperatorModel[];
 
@@ -59,5 +59,38 @@ describe('deleteErrorMessage', () => {
         for (const status of [403, 404, 500, 0]) {
             expect(deleteErrorMessage(new HttpErrorResponse({status}), operators)).toBe('Could not delete operator');
         }
+    });
+});
+
+describe('deleteVersionErrorMessage', () => {
+    const message = (status: number, error?: unknown) => deleteVersionErrorMessage(new HttpErrorResponse({status, error}), 'v1.0.0');
+
+    it('names the flows and pipelines that pin the version', () => {
+        expect(message(409, {error: 'in use', flows: 2, readable: [{id: 'f', name: 'Flow'}], pipelines: 1}))
+            .toBe('Version v1.0.0 is in use by 2 flows (Flow) and 1 pipeline, it was not deleted');
+    });
+
+    it('reads a JSON body that arrives as text', () => {
+        expect(message(409, JSON.stringify({error: 'in use', flows: 1, pipelines: 0}))).toContain('is in use by 1 flow');
+    });
+
+    it('tells a concurrent write from a version in use', () => {
+        expect(message(409, 'concurrent write')).toContain('changed at the same time');
+    });
+
+    it('says that the only version stays, with the repository text when there is one', () => {
+        expect(message(400, 'an operator keeps at least one version; delete the operator instead'))
+            .toBe('an operator keeps at least one version; delete the operator instead');
+        expect(message(400)).toContain('keeps at least one version');
+    });
+
+    it('reports a down usage service as not deleted', () => {
+        expect(message(502, 'down')).toBe('Could not check whether version v1.0.0 is in use, nothing was deleted');
+    });
+
+    it('explains missing permission and an unknown version', () => {
+        expect(message(403)).toContain('may not delete');
+        expect(message(404)).toContain('does not exist');
+        expect(message(500)).toBe('Could not delete version v1.0.0');
     });
 });

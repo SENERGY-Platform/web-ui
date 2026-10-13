@@ -45,6 +45,15 @@ export interface OperatorVersionModel {
     deprecated?: boolean;
 }
 
+/** Body of PUT /operator/{id}/versions/{version}; the label is in the path. */
+export interface OperatorVersionBody {
+    image: string;
+    inputs: IOModel[];
+    outputs: IOModel[];
+    config_values: IOModel[];
+    deprecated: boolean;
+}
+
 export interface UsageReference {
     id: string;
     name: string;

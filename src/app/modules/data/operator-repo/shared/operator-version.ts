@@ -144,3 +144,31 @@ export function versionHint(pin: string | undefined, newer: string | undefined):
     }
     return {text: `${pin} - update available`, title: `Pinned to ${pin}, newer version ${newer} available`};
 }
+
+const LABEL_PATTERN = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+
+/** The label rule of the operator repository: "vMAJOR.MINOR.PATCH", no leading zeros, no suffix. */
+export function isValidVersionLabel(label: string): boolean {
+    return LABEL_PATTERN.test(label);
+}
+
+/** The versions of an operator, newest first. */
+export function versionsNewestFirst(operator: OperatorModel): OperatorVersionModel[] {
+    return [...(operator.versions ?? [])].sort((a, b) => compareVersionLabels(b.version, a.version));
+}
+
+/** The label after the highest existing one with the patch raised, "v1.0.0" if there is none. */
+export function nextVersionLabel(operator: OperatorModel): string {
+    let highest: number[] | undefined;
+    for (const version of operator.versions ?? []) {
+        const match = LABEL_PATTERN.exec(version.version);
+        if (match === null) {
+            continue;
+        }
+        const parts = [Number(match[1]), Number(match[2]), Number(match[3])];
+        if (highest === undefined || compareVersionLabels(version.version, `v${highest.join('.')}`) > 0) {
+            highest = parts;
+        }
+    }
+    return highest === undefined ? 'v1.0.0' : `v${highest[0]}.${highest[1]}.${highest[2] + 1}`;
+}

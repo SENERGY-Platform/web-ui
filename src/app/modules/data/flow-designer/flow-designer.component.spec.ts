@@ -28,7 +28,7 @@ import { FlowModel } from '../flow-repo/shared/flow.model';
 import { environment } from '../../../../environments/environment';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { OperatorModel } from '../operator-repo/shared/operator.model';
 import { OperatorRepoService } from '../operator-repo/shared/operator-repo.service';
 import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
@@ -263,5 +263,77 @@ describe('FlowDesignerComponent opening a flow', () => {
         expect(snackOpen.calls.mostRecent().args[0]).toContain('v0.0.1');
         expect(snackOpen.calls.mostRecent().args[0]).toContain('my node');
         expect(snackOpen.calls.mostRecent().args[0]).toContain('saving will fail');
+    });
+
+    describe('the version dialog of a node', () => {
+        let closed$: Subject<any>;
+        let backdrop$: Subject<void>;
+        let keys$: Subject<any>;
+        let ref: any;
+        let applied: any[];
+
+        async function openWithRef() {
+            open([cell({version: 7})]);
+            await Promise.resolve();
+            dialogOpen.calls.reset();
+            // Each dialog gets its own streams, as a real one does.
+            dialogOpen.and.callFake(() => {
+                closed$ = new Subject<any>();
+                backdrop$ = new Subject<void>();
+                keys$ = new Subject<any>();
+                const current = closed$;
+                ref = {
+                    afterClosed: () => current,
+                    backdropClick: () => backdrop$,
+                    keydownEvents: () => keys$,
+                    close: jasmine.createSpy('close').and.callFake((result?: any) => current.next(result)),
+                };
+                return ref;
+            });
+            applied = [];
+            (component.diagram as any).getNodeInfo = () => ({operatorId: 'op', name: 'op', image: 'img', inPorts: ['a'], outPorts: ['o'], config: [], links: []});
+            (component.diagram as any).applyNodeVersion = (id: string, change: any) => applied.push([id, change]);
+        }
+
+        it('opens one dialog at a time and again after it was closed', async () => {
+            await openWithRef();
+            component.openVersionDialog('n1');
+            component.openVersionDialog('n1');
+            expect(dialogOpen).toHaveBeenCalledTimes(1);
+
+            closed$.next(undefined);
+            component.openVersionDialog('n1');
+            expect(dialogOpen).toHaveBeenCalledTimes(2);
+        });
+
+        it('is not closed by the second click of a double click on the Version button, but by a later click on the backdrop', async () => {
+            await openWithRef();
+            const now = spyOn(Date, 'now').and.returnValue(1000);
+            component.openVersionDialog('n1');
+            expect(dialogOpen.calls.mostRecent().args[1]?.disableClose).toBeTrue();
+
+            now.and.returnValue(1200);
+            backdrop$.next();
+            expect(ref.close).not.toHaveBeenCalled();
+
+            now.and.returnValue(1600);
+            backdrop$.next();
+            expect(ref.close).toHaveBeenCalledTimes(1);
+        });
+
+        it('still closes on Escape and applies a chosen version', async () => {
+            await openWithRef();
+            component.openVersionDialog('n1');
+            keys$.next({key: 'Enter'});
+            expect(ref.close).not.toHaveBeenCalled();
+            keys$.next({key: 'Escape'});
+            expect(ref.close).toHaveBeenCalledTimes(1);
+            expect(applied).toEqual([]);
+
+            component.openVersionDialog('n1');
+            closed$.next({operatorVersion: 'v1.0.0', image: 'img:v1.0.0', inPorts: ['a'], outPorts: ['o'], config: [], removeLinkIds: []});
+            expect(applied.length).toBe(1);
+            expect(applied[0][1].operatorVersion).toBe('v1.0.0');
+        });
     });
 });

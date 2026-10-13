@@ -67,3 +67,28 @@ export function deleteErrorMessage(error: HttpErrorResponse, operators: Operator
     }
     return 'Could not delete operator';
 }
+
+/** The text for a refused delete of one version of an operator. */
+export function deleteVersionErrorMessage(error: HttpErrorResponse, label: string): string {
+    switch (error.status) {
+        case 400:
+            return typeof error.error === 'string' && error.error.trim() !== ''
+                ? error.error.trim()
+                : 'An operator keeps at least one version; delete the operator instead';
+        case 403:
+            return 'You may not delete versions of this operator';
+        case 404:
+            return `Version ${label} does not exist (anymore)`;
+        case 409: {
+            const response = body(error);
+            if (typeof response?.flows === 'number' || typeof response?.pipelines === 'number') {
+                return `Version ${label} is in use by ${describeUsage(response)}, it was not deleted`;
+            }
+            return `The operator was changed at the same time, version ${label} was not deleted. Reload and try again`;
+        }
+        case 502:
+            return `Could not check whether version ${label} is in use, nothing was deleted`;
+        default:
+            return `Could not delete version ${label}`;
+    }
+}

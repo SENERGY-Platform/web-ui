@@ -17,14 +17,17 @@
 import {OperatorModel} from './operator.model';
 import {
     compareVersionLabels,
+    isValidVersionLabel,
     linksToRemove,
     newerVersionLabel,
+    nextVersionLabel,
     NEWEST_VERSION,
     portNameFromItemId,
     portNames,
     resolveVersionData,
     versionHint,
     versionOptions,
+    versionsNewestFirst,
 } from './operator-version';
 
 const text = 'https://schema.org/Text';
@@ -151,6 +154,49 @@ describe('operator-version', () => {
             const hint = versionHint('v1.0.0', 'v1.2.0');
             expect(hint.text).toContain('update available');
             expect(hint.title).toContain('v1.2.0');
+        });
+    });
+
+    describe('isValidVersionLabel', () => {
+        it('accepts vMAJOR.MINOR.PATCH', () => {
+            for (const label of ['v0.0.0', 'v1.0.0', 'v10.20.30']) {
+                expect(isValidVersionLabel(label)).withContext(label).toBeTrue();
+            }
+        });
+
+        it('refuses a missing v, leading zeros, a suffix and anything else', () => {
+            for (const label of ['', '1.0.0', 'v1.0', 'v01.0.0', 'v1.00.0', 'v1.0.00', 'v1.0.0-rc1', 'v1.0.0 ', 'V1.0.0', 'v1.0.x']) {
+                expect(isValidVersionLabel(label)).withContext(label).toBeFalse();
+            }
+        });
+    });
+
+    describe('nextVersionLabel', () => {
+        const withVersions = (...labels: string[]) => ({versions: labels.map(version => ({version, image: 'i:' + version}))} as OperatorModel);
+
+        it('starts at v1.0.0', () => {
+            expect(nextVersionLabel({} as OperatorModel)).toBe('v1.0.0');
+            expect(nextVersionLabel(withVersions())).toBe('v1.0.0');
+        });
+
+        it('raises the patch of the highest label, compared numerically and regardless of order', () => {
+            expect(nextVersionLabel(withVersions('v1.2.0', 'v1.10.3', 'v1.9.9'))).toBe('v1.10.4');
+            expect(nextVersionLabel(withVersions('v0.0.9'))).toBe('v0.0.10');
+        });
+
+        it('counts a deprecated version too', () => {
+            const op = withVersions('v1.0.0', 'v1.1.0');
+            op.versions![1].deprecated = true;
+            expect(nextVersionLabel(op)).toBe('v1.1.1');
+        });
+    });
+
+    describe('versionsNewestFirst', () => {
+        it('sorts by precedence without touching the operator', () => {
+            const op = {versions: [{version: 'v1.2.0'}, {version: 'v1.10.0'}, {version: 'v1.0.0'}]} as OperatorModel;
+            expect(versionsNewestFirst(op).map(version => version.version)).toEqual(['v1.10.0', 'v1.2.0', 'v1.0.0']);
+            expect(op.versions!.map(version => version.version)).toEqual(['v1.2.0', 'v1.10.0', 'v1.0.0']);
+            expect(versionsNewestFirst({} as OperatorModel)).toEqual([]);
         });
     });
 });

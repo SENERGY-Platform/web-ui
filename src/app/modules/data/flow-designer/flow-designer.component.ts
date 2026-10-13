@@ -226,7 +226,14 @@ export class FlowDesignerComponent implements AfterViewInit {
         );
     }
 
+    /** A second click of a double click on the Version button lands on the backdrop of the dialog the first one opened. */
+    private static readonly BACKDROP_GRACE_MS = 500;
+    private versionDialogOpen = false;
+
     public openVersionDialog(nodeId: string) {
+        if (this.versionDialogOpen) {
+            return;
+        }
         const node = this.diagram.getNodeInfo(nodeId);
         const operator = node === undefined ? null : this.getOperator(node.operatorId);
         if (node === undefined || operator === null) {
@@ -238,11 +245,25 @@ export class FlowDesignerComponent implements AfterViewInit {
             });
             return;
         }
+        this.versionDialogOpen = true;
+        const openedAt = Date.now();
         const dialogRef = this.dialog.open(OperatorVersionDialogComponent, {
             data: {node, operator},
             minWidth: '700px',
+            disableClose: true,
+        });
+        dialogRef.backdropClick().subscribe(() => {
+            if (Date.now() - openedAt >= FlowDesignerComponent.BACKDROP_GRACE_MS) {
+                dialogRef.close();
+            }
+        });
+        dialogRef.keydownEvents().subscribe((event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                dialogRef.close();
+            }
         });
         dialogRef.afterClosed().subscribe((result: OperatorVersionDialogResult | undefined) => {
+            this.versionDialogOpen = false;
             if (result === undefined) {
                 return;
             }

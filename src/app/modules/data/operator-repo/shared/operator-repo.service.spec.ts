@@ -77,4 +77,40 @@ describe('OperatorRepoService', () => {
         expect(req.request.url).toBe(environment.operatorRepoUrl + '/operator?limit=0&offset=0&sort=name:asc&for_user=user-a');
         req.flush({ operators: [], totalCount: 0 });
     });
+
+    describe('versions', () => {
+        const body = {image: 'img:v1', inputs: [], outputs: [], config_values: [], deprecated: false};
+
+        it('puts the version under its label and returns the answer', () => {
+            let done = false;
+            service.putOperatorVersion('op-1', 'v1.0.0', body).subscribe(() => (done = true));
+            const req = http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.0.0');
+            expect(req.request.method).toBe('PUT');
+            expect(req.request.body).toEqual(body);
+            req.flush({}, {status: 201, statusText: 'Created'});
+            expect(done).toBeTrue();
+        });
+
+        it('passes a refused put on to the caller', () => {
+            let status: number | undefined;
+            service.putOperatorVersion('op-1', 'v1.0.0', body).subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+            http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.0.0').flush('image in use', {status: 400, statusText: 'Bad Request'});
+            expect(status).toBe(400);
+        });
+
+        it('deletes the version under its label and passes a refused delete on', () => {
+            let ok = false;
+            service.deleteOperatorVersion('op-1', 'v1.0.0').subscribe(() => (ok = true));
+            const req = http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.0.0');
+            expect(req.request.method).toBe('DELETE');
+            req.flush(null, {status: 204, statusText: 'No Content'});
+            expect(ok).toBeTrue();
+
+            let status: number | undefined;
+            service.deleteOperatorVersion('op-1', 'v1.1.0').subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+            http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.1.0')
+                .flush({error: 'in use', flows: 1, pipelines: 0}, {status: 409, statusText: 'Conflict'});
+            expect(status).toBe(409);
+        });
+    });
 });

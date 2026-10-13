@@ -14,49 +14,164 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px;
-}
-
-mat-grid-tile-footer {
-    background-color: white !important;
-    height: 68px !important;
-    color: black !important;
-}
-
-mat-grid-list {
-    margin-bottom: 100px;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.background {
-    background-image: url('/src/img/background_deviceTypes.png');
-    background-size: contain;
-}
-
-.device-icon {
-    top: 40px;
-    max-height: 100px;
-    max-width: 200px;
-    margin: auto;
-    display: block;
-    position: relative;
-}
-
 .main-panel {
     height: calc(100% - 64px);
     overflow-y: auto;
 }
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
+.editor {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 8px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
+.top-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.revision {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.section {
+    padding: 16px 20px;
+}
+
+.section h2 {
+    margin: 0 0 12px;
+    font-weight: 500;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.section-header h2 {
+    margin: 0;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.field-row {
+    display: flex;
+    gap: 16px;
+}
+
+.field-row-item {
+    flex: 1;
+    min-width: 0;
+}
+
+.field-row-item.wide {
+    flex: 2;
+}
+
+.hint {
+    margin: 0 0 12px;
+    opacity: 0.7;
+}
+
+.version-form {
+    margin: 12px 0 16px;
+    padding: 12px 16px;
+    border: 1px solid rgba(128, 128, 128, 0.4);
+    border-radius: 4px;
+}
+
+.version-form h3 {
+    margin: 0 0 12px;
+    font-weight: 500;
+}
+
+.version-form senergy-operator-ports {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.version-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.versions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.versions-table th {
+    text-align: left;
+    font-weight: 500;
+    padding: 8px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.4);
+}
+
+.versions-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.versions-table .actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.version-image-cell {
+    word-break: break-all;
+}
+
+.version-row.deprecated .version-name,
+.version-row.deprecated .version-image-cell {
+    opacity: 0.6;
+}
+
+.badge {
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    border: 1px solid rgba(128, 128, 128, 0.6);
+}
+
+.save-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #fafafa;
+    border-top: 1px solid rgba(128, 128, 128, 0.4);
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.save-bar-text.invalid {
+    color: #f44336;
+}
+
+@media (max-width: 600px) {
+    .field-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .versions-table .actions {
+        white-space: normal;
+    }
+}

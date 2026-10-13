@@ -14,126 +14,165 @@
   ~ limitations under the License.
   -->
 <div class="main-panel">
-    <div fxLayout="column" class="layout-margin">
-        <div fxLayout="row" fxLayoutAlign="start center" style="margin-bottom:8px;">
+    <div class="editor">
+        <div class="top-row">
             <button mat-raised-button color="accent" routerLink="/data/operator-repo">back</button>
-            <div fxFlex></div>
-            <div *ngIf="shareUser">
-                <h3>Shared by {{shareUser}}</h3>
+            <div class="spacer"></div>
+            <div *ngIf="shareUser" class="shared-by">Shared by {{shareUser}}</div>
+            <div *ngIf="operator.version !== undefined" class="revision" matTooltip="Revision of the operator">
+                <mat-icon>difference</mat-icon>{{operator.version}}
             </div>
         </div>
-        <div  fxLayout="row" fxLayoutAlign="end center" style="margin-bottom: 10px;">
-            <mat-icon>difference</mat-icon>{{operator.version}}
-        </div>
-        <mat-form-field fxFill color="accent" appearance="outline">
-            <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="operator.name" [disabled]="!userHasWritePermission()">
-            <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
-        <mat-form-field fxFill color="accent" appearance="outline">
-            <mat-label>Image</mat-label>
-            <input matInput [(ngModel)]="operator.image" [disabled]="!userHasWritePermission()">
-            <mat-error senergyError label="Image"></mat-error>
-        </mat-form-field>
-        <mat-form-field fxFill color="accent" appearance="outline">
-            <mat-label>Description</mat-label>
-            <input matInput [(ngModel)]="operator.description" [disabled]="!userHasWritePermission()">
-            <mat-error senergyError label="Description"></mat-error>
-        </mat-form-field>
-        <mat-form-field fxFill color="accent" appearance="outline">
-            <mat-label>Cost</mat-label>
-            <input matInput [(ngModel)]="operator.cost" placeholder="0" type="number"
-                [min]="0" [disabled]="!userHasWritePermission()">
-            <mat-error senergyError label="Cost"></mat-error>
-        </mat-form-field>
-        <mat-form-field fxFlex color="accent" appearance="outline">
-            <mat-label>Deployment Type</mat-label>
-            <mtx-select [(ngModel)]="operator.deploymentType"
-                appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-                <mtx-option value="cloud">cloud</mtx-option>
-                <mtx-option value="local">local</mtx-option>
-                <mtx-option value="both">both</mtx-option>
-            </mtx-select>
-            <mat-error senergyError label="Deployment Type"></mat-error>
-        </mat-form-field>
-        <div fxLayout="row" style="margin-top: 8px;" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addInput()" [disabled]="!userHasWritePermission()">Add
-                Input</button>
-        </div>
-        <div *ngFor="let item of operator.inputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center">
-            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
+
+        <mat-card appearance="outlined" class="section general">
+            <h2>General</h2>
+            <mat-form-field class="full-width" color="accent" appearance="outline">
                 <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
-                <mat-error senergyError label="Name"></mat-error>
+                <input matInput [(ngModel)]="operator.name" [disabled]="readOnly"
+                    [errorStateMatcher]="nameMatcher" required>
+                <mat-error>Name is required</mat-error>
             </mat-form-field>
-            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-label>Type</mat-label>
-                <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-                    <mtx-option *ngFor="let option of dropdown" [value]="option">
-                        {{option}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Type"></mat-error>
+            <mat-form-field class="full-width" color="accent" appearance="outline">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="operator.description" [disabled]="readOnly">
+                <mat-error senergyError label="Description"></mat-error>
             </mat-form-field>
-            <button mat-icon-button (click)="deleteInput(item)" [hidden]="!userHasWritePermission()">
-                <mat-icon color="warn">
-                    delete
-                </mat-icon>
-            </button>
-        </div>
-        <div fxLayout="row" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addOutput()" [disabled]="!userHasWritePermission()">Add
-                Output</button>
-        </div>
-        <div *ngFor="let item of operator.outputs" fxLayout="row" class="layout-margin" fxLayoutAlign="center center">
-            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
-                <mat-error senergyError label="Name"></mat-error>
+            <div class="field-row">
+                <mat-form-field class="field-row-item" color="accent" appearance="outline">
+                    <mat-label>Deployment Type</mat-label>
+                    <mtx-select [(ngModel)]="operator.deploymentType"
+                        appendTo=".ng-select-anchor" [disabled]="readOnly">
+                        <mtx-option value="cloud">cloud</mtx-option>
+                        <mtx-option value="local">local</mtx-option>
+                        <mtx-option value="both">both</mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Deployment Type"></mat-error>
+                </mat-form-field>
+                <mat-form-field class="field-row-item" color="accent" appearance="outline">
+                    <mat-label>Cost</mat-label>
+                    <input matInput [(ngModel)]="operator.cost" placeholder="0" type="number"
+                        [min]="0" [disabled]="readOnly">
+                    <mat-error senergyError label="Cost"></mat-error>
+                </mat-form-field>
+            </div>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <h2>Image</h2>
+            <p class="hint" *ngIf="topLevelHint('the image')">{{topLevelHint('the image')}}</p>
+            <mat-form-field class="full-width" color="accent" appearance="outline">
+                <mat-label>Image</mat-label>
+                <input matInput [(ngModel)]="operator.image" [disabled]="topLevelLocked"
+                    [readonly]="hasVersions">
+                <mat-error senergyError label="Image"></mat-error>
             </mat-form-field>
-            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-label>Type</mat-label>
-                <mtx-select [(ngModel)]="item.type"  appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-                    <mtx-option *ngFor="let option of dropdown" [value]="option">
-                        {{option}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Type"></mat-error>
-            </mat-form-field>
-            <button mat-icon-button (click)="deleteOutput(item)" [hidden]="!userHasWritePermission()">
-                <mat-icon color="warn">
-                    delete
-                </mat-icon>
-            </button>
-        </div>
-        <div fxLayout="row" fxLayoutAlign="center center">
-            <button mat-raised-button color="accent" (click)="addConfig()" [disabled]="!userHasWritePermission()">Add Config
-                Value</button>
-        </div>
-        <div *ngFor="let item of operator.config_values" fxLayout="row" class="layout-margin"
-            fxLayoutAlign="center center">
-            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
-                <mat-error senergyError label="Name"></mat-error>
-            </mat-form-field>
-            <mat-form-field fxFlex color="accent" appearance="outline" class="layout-margin">
-                <mat-label>Type</mat-label>
-                <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-                    <mtx-option *ngFor="let option of dropdown" [value]="option">
-                        {{option}}
-                    </mtx-option>
-                </mtx-select>
-                <mat-error senergyError label="Type"></mat-error>
-            </mat-form-field>
-            <button mat-icon-button (click)="deleteConfig(item)" [hidden]="!userHasWritePermission()" >
-                <mat-icon color="warn">
-                    delete
-                </mat-icon>
-            </button>
-        </div>
-        <button mat-fab class="fab" (click)="saveOperator()" [hidden]="!userHasWritePermission()"  matTooltip="Save">
-            <mat-icon>save</mat-icon>
-        </button>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <senergy-operator-ports title="Inputs" [section]="true" noun="input" [(ports)]="operator.inputs"
+                [readonly]="hasVersions" [disabled]="topLevelLocked"
+                [before]="saved.inputs" [hint]="topLevelHint('the inputs')">
+            </senergy-operator-ports>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <senergy-operator-ports title="Outputs" [section]="true" noun="output" [(ports)]="operator.outputs"
+                [readonly]="hasVersions" [disabled]="topLevelLocked"
+                [before]="saved.outputs" [hint]="topLevelHint('the outputs')">
+            </senergy-operator-ports>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <senergy-operator-ports title="Configuration" [section]="true" noun="config value" [(ports)]="operator.config_values"
+                [readonly]="hasVersions" [disabled]="topLevelLocked"
+                [before]="saved.config_values" [hint]="topLevelHint('the config values')">
+            </senergy-operator-ports>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section versions" *ngIf="isExisting">
+            <div class="section-header">
+                <h2>Versions</h2>
+                <div class="spacer"></div>
+                <button mat-stroked-button color="accent" type="button" class="add-version" (click)="startAddVersion()"
+                    *ngIf="!addingVersion" [disabled]="versionActionsBlocked || topLevelDirty">
+                    <mat-icon>add</mat-icon>Add version
+                </button>
+            </div>
+            <p class="hint no-versions" *ngIf="!hasVersions">No versions yet. Add one to let flows pin it.</p>
+            <p class="hint save-first" *ngIf="topLevelDirty && !addingVersion">
+                Save or discard the changes to image, inputs, outputs and config values before adding a version.
+            </p>
+
+            <div class="version-form" *ngIf="addingVersion">
+                <h3>New version</h3>
+                <div class="field-row">
+                    <mat-form-field class="field-row-item" color="accent" appearance="outline">
+                        <mat-label>Version</mat-label>
+                        <input matInput class="version-label" [(ngModel)]="newVersion.label" placeholder="v1.0.0"
+                            [errorStateMatcher]="labelMatcher">
+                        <mat-error>{{versionLabelError()}}</mat-error>
+                    </mat-form-field>
+                    <mat-form-field class="field-row-item wide" color="accent" appearance="outline">
+                        <mat-label>Image</mat-label>
+                        <input matInput class="version-image" [(ngModel)]="newVersion.image" [errorStateMatcher]="imageMatcher">
+                        <mat-error>{{versionImageError()}}</mat-error>
+                    </mat-form-field>
+                </div>
+                <senergy-operator-ports title="Inputs" noun="input" [(ports)]="newVersion.inputs"></senergy-operator-ports>
+                <senergy-operator-ports title="Outputs" noun="output" [(ports)]="newVersion.outputs"></senergy-operator-ports>
+                <senergy-operator-ports title="Config values" noun="config value" [(ports)]="newVersion.config_values">
+                </senergy-operator-ports>
+                <div class="version-form-actions">
+                    <button mat-button type="button" class="cancel-version" (click)="cancelAddVersion()">Cancel</button>
+                    <button mat-raised-button color="accent" type="button" class="save-version" (click)="saveVersion()"
+                        [disabled]="!newVersionValid || versionActionsBlocked">Add version</button>
+                </div>
+            </div>
+
+            <table class="versions-table" *ngIf="hasVersions">
+                <thead>
+                    <tr>
+                        <th>Version</th>
+                        <th>Image</th>
+                        <th>Inputs</th>
+                        <th>Outputs</th>
+                        <th>Config</th>
+                        <th class="actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let version of versions" class="version-row" [class.deprecated]="version.deprecated">
+                        <td class="version-name">
+                            {{version.version}}
+                            <span class="badge" *ngIf="version.deprecated">deprecated</span>
+                        </td>
+                        <td class="version-image-cell">{{version.image}}</td>
+                        <td>{{version.inputs?.length ?? 0}}</td>
+                        <td>{{version.outputs?.length ?? 0}}</td>
+                        <td>{{version.config_values?.length ?? 0}}</td>
+                        <td class="actions">
+                            <button mat-button type="button" class="toggle-deprecated" (click)="toggleDeprecated(version)"
+                                [disabled]="versionActionsBlocked">
+                                {{version.deprecated ? 'Undeprecate' : 'Deprecate'}}
+                            </button>
+                            <button mat-icon-button type="button" class="delete-version" (click)="deleteVersion(version)"
+                                [disabled]="versionActionsBlocked" matTooltip="Delete version">
+                                <mat-icon color="warn">delete</mat-icon>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </mat-card>
+    </div>
+
+    <div class="save-bar" *ngIf="dirty && userHasWritePermission()">
+        <span class="save-bar-text" [class.invalid]="!valid">
+            {{valid ? 'Unsaved changes' : 'Fix the marked fields to save'}}
+        </span>
+        <div class="spacer"></div>
+        <button mat-button type="button" class="cancel" (click)="discardChanges()" [disabled]="isSaving">Cancel</button>
+        <button mat-raised-button color="accent" type="button" class="save" (click)="saveOperator()"
+            [disabled]="!valid || isSaving || versionBusy">{{isSaving ? 'Saving...' : 'Save'}}</button>
     </div>
 </div>

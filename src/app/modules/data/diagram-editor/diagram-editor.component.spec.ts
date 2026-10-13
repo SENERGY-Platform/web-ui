@@ -93,6 +93,33 @@ describe('DiagramEditorComponent', () => {
             expect(emitted).toEqual(['n1']);
         });
 
+        it('shows a Version button on a node that emits the same event as the double click', () => {
+            add('n1', ['a'], ['o']);
+            const emitted: string[] = [];
+            component.nodeDoubleClick.subscribe((id: string) => emitted.push(id));
+            const paper = component.paperService.getPaper();
+            const view = (component as any).graph.getCell('n1').findView(paper);
+            const label = view.el.querySelector('[joint-selector="buttonLabel3"]') as SVGElement;
+            const button = view.el.querySelector('[joint-selector="button3"]') as SVGElement;
+            expect(label.textContent).toBe('Version');
+            expect(button.getAttribute('event')).toBe('element:button3:pointerdown');
+
+            let stopped = false;
+            paper.trigger('element:button3:pointerdown', view, {stopPropagation: () => (stopped = true)});
+            expect(emitted).toEqual(['n1']);
+            expect(stopped).toBeTrue();
+        });
+
+        it('does not open the version dialog twice for a double click on the Version button', () => {
+            add('n1', ['a'], ['o']);
+            const emitted: string[] = [];
+            component.nodeDoubleClick.subscribe((id: string) => emitted.push(id));
+            const paper = component.paperService.getPaper();
+            const view = (component as any).graph.getCell('n1').findView(paper);
+            paper.trigger('element:pointerdblclick', view, {target: view.el.querySelector('[joint-selector="button3"]')});
+            expect(emitted).toEqual([]);
+        });
+
         it('ignores a double click on a button or a port of the node', () => {
             add('n1', ['a'], ['o']);
             const emitted: string[] = [];

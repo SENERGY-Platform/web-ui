@@ -162,6 +162,12 @@ export class NodeFactory {
                 stroke: 'black',
                 strokeWidth: 2,
             },
+            button3: {
+                event: 'element:button3:pointerdown',
+                fill: 'lightblue',
+                stroke: 'black',
+                strokeWidth: 2,
+            },
             buttonLabel: {
                 text: ' X ',
                 fill: 'black',
@@ -170,6 +176,12 @@ export class NodeFactory {
             },
             buttonLabel2: {
                 text: 'Copy Id',
+                fill: 'black',
+                fontSize: 9,
+                fontWeight: 'bold',
+            },
+            buttonLabel3: {
+                text: 'Version',
                 fill: 'black',
                 fontSize: 9,
                 fontWeight: 'bold',
