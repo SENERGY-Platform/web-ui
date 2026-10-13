@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpRequest, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DatePipe, NgStyle } from '@angular/common';
 import { NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
@@ -40,6 +40,8 @@ import { ErrorHandlerService } from '../../../core/services/error-handler.servic
 import { provideAppCharts } from '../../../core/charts/provide-app-charts';
 
 const QUERIES = environment.timescaleAPIURL + '/queries/v2';
+// Grouped queries carry force_tz as a query parameter, so match on the path only.
+const isQuery = (req: HttpRequest<unknown>) => req.url === QUERIES;
 const IOMETER = 'urn:infai:ses:device:342bbd67-919e-4a0d-ba57-d7ac59fbe296';
 const IOMETER_SERVICE = 'urn:infai:ses:service:5dbfb0cd-5caa-5896-bce8-2ef3704a74ee';
 const FAN = 'urn:infai:ses:device:0c5f92f6-9341-459e-b898-e8a217547e09';
@@ -195,7 +197,7 @@ function monthlyWidget(): WidgetModel {
     }
 
     function respond(body: any[]) {
-        const req = httpMock.expectOne(QUERIES);
+        const req = httpMock.expectOne(isQuery);
         req.flush(body);
         return req.request.body;
     }
@@ -220,7 +222,7 @@ function monthlyWidget(): WidgetModel {
         const index = ticks().indexOf(time.valueOf());
         expect(index).withContext('tick at ' + time.toISOString() + ' in ' + JSON.stringify(ticks().map(t => new Date(t).toISOString()))).not.toBe(-1);
         await clickXLabel(index);
-        const req = httpMock.expectOne(QUERIES);
+        const req = httpMock.expectOne(isQuery);
         req.flush([{ requestIndex: 0, data: [[]] }]);
         return req.request.body;
     }
@@ -329,7 +331,7 @@ function monthlyWidget(): WidgetModel {
                 const t = ticks();
                 expect(t.length).withContext('ticks before click ' + (click + 1)).toBeGreaterThan(1);
                 await clickXLabel(0);
-                const req = httpMock.expectOne(QUERIES);
+                const req = httpMock.expectOne(isQuery);
                 expect(req.request.body[0].time).withContext('click ' + (click + 1)).toEqual({ start: new Date(t[0]).toISOString(), end: new Date(t[1]).toISOString() });
                 expect(localStorage.getItem(widget.id + '_groupTime')).withContext('click ' + (click + 1)).toBe(expectedGroupTimes[click]);
                 req.flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [(answers[click] || []).map((d, i) => [d.toISOString(), i + 1])] }]);
@@ -395,7 +397,7 @@ function monthlyWidget(): WidgetModel {
 
         function zoomOut(): any {
             component.zoomOutTime();
-            const req = httpMock.expectOne(QUERIES);
+            const req = httpMock.expectOne(isQuery);
             req.flush([{ requestIndex: 0, data: [[]] }]);
             return req.request.body;
         }
@@ -482,7 +484,7 @@ function monthlyWidget(): WidgetModel {
         /** Drills into the dataset and returns the device ids the drilled request asks for. */
         function drill(label: string): string[] {
             component.drillDown(datasetIndex(label));
-            const req = httpMock.expectOne(QUERIES);
+            const req = httpMock.expectOne(isQuery);
             req.flush([{ requestIndex: 0, data: [[]] }]);
             return req.request.body.map((e: any) => e.deviceId);
         }
@@ -493,7 +495,7 @@ function monthlyWidget(): WidgetModel {
             fixture.detectChanges();
             expect(component.drillable(0)).toBeTrue();
             component.drillDown(0);
-            const req = httpMock.expectOne(QUERIES);
+            const req = httpMock.expectOne(isQuery);
             // compared as sent on the wire, where undefined fields are left out
             expect(JSON.parse(JSON.stringify(req.request.body))).toEqual([{
                 columns: [{ name: 'root.aenergy.total', math: '/1000', groupType: 'difference-last' }],
@@ -667,7 +669,7 @@ function monthlyWidget(): WidgetModel {
             const maximized = component;
             await clickXLabel(ticks().indexOf(local(2026, 9).valueOf()));
             expect(maximized.ready()).withContext('spinner while loading').toBeFalse();
-            const req = httpMock.expectOne(QUERIES);
+            const req = httpMock.expectOne(isQuery);
             expect(req.request.body[0].time).toEqual({ start: local(2026, 9).toISOString(), end: local(2026, 10).toISOString() });
             req.flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [[1, 2, 3].map(d => [local(2026, 9, d).toISOString(), d])] }]);
             fixture.detectChanges();
@@ -679,12 +681,12 @@ function monthlyWidget(): WidgetModel {
             await maximize(months);
             const maximized = component;
             await clickXLabel(ticks().indexOf(local(2026, 9).valueOf()));
-            httpMock.expectOne(QUERIES).flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [[1, 2, 3].map(d => [local(2026, 9, d).toISOString(), d])] }]);
+            httpMock.expectOne(isQuery).flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [[1, 2, 3].map(d => [local(2026, 9, d).toISOString(), d])] }]);
             fixture.detectChanges();
             layout();
             (chart().options.onClick as any)(null, [{ datasetIndex: 0 }], chart());
             expect(maximized.ready()).withContext('spinner while loading').toBeFalse();
-            const req = httpMock.expectOne(QUERIES);
+            const req = httpMock.expectOne(isQuery);
             expect(req.request.body.map((e: any) => e.deviceId)).toEqual([FAN]);
             req.flush([{ requestIndex: 0, data: [[]] }]);
         });
@@ -693,7 +695,7 @@ function monthlyWidget(): WidgetModel {
             await maximize(months);
             expect(component.drillable(0)).toBeTrue();
             component.drillDown(0);
-            const req = httpMock.expectOne(QUERIES);
+            const req = httpMock.expectOne(isQuery);
             expect(req.request.body.map((e: any) => e.deviceId)).toEqual([FAN]);
             req.flush([{ requestIndex: 0, deviceId: FAN, serviceId: FAN_SERVICE, columnNames: ['value'], data: [months] }]);
             fixture.detectChanges();
@@ -736,7 +738,7 @@ function monthlyWidget(): WidgetModel {
             it('draws the zoomed answer after a label click', async () => {
                 await rendered();
                 await clickXLabel(ticks().indexOf(local(2026, 9).valueOf()));
-                const req = httpMock.expectOne(QUERIES);
+                const req = httpMock.expectOne(isQuery);
                 req.flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [[1, 2].map(d => [local(2026, 9, d).toISOString(), d])] }]);
                 await fixture.whenStable();
                 expect(chart().data.datasets[0].data.length).toBe(2);
@@ -766,13 +768,13 @@ function monthlyWidget(): WidgetModel {
             it('offers drill up after a drill and drops it after drilling up', async () => {
                 await rendered();
                 component.drillDown(0);
-                httpMock.expectOne(QUERIES).flush([{ requestIndex: 0, deviceId: FAN, serviceId: FAN_SERVICE, columnNames: ['value'], data: [months] }]);
+                httpMock.expectOne(isQuery).flush([{ requestIndex: 0, deviceId: FAN, serviceId: FAN_SERVICE, columnNames: ['value'], data: [months] }]);
                 await fixture.whenStable();
                 expect(chart().data.datasets.map(d => d.label)).toEqual(['Badlüfter kWh']);
                 expect(component.getCustomIcons(false).icons).toContain('arrow_upward');
                 expect(footerIcons()).toContain('arrow_upward');
                 component.drillUp();
-                httpMock.expectOne(QUERIES).flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [months] }]);
+                httpMock.expectOne(isQuery).flush([{ requestIndex: 0, deviceId: IOMETER, serviceId: IOMETER_SERVICE, columnNames: ['value'], data: [months] }]);
                 await fixture.whenStable();
                 expect(chart().data.datasets.map(d => d.label)).toEqual(['Verbrauch kWh']);
                 expect(component.getCustomIcons(false).icons).not.toContain('arrow_upward');
@@ -792,7 +794,7 @@ function monthlyWidget(): WidgetModel {
                 const replaced = { ...widget, properties: { ...widget.properties, vAxes: [{ ...widget.properties.vAxes![0], subAxes: undefined, deviceId: FAN, serviceId: FAN_SERVICE, valueAlias: 'Edited' }] } } as WidgetModel;
                 fixture.componentRef.setInput('widget', replaced);
                 initWidget.next(widget.id);
-                const req = httpMock.expectOne(QUERIES);
+                const req = httpMock.expectOne(isQuery);
                 expect(req.request.body.map((e: any) => e.deviceId)).toEqual([FAN]);
                 req.flush([{ requestIndex: 0, deviceId: FAN, serviceId: FAN_SERVICE, columnNames: ['value'], data: [months] }]);
                 await fixture.whenStable();
