@@ -577,8 +577,8 @@ export class DeployFlowComponent implements OnInit {
         }
         const characteristicKey = DeployFlowComponent.stringArrayKey(characteristicIds);
         if (this.selectablesCharacteristics.has(aspectsKey + functionId + characteristicKey)) {
-            for (const selectable of this.selectablesCharacteristics.get(aspectsKey + functionId + characteristicKey)?.values() || []) {
-                if (selectable === (currentlySelected as unknown)) {
+            for (const selectables of this.selectablesCharacteristics.get(aspectsKey + functionId + characteristicKey)?.values() || []) {
+                if (selectables.some((selectable) => selectable.id === currentlySelected)) {
                     return of(null);
                 }
             }
