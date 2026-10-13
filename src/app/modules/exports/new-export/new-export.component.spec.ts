@@ -203,4 +203,17 @@ describe('NewExportComponent', () => {
         expect(saved()?.EntityName).toBe(OTHER_OPERATOR_ID);
         expect(saved()?.Topic).toBe('analytics-second');
     }));
+
+    it('sets the time path and its format when an operator is chosen', fakeAsync(() => {
+        const {component} = openForEditing();
+        component.exportForm.patchValue({timestampFormat: null});
+        component.formatControl.setValue('');
+
+        component.operatorChanged(pipeline.operators[1]);
+        tick();
+
+        expect(component.exportForm.getRawValue().timePath).toBe('time');
+        expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
+        expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
+    }));
 });
