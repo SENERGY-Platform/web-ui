@@ -96,9 +96,9 @@ export class ProcessSchedulerComponent implements OnInit {
         dialogConfig.data = item ? JSON.parse(JSON.stringify(item)) : null;
         const editDialogRef = this.dialog.open(ProcessSchedulerScheduleDialogComponent, dialogConfig);
 
-        editDialogRef.afterClosed().subscribe((schedule: ProcessSchedulerModel) => {
-            schedule.created_by = this.widget.id;
+        editDialogRef.afterClosed().subscribe((schedule: ProcessSchedulerModel | undefined) => {
             if (schedule !== undefined) {
+                schedule.created_by = this.widget.id;
                 if (schedule.id === '') {
                     this.processSchedulerService.createSchedule(schedule).subscribe((resp: ProcessSchedulerModel | null) => {
                         if (resp !== null) {
