@@ -65,6 +65,23 @@ describe('OperatorRepoComponent', () => {
         expect(fixture).toBeTruthy();
     });
 
+    describe('version column', () => {
+        it('comes after the name', () => {
+            const columns = fixture.componentInstance.displayedColumns;
+            expect(columns.indexOf('version')).toBe(columns.indexOf('name') + 1);
+        });
+
+        it('shows the newest label, whatever the order, and a dash without versions', () => {
+            const component = fixture.componentInstance;
+            const withVersions = {_id: 'a', versions: [{version: 'v1.2.0'}, {version: 'v1.10.0'}, {version: 'v1.9.0'}]} as OperatorModel;
+            expect(component.versionLabel(withVersions)).toBe('v1.10.0');
+            const deprecatedHighest = {_id: 'd', versions: [{version: 'v1.0.0'}, {version: 'v2.0.0', deprecated: true}]} as OperatorModel;
+            expect(component.versionLabel(deprecatedHighest)).toBe('v1.0.0');
+            expect(component.versionLabel({_id: 'b'} as OperatorModel)).toBe('–');
+            expect(component.versionLabel({_id: 'c', versions: []} as unknown as OperatorModel)).toBe('–');
+        });
+    });
+
     describe('deleting', () => {
         let component: OperatorRepoComponent;
         let service: any;

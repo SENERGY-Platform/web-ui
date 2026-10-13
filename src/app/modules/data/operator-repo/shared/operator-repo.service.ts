@@ -80,10 +80,11 @@ export class OperatorRepoService {
         );
     }
 
-    saveOperator(operator: OperatorModel): Observable<HttpResponse<string> | null> {
+    /** A created operator is answered with {"_id": "..."} as the body; older repositories answer without one. */
+    saveOperator(operator: OperatorModel): Observable<HttpResponse<unknown> | null> {
         if (operator._id === undefined) {
             return this.http
-                .put<string>(environment.operatorRepoUrl + '/operator/', operator, {observe: 'response'})
+                .put<{_id?: string} | null>(environment.operatorRepoUrl + '/operator/', operator, {observe: 'response'})
                 .pipe(catchError(this.errorHandlerService.handleErrorWithSnackBar('Error saving operator',OperatorRepoService.name, 'saveOperator()', null )));
         } else {
             const id = operator._id;

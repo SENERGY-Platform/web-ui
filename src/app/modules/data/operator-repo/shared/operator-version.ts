@@ -157,18 +157,87 @@ export function versionsNewestFirst(operator: OperatorModel): OperatorVersionMod
     return [...(operator.versions ?? [])].sort((a, b) => compareVersionLabels(b.version, a.version));
 }
 
-/** The label after the highest existing one with the patch raised, "v1.0.0" if there is none. */
-export function nextVersionLabel(operator: OperatorModel): string {
-    let highest: number[] | undefined;
+/** The highest label of the operator by semver, or undefined without versions. */
+export function highestVersionLabel(operator: OperatorModel): string | undefined {
+    let highest: string | undefined;
     for (const version of operator.versions ?? []) {
-        const match = LABEL_PATTERN.exec(version.version);
-        if (match === null) {
-            continue;
-        }
-        const parts = [Number(match[1]), Number(match[2]), Number(match[3])];
-        if (highest === undefined || compareVersionLabels(version.version, `v${highest.join('.')}`) > 0) {
-            highest = parts;
+        if (LABEL_PATTERN.test(version.version) && (highest === undefined || compareVersionLabels(version.version, highest) > 0)) {
+            highest = version.version;
         }
     }
-    return highest === undefined ? 'v1.0.0' : `v${highest[0]}.${highest[1]}.${highest[2] + 1}`;
+    return highest;
+}
+
+/** The current version as the repository defines it: the highest label that is not deprecated, the highest overall if all are. Undefined without versions. */
+export function newestVersionLabel(operator: OperatorModel): string | undefined {
+    const ordered = versionsNewestFirst(operator);
+    return (ordered.find(version => !version.deprecated) ?? ordered[0])?.version;
+}
+
+export type ChangeKind = 'major' | 'minor' | 'patch' | 'none';
+
+function typesByName(ios: IOModel[] | undefined): Map<string, Set<string>> {
+    const result = new Map<string, Set<string>>();
+    for (const io of ios ?? []) {
+        if (io.name) {
+            result.set(io.name, (result.get(io.name) ?? new Set<string>()).add(io.type));
+        }
+    }
+    return result;
+}
+
+function sameTypes(a: Set<string>, b: Set<string>): boolean {
+    return a.size === b.size && [...a].every(type => b.has(type));
+}
+
+/** A port or config list: a removed or renamed name or a changed type is major, any other change to the list is minor. */
+function portsChange(before: IOModel[] | undefined, after: IOModel[] | undefined): ChangeKind {
+    const earlier = typesByName(before);
+    const later = typesByName(after);
+    for (const [name, types] of earlier) {
+        const now = later.get(name);
+        if (now === undefined || !sameTypes(types, now)) {
+            return 'major';
+        }
+    }
+    return JSON.stringify(before ?? []) === JSON.stringify(after ?? []) ? 'none' : 'minor';
+}
+
+/** How a version differs from the one before: major for an incompatible port or config change, minor for added ones, patch for the image alone. */
+export function classifyChange(before: VersionData, after: VersionData): ChangeKind {
+    const kinds = [
+        portsChange(before.inputs, after.inputs),
+        portsChange(before.outputs, after.outputs),
+        portsChange(before.config_values, after.config_values),
+    ];
+    if (kinds.includes('major')) {
+        return 'major';
+    }
+    if (kinds.includes('minor')) {
+        return 'minor';
+    }
+    return before.image.trim() === after.image.trim() ? 'none' : 'patch';
+}
+
+/** The label that follows a label: the major, minor or (for 'patch' and 'none') patch number raised, lower numbers reset. */
+export function bumpVersionLabel(label: string, kind: ChangeKind): string {
+    const match = LABEL_PATTERN.exec(label);
+    if (match === null) {
+        return 'v1.0.0';
+    }
+    const [major, minor, patch] = [Number(match[1]), Number(match[2]), Number(match[3])];
+    switch (kind) {
+        case 'major':
+            return `v${major + 1}.0.0`;
+        case 'minor':
+            return `v${major}.${minor + 1}.0`;
+        default:
+            return `v${major}.${minor}.${patch + 1}`;
+    }
+}
+
+/** The label after the highest existing one with the patch raised, "v1.0.0" if there is none. */
+export function nextVersionLabel(operator: OperatorModel): string {
+    const highest = highestVersionLabel(operator);
+    return highest === undefined ? 'v1.0.0' : bumpVersionLabel(highest, 'patch');
 }

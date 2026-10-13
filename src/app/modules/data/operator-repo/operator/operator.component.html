@@ -19,6 +19,9 @@
             <button mat-raised-button color="accent" routerLink="/data/operator-repo">back</button>
             <div class="spacer"></div>
             <div *ngIf="shareUser" class="shared-by">Shared by {{shareUser}}</div>
+            <div *ngIf="isExisting" class="current-version" matTooltip="Newest version of the operator">
+                {{currentVersion ?? 'no version'}}
+            </div>
             <div *ngIf="operator.version !== undefined" class="revision" matTooltip="Revision of the operator">
                 <mat-icon>difference</mat-icon>{{operator.version}}
             </div>
@@ -59,84 +62,49 @@
 
         <mat-card appearance="outlined" class="section">
             <h2>Image</h2>
-            <p class="hint" *ngIf="topLevelHint('the image')">{{topLevelHint('the image')}}</p>
+            <p class="hint" *ngIf="isExisting">A change to the image, inputs, outputs or config is saved as a new version.</p>
             <mat-form-field class="full-width" color="accent" appearance="outline">
                 <mat-label>Image</mat-label>
-                <input matInput [(ngModel)]="operator.image" [disabled]="topLevelLocked"
-                    [readonly]="hasVersions">
-                <mat-error senergyError label="Image"></mat-error>
+                <input matInput class="image-input" [(ngModel)]="operator.image" [disabled]="readOnly"
+                    [errorStateMatcher]="imageMatcher">
+                <mat-error class="image-problem">{{imageProblem()}}</mat-error>
             </mat-form-field>
         </mat-card>
 
         <mat-card appearance="outlined" class="section">
             <senergy-operator-ports title="Inputs" [section]="true" noun="input" [(ports)]="operator.inputs"
-                [readonly]="hasVersions" [disabled]="topLevelLocked"
-                [before]="saved.inputs" [hint]="topLevelHint('the inputs')">
+                [disabled]="readOnly" [before]="saved.inputs">
             </senergy-operator-ports>
         </mat-card>
 
         <mat-card appearance="outlined" class="section">
             <senergy-operator-ports title="Outputs" [section]="true" noun="output" [(ports)]="operator.outputs"
-                [readonly]="hasVersions" [disabled]="topLevelLocked"
-                [before]="saved.outputs" [hint]="topLevelHint('the outputs')">
+                [disabled]="readOnly" [before]="saved.outputs">
             </senergy-operator-ports>
         </mat-card>
 
         <mat-card appearance="outlined" class="section">
             <senergy-operator-ports title="Configuration" [section]="true" noun="config value" [(ports)]="operator.config_values"
-                [readonly]="hasVersions" [disabled]="topLevelLocked"
-                [before]="saved.config_values" [hint]="topLevelHint('the config values')">
+                [disabled]="readOnly" [before]="saved.config_values">
             </senergy-operator-ports>
         </mat-card>
 
         <mat-card appearance="outlined" class="section versions" *ngIf="isExisting">
-            <div class="section-header">
-                <h2>Versions</h2>
-                <div class="spacer"></div>
-                <button mat-stroked-button color="accent" type="button" class="add-version" (click)="startAddVersion()"
-                    *ngIf="!addingVersion" [disabled]="versionActionsBlocked || topLevelDirty">
-                    <mat-icon>add</mat-icon>Add version
-                </button>
-            </div>
-            <p class="hint no-versions" *ngIf="!hasVersions">No versions yet. Add one to let flows pin it.</p>
-            <p class="hint save-first" *ngIf="topLevelDirty && !addingVersion">
-                Save or discard the changes to image, inputs, outputs and config values before adding a version.
+            <h2>Version history</h2>
+            <p class="hint no-versions" *ngIf="!hasVersions">
+                No versions yet. Changing the image, inputs, outputs or config saves the current state as {{adopts ? 'v1.0.0' : 'a version'}}
+                and the change as a new version.
             </p>
-
-            <div class="version-form" *ngIf="addingVersion">
-                <h3>New version</h3>
-                <div class="field-row">
-                    <mat-form-field class="field-row-item" color="accent" appearance="outline">
-                        <mat-label>Version</mat-label>
-                        <input matInput class="version-label" [(ngModel)]="newVersion.label" placeholder="v1.0.0"
-                            [errorStateMatcher]="labelMatcher">
-                        <mat-error>{{versionLabelError()}}</mat-error>
-                    </mat-form-field>
-                    <mat-form-field class="field-row-item wide" color="accent" appearance="outline">
-                        <mat-label>Image</mat-label>
-                        <input matInput class="version-image" [(ngModel)]="newVersion.image" [errorStateMatcher]="imageMatcher">
-                        <mat-error>{{versionImageError()}}</mat-error>
-                    </mat-form-field>
-                </div>
-                <senergy-operator-ports title="Inputs" noun="input" [(ports)]="newVersion.inputs"></senergy-operator-ports>
-                <senergy-operator-ports title="Outputs" noun="output" [(ports)]="newVersion.outputs"></senergy-operator-ports>
-                <senergy-operator-ports title="Config values" noun="config value" [(ports)]="newVersion.config_values">
-                </senergy-operator-ports>
-                <div class="version-form-actions">
-                    <button mat-button type="button" class="cancel-version" (click)="cancelAddVersion()">Cancel</button>
-                    <button mat-raised-button color="accent" type="button" class="save-version" (click)="saveVersion()"
-                        [disabled]="!newVersionValid || versionActionsBlocked">Add version</button>
-                </div>
-            </div>
+            <p class="hint save-first" *ngIf="hasVersions && topLevelDirty">
+                Save or discard the changes to image, inputs, outputs and config before deprecating or deleting a version.
+            </p>
 
             <table class="versions-table" *ngIf="hasVersions">
                 <thead>
                     <tr>
                         <th>Version</th>
                         <th>Image</th>
-                        <th>Inputs</th>
-                        <th>Outputs</th>
-                        <th>Config</th>
+                        <th>Ports</th>
                         <th class="actions"></th>
                     </tr>
                 </thead>
@@ -147,9 +115,7 @@
                             <span class="badge" *ngIf="version.deprecated">deprecated</span>
                         </td>
                         <td class="version-image-cell">{{version.image}}</td>
-                        <td>{{version.inputs?.length ?? 0}}</td>
-                        <td>{{version.outputs?.length ?? 0}}</td>
-                        <td>{{version.config_values?.length ?? 0}}</td>
+                        <td class="version-ports">{{portsSummary(version)}}</td>
                         <td class="actions">
                             <button mat-button type="button" class="toggle-deprecated" (click)="toggleDeprecated(version)"
                                 [disabled]="versionActionsBlocked">
@@ -170,6 +136,15 @@
         <span class="save-bar-text" [class.invalid]="!valid">
             {{valid ? 'Unsaved changes' : 'Fix the marked fields to save'}}
         </span>
+        <ng-container *ngIf="versionChange">
+            <span class="saves-as">Saves as</span>
+            <mat-form-field class="label-field" color="accent" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Version</mat-label>
+                <input matInput class="save-label" [(ngModel)]="versionLabel" [disabled]="isSaving"
+                    [errorStateMatcher]="labelMatcher">
+                <mat-error class="label-error">{{versionLabelError()}}</mat-error>
+            </mat-form-field>
+        </ng-container>
         <div class="spacer"></div>
         <button mat-button type="button" class="cancel" (click)="discardChanges()" [disabled]="isSaving">Cancel</button>
         <button mat-raised-button color="accent" type="button" class="save" (click)="saveOperator()"

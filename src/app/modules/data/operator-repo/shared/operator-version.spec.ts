@@ -16,15 +16,20 @@
 
 import {OperatorModel} from './operator.model';
 import {
+    bumpVersionLabel,
+    classifyChange,
     compareVersionLabels,
+    highestVersionLabel,
     isValidVersionLabel,
     linksToRemove,
     newerVersionLabel,
+    newestVersionLabel,
     nextVersionLabel,
     NEWEST_VERSION,
     portNameFromItemId,
     portNames,
     resolveVersionData,
+    VersionData,
     versionHint,
     versionOptions,
     versionsNewestFirst,
@@ -188,6 +193,80 @@ describe('operator-version', () => {
             const op = withVersions('v1.0.0', 'v1.1.0');
             op.versions![1].deprecated = true;
             expect(nextVersionLabel(op)).toBe('v1.1.1');
+        });
+    });
+
+    describe('classifyChange', () => {
+        const io = (name: string, type = 'float') => ({name, type});
+        const data = (extra: Partial<VersionData> = {}): VersionData => ({
+            image: 'img:1', inputs: [io('a')], outputs: [io('o')], config_values: [io('c', 'string')], ...extra,
+        });
+
+        it('is patch for a new image alone and none without a change', () => {
+            expect(classifyChange(data(), data({image: 'img:2'}))).toBe('patch');
+            expect(classifyChange(data(), data({image: ' img:1 '}))).toBe('none');
+            expect(classifyChange(data(), data())).toBe('none');
+        });
+
+        it('is minor when inputs, outputs or config values were only added', () => {
+            expect(classifyChange(data(), data({inputs: [io('a'), io('b')]}))).toBe('minor');
+            expect(classifyChange(data(), data({outputs: [io('o'), io('p')]}))).toBe('minor');
+            expect(classifyChange(data(), data({config_values: [io('c', 'string'), io('d')]}))).toBe('minor');
+            expect(classifyChange(data({inputs: undefined as any}), data())).toBe('minor');
+        });
+
+        it('is major when a port or config value was removed, renamed or retyped', () => {
+            expect(classifyChange(data(), data({inputs: []}))).toBe('major');
+            expect(classifyChange(data(), data({outputs: [io('renamed')]}))).toBe('major');
+            expect(classifyChange(data(), data({inputs: [io('a', 'string')]}))).toBe('major');
+            expect(classifyChange(data(), data({config_values: []}))).toBe('major');
+            expect(classifyChange(data(), data({config_values: [io('c', 'int')]}))).toBe('major');
+        });
+
+        it('takes the largest change when several kinds are mixed', () => {
+            expect(classifyChange(data(), data({image: 'img:2', inputs: [io('a'), io('b')], outputs: []}))).toBe('major');
+            expect(classifyChange(data(), data({image: 'img:2', inputs: [io('a'), io('b')]}))).toBe('minor');
+        });
+
+        it('does not count a blank row as a port that was removed or added', () => {
+            expect(classifyChange(data({inputs: [io('a'), io('')]}), data())).toBe('minor');
+            expect(classifyChange(data(), data({inputs: [io('a'), io('')]}))).toBe('minor');
+        });
+    });
+
+    describe('bumpVersionLabel', () => {
+        it('raises the part for the kind and resets the lower ones', () => {
+            expect(bumpVersionLabel('v1.4.7', 'major')).toBe('v2.0.0');
+            expect(bumpVersionLabel('v1.4.7', 'minor')).toBe('v1.5.0');
+            expect(bumpVersionLabel('v1.4.7', 'patch')).toBe('v1.4.8');
+            expect(bumpVersionLabel('v1.4.9', 'none')).toBe('v1.4.10');
+        });
+
+        it('starts over at v1.0.0 from a label it cannot read', () => {
+            expect(bumpVersionLabel('v1.0.0-rc1', 'minor')).toBe('v1.0.0');
+        });
+    });
+
+    describe('highestVersionLabel and newestVersionLabel', () => {
+        const withVersions = (...labels: string[]) => ({versions: labels.map(version => ({version, image: 'i:' + version}))} as OperatorModel);
+
+        it('compare numerically and regardless of order', () => {
+            expect(highestVersionLabel(withVersions('v1.2.0', 'v1.10.0', 'v1.9.9'))).toBe('v1.10.0');
+            expect(newestVersionLabel(withVersions('v1.2.0', 'v1.10.0', 'v1.9.9'))).toBe('v1.10.0');
+        });
+
+        it('newest skips deprecated versions, but names the highest one when all are deprecated', () => {
+            const op = withVersions('v1.0.0', 'v1.1.0', 'v2.0.0');
+            op.versions![2].deprecated = true;
+            expect(newestVersionLabel(op)).toBe('v1.1.0');
+            expect(highestVersionLabel(op)).toBe('v2.0.0');
+            op.versions!.forEach(version => (version.deprecated = true));
+            expect(newestVersionLabel(op)).toBe('v2.0.0');
+        });
+
+        it('are undefined without versions', () => {
+            expect(highestVersionLabel({} as OperatorModel)).toBeUndefined();
+            expect(newestVersionLabel({} as OperatorModel)).toBeUndefined();
         });
     });
 

@@ -37,6 +37,7 @@ import {Router} from '@angular/router';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
 import {deleteErrorMessage} from './shared/operator-delete-error';
+import {newestVersionLabel} from './shared/operator-version';
 import {HttpErrorResponse} from '@angular/common/http';
 @Component({
     selector: 'senergy-operator-repo',
@@ -48,7 +49,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
     selection = new SelectionModel<OperatorModel>(true, []);
-    displayedColumns: string[] = ['select', 'pub', 'name', 'image'];
+    displayedColumns: string[] = ['select', 'pub', 'name', 'version', 'image'];
     totalCount = 0;
 
     operators = [] as OperatorModel[];
@@ -131,6 +132,11 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
                     });
                 }
             });
+    }
+
+    /** The label of the newest version of the operator, "–" if it has none. */
+    versionLabel(operator: OperatorModel): string {
+        return newestVersionLabel(operator) ?? '–';
     }
 
     /** A refused delete leaves the list and the selection as they are. */
