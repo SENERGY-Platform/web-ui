@@ -154,6 +154,30 @@ describe('ChartsExportService', () => {
             { column: 'global_irradiance_wm2', type: '>', value: 5 },
         ]);
     });
+
+    describe('time zone of the Timescale query', () => {
+        const properties = (group?: ChartsExportPropertiesModel['group']): ChartsExportPropertiesModel => ({
+            exports: [timescaleExport()],
+            vAxes: [{ instanceId: 'export-1', exportName: 'weather', valueName: 'v', valueType: 'number', math: '', color: '' }],
+            group,
+        });
+        const forcedTz = () => {
+            const req = httpMock.expectOne(r => r.url === environment.timescaleAPIURL + '/queries/v2');
+            req.flush([{ requestIndex: 0, data: [] }]);
+            return req.request.params.get('force_tz');
+        };
+
+        it('sends the browser zone when the request groups by time', (done) => {
+            service.getData(properties({ time: '1h', type: 'mean' }) as any).subscribe(() => done());
+            expect(forcedTz()).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        });
+
+        it('sends none when the request does not group by time', (done) => {
+            service.getData(properties() as any).subscribe(() => done());
+            expect(forcedTz()).toBeNull();
+        });
+    });
+
     describe('chart data of a column chart', () => {
         const axis = (alias: string, extra: Partial<ChartsExportVAxesModel> = {}): ChartsExportVAxesModel => ({
             deviceId: 'dev-' + alias,
@@ -184,7 +208,7 @@ describe('ChartsExportService', () => {
         function load(widget: WidgetModel, answer: [number, string, [string, number | null][]][], chooseColors = false): ChartsExportChart {
             let chart: ChartsExportChart | undefined;
             service.getChartData(widget, undefined, undefined, '1months', undefined, undefined, chooseColors).subscribe(c => chart = c as ChartsExportChart);
-            httpMock.expectOne(environment.timescaleAPIURL + '/queries/v2').flush(answer.map(([requestIndex, deviceId, rows]) => ({
+            httpMock.expectOne(r => r.url === environment.timescaleAPIURL + '/queries/v2').flush(answer.map(([requestIndex, deviceId, rows]) => ({
                 requestIndex, deviceId, serviceId: 'svc', columnNames: ['value'], data: [rows],
             })));
             expect(chart).withContext('chart').toBeDefined();

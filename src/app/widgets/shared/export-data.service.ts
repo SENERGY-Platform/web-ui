@@ -59,8 +59,10 @@ export class ExportDataService {
         return this.http.post<any[][][]>(environment.timescaleAPIURL + '/queries?format=per_query', query);
     }
 
-    queryTimescaleV2(query: QueriesRequestV2ElementTimescaleModel[]): Observable<{requestIndex: number; deviceId?: string; serviceId?: string; exportId?: string; columnNames?: string[]; data: any[][][]}[]> {
-        return this.http.post<{requestIndex: number; deviceId?: string; serviceId?: string; exportId?: string; columnNames?: string[]; data: any[][][]}[]>(environment.timescaleAPIURL + '/queries/v2', query);
+    /** `timezone` (IANA) makes the backend compute time buckets in that zone instead of each device's own. */
+    queryTimescaleV2(query: QueriesRequestV2ElementTimescaleModel[], timezone?: string): Observable<{requestIndex: number; deviceId?: string; serviceId?: string; exportId?: string; columnNames?: string[]; data: any[][][]}[]> {
+        return this.http.post<{requestIndex: number; deviceId?: string; serviceId?: string; exportId?: string; columnNames?: string[]; data: any[][][]}[]>(
+            environment.timescaleAPIURL + '/queries/v2', query, timezone ? { params: { force_tz: timezone } } : undefined);
     }
 
     queryAsTableInflux(
