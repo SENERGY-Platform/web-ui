@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, HostListener, OnDestroy} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, HostListener, OnDestroy, Output} from '@angular/core';
 import {dia, shapes, util, Vectorizer} from 'jointjs';
-import {DiagramModel, LinkIOModel} from './shared/diagram.model';
+import {DiagramModel, LinkIOModel, NodeInfo, NodeLinkInfo, NodeVersionChange} from './shared/diagram.model';
 import {IOModel} from '../operator-repo/shared/operator.model';
+import {portNameFromItemId} from '../operator-repo/shared/operator-version';
 import uuid = util.uuid;
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Clipboard} from '@angular/cdk/clipboard';
@@ -40,6 +41,8 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     paperHeight = 600;
 
     private linkAttrs = {'.marker-target': {d: 'M 10 0 L 0 5 L 10 10 z'}};
+
+    @Output() nodeDoubleClick = new EventEmitter<string>();
 
     public dragStartPosition: { x: number; y: number } | null = null;
 
@@ -106,6 +109,13 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
                 duration: 2000,
             });
         });
+        this.paperService.getPaper().on('element:pointerdblclick', (elementView: any, evt: any) => {
+            // The delete and copy buttons and the ports react to clicks themselves.
+            if ((evt?.target as Element | undefined)?.closest?.('[event], [magnet="true"], [port]')) {
+                return;
+            }
+            this.nodeDoubleClick.emit(elementView.model.id);
+        });
     }
 
     public prepareLink(source: LinkIOModel, target: LinkIOModel) {
@@ -131,7 +141,9 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
                operatorId: string,
                version: number | undefined = undefined,
                position: NodePosition | undefined = undefined,
-               id: string | undefined = undefined
+               id: string | undefined = undefined,
+               operatorVersion: string | undefined = undefined,
+               newerVersion: string | undefined = undefined
     ) {
         if (position === undefined) {
             position = this.calculateNodePosition();
@@ -147,6 +159,8 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
             position: position,
             deploymentType: type,
             version: version,
+            operatorVersion: operatorVersion,
+            newerVersion: newerVersion,
         });
         return node;
     }
@@ -160,11 +174,62 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
             operatorId: string,
             version: number | undefined = undefined,
             position: NodePosition | undefined = undefined,
-            id: string | undefined = undefined
+            id: string | undefined = undefined,
+            operatorVersion: string | undefined = undefined,
+            newerVersion: string | undefined = undefined
     ) {
-        const node = this.createNode(type, name, image, inputs, outputs, config, operatorId, version, position, id);
+        const node = this.createNode(
+            type, name, image, inputs, outputs, config, operatorId, version, position, id, operatorVersion, newerVersion);
         this.graph.addCells([node]);
         this.graph.maxZIndex();
+    }
+
+    public getNodeInfo(id: string): NodeInfo | undefined {
+        const node = this.graph.getCell(id);
+        if (node === undefined || node.get('type') !== 'senergy.NodeElement') {
+            return undefined;
+        }
+        const links: NodeLinkInfo[] = [];
+        for (const link of this.graph.getConnectedLinks(node)) {
+            const source = link.source();
+            const target = link.target();
+            const outgoing = source.id === node.id;
+            const end = outgoing ? source : target;
+            const peerId = outgoing ? target.id : source.id;
+            if (end.port === undefined) {
+                continue;
+            }
+            links.push({
+                id: link.id,
+                direction: outgoing ? 'out' : 'in',
+                port: portNameFromItemId(end.port),
+                peerName: peerId === undefined ? '' : this.graph.getCell(peerId)?.get('name') ?? '',
+            });
+        }
+        return {
+            operatorId: node.get('operatorId'),
+            name: node.get('name'),
+            image: node.get('image'),
+            operatorVersion: node.get('operatorVersion') || undefined,
+            inPorts: node.get('inPorts') ?? [],
+            outPorts: node.get('outPorts') ?? [],
+            config: node.get('config'),
+            links,
+        };
+    }
+
+    /**
+     * Applies a version choice to a node: removes the links that lost their port, then replaces ports and config.
+     */
+    public applyNodeVersion(id: string, change: NodeVersionChange) {
+        const node = this.graph.getCell(id);
+        if (node === undefined) {
+            return;
+        }
+        for (const linkId of change.removeLinkIds) {
+            this.graph.getCell(linkId)?.remove();
+        }
+        this.nodeFactory.applyVersionChange(node, change);
     }
 
     calculateNodePosition(): NodePosition {

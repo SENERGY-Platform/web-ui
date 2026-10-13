@@ -16,8 +16,9 @@
 
 import { Injectable } from '@angular/core';
 import { dia } from 'jointjs';
-import { LinkIOModel } from './diagram.model';
+import { LinkIOModel, NodeVersionChange } from './diagram.model';
 import { IOModel } from '../../operator-repo/shared/operator.model';
+import { versionHint } from '../../operator-repo/shared/operator-version';
 import { NodeElementDefinition } from './node-element-definition';
 
 export interface NodeConfig {
@@ -29,6 +30,8 @@ export interface NodeConfig {
     config: IOModel[] |undefined;
     operatorId: string;
     version?: number;
+    operatorVersion?: string;
+    newerVersion?: string;
     position: NodePosition;
     deploymentType: 'cloud' | 'local' | '';
 }
@@ -75,6 +78,8 @@ export class NodeFactory {
             config: config.config,
             operatorId: config.operatorId,
             version: config.version,
+            // An unpinned node must not carry the key: graph.toJSON() would send it to the flow repo.
+            ...(config.operatorVersion ? {operatorVersion: config.operatorVersion} : {}),
         });
 
         if (config.id) {
@@ -85,8 +90,47 @@ export class NodeFactory {
         node.position(config.position.x, config.position.y);
 
         this.applyNodeStyling(node, config.name, fillColor);
+        this.applyVersionHint(node, config.operatorVersion, config.newerVersion);
 
         return node;
+    }
+
+    /**
+     * Pin or unpin an existing node and replace its ports and config with those of the chosen version
+     */
+    public applyVersionChange(node: any, change: NodeVersionChange): void {
+        if (change.operatorVersion) {
+            node.set('operatorVersion', change.operatorVersion);
+        } else {
+            node.unset('operatorVersion');
+        }
+        node.set({
+            image: change.image,
+            inPorts: change.inPorts,
+            outPorts: change.outPorts,
+            config: change.config,
+        });
+        if (change.version !== undefined) {
+            node.set('version', change.version);
+        }
+        node.updatePortItems();
+        const size = this.calculateNodeSize(change.inPorts, change.outPorts);
+        node.resize(size.width, size.height);
+        this.applyVersionHint(node, change.operatorVersion, change.newerVersion);
+    }
+
+    /**
+     * Show the pinned version on the node and mark it when the operator has a newer one
+     */
+    private applyVersionHint(node: any, pin: string | undefined, newer: string | undefined): void {
+        const hint = versionHint(pin, newer);
+        node.attr({
+            versionlabel: {
+                text: hint.text,
+                title: hint.title,
+                fontWeight: newer === undefined ? 'normal' : 'bold',
+            },
+        });
     }
 
     /**

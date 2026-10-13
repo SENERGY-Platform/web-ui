@@ -37,6 +37,8 @@ import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import {FlowDesignerComponent} from './flow-designer.component';
 import {FlowUpdateDialogComponent} from './update-dialog/flow-update-dialog.component';
+import {OperatorVersionDialogComponent} from './version-dialog/operator-version-dialog.component';
+import { MatSelectModule } from '@angular/material/select';
 import {DiagramEditorComponent} from '../diagram-editor/diagram-editor.component';
 
 const designer: Route = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
@@ -61,10 +63,11 @@ const designerEdit: Route = { path: 'data/designer/:id', pathMatch: 'full', comp
         FormsModule,
         MatCheckboxModule,
         MatCardModule,
+        MatSelectModule,
         ReactiveFormsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
     ],
-    declarations: [FlowDesignerComponent,FlowUpdateDialogComponent, DiagramEditorComponent],
+    declarations: [FlowDesignerComponent,FlowUpdateDialogComponent, OperatorVersionDialogComponent, DiagramEditorComponent],
 })
 export class FlowDesignerModule {}

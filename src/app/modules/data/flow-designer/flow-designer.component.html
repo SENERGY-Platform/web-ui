@@ -32,7 +32,7 @@
         </mat-form-field>
         <div fxLayout="row">
             <div id="senergy-diagram-editor" style="width: 70%">
-                <senergy-diagram-editor></senergy-diagram-editor>
+                <senergy-diagram-editor (nodeDoubleClick)="openVersionDialog($event)"></senergy-diagram-editor>
             </div>
             <div id="diagram-operators" style="width: 30%" class="mat-elevation-z1" >
                 <div style="overflow: auto; height: {{listHeight}} px">

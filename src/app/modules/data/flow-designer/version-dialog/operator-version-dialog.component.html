@@ -1,0 +1,80 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<h1 mat-dialog-title>Operator version of {{ data.node.name }}</h1>
+<div mat-dialog-content>
+    <mat-form-field appearance="outline" color="accent" class="version-select">
+        <mat-label>Version</mat-label>
+        <mat-select [ngModel]="selected" (ngModelChange)="select($event)">
+            <mat-option *ngFor="let option of options" [value]="option.value">{{ option.label }}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div class="comparison-container">
+        <div class="cell-model-column">
+            <h3>Current</h3>
+            <p><strong>Version:</strong> {{ data.node.operatorVersion || 'Newest' }}</p>
+            <p>
+                <strong>Image:</strong>
+                <span [style.color]="differs('image') ? 'red' : 'inherit'">{{ current.image }}</span>
+            </p>
+            <p>
+                <strong>In Ports:</strong>
+                <span [style.color]="differs('inPorts') ? 'red' : 'inherit'">{{ current.inPorts }}</span>
+            </p>
+            <p>
+                <strong>Out Ports:</strong>
+                <span [style.color]="differs('outPorts') ? 'red' : 'inherit'">{{ current.outPorts }}</span>
+            </p>
+            <p>
+                <strong>Config:</strong>
+                <span [style.color]="differs('config') ? 'red' : 'inherit'">{{ current.config }}</span>
+            </p>
+        </div>
+        <div class="cell-model-column">
+            <h3>Selected</h3>
+            <p><strong>Version:</strong> {{ selected === newestValue ? 'Newest' : selected }}</p>
+            <p>
+                <strong>Image:</strong>
+                <span [style.color]="differs('image') ? 'green' : 'inherit'">{{ chosen.image }}</span>
+            </p>
+            <p>
+                <strong>In Ports:</strong>
+                <span [style.color]="differs('inPorts') ? 'green' : 'inherit'">{{ chosen.inPorts }}</span>
+            </p>
+            <p>
+                <strong>Out Ports:</strong>
+                <span [style.color]="differs('outPorts') ? 'green' : 'inherit'">{{ chosen.outPorts }}</span>
+            </p>
+            <p>
+                <strong>Config:</strong>
+                <span [style.color]="differs('config') ? 'green' : 'inherit'">{{ chosen.config }}</span>
+            </p>
+        </div>
+    </div>
+    <div *ngIf="removedLinks.length > 0" class="removed-links">
+        <p><strong>These links will be removed because the selected version has no such port:</strong></p>
+        <ul>
+            <li *ngFor="let link of removedLinks">
+                {{ link.direction === 'in' ? 'Input' : 'Output' }} "{{ link.port }}"<span *ngIf="link.peerName">
+                    {{ link.direction === 'in' ? 'from' : 'to' }} {{ link.peerName }}</span>
+            </li>
+        </ul>
+    </div>
+</div>
+<div mat-dialog-actions>
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-button color="accent" (click)="onApply()">Apply</button>
+</div>
