@@ -78,11 +78,6 @@
                         (click)="runCommand(widget.properties.acControl?.setModeDry, widget.properties.acControl?.setModeDry?.value)">
                     <mat-icon>water_drop</mat-icon>
                 </button>
-                <button *ngIf="widget.properties.acControl?.getLocked !== undefined" mat-icon-button color="accent"
-                        (click)="toggleLocked()">
-                    <mat-icon *ngIf="widget.properties.acControl?.getLocked?.value === false">lock_open</mat-icon>
-                    <mat-icon *ngIf="widget.properties.acControl?.getLocked?.value === true">lock_open</mat-icon>
-                </button>
             </div>
             <div *ngIf="widget.properties.acControl?.getFanSpeedLevel !== undefined && widget.properties.acControl?.setFanSpeedLevel !== undefined"
                  fxLayout="row" fxLayoutAlign="space-between center">

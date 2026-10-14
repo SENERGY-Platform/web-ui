@@ -16,7 +16,7 @@
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { WidgetModel } from '../../modules/dashboard/shared/dashboard-widget.model';
-import { Subscription } from 'rxjs';
+import { concatMap, map, Observable, of, Subscription } from 'rxjs';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { DeviceCommandModel, DeviceCommandService } from '../../core/services/device-command.service';
 import { AcControlElementModel } from './shared/ac-control.model';
@@ -24,6 +24,10 @@ import { AcControlEditDialogComponent } from './dialog/ac-control-edit-dialog.co
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardManipulationEnum } from '../../modules/dashboard/shared/dashboard-manipulation.enum';
 import { environment } from '../../../environments/environment';
+import { DeviceInstancesService } from '../../modules/devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService } from '../../modules/metadata/device-types-overview/shared/device-type.service';
+import { DeviceGroupsService } from '../../modules/devices/device-groups/shared/device-groups.service';
+import { AcControlCandidate, acControlElements, deviceGroupCandidates, deviceTypeCandidates, isLegacyAcControl, keepsEveryRole } from './shared/ac-control-elements';
 
 @Component({
     selector: 'senergy-ac-control',
@@ -44,12 +48,17 @@ export class AcControlComponent implements OnInit, OnDestroy {
 
 
     constructor(private dashboardService: DashboardService, private deviceCommandService: DeviceCommandService, private dialog: MatDialog,
+                private deviceInstancesService: DeviceInstancesService, private deviceTypeService: DeviceTypeService,
+                private deviceGroupsService: DeviceGroupsService,
     ) {
     }
 
     ngOnInit(): void {
-        this.update();
-        this.refresh();
+        // reload events wait for the migration, a refresh before it would send the removed functions
+        this.destroy.add(this.migrateLegacyConfiguration().subscribe(() => {
+            this.update();
+            this.refresh();
+        }));
     }
 
     ngOnDestroy(): void {
@@ -77,12 +86,52 @@ export class AcControlComponent implements OnInit, OnDestroy {
         });
     }
 
+    /**
+     * Derives a configuration saved before the aspect lists again from the current device type or group, the way
+     * saving the edit dialog does. Device, group and the target range are kept. It is stored only if the user may
+     * change the widget and every role is filled again; otherwise it is derived on every load, so that a corrected
+     * environment or device type still reaches it. A device or group that cannot be read leaves it unchanged.
+     */
+    private migrateLegacyConfiguration(): Observable<unknown> {
+        const acControl = this.widget.properties.acControl;
+        if (acControl === undefined || !isLegacyAcControl(acControl)) {
+            return of(null);
+        }
+        let candidates: Observable<AcControlCandidate[] | null>;
+        if (acControl.deviceId) {
+            candidates = this.deviceInstancesService.getDeviceInstanceBaseModel(acControl.deviceId).pipe(
+                concatMap(device => device === null ? of(null) : this.deviceTypeService.getDeviceType(device.device_type_id)),
+                map(deviceType => deviceType === null ? null : deviceTypeCandidates(deviceType)));
+        } else if (acControl.deviceGroupId) {
+            candidates = this.deviceGroupsService.getDeviceGroup(acControl.deviceGroupId)
+                .pipe(map(group => group === null ? null : deviceGroupCandidates(group)));
+        } else {
+            return of(null);
+        }
+        return candidates.pipe(concatMap(c => {
+            // the edit dialog may have replaced the configuration in the meantime
+            if (c === null || this.widget.properties.acControl !== acControl) {
+                return of(null);
+            }
+            this.widget.properties.acControl = {
+                deviceId: acControl.deviceId,
+                deviceGroupId: acControl.deviceGroupId,
+                minTarget: acControl.minTarget,
+                maxTarget: acControl.maxTarget,
+                ...acControlElements(c),
+            };
+            return this.userHasUpdatePropertiesAuthorization && keepsEveryRole(acControl, this.widget.properties.acControl)
+                ? this.dashboardService.updateWidgetProperty(this.dashboardId, this.widget.id, [], this.widget.properties)
+                : of(null);
+        }));
+    }
+
     private update() {
-        this.destroy = this.dashboardService.initWidgetObservable.subscribe(async (event: string) => {
+        this.destroy.add(this.dashboardService.initWidgetObservable.subscribe(async (event: string) => {
             if (event === 'reloadAll' || event === this.widget.id) {
                 this.refresh();
             }
-        });
+        }));
     }
 
     private refresh() {
@@ -99,10 +148,6 @@ export class AcControlComponent implements OnInit, OnDestroy {
         if (this.widget.properties.acControl?.getMode !== undefined) {
              
             m.set(this.toCommand(this.widget.properties.acControl!.getMode!, null), this.widget.properties.acControl!.getMode!);
-        }
-        if (this.widget.properties.acControl?.getLocked !== undefined) {
-             
-            m.set(this.toCommand(this.widget.properties.acControl!.getLocked!, null), this.widget.properties.acControl!.getLocked!);
         }
         if (this.widget.properties.acControl?.getTargetTemperature !== undefined) {
              
@@ -220,14 +265,6 @@ export class AcControlComponent implements OnInit, OnDestroy {
         }
     }
 
-    toggleLocked() {
-        if (this.widget.properties.acControl?.getLocked?.value === true) {
-            this.runCommand(this.widget.properties.acControl?.setUnlocked, null);
-        } else {
-            this.runCommand(this.widget.properties.acControl?.setLocked, null);
-        }
-    }
-
     runCommand(e: AcControlElementModel | undefined, value: any) {
         if (e === undefined) {
             return;
@@ -260,7 +297,7 @@ export class AcControlComponent implements OnInit, OnDestroy {
             group_id: this.widget.properties.acControl?.deviceGroupId,
             function_id: e.functionId,
             service_id: e.serviceId,
-            aspect_id: e.aspectId,
+            ...(e.aspectIds !== undefined ? {aspect_ids: e.aspectIds} : {aspect_id: e.aspectId}),
             device_class_id: environment.deviceClassThermostat,
             input: value,
         };
@@ -285,9 +322,6 @@ export class AcControlComponent implements OnInit, OnDestroy {
         }
         if ((e === acControl?.setModeAuto || e === acControl?.setModeCool || e === acControl?.setModeHeat || e === acControl?.setModeVent || e === acControl?.setModeDry) && acControl.getMode !== undefined) {
             acControl.getMode.value = value;
-        }
-        if ((e === acControl?.setUnlocked || e === acControl?.setLocked) && acControl.getLocked !== undefined) {
-            acControl.getLocked.value = value;
         }
         if (e === acControl?.setTargetTemperature?.[0] && acControl.getTargetTemperature !== undefined) {
             acControl.getTargetTemperature?.forEach(e2 => e2.value = value);
