@@ -102,14 +102,25 @@ describe('DeploymentsService.v2deleteDeploymentIfExists', () => {
 
     function serviceFailingWith(status: number): DeploymentsService {
         reported = [];
-        const notice = (kind: string) => (_s: string, _m: string, result: unknown) => () => {
-            reported.push(kind);
-            return of(result);
+        // reached through `this`, so a handler called unbound fails the spec
+        const handlers = {
+            record(kind: string, result: unknown) {
+                return () => {
+                    reported.push(kind);
+                    return of(result);
+                };
+            },
+            handleError(_s: string, _m: string, result: unknown) {
+                return this.record('notice', result);
+            },
+            handleErrorQuietly(_s: string, _m: string, result: unknown) {
+                return this.record('quiet', result);
+            },
         };
         TestBed.configureTestingModule({
             providers: [
                 { provide: HttpClient, useValue: { delete: () => throwError(() => new HttpErrorResponse({ status })) } },
-                { provide: ErrorHandlerService, useValue: { handleError: notice('notice'), handleErrorQuietly: notice('quiet') } },
+                { provide: ErrorHandlerService, useValue: handlers },
                 { provide: LadonService, useValue: { getUserAuthorizationsForURI: () => ({}) } },
             ],
         });

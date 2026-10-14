@@ -272,14 +272,37 @@ describe('GeneratedResourceJanitor', () => {
             expect(storedIds()).toEqual(['bad']);
         });
 
-        it('keeps everything when the dashboards read fails, which answers an empty list', () => {
-            seed([entry(exp('e1'), SETTLE_AFTER_MS)]);
-            answer();
+        it('keeps everything when the dashboards read fails, which answers null', () => {
+            seed([entry(exp('e1'), SETTLE_AFTER_MS), entry(exp('e2'), SETTLE_AFTER_MS, ripe)]);
+            dashboards = () => of(null);
 
             janitor.settle();
 
             expect(deleted).toEqual([]);
-            expect(storedIds()).toEqual(['e1']);
+            expect(stored()).toEqual([entry(exp('e1'), SETTLE_AFTER_MS), entry(exp('e2'), SETTLE_AFTER_MS, ripe)]);
+        });
+
+        it('marks and deletes unreferenced entries of a user without dashboards', () => {
+            seed([entry(exp('fresh'), SETTLE_AFTER_MS), entry(exp('old'), SETTLE_AFTER_MS, ripe), entry(ins('i1'), SETTLE_AFTER_MS, ripe)]);
+            answer();
+
+            janitor.settle();
+
+            expect(getDashboards()).toHaveBeenCalledTimes(2);
+            expect(deleted).toEqual(['old', 'i1']);
+            expect(stored()).toEqual([entry(exp('fresh'), SETTLE_AFTER_MS, { unreferencedSince: NOW })]);
+        });
+
+        it('keeps everything when the second dashboards read of a settle fails', () => {
+            seed([entry(ins('i1'), SETTLE_AFTER_MS, ripe)]);
+            const answers: unknown[] = [[], null];
+            dashboards = () => of(answers.shift());
+
+            janitor.settle();
+
+            expect(getDashboards()).toHaveBeenCalledTimes(2);
+            expect(deleted).toEqual([]);
+            expect(storedIds()).toEqual(['i1']);
         });
 
         it('keeps everything when reading the dashboards throws, and settles on the next call', () => {
@@ -552,7 +575,7 @@ describe('GeneratedResourceJanitor', () => {
             it('keeps everything when the dashboards read after the export list fails or is malformed', () => {
                 const before = [entry(ins('i1'), SETTLE_AFTER_MS, ripe), entry(exp('e1'), SETTLE_AFTER_MS, ripe)];
                 spyOn(console, 'warn');
-                const failedReads: (() => Observable<unknown>)[] = [() => of([]), () => of([null]), () => throwError(() => new Error('500'))];
+                const failedReads: (() => Observable<unknown>)[] = [() => of(null), () => of([null]), () => throwError(() => new Error('500'))];
                 failedReads.forEach((second) => {
                     seed(before);
                     const loading = new Subject<unknown>();

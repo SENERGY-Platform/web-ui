@@ -73,10 +73,12 @@ export class DashboardService {
     /** REST Services */
 
     /**
-     * Answers [] on any error; `quiet` logs the error without the error notice. `bypassCache` neither reads nor writes the
-     * session cache and asks for the full list, so the answer cannot lag a write.
+     * Answers [] on an error, or null with `quiet`, which logs it without the error notice. `bypassCache` neither reads
+     * nor writes the session cache and asks for the full list, so the answer cannot lag a write; a 304 then answers null.
      */
-    getDashboards(options: { quiet?: boolean; bypassCache?: boolean } = {}): Observable<DashboardModel[]> {
+    getDashboards(): Observable<DashboardModel[]>;
+    getDashboards(options: { quiet?: boolean; bypassCache?: boolean }): Observable<DashboardModel[] | null>;
+    getDashboards(options: { quiet?: boolean; bypassCache?: boolean } = {}): Observable<DashboardModel[] | null> {
         const key = DashboardService.name + '/getDashboards';
         const stored = options.bypassCache ? null : sessionStorage.getItem(key);
         let cached: { dashboards: DashboardModel[]; lastModified: string } | undefined;
@@ -93,12 +95,15 @@ export class DashboardService {
                 }
                 return resp.body || [];
             }),
-            catchError((e: HttpErrorResponse) => {
+            catchError((e: HttpErrorResponse): Observable<DashboardModel[] | null> => {
                 if (e.status === 304) {
-                    return of(cached?.dashboards || []);
+                    // without a cache there is nothing a 304 could stand for
+                    return options.bypassCache
+                        ? this.errorHandlerService.handleErrorQuietly(DashboardService.name, 'getDashboards: 304 without a cache', null)(e)
+                        : of(cached?.dashboards || []);
                 }
                 return options.quiet
-                    ? this.errorHandlerService.handleErrorQuietly(DashboardService.name, 'getDashboards', [] as DashboardModel[])(e)
+                    ? this.errorHandlerService.handleErrorQuietly(DashboardService.name, 'getDashboards', null)(e)
                     : this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [] as DashboardModel[])(e);
             }),
         );

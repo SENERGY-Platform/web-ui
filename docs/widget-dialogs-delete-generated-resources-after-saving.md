@@ -70,8 +70,9 @@ It settles at app start and whenever a dialog closes, under these conditions:
   id of a linked export does, or of any export reading from it (`Filter` is the instance id) in the user's live export
   list. That list is loaded once per settle, only if a due import instance is not referenced through its own id or its
   linked exports; the dashboards are then read a second time, and that read decides for all entries. If the list fails
-  or is malformed or incomplete, no import instance is marked or deleted in that settle. A failed, empty or malformed
-  dashboards read keeps everything;
+  or is malformed or incomplete, no import instance is marked or deleted in that settle. A failed or malformed
+  dashboards read keeps everything, and so does a 304, since the read bypasses the cache; an empty dashboard list means
+  that no widget references anything;
 - an unreferenced entry is first only marked and deleted at a later settle at least 10 minutes after the mark that
   finds it unreferenced again. Moving a widget between dashboards is two updates, so one read can miss it.
 

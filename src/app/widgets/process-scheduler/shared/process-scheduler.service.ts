@@ -78,13 +78,15 @@ export class ProcessSchedulerService {
             .delete<HttpResponseBase>(environment.processSchedulerUrl + '/schedules/' + scheduleId, { observe: 'response' })
             .pipe(
                 map((resp) => ({ status: resp.status })),
-                catchError((error: HttpErrorResponse) =>
-                    error?.status === 404
-                        ? this.errorHandlerService.handleErrorQuietly(ProcessRepoService.name, 'deleteScheduleIfExists: already gone', { status: 404 })(error)
-                        : quiet
-                          ? this.errorHandlerService.handleErrorQuietly(ProcessRepoService.name, 'deleteScheduleIfExists', { status: error?.status >= 400 ? error.status : 500 })(error)
-                          : this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteScheduleIfExists', { status: error?.status >= 400 ? error.status : 500 })(error),
-                ),
+                catchError((error: HttpErrorResponse) => {
+                    const handlers = this.errorHandlerService;
+                    if (error?.status === 404) {
+                        return handlers.handleErrorQuietly(ProcessRepoService.name, 'deleteScheduleIfExists: already gone', { status: 404 })(error);
+                    }
+                    // bound, because the handlers use the service's own members
+                    const handle = quiet ? handlers.handleErrorQuietly.bind(handlers) : handlers.handleError.bind(handlers);
+                    return handle(ProcessRepoService.name, 'deleteScheduleIfExists', { status: error?.status >= 400 ? error.status : 500 })(error);
+                }),
             );
     }
 

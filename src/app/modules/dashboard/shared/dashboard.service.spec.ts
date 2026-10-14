@@ -196,12 +196,29 @@ describe('DashboardService write failures', () => {
             expect(snackOpen).toHaveBeenCalled();
         });
 
-        it('answers an empty list on a failure without the error notice when quiet', () => {
-            let result: DashboardModel[] | undefined;
+        it('answers null on a failure without the error notice when quiet, so it cannot pass for an empty list', () => {
+            let result: DashboardModel[] | null | undefined;
             service.getDashboards({ quiet: true }).subscribe((r) => (result = r));
             failNext('GET', '/dashboards');
-            expect(result).toEqual([]);
+            expect(result).toBeNull();
             expect(snackOpen).not.toHaveBeenCalled();
+        });
+
+        it('answers an empty list on a failure with the error notice past the cache when not quiet', () => {
+            let result: DashboardModel[] | null | undefined;
+            service.getDashboards({ bypassCache: true }).subscribe((r) => (result = r));
+            failNext('GET', '/dashboards');
+            expect(result).toEqual([]);
+            expect(snackOpen).toHaveBeenCalled();
+        });
+
+        it('answers an empty list for an empty or null body when quiet past the cache', () => {
+            const results: (DashboardModel[] | null)[] = [];
+            service.getDashboards({ quiet: true, bypassCache: true }).subscribe((r) => results.push(r));
+            http.expectOne((r) => r.method === 'GET' && r.url.endsWith('/dashboards')).flush([]);
+            service.getDashboards({ quiet: true, bypassCache: true }).subscribe((r) => results.push(r));
+            http.expectOne((r) => r.method === 'GET' && r.url.endsWith('/dashboards')).flush(null);
+            expect(results).toEqual([[], []]);
         });
 
         const lastModified = 'Tue, 13 Oct 2026 10:00:00 GMT';
@@ -219,9 +236,16 @@ describe('DashboardService write failures', () => {
             expect(result?.map((d) => d.id)).toEqual(['cached']);
         });
 
+        it('by default answers an empty list on a 304 without a cache', () => {
+            let result: DashboardModel[] | undefined;
+            service.getDashboards().subscribe((r) => (result = r));
+            nextGet().flush(null, { status: 304, statusText: 'Not Modified' });
+            expect(result).toEqual([]);
+        });
+
         it('bypassing the cache asks for the full list and neither reads nor writes the session cache', () => {
             cache('cached');
-            let result: DashboardModel[] | undefined;
+            let result: DashboardModel[] | null | undefined;
             service.getDashboards({ bypassCache: true }).subscribe((r) => (result = r));
             const req = nextGet();
             expect(req.request.headers.get('If-Modified-Since')).toBe(epoch);
@@ -229,9 +253,11 @@ describe('DashboardService write failures', () => {
             expect(result?.map((d) => d.id)).toEqual(['fresh']);
             expect(JSON.parse(sessionStorage.getItem(cacheKey) as string).dashboards).toEqual([{ id: 'cached' }]);
 
+            // with nothing cached to stand for, a 304 is a failed read
             service.getDashboards({ bypassCache: true }).subscribe((r) => (result = r));
             nextGet().flush(null, { status: 304, statusText: 'Not Modified' });
-            expect(result).toEqual([]);
+            expect(result).toBeNull();
+            expect(snackOpen).not.toHaveBeenCalled();
         });
     });
 });

@@ -125,11 +125,11 @@ function newTabId(): string {
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 
 /**
- * Every string key and value in the properties of all widgets, joined; undefined when the answer is not a non-empty
- * dashboard list, because a failed read also answers an empty one.
+ * Every string key and value in the properties of all widgets, joined; undefined unless the answer is a dashboard list.
+ * A failed read answers null; an empty list means no widget references anything.
  */
 function widgetPropertyText(dashboards: unknown): string | undefined {
-    if (!Array.isArray(dashboards) || dashboards.length === 0) {
+    if (!Array.isArray(dashboards)) {
         return undefined;
     }
     const strings: string[] = [];

@@ -156,13 +156,15 @@ export class ExportService {
     stopPipelineByIdIfExists(id: string, quiet = false): Observable<{ status: number }> {
         return this.http.delete(environment.exportService + '/instance/' + id, { responseType: 'text', observe: 'response' }).pipe(
             map((resp) => ({ status: resp.status })),
-            catchError((error: HttpErrorResponse) =>
-                error?.status === 404
-                    ? this.errorHandlerService.handleErrorQuietly(ExportService.name, 'stopPipelineByIdIfExists: already gone', { status: 404 })(error)
-                    : quiet
-                      ? this.errorHandlerService.handleErrorQuietly(ExportService.name, 'stopPipelineByIdIfExists: Error', { status: error?.status >= 400 ? error.status : 500 })(error)
-                      : this.errorHandlerService.handleError(ExportService.name, 'stopPipelineByIdIfExists: Error', { status: error?.status >= 400 ? error.status : 500 })(error),
-            ),
+            catchError((error: HttpErrorResponse) => {
+                const handlers = this.errorHandlerService;
+                if (error?.status === 404) {
+                    return handlers.handleErrorQuietly(ExportService.name, 'stopPipelineByIdIfExists: already gone', { status: 404 })(error);
+                }
+                // bound, because the handlers use the service's own members
+                const handle = quiet ? handlers.handleErrorQuietly.bind(handlers) : handlers.handleError.bind(handlers);
+                return handle(ExportService.name, 'stopPipelineByIdIfExists: Error', { status: error?.status >= 400 ? error.status : 500 })(error);
+            }),
         );
     }
 

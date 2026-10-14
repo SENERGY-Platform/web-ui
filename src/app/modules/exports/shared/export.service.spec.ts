@@ -64,16 +64,21 @@ describe('stopPipelines', () => {
 describe('stopPipelineByIdIfExists', () => {
     const ladon = { getUserAuthorizationsForURI: () => ({}) } as unknown as LadonService;
     let reported: string[];
+    // reached through `this`, so a handler called unbound fails the spec
     const errorHandler = {
-        handleErrorQuietly: (_s: string, _m: string, result: unknown) => () => {
-            reported.push('quiet');
-            return of(result);
+        record(kind: string, result: unknown) {
+            return () => {
+                reported.push(kind);
+                return of(result);
+            };
         },
-        handleError: (_s: string, _m: string, result: unknown) => () => {
-            reported.push('snack');
-            return of(result);
+        handleErrorQuietly(_s: string, _m: string, result: unknown) {
+            return this.record('quiet', result);
         },
-    } as unknown as ErrorHandlerService;
+        handleError(_s: string, _m: string, result: unknown) {
+            return this.record('snack', result);
+        },
+    };
 
     beforeEach(() => (reported = []));
 
