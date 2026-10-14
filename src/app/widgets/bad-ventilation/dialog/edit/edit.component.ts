@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { map } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
@@ -33,13 +33,14 @@ import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { DataSourceSelectorComponent } from '../../../charts/shared/data-source-selector/data-source-selector.component';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     selector: 'senergy-edit-ventilation',
     templateUrl: './edit.component.html',
     styleUrls: ['./edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, DataSourceSelectorComponent, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, DataSourceSelectorComponent, MatDialogActions, MatButton]
 })
 export class EditVentilationWidgetComponent implements OnInit {
     private formBuilder = inject(FormBuilder);

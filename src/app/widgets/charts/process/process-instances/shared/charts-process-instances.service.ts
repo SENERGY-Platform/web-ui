@@ -25,6 +25,7 @@ import { DashboardService } from '../../../../../modules/dashboard/shared/dashbo
 import { openWidgetEditDialog } from '../../../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { map } from 'rxjs/operators';
 import { processStatusCounts, ProcessStatusCount } from './charts-process-instances-chart';
+import { dialogSize } from '../../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -42,7 +43,7 @@ export class ChartsProcessInstancesService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     /** The instance count per state; undefined without instances. */

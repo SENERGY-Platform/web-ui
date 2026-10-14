@@ -27,6 +27,7 @@ import { QueriesRequestV2ElementTimescaleModel } from '../../shared/export-data.
 import { ExportDataService } from '../../shared/export-data.service';
 import { EditVentilationWidgetComponent } from '../dialog/edit/edit.component';
 import { DeviceValue, VentilationResult } from './model';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root'
@@ -150,6 +151,6 @@ export class BadVentilationService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '450px' });
+        }, dialogSize('l'));
     }
 }

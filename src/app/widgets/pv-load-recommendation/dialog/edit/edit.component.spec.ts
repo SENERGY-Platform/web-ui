@@ -51,3 +51,36 @@ describe('PVLoadRecommendationEditComponent', () => {
         expect(component).toBeTruthy();
     });
 });
+
+describe('PVLoadRecommendationEditComponent closing', () => {
+  let fixture: ComponentFixture<PVLoadRecommendationEditComponent>;
+  let close: jasmine.Spy;
+
+  beforeEach(async () => {
+    close = jasmine.createSpy('close');
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule, MatSnackBarModule, PVLoadRecommendationEditComponent],
+        providers: [
+            { provide: MAT_DIALOG_DATA, useValue: {} },
+            { provide: MatDialogRef, useValue: { close } },
+            provideHttpClient(withInterceptorsFromDi()),
+            provideHttpClientTesting(),
+        ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(PVLoadRecommendationEditComponent);
+    fixture.componentInstance.widget = {properties: {measurement: undefined}, id: '', name: '', type: '', y: 1, x: 1, w: 1, h: 1};
+    fixture.detectChanges();
+  });
+
+  it('returns the Cancel result from the header close icon', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    (el.querySelector('mat-dialog-actions button') as HTMLButtonElement).click();
+    const cancelArgs = close.calls.mostRecent().args;
+    close.calls.reset();
+
+    (el.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(close.calls.mostRecent().args).toEqual(cancelArgs);
+  });
+});

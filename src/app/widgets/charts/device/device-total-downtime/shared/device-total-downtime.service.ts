@@ -28,6 +28,7 @@ import {
 } from '../../../../../modules/devices/device-instances/shared/device-instances-history.model';
 import {catchError, concatMap, map} from 'rxjs/operators';
 import {FailureRatioInterval, failureRatioIntervals, toConnectionTimelines} from './device-total-downtime-chart';
+import { dialogSize } from '../../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -45,7 +46,7 @@ export class DeviceTotalDowntimeService {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     /** The failure ratio intervals of today up to now; undefined when no device has a history. */

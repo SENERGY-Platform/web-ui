@@ -19,6 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { EventListEditDialogComponent } from '../dialogs/event-list-edit-dialog.component';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -33,6 +34,6 @@ export class EventListService {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        });
+        }, dialogSize('m'));
     }
 }
