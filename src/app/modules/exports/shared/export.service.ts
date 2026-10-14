@@ -84,6 +84,13 @@ export class ExportService {
             );
     }
 
+    /** Every export the user can read, also outside the internal databases and unpaged; null on error, logged without the error notice. */
+    getAllExportsQuietly(): Observable<ExportResponseModel | null> {
+        return this.http
+            .get<ExportResponseModel | null>(environment.exportService + '/instance?internal_only=false')
+            .pipe(catchError(this.errorHandlerService.handleErrorQuietly(ExportService.name, 'getAllExportsQuietly: Error', null)));
+    }
+
     getExportsAdmin(
         internalOnly: boolean,
         search?: string,
@@ -144,16 +151,17 @@ export class ExportService {
     /**
      * For clean-ups: a 404 means the export is already gone and is answered quietly with status 404; any other
      * failure answers its real status (500 without one), unlike stopPipelineById whose fallback 404 hides errors.
+     * `quiet` logs that failure without the error notice.
      */
-    stopPipelineByIdIfExists(id: string): Observable<{ status: number }> {
+    stopPipelineByIdIfExists(id: string, quiet = false): Observable<{ status: number }> {
         return this.http.delete(environment.exportService + '/instance/' + id, { responseType: 'text', observe: 'response' }).pipe(
             map((resp) => ({ status: resp.status })),
             catchError((error: HttpErrorResponse) =>
                 error?.status === 404
                     ? this.errorHandlerService.handleErrorQuietly(ExportService.name, 'stopPipelineByIdIfExists: already gone', { status: 404 })(error)
-                    : this.errorHandlerService.handleError(ExportService.name, 'stopPipelineByIdIfExists: Error', {
-                          status: error?.status >= 400 ? error.status : 500,
-                      })(error),
+                    : quiet
+                      ? this.errorHandlerService.handleErrorQuietly(ExportService.name, 'stopPipelineByIdIfExists: Error', { status: error?.status >= 400 ? error.status : 500 })(error)
+                      : this.errorHandlerService.handleError(ExportService.name, 'stopPipelineByIdIfExists: Error', { status: error?.status >= 400 ? error.status : 500 })(error),
             ),
         );
     }

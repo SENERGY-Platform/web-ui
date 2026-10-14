@@ -23,7 +23,7 @@ import { DeploymentsService } from '../../../modules/processes/deployments/share
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { DataTableElementModel } from './data-table.model';
 import { Observable } from 'rxjs';
-import { deleteGeneratedResources, deleteResources, GeneratedResource, GeneratedResourceDeleters } from '../../shared/generated-resources';
+import { deleteResources, GeneratedResource, GeneratedResourceDeleters } from '../../shared/generated-resources';
 
 @Injectable({
     providedIn: 'root',
@@ -65,11 +65,6 @@ export class DataTableService {
             }
         });
         return resources;
-    }
-
-    /** Deletes the candidates that `stillUsed` does not contain; answers the descriptions of the deletes that failed. */
-    deleteGeneratedResources(candidates: GeneratedResource[], stillUsed: GeneratedResource[]): Observable<string[]> {
-        return deleteGeneratedResources(candidates, stillUsed, this.deleters());
     }
 
     /** Deletes the resources; answers those whose delete failed. */

@@ -182,4 +182,56 @@ describe('DashboardService write failures', () => {
             expect(widgetEvents.map((e) => e.widgetId)).toEqual(['w9']);
         });
     });
+
+    describe('getDashboards', () => {
+        const cacheKey = DashboardService.name + '/getDashboards';
+        beforeEach(() => sessionStorage.removeItem(cacheKey));
+        afterEach(() => sessionStorage.removeItem(cacheKey));
+
+        it('answers an empty list on a failure and shows the error notice', () => {
+            let result: DashboardModel[] | undefined;
+            service.getDashboards().subscribe((r) => (result = r));
+            failNext('GET', '/dashboards');
+            expect(result).toEqual([]);
+            expect(snackOpen).toHaveBeenCalled();
+        });
+
+        it('answers an empty list on a failure without the error notice when quiet', () => {
+            let result: DashboardModel[] | undefined;
+            service.getDashboards({ quiet: true }).subscribe((r) => (result = r));
+            failNext('GET', '/dashboards');
+            expect(result).toEqual([]);
+            expect(snackOpen).not.toHaveBeenCalled();
+        });
+
+        const lastModified = 'Tue, 13 Oct 2026 10:00:00 GMT';
+        const epoch = new Date(0).toUTCString();
+        const cache = (id: string) => sessionStorage.setItem(cacheKey, JSON.stringify({ dashboards: [{ id }], lastModified }));
+        const nextGet = () => http.expectOne((r) => r.method === 'GET' && r.url.endsWith('/dashboards'));
+
+        it('by default revalidates the session cache and answers it on 304', () => {
+            cache('cached');
+            let result: DashboardModel[] | undefined;
+            service.getDashboards().subscribe((r) => (result = r));
+            const req = nextGet();
+            expect(req.request.headers.get('If-Modified-Since')).toBe(lastModified);
+            req.flush(null, { status: 304, statusText: 'Not Modified' });
+            expect(result?.map((d) => d.id)).toEqual(['cached']);
+        });
+
+        it('bypassing the cache asks for the full list and neither reads nor writes the session cache', () => {
+            cache('cached');
+            let result: DashboardModel[] | undefined;
+            service.getDashboards({ bypassCache: true }).subscribe((r) => (result = r));
+            const req = nextGet();
+            expect(req.request.headers.get('If-Modified-Since')).toBe(epoch);
+            req.flush([{ id: 'fresh' }], { headers: { 'Last-Modified': 'Tue, 13 Oct 2026 11:00:00 GMT' } });
+            expect(result?.map((d) => d.id)).toEqual(['fresh']);
+            expect(JSON.parse(sessionStorage.getItem(cacheKey) as string).dashboards).toEqual([{ id: 'cached' }]);
+
+            service.getDashboards({ bypassCache: true }).subscribe((r) => (result = r));
+            nextGet().flush(null, { status: 304, statusText: 'Not Modified' });
+            expect(result).toEqual([]);
+        });
+    });
 });

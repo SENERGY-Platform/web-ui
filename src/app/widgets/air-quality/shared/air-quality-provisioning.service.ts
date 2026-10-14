@@ -28,7 +28,17 @@ import { UBAStation } from './uba.model';
 import { snackError } from '../../../core/services/snack-bar-messages';
 import { environment } from '../../../../environments/environment';
 import { AirQualityExternalProvider, Location, MeasurementModel } from './air-quality.model';
-import { deleteResources, GeneratedResource, UnsavedGeneratedResources } from '../../shared/generated-resources';
+import {
+    deleteResources,
+    GeneratedResource,
+    GeneratedResourceLog,
+    NO_LOG,
+    UnsavedGeneratedResources,
+    unsavedNotice,
+    withExport,
+} from '../../shared/generated-resources';
+
+type Provisioned = 'export' | 'import instance';
 
 /** A generated import instance or export that could not be created; the widget must not be saved. */
 export class AirQualitySaveStepError extends Error {
@@ -61,14 +71,17 @@ export class AirQualityProvisioningService {
     private importTypesService = inject(ImportTypesService);
     private snackBar = inject(MatSnackBar);
     private state!: AirQualityProvisioningState;
-    private pendingCleanup: { kind: 'export' | 'import instance'; id: string; provider: string }[] = [];
+    private pendingCleanup: { kind: Provisioned; id: string; provider: string }[] = [];
     // created by this dialog and matched like the loaded ones, so a retry reuses them instead of creating them again
     private createdInstances: ImportInstancesModel[] = [];
     private createdExports: ExportModel[] = [];
-    // deleted by a clean-up of this dialog, so no later save may adopt them from the lists loaded at open
-    private deletedIds = new Set<string>();
+    // released for clean-up by a save of this dialog, so no later save adopts them from the lists loaded at open
+    private releasedIds = new Set<string>();
+    // every export this dialog started, also for an aborted attempt, by the import instance it reads from
+    private startedExports: { instanceId: string; exportId: string }[] = [];
+    private log: GeneratedResourceLog = NO_LOG;
 
-    /** Import instances and exports of attempts not yet saved; deleted after a save that does not use them or on close. */
+    /** Import instances and exports of attempts not yet saved; released for clean-up after a save that does not use them or on close. */
     readonly unsaved = new UnsavedGeneratedResources({
         delete: (resources) =>
             deleteResources(resources, {
@@ -79,15 +92,17 @@ export class AirQualityProvisioningService {
                         catchError((err: unknown) => of({ status: (err as { status?: number })?.status === 404 ? 404 : 500 })),
                     ),
             }),
-        reportNotDeleted: (notDeleted) =>
-            snackError(
-                this.snackBar,
-                'Could not delete the ' + notDeleted.map((r) => r.kind + ' for ' + r.label).join(', ') + ' generated for the unsaved changes',
-            ),
+        reportNotDeleted: (failed, unconfirmed, logged) =>
+            snackError(this.snackBar, unsavedNotice(failed, unconfirmed, logged, (r) => r.kind + ' for ' + r.label)),
     });
 
     bind(state: AirQualityProvisioningState): void {
         this.state = state;
+    }
+
+    logTo(log: GeneratedResourceLog): void {
+        this.log = log;
+        this.unsaved.logTo(log);
     }
 
     private get widget(): WidgetModel {
@@ -127,8 +142,8 @@ export class AirQualityProvisioningService {
         return forkJoin(observables);
     }
 
-    // Old generated resources are deleted only after the new ones exist and the widget was saved.
-    private queueCleanup(kind: 'export' | 'import instance', id: string, provider: string): void {
+    // Old generated resources are released for clean-up only after the new ones exist and the widget was saved.
+    private queueCleanup(kind: Provisioned, id: string, provider: string): void {
         if (!this.pendingCleanup.some((c) => c.kind === kind && c.id === id)) {
             this.pendingCleanup.push({ kind, id, provider });
         }
@@ -150,31 +165,62 @@ export class AirQualityProvisioningService {
 
     /** Runs after the property update answered OK; `sent` are the references of the properties that update carried. */
     runPendingCleanup(sent: GeneratedResource[]): void {
+        this.unsaved.propertiesSaved(sent);
         this.unsaved.takeForSave().forEach((r) => (r.kind === 'export' || r.kind === 'import instance') && this.queueCleanup(r.kind, r.id, r.label));
         const stillUsed = new Set([...sent, ...this.unsaved.possiblyStored()].map((r) => r.id));
-        const failed: string[] = [];
-        this.pendingCleanup
-            .filter((c) => !stillUsed.has(c.id))
-            .forEach((c) => {
-                this.deletedIds.add(c.id);
-                const text = c.kind + ' for ' + c.provider;
-                const request: Observable<{ status: number } | void> =
-                    c.kind === 'export' ? this.exportService.stopPipelineByIdIfExists(c.id) : this.importInstancesService.deleteImportInstance(c.id);
-                request.subscribe({
-                    next: (resp) => {
-                        if (resp && resp.status >= 400 && resp.status !== 404) {
-                            this.reportFailedCleanup(failed, text);
-                        }
-                    },
-                    // a 404 means the resource is already gone
-                    error: (err: unknown) => {
-                        if ((err as { status?: number })?.status !== 404) {
-                            this.reportFailedCleanup(failed, text);
-                        }
-                    },
-                });
-            });
+        const unused = this.pendingCleanup.filter((c) => !stillUsed.has(c.id));
         this.pendingCleanup = [];
+        unused.forEach((c) => this.releasedIds.add(c.id));
+        // another widget may have adopted them, so the janitor checks all dashboards first; without storage they go at once
+        if (unused.length === 0 || this.log.add(unused.map((c) => this.asResource(c)))) {
+            return;
+        }
+        const failed: string[] = [];
+        unused.forEach((c) => {
+            const text = c.kind + ' for ' + c.provider;
+            const request: Observable<{ status: number } | void> =
+                c.kind === 'export' ? this.exportService.stopPipelineByIdIfExists(c.id) : this.importInstancesService.deleteImportInstance(c.id);
+            request.subscribe({
+                next: (resp) => {
+                    if (resp && resp.status >= 400 && resp.status !== 404) {
+                        this.reportFailedCleanup(failed, text);
+                    } else {
+                        this.log.remove([this.asResource(c)]);
+                    }
+                },
+                // a 404 means the resource is already gone
+                error: (err: unknown) => {
+                    if ((err as { status?: number })?.status !== 404) {
+                        this.reportFailedCleanup(failed, text);
+                    } else {
+                        this.log.remove([this.asResource(c)]);
+                    }
+                },
+            });
+        });
+    }
+
+    /** The property update did not answer OK; if it was stored after all, the queued old resources are orphans. */
+    propertiesNotSaved(sent: GeneratedResource[]): void {
+        this.unsaved.propertiesNotSaved(sent, this.pendingCleanup.map((c) => this.asResource(c)));
+    }
+
+    /** An import instance carries the exports known to read from it, so the clean-up keeps it while one is in use. */
+    private asResource(c: { kind: Provisioned; id: string; provider: string }): GeneratedResource {
+        const resource: GeneratedResource = { kind: c.kind, id: c.id, label: c.provider };
+        if (c.kind === 'export') {
+            return resource;
+        }
+        const exportIds = [
+            ...this.exports.filter((e) => e.FilterType === 'import_id' && e.Filter === c.id).map((e) => e.ID || ''),
+            ...this.startedExports.filter((e) => e.instanceId === c.id).map((e) => e.exportId),
+        ];
+        return withExport(resource, ...exportIds);
+    }
+
+    /** For a resource adopted from the loaded list: this dialog created it, or it is pending clean-up for the user. */
+    private isGenerated(kind: Provisioned, id: string | undefined): boolean {
+        return this.isCreatedHere(id) || (id !== undefined && this.log.isPending(kind, id));
     }
 
     private reportFailedCleanup(failed: string[], text: string): void {
@@ -183,7 +229,7 @@ export class AirQualityProvisioningService {
     }
 
     private getImportInstancesOfType(typeId: string): ImportInstancesModel[] {
-        return [...this.importInstances, ...this.createdInstances].filter((i) => i.import_type_id === typeId && !this.deletedIds.has(i.id));
+        return [...this.importInstances, ...this.createdInstances].filter((i) => i.import_type_id === typeId && !this.releasedIds.has(i.id));
     }
 
     private filterImportInstancesByConfigValue(
@@ -209,7 +255,7 @@ export class AirQualityProvisioningService {
     private getExportsOfImports(importInstances: ImportInstancesModel[]): ExportModel[] {
         const ids = importInstances.map((i) => i.id);
         return [...this.exports, ...this.createdExports].filter(
-            (e) => e.FilterType === 'import_id' && ids.indexOf(e.Filter) !== -1 && !this.deletedIds.has(e.ID || ''),
+            (e) => e.FilterType === 'import_id' && ids.indexOf(e.Filter) !== -1 && !this.releasedIds.has(e.ID || ''),
         );
     }
 
@@ -280,8 +326,7 @@ export class AirQualityProvisioningService {
                         this.queueCleanup('import instance', this.widget.properties.ubaInfo.importInstanceId, 'UBA');
                     }
                     instance = ubaInstances[0];
-                    // adopted from the loaded list: generated only if this dialog created it, else it belongs to others
-                    this.widget.properties.ubaInfo.importGenerated = this.isCreatedHere(instance.id);
+                    this.widget.properties.ubaInfo.importGenerated = this.isGenerated('import instance', instance.id);
                 }
                 if (this.widget.properties.ubaInfo === undefined) {
                     this.widget.properties.ubaInfo = {};
@@ -305,7 +350,7 @@ export class AirQualityProvisioningService {
                             this.queueCleanup('export', this.widget.properties.ubaInfo.exportId, 'UBA');
                         }
                         exp = matchingExports[0];
-                        this.widget.properties.ubaInfo.exportGenerated = this.isCreatedHere(exp.ID);
+                        this.widget.properties.ubaInfo.exportGenerated = this.isGenerated('export', exp.ID);
                     }
                     this.widget.properties.ubaInfo.exportId = exp.ID;
                     this.widget.properties.ubaInfo.exportDatabaseId = exp.ExportDatabaseID;
@@ -449,8 +494,7 @@ export class AirQualityProvisioningService {
                             this.queueCleanup('import instance', this.widget.properties.dwdPollenInfo.importInstanceId, 'DWD pollen');
                         }
                         instance = matchingImportInstances[0];
-                        // adopted from the loaded list: generated only if this dialog created it, else it belongs to others
-                        this.widget.properties.dwdPollenInfo.importGenerated = this.isCreatedHere(instance.id);
+                        this.widget.properties.dwdPollenInfo.importGenerated = this.isGenerated('import instance', instance.id);
                     }
                     this.widget.properties.dwdPollenInfo.importInstanceId = instance.id;
                     const matchingExports = this.getExportsOfImports(matchingImportInstances);
@@ -470,7 +514,7 @@ export class AirQualityProvisioningService {
                                 this.queueCleanup('export', this.widget.properties.dwdPollenInfo.exportId, 'DWD pollen');
                             }
                             exp = matchingExports[0];
-                            this.widget.properties.dwdPollenInfo.exportGenerated = this.isCreatedHere(exp.ID);
+                            this.widget.properties.dwdPollenInfo.exportGenerated = this.isGenerated('export', exp.ID);
                         }
                         this.widget.properties.dwdPollenInfo.exportId = exp.ID;
                         this.widget.properties.dwdPollenInfo.exportDatabaseId = exp.ExportDatabaseID;
@@ -596,7 +640,13 @@ export class AirQualityProvisioningService {
                     Generated: true,
                 } as ExportModel),
             ),
-            tap((exp) => exp !== null && this.unsaved.record({ kind: 'export', id: exp.ID || '', label: provider })),
+            tap((exp) => {
+                if (exp !== null) {
+                    this.startedExports.push({ instanceId: importInstance.id, exportId: exp.ID || '' });
+                    this.unsaved.link(importInstance.id, exp.ID || '');
+                    this.unsaved.record({ kind: 'export', id: exp.ID || '', label: provider });
+                }
+            }),
             catchError(() => of(null)),
         );
     }
@@ -647,8 +697,7 @@ export class AirQualityProvisioningService {
                         this.queueCleanup('import instance', this.widget.properties.yrInfo.importInstanceId, 'Yr');
                     }
                     instance = yrInstances[0];
-                    // adopted from the loaded list: generated only if this dialog created it, else it belongs to others
-                    this.widget.properties.yrInfo.importGenerated = this.isCreatedHere(instance.id);
+                    this.widget.properties.yrInfo.importGenerated = this.isGenerated('import instance', instance.id);
                 }
                 if (this.widget.properties.yrInfo === undefined) {
                     this.widget.properties.yrInfo = {};
@@ -672,7 +721,7 @@ export class AirQualityProvisioningService {
                             this.queueCleanup('export', this.widget.properties.yrInfo.exportId, 'Yr');
                         }
                         exp = matchingExports[0];
-                        this.widget.properties.yrInfo.exportGenerated = this.isCreatedHere(exp.ID);
+                        this.widget.properties.yrInfo.exportGenerated = this.isGenerated('export', exp.ID);
                     }
                     this.widget.properties.yrInfo.exportId = exp.ID;
                     this.widget.properties.yrInfo.exportDatabaseId = exp.ExportDatabaseID;

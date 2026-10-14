@@ -30,6 +30,9 @@ import { ImportTypesService } from '../../../modules/imports/import-types/shared
 import { ImportTypeModel } from '../../../modules/imports/import-types/shared/import-types.model';
 import { environment } from '../../../../environments/environment';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { GENERATED_RESOURCE_STORAGE, PENDING_GENERATED_RESOURCES_KEY, PendingGeneratedResource } from '../../shared/generated-resource-janitor';
+import { MemoryStorage } from '../../shared/memory-storage.mock';
 
 describe('AirQualityEditDialogComponent save', () => {
     let component: AirQualityEditDialogComponent;
@@ -40,6 +43,9 @@ describe('AirQualityEditDialogComponent save', () => {
     let importInstancesServiceSpy: Spy<ImportInstancesService>;
     let importTypesServiceSpy: Spy<ImportTypesService>;
     let matDialogRefSpy: Spy<MatDialogRef<AirQualityEditDialogComponent>>;
+    let storage: MemoryStorage;
+    const pending = (): PendingGeneratedResource[] => JSON.parse(storage.data.get(PENDING_GENERATED_RESOURCES_KEY) || '[]');
+    const pendingIds = () => pending().map((e) => e.resource.id).sort();
 
     const instance = { id: 'instance1', name: 'instance', kafka_topic: 'topic' } as ImportInstancesModel;
 
@@ -60,8 +66,11 @@ describe('AirQualityEditDialogComponent save', () => {
         importTypesServiceSpy.parseImportTypeExportValues.and.returnValue([]);
         exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export1', Values: [] } as unknown as ExportModel));
 
+        storage = new MemoryStorage();
         TestBed.configureTestingModule({
             providers: [
+                { provide: GENERATED_RESOURCE_STORAGE, useFactory: () => storage },
+                { provide: AuthorizationService, useValue: { getUserId: () => 'user-1' } },
                 { provide: DashboardService, useValue: dashboardServiceSpy },
                 { provide: ExportService, useValue: exportServiceSpy },
                 { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
@@ -166,7 +175,8 @@ describe('AirQualityEditDialogComponent save', () => {
         expectAborted('Could not create the export for Yr');
     });
 
-    it('reports a failed cleanup of the old import instance and still stores the widget', () => {
+    it('reports a failed cleanup of the old import instance when nothing can be logged and still stores the widget', () => {
+        storage.failWrite = true;
         component.widget.properties.yrInfo = { importGenerated: true, importInstanceId: 'old' } as any;
         importInstancesServiceSpy.deleteImportInstance.and.returnValue(throwError(() => new Error('500')));
 
@@ -222,45 +232,62 @@ describe('AirQualityEditDialogComponent save', () => {
             expect(order).toEqual([]);
         });
 
-        it('deletes the old import instance and export after the widget was saved', () => {
+        it('deletes nothing after the widget was saved and logs the old import instance and export for the clean-up', () => {
             component.save();
 
-            expect(order).toEqual(['save', 'delete import instance', 'delete export']);
-            expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old']]);
-            expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+            expect(order).toEqual(['save']);
+            expect(pending().map((e) => [e.userId, e.dashboardId, e.widgetId, e.resource.kind, e.resource.id, e.resource.label])).toEqual([
+                ['user-1', 'dashboard1', 'widget1', 'import instance', 'old', 'Yr'],
+                ['user-1', 'dashboard1', 'widget1', 'export', 'old_export', 'Yr'],
+            ]);
             expect(snackOpen).not.toHaveBeenCalled();
         });
 
-        it('does not delete a resource the saved widget still uses', () => {
+        it('does not log a resource the saved widget still uses', () => {
+            importInstancesServiceSpy.saveImportInstance.and.returnValue(of({ ...instance, id: 'old' }));
+
+            component.save();
+
+            expect(order).toEqual(['save']);
+            expect(pendingIds()).toEqual(['old_export']);
+        });
+
+        it('deletes the old resources at once when they cannot be logged, except what the saved widget still uses', () => {
+            storage.failWrite = true;
             importInstancesServiceSpy.saveImportInstance.and.returnValue(of({ ...instance, id: 'old' }));
 
             component.save();
 
             expect(order).toEqual(['save', 'delete export']);
+            expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+            expect(snackOpen).not.toHaveBeenCalled();
         });
 
-        it('stores the widget and names the old export that could not be deleted', () => {
+        it('stores the widget and names the old export that could not be deleted when nothing can be logged', () => {
+            storage.failWrite = true;
             exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 500 }));
 
             component.save();
 
             expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
             expect(matDialogRefSpy.close.calls.count()).toBe(1);
-            expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not delete the old export for Yr');
+            expect(snackOpen.calls.mostRecent().args[0]).toBe('Could not delete the old export for Yr, the widget was saved');
             expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
         });
 
-        it('deletes the old resources although the name update failed', () => {
+        it('logs the old resources although the name update failed', () => {
             component.userHasUpdateNameAuthorization = true;
             dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'error' }));
 
             component.save();
 
-            expect(order).toEqual(['save', 'delete import instance', 'delete export']);
+            expect(order).toEqual(['save']);
+            expect(pendingIds()).toEqual(['old', 'old_export']);
             expect(matDialogRefSpy.close.calls.count()).toBe(0);
         });
 
-        it('takes a 404 for a resource that is already gone', () => {
+        it('takes a 404 for a resource that is already gone when nothing can be logged', () => {
+            storage.failWrite = true;
             exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 404 }));
             importInstancesServiceSpy.deleteImportInstance.and.returnValue(throwError(() => ({ status: 404 })));
 
@@ -299,19 +326,19 @@ describe('AirQualityEditDialogComponent save', () => {
                 );
             }
 
-            it('deletes exactly what the failed attempt created when the dialog is closed', () => {
+            it('deletes nothing when the dialog is closed and keeps exactly what the failed attempt created logged', () => {
                 failAtYrExport();
                 component.save();
                 expectAborted('Could not create the export for Yr');
 
                 closeDialog();
 
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['uba'], ['yr']]);
-                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export_uba']]);
+                expect(order).toEqual([]);
+                expect(pendingIds()).toEqual(['export_uba', 'uba', 'yr']);
                 expect(snackOpen.calls.count()).toBe(1);
             });
 
-            it('reuses what the failed attempt created on a retry and leaves nothing behind', () => {
+            it('reuses what the failed attempt created on a retry and logs only the old resources', () => {
                 failAtYrExport();
                 component.save();
                 exportServiceSpy.startPipeline.and.callFake((exp: ExportModel) => of({ ...exp, ID: 'export_' + exp.Filter }));
@@ -321,15 +348,14 @@ describe('AirQualityEditDialogComponent save', () => {
 
                 expect(importInstancesServiceSpy.saveImportInstance.calls.count()).toBe(2);
                 expect(exportServiceSpy.startPipeline.calls.allArgs().map((a) => a[0].Filter)).toEqual(['uba', 'yr', 'yr']);
-                expect(order).toEqual(['save', 'delete import instance', 'delete export']);
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old']]);
-                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                expect(order).toEqual(['save']);
+                expect(pendingIds()).toEqual(['old', 'old_export']);
                 const saved = dashboardServiceSpy.updateWidgetProperty.calls.mostRecent().args[3];
                 expect(saved.ubaInfo).toEqual(jasmine.objectContaining({ importInstanceId: 'uba', exportId: 'export_uba' }));
                 expect(saved.yrInfo).toEqual(jasmine.objectContaining({ importInstanceId: 'yr', exportId: 'export_yr' }));
             });
 
-            it('does not reuse an instance that a later save of the same dialog deleted', () => {
+            it('does not reuse an instance that a later save of the same dialog released for clean-up', () => {
                 component.userHasUpdateNameAuthorization = true;
                 dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'error' }));
                 let n = 0;
@@ -345,7 +371,8 @@ describe('AirQualityEditDialogComponent save', () => {
 
                 expect(importInstancesServiceSpy.saveImportInstance.calls.count()).toBe(3);
                 expect(dashboardServiceSpy.updateWidgetProperty.calls.mostRecent().args[3].yrInfo.importInstanceId).toBe('yr3');
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old'], ['yr1'], ['yr2']]);
+                expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(0);
+                expect(pendingIds()).toEqual(['export_yr1', 'export_yr2', 'old', 'old_export', 'yr1', 'yr2']);
             });
 
             it('deletes nothing new after a successful save, also when the dialog closes', () => {
@@ -354,11 +381,11 @@ describe('AirQualityEditDialogComponent save', () => {
                 component.save();
                 closeDialog();
 
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old']]);
-                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(0);
+                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
             });
 
-            it('waits for a running attempt before deleting and keeps what it saved', () => {
+            it('waits for a running attempt and logs only the old resources once it saved', () => {
                 const response = new Subject<{ message: string }>();
                 dashboardServiceSpy.updateWidgetProperty.and.returnValue(response);
 
@@ -368,11 +395,11 @@ describe('AirQualityEditDialogComponent save', () => {
                 response.next({ message: 'OK' });
                 response.complete();
 
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old']]);
-                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                expect(order).toEqual([]);
+                expect(pendingIds()).toEqual(['old', 'old_export']);
             });
 
-            it('deletes what a step creates after the attempt failed and the dialog was closed', () => {
+            it('logs what a step creates after the attempt failed and the dialog was closed', () => {
                 useUba();
                 const ubaInstance = new Subject<ImportInstancesModel>();
                 importInstancesServiceSpy.saveImportInstance.and.callFake((i: ImportInstancesModel) =>
@@ -387,12 +414,12 @@ describe('AirQualityEditDialogComponent save', () => {
                 ubaInstance.complete();
 
                 // the aborted attempt's chain ends with the answer, so no export is created for it
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['uba']]);
+                expect(order).toEqual([]);
+                expect(pendingIds()).toEqual(['uba']);
                 expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
-                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
             });
 
-            it('keeps and names what a property update without OK sent when the dialog closes', () => {
+            it('keeps what a property update without OK sent logged when the dialog closes, without a notice', () => {
                 useUba();
                 dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'error update' }));
 
@@ -401,9 +428,8 @@ describe('AirQualityEditDialogComponent save', () => {
 
                 expect(dashboardServiceSpy.getWidget.calls.count()).toBe(0);
                 expect(order).toEqual([]);
-                expect(snackOpen.calls.mostRecent().args[0]).toBe(
-                    'Could not delete the import instance for UBA, export for UBA, import instance for Yr, export for Yr generated for the unsaved changes',
-                );
+                expect(pendingIds()).toEqual(['export_uba', 'export_yr', 'old', 'old_export', 'uba', 'yr']);
+                expect(snackOpen).not.toHaveBeenCalled();
             });
 
             it('never deletes what a property update without OK sent, not even after a later save', () => {
@@ -417,8 +443,8 @@ describe('AirQualityEditDialogComponent save', () => {
                 component.location = { latitude: 1, longitude: 1 };
                 component.save();
 
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old']]);
-                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(0);
+                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
             });
 
             describe('with an aborted attempt whose UBA import instance answers late', () => {
@@ -465,9 +491,9 @@ describe('AirQualityEditDialogComponent save', () => {
                     const used = jasmine.objectContaining({ importInstanceId: 'uba2', exportId: 'export_uba2' });
                     expect(sent['ubaInfo']).toEqual(used);
                     expect(component.widget.properties.ubaInfo).toEqual(used);
-                    expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toContain(['uba1']);
-                    expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).not.toContain(['uba2']);
-                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).not.toContain(['export_uba2']);
+                    expect(pendingIds()).toContain('uba1');
+                    expect(pendingIds()).not.toContain('uba2');
+                    expect(pendingIds()).not.toContain('export_uba2');
                     expect(exportServiceSpy.startPipeline.calls.allArgs().map((a) => a[0].Filter)).not.toContain('uba1');
                 });
 
@@ -480,13 +506,14 @@ describe('AirQualityEditDialogComponent save', () => {
                     answerLate();
 
                     expect(handed.properties.ubaInfo).toEqual(jasmine.objectContaining({ importInstanceId: 'uba2', exportId: 'export_uba2' }));
-                    expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toContain(['uba1']);
-                    expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).not.toContain(['uba2']);
+                    expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(0);
+                    expect(pendingIds()).toContain('uba1');
+                    expect(pendingIds()).not.toContain('uba2');
                     expect(exportServiceSpy.startPipeline.calls.allArgs().map((a) => a[0].Filter)).not.toContain('uba1');
                 });
             });
 
-            it('marks an adopted import instance and export of others as not generated and never deletes them', () => {
+            it('marks an adopted import instance and export of others as not generated and never releases them', () => {
                 component.widget.properties.ubaInfo = {
                     stationId: '4',
                     importGenerated: true,
@@ -543,14 +570,111 @@ describe('AirQualityEditDialogComponent save', () => {
                 component.location = { latitude: 1, longitude: 1 };
                 component.save();
 
-                const deleted = [
-                    ...importInstancesServiceSpy.deleteImportInstance.calls.allArgs(),
-                    ...exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs(),
-                ].map((a) => a[0]);
-                expect(deleted).toEqual(jasmine.arrayWithExactContents(['own_uba', 'own_dwd', 'own_yr', 'own_uba_export', 'own_dwd_export', 'own_yr_export']));
+                expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(0);
+                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
+                expect(pendingIds()).toEqual(['own_dwd', 'own_dwd_export', 'own_uba', 'own_uba_export', 'own_yr', 'own_yr_export']);
             });
 
-            it('does not match an import instance or export that an earlier save of the dialog deleted', () => {
+            it('marks an adopted import instance and export pending clean-up as generated, so a later change releases them again', () => {
+                const released = (id: string, kind: string) => ({
+                    userId: 'user-1',
+                    dashboardId: 'dashboard9',
+                    widgetId: 'widget9',
+                    resource: { kind, id, label: 'Yr' },
+                    touched: Date.now(),
+                });
+                storage.data.set(
+                    PENDING_GENERATED_RESOURCES_KEY,
+                    JSON.stringify([released('shared_yr', 'import instance'), released('shared_yr_export', 'export')]),
+                );
+                component.importInstances = [
+                    {
+                        id: 'shared_yr',
+                        import_type_id: environment.importTypeIdYrForecast,
+                        configs: [
+                            { name: 'lat', value: 0 },
+                            { name: 'long', value: 0 },
+                            { name: 'max_forecasts', value: 1 },
+                        ],
+                    },
+                ] as ImportInstancesModel[];
+                component.exports = [{ ID: 'shared_yr_export', FilterType: 'import_id', Filter: 'shared_yr', Values: [] } as unknown as ExportModel];
+
+                component.save();
+                expect(component.widget.properties.yrInfo).toEqual(
+                    jasmine.objectContaining({ importInstanceId: 'shared_yr', importGenerated: true, exportId: 'shared_yr_export', exportGenerated: true }),
+                );
+                component.location = { latitude: 1, longitude: 1 };
+                component.save();
+
+                expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(0);
+                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
+                expect(pending().map((e) => [e.widgetId, e.resource.id, e.resource.exportIds])).toEqual([
+                    ['widget9', 'shared_yr', undefined],
+                    ['widget9', 'shared_yr_export', undefined],
+                    ['widget1', 'old', undefined],
+                    ['widget1', 'old_export', undefined],
+                    ['widget1', 'shared_yr', ['shared_yr_export']],
+                    ['widget1', 'shared_yr_export', undefined],
+                ]);
+            });
+
+            for (const provider of ['UBA', 'DWD pollen'] as const) {
+                it('marks an adopted ' + provider + ' import instance and export pending clean-up as generated, so a later change releases them again', () => {
+                    const id = provider === 'UBA' ? 'shared_uba' : 'shared_dwd';
+                    const released = (resourceId: string, kind: string) => ({
+                        userId: 'user-1',
+                        dashboardId: 'dashboard9',
+                        widgetId: 'widget9',
+                        resource: { kind, id: resourceId, label: provider },
+                        touched: Date.now(),
+                    });
+                    storage.data.set(PENDING_GENERATED_RESOURCES_KEY, JSON.stringify([released(id, 'import instance'), released(id + '_export', 'export')]));
+                    component.importInstances = [
+                        provider === 'UBA'
+                            ? { id, import_type_id: environment.importTypeIdUbaStation, configs: [{ name: 'FilterStationIds', value: ['5'] }] }
+                            : {
+                                  id,
+                                  import_type_id: environment.importTypeIdDwdPollen,
+                                  configs: [
+                                      { name: 'lat', value: 0 },
+                                      { name: 'long', value: 0 },
+                                      { name: 'FilterPollen', value: [component.pollen[0].short_name] },
+                                  ],
+                              },
+                    ] as ImportInstancesModel[];
+                    component.exports = [{ ID: id + '_export', FilterType: 'import_id', Filter: id, Values: [] } as unknown as ExportModel];
+                    const info = () => (provider === 'UBA' ? component.widget.properties.ubaInfo : component.widget.properties.dwdPollenInfo);
+                    if (provider === 'UBA') {
+                        useUba();
+                    } else {
+                        useDwd();
+                    }
+
+                    component.save();
+                    expect(info()).toEqual(
+                        jasmine.objectContaining({ importInstanceId: id, importGenerated: true, exportId: id + '_export', exportGenerated: true }),
+                    );
+                    if (provider === 'UBA') {
+                        component.ubaStationSelected = { station_id: 6, station_longitude: 1, station_latitude: 1, station_name: 'other' };
+                    } else {
+                        component.location = { latitude: 1, longitude: 1 };
+                    }
+                    component.save();
+
+                    expect(info()).toEqual(jasmine.objectContaining({ importInstanceId: provider === 'UBA' ? 'uba' : 'dwd' }));
+                    expect(importInstancesServiceSpy.deleteImportInstance.calls.count()).toBe(0);
+                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
+                    expect(pending().filter((e) => e.resource.id.startsWith(id)).map((e) => [e.widgetId, e.resource.id, e.resource.exportIds])).toEqual([
+                        ['widget9', id, undefined],
+                        ['widget9', id + '_export', undefined],
+                        ['widget1', id, [id + '_export']],
+                        ['widget1', id + '_export', undefined],
+                    ]);
+                });
+            }
+
+            it('does not match an import instance or export that an earlier save of the dialog released for clean-up', () => {
                 component.importInstances = [
                     {
                         id: 'old',
@@ -570,7 +694,7 @@ describe('AirQualityEditDialogComponent save', () => {
 
                 component.location = { latitude: 1, longitude: 1 };
                 component.save();
-                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['old']]);
+                expect(pendingIds()).toEqual(['old', 'old_export']);
                 component.location = { latitude: 0, longitude: 0 };
                 component.save();
 
@@ -580,7 +704,19 @@ describe('AirQualityEditDialogComponent save', () => {
                 );
             });
 
-            it('reports a delete that failed after the dialog was closed', () => {
+            it('deletes what the failed attempt created at once on close when nothing can be logged', () => {
+                storage.failWrite = true;
+                failAtYrExport();
+                component.save();
+
+                closeDialog();
+
+                expect(importInstancesServiceSpy.deleteImportInstance.calls.allArgs()).toEqual([['uba'], ['yr']]);
+                expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export_uba']]);
+            });
+
+            it('reports a delete that failed after the dialog was closed when nothing can be logged', () => {
+                storage.failWrite = true;
                 failAtYrExport();
                 importInstancesServiceSpy.deleteImportInstance.and.returnValue(throwError(() => ({ status: 500 })));
                 component.save();
@@ -591,6 +727,45 @@ describe('AirQualityEditDialogComponent save', () => {
                     'Could not delete the import instance for UBA, import instance for Yr generated for the unsaved changes',
                 );
                 expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+            });
+
+            it('logs what a failed attempt created for this widget and keeps it logged after the close', () => {
+                failAtYrExport();
+                component.save();
+
+                expect(pending().map((e) => [e.userId, e.dashboardId, e.widgetId, e.resource.kind, e.resource.id, e.resource.exportIds])).toEqual([
+                    ['user-1', 'dashboard1', 'widget1', 'import instance', 'uba', ['export_uba']],
+                    ['user-1', 'dashboard1', 'widget1', 'export', 'export_uba', undefined],
+                    ['user-1', 'dashboard1', 'widget1', 'import instance', 'yr', undefined],
+                ]);
+                closeDialog();
+
+                expect(pendingIds()).toEqual(['export_uba', 'uba', 'yr']);
+            });
+
+            it('keeps the old resources of a save that answered OK logged when the dialog closes', () => {
+                useUba();
+
+                component.save();
+                closeDialog();
+
+                expect(pendingIds()).toEqual(['old', 'old_export']);
+            });
+
+            it('deletes the old resources at once after a save when the log cannot be read', () => {
+                storage.failRead = true;
+
+                component.save();
+
+                expect(order).toEqual(['save', 'delete import instance', 'delete export']);
+            });
+
+            it('logs the replaced resources of the stored state when a property update did not answer OK', () => {
+                dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'error update' }));
+
+                component.save();
+
+                expect(pendingIds()).toEqual(['export_yr', 'old', 'old_export', 'yr']);
             });
         });
     });

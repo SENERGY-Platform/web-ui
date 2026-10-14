@@ -65,6 +65,7 @@ import { MatList, MatListItem } from '@angular/material/list';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from '../../../core/services/snack-bar-messages';
+import { GeneratedResourceJanitor } from '../../shared/generated-resource-janitor';
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
@@ -88,6 +89,7 @@ export class AirQualityEditDialogComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
     private snackBar = inject(MatSnackBar);
     private provisioning = inject(AirQualityProvisioningService);
+    private janitor = inject(GeneratedResourceJanitor);
 
     constructor() {
         const dwdPollenService = this.dwdPollenService;
@@ -105,6 +107,7 @@ export class AirQualityEditDialogComponent implements OnInit {
         this.geonamesSearchResults = from([]);
         this.pollenLevel = dwdPollenService.getNameValuePairs();
         this.provisioning.bind(this);
+        this.provisioning.logTo(this.janitor.session(this.dashboardId, this.widgetId));
         this.destroyRef.onDestroy(() => this.provisioning.unsaved.close());
     }
 
@@ -268,7 +271,7 @@ export class AirQualityEditDialogComponent implements OnInit {
                         if (response.message === 'OK') {
                             this.provisioning.runPendingCleanup(sent);
                         } else {
-                            this.provisioning.unsaved.propertiesNotSaved(sent);
+                            this.provisioning.propertiesNotSaved(sent);
                         }
                     }),
                 );

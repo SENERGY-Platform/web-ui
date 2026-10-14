@@ -241,8 +241,11 @@ export class DeploymentsService {
             );
     }
 
-    /** For clean-ups: a 404 means the deployment is already gone (answered quietly); other failures answer their real status. */
-    v2deleteDeploymentIfExists(deploymentId: string): Observable<{ status: number }> {
+    /**
+     * For clean-ups: a 404 means the deployment is already gone (answered quietly); other failures answer their real status.
+     * `quiet` logs such a failure without the error notice.
+     */
+    v2deleteDeploymentIfExists(deploymentId: string, quiet = false): Observable<{ status: number }> {
         return this.http
             .delete(environment.processDeploymentUrl + '/v3/deployments/' + encodeURIComponent(deploymentId), {
                 responseType: 'text',
@@ -253,9 +256,9 @@ export class DeploymentsService {
                 catchError((error: HttpErrorResponse) =>
                     error?.status === 404
                         ? this.errorHandlerService.handleErrorQuietly(DeploymentsService.name, 'v2deleteDeploymentIfExists: already gone', { status: 404 })(error)
-                        : this.errorHandlerService.handleError(DeploymentsService.name, 'v2deleteDeploymentIfExists', {
-                              status: error?.status >= 400 ? error.status : 500,
-                          })(error),
+                        : quiet
+                          ? this.errorHandlerService.handleErrorQuietly(DeploymentsService.name, 'v2deleteDeploymentIfExists', { status: error?.status >= 400 ? error.status : 500 })(error)
+                          : this.errorHandlerService.handleError(DeploymentsService.name, 'v2deleteDeploymentIfExists', { status: error?.status >= 400 ? error.status : 500 })(error),
                 ),
             );
     }

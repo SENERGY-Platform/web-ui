@@ -69,8 +69,11 @@ export class ProcessSchedulerService {
             );
     }
 
-    /** For clean-ups: a 404 means the schedule is already gone (answered quietly); other failures answer their real status. */
-    deleteScheduleIfExists(scheduleId: string): Observable<{ status: number }> {
+    /**
+     * For clean-ups: a 404 means the schedule is already gone (answered quietly); other failures answer their real status.
+     * `quiet` logs such a failure without the error notice.
+     */
+    deleteScheduleIfExists(scheduleId: string, quiet = false): Observable<{ status: number }> {
         return this.http
             .delete<HttpResponseBase>(environment.processSchedulerUrl + '/schedules/' + scheduleId, { observe: 'response' })
             .pipe(
@@ -78,9 +81,9 @@ export class ProcessSchedulerService {
                 catchError((error: HttpErrorResponse) =>
                     error?.status === 404
                         ? this.errorHandlerService.handleErrorQuietly(ProcessRepoService.name, 'deleteScheduleIfExists: already gone', { status: 404 })(error)
-                        : this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteScheduleIfExists', {
-                              status: error?.status >= 400 ? error.status : 500,
-                          })(error),
+                        : quiet
+                          ? this.errorHandlerService.handleErrorQuietly(ProcessRepoService.name, 'deleteScheduleIfExists', { status: error?.status >= 400 ? error.status : 500 })(error)
+                          : this.errorHandlerService.handleError(ProcessRepoService.name, 'deleteScheduleIfExists', { status: error?.status >= 400 ? error.status : 500 })(error),
                 ),
             );
     }

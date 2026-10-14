@@ -72,25 +72,34 @@ export class DashboardService {
 
     /** REST Services */
 
-    getDashboards(): Observable<DashboardModel[]> {
+    /**
+     * Answers [] on any error; `quiet` logs the error without the error notice. `bypassCache` neither reads nor writes the
+     * session cache and asks for the full list, so the answer cannot lag a write.
+     */
+    getDashboards(options: { quiet?: boolean; bypassCache?: boolean } = {}): Observable<DashboardModel[]> {
         const key = DashboardService.name + '/getDashboards';
-        const stored = sessionStorage.getItem(key);
+        const stored = options.bypassCache ? null : sessionStorage.getItem(key);
         let cached: { dashboards: DashboardModel[]; lastModified: string } | undefined;
         if (stored !== null) {
             cached = JSON.parse(stored);
         }
+        // a conditional header also keeps the browser's HTTP cache out of the request
         return this.http.get<DashboardModel[]>(environment.dashboardServiceUrl + '/dashboards', { headers: { 'If-Modified-Since': cached?.lastModified || new Date(0).toUTCString() }, observe: 'response' }).pipe(
             map((resp) => {
-                try {
-                    sessionStorage.setItem(key, JSON.stringify({ dashboards: resp.body || [], lastModified: resp.headers.get('Last-Modified') }));
-                } catch (_) { }
+                if (!options.bypassCache) {
+                    try {
+                        sessionStorage.setItem(key, JSON.stringify({ dashboards: resp.body || [], lastModified: resp.headers.get('Last-Modified') }));
+                    } catch (_) { }
+                }
                 return resp.body || [];
             }),
             catchError((e: HttpErrorResponse) => {
                 if (e.status === 304) {
                     return of(cached?.dashboards || []);
                 }
-                return this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])(e);
+                return options.quiet
+                    ? this.errorHandlerService.handleErrorQuietly(DashboardService.name, 'getDashboards', [] as DashboardModel[])(e)
+                    : this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [] as DashboardModel[])(e);
             }),
         );
     }
