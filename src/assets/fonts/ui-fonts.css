@@ -1,0 +1,22 @@
+/* Text and heading fonts of the theme; licences in LICENSE next to this file. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/assets/fonts/InterVariable.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(/assets/fonts/Figtree-Medium.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'Figtree';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/assets/fonts/Figtree-SemiBold.woff2) format('woff2');
+}

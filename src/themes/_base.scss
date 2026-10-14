@@ -17,6 +17,7 @@
 @use '@angular/material' as mat;
 @use '@angular/material/core/style/elevation';
 @use '@ng-matero/extensions' as mtx;
+@use 'design';
 @use 'designer-panel';
 @use 'palette-neutral';
 
@@ -44,7 +45,13 @@
         tertiary: $tertiary,
         theme-type: $theme-type,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: design.$text-font,
+        brand-family: design.$heading-font,
+        regular-weight: 400,
+        medium-weight: 500,
+        bold-weight: 600,
+      ),
       density: 0,
     ));
 
@@ -85,11 +92,6 @@
       tonal-horizontal-padding: 16px,
       text-horizontal-padding: 8px,
       text-with-icon-horizontal-padding: 8px,
-      filled-label-text-tracking: 0.0892857143em,
-      outlined-label-text-tracking: 0.0892857143em,
-      protected-label-text-tracking: 0.0892857143em,
-      text-label-text-tracking: 0.0892857143em,
-      tonal-label-text-tracking: 0.0892857143em,
     ));
     // Icon buttons took the surrounding text colour, e.g. white on the designer toolbars.
     @include mat.icon-button-overrides((icon-color: currentColor, state-layer-size: 48px));
@@ -108,6 +110,8 @@
     @for $z from 0 through 24 {
       --mat-app-elevation-shadow-level-#{$z}: #{elevation.get-box-shadow($z, rgba(0, 0, 0, 1))};
     }
+
+    @include design.tokens();
   }
 
   body {
@@ -117,9 +121,6 @@
 
   @include mat.elevation-classes();
 
-  // <body class="mat-typography"> carries the old M2 type scale (font, headings, paragraph margins);
-  // the M3 hierarchy would change every heading size.
-  @include mat.typography-hierarchy(mat.m2-define-typography-config());
 
   // color="accent" is the brand colour, so the compatibility theme maps its tertiary slot to the
   // primary palette. Its colours are baked in (no system variables), which keeps the mapping local
@@ -145,17 +146,11 @@
     --mat-button-protected-state-layer-color: var(--mat-sys-on-surface);
   }
 
-  // color="accent" and color="warn" raised buttons are filled with the brand/warn colour.
+  // color="accent" raised buttons are filled with the brand colour; color="warn" ones are destructive (see design.styles()).
   .mat-mdc-raised-button.mat-accent:not(:disabled) {
     --mat-button-protected-container-color: var(--mat-sys-primary);
     --mat-button-protected-label-text-color: var(--mat-sys-on-primary);
     --mat-button-protected-state-layer-color: var(--mat-sys-on-primary);
-  }
-
-  .mat-mdc-raised-button.mat-warn:not(:disabled) {
-    --mat-button-protected-container-color: var(--mat-sys-error);
-    --mat-button-protected-label-text-color: var(--mat-sys-on-error);
-    --mat-button-protected-state-layer-color: var(--mat-sys-on-error);
   }
 
   // M3 has no filled tab header; backgroundColor="accent" fills it with the brand colour.
@@ -216,5 +211,6 @@
     color: var(--mat-sys-primary) !important;
   }
 
+  @include design.styles();
   @include designer-panel.colors();
 }

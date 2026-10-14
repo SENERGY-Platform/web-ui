@@ -83,3 +83,8 @@ svg > g > g:last-child { pointer-events: none } /* google chart anti flickering 
 .multiline-tooltip {
     white-space: pre-line;
 }
+
+/* Shared width utility for form fields and inputs. */
+.full-width {
+    width: 100%;
+}

@@ -14,17 +14,27 @@
   ~ limitations under the License.
   -->
 
-<mat-toolbar class="shadow" color="primary">
-  <button mat-icon-button color="accent" (click)="toggle()">
+<mat-toolbar class="app-toolbar">
+  <button mat-icon-button (click)="toggle()" aria-label="Toggle navigation">
     <mat-icon>menu</mat-icon>
   </button>
   <a routerLink="/dashboard" (click)="resetSidenav()" class="image-wrapper">
-    <img class="logo"
+    <img class="logo" alt="Home"
       src="{{getLogoUrl()}}">
   </a>
+  @if (title.length > 0) {
+    <h1 class="page-title">
+      @for (part of title; track $index; let last = $last) {
+        <span [class.page-title-current]="last">{{part}}</span>
+        @if (!last) {
+          <mat-icon class="page-title-separator" aria-hidden="true">chevron_right</mat-icon>
+        }
+      }
+    </h1>
+  }
   <span class="fill-remaining-space"></span>
   @if (userHasNotificationsReadAuthorization) {
-    <button mat-icon-button color="accent" routerLink="/notifications">
+    <button mat-icon-button routerLink="/notifications" aria-label="Notifications">
       @if (unreadCounter < 1) {
         <mat-icon>notifications_none</mat-icon>
       }
@@ -34,7 +44,7 @@
     </button>
   }
 
-  <button mat-icon-button [matMenuTriggerFor]="user" color="accent">
+  <button mat-icon-button [matMenuTriggerFor]="user" aria-label="Account">
     <mat-icon>account_circle</mat-icon>
   </button>
   <mat-menu #user="matMenu" [overlapTrigger]="false">
@@ -61,9 +71,3 @@
     </button>
   </mat-menu>
 </mat-toolbar>
-
-
-
-
-
-

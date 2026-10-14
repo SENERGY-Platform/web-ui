@@ -20,19 +20,55 @@
     flex: 1 1 auto;
 }
 
-.image-wrapper {
-    width: 275px;
-}
-
-.logo {
-    max-height: 48px;
-    display: block;
-}
-
-.shadow {
+.app-toolbar {
     padding-left: 8px;
-    box-shadow: 0 0 0.2rem rgba(0, 0, 0, .1), 0 0.2rem 0.4rem rgba(0, 0, 0, .1);
+    border-bottom: var(--app-hairline);
     z-index: 1;
     position: relative;
 }
 
+.app-toolbar .mat-mdc-icon-button {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.image-wrapper {
+    width: 232px;
+    flex: none;
+}
+
+.logo {
+    max-height: 40px;
+    display: block;
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    margin: 0;
+    font-family: var(--app-font-heading);
+    font-size: var(--app-text-md);
+    line-height: 24px;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.page-title-current {
+    color: var(--mat-sys-on-surface);
+    font-weight: 600;
+}
+
+.page-title-separator {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+@media screen and (max-width: 599px) {
+    .page-title {
+        display: none;
+    }
+}

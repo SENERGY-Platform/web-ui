@@ -24,6 +24,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core/core.module';
 import { provideIconFontSet } from './core/icon-font-set';
 import { provideOverlayDefaults } from './core/overlay-defaults';
+import { provideFormFieldDefaults } from './core/form-field-defaults';
 import { authInterceptor } from './core/services/auth.interceptor';
 import { AuthorizationService } from './core/services/authorization.service';
 import { initializerService } from './core/services/initializer.service';
@@ -53,5 +54,6 @@ export const appConfig: ApplicationConfig = {
         provideNativeDateAdapter(),
         provideIconFontSet(),
         provideOverlayDefaults(),
+        provideFormFieldDefaults(),
     ],
 };

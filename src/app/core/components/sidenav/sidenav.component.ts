@@ -25,7 +25,7 @@ import { SidenavSectionModel } from './shared/sidenav-section.model';
 import { SidenavPageModel } from './shared/sidenav-page.model';
 import { ResponsiveService } from '../../services/responsive.service';
 import { fadeInAnimation } from '../../../animations/fade-in.animation';
-import { NgStyle, NgClass, UpperCasePipe } from '@angular/common';
+import { NgStyle, NgClass } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatBadge } from '@angular/material/badge';
@@ -36,7 +36,7 @@ import { MatBadge } from '@angular/material/badge';
     styleUrls: ['./sidenav.component.css'],
     animations: [fadeInAnimation],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatSidenavContainer, NgStyle, MatSidenav, MatButton, RouterLinkActive, RouterLink, MatIcon, NgClass, MatBadge, MatSidenavContent, RouterOutlet, UpperCasePipe]
+    imports: [MatSidenavContainer, NgStyle, MatSidenav, MatButton, RouterLinkActive, RouterLink, MatIcon, NgClass, MatBadge, MatSidenavContent, RouterOutlet]
 })
 export class SidenavComponent implements OnInit, AfterViewInit {
     private router = inject(Router);

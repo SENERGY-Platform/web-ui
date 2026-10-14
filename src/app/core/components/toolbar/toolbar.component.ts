@@ -17,7 +17,8 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { SidenavService } from '../sidenav/shared/sidenav.service';
-import { Router, RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { AuthorizationService } from '../../services/authorization.service';
 import { SettingsDialogService } from '../../../modules/settings/shared/settings-dialog.service';
 import { NotificationService } from '../notifications/shared/notification.service';
@@ -53,15 +54,23 @@ export class ToolbarComponent implements OnInit {
     unreadCounter = 0;
     userHasSettingsUpdateAuthorization = false;
     userHasNotificationsReadAuthorization = false;
+    /** Section and page of the current route, shown next to the logo. */
+    title: string[] = [];
 
     ngOnInit() {
         this.initUser();
+        this.updateTitle();
+        this.router.events.pipe(filter((e) => e instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateTitle());
         this.notificationService.getNotifications().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((n) => {
             this.unreadCounter = 0;
             this.notifications = n;
             this.notifications.forEach((no) => (!no.isRead ? this.unreadCounter++ : null));
         });
         this.checkAuthorization();
+    }
+
+    private updateTitle() {
+        this.title = this.sidenavService.titleFor(this.router.url.split('?')[0].split('#')[0]);
     }
 
     checkAuthorization() {

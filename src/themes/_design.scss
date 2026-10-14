@@ -1,0 +1,225 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@use '@angular/material' as mat;
+
+// Flat, compact look shared by all tenants: neutral surfaces with hairline borders, the brand colour
+// only as an accent. tokens() goes inside the theme's html rule, styles() at the top level.
+
+$text-font: (Inter, system-ui, Arial, sans-serif);
+$heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
+
+@mixin tokens() {
+  --app-font-text: #{$text-font};
+  --app-font-heading: #{$heading-font};
+  // Type scale: 12 / 14 / 16 / 20 / 24 px.
+  --app-text-xs: 12px;
+  --app-text-sm: 14px;
+  --app-text-md: 16px;
+  --app-text-lg: 20px;
+  --app-text-xl: 24px;
+  --app-radius-sm: 8px;
+  --app-radius-lg: 10px;
+  --app-hairline: 1px solid var(--mat-sys-outline-variant);
+  --app-hover: var(--mat-sys-surface-container-low);
+  --app-brand-tint: color-mix(in srgb, var(--mat-sys-primary) 10%, var(--mat-sys-surface));
+  // Destructive actions are the same red in every tenant; text on the tint keeps a contrast above 4.5:1.
+  --app-danger: #b3261e;
+  --app-danger-tint: color-mix(in srgb, #b3261e 10%, var(--mat-sys-surface));
+  --app-overlay-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  // Floating overlays keep a subtle shadow; every other surface is flat.
+  @for $z from 0 through 2 {
+    --mat-app-elevation-shadow-level-#{$z}: none;
+  }
+
+  @include mat.card-overrides((
+    elevated-container-elevation: none,
+    elevated-container-shape: 10px,
+    outlined-container-shape: 10px,
+    filled-container-shape: 10px,
+    title-text-font: $heading-font,
+    title-text-weight: 600,
+  ));
+  @include mat.dialog-overrides((
+    container-shape: 10px,
+    container-elevation-shadow: none,
+    actions-alignment: flex-end,
+    actions-padding: 12px 24px 20px,
+    headline-padding: 4px 24px 4px,
+    subhead-font: $heading-font,
+    subhead-size: 20px,
+    subhead-line-height: 28px,
+    subhead-weight: 600,
+    supporting-text-size: 14px,
+    supporting-text-line-height: 20px,
+  ));
+  @include mat.expansion-overrides((
+    container-elevation-shadow: none,
+    container-shape: 10px,
+    header-text-font: $heading-font,
+    header-text-size: 16px,
+    header-text-weight: 600,
+    header-collapsed-state-height: 52px,
+    header-expanded-state-height: 56px,
+  ));
+  @include mat.table-overrides((
+    header-container-height: 44px,
+    row-item-container-height: 48px,
+    header-headline-color: var(--mat-sys-on-surface-variant),
+    header-headline-size: 12px,
+    header-headline-weight: 600,
+    row-item-label-text-size: 14px,
+    row-item-outline-color: var(--mat-sys-outline-variant),
+  ));
+  @include mat.toolbar-overrides((
+    container-background-color: var(--mat-sys-surface),
+    container-text-color: var(--mat-sys-on-surface),
+    title-text-font: $heading-font,
+    title-text-weight: 600,
+    title-text-size: 18px,
+  ));
+  @include mat.sidenav-overrides((
+    container-elevation-shadow: none,
+    container-shape: 0,
+    container-divider-color: var(--mat-sys-outline-variant),
+  ));
+  // Compact controls: 36px buttons with 8px corners, 44px form fields with 14px text.
+  @include mat.button-overrides((
+    filled-container-shape: 8px,
+    outlined-container-shape: 8px,
+    protected-container-shape: 8px,
+    text-container-shape: 8px,
+    tonal-container-shape: 8px,
+    protected-container-elevation-shadow: none,
+    protected-hover-container-elevation-shadow: none,
+    protected-focus-container-elevation-shadow: none,
+    protected-pressed-container-elevation-shadow: none,
+    protected-disabled-container-elevation-shadow: none,
+    outlined-outline-color: var(--mat-sys-outline-variant),
+  ));
+  @include mat.form-field-overrides((
+    container-height: 44px,
+    container-vertical-padding: 10px,
+    outlined-container-shape: 8px,
+    container-text-size: 14px,
+    container-text-line-height: 20px,
+    outlined-label-text-size: 14px,
+    subscript-text-size: 12px,
+  ));
+  @include mat.chips-overrides((container-shape-radius: 8px));
+  @include mat.menu-overrides((container-shape: 8px, container-elevation-shadow: var(--app-overlay-shadow)));
+  @include mat.select-overrides((
+    container-elevation-shadow: var(--app-overlay-shadow),
+    trigger-text-size: 14px,
+    trigger-text-line-height: 20px,
+  ));
+  @include mat.autocomplete-overrides((container-shape: 8px, container-elevation-shadow: var(--app-overlay-shadow)));
+  @include mat.snack-bar-overrides((container-shape: 8px));
+  @include mat.tooltip-overrides((container-shape: 6px));
+}
+
+@mixin styles() {
+  // <body class="mat-typography">: text in Inter, headings in Figtree; sizes and margins of the old hierarchy.
+  .mat-typography {
+    font-family: var(--app-font-text);
+    font-size: var(--app-text-sm);
+    line-height: 20px;
+    font-weight: 400;
+    letter-spacing: normal;
+
+    h1, .mat-h1, h2, .mat-h2, h3, .mat-h3, h4, .mat-h4 {
+      font-family: var(--app-font-heading);
+      font-weight: 600;
+      letter-spacing: normal;
+      margin: 0 0 16px;
+    }
+    h1, .mat-h1 { font-size: var(--app-text-xl); line-height: 32px; }
+    h2, .mat-h2 { font-size: var(--app-text-lg); line-height: 28px; }
+    h3, .mat-h3 { font-size: var(--app-text-md); line-height: 24px; }
+    h4, .mat-h4 { font-size: var(--app-text-sm); line-height: 20px; }
+    h5, .mat-h5, small, .mat-small { font-size: var(--app-text-xs); line-height: 16px; }
+    p { margin: 0 0 12px; }
+    a:not([class]) { color: var(--mat-sys-primary); }
+  }
+
+  // Former card shadows (mat-elevation-z1 wraps most list tables) become a hairline frame.
+  .mat-elevation-z1 {
+    border: var(--app-hairline);
+    border-radius: var(--app-radius-lg);
+    background-color: var(--mat-sys-surface);
+  }
+
+  .mat-mdc-card:not(.mat-mdc-card-outlined),
+  .mat-expansion-panel:not([class*='mat-elevation-z']),
+  .mat-mdc-dialog-surface {
+    border: var(--app-hairline);
+  }
+
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel,
+  .mat-mdc-menu-panel {
+    border: var(--app-hairline);
+  }
+
+  // Tables: dividers between rows only, a hover tint, aligned digits.
+  .mat-mdc-table {
+    font-variant-numeric: tabular-nums;
+    background: transparent;
+  }
+  .mat-mdc-row:hover {
+    background-color: var(--app-hover);
+  }
+
+  // Neutral raised buttons (no colour or color="primary") read as outlined buttons.
+  .mat-mdc-raised-button:not(.mat-accent):not(.mat-warn):not(:disabled) {
+    --mat-button-protected-container-color: transparent;
+    box-shadow: inset 0 0 0 1px var(--mat-sys-outline-variant);
+  }
+
+  // Destructive buttons: red text on a red tint, never a solid red fill.
+  .mat-mdc-raised-button.mat-warn:not(:disabled),
+  .mat-mdc-unelevated-button.mat-warn:not(:disabled),
+  .mat-tonal-button.mat-warn:not(:disabled),
+  .mat-mdc-outlined-button.mat-warn:not(:disabled),
+  .mat-mdc-button.mat-warn:not(:disabled) {
+    --mat-button-protected-container-color: var(--app-danger-tint);
+    --mat-button-protected-label-text-color: var(--app-danger);
+    --mat-button-protected-state-layer-color: var(--app-danger);
+    --mat-button-filled-container-color: var(--app-danger-tint);
+    --mat-button-filled-label-text-color: var(--app-danger);
+    --mat-button-filled-state-layer-color: var(--app-danger);
+    --mat-button-tonal-container-color: var(--app-danger-tint);
+    --mat-button-tonal-label-text-color: var(--app-danger);
+    --mat-button-tonal-state-layer-color: var(--app-danger);
+    --mat-button-outlined-label-text-color: var(--app-danger);
+    --mat-button-outlined-outline-color: var(--app-danger);
+    --mat-button-text-label-text-color: var(--app-danger);
+  }
+
+  // mtx-select sizes its control for a 24px line; the compact fields use 20px, which aligns it with inputs.
+  .mat-mdc-form-field .ng-select-control {
+    min-height: var(--mat-form-field-container-text-line-height, 24px);
+  }
+
+  .mat-mdc-icon-button.mat-warn:not(:disabled) {
+    --mat-icon-button-icon-color: var(--app-danger);
+    color: var(--app-danger);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}

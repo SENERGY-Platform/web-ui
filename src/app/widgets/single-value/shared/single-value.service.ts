@@ -15,6 +15,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
+import { dialogSize } from '../../../core/dialog-size';
 import {
     Observable,
     of,
@@ -71,7 +72,7 @@ export class SingleValueService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     getValues(widget: WidgetModel, date?: Date): Observable<SingleValueModel[]> {

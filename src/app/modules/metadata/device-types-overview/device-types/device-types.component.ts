@@ -58,19 +58,18 @@ import { Attribute } from 'src/app/modules/devices/device-instances/shared/devic
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { AspectClassesService } from '../../aspects/shared/aspect-classes.service';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
-import { MatCard, MatCardContent, MatCardFooter } from '@angular/material/card';
 import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent } from '@angular/material/expansion';
-import { MatStepLabel } from '@angular/material/stepper';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
-import { MatDivider } from '@angular/material/divider';
 import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -82,7 +81,7 @@ interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     templateUrl: './device-types.component.html',
     styleUrls: ['./device-types.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SpinnerComponent, MatCard, MatCardContent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, MatStepLabel, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDivider, MatIconButton, MatIcon, MatButton, MatExpansionPanelContent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle, MatTabGroup, MatTab, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTooltip, MatNestedTreeNode, MatTreeNodeOutlet, MatCardFooter, MatFabButton]
+    imports: [SpinnerComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatIcon, MatButton, MatExpansionPanelContent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle, MatTabGroup, MatTab, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTooltip, MatNestedTreeNode, MatTreeNodeOutlet, MatFabButton, FormSectionComponent, SaveBarComponent]
 })
 export class DeviceTypesComponent implements OnInit {
     private _formBuilder = inject(FormBuilder);
@@ -448,6 +447,35 @@ export class DeviceTypesComponent implements OnInit {
         this.reload({ id: this.id } as DeviceTypeModel); // no more info needed
     }
 
+    /** True while any form section blocks saving; the same condition as the "Please fix" status. */
+    saveBlocked(): boolean {
+        return this.firstFormGroup.invalid || this.secondFormGroup.invalid;
+    }
+
+    /** Status text of the save bar: what blocks saving, else whether anything changed. */
+    saveStatus(): string {
+        const errors: string[] = [];
+        if (this.firstFormGroup.invalid) {
+            errors.push('Information');
+        }
+        if (this.secondFormGroup.invalid) {
+            errors.push('Services (at least one service is needed)');
+        }
+        if (errors.length > 0) {
+            return 'Please fix: ' + errors.join(', ');
+        }
+        return this.firstFormGroup.dirty || this.attrFormGroup.dirty || this.secondFormGroup.dirty ? 'Unsaved changes' : 'Editing';
+    }
+
+    /** Leaves editing without saving: back to the read-only view, or to the list for a new or copied type. */
+    discard() {
+        if (this.queryParamFunction === 'edit' && this.id !== '') {
+            this.reload({ id: this.id } as DeviceTypeModel, 'details');
+        } else {
+            this.router.navigate(['metadata/devicetypesoverview']);
+        }
+    }
+
     private cleanUpServices(): DeviceTypeServiceModel[] {
         const services = this.secondFormGroup.getRawValue()['services'] as DeviceTypeServiceModel[];
 
@@ -726,14 +754,14 @@ export class DeviceTypesComponent implements OnInit {
         }
     }
 
-    private reload(deviceType: DeviceTypeModel | null) {
+    private reload(deviceType: DeviceTypeModel | null, queryParamFunction = 'edit') {
         if (deviceType) {
             this.router.routeReuseStrategy.shouldReuseRoute = function () {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
             this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceType.id], {
-                queryParams: { function: 'edit' },
+                queryParams: { function: queryParamFunction },
             });
         }
     }
