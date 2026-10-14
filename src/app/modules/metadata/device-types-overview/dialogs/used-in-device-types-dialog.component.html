@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Used In Device-Types</h2>
+<senergy-dialog-header title="Used In Device-Types" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
   <table mat-table [dataSource]="dataSource">
@@ -50,6 +50,6 @@
   </table>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="accent" (click)="close()">Ok</button>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="close()">Close</button>
 </mat-dialog-actions>

@@ -40,6 +40,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { UsedInDeviceTypesDialogComponent } from '../dialogs/used-in-device-types-dialog.component';
 import { ImportTypesService } from 'src/app/modules/imports/import-types/shared/import-types.service';
 import { ImportTypeContentVariableModel } from 'src/app/modules/imports/import-types/shared/import-types.model';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -56,6 +57,7 @@ export class DeviceTypeService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.closeOnNavigation = true;
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.data = {
             element,
         };

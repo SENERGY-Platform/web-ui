@@ -37,7 +37,8 @@ describe('ConfirmDialogComponent', () => {
     });
 
     const el = (): HTMLElement => fixture.nativeElement;
-    const buttons = (): HTMLButtonElement[] => Array.from(el().querySelectorAll('button'));
+    const buttons = (): HTMLButtonElement[] => Array.from(el().querySelectorAll('mat-dialog-actions button'));
+    const closeIcon = (): HTMLButtonElement => el().querySelector('button[aria-label="Close"]') as HTMLButtonElement;
 
     it('renders title and text', () => {
         expect(el().querySelector('h2')?.textContent?.trim()).toBe('Move Aspect');
@@ -50,6 +51,11 @@ describe('ConfirmDialogComponent', () => {
 
     it('closes with false on Cancel', () => {
         buttons()[0].click();
+        expect(close).toHaveBeenCalledOnceWith(false);
+    });
+
+    it('closes with false from the header close icon', () => {
+        closeIcon().click();
         expect(close).toHaveBeenCalledOnceWith(false);
     });
 

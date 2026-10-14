@@ -15,9 +15,10 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 /**
  * Shown instead of the generic error snackbar when a save answers 409: somebody else's write
@@ -30,7 +31,7 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './environments-version-conflict-dialog.component.html',
     styleUrls: ['./environments-version-conflict-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, MatDialogActions, MatButton]
 })
 export class EnvironmentsVersionConflictDialogComponent {
     private dialogRef = inject<MatDialogRef<EnvironmentsVersionConflictDialogComponent>>(MatDialogRef);

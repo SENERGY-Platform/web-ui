@@ -19,6 +19,7 @@ import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dial
 import { DeleteDialogComponent, DeleteDialogOptions, DeleteDialogResponse } from '../dialogs/delete-dialog.component';
 import { ConfirmDialogComponent } from '../dialogs/confirm-dialog.component';
 import {InputDialogComponent} from '../dialogs/input-dialog.component';
+import { dialogSize } from '../dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -33,6 +34,7 @@ export class DialogsService {
     openDeleteDialog(text: string, options: DeleteDialogOptions | undefined): MatDialogRef<DeleteDialogComponent, boolean | DeleteDialogResponse>;
     openDeleteDialog(text: string, options?: DeleteDialogOptions): MatDialogRef<DeleteDialogComponent, boolean | DeleteDialogResponse> {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('s'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             text,
@@ -44,6 +46,7 @@ export class DialogsService {
 
     openConfirmDialog(title: string, text: string): MatDialogRef<ConfirmDialogComponent, boolean> {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('s'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             text,
@@ -55,6 +58,7 @@ export class DialogsService {
 
     openInputDialog(title: string, fields: {[key: string]: string}, required: string[]): MatDialogRef<InputDialogComponent, {[key: string]: string} | null> {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             title,

@@ -23,6 +23,7 @@ import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleM
 import { ExportDataService } from '../../shared/export-data.service';
 import { ConsumptionProfileEditComponent } from '../dialog/edit/edit.component';
 import { ConsumptionProfileResponse } from './consumption-profile.model';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root'
@@ -103,6 +104,6 @@ export class ConsumptionProfileService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '450px' });
+        }, dialogSize('m'));
     }
 }

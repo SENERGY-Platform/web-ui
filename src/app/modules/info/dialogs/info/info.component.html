@@ -14,21 +14,19 @@
   ~ limitations under the License.
   -->
 
-<div id="container">
-    <h2 mat-dialog-title>Info</h2>
+<senergy-dialog-header title="Info" (closed)="close()"></senergy-dialog-header>
 
-    <mat-dialog-content>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Version</mat-label>
-            <input type="text" matInput [value]="version" readonly>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-            <mat-label>Commit</mat-label>
-            <input type="text" matInput [value]="commit" readonly>
-        </mat-form-field>
-    </mat-dialog-content>
+<mat-dialog-content>
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+        <mat-label>Version</mat-label>
+        <input type="text" matInput [value]="version" readonly>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width" color="accent">
+        <mat-label>Commit</mat-label>
+        <input type="text" matInput [value]="commit" readonly>
+    </mat-form-field>
+</mat-dialog-content>
 
-    <mat-dialog-actions class="ly-row ly-align-end-center">
-        <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    </mat-dialog-actions>
-</div>
+<mat-dialog-actions>
+    <button matButton="outlined" (click)="close()">Close</button>
+</mat-dialog-actions>

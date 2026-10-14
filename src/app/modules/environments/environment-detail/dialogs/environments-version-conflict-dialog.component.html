@@ -14,14 +14,14 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Someone else saved first</h2>
+<senergy-dialog-header title="Someone else saved first" (closed)="keepEditing()"></senergy-dialog-header>
 
 <mat-dialog-content>
     Someone else saved this environment while you were editing. Reload to get their changes --
     your unsaved edits will be lost.
 </mat-dialog-content>
 
-<mat-dialog-actions style="display: flex; justify-content: end;">
-    <button mat-raised-button color="primary" (click)="keepEditing()">Keep editing</button>
-    <button mat-raised-button color="accent" (click)="reload()">Reload</button>
+<mat-dialog-actions>
+    <button matButton="outlined" (click)="keepEditing()">Keep editing</button>
+    <button matButton="filled" (click)="reload()">Reload</button>
 </mat-dialog-actions>

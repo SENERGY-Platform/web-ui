@@ -15,7 +15,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../directives/close-mtx-select-on-scroll.directive';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -23,12 +23,13 @@ import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { TitleCasePipe } from '@angular/common';
+import { DialogHeaderComponent } from '../components/dialog-header/dialog-header.component';
 
 @Component({
     templateUrl: './input-dialog.component.html',
     styleUrls: ['./input-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatDialogActions, MatButton, TitleCasePipe]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatDialogActions, MatButton, TitleCasePipe]
 })
 export class InputDialogComponent {
     private dialogRef = inject<MatDialogRef<InputDialogComponent>>(MatDialogRef);

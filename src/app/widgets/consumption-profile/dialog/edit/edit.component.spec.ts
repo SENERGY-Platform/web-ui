@@ -50,3 +50,35 @@ describe('ConsumptionProfileEditComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+describe('ConsumptionProfileEditComponent closing', () => {
+  let fixture: ComponentFixture<ConsumptionProfileEditComponent>;
+  let close: jasmine.Spy;
+
+  beforeEach(async () => {
+    close = jasmine.createSpy('close');
+    await TestBed.configureTestingModule({
+        schemas: [NO_ERRORS_SCHEMA],
+        imports: [MatDialogModule, MatSnackBarModule, ConsumptionProfileEditComponent],
+        providers: [
+            { provide: MAT_DIALOG_DATA, useValue: {} },
+            { provide: MatDialogRef, useValue: { close } },
+            provideHttpClient(withInterceptorsFromDi()),
+            provideHttpClientTesting(),
+        ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(ConsumptionProfileEditComponent);
+    fixture.detectChanges();
+  });
+
+  it('returns the Cancel result from the header close icon', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    (el.querySelector('mat-dialog-actions button') as HTMLButtonElement).click();
+    const cancelArgs = close.calls.mostRecent().args;
+    close.calls.reset();
+
+    (el.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(close.calls.mostRecent().args).toEqual(cancelArgs);
+  });
+});

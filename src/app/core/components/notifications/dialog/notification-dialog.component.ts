@@ -15,7 +15,7 @@
  */
 
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     NotificationBrokerModel,
     NotificationChannel,
@@ -50,6 +50,7 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../directives/matError.directive';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { DialogHeaderComponent } from '../../dialog-header/dialog-header.component';
 
 
 export enum Modes {
@@ -63,7 +64,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
     templateUrl: './notification-dialog.component.html',
     styleUrls: ['./notification-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTabGroup, MatTab, SpinnerComponent, MatCheckbox, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatIconButton, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatButtonToggleGroup, MatButtonToggle, MatButton, MatDialogActions]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTabGroup, MatTab, SpinnerComponent, MatCheckbox, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatIconButton, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatButtonToggleGroup, MatButtonToggle, MatButton, MatDialogActions]
 })
 export class NotificationDialogComponent implements OnInit, OnDestroy {
     private dialogRef = inject<MatDialogRef<NotificationDialogComponent>>(MatDialogRef);

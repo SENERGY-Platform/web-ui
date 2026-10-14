@@ -15,11 +15,12 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {CellModel} from '../../diagram-editor/shared/diagram.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatButton } from '@angular/material/button';
 import { JsonPipe } from '@angular/common';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 export interface DialogData {
     oldOperator: CellModel;
@@ -31,7 +32,7 @@ export interface DialogData {
     templateUrl: './flow-update-dialog.component.html',
     styleUrls: ['./flow-update-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, JsonPipe]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, MatDialogActions, MatButton, JsonPipe]
 })
 export class FlowUpdateDialogComponent {
     dialogRef = inject<MatDialogRef<FlowUpdateDialogComponent>>(MatDialogRef);

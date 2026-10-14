@@ -14,9 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 class="ly-row" mat-dialog-title>
-  <span class="ly-flex">Notification settings</span>
-</h2>
+<senergy-dialog-header title="Notification settings" (closed)="close()"></senergy-dialog-header>
 <mat-dialog-content>
   <mat-tab-group color="accent" animationDuration="0ms">
     <mat-tab label="Delivery">
@@ -209,7 +207,7 @@
   </mat-tab-group>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-start-center">
+<mat-dialog-actions>
   <span class="save-state ly-flex">
     @switch (saveState) {
       @case ('saving') {
@@ -231,8 +229,7 @@
     }
   </span>
   @if (mode === modes.BROKER_EDIT) {
-    <button mat-raised-button color="accent" (click)="gotoBrokerList()">Back
-    </button>
+    <button matButton="outlined" (click)="gotoBrokerList()">Back</button>
   }
-  <button mat-raised-button color="primary" (click)="close()">Close</button>
+  <button matButton="outlined" (click)="close()">Close</button>
 </mat-dialog-actions>

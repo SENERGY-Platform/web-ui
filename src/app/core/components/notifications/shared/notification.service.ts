@@ -34,6 +34,7 @@ import { AuthorizationService } from '../../../services/authorization.service';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
+import { dialogSize } from '../../../dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -66,8 +67,7 @@ export class NotificationService implements OnDestroy {
         dialogConfig.data = {
             notificationService: this,
         };
-        dialogConfig.width = '860px';
-        dialogConfig.maxWidth = '95vw';
+        Object.assign(dialogConfig, dialogSize('l'));
         const dialogRef = this.dialog.open(NotificationDialogComponent, dialogConfig);
         return dialogRef.afterClosed();
     }

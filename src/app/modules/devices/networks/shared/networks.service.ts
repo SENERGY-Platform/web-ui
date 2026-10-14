@@ -39,6 +39,7 @@ import {
 } from '../../device-instances/shared/device-instances.model';
 import { NetworksLoraCertsDialogComponent } from '../dialogs/networks-loracerts-dialog.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -146,6 +147,7 @@ export class NetworksService {
 
     openNetworkClearDialog(network: HubModel): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('s'));
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(NetworksClearDialogComponent, dialogConfig);
 
@@ -168,7 +170,7 @@ export class NetworksService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = { network, certs };
-        dialogConfig.width = '80vw';
+        Object.assign(dialogConfig, dialogSize('l'));
         this.dialog.open(NetworksLoraCertsDialogComponent, dialogConfig);
     }
 

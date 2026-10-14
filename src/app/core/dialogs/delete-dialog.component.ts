@@ -15,12 +15,13 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../directives/close-mtx-select-on-scroll.directive';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../components/dialog-header/dialog-header.component';
 
 export interface DeleteDialogOptions {
     checkboxText?: string;
@@ -39,7 +40,7 @@ export interface DeleteDialogResponse {
     templateUrl: './delete-dialog.component.html',
     styleUrls: ['./delete-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatCheckbox, FormsModule, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatCheckbox, FormsModule, MatDialogActions, MatButton]
 })
 export class DeleteDialogComponent {
     private dialogRef = inject<MatDialogRef<DeleteDialogComponent>>(MatDialogRef);

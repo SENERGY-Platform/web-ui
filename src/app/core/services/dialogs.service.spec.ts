@@ -65,6 +65,15 @@ describe('DialogsService', () => {
         expect(config.data).toEqual({ title: 'Title', fields, required: ['name'] });
     });
 
+    it('sizes confirmations s and the input dialog m, with a max width', () => {
+        service.openDeleteDialog('x');
+        expect(open.calls.mostRecent().args[1]).toEqual(jasmine.objectContaining({ width: '400px', maxWidth: '95vw' }));
+        service.openConfirmDialog('T', 'x');
+        expect(open.calls.mostRecent().args[1]).toEqual(jasmine.objectContaining({ width: '400px', maxWidth: '95vw' }));
+        service.openInputDialog('T', {}, []);
+        expect(open.calls.mostRecent().args[1]).toEqual(jasmine.objectContaining({ width: '600px', maxWidth: '95vw' }));
+    });
+
     it('returns the ref of MatDialog.open', () => {
         const ref = { afterClosed: () => of(true) };
         open.and.returnValue(ref);

@@ -15,8 +15,8 @@
   -->
 
 
-<h1 mat-dialog-title>Attention: {{ data.oldOperator.id }} changed</h1>
-<div mat-dialog-content>
+<senergy-dialog-header [title]="'Attention: ' + data.oldOperator.id + ' changed'" (closed)="onClick()"></senergy-dialog-header>
+<mat-dialog-content>
   <div class="comparison-container">
     <!-- Left Column: Old Operator -->
     <div class="cell-model-column">
@@ -132,8 +132,8 @@
       }
     </div>
   </div>
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="onClick()">OK</button>
-</div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="onClick()">Close</button>
+</mat-dialog-actions>
 

@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>LoRaWAN Certs</h2>
+<senergy-dialog-header title="LoRaWAN Certs" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
     <mat-form-field appearance="outline" class="full-width" color="accent">
@@ -53,6 +53,6 @@
    
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="primary" (click)="close()">Close</button>
+<mat-dialog-actions>
+    <button matButton="outlined" (click)="close()">Close</button>
 </mat-dialog-actions>

@@ -40,7 +40,8 @@ describe('DeleteDialogComponent', () => {
     }
 
     const el = (): HTMLElement => fixture.nativeElement;
-    const buttons = (): HTMLButtonElement[] => Array.from(el().querySelectorAll('button'));
+    const buttons = (): HTMLButtonElement[] => Array.from(el().querySelectorAll('mat-dialog-actions button'));
+    const closeIcon = (): HTMLButtonElement => el().querySelector('button[aria-label="Close"]') as HTMLButtonElement;
     const checkbox = (): HTMLInputElement | null => el().querySelector('mat-checkbox input');
 
     describe('without options', () => {
@@ -71,6 +72,16 @@ describe('DeleteDialogComponent', () => {
             buttons()[1].click();
             expect(close).toHaveBeenCalledOnceWith(true);
         });
+
+        it('closes with the Cancel result from the header close icon', () => {
+            closeIcon().click();
+            expect(close).toHaveBeenCalledOnceWith(false);
+        });
+
+        it('styles Delete as the destructive filled action', () => {
+            expect(buttons()[0].classList).not.toContain('mat-warn');
+            expect(buttons()[1].classList).toContain('mat-warn');
+        });
     });
 
     describe('with a checkbox', () => {
@@ -95,6 +106,12 @@ describe('DeleteDialogComponent', () => {
             fixture.detectChanges();
             buttons()[1].click();
             expect(close).toHaveBeenCalledOnceWith({ confirmed: true, checkboxChecked: true });
+        });
+
+        it('reports the checkbox state with confirmed false from the header close icon', async () => {
+            await create({ checkboxText: 'Also delete', checkboxDefault: true });
+            closeIcon().click();
+            expect(close).toHaveBeenCalledOnceWith({ confirmed: false, checkboxChecked: true });
         });
 
         it('reports the checkbox state on Cancel with confirmed false', async () => {

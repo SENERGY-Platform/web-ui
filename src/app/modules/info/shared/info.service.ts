@@ -17,6 +17,7 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { InfoDialogComponent } from '../dialogs/info/info.component';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root'
@@ -28,6 +29,7 @@ export class InfoService {
     openInfoDialog() {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
+        Object.assign(dialogConfig, dialogSize('s'));
         // dialogConfig.data = {
         //     name: name,
         //     permissions: permissionsIn,

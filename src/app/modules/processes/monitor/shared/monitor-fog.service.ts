@@ -25,6 +25,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MonitorDetailsDialogComponent } from '../dialogs/monitor-details-dialog.component';
 import { MonitorProcessTotalModel } from './monitor-process-total.model';
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -147,6 +148,7 @@ export class MonitorFogService {
             .subscribe((incident: ProcessIncidentsModel[]) => {
                 const dialogConfig = new MatDialogConfig();
                 dialogConfig.disableClose = false;
+                Object.assign(dialogConfig, dialogSize('m'));
                 dialogConfig.data = {
                     incident,
                 };

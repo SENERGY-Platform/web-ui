@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Details</h2>
+<senergy-dialog-header title="Details" (closed)="ok()"></senergy-dialog-header>
 
 <mat-dialog-content>
   @if (incidents.length === 0) {
@@ -31,6 +31,6 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="accent" (click)="ok()">Ok</button>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="ok()">Close</button>
 </mat-dialog-actions>
