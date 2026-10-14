@@ -2,8 +2,9 @@
 
 ## Applies when
 
-Adding, renaming or removing a service URL in this app. Service URLs reach the
-app as **runtime** environment variables, not as build-time constants.
+Adding, renaming or removing a service URL in this app, or a function, aspect or
+device class id. Both reach the app as **runtime** environment variables, not as
+build-time constants.
 
 **Not this if**: you found the key in `src/assets/env.json`,
 `src/environments/environment.dev.ts` or `environment.prod.ts` and want to edit
@@ -25,6 +26,19 @@ rather than a missing edit:
 that flips `production: false`. So a key added to `environment.ts` is
 automatically in the file `fileReplacements` swaps in, and there is nothing else
 to keep in sync for the build.
+
+## Function and aspect ids take the same route
+
+Ids of functions, aspects and device classes are keys in the same two files. Their
+fallback in `environment.ts` is a placeholder such as
+`urn:infai:ses:aspect:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`, and `loadEnv` in
+`initializer.service.ts` skips an empty value. A deployment that does not set the
+key therefore leaves the placeholder in place: it matches no content variable and
+no criteria, so a widget built on it finds nothing and reports no error.
+
+The placeholder is the same string for every key of one kind. A spec that tells
+two functions or two aspects apart has to set distinct values for them first, as
+the `ac-control` specs do, or both compare equal.
 
 ## `set-env.ts` is not part of the chain
 
