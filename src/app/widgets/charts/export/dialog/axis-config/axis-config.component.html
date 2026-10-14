@@ -112,7 +112,7 @@
                                 <mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mtx-option>
                                 <mtx-option [value]="chartsExportDeviceGroupMergingStrategy.Merge">Merge</mtx-option>
-                                <mtx-option *ngIf="groupType !== undefined"
+                                <mtx-option *ngIf="groupType"
                                     [value]="chartsExportDeviceGroupMergingStrategy.Sum">Sum</mtx-option>
                             </mtx-select>
                             <mat-error senergyError label="Merging Strategy"></mat-error>
