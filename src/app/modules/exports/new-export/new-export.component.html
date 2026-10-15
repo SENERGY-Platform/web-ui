@@ -168,8 +168,8 @@
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>{{exportForm.get('targetSelector')?.value === targetDb ? 'Name' :
                                 'Topic'}}</mat-label>
-                            <input #input matInput formControlName="Name" />
-                            <mat-error senergyError label="Name"></mat-error>
+                            <input #input matInput formControlName="Name" [errorStateMatcher]="nameMatcher(group)" />
+                            <mat-error>{{nameError(group)}}</mat-error>
                         </mat-form-field>
                         <mat-form-field fxFlex color="accent" appearance="outline" class="layout-value">
                             <mat-label>Path</mat-label>
@@ -202,6 +202,7 @@
                     [pageSizeOptions]="[20, 50, 75, 100]" (page)="movePage($event)" showFirstLastButtons
                     aria-label="Select page">
                 </mat-paginator>
+                <mat-error *ngIf="invalidNames().length > 0">Names to change: {{invalidNames().join(', ')}}</mat-error>
                 <div fxLayout="row" class="button-footer">
                     <div fxLayout="column" fxFlex fxLayoutAlign="center start">
                         <button type="button" mat-raised-button color="accent" (click)="autofillValues()"

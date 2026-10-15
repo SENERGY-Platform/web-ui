@@ -25,7 +25,15 @@ import {
     DeviceTypeModel,
     DeviceTypeServiceModel,
 } from '../../metadata/device-types-overview/shared/device-type.model';
-import { DatabaseType, ExportDatabaseModel, ExportModel, ExportValueModel } from '../shared/export.model';
+import {
+    columnNameError,
+    DatabaseType,
+    duplicateValueNames,
+    ExportDatabaseModel,
+    ExportModel,
+    ExportValueModel,
+    invalidColumnNames,
+} from '../shared/export.model';
 import { ExportService } from '../shared/export.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PipelineModel, PipelineOperatorModel } from '../../data/pipeline-registry/shared/pipeline.model';
@@ -46,6 +54,7 @@ import {
     FormArray,
     FormControl,
     UntypedFormBuilder,
+    ValidationErrors,
     Validators
 } from '@angular/forms';
 import * as _ from 'lodash';
@@ -53,6 +62,8 @@ import { BrokerExportService } from '../shared/broker-export.service';
 import { PageEvent } from '@angular/material/paginator';
 import { AddTagFn } from '@ng-matero/extensions/select';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { stateMatcher } from '../../data/operator-repo/shared/operator-validation';
 
 @Component({
     selector: 'senergy-new-export',
@@ -94,8 +105,12 @@ export class NewExportComponent implements OnInit {
         pipeline: [{value: null, disabled: true}, Validators.required],
         exportDatabaseId: [{value: environment.exportDatabaseIdInternalTimescaleDb}, Validators.required],
         timestampFormat: [''],
-        exportValues: this.fb.array([] as ExportValueModel[]),
+        exportValues: this.fb.array([] as ExportValueModel[], (array: AbstractControl) => this.columnNamesError(array)),
     });
+
+    private readonly nameMatchers = new WeakMap<AbstractControl, ErrorStateMatcher>();
+    /** The offset the export was loaded with; this.export.Offset is overwritten by a save that may still fail. */
+    private storedOffset: string | undefined;
 
     ready = true;
     export = {} as ExportModel;
@@ -191,7 +206,9 @@ export class NewExportComponent implements OnInit {
                                 timestampFormat: exp.TimestampFormat,
                             });
                             exp.Values.forEach(v => this.addValue(v.Name, v.Path, v.Type, v.Tag));
-                            if (exp.Offset === 'smallest') {
+                            this.storedOffset = exp.Offset;
+                            // an export created from the import dialog says earliest, the form itself writes smallest
+                            if (exp.Offset === 'smallest' || exp.Offset === 'earliest') {
                                 this.exportForm.patchValue({allMessages: true});
                             }
                             if (exp.FilterType === 'deviceId') {
@@ -321,7 +338,8 @@ export class NewExportComponent implements OnInit {
             }
 
             if (raw.allMessages) {
-                this.export.Offset = 'smallest';
+                // keep the import dialog's spelling: analytics-serving takes another offset string for a changed consumption strategy
+                this.export.Offset = this.storedOffset === 'earliest' ? 'earliest' : 'smallest';
             } else {
                 this.export.Offset = 'largest';
             }
@@ -430,6 +448,8 @@ export class NewExportComponent implements OnInit {
                     });
                 }
                 this.autofillValues();
+                // autofill may leave the values as they are, and only the names of a database export become columns
+                this.exportValues.updateValueAndValidity();
             });
             this.exportForm.get('customBrokerEnabled')?.valueChanges.subscribe((customBrokerEnabled) => {
                 if (!customBrokerEnabled) {
@@ -650,6 +670,35 @@ export class NewExportComponent implements OnInit {
                 Tag: tag || false,
             }),
         );
+    }
+
+    /** The names of a database export become its columns; a broker export uses them as topics. */
+    private columnNamesError(array: AbstractControl): ValidationErrors | null {
+        if (array.parent?.getRawValue().targetSelector !== this.targetDb) {
+            return null;
+        }
+        return invalidColumnNames(array.value).length > 0 ? {columnNames: true} : null;
+    }
+
+    nameError(group: AbstractControl): string {
+        if (!this.exportValues.hasError('columnNames')) {
+            return '';
+        }
+        return columnNameError(group.value.Name, duplicateValueNames(this.exportValues.value));
+    }
+
+    /** The paginator hides most rows, so the names to change are listed below it as well. */
+    invalidNames(): string[] {
+        return this.exportValues.hasError('columnNames') ? invalidColumnNames(this.exportValues.value) : [];
+    }
+
+    nameMatcher(group: AbstractControl): ErrorStateMatcher {
+        let matcher = this.nameMatchers.get(group);
+        if (matcher === undefined) {
+            matcher = stateMatcher(() => this.nameError(group) !== '');
+            this.nameMatchers.set(group, matcher);
+        }
+        return matcher;
     }
 
     deleteValue(index: number) {
