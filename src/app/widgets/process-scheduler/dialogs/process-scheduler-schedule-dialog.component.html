@@ -14,19 +14,19 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Schedule</h2>
+<senergy-dialog-header title="Schedule" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
     <div class="ly-column" [formGroup]="form">
         <mat-slide-toggle color="accent" class="toggle-padding" formControlName="enable">Enable</mat-slide-toggle>
 
-        <mat-form-field class="full-width" appearance="outline" color="accent">
+        <mat-form-field class="full-width">
             <mat-label>Alias</mat-label>
             <input formControlName="process_alias" matInput type="text">
             <mat-error senergyError label="Alias"></mat-error>
         </mat-form-field>
 
-        <mat-form-field class="full-width" appearance="outline" color="accent">
+        <mat-form-field class="full-width">
             <mat-label>Time</mat-label>
             <input formControlName="time" matInput type="time" required>
             <mat-error senergyError label="Time"></mat-error>
@@ -42,7 +42,7 @@
             <mat-checkbox class="checkbox-margin" formControlName="0">Sunday</mat-checkbox>
         </section>
 
-        <mat-form-field class="full-width deployment" appearance="outline" color="accent">
+        <mat-form-field class="full-width deployment">
             <mat-label>Deployment</mat-label>
             <mtx-select formControlName="processId" [required]="true" [compareWith]="compare" [items]="deployments"
                 bindLabel="name" bindValue="id" appendTo=".ng-select-anchor">
@@ -52,8 +52,8 @@
     </div>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="this.form.invalid || !daySelected()"
+<mat-dialog-actions>
+    <button matButton="outlined" (click)="close()">Cancel</button>
+    <button matButton="filled" [disabled]="this.form.invalid || !daySelected()"
         (click)="save()">Save</button>
 </mat-dialog-actions>

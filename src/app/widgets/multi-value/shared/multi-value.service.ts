@@ -21,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { MultiValueEditDialogComponent } from '../dialog/multi-value-edit-dialog.component';
+import { dialogSize } from '../../../core/dialog-size';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { LastValuesRequestElementInfluxModel } from '../../shared/export-data.model';
@@ -42,7 +43,7 @@ export class MultiValueService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '675px' });
+        }, dialogSize('l'));
     }
 
     getValues(widget: WidgetModel): Observable<WidgetModel> {

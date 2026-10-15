@@ -16,7 +16,8 @@
 
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import {
@@ -146,7 +147,7 @@ type ElementGroup = FormGroup<{
     templateUrl: './data-table-edit-dialog.component.html',
     styleUrls: ['./data-table-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MtxSelectLabelTemplate, MatIcon, NgStyle, MatIconButton, MatTooltip, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatRadioGroup, MatRadioButton, MatSlideToggle, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MtxSelectLabelTemplate, MatIcon, NgStyle, MatIconButton, MatTooltip, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatRadioGroup, MatRadioButton, MatSlideToggle, MatDialogActions, MatButton]
 })
 export class DataTableEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DataTableEditDialogComponent>>(MatDialogRef);

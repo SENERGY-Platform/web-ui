@@ -14,12 +14,12 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Floorplan</h2>
+<senergy-dialog-header title="Edit Floorplan" (closed)="close()"></senergy-dialog-header>
 <mat-dialog-content>
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
   <div [hidden]="!ready">
     @if (userHasUpdateNameAuthorization) {
-      <mat-form-field appearance="outline" style="display: flex;" color="accent">
+      <mat-form-field class="full-width">
         <mat-label>Widget Name</mat-label>
         <input type="text" matInput [formControl]="name" required>
         <mat-error senergyError label="Widget Name"></mat-error>
@@ -27,8 +27,7 @@
     }
 
     @if (userHasUpdatePropertiesAuthorization) {
-      <mat-form-field appearance="outline" color="accent"
-        style="display: flex;" [formGroup]="form">
+      <mat-form-field class="full-width" [formGroup]="form">
         <mat-label>Point Size</mat-label>
         <input type="number" formControlName="dotSize" matInput>
         <mat-error senergyError label="Point Size"></mat-error>
@@ -98,7 +97,7 @@
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
               <div style="display: flex; justify-content: end;">
-                <mat-form-field appearance="outline" color="accent" style="flex-grow: 1;">
+                <mat-form-field style="flex-grow: 1;">
                   <mat-label>Alias</mat-label>
                   <input type="text" matInput formControlName="alias" required>
                   <mat-error senergyError label="Alias"></mat-error>
@@ -125,14 +124,14 @@
                   </div>
                 </div>
               </div>
-              <mat-form-field appearance="outline" color="accent" style="display: flex;">
+              <mat-form-field class="full-width">
                 <mat-label>Device Group</mat-label>
                 <mtx-select required formControlName="deviceGroupId" [hideSelected]="false" closeOnSelect
                   virtualScroll="true" placeholder="Type to search" bindLabel="name" bindValue="id" [items]="deviceGroups"
                   (scroll)="onSelectScroll($event)" (search)="onSelectSearch($event)" appendTo=".ng-select-anchor">
                 </mtx-select>
               </mat-form-field>
-              <mat-form-field appearance="outline" color="accent" style="display: flex;">
+              <mat-form-field class="full-width">
                 <mat-label>Criteria</mat-label>
                 <mtx-select required formControlName="criteria" [hideSelected]="false" closeOnSelect virtualScroll="true"
                   placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria"
@@ -147,7 +146,7 @@
                   }
                 </mtx-select>
               </mat-form-field>
-              <mat-form-field appearance="outline" color="accent" style="display: flex;">
+              <mat-form-field class="full-width">
                 <mat-label>Tooltip Criteria and Controls</mat-label>
                 <mtx-select formControlName="tooltipCriteria" [hideSelected]="false" virtualScroll="true"
                   placeholder="Type to search" bindLabel="name" [compareWith]="compareCriteria" appendTo=".ng-select-anchor"
@@ -173,7 +172,7 @@
                   <tr [formGroup]="c">
                     <td>
                       <div>
-                        <mat-form-field appearance="outline" color="accent" style="max-width: 6em;">
+                        <mat-form-field style="max-width: 6em;">
                           <mat-label>Icon</mat-label>
                           <mtx-select formControlName="icon" required [items]="materialIconNames" appendTo=".ng-select-anchor"
                             virtualScroll>
@@ -197,7 +196,7 @@
                           values</span>
                         }
                         @if (colorIndex !== getColoringControls(tab).controls.length - 1) {
-                          <mat-form-field appearance="outline" color="accent" class="value-form"
+                          <mat-form-field class="value-form"
                             >
                             <mat-label>Value</mat-label>
                             <input [type]="criteriaIsNumeric(tab) ? 'number' : 'text'" matInput formControlName="value">
@@ -239,9 +238,9 @@
   }
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="save()" [disabled]="!form.valid || !name.valid" cdkFocusInitial>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="close()">Cancel</button>
+  <button matButton="filled" (click)="save()" [disabled]="!form.valid || !name.valid" cdkFocusInitial>
     Save
   </button>
 </mat-dialog-actions>

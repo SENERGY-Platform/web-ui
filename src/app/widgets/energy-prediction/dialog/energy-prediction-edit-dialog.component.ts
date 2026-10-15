@@ -15,7 +15,8 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { AbstractControl, FormBuilder, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
@@ -40,7 +41,7 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './energy-prediction-edit-dialog.component.html',
     styleUrls: ['./energy-prediction-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatHint, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatHint, MatDialogActions, MatButton]
 })
 export class EnergyPredictionEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<EnergyPredictionEditDialogComponent>>(MatDialogRef);

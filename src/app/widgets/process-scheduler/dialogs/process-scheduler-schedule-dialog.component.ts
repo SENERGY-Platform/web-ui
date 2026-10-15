@@ -15,7 +15,8 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { FormArray, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProcessSchedulerModel } from '../shared/process-scheduler.model';
@@ -37,7 +38,7 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './process-scheduler-schedule-dialog.component.html',
     styleUrls: ['./process-scheduler-schedule-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatSlideToggle, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, MtxSelect, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatSlideToggle, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCheckbox, MtxSelect, MatDialogActions, MatButton]
 })
 export class ProcessSchedulerScheduleDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<ProcessSchedulerScheduleDialogComponent>>(MatDialogRef);

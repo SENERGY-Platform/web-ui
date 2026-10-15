@@ -15,6 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { reconstructionPoints } from './reconstruction-chart';
 import { reconstructionChart } from './reconstruction-chartjs';
@@ -31,7 +32,7 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './reconstruction.component.html',
     styleUrls: ['./reconstruction.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, BaseChartDirective, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, BaseChartDirective, MatDialogActions, MatButton]
 })
 export class AnomalyReconstructionComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<AnomalyReconstructionComponent>>(MatDialogRef);

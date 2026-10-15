@@ -1314,6 +1314,22 @@ describe('DataTableEditDialogComponent', () => {
                 );
 
                 it(
+                    'cleans up the unsaved resources when the dialog is closed from the header icon',
+                    fakeAsync(() => {
+                        generatingElement();
+                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        component.save();
+
+                        (fixture.nativeElement.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+                        fixture.destroy();
+
+                        expect(matDialogRefSpy.close.calls.mostRecent().args).toEqual([]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
+                        expect(pendingIds()).toEqual(['export1']);
+                    }),
+                );
+
+                it(
                     'deletes the deployments and schedules no longer used once the retry was saved and logs the exports',
                     fakeAsync(() => {
                         generatingElement();

@@ -16,6 +16,7 @@
 
 import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { dialogSize } from '../../../../../core/dialog-size';
 import { ChartsExportVAxesModel, ChartsExportDeviceGroupMergingStrategy, ChartsExportConversion } from '../../shared/charts-export-properties.model';
 import { ListRulesComponent } from '../list-rules/list-rules.component';
 import { NestedTreeControl } from '@angular/cdk/tree';
@@ -65,7 +66,8 @@ export class AxisConfigComponent {
 
     listRules(element: ChartsExportVAxesModel) {
         const dialog = this.dialog.open(ListRulesComponent, {
-            data: element.conversions || []
+            data: element.conversions || [],
+            ...dialogSize('m')
         });
 
         dialog.afterClosed().subscribe({

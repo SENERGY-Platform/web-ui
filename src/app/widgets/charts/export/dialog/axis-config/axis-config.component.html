@@ -52,21 +52,21 @@
           <mat-card-content>
             <div class="row w-100">
               <div>
-                <mat-form-field color="accent" appearance="outline">
+                <mat-form-field>
                   <mat-label>Value Alias</mat-label>
                   <input type="text" matInput [(ngModel)]="element.valueAlias">
                   <mat-error senergyError label="Value Alias"></mat-error>
                 </mat-form-field>
               </div>
               <div>
-                <mat-form-field color="accent" appearance="outline">
+                <mat-form-field>
                   <mat-label>Color</mat-label>
                   <input type="text" matInput placeholder="e.g. red, #004411" [(ngModel)]="element.color">
                   <mat-error senergyError label="Color"></mat-error>
                 </mat-form-field>
               </div>
               <div [hidden]="groupTypeIsDifference">
-                <mat-form-field color="accent" appearance="outline">
+                <mat-form-field>
                   <mat-label>Math</mat-label>
                   <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
                     [disabled]="groupTypeIsDifference">
@@ -76,7 +76,7 @@
             </div>
             <div class="row w-100">
               <div>
-                <mat-form-field color="accent" appearance="outline">
+                <mat-form-field>
                   <mat-label>Filter</mat-label>
                   <mtx-select [compareWith]="compareFilterTypes" [(ngModel)]="element.filterType"
                     (valueChange)="filerTypeSelected(element)" appendTo=".ng-select-anchor">
@@ -90,7 +90,7 @@
                         </mat-form-field>
                     </div>
                     <div>
-                        <mat-form-field color="accent" appearance="outline">
+                        <mat-form-field>
                             <mat-label>Filter Value</mat-label>
                             <input [type]="element.valueType === 'string' ? 'text' : 'number'" matInput
                                 placeholder="e.g. 1000, filter" [disabled]="element.filterType === undefined"
@@ -101,7 +101,7 @@
                 </div>
                 <div class="row w-100">
                     <div [hidden]="getTags(element).length === 0">
-                        <mat-form-field color="accent" appearance="outline">
+                        <mat-form-field>
                             <mat-label>Tags</mat-label>
                             <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
                                 [disabled]="getTags(element).length === 0" [(ngModel)]="element.tagSelection"
@@ -116,7 +116,7 @@
                         </mat-form-field>
                     </div>
                     <div [hidden]="element.criteria === undefined">
-                        <mat-form-field color="accent" appearance="outline">
+                        <mat-form-field>
                             <mat-label>Merging Strategy</mat-label>
                             <mtx-select placeholder="Choose Tags" [disabled]="element.criteria === undefined"
                                 [(ngModel)]="element.deviceGroupMergingStrategy" appendTo=".ng-select-anchor">

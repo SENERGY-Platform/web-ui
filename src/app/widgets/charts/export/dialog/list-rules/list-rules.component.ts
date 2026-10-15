@@ -15,6 +15,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { DialogHeaderComponent } from '../../../../../core/components/dialog-header/dialog-header.component';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ChartsExportConversion } from '../../shared/charts-export-properties.model';
@@ -30,7 +31,7 @@ import { dialogSize } from '../../../../../core/dialog-size';
     templateUrl: './list-rules.component.html',
     styleUrls: ['./list-rules.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton, MatDialogActions, MatButton]
 })
 export class ListRulesComponent {
   rules = inject(MAT_DIALOG_DATA);

@@ -1,3 +1,4 @@
+<senergy-dialog-header title="Conversion Rules" (closed)="cancel()"></senergy-dialog-header>
 <!--
   ~ Copyright 2025 InfAI (CC SES)
   ~
@@ -72,11 +73,11 @@
     </button>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="accent" (click)="cancel()">
+<mat-dialog-actions>
+    <button matButton="outlined" (click)="cancel()">
         Cancel
     </button>
-    <button mat-raised-button color="accent" (click)="saveRules()">
+    <button matButton="filled" (click)="saveRules()">
         Save
     </button>
 </mat-dialog-actions>

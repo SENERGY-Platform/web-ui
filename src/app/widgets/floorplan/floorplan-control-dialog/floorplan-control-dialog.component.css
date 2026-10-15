@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-mat-dialog-content {
-    min-width: min(24rem, 70vw);
-}
-
 /* the label sits above the input, so a long function name cannot squeeze a slider into nothing */
 .control {
     padding: 0.5rem 0;

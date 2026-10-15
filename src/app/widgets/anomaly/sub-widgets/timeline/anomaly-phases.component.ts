@@ -16,6 +16,7 @@
 
 import { Component, Input, OnChanges, OnInit, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { dialogSize } from '../../../../core/dialog-size';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { AnomaliesPerDevice } from '../../shared/anomaly.model';
 import { AnomalyReconstructionComponent } from '../../reconstruction/reconstruction.component';
@@ -100,8 +101,7 @@ export class AnomalyPhasesComponent implements OnInit, OnChanges {
             return;
         }
         const dialogConfig = new MatDialogConfig();
-        dialogConfig.minWidth = '1000px';
-        dialogConfig.minHeight = '500px';
+        Object.assign(dialogConfig, dialogSize('xl'));
         dialogConfig.data = { anomaly };
         this.dialog.open(AnomalyReconstructionComponent, dialogConfig);
     };

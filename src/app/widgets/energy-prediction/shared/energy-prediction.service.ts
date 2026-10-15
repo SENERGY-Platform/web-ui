@@ -21,6 +21,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {openWidgetEditDialog} from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import {EnergyPredictionEditDialogComponent} from '../dialog/energy-prediction-edit-dialog.component';
+import { dialogSize } from '../../../core/dialog-size';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {ExportDataService} from '../../shared/export-data.service';
@@ -47,7 +48,7 @@ export class EnergyPredictionService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '450px' });
+        }, dialogSize('m'));
     }
 
     getPrediction(widget: WidgetModel): Observable<EnergyPredictionModel> {

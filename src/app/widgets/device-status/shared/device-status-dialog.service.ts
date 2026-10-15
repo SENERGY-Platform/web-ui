@@ -19,6 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { DeviceStatusEditDialogComponent } from '../dialog/device-status-edit-dialog.component';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -34,6 +35,6 @@ export class DeviceStatusDialogService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '675px' });
+        }, dialogSize('l'));
     }
 }

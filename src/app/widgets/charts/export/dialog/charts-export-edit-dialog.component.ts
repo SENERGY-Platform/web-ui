@@ -24,7 +24,8 @@ import { ExportService } from '../../../../modules/exports/shared/export.service
 import { ChartsExportDeviceGroupMergingStrategy, ChartsExportMeasurementModel, ChartsExportPropertiesModel, ChartsExportVAxesModel } from '../shared/charts-export-properties.model';
 import { ChartsExportRangeTimeTypeEnum } from '../shared/charts-export-range-time-type.enum';
 import { MatTableDataSource } from '@angular/material/table';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialog, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialog, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../../modules/metadata/device-types-overview/shared/device-type.model';
@@ -88,7 +89,7 @@ type ChartsExportForm = FormGroup<{
     templateUrl: './charts-export-edit-dialog.component.html',
     styleUrls: ['./charts-export-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatSlideToggle, DataSourceSelectorComponent, MatTooltip, MatTree, CdkDropList, MatTreeNodeDef, MatTreeNode, MatTreeNodePadding, AxisConfigComponent, MatNestedTreeNode, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatSlideToggle, DataSourceSelectorComponent, MatTooltip, MatTree, CdkDropList, MatTreeNodeDef, MatTreeNode, MatTreeNodePadding, AxisConfigComponent, MatNestedTreeNode, MatDialogActions, MatButton]
 })
 export class ChartsExportEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<ChartsExportEditDialogComponent>>(MatDialogRef);
