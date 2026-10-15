@@ -492,6 +492,25 @@ describe('DeviceStatusEditDialogComponent', () => {
         }),
     );
 
+    it(
+        'saves a widget without elements and closes the dialog',
+        waitForAsync(() => {
+            component.userHasUpdateNameAuthorization = true;
+            component.userHasUpdatePropertiesAuthorization = true;
+            component.formGroup.get('name')?.setValue('renamed');
+            expect(component.elements.length).toBe(0);
+            dashboardServiceSpy.updateWidgetName.calls.reset();
+            dashboardServiceSpy.updateWidgetProperty.calls.reset();
+            matDialogRefSpy.close.calls.reset();
+
+            component.save();
+
+            expect(dashboardServiceSpy.updateWidgetName.calls.count()).toBe(1);
+            expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+            expect(matDialogRefSpy.close.calls.count()).toBe(1);
+        }),
+    );
+
     describe('results of two elements of which the first is skipped', () => {
         const addElementWithService = (index: number, serviceId: string) => {
             component.addElement({} as DeviceStatusElementModel);

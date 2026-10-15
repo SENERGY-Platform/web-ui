@@ -34,7 +34,7 @@ import {
     DeploymentsPreparedSelectableModel
 } from '../../../modules/processes/deployments/shared/deployments-prepared.model';
 import { ExportModel, ExportValueCharacteristicModel } from '../../../modules/exports/shared/export.model';
-import { forkJoin, Observable, of } from 'rxjs';
+import { defaultIfEmpty, forkJoin, Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { DeviceStatusService } from '../shared/device-status.service';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
@@ -302,21 +302,22 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     save(): void {
         this.deviceStatusService.deleteElements(this.widgetOld.properties.elements);
 
-        // the request arrays hold one entry per element, null for an element that gets no new export or deployment
-        forkJoin(this.getExportArray()).subscribe((respExport: (ExportModel | null)[]) => {
+        // the request arrays hold one entry per element, null for an element that gets no new export or deployment;
+        // without elements forkJoin([]) completes without a value, so defaultIfEmpty keeps the chain going
+        forkJoin(this.getExportArray()).pipe(defaultIfEmpty([])).subscribe((respExport: (ExportModel | null)[]) => {
             respExport.forEach((exp: ExportModel | null, exportIndex: number) => {
                 if (exp !== null) {
                     this.getExportId(exportIndex).setValue(exp.ID);
                 }
             });
 
-            forkJoin(this.getDeploymentArray()).subscribe((respDeployment: ({ status: number; id: string } | null)[]) => {
+            forkJoin(this.getDeploymentArray()).pipe(defaultIfEmpty([])).subscribe((respDeployment: ({ status: number; id: string } | null)[]) => {
                 respDeployment.forEach((deployment: { status: number; id: string } | null, deploymentIndex: number) => {
                     if (deployment !== null) {
                         this.getDeploymentId(deploymentIndex).setValue(deployment.id);
                     }
                 });
-                forkJoin(this.getScheduleArray()).subscribe((schedules) => {
+                forkJoin(this.getScheduleArray()).pipe(defaultIfEmpty([])).subscribe((schedules) => {
                     schedules.forEach((schedule, index) => {
                         this.getScheduleId(index).setValue(schedule !== null ? schedule.id : null);
                     });
@@ -448,7 +449,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
             obs.push(this.updateProperties());
         }
 
-        forkJoin(obs).subscribe(responses => {
+        // without update authorization obs is empty and forkJoin([]) would never close the dialog
+        forkJoin(obs).pipe(defaultIfEmpty([])).subscribe(responses => {
             const errorOccured = responses.find((response) => response.message != 'OK');
             if(!errorOccured) {
                 this.dialogRef.close(this.widgetNew);
