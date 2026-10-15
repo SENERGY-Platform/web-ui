@@ -15,26 +15,26 @@
   -->
 
 <mat-sidenav-container class="sidenav-container" [ngStyle]="{'z-index': zIndex}" (backdropClick)="closeSidenav()">
-  <mat-sidenav disableClose #sidenav role="navigation" class="sidenav mat-elevation-z1" [fixedInViewport]="true">
+  <mat-sidenav disableClose #sidenav role="navigation" class="sidenav" [fixedInViewport]="true">
     <ul class="side-menu">
       @for (section of sections; track section) {
         <li>
           @if (section.type === 'link') {
-            <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="background-color-sidenav"
+            <button mat-button  type=button routerLink="{{section.state}}" routerLinkActive="nav-active"
               (click)="toggleSection(section)"
               class="md-button-toggle">
               <mat-icon>{{section.icon}}</mat-icon>
-              {{section.name | uppercase}}
+              {{section.name}}
             </button>
           }
           @if (section.type === 'toggle') {
             <button mat-button
               (click)="toggleSection(section)"
-              [ngClass]="{'background-color-sidenav': isSectionOpen(section)}"
+              [ngClass]="{'nav-open': isSectionOpen(section)}"
               class="md-button-toggle">
               <div class="ly-row ly-align-start-center">
                 <mat-icon>{{section.icon}}</mat-icon>
-                <div class="ly-offset-5">{{section.name | uppercase}}</div>
+                <div class="ly-offset-5">{{section.name}}</div>
                 <mat-icon class="md-toggle-icon"
                   [ngClass]="{'toggled': isSectionOpen(section)}">
                   keyboard_arrow_down
@@ -47,7 +47,7 @@
             @for (page of section.pages; track page) {
               <li>
                 <button mat-button
-                  routerLink="{{page.state}}" [class.background-color-sidenav]="isPageActive(page, section)"
+                  routerLink="{{page.state}}" [class.nav-active]="isPageActive(page, section)"
                   (click)="closeSidenav()" class="md-button-toggle">
                   <mat-icon aria-hidden="false" matBadge="{{page.badge}}"
                     [matBadgeHidden]="!page.badge || page.badge === ''"

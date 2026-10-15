@@ -27,7 +27,7 @@ import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared
 import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import { SwitchPropertiesDeploymentsModel } from '../shared/switch-properties.model';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatFooterCellDef, MatFooterCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFooterRowDef, MatFooterRow } from '@angular/material/table';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -39,6 +39,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 
 export interface TableElement {
     name: string;
@@ -50,7 +51,7 @@ export interface TableElement {
     templateUrl: './switch-edit-dialog.component.html',
     styleUrls: ['./switch-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatFooterCellDef, MatFooterCell, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatSelect, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFooterRowDef, MatFooterRow, MatDialogActions, MatButton, AsyncPipe]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatFooterCellDef, MatFooterCell, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatSelect, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFooterRowDef, MatFooterRow, MatDialogActions, MatButton, AsyncPipe]
 })
 export class SwitchEditDialogComponent implements OnInit {
     private fb = inject(FormBuilder);

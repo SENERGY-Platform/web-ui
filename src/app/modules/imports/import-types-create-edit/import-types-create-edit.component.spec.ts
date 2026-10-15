@@ -308,4 +308,67 @@ describe('ImportTypesCreateEditComponent', () => {
             expect(importTypesServiceSpy.saveImportType.calls.mostRecent().args[0]).toEqual(testType);
         }),
     );
+    describe('save bar', () => {
+        const saveBar = (): HTMLElement | null => fixture.nativeElement.querySelector('senergy-save-bar');
+
+        it('stays hidden while nothing changed', () => {
+            expect(component.hasChanges()).toBeFalse();
+            expect(saveBar()).toBeNull();
+        });
+
+        it('appears once a field is edited', () => {
+            component.form.controls.name.setValue('renamed');
+            component.form.controls.name.markAsDirty();
+            fixture.detectChanges();
+
+            expect(saveBar()).not.toBeNull();
+        });
+
+        it('appears once a config is removed', () => {
+            component.deleteConfig(0);
+            fixture.detectChanges();
+
+            expect(saveBar()).not.toBeNull();
+        });
+
+        it('re-enables saving once an invalid config is deleted', () => {
+            const configs = component.getConfigsFormArray();
+            configs.at(0).controls.name.setValue('');
+            configs.at(0).markAsDirty();
+            fixture.detectChanges();
+            const save = (): HTMLButtonElement => fixture.nativeElement.querySelector('senergy-save-bar button.save');
+            expect(save().disabled).toBeTrue();
+
+            component.deleteConfig(0);
+            fixture.detectChanges();
+
+            expect(component.form.invalid).toBeFalse();
+            expect(save().disabled).toBeFalse();
+        });
+
+        it('appears once the output tree is edited, which lives outside the form', () => {
+            // the tree edits the loaded object in place, so this test works on a copy of the shared fixture
+            importTypesServiceSpy.getImportType.and.returnValue(of(JSON.parse(JSON.stringify(testType))));
+            const local = TestBed.createComponent(ImportTypesCreateEditComponent);
+            local.detectChanges();
+
+            local.componentInstance.deleteContentVariable(local.componentInstance.dataSource.data[0]);
+            local.detectChanges();
+
+            expect(local.componentInstance.form.dirty).toBeFalse();
+            expect(local.nativeElement.querySelector('senergy-save-bar')).not.toBeNull();
+        });
+
+        it('leaves for the list without saving on discard', () => {
+            component.form.markAsDirty();
+            fixture.detectChanges();
+            const navigate = spyOn(component, 'navigateToList').and.returnValue(false);
+            importTypesServiceSpy.saveImportType.calls.reset();
+
+            (saveBar()!.querySelector('button.discard') as HTMLButtonElement).click();
+
+            expect(navigate).toHaveBeenCalled();
+            expect(importTypesServiceSpy.saveImportType).not.toHaveBeenCalled();
+        });
+    });
 });

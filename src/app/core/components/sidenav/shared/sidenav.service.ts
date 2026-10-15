@@ -334,4 +334,15 @@ export class SidenavService implements OnDestroy {
     isOpen(): boolean {
         return this.isToggled;
     }
+
+    /** Section and page name for a url path, e.g. ['Imports', 'Types']; the longest matching page wins. */
+    titleFor(url: string): string[] {
+        const matches = (state: string) => url === state || url.startsWith(state + '/');
+        const section = this.sections.find((s) => matches(s.state));
+        if (section === undefined) {
+            return [];
+        }
+        const page = section.pages.filter((p) => matches(p.state)).sort((a, b) => b.state.length - a.state.length)[0];
+        return page === undefined ? [section.name] : [section.name, page.name];
+    }
 }

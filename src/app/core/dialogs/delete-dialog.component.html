@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Delete</h2>
+<senergy-dialog-header title="Delete" (closed)="cancel()"></senergy-dialog-header>
 
 <mat-dialog-content>
   <div>
@@ -33,7 +33,7 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="cancel()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="delete()">Delete</button>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="cancel()">Cancel</button>
+  <button matButton="filled" color="warn" (click)="delete()">Delete</button>
 </mat-dialog-actions>

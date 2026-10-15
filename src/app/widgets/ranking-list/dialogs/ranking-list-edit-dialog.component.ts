@@ -23,7 +23,7 @@ import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.
 import { DashboardResponseMessageModel } from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
 import { MatTable } from '@angular/material/table';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CdkScrollable } from '@angular/cdk/scrolling';
@@ -32,12 +32,13 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     templateUrl: './ranking-list-edit-dialog.component.html',
     styleUrls: ['./ranking-list-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class RankingListEditDialogComponent implements OnInit {
     private fb = inject(FormBuilder);

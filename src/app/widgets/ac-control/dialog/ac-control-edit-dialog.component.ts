@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {DeviceTypeService} from '../../../modules/metadata/device-types-overview/shared/device-type.service';
@@ -37,6 +37,7 @@ import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 
 interface AcControlFormControls {
     name: FormControl<string | null>;
@@ -50,7 +51,7 @@ interface AcControlFormControls {
     templateUrl: './ac-control-edit-dialog.component.html',
     styleUrls: ['./ac-control-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class AcControlEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<AcControlEditDialogComponent>>(MatDialogRef);

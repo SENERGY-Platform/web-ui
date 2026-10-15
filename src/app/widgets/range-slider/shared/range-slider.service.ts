@@ -21,6 +21,7 @@ import { HttpClient } from '@angular/common/http';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { MatDialog } from '@angular/material/dialog';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -37,6 +38,6 @@ export class RangeSliderService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 }

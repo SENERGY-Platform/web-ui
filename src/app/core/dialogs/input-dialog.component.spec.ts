@@ -40,7 +40,8 @@ describe('InputDialogComponent', () => {
     }
 
     const el = (): HTMLElement => fixture.nativeElement;
-    const buttons = (): HTMLButtonElement[] => Array.from(el().querySelectorAll('button'));
+    const buttons = (): HTMLButtonElement[] => Array.from(el().querySelectorAll('mat-dialog-actions button'));
+    const closeIcon = (): HTMLButtonElement => el().querySelector('button[aria-label="Close"]') as HTMLButtonElement;
     const inputs = (): HTMLInputElement[] => Array.from(el().querySelectorAll('input'));
 
     describe('with a required field', () => {
@@ -63,6 +64,11 @@ describe('InputDialogComponent', () => {
 
         it('closes with null on Cancel', () => {
             buttons()[0].click();
+            expect(close).toHaveBeenCalledOnceWith(null);
+        });
+
+        it('closes with null from the header close icon', () => {
+            closeIcon().click();
             expect(close).toHaveBeenCalledOnceWith(null);
         });
 

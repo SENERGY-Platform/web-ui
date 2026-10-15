@@ -15,16 +15,17 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     templateUrl: './networks-clear-dialog.component.html',
     styleUrls: ['./networks-clear-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatDialogActions, MatButton]
 })
 export class NetworksClearDialogComponent {
     private dialogRef = inject<MatDialogRef<NetworksClearDialogComponent>>(MatDialogRef);

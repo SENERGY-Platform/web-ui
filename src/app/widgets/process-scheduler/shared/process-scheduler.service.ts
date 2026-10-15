@@ -27,6 +27,7 @@ import { HttpClient, HttpErrorResponse, HttpResponseBase } from '@angular/common
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProcessSchedulerScheduleEditDialogComponent } from '../dialogs/process-scheduler-schedule-edit-dialog.component';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -46,7 +47,7 @@ export class ProcessSchedulerService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minHeight: '235px' });
+        }, dialogSize('m'));
     }
 
     getSchedules(createdBy: string | null): Observable<ProcessSchedulerModel[]> {

@@ -25,6 +25,7 @@ import { openWidgetEditDialog } from '../../../../../modules/dashboard/shared/op
 import { ChartsProcessDeploymentsEditDialogComponent } from '../dialogs/charts-process-deployments-edit-dialog.component';
 import { map } from 'rxjs/operators';
 import { DeploymentsPerDay, deploymentsPerDay } from './charts-process-deployments-chart';
+import { dialogSize } from '../../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -42,7 +43,7 @@ export class ChartsProcessDeploymentsService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     /** The instances per start day; undefined without instances. */

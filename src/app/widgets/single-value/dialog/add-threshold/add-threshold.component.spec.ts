@@ -44,3 +44,27 @@ describe('AddThresholdComponent', () => {
     expect(component).toBeTruthy();
   });
 });
+
+describe('AddThresholdComponent header', () => {
+  function title(data: unknown): string {
+    TestBed.configureTestingModule({
+        imports: [AddThresholdComponent],
+        schemas: [NO_ERRORS_SCHEMA],
+        providers: [
+            { provide: MatDialogRef, useValue: {} },
+            { provide: MAT_DIALOG_DATA, useValue: data },
+        ],
+    });
+    const fixture = TestBed.createComponent(AddThresholdComponent);
+    fixture.detectChanges();
+    return (fixture.nativeElement as HTMLElement).querySelector('h2')!.textContent!.trim();
+  }
+
+  it('shows the add title without data', () => {
+    expect(title(undefined)).toBe('Add threshold');
+  });
+
+  it('shows the edit title with the old entry', () => {
+    expect(title({ threshold: 5, color: 'red', direction: '>=' })).toBe('Edit threshold');
+  });
+});

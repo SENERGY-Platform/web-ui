@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     UsedInDeviceTypeResponseDeviceTypeRef,
     UsedInDeviceTypeResponseElement
@@ -26,12 +26,13 @@ import { Router, RouterLink } from '@angular/router';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     templateUrl: './used-in-device-types-dialog.component.html',
     styleUrls: ['./used-in-device-types-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatDialogActions, MatButton]
 })
 export class UsedInDeviceTypesDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<UsedInDeviceTypesDialogComponent>>(MatDialogRef);

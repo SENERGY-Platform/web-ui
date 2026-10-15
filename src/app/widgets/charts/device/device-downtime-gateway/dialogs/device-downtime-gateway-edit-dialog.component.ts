@@ -15,7 +15,7 @@
  */
 
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeploymentsModel } from '../../../../../modules/processes/deployments/shared/deployments.model';
 import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeploymentsService } from '../../../../../modules/processes/deployments/shared/deployments.service';
@@ -32,12 +32,13 @@ import { FormsModule } from '@angular/forms';
 import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     templateUrl: './device-downtime-gateway-edit-dialog.component.html',
     styleUrls: ['./device-downtime-gateway-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatDialogActions, MatButton]
 })
 export class DeviceDowntimeGatewayEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DeviceDowntimeGatewayEditDialogComponent>>(MatDialogRef);

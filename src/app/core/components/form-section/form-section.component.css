@@ -1,0 +1,56 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+:host {
+    display: block;
+    padding: 16px 0 0;
+}
+
+:host(:first-child) {
+    padding-top: 8px;
+}
+
+:host(:not(:first-child)) {
+    border-top: var(--app-hairline);
+    margin-top: 4px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.section-heading {
+    flex: 1;
+    min-width: 0;
+}
+
+.section-title {
+    margin: 0;
+    font-family: var(--app-font-heading);
+    font-size: var(--app-text-md);
+    line-height: 24px;
+    font-weight: 600;
+}
+
+.section-hint {
+    margin: 2px 0 0;
+    font-size: var(--app-text-xs);
+    line-height: 16px;
+    color: var(--mat-sys-on-surface-variant);
+}

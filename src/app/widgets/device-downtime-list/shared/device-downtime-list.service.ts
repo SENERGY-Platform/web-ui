@@ -23,6 +23,7 @@ import { Observable } from 'rxjs';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { Attribute, OfflineSinceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { DevicesDowntimeListPropertiesModel } from './device-downtime-list.model';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -39,7 +40,7 @@ export class DeviceDowntimeListService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     getDevicesDowntime(properties: DevicesDowntimeListPropertiesModel): Observable<OfflineSinceModel[]> {

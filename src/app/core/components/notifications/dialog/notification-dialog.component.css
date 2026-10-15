@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-mat-dialog-actions button:not(:last-child) {
-    margin-right: 8px;
-}
-
 .tab-intro {
     margin: 16px 0;
     line-height: 1.4;
@@ -151,10 +147,12 @@ table {
     width: 100%;
 }
 
+/* The dialog content is the only scroll container; the global .table-container would add a second one. */
 .table-container {
     position: relative;
     max-width: 100%;
-    overflow-x: auto;
+    max-height: none;
+    overflow: visible;
 }
 
 td[mat-cell] {

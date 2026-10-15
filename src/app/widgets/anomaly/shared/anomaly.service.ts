@@ -52,6 +52,7 @@ import {
 import { ChartsExportRangeTimeTypeEnum } from '../../charts/export/shared/charts-export-range-time-type.enum';
 import { environment } from 'src/environments/environment';
 import { phaseWindows } from './anomaly-phases';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root'
@@ -70,7 +71,7 @@ export class AnomalyService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '450px' });
+        }, dialogSize('l'));
     }
 
     getAnomaly(exportID: string, deviceIDs?: string[]): Observable < AnomalyResultModel | null > {

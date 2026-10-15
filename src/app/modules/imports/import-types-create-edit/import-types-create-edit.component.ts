@@ -45,13 +45,14 @@ import { WidgetSpinnerComponent } from '../../../widgets/components/widget-spinn
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
-import { MatDivider } from '@angular/material/divider';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../core/components/save-bar/save-bar.component';
 
 type ConfigGroup = FormGroup<{
     name: FormControl<string | null | undefined>;
@@ -65,7 +66,7 @@ type ConfigGroup = FormGroup<{
     templateUrl: './import-types-create-edit.component.html',
     styleUrls: ['./import-types-create-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDivider, MatIconButton, MatIcon, MtxSelect, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet, MatCheckbox, MatTooltip, MatButton]
+    imports: [WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatIconButton, MatIcon, MtxSelect, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet, MatCheckbox, MatTooltip, MatButton, FormSectionComponent, SaveBarComponent]
 })
 export class ImportTypesCreateEditComponent implements OnInit {
     private route = inject(ActivatedRoute);
@@ -155,6 +156,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
             },
         ],
     };
+
+    /** Set by edits of the output tree, which lives outside the form. */
+    outputChanged = false;
 
     treeControl = new NestedTreeControl<ImportTypeContentVariableModel>((node) => node.sub_content_variables);
     dataSource = new MatTreeNestedDataSource<ImportTypeContentVariableModel>();
@@ -287,6 +291,11 @@ export class ImportTypesCreateEditComponent implements OnInit {
         );
     }
 
+    /** Whether there is anything to save: the save bar is shown only then. */
+    hasChanges(): boolean {
+        return this.form.dirty || this.timeAspect.dirty || this.outputChanged;
+    }
+
     navigateToList(): boolean {
         this.router.navigateByUrl('imports/types/list');
         return false;
@@ -305,7 +314,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
         if (this.detailsMode) {
             group.disable();
         }
-        if (config !== undefined) {
+        if (config === undefined) {
+            this.form.markAsDirty();
+        } else {
             group.patchValue({ name: config.name, description: config.description, type: config.type });
             if (config.type !== ImportTypesCreateEditComponent.STRING) {
                 group.patchValue({ default_value: JSON.stringify(config.default_value) });
@@ -326,7 +337,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
     }
 
     deleteConfig(index: number) {
-        this.getConfigsFormArray().controls.splice(index, 1);
+        this.getConfigsFormArray().removeAt(index);
+        this.form.markAsDirty();
     }
 
     editContentVariable(sub: ImportTypeContentVariableModel) {
@@ -338,6 +350,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 }
                 this.autoFillContent(val);
                 sub = val;
+                this.outputChanged = true;
                 const data = this.dataSource.data;
                 this.dataSource.data = [];
                 this.dataSource.data = data; // forces redraw
@@ -354,6 +367,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 } else {
                     sub.sub_content_variables.push(val);
                 }
+                this.outputChanged = true;
                 const data = this.dataSource.data;
                 this.dataSource.data = [];
                 this.dataSource.data = data; // forces redraw
@@ -365,6 +379,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
         this.openDialog(undefined, false, false).subscribe((val) => {
             if (val !== undefined) {
                 this.autoFillContent(val);
+                this.outputChanged = true;
                 const data = this.dataSource.data;
                 data.push(val);
                 this.dataSource.data = data; // forces redraw
@@ -399,6 +414,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 this.findAndDeleteChild(sub, node);
             }
         });
+        this.outputChanged = true;
         const data = this.dataSource.data;
         this.dataSource.data = [];
         this.dataSource.data = data; // forces redraw

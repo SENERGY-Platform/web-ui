@@ -23,6 +23,7 @@ import { Observable } from 'rxjs';
 import { ProcessModelListModel } from './process-model-list.model';
 import { ProcessModel } from '../../../modules/processes/process-repo/shared/process.model';
 import { ProcessRepoService } from '../../../modules/processes/process-repo/shared/process-repo.service';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -38,7 +39,7 @@ export class ProcessModelListService {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     getProcesses(): Observable<ProcessModelListModel[]> {

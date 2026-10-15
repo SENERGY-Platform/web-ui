@@ -14,12 +14,12 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Process Model List</h2>
+<senergy-dialog-header title="Edit Process Model List" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
-  <form [formGroup]="formGroup" class="ly-column">
+  <form [formGroup]="formGroup">
     @if (userHasUpdateNameAuthorization) {
-      <mat-form-field appearance="outline" color="accent">
+      <mat-form-field class="full-width">
         <mat-label>Widget Name</mat-label>
         <input matInput formControlName="name">
         <mat-error senergyError label="Widget Name"></mat-error>
@@ -28,8 +28,8 @@
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="save()">Save</button>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="close()">Cancel</button>
+  <button matButton="filled" (click)="save()">Save</button>
 </mat-dialog-actions>
 

@@ -20,9 +20,10 @@
     margin-bottom: 8px;
 }
 
+/* The dialog content is the only scroll container; the global .table-container would add a second one. */
 .table-container {
-    overflow: auto;
-    max-height: 60vh;
+    max-height: none;
+    overflow: visible;
 }
 
 table {

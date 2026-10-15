@@ -48,6 +48,7 @@ import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { ThresholdComponent } from './threshold/threshold.component';
 import { MatButton } from '@angular/material/button';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
 
 /** The form uses '' or {} for "nothing selected" next to the model. */
 type Picked<T> = T | string | Record<string, never> | null | undefined;
@@ -90,7 +91,7 @@ type SingleValueForm = FormGroup<{
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatRadioGroup, MatRadioButton, MatProgressSpinner, MtxSelect, MtxOption, MatCheckbox, ThresholdComponent, MatDialogActions, MatButton]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatRadioGroup, MatRadioButton, MatProgressSpinner, MtxSelect, MtxOption, MatCheckbox, ThresholdComponent, MatDialogActions, MatButton, FormSectionComponent]
 })
 export class SingleValueEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<SingleValueEditDialogComponent>>(MatDialogRef);

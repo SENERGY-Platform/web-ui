@@ -29,7 +29,9 @@ Pulled in transitively by `swagger-ui`, `monaco-editor`, `posthog-js` and
 ## Fonts
 
 Roboto and Material Symbols are self-hosted under `src/assets/fonts/` and are
-Google LLC, Apache-2.0. See `src/assets/fonts/LICENSE`.
+Google LLC, Apache-2.0. Inter (The Inter Project Authors) and Figtree (The
+Figtree Project Authors) are self-hosted there too, under the SIL Open Font
+License 1.1. See `src/assets/fonts/LICENSE`.
 
 ## Map data
 

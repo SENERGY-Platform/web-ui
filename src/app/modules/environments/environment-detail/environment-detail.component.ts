@@ -110,6 +110,7 @@ import { EnvironmentsEffectsComponent } from './effects/environments-effects.com
 import { EnvironmentsLiveStateTabComponent } from './live-state/environments-live-state-tab.component';
 import { EnvironmentsLiveState } from './live-state/environments-live-state.service';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 /**
  * Editor for a single environment: a tree of its zones/assets/channels on the left,
@@ -1142,7 +1143,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     /** Opens the 409 conflict dialog and reloads (discarding the unsaved edit) only if the user chose "Reload". */
     private openVersionConflictDialog(): void {
         this.dialog
-            .open(EnvironmentsVersionConflictDialogComponent)
+            .open(EnvironmentsVersionConflictDialogComponent, dialogSize('s'))
             .afterClosed()
             .subscribe((shouldReload: boolean | undefined) => {
                 if (shouldReload) {

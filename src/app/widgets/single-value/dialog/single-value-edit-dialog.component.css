@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-.form{
-    min-width: 600px;
-
-}
-
 mat-radio-group mat-radio-button:not(:first-child) {
     padding-left: 8px;
+}
+
+.source-type {
+    display: block;
+    margin: -4px 0 12px -8px;
 }
 
 mat-form-field {
@@ -31,10 +31,17 @@ mat-form-field {
     display: flex;
     flex-direction: row;
     align-items: stretch;
+    gap: 12px;
 }
 
 .one-line-form-container > div {
     flex: 1;
-    margin-right: 10px
+    min-width: 0;
 }
 
+@media screen and (max-width: 599px) {
+    .one-line-form-container {
+        flex-direction: column;
+        gap: 0;
+    }
+}

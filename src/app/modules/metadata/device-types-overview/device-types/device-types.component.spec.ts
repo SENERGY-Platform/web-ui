@@ -20,7 +20,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {DeviceTypesComponent} from './device-types.component';
 import {CoreModule} from '../../../../core/core.module';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-import {ActivatedRoute, convertToParamMap, Route} from '@angular/router';
+import {ActivatedRoute, convertToParamMap, Route, Router} from '@angular/router';
 import {MatStepperModule} from '@angular/material/stepper';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
@@ -421,4 +421,74 @@ describe('DeviceTypesComponent', () => {
                 ]);
         }),
     );
+
+    describe('save bar', () => {
+        it(
+            'reports an edit without changes, then unsaved changes',
+            waitForAsync(() => {
+                init('device_id_4711', 'edit');
+                expect(component.saveStatus()).toBe('Editing');
+
+                component.firstFormGroup.markAsDirty();
+                expect(component.saveStatus()).toBe('Unsaved changes');
+            }),
+        );
+
+        it(
+            'names the sections that block saving',
+            waitForAsync(() => {
+                init('', 'create');
+                expect(component.saveStatus()).toBe('Please fix: Information, Services (at least one service is needed)');
+            }),
+        );
+
+        it(
+            'allows saving a type without attributes',
+            waitForAsync(() => {
+                init('device_id_4711', 'edit');
+                expect(component.deviceTypeAttributes.length).toBe(0);
+                expect(component.saveBlocked()).toBeFalse();
+            }),
+        );
+
+        it(
+            'disables the save button while saving is blocked',
+            waitForAsync(async () => {
+                init('device_id_4711', 'edit');
+                await fixture.whenStable();
+                component.ready = true;
+                component.firstFormGroup.get('name')?.setValue('');
+                fixture.detectChanges();
+
+                const save: HTMLButtonElement = fixture.nativeElement.querySelector('senergy-save-bar button.save');
+                expect(save.disabled).toBeTrue();
+            }),
+        );
+
+        it(
+            'discards an edit by opening the read-only view of the device type',
+            waitForAsync(() => {
+                init('device_id_4711', 'edit');
+                const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+                component.discard();
+
+                expect(navigate).toHaveBeenCalledWith(['metadata/devicetypesoverview/devicetypes/device_id_4711'], {
+                    queryParams: { function: 'details' },
+                });
+            }),
+        );
+
+        it(
+            'discards a copy by returning to the list',
+            waitForAsync(() => {
+                init('device_id_4711', 'copy');
+                const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+                component.discard();
+
+                expect(navigate).toHaveBeenCalledWith(['metadata/devicetypesoverview']);
+            }),
+        );
+    });
 });

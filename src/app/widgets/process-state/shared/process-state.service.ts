@@ -25,6 +25,7 @@ import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { ProcessRepoService } from '../../../modules/processes/process-repo/shared/process-repo.service';
 import { MatDialog } from '@angular/material/dialog';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -42,7 +43,7 @@ export class ProcessStateService {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     getProcessStatus(): Observable<ProcessStateModel> {

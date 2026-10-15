@@ -36,6 +36,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatFabButton } from '@angular/material/button';
 import { DatePipe } from '@angular/common';
 import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 import {newerVersionLabel, portNames, resolveVersionData} from '../operator-repo/shared/operator-version';
 import {OperatorVersionDialogComponent, OperatorVersionDialogResult} from './version-dialog/operator-version-dialog.component';
 
@@ -120,6 +121,7 @@ export class FlowDesignerComponent implements AfterViewInit {
                                     } as CellModel;
                                     const dialogPromise = new Promise<void>((resolve) => {
                                         const dialogRef = this.dialog.open(FlowUpdateDialogComponent, {
+                                            ...dialogSize('l'),
                                             data: operatorsUpdated
                                         });
 

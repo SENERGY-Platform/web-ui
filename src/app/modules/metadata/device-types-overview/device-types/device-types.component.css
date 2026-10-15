@@ -17,11 +17,16 @@
 .device-type-container {
     height: calc(100% - 64px);
     overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.root-card {
-    margin: 1rem;
-    padding: 1rem;
+.page {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 1100px;
+    box-sizing: border-box;
+    padding: 0 24px 24px;
 }
 
 .form {
@@ -71,23 +76,28 @@ table {
 }
 
 .third-width {
-    width: 33%;
+    flex: 1;
+    min-width: 0;
 }
 
 .attribute {
-    justify-content: space-between;
     display: flex;
-    align-items: baseline;
+    align-items: flex-start;
+    gap: 12px;
 }
 
-.divider {
-    margin-top: 20px;
-    margin-bottom: 20px;
+/* Centred on the 44px fields, which sit 0.5em below their own top. */
+.equals {
+    color: var(--mat-sys-on-surface-variant);
+    margin-top: calc(0.5em + 12px);
 }
 
-mat-card-footer {
-    padding-top: 1rem;
-    margin-right: 0.5rem;
+.attribute > .mat-mdc-icon-button {
+    margin-top: calc(0.5em - 2px);
+}
+
+.empty {
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .fab {

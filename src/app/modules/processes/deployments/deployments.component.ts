@@ -53,6 +53,7 @@ import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyle
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 const grids = new Map([
     ['xs', 1],
@@ -352,6 +353,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     showOfflineReasons(reasons: DeploymentsOfflineReasonsModel[]): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.data = {
             reasons,
         };

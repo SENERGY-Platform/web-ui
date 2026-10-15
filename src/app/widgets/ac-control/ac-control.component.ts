@@ -39,6 +39,7 @@ import { DeviceInstancesService } from '../../modules/devices/device-instances/s
 import { DeviceTypeService } from '../../modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceGroupsService } from '../../modules/devices/device-groups/shared/device-groups.service';
 import { AcControlCandidate, acControlElements, deviceGroupCandidates, deviceTypeCandidates, isLegacyAcControl, keepsEveryRole } from './shared/ac-control-elements';
+import { dialogSize } from '../../core/dialog-size';
 
 @Component({
     selector: 'senergy-ac-control',
@@ -85,8 +86,7 @@ export class AcControlComponent implements OnInit {
             userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization
         };
-        dialogConfig.minWidth = '350px';
-        const editDialogRef = this.dialog.open(AcControlEditDialogComponent, dialogConfig);
+        const editDialogRef = this.dialog.open(AcControlEditDialogComponent, { ...dialogConfig, ...dialogSize('m') });
 
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {

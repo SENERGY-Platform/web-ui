@@ -18,3 +18,32 @@
     padding-top: 8px;
 }
 
+.field-row {
+    display: flex;
+    gap: 12px;
+}
+
+.field-row .grow {
+    flex: 1;
+    min-width: 0;
+}
+
+.field-row .priority {
+    width: 120px;
+}
+
+.rule-form .mat-mdc-input-element.code {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 13px;
+}
+
+@media screen and (max-width: 599px) {
+    .field-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .field-row .priority {
+        width: auto;
+    }
+}

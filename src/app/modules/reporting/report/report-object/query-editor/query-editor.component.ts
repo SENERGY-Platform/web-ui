@@ -53,6 +53,7 @@ import { MatErrorMessagesDirective } from '../../../../../core/directives/matErr
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatInput } from '@angular/material/input';
 import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
+import { dialogSize } from '../../../../../core/dialog-size';
 
 interface TimeUnit {
     unit: string;
@@ -423,8 +424,7 @@ export class QueryEditorComponent implements OnInit, OnChanges, OnDestroy {
                     return;
                 }
                 this.dialog.open(QueryPreviewDialogComponent, {
-                    width: '900px',
-                    maxWidth: '95vw',
+                    ...dialogSize('xl'),
                     data: { rows } as QueryPreviewData,
                 });
             },

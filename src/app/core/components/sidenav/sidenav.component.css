@@ -16,23 +16,42 @@
 
 mat-sidenav {
     width: 272px;
+    border-right: var(--app-hairline);
 }
 
 .side-menu, .side-menu ul {
-    color: dimgrey;
+    color: var(--mat-sys-on-surface-variant);
     list-style: none;
     padding: 0;
     margin-top: 0;
 }
 
-.side-menu .menu-toggle-list [mat-button] {
-    display: block;
-    padding: 0 16px 0 32px;
-    text-transform: none;
+.side-menu {
+    padding: 8px 0;
 }
 
-.side-menu > li {
-    border-top: 1px solid var(--mat-sys-outline-variant);
+.side-menu .menu-toggle-list [mat-button] {
+    display: block;
+    height: 40px;
+    padding: 0 12px 0 28px;
+    text-transform: none;
+    font-weight: 400;
+}
+
+/* The active page: brand tint, brand icon, dark text. */
+.side-menu [mat-button].nav-active {
+    background-color: var(--app-brand-tint);
+    color: var(--mat-sys-on-surface);
+    font-weight: 600;
+}
+
+.side-menu [mat-button].nav-active .mat-icon {
+    color: var(--mat-sys-primary);
+}
+
+.side-menu [mat-button].nav-open {
+    color: var(--mat-sys-on-surface);
+    font-weight: 600;
 }
 
 .md-button-toggle .md-toggle-icon.toggled {
@@ -60,18 +79,20 @@ mat-sidenav {
 }
 
 .side-menu [mat-button] {
-    border-radius: 0;
+    border-radius: var(--app-radius-sm);
     cursor: pointer;
-    margin: 0;
-    height: 54px;
+    margin: 1px 0;
+    height: 44px;
     overflow: hidden;
     padding: 0 1rem;
     text-align: left;
     text-decoration: none;
     white-space: normal;
-    width: 100%;
+    width: calc(100% - 16px);
+    margin-left: 8px;
     color: inherit;
     display: block;
+    font-weight: 500;
 }
 
 [mat-button]>.mat-icon {

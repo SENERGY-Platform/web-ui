@@ -13,6 +13,7 @@ import { WidgetModule } from '../app/widgets/widget.module';
 import { ChartsPreviewComponent } from './charts-preview.component';
 import { provideIconFontSet } from '../app/core/icon-font-set';
 import { provideOverlayDefaults } from '../app/core/overlay-defaults';
+import { provideFormFieldDefaults } from '../app/core/form-field-defaults';
 import { AUTH_CLIENT } from '../app/core/services/auth-client';
 import { PreviewAuthClient } from './preview-keycloak.service';
 import { PermissionTestResponse } from '../app/modules/admin/permissions/shared/permission.model';
@@ -38,5 +39,6 @@ export const previewConfig: ApplicationConfig = {
         { provide: HTTP_INTERCEPTORS, useClass: FixtureInterceptor, multi: true },
         provideIconFontSet(),
         provideOverlayDefaults(),
+        provideFormFieldDefaults(),
     ],
 };

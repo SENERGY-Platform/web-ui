@@ -14,15 +14,17 @@
   ~ limitations under the License.
   -->
 
+<senergy-dialog-header [title]="title" (closed)="cancel()"></senergy-dialog-header>
+
 <mat-dialog-content>
-    <div [formGroup]="form" class="ly-column">
-        <mat-form-field appearance="outline" color="accent">
+    <div [formGroup]="form">
+        <mat-form-field class="full-width">
             <mat-label>Threshold</mat-label>
             <input matInput type="text" formControlName="threshold">
             <mat-error senergyError label="Threshold"></mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" color="accent">
+        <mat-form-field class="full-width">
             <mat-label>Direction</mat-label>
             <mtx-select formControlName="direction" appendTo=".ng-select-anchor">
                 <mtx-option value="<="><=</mtx-option>             
@@ -31,7 +33,7 @@
             <mat-error senergyError label="Direction"></mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" color="accent">
+        <mat-form-field class="full-width">
             <mat-label>Color</mat-label>
             <input matInput type="text" formControlName="color">
             <mat-error senergyError label="Color"></mat-error>
@@ -39,9 +41,9 @@
     </div>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="accent" type="submit" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" type="submit" [disabled]="!form.valid"
+<mat-dialog-actions>
+    <button matButton="outlined" type="submit" (click)="cancel()">Cancel</button>
+    <button matButton="filled" type="submit" [disabled]="!form.valid"
         (click)="add()">{{submitButtonText}}</button>
 
 </mat-dialog-actions>

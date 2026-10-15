@@ -14,12 +14,11 @@
   ~ limitations under the License.
   -->
 
-<div class="ly-row" mat-dialog-title>
-  <span class="ly-flex">Data</span>
-  <button mat-icon-button color="accent" (click)="refresh()">
+<senergy-dialog-header title="Data" (closed)="close()">
+  <button mat-icon-button color="accent" (click)="refresh()" aria-label="Refresh">
     <mat-icon>refresh</mat-icon>
   </button>
-</div>
+</senergy-dialog-header>
 
 <mat-dialog-content>
   <div id="id-container">
@@ -225,6 +224,6 @@
   </mat-accordion>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="accent" (click)="close()">Close</button>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="close()">Close</button>
 </mat-dialog-actions>

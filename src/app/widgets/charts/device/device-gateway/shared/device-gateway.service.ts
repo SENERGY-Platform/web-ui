@@ -27,6 +27,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
 import { devicesPerGateway, GatewayDeviceCount } from './device-gateway-chart';
+import { dialogSize } from '../../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -46,7 +47,7 @@ export class DeviceGatewayService {
             widgetId,
             dashboardId,
             userHasUpdateNameAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     /** The device count of every gateway, in listing order; empty without gateways. */

@@ -24,17 +24,20 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     selector: 'app-add-rule',
     templateUrl: './add-rule.component.html',
     styleUrls: ['./add-rule.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatDialogActions, MatButton]
 })
 export class AddRuleComponent {
   private dialogRef = inject<MatDialogRef<AddRuleComponent>>(MatDialogRef);
   rule? = inject<ChartsExportConversion>(MAT_DIALOG_DATA);
+
+  title = 'Add rule';
 
   form = new FormGroup({
     from: new FormControl('', {nonNullable: true, validators: Validators.required}),
@@ -47,6 +50,7 @@ export class AddRuleComponent {
     const rule = this.rule;
 
     if(rule != null) {
+      this.title = 'Edit rule';
       this.form.controls.from.patchValue(rule.from);
       this.form.controls.to.patchValue(rule.to);
       this.form.controls.color.patchValue(rule.color || '');

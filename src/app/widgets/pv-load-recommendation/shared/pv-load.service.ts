@@ -24,6 +24,7 @@ import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleM
 import { ExportDataService } from '../../shared/export-data.service';
 import { PVLoadRecommendationEditComponent } from '../dialog/edit/edit.component';
 import { PVLoadRecommendationResult } from './recommendation.model';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root'
@@ -41,7 +42,7 @@ export class PvLoadService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '450px' });
+        }, dialogSize('m'));
     }
 
     getPVLoadRecommendation(exportID: string): Observable<PVLoadRecommendationResult> {

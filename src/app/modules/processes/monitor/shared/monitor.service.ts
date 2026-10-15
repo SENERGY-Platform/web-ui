@@ -28,6 +28,7 @@ import { ProcessIncidentsService } from '../../incidents/shared/process-incident
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -141,6 +142,7 @@ export class MonitorService {
         this.processIncidentsService.getProcessIncidentsByProcessInstanceId(id).subscribe((incident: ProcessIncidentsModel[]) => {
             const dialogConfig = new MatDialogConfig();
             dialogConfig.disableClose = false;
+            Object.assign(dialogConfig, dialogSize('m'));
             dialogConfig.data = {
                 incident,
             };

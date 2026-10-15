@@ -19,6 +19,7 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { RankingListEditDialogComponent } from '../dialogs/ranking-list-edit-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -34,6 +35,6 @@ export class RankingListService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 }

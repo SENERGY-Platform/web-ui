@@ -32,6 +32,7 @@ import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../../components/widget-header/widget-header.component';
 import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
 import { WidgetFooterComponent } from '../../components/widget-footer/widget-footer.component';
+import { dialogSize } from '../../../core/dialog-size';
 
 interface InitCheck {
     message: string;
@@ -197,7 +198,6 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
 
     edit() {
         const dialogConfig = new MatDialogConfig();
-        dialogConfig.minWidth = '600px';
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             widget: this.widget,
@@ -205,7 +205,7 @@ export class OpenWindowComponent implements OnInit, OnChanges, AfterViewInit {
             userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization
         };
-        const editDialogRef = this.dialog.open(OpenWindowEditComponent, dialogConfig);
+        const editDialogRef = this.dialog.open(OpenWindowEditComponent, { ...dialogConfig, ...dialogSize('l') });
 
         editDialogRef.afterClosed().subscribe((widget: WidgetModel) => {
             if (widget !== undefined) {

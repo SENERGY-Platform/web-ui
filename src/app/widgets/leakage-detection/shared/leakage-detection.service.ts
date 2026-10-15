@@ -23,6 +23,7 @@ import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleM
 import { ExportDataService } from '../../shared/export-data.service';
 import { LeakageDetectionEditComponent } from '../dialog/edit/edit.component';
 import { LeakageDetectionResponse } from './leakage-detction.model';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root'
@@ -102,6 +103,6 @@ export class LeakageDetectionService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '450px' });
+        }, dialogSize('m'));
     }
 }

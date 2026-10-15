@@ -21,7 +21,7 @@ import {DeploymentsModel} from '../../../modules/processes/deployments/shared/de
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {MatTable} from '@angular/material/table';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {DeploymentsService} from '../../../modules/processes/deployments/shared/deployments.service';
 import {DashboardResponseMessageModel} from '../../../modules/dashboard/shared/dashboard-response-message.model';
 import { saveWidgetEdits } from '../../../modules/dashboard/shared/save-widget-edits';
@@ -36,12 +36,13 @@ import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { MtxSelect } from '@ng-matero/extensions/select';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     templateUrl: './range-slider-edit-dialog.component.html',
     styleUrls: ['./range-slider-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatDialogActions, MatButton]
 })
 export class RangeSliderEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<RangeSliderEditDialogComponent>>(MatDialogRef);

@@ -52,4 +52,9 @@ describe('EnvironmentsVersionConflictDialogComponent', () => {
         component.keepEditing();
         expect(dialogRef.close).toHaveBeenCalledWith(false);
     });
+
+    it('closes with the keep-editing result from the header close icon', () => {
+        (fixture.nativeElement.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+        expect(dialogRef.close).toHaveBeenCalledOnceWith(false);
+    });
 });

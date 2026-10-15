@@ -23,6 +23,7 @@ import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatIconButton, MatFabButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { dialogSize } from '../../../../../core/dialog-size';
 
 @Component({
     selector: 'app-list-rules',
@@ -58,7 +59,7 @@ export class ListRulesComponent {
 
   edit(index: number) {
     const oldRule: ChartsExportConversion = this.dataSource.data[index];
-    this.dialog.open(AddRuleComponent, {data: oldRule}).afterClosed().subscribe({
+    this.dialog.open(AddRuleComponent, {data: oldRule, ...dialogSize('s')}).afterClosed().subscribe({
       next: (rule: ChartsExportConversion) => {
         if(rule != null) {
           const data = this.dataSource.data.slice();
@@ -74,7 +75,7 @@ export class ListRulesComponent {
   }
 
   add() {
-    this.dialog.open(AddRuleComponent).afterClosed().subscribe({
+    this.dialog.open(AddRuleComponent, dialogSize('s')).afterClosed().subscribe({
       next: (rule: ChartsExportConversion) => {
         if(rule != null) {
           this.dataSource.data = [...this.dataSource.data, rule];

@@ -22,6 +22,7 @@ import {ImportTypeModel} from '../../imports/import-types/shared/import-types.mo
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {TimescaleRulesCreateEditComponent} from './timescale-rules-create-edit/timescale-rules-create-edit.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
+import { dialogSize } from '../../../core/dialog-size';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -115,8 +116,7 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minHeight: '65vh',
-            minWidth: '' + this.dialogWidth + 'px',
+            ...dialogSize('l'),
         };
         this.dialog
             .open(TimescaleRulesCreateEditComponent, config)
@@ -159,12 +159,11 @@ export class TimescaleRulesComponent implements OnInit {
                 roles: this.roles,
                 users: this.users,
             },
-            minWidth: '' + this.dialogWidth + 'px',
         };
         if (r.type === 'template') {
-            this.dialog.open(TimescaleRulesCreateEditTemplateComponent, config);
+            this.dialog.open(TimescaleRulesCreateEditTemplateComponent, { ...config, minWidth: '' + this.dialogWidth + 'px' });
         } else {
-            this.dialog.open(TimescaleRulesCreateEditComponent, config);
+            this.dialog.open(TimescaleRulesCreateEditComponent, { ...config, ...dialogSize('l') });
         }
     }
 
@@ -177,11 +176,10 @@ export class TimescaleRulesComponent implements OnInit {
                 users: this.users,
                 templates: this.templates,
             },
-            minWidth: '' + this.dialogWidth + 'px',
         };
         if (r.type === 'template') {
             this.dialog
-                .open(TimescaleRulesCreateEditTemplateComponent, config)
+                .open(TimescaleRulesCreateEditTemplateComponent, { ...config, minWidth: '' + this.dialogWidth + 'px' })
                 .afterClosed()
                 .subscribe((rule) => {
                     if (rule !== undefined) {
@@ -192,7 +190,7 @@ export class TimescaleRulesComponent implements OnInit {
                 });
         } else {
             this.dialog
-                .open(TimescaleRulesCreateEditComponent, config)
+                .open(TimescaleRulesCreateEditComponent, { ...config, ...dialogSize('l') })
                 .afterClosed()
                 .subscribe((rule) => {
                     if (rule !== undefined) {

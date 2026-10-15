@@ -34,6 +34,7 @@ import { LastValuesRequestElementTimescaleModel } from '../../../../widgets/shar
 import { map, concatMap } from 'rxjs/operators';
 import { DeviceInstancesReplaceDialogComponent } from '../dialogs/device-instances-replace-dialog/device-instances-replace-dialog.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -109,7 +110,7 @@ export class DeviceInstancesDialogService {
             });
             const dialogConfig = new MatDialogConfig();
             dialogConfig.disableClose = false;
-            dialogConfig.minWidth = '650px';
+            Object.assign(dialogConfig, dialogSize('xl'));
             if (deviceType) {
                 dialogConfig.data = {
                     device,

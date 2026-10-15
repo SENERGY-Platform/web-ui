@@ -15,7 +15,7 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HubModel, LoraCertsModel } from '../shared/networks.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -26,12 +26,13 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { NgClass, DatePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     templateUrl: './networks-loracerts-dialog.component.html',
     styleUrls: ['./networks-loracerts-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, MatIconButton, MatPrefix, MatTooltip, NgClass, MatIcon, CdkTextareaAutosize, MatDialogActions, MatButton, DatePipe]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, MatIconButton, MatPrefix, MatTooltip, NgClass, MatIcon, CdkTextareaAutosize, MatDialogActions, MatButton, DatePipe]
 })
 export class NetworksLoraCertsDialogComponent {
     private dialogRef = inject<MatDialogRef<NetworksLoraCertsDialogComponent>>(MatDialogRef);
