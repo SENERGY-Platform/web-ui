@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { OperatorRepoComponent } from './operator-repo.component';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { OperatorRepoService } from './shared/operator-repo.service';
@@ -33,6 +33,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 import { OperatorModel } from './shared/operator.model';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 
 class MockOperatorRepoService {}
 
@@ -55,6 +57,7 @@ describe('OperatorRepoComponent', () => {
         DialogsService,
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),
+        provideNoopAnimations(),
     ]
 });
             fixture = TestBed.createComponent(OperatorRepoComponent);
@@ -80,6 +83,43 @@ describe('OperatorRepoComponent', () => {
             expect(component.versionLabel({_id: 'b'} as OperatorModel)).toBe('–');
             expect(component.versionLabel({_id: 'c', versions: []} as unknown as OperatorModel)).toBe('–');
         });
+    });
+
+    describe('requests per sort or page event', () => {
+        let component: OperatorRepoComponent;
+        let getOperators: jasmine.Spy;
+
+        beforeEach(() => {
+            component = fixture.componentInstance;
+            const service = TestBed.inject(OperatorRepoService) as any;
+            service.userHasCreateAuthorization = () => false;
+            service.userHasUpdateAuthorization = () => false;
+            service.userHasDeleteAuthorization = () => false;
+            getOperators = jasmine.createSpy('getOperators').and.returnValue(of({operators: [{_id: 'a', name: 'Alpha'}], totalCount: 1}));
+            service.getOperators = getOperators;
+        });
+
+        it('sends one request after several searches and reloads', fakeAsync(() => {
+            const searchbar = TestBed.inject(SearchbarService);
+            fixture.detectChanges();
+            tick(300);
+            searchbar.changeMessage('al');
+            tick(300);
+            searchbar.changeMessage('alp');
+            tick(300);
+            (component as any).getOperators(true);
+            (component as any).getOperators(true);
+            expect(component.ready).toBeTrue();
+
+            getOperators.calls.reset();
+            component.sort.sortChange.emit({active: 'name', direction: 'desc'});
+            expect(getOperators).toHaveBeenCalledTimes(1);
+            expect(getOperators.calls.mostRecent().args[0]).toBe('alp');
+
+            getOperators.calls.reset();
+            component.paginator.page.emit({pageIndex: 1, pageSize: 10, length: 30});
+            expect(getOperators).toHaveBeenCalledTimes(1);
+        }));
     });
 
     describe('deleting', () => {

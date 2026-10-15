@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { OperatorModel } from './shared/operator.model';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { Subscription, merge } from 'rxjs';
+import { Subject, Subscription, merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
-import { startWith, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
@@ -44,7 +44,7 @@ import {HttpErrorResponse} from '@angular/common/http';
     templateUrl: './operator-repo.component.html',
     styleUrls: ['./operator-repo.component.css'],
 })
-export class OperatorRepoComponent implements OnInit, OnDestroy {
+export class OperatorRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
 
@@ -66,6 +66,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
     private searchText = '';
     private searchSub: Subscription = new Subscription();
     private operatorSub: Subscription = new Subscription();
+    private reload = new Subject<void>();
 
     permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
     pipeOperatorUsagePerOperator: PipelineOperatorUsage[] = [];
@@ -107,6 +108,39 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
+    }
+
+    ngAfterViewInit() {
+        this.operatorsDataSource.sort = this.sort;
+        this.sort.sortChange.subscribe(() => {
+            this.paginator.pageIndex = 0;
+            this.selectionClear();
+        });
+
+        // set up once: a search or reload only triggers this pipeline, a new one per call would multiply the requests
+        this.operatorSub = merge(this.sort.sortChange, this.paginator.page, this.reload)
+            .pipe(
+                switchMap(() => {
+                    this.ready = false;
+                    return this.operatorRepoService.getOperators(
+                        this.searchText,
+                        this.paginator.pageSize,
+                        this.paginator.pageSize * this.paginator.pageIndex,
+                        this.sort.active,
+                        this.sort.direction,
+                    );
+                }),
+            )
+            .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
+                if (resp.operators.length > 0) {
+                    this.operators = resp.operators;
+                    this.operatorsDataSource.data = this.operators;
+
+                    this.totalCount = resp.totalCount;
+                }
+                this.loadOperatorPermissions();
+                this.ready = true;
+            });
     }
 
     ngOnDestroy() {
@@ -159,36 +193,7 @@ export class OperatorRepoComponent implements OnInit, OnDestroy {
         if (reset) {
             this.reset();
         }
-        this.operatorsDataSource.sort = this.sort;
-        this.sort.sortChange.subscribe(() => {
-            this.paginator.pageIndex = 0;
-            this.selectionClear();
-        });
-
-        this.operatorSub = merge(this.sort.sortChange, this.paginator.page)
-            .pipe(
-                startWith({}),
-                switchMap(() => {
-                    this.ready = false;
-                    return this.operatorRepoService.getOperators(
-                        this.searchText,
-                        this.paginator.pageSize,
-                        this.paginator.pageSize * this.paginator.pageIndex,
-                        this.sort.active,
-                        this.sort.direction,
-                    );
-                }),
-            )
-            .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
-                if (resp.operators.length > 0) {
-                    this.operators = resp.operators;
-                    this.operatorsDataSource.data = this.operators;
-
-                    this.totalCount = resp.totalCount;
-                }
-                this.loadOperatorPermissions();
-                this.ready = true;
-            });
+        this.reload.next();
     }
 
     private reset() {
