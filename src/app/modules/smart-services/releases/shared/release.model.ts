@@ -26,6 +26,15 @@ export interface SmartServiceReleaseModel extends SmartServiceReleaseCreateModel
     id: string;
     created_at: string;
     error?: string;
+    /** hint from the repository: resources used by the release changed or disappeared after its creation */
+    changed_resources?: SmartServiceChangedResource[];
+}
+
+export interface SmartServiceChangedResource {
+    kind: 'process_model' | 'flow' | 'import_type';
+    id: string;
+    reason: 'changed' | 'gone';
+    at: number; // unix seconds
 }
 
 export interface SmartServiceExtendedReleaseModel extends SmartServiceReleaseModel {

@@ -36,6 +36,8 @@ import { Subscription } from 'rxjs';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { environment } from 'src/environments/environment';
 import { smartServiceLogsUrl } from './shared/opensearch';
+import { SmartServiceReleasesService } from '../releases/shared/release.service';
+import { SmartServiceChangedResource } from '../releases/shared/release.model';
 
 
 @Component({
@@ -74,6 +76,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     modulesByInstanceId = new Map<string, SmartServiceModuleModel[]>();
     loadingModulesByInstanceId = new Set<string>();
     upgradingInstanceIds = new Set<string>();
+    changedResourcesByReleaseId = new Map<string, SmartServiceChangedResource[]>();
     private loadSubscription?: Subscription;
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -90,6 +93,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         private modulesService: SmartServiceModuleService,
         private instanceDialogService: SmartServiceInstanceDialogService,
         private authorizationService: AuthorizationService,
+        private releasesService: SmartServiceReleasesService,
     ) { }
     ngOnInit(): void {
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
@@ -141,8 +145,22 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.loadSubscription = this.instancesService.getInstances({ limit: this.pageSize, offset: this.offset, sort: this.sortBy + '.' + this.sortDirection, releaseId: this.releaseId }).subscribe((instances) => {
             this.dataSource.data = instances.instances;
             this.totalCount = instances.total;
+            this.loadChangedResources(instances.instances);
             this.ready = true;
             this.restoreStateFromQueryParams();
+        });
+    }
+
+    /** One request for all releases on the page, not one per instance. */
+    private loadChangedResources(instances: SmartServiceInstanceModel[]): void {
+        const ids = Array.from(new Set(instances.map(i => i.release_id).filter(id => !!id)));
+        if (ids.length === 0) {
+            return;
+        }
+        this.releasesService.getExtendedReleaseList(ids.length, 0, '', 'r', false, ids).subscribe((answer) => {
+            this.changedResourcesByReleaseId = new Map(answer.releases
+                .filter(r => r.changed_resources && r.changed_resources.length > 0)
+                .map(r => [r.id, r.changed_resources as SmartServiceChangedResource[]]));
         });
     }
 
@@ -154,6 +172,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
             }
             this.dataSource.data = data;
             this.totalCount = 1;
+            this.loadChangedResources(data);
             this.ready = true;
             this.restoreStateFromQueryParams();
         });

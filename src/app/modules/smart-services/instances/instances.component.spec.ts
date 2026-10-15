@@ -23,6 +23,7 @@ import { SmartServiceInstancesComponent } from './instances.component';
 describe('SmartServiceInstancesComponent', () => {
     let getInstances: jasmine.Spy;
     let navigate: jasmine.Spy;
+    let getExtendedReleaseList: jasmine.Spy;
     let component: SmartServiceInstancesComponent;
 
     const answer = (name: string) => ({ instances: [{ id: name, name } as any], total: 100 });
@@ -40,12 +41,14 @@ describe('SmartServiceInstancesComponent', () => {
             {} as any,
             {} as any,
             { userIsDeveloper: () => false } as any,
+            { getExtendedReleaseList } as any,
         );
         component.paginator = { pageIndex: Number(params['page'] || 0) } as MatPaginator;
     };
 
     beforeEach(() => {
         getInstances = jasmine.createSpy('getInstances').and.returnValue(of(answer('first')));
+        getExtendedReleaseList = jasmine.createSpy('getExtendedReleaseList').and.returnValue(of({ releases: [], total: 0 }));
     });
 
     it('restores the page of the URL on the first load', () => {
@@ -91,5 +94,21 @@ describe('SmartServiceInstancesComponent', () => {
         older.next(answer('older'));
 
         expect(component.dataSource.data.map(i => i.name)).toEqual(['newer']);
+    });
+
+    it('maps the changed resources of the releases to their instances with one request', () => {
+        const changed = [{ kind: 'flow', id: 'f1', reason: 'gone', at: 1 }];
+        getInstances.and.returnValue(of({
+            instances: [{ id: 'a', release_id: 'r1' }, { id: 'b', release_id: 'r1' }, { id: 'c', release_id: 'r2' }],
+            total: 3,
+        }));
+        getExtendedReleaseList.and.returnValue(of({ releases: [{ id: 'r1', changed_resources: changed }, { id: 'r2' }], total: 2 }));
+        create({});
+        component.ngOnInit();
+
+        expect(getExtendedReleaseList.calls.count()).toBe(1);
+        expect(getExtendedReleaseList.calls.mostRecent().args[5]).toEqual(['r1', 'r2']);
+        expect(component.changedResourcesByReleaseId.get('r1')).toEqual(changed as any);
+        expect(component.changedResourcesByReleaseId.has('r2')).toBeFalse();
     });
 });

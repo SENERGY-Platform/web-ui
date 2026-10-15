@@ -47,6 +47,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
+import { ChangedResourcesHintComponent } from './changed-resources/changed-resources-hint.component';
 import {SmartServiceReleasesComponent} from './releases/releases.component';
 import {SmartServiceDesignsComponent} from './designs/designs.component';
 import {SmartServiceDesignerComponent} from './designer/designer.component';
@@ -174,6 +175,7 @@ const designer: Route = {
         SmartServiceInstancesComponent,
         SmartServiceParameterDialogComponent,
         CheckboxValueDirective,
+        ChangedResourcesHintComponent,
         CriteriaListComponent
     ],
 })

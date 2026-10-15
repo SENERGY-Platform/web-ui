@@ -205,6 +205,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
                     permissions: repoItem.permissions_info.permissions,
                     created_at: repoItem.created_at,
                     error: repoItem.error,
+                    changed_resources: [repoItem.changed_resources],
                     metadataWarning: '',
                 }),
             );

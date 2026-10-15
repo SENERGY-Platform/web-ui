@@ -91,6 +91,8 @@
               (click)="$event.stopPropagation(); goToRelease(instance.release_id)">
               <mat-icon>input_circle</mat-icon>
             </button>
+            <senergy-changed-resources-hint
+              [resources]="changedResourcesByReleaseId.get(instance.release_id)"></senergy-changed-resources-hint>
           </td>
         </ng-container>
 
