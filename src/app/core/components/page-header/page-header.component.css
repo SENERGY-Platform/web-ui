@@ -1,0 +1,49 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 24px 24px 16px;
+}
+
+.page-heading {
+    min-width: 0;
+}
+
+.page-title {
+    margin: 0;
+    font-family: var(--app-font-heading);
+    font-size: var(--app-text-xl);
+    line-height: 32px;
+    font-weight: 600;
+    color: var(--mat-sys-on-surface);
+}
+
+.page-description {
+    margin: 4px 0 0;
+    font-size: var(--app-text-sm);
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}

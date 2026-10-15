@@ -16,6 +16,7 @@
 
 import { Provider } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions } from '@angular/material/form-field';
+import { MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS } from '@angular/material/slide-toggle';
 
 /**
  * Every form field is outlined with a floating label. The subscript keeps its fixed line, so a validation
@@ -24,5 +25,9 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions } from '@ang
 export const FORM_FIELD_DEFAULTS: MatFormFieldDefaultOptions = { appearance: 'outline', subscriptSizing: 'fixed' };
 
 export function provideFormFieldDefaults(): Provider[] {
-    return [{ provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: FORM_FIELD_DEFAULTS }];
+    return [
+        { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: FORM_FIELD_DEFAULTS },
+        // Toggles show no check or minus glyph in the handle; position and colour carry the state.
+        { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { hideIcon: true } },
+    ];
 }

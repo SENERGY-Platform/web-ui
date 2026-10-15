@@ -24,6 +24,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatMenuModule } from '@angular/material/menu';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -174,6 +175,7 @@ describe('EnvironmentsComponent', () => {
                 MatDialogModule,
                 MatSnackBarModule,
                 MatSlideToggleModule,
+                MatMenuModule,
                 EnvironmentsComponent,
             ],
             providers: [
@@ -249,33 +251,48 @@ describe('EnvironmentsComponent', () => {
         expect(component.ownerName('user-1')).toBe('user-1');
     });
 
-    it('should show the delete column only with delete authorization', () => {
+    /** Labels of the row menu of the first environment; the menu renders into the overlay container. */
+    function rowMenuLabels(): string[] {
         fixture.detectChanges();
-        expect(component.displayedColumns).toContain('delete');
-    });
+        (fixture.nativeElement.querySelector('button[aria-label="Actions"]') as HTMLButtonElement).click();
+        fixture.detectChanges();
+        return Array.from(document.querySelectorAll('.cdk-overlay-container [mat-menu-item]')).map((e) => (e.textContent || '').trim());
+    }
 
-    it('should hide the delete column without delete authorization', () => {
-        environmentsService.deleteAuthorized = false;
+    function recreate(): void {
         fixture = TestBed.createComponent(EnvironmentsComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
+    }
 
-        expect(component.displayedColumns).not.toContain('delete');
+    it('should offer delete in the row menu only with delete authorization', () => {
+        expect(rowMenuLabels().some((l) => l.endsWith('Delete'))).toBeTrue();
+    });
+
+    it('should not offer delete in the row menu without delete authorization', () => {
+        environmentsService.deleteAuthorized = false;
+        recreate();
+        const labels = rowMenuLabels();
+        expect(labels.some((l) => l.endsWith('Open'))).toBeTrue();
+        expect(labels.some((l) => l.endsWith('Delete'))).toBeFalse();
     });
 
     // Share changes the environment, same as delete -- gated the same way.
-    it('should show the share column only with delete authorization', () => {
-        fixture.detectChanges();
-        expect(component.displayedColumns).toContain('share');
+    it('should offer share in the row menu only with delete authorization', () => {
+        expect(rowMenuLabels().some((l) => l.endsWith('Share'))).toBeTrue();
     });
 
-    it('should hide the share column without delete authorization', () => {
+    it('should not offer share in the row menu without delete authorization', () => {
         environmentsService.deleteAuthorized = false;
-        fixture = TestBed.createComponent(EnvironmentsComponent);
-        component = fixture.componentInstance;
-        fixture.detectChanges();
+        recreate();
+        expect(rowMenuLabels().some((l) => l.endsWith('Share'))).toBeFalse();
+    });
 
-        expect(component.displayedColumns).not.toContain('share');
+    it('should open the environment when its row is clicked', () => {
+        const router = TestBed.inject(Router);
+        const navigate = spyOn(router, 'navigate').and.callThrough();
+        fixture.detectChanges();
+        (fixture.nativeElement.querySelector('tr.clickable-row') as HTMLElement).click();
+        expect(navigate).toHaveBeenCalled();
     });
 
     it('should not render the "All environments" toggle for a non-admin', () => {
