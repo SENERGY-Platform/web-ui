@@ -22,6 +22,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { Observable } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { NewExportComponent } from './new-export.component';
 import { ExportModel } from '../shared/export.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
@@ -32,6 +33,7 @@ import { DeviceInstancesService } from '../../devices/device-instances/shared/de
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ImportInstancesService } from '../../imports/import-instances/shared/import-instances.service';
 import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
+import { ImportInstancesModel } from '../../imports/import-instances/shared/import-instances.model';
 import { BrokerExportService } from '../shared/broker-export.service';
 import { ExportService } from '../shared/export.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -128,12 +130,12 @@ interface Harness {
     saved: () => ExportModel | undefined;
 }
 
-const openForEditing = (exp: ExportModel = existingExport()): Harness => {
+const openForEditing = (exp: ExportModel = existingExport(), id: string | null = 'export-1'): Harness => {
     let saved: ExportModel | undefined;
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
         providers: [
-            { provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => 'export-1'}}} },
+            { provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => id}}} },
             { provide: Location, useValue: {} },
             { provide: PipelineRegistryService, useValue: {getPipelines: () => of([pipeline])} },
             { provide: DeviceInstancesService, useValue: {getDeviceInstances: () => of({result: [], total: 0})} },
@@ -141,12 +143,16 @@ const openForEditing = (exp: ExportModel = existingExport()): Harness => {
             {
                 provide: ExportService,
                 useValue: {
-                    getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ'],
+                    getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'],
                     getExportDatabases: () => of([]),
                     getExport: () => of(exp),
                     editExport: (_id: string, edited: ExportModel) => {
                         saved = edited;
                         return of({status: 200});
+                    },
+                    startPipeline: (created: ExportModel) => {
+                        saved = created;
+                        return of(created);
                     },
                 },
             },
@@ -162,7 +168,14 @@ const openForEditing = (exp: ExportModel = existingExport()): Harness => {
             { provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} },
             { provide: MatSnackBar, useValue: {open: () => undefined} },
             { provide: ImportInstancesService, useValue: {listImportInstances: () => of([importInstance])} },
-            { provide: ImportTypesService, useValue: {getImportType: () => of(importType)} },
+            {
+                provide: ImportTypesService,
+                useValue: {
+                    // asynchronous like the HTTP call, so the form has recomputed its value when the answer arrives
+                    getImportType: () => of(importType).pipe(delay(1)),
+                    parseImportTypeExportValues: () => [{Name: 'value', Path: 'value', Type: 'float'}],
+                },
+            },
             { provide: FormBuilder, useValue: new FormBuilder() },
             { provide: PreferencesService, useValue: {pageSize: 20} },
         ],
@@ -306,5 +319,19 @@ describe('NewExportComponent', () => {
         expect(component.exportForm.getRawValue().timePath).toBe('time');
         expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
         expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
+    }));
+
+    it('sets the time path and the seconds format when an import is chosen', fakeAsync(() => {
+        const {component, saved} = openForEditing(existingImportExport(), null);
+        component.exportForm.patchValue({selector: 'import', name: 'a new export'});
+
+        component.exportForm.get('import')?.setValue(importInstance as unknown as ImportInstancesModel);
+        tick(10);
+
+        expect(component.exportForm.getRawValue().timePath).toBe('time');
+        expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
+        expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%SZ');
+        component.onSubmit();
+        expect(saved()?.TimestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
     }));
 });

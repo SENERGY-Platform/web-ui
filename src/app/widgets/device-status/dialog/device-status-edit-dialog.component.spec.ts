@@ -48,6 +48,10 @@ import { V2DeploymentsPreparedModel } from '../../../modules/processes/deploymen
 import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { AuthorizationService } from '../../../core/services/authorization.service';
+import { GENERATED_RESOURCE_STORAGE, PENDING_GENERATED_RESOURCES_KEY, PendingGeneratedResource } from '../../shared/generated-resource-janitor';
+import { DELETE_RETRY_NOTE } from '../../shared/generated-resources';
+import { MemoryStorage } from '../../shared/memory-storage.mock';
 
 describe('DeviceStatusEditDialogComponent', () => {
     let component: DeviceStatusEditDialogComponent;
@@ -60,6 +64,9 @@ describe('DeviceStatusEditDialogComponent', () => {
         createSpyFromClass<MatDialogRef<DeviceStatusEditDialogComponent>>(MatDialogRef);
     const dashboardServiceSpy: Spy<DashboardService> = createSpyFromClass<DashboardService>(DashboardService);
     const deviceTypeServiceeSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
+    let storage: MemoryStorage;
+    const pending = (): PendingGeneratedResource[] => JSON.parse(storage.data.get(PENDING_GENERATED_RESOURCES_KEY) || '[]');
+    const pendingIds = () => pending().map((e) => e.resource.id).sort();
 
     beforeEach(
         waitForAsync(() => {
@@ -179,6 +186,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 } as DeviceTypeModel),
             );
 
+            storage = new MemoryStorage();
             TestBed.configureTestingModule({
                 schemas: [NO_ERRORS_SCHEMA],
                 imports: [CoreModule,
@@ -197,6 +205,8 @@ describe('DeviceStatusEditDialogComponent', () => {
                     { provide: ExportService, useValue: exportServiceSpy },
                     { provide: MatDialogRef, useValue: matDialogRefSpy },
                     { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
+                    { provide: GENERATED_RESOURCE_STORAGE, useFactory: () => storage },
+                    { provide: AuthorizationService, useValue: { getUserId: () => 'user-1' } },
                     provideHttpClient(withInterceptorsFromDi()),
                     provideHttpClientTesting(),
                 ],
@@ -623,6 +633,10 @@ describe('DeviceStatusEditDialogComponent', () => {
             });
 
             const oldElement = { name: 'old element', exportId: 'old_export', deploymentId: 'old_deployment', scheduleId: 'old_schedule' };
+            // no delete was tried for what a property update without OK sent, so the notice claims none
+            const KEPT_DEPLOYMENT =
+                'Kept the process deployment of living room generated for the unsaved changes, since a save without confirmation may use it. ' +
+                'A later clean-up deletes it if no widget does';
 
             it(
                 'deletes nothing when a new resource cannot be created',
@@ -637,44 +651,80 @@ describe('DeviceStatusEditDialogComponent', () => {
             );
 
             it(
-                'deletes the old resources after the widget was saved',
+                'deletes the old deployment and schedule after the widget was saved and logs the old export for the clean-up',
                 waitForAsync(() => {
                     prepareElement(true);
                     storeOldElement(oldElement);
                     component.save();
-                    expect(order).toEqual(['save', 'delete export', 'delete deployment', 'delete schedule']);
-                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.mostRecent().args[0]).toBe('old_export');
+                    expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
+                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(deleteSchedule.calls.allArgs()).toEqual([['old_schedule']]);
+                    expect(pending().map((e) => [e.userId, e.dashboardId, e.widgetId, e.resource.kind, e.resource.id])).toEqual([
+                        ['user-1', 'dashboardId-1', 'widgetId-1', 'export', 'old_export'],
+                    ]);
                     expect(matDialogRefSpy.close.calls.count()).toBe(1);
                 }),
             );
 
             it(
-                'does not delete a resource the saved widget still uses',
+                'neither deletes nor logs a resource the saved widget still uses',
                 waitForAsync(() => {
                     prepareElement(true);
                     deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
                     storeOldElement({ ...oldElement, exportId: 'export_id_123', deploymentId: 'deployment_id_1' });
                     component.save();
                     expect(order).toEqual(['save', 'delete schedule']);
+                    expect(pendingIds()).toEqual([]);
                 }),
             );
 
             it(
-                'keeps the saved widget and reports a delete that failed',
+                'deletes the old resources at once when they cannot be logged, except what the saved widget still uses',
                 waitForAsync(() => {
+                    storage.failWrite = true;
+                    prepareElement(true);
+                    deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+                    storeOldElement({ ...oldElement, deploymentId: 'deployment_id_1' });
+                    component.save();
+                    expect(order).toEqual(['save', 'delete export', 'delete schedule']);
+                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                    expect(snackOpen).not.toHaveBeenCalled();
+                }),
+            );
+
+            it(
+                'keeps the saved widget and reports a delete that failed when nothing can be logged',
+                waitForAsync(() => {
+                    storage.failWrite = true;
                     prepareElement(true);
                     storeOldElement(oldElement);
                     exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 500 }));
                     component.save();
                     expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
                     expect(matDialogRefSpy.close.calls.count()).toBe(1);
-                    expect(snackOpen.calls.mostRecent().args[0]).toContain('old export of old element could not be deleted');
+                    expect(snackOpen.calls.mostRecent().args[0]).toBe('The widget was saved, but the old export of old element could not be deleted');
                     expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
                 }),
             );
 
             it(
-                'deletes what a failed attempt created once a retry was saved',
+                'keeps an old schedule logged whose delete failed after the save and says it is retried',
+                waitForAsync(() => {
+                    prepareElement(true);
+                    storeOldElement(oldElement);
+                    deleteSchedule.and.returnValue(of({ status: 500 }));
+                    component.save();
+                    expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                    expect(pendingIds()).toEqual(['old_export', 'old_schedule']);
+                    expect(snackOpen.calls.mostRecent().args[0]).toBe(
+                        'The widget was saved, but the old schedule of old element could not be deleted' + DELETE_RETRY_NOTE,
+                    );
+                    expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+                }),
+            );
+
+            it(
+                'logs the export a failed attempt created once a retry was saved and deletes the old deployment and schedule',
                 waitForAsync(() => {
                     prepareElement(true);
                     storeOldElement(oldElement);
@@ -686,13 +736,14 @@ describe('DeviceStatusEditDialogComponent', () => {
                     expect(order).toEqual([]);
                     component.save();
 
-                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export'], ['export1']]);
+                    expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
                     expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(pendingIds()).toEqual(['export1', 'old_export']);
                 }),
             );
 
             it(
-                'deletes the old resources although the name update failed',
+                'cleans up the old resources although the name update failed',
                 waitForAsync(() => {
                     prepareElement(true);
                     component.userHasUpdateNameAuthorization = true;
@@ -701,14 +752,16 @@ describe('DeviceStatusEditDialogComponent', () => {
 
                     component.save();
 
-                    expect(order).toContain('delete export');
+                    expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
+                    expect(pendingIds()).toEqual(['old_export']);
                     expect(matDialogRefSpy.close.calls.count()).toBe(0);
                 }),
             );
 
             it(
-                'takes a 404 for a resource that is already gone',
+                'takes a 404 for a resource that is already gone when nothing can be logged',
                 waitForAsync(() => {
+                    storage.failWrite = true;
                     prepareElement(true);
                     storeOldElement(oldElement);
                     exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 404 }));
@@ -733,8 +786,8 @@ describe('DeviceStatusEditDialogComponent', () => {
                     response.next({ message: 'OK' });
                     response.complete();
 
-                    expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
                     expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(pendingIds()).toEqual(['old_export']);
                 }),
             );
 
@@ -796,7 +849,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 }
 
                 it(
-                    'deletes exactly what the failed attempt created when the dialog is closed',
+                    'deletes the deployment the failed attempt created when the dialog is closed and keeps its export logged',
                     waitForAsync(() => {
                         failAtSchedule();
                         component.save();
@@ -804,15 +857,16 @@ describe('DeviceStatusEditDialogComponent', () => {
 
                         closeDialog();
 
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export_id_123']]);
+                        expect(order).toEqual(['delete deployment']);
                         expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
                         expect(deleteSchedule.calls.count()).toBe(0);
+                        expect(pendingIds()).toEqual(['export_id_123']);
                         expect(snackOpen.calls.count()).toBe(1);
                     }),
                 );
 
                 it(
-                    'deletes what a failed attempt created after the retry was saved and leaves nothing behind',
+                    'deletes the deployments and schedules no longer used once the retry was saved and logs the exports',
                     waitForAsync(() => {
                         failAtSchedule();
                         let n = 0;
@@ -830,19 +884,10 @@ describe('DeviceStatusEditDialogComponent', () => {
                         component.save();
                         closeDialog();
 
-                        expect(order).toEqual([
-                            'create export',
-                            'create export',
-                            'save',
-                            'delete export',
-                            'delete deployment',
-                            'delete schedule',
-                            'delete export',
-                            'delete deployment',
-                        ]);
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export'], ['export1']]);
+                        expect(order).toEqual(['create export', 'create export', 'save', 'delete deployment', 'delete schedule', 'delete deployment']);
                         expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment_id_1']]);
                         expect(deleteSchedule.calls.allArgs()).toEqual([['old_schedule']]);
+                        expect(pendingIds()).toEqual(['export1', 'old_export']);
                         expect(component.elements[0]).toEqual(
                             jasmine.objectContaining({ exportId: 'export2', deploymentId: 'deployment_retry', scheduleId: 'schedule_retry' }),
                         );
@@ -850,7 +895,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 );
 
                 it(
-                    'deletes nothing new after a successful save, also when the dialog closes',
+                    'deletes only the old deployment and schedule after a successful save, nothing more when the dialog closes',
                     waitForAsync(() => {
                         prepareElement(true);
                         storeOldElement(oldElement);
@@ -858,14 +903,13 @@ describe('DeviceStatusEditDialogComponent', () => {
                         component.save();
                         closeDialog();
 
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                        expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
                         expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
-                        expect(deleteSchedule.calls.allArgs()).toEqual([['old_schedule']]);
                     }),
                 );
 
                 it(
-                    'waits for a running attempt before deleting and keeps what it saved',
+                    'waits for a running attempt and cleans up only the old resources once it saved',
                     waitForAsync(() => {
                         prepareElement(true);
                         storeOldElement(oldElement);
@@ -878,13 +922,14 @@ describe('DeviceStatusEditDialogComponent', () => {
                         response.next({ message: 'OK' });
                         response.complete();
 
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                        expect(order).toEqual(['delete deployment', 'delete schedule']);
                         expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(pendingIds()).toEqual(['old_export']);
                     }),
                 );
 
                 it(
-                    'deletes what a running attempt created once it ended without a save',
+                    'logs what a running attempt created once it ended without a save and deletes nothing',
                     waitForAsync(() => {
                         prepareElement(true);
                         storeOldElement(oldElement);
@@ -897,13 +942,13 @@ describe('DeviceStatusEditDialogComponent', () => {
                         deployment.next({ status: 500, id: '' });
                         deployment.complete();
 
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export_id_123']]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.count()).toBe(0);
+                        expect(order).toEqual([]);
+                        expect(pendingIds()).toEqual(['export_id_123']);
                     }),
                 );
 
                 it(
-                    'keeps and names what a property update without OK sent when the dialog closes',
+                    'keeps what a property update without OK sent logged when the dialog closes and names its deployment',
                     waitForAsync(() => {
                         prepareElement(true);
                         storeOldElement(oldElement);
@@ -915,9 +960,8 @@ describe('DeviceStatusEditDialogComponent', () => {
 
                         expect(dashboardServiceSpy.getWidget.calls.count()).toBe(0);
                         expect(order).toEqual([]);
-                        expect(snackOpen.calls.mostRecent().args[0]).toBe(
-                            'Could not delete the export of living room, process deployment of living room generated for the unsaved changes',
-                        );
+                        expect(pendingIds()).toEqual(['deployment_id_1', 'export_id_123', 'old_deployment', 'old_export', 'old_schedule']);
+                        expect(snackOpen.calls.mostRecent().args[0]).toBe(KEPT_DEPLOYMENT);
                     }),
                 );
 
@@ -938,16 +982,16 @@ describe('DeviceStatusEditDialogComponent', () => {
                         component.save();
                         closeDialog();
 
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['old_export']]);
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
                         expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
-                        expect(snackOpen.calls.mostRecent().args[0]).toBe(
-                            'Could not delete the export of living room, process deployment of living room generated for the unsaved changes',
-                        );
+                        expect(deleteSchedule.calls.allArgs()).toEqual([['old_schedule']]);
+                        expect(pendingIds()).toEqual(['deployment_id_1', 'export1', 'old_export']);
+                        expect(snackOpen.calls.mostRecent().args[0]).toBe(KEPT_DEPLOYMENT);
                     }),
                 );
 
                 it(
-                    'deletes on close what a later attempt created when an earlier property update had no OK',
+                    'logs on close what a later attempt created when an earlier property update had no OK',
                     waitForAsync(() => {
                         prepareElement(true);
                         storeOldElement(oldElement);
@@ -963,8 +1007,9 @@ describe('DeviceStatusEditDialogComponent', () => {
                         component.save();
                         closeDialog();
 
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export2']]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.count()).toBe(0);
+                        expect(order).toEqual([]);
+                        expect(pendingIds()).toEqual(['deployment_id_1', 'export1', 'export2', 'old_deployment', 'old_export', 'old_schedule']);
+                        expect(snackOpen.calls.mostRecent().args[0]).toBe(KEPT_DEPLOYMENT);
                     }),
                 );
 
@@ -984,7 +1029,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                         const prepared = () =>
                             ({ Values: [{ Name: 'Time', Path: 'value.struct.Time', Type: 'string', InstanceID: '0' }] }) as ExportModel;
                         let prepares = 0;
-                        // the retry gets two prepared exports for the first element and skips it
+                        // the retry gets two prepared exports for the first element, which keeps the export of the failed attempt
                         exportServiceSpy.prepareDeviceServiceExport.and.callFake(() => (++prepares === 3 ? [prepared(), prepared()] : [prepared()]));
                         let n = 0;
                         exportServiceSpy.startPipeline.and.callFake(() => of({ ID: 'export' + ++n } as ExportModel));
@@ -999,14 +1044,31 @@ describe('DeviceStatusEditDialogComponent', () => {
                         component.save();
 
                         const sent = dashboardServiceSpy.updateWidgetProperty.calls.mostRecent().args[3].elements;
-                        expect(sent[1].exportId).toBe('export2');
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).not.toContain(['export2']);
+                        expect(sent[0].exportId).toBe('export1');
+                        expect(sent[1].exportId).toBe('export3');
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).not.toContain(['export1']);
                     }),
                 );
 
                 it(
-                    'reports a delete that failed after the dialog was closed',
+                    'deletes what the failed attempt created at once on close when nothing can be logged',
                     waitForAsync(() => {
+                        storage.failWrite = true;
+                        failAtSchedule();
+                        component.save();
+
+                        closeDialog();
+
+                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export_id_123']]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
+                        expect(deleteSchedule.calls.count()).toBe(0);
+                    }),
+                );
+
+                it(
+                    'reports a delete that failed after the dialog was closed when nothing can be logged',
+                    waitForAsync(() => {
+                        storage.failWrite = true;
                         failAtSchedule();
                         exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 500 }));
                         component.save();
@@ -1014,15 +1076,85 @@ describe('DeviceStatusEditDialogComponent', () => {
                         closeDialog();
 
                         expect(matDialogRefSpy.close.calls.count()).toBe(1);
+                        expect(snackOpen.calls.mostRecent().args[0]).toBe('Could not delete the export of living room generated for the unsaved changes');
+                        expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
+                    }),
+                );
+
+                it(
+                    'keeps a deployment logged whose delete failed when the dialog was closed and says it is retried',
+                    waitForAsync(() => {
+                        failAtSchedule();
+                        deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
+                        component.save();
+
+                        closeDialog();
+
+                        expect(pendingIds()).toEqual(['deployment_id_1', 'export_id_123']);
                         expect(snackOpen.calls.mostRecent().args[0]).toBe(
-                            'Could not delete the export of living room generated for the unsaved changes',
+                            'Could not delete the process deployment of living room generated for the unsaved changes' + DELETE_RETRY_NOTE,
                         );
                         expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
                     }),
                 );
 
                 it(
-                    'deletes what was created when only the name could be saved',
+                    'logs what a failed attempt created for this widget and keeps its export logged after the close',
+                    waitForAsync(() => {
+                        failAtSchedule();
+                        component.save();
+
+                        expect(pending().map((e) => [e.userId, e.dashboardId, e.widgetId, e.resource.kind, e.resource.id])).toEqual([
+                            ['user-1', 'dashboardId-1', 'widgetId-1', 'export', 'export_id_123'],
+                            ['user-1', 'dashboardId-1', 'widgetId-1', 'process deployment', 'deployment_id_1'],
+                        ]);
+                        closeDialog();
+
+                        expect(pendingIds()).toEqual(['export_id_123']);
+                    }),
+                );
+
+                it(
+                    'keeps the old export of a save that answered OK logged when the dialog closes',
+                    waitForAsync(() => {
+                        prepareElement(true);
+                        storeOldElement(oldElement);
+
+                        component.save();
+                        closeDialog();
+
+                        expect(pendingIds()).toEqual(['old_export']);
+                    }),
+                );
+
+                it(
+                    'deletes the old resources at once after a save when the log cannot be read',
+                    waitForAsync(() => {
+                        prepareElement(true);
+                        storeOldElement(oldElement);
+                        storage.failRead = true;
+
+                        component.save();
+
+                        expect(order).toEqual(['save', 'delete export', 'delete deployment', 'delete schedule']);
+                    }),
+                );
+
+                it(
+                    'logs the resources of the stored state when a property update did not answer OK',
+                    waitForAsync(() => {
+                        prepareElement(true);
+                        storeOldElement(oldElement);
+                        dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'error update' }));
+
+                        component.save();
+
+                        expect(pendingIds()).toEqual(['deployment_id_1', 'export_id_123', 'old_deployment', 'old_export', 'old_schedule']);
+                    }),
+                );
+
+                it(
+                    'logs the export and deletes the deployment created when only the name could be saved',
                     waitForAsync(() => {
                         prepareElement(true);
                         component.userHasUpdatePropertiesAuthorization = false;
@@ -1032,12 +1164,80 @@ describe('DeviceStatusEditDialogComponent', () => {
                         expect(matDialogRefSpy.close.calls.count()).toBe(1);
                         fixture.destroy();
 
-                        expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export_id_123']]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
+                        expect(order).toEqual(['delete deployment']);
+                        expect(pendingIds()).toEqual(['export_id_123']);
                     }),
                 );
             });
         });
+    });
+
+    describe('results of two elements of which the first is skipped', () => {
+        const addElementWithService = (index: number, serviceId: string) => {
+            component.addElement({} as DeviceStatusElementModel);
+            component.elementsControl.at(index).patchValue({ aspectId: component.aspects[0].id });
+            component.elementsControl.at(index).patchValue({ function: component.funcArray[index][0] });
+            component.elementsControl.at(index).patchValue({ selectable: component.selectablesArray[index][0] });
+            component.elementsControl.at(index).patchValue({ service: { ...component.serviceExportValueArray[index][0].service, id: serviceId } });
+            component.elementsControl.at(index).patchValue({ exportValues: component.serviceExportValueArray[index][0].exportValues[0] });
+        };
+
+        it('gives the export to the element it was started for', waitForAsync(() => {
+            addElementWithService(0, 'service_two_outputs');
+            addElementWithService(1, 'service_1');
+            exportServiceSpy.prepareDeviceServiceExport.and.callFake((_device, service) => {
+                const make = () => ({ Name: 'x', Values: [{ Name: 'Time', Path: 'value.struct.Time', Type: 'string', InstanceID: '0' }] } as ExportModel);
+                return service.id === 'service_two_outputs' ? [make(), make()] : [make()];
+            });
+            exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_of_b' } as ExportModel));
+
+            component.save();
+
+            expect(component.elements[0].exportId).toBeNull();
+            expect(component.elements[1].exportId).toBe('export_of_b');
+        }));
+
+        it('gives the deployment to the element it was created for', waitForAsync(() => {
+            addElementWithService(0, 'service_1');
+            addElementWithService(1, 'service_1');
+            component.elementsControl.at(1).patchValue({ requestDevice: true });
+            component.elementsControl.at(0).patchValue({ selectable: null });
+            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_of_b' }));
+
+            component.save();
+
+            expect(component.elements[0].deploymentId).toBeNull();
+            expect(component.elements[1].deploymentId).toBe('deployment_of_b');
+        }));
+
+        it('keeps the export and deployment of an element that gets no new one', waitForAsync(() => {
+            addElementWithService(0, 'service_1');
+            addElementWithService(1, 'service_1');
+            component.elementsControl.at(0).patchValue({ selectable: null, exportId: 'old_export', deploymentId: 'old_deployment' });
+            exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_of_b' } as ExportModel));
+
+            component.save();
+
+            expect(component.elements[0].exportId).toBe('old_export');
+            expect(component.elements[0].deploymentId).toBe('old_deployment');
+            expect(component.elements[1].exportId).toBe('export_of_b');
+        }));
+
+        it('gives the schedule to the element it was created for', waitForAsync(() => {
+            addElementWithService(0, 'service_1');
+            addElementWithService(1, 'service_1');
+            component.elementsControl.at(1).patchValue({ requestDevice: true });
+            component.elementsControl.at(0).patchValue({ selectable: null });
+            component.formGroup.get('refreshTime')?.setValue(5);
+            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_of_b' }));
+            const scheduler = (component as any).processSchedulerService;
+            spyOn(scheduler, 'createSchedule').and.returnValue(of({ id: 'schedule_of_b' }));
+
+            component.save();
+
+            expect(component.elements[0].scheduleId).toBeNull();
+            expect(component.elements[1].scheduleId).toBe('schedule_of_b');
+        }));
     });
 
     it(

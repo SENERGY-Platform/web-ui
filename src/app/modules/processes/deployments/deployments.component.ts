@@ -30,8 +30,9 @@ import { environment } from '../../../../environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeploymentsMissingDependenciesDialogComponent } from './dialogs/deployments-missing-dependencies-dialog.component';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { CamundaVariable } from './shared/deployments-definition.model';
 import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-start-parameter-dialog.component';
 import { DeploymentsFogFactory } from './shared/deployments-fog.service';
@@ -67,7 +68,7 @@ const grids = new Map([
     templateUrl: './deployments.component.html',
     styleUrls: ['./deployments.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatBadge, MatMenuTrigger, MatMenu, MatMenuItem, NgClass, SortComponent, MatChipSet, MatChipRow, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatCheckbox, SpinnerComponent, DatePipe]
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatBadge, MatMenuTrigger, MatMenu, MatMenuItem, NgClass, SortComponent, MatChipSet, MatChipRow, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatCheckbox, MatSlideToggle, SpinnerComponent, DatePipe]
 })
 export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDestroy {
     private sanitizer = inject(DomSanitizer);
@@ -312,6 +313,43 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             });
     }
 
+    /**
+     * Switching off ends the running instances, so it is confirmed first. The toggle is set back
+     * whenever the switch does not happen, because its own state has already flipped by then.
+     */
+    toggleDeploymentEnabled(item: AbstractControl, change: MatSlideToggleChange): void {
+        const disabled = !change.checked;
+        const revert = () => (change.source.checked = !change.checked);
+        if (!disabled) {
+            this.setDeploymentDisabled(item, false, revert);
+            return;
+        }
+        this.dialogsService
+            .openConfirmDialog(
+                'Switch off deployment',
+                'Switching off "' + item.value.name + '" ends its running instances. Do you want to continue?',
+            )
+            .afterClosed()
+            .subscribe((confirmed: boolean | undefined) => {
+                if (confirmed) {
+                    this.setDeploymentDisabled(item, true, revert);
+                } else {
+                    revert();
+                }
+            });
+    }
+
+    private setDeploymentDisabled(item: AbstractControl, disabled: boolean, revert: () => void): void {
+        this.platformDeploymentsService.setDeploymentDisabled(item.value.id, disabled).subscribe((resp) => {
+            if (resp === null) {
+                this.showSnackBarError('switching the deployment ' + (disabled ? 'off' : 'on') + '!');
+                revert();
+            } else {
+                item.patchValue({ disabled: resp.disabled });
+            }
+        });
+    }
+
     showOfflineReasons(reasons: DeploymentsOfflineReasonsModel[]): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
@@ -502,6 +540,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                     online: repoItem.online,
                     image: this.provideImg(repoItem.diagram),
                     sync: repoItem.sync,
+                    disabled: repoItem.disabled === true,
                     selected: false,
                     metadataWarning: '',
                 }),

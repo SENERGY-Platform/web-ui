@@ -72,25 +72,39 @@ export class DashboardService {
 
     /** REST Services */
 
-    getDashboards(): Observable<DashboardModel[]> {
+    /**
+     * Answers [] on an error, or null with `quiet`, which logs it without the error notice. `bypassCache` neither reads
+     * nor writes the session cache and asks for the full list, so the answer cannot lag a write; a 304 then answers null.
+     */
+    getDashboards(): Observable<DashboardModel[]>;
+    getDashboards(options: { quiet?: boolean; bypassCache?: boolean }): Observable<DashboardModel[] | null>;
+    getDashboards(options: { quiet?: boolean; bypassCache?: boolean } = {}): Observable<DashboardModel[] | null> {
         const key = DashboardService.name + '/getDashboards';
-        const stored = sessionStorage.getItem(key);
+        const stored = options.bypassCache ? null : sessionStorage.getItem(key);
         let cached: { dashboards: DashboardModel[]; lastModified: string } | undefined;
         if (stored !== null) {
             cached = JSON.parse(stored);
         }
+        // a conditional header also keeps the browser's HTTP cache out of the request
         return this.http.get<DashboardModel[]>(environment.dashboardServiceUrl + '/dashboards', { headers: { 'If-Modified-Since': cached?.lastModified || new Date(0).toUTCString() }, observe: 'response' }).pipe(
             map((resp) => {
-                try {
-                    sessionStorage.setItem(key, JSON.stringify({ dashboards: resp.body || [], lastModified: resp.headers.get('Last-Modified') }));
-                } catch (_) { }
+                if (!options.bypassCache) {
+                    try {
+                        sessionStorage.setItem(key, JSON.stringify({ dashboards: resp.body || [], lastModified: resp.headers.get('Last-Modified') }));
+                    } catch (_) { }
+                }
                 return resp.body || [];
             }),
-            catchError((e: HttpErrorResponse) => {
+            catchError((e: HttpErrorResponse): Observable<DashboardModel[] | null> => {
                 if (e.status === 304) {
-                    return of(cached?.dashboards || []);
+                    // without a cache there is nothing a 304 could stand for
+                    return options.bypassCache
+                        ? this.errorHandlerService.handleErrorQuietly(DashboardService.name, 'getDashboards: 304 without a cache', null)(e)
+                        : of(cached?.dashboards || []);
                 }
-                return this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [])(e);
+                return options.quiet
+                    ? this.errorHandlerService.handleErrorQuietly(DashboardService.name, 'getDashboards', null)(e)
+                    : this.errorHandlerService.handleError(DashboardService.name, 'getDashboards', [] as DashboardModel[])(e);
             }),
         );
     }

@@ -44,7 +44,8 @@ export interface DeviceCommandModel {
     group_id?: string;
     device_class_id?: string;
     service_id?: string;
-    aspect_id?: string;
+    aspect_id?: string; // deprecated: device-command folds it into aspect_ids
+    aspect_ids?: string[]; // every aspect has to be served by the content variable
     input?: any;
 }
 

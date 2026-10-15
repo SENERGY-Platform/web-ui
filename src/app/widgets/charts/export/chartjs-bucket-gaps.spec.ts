@@ -187,6 +187,35 @@ describe('chartjs bucket gaps', () => {
             });
         });
 
+        describe('Influx buckets, fixed-length UTC across daylight saving', () => {
+            const dayMs = 24 * 3600 * 1000;
+            /** The first UTC midnight of 2026 whose following `spanMs` crosses a change of the runner's UTC offset, or null without daylight saving. */
+            const crossingStart = (spanMs: number): number | null => {
+                for (let t = Date.UTC(2026, 0, 1); t < Date.UTC(2027, 0, 1); t += dayMs) {
+                    if (new Date(t).getTimezoneOffset() !== new Date(t + spanMs).getTimezoneOffset()) {
+                        return t;
+                    }
+                }
+                return null;
+            };
+
+            [['1d', 'day', dayMs], ['1w', 'week', 7 * dayMs]].forEach(([groupTime, name, spanMs]) => {
+                it('ends the last ' + name + ' bucket one fixed span after its start, but by the calendar for other sources', function () {
+                    const start = crossingStart(spanMs as number);
+                    if (start === null) {
+                        pending('the runner\'s time zone has no daylight saving');
+                        return;
+                    }
+                    expect(clickedBucket(start, [start], groupTime as string, true)).toEqual(range(start, start + (spanMs as number)));
+                    expect(clickedBucket(start, [start], groupTime as string)).not.toEqual(range(start, start + (spanMs as number)));
+                });
+            });
+
+            it('keeps the calendar for months and years', () => {
+                expect(clickedBucket(at(2026, 10), [at(2026, 10)], '1months', true)).toEqual(range(at(2026, 10), at(2026, 11)));
+            });
+        });
+
         it('keeps the calendar end when the next bucket has no data', () => {
             const data = [at(2026, 8, 3), at(2026, 8, 5)];
             expect(clickedBucket(at(2026, 8, 3), data, '1d')).toEqual(range(at(2026, 8, 3), at(2026, 8, 4)));

@@ -14,139 +14,183 @@
   ~ limitations under the License.
   -->
 <div class="main-panel">
-  <div class="layout-margin ly-column">
-    <div class="ly-row ly-align-start-center" style="margin-bottom:8px;">
-      <button mat-raised-button color="accent" routerLink="/data/operator-repo">back</button>
-      <div class="ly-flex"></div>
-      @if (shareUser) {
-        <div>
-          <h3>Shared by {{shareUser}}</h3>
+    <div class="editor">
+        <div class="top-row">
+            <button mat-raised-button color="accent" routerLink="/data/operator-repo">back</button>
+            <div class="spacer"></div>
+            @if (shareUser) {
+                <div class="shared-by">Shared by {{shareUser}}</div>
+            }
+            @if (isExisting) {
+                <div class="current-version" matTooltip="Newest version of the operator">
+                    {{currentVersion ?? 'no version'}}
+                </div>
+            }
+            @if (operator.version !== undefined) {
+                <div class="revision" matTooltip="Revision of the operator">
+                    <mat-icon>difference</mat-icon>{{operator.version}}
+                </div>
+            }
         </div>
-      }
-    </div>
-    <div class="ly-row ly-align-end-center" style="margin-bottom: 10px;">
-      <mat-icon>difference</mat-icon>{{operator.version}}
-    </div>
-    <mat-form-field class="ly-fill" color="accent" appearance="outline">
-      <mat-label>Name</mat-label>
-      <input matInput [(ngModel)]="operator.name" [disabled]="!userHasWritePermission()">
-      <mat-error senergyError label="Name"></mat-error>
-    </mat-form-field>
-    <mat-form-field class="ly-fill" color="accent" appearance="outline">
-      <mat-label>Image</mat-label>
-      <input matInput [(ngModel)]="operator.image" [disabled]="!userHasWritePermission()">
-      <mat-error senergyError label="Image"></mat-error>
-    </mat-form-field>
-    <mat-form-field class="ly-fill" color="accent" appearance="outline">
-      <mat-label>Description</mat-label>
-      <input matInput [(ngModel)]="operator.description" [disabled]="!userHasWritePermission()">
-      <mat-error senergyError label="Description"></mat-error>
-    </mat-form-field>
-    <mat-form-field class="ly-fill" color="accent" appearance="outline">
-      <mat-label>Cost</mat-label>
-      <input matInput [(ngModel)]="operator.cost" placeholder="0" type="number"
-        [min]="0" [disabled]="!userHasWritePermission()">
-      <mat-error senergyError label="Cost"></mat-error>
-    </mat-form-field>
-    <mat-form-field class="ly-flex" color="accent" appearance="outline">
-      <mat-label>Deployment Type</mat-label>
-      <mtx-select [(ngModel)]="operator.deploymentType"
-        appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-        <mtx-option value="cloud">cloud</mtx-option>
-        <mtx-option value="local">local</mtx-option>
-        <mtx-option value="both">both</mtx-option>
-      </mtx-select>
-      <mat-error senergyError label="Deployment Type"></mat-error>
-    </mat-form-field>
-    <div class="ly-row ly-align-center-center" style="margin-top: 8px;">
-      <button mat-raised-button color="accent" (click)="addInput()" [disabled]="!userHasWritePermission()">Add
-      Input</button>
-    </div>
-    @for (item of operator.inputs; track item) {
-      <div class="layout-margin ly-row ly-align-center-center">
-        <mat-form-field color="accent" appearance="outline" class="layout-margin ly-flex">
-          <mat-label>Name</mat-label>
-          <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
-          <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
-        <mat-form-field color="accent" appearance="outline" class="layout-margin ly-flex">
-          <mat-label>Type</mat-label>
-          <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-            @for (option of dropdown; track option) {
-              <mtx-option [value]="option">
-                {{option}}
-              </mtx-option>
+
+        <mat-card appearance="outlined" class="section general">
+            <h2>General</h2>
+            <mat-form-field class="full-width" color="accent" appearance="outline">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="operator.name" [disabled]="readOnly"
+                    [errorStateMatcher]="nameMatcher" required>
+                <mat-error>Name is required</mat-error>
+            </mat-form-field>
+            <mat-form-field class="full-width" color="accent" appearance="outline">
+                <mat-label>Description</mat-label>
+                <input matInput [(ngModel)]="operator.description" [disabled]="readOnly">
+                <mat-error senergyError label="Description"></mat-error>
+            </mat-form-field>
+            <div class="field-row">
+                <mat-form-field class="field-row-item" color="accent" appearance="outline">
+                    <mat-label>Deployment Type</mat-label>
+                    <mtx-select [(ngModel)]="operator.deploymentType"
+                        appendTo=".ng-select-anchor" [disabled]="readOnly">
+                        <mtx-option value="cloud">cloud</mtx-option>
+                        <mtx-option value="local">local</mtx-option>
+                        <mtx-option value="both">both</mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Deployment Type"></mat-error>
+                </mat-form-field>
+                <mat-form-field class="field-row-item" color="accent" appearance="outline">
+                    <mat-label>Cost</mat-label>
+                    <input matInput [(ngModel)]="operator.cost" placeholder="0" type="number"
+                        [min]="0" [disabled]="readOnly">
+                    <mat-error senergyError label="Cost"></mat-error>
+                </mat-form-field>
+            </div>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <h2>Image</h2>
+            @if (isExisting) {
+                <p class="hint">A change to the image, inputs, outputs or config is saved as a new version.</p>
             }
-          </mtx-select>
-          <mat-error senergyError label="Type"></mat-error>
-        </mat-form-field>
-        <button mat-icon-button (click)="deleteInput(item)" [hidden]="!userHasWritePermission()">
-          <mat-icon color="warn">
-            delete
-          </mat-icon>
-        </button>
-      </div>
-    }
-    <div class="ly-row ly-align-center-center">
-      <button mat-raised-button color="accent" (click)="addOutput()" [disabled]="!userHasWritePermission()">Add
-      Output</button>
+            <mat-form-field class="full-width" color="accent" appearance="outline">
+                <mat-label>Image</mat-label>
+                <input matInput class="image-input" [(ngModel)]="operator.image" [disabled]="readOnly"
+                    [errorStateMatcher]="imageMatcher">
+                <mat-error class="image-problem">{{imageProblem()}}</mat-error>
+            </mat-form-field>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <senergy-operator-ports title="Inputs" [section]="true" noun="input" [(ports)]="operator.inputs"
+                [disabled]="readOnly" [before]="saved.inputs">
+            </senergy-operator-ports>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <senergy-operator-ports title="Outputs" [section]="true" noun="output" [(ports)]="operator.outputs"
+                [disabled]="readOnly" [before]="saved.outputs">
+            </senergy-operator-ports>
+        </mat-card>
+
+        <mat-card appearance="outlined" class="section">
+            <senergy-operator-ports title="Configuration" [section]="true" noun="config value" [(ports)]="operator.config_values"
+                [disabled]="readOnly" [before]="saved.config_values">
+            </senergy-operator-ports>
+        </mat-card>
+
+        @if (isExisting) {
+            <mat-card appearance="outlined" class="section versions">
+                <h2>Version history</h2>
+                @if (!hasVersions) {
+                    <p class="hint no-versions">
+                        No versions yet. Changing the image, inputs, outputs or config saves the current state as {{adopts ? 'v1.0.0' : 'a version'}}
+                        and the change as a new version.
+                    </p>
+                }
+                @if (hasVersions && topLevelDirty) {
+                    <p class="hint save-first">
+                        Save or discard the changes to image, inputs, outputs and config before deprecating or deleting a version.
+                    </p>
+                }
+
+                @if (hasVersions) {
+                    <div class="versions-table">
+                        <div class="version-head">
+                            <span></span>
+                            <span>Version</span>
+                            <span>Image</span>
+                            <span class="version-ports">Ports</span>
+                            <span></span>
+                        </div>
+                        <div class="versions-list">
+                            @for (version of versions; track version.version) {
+                                <div class="version-row" [class.deprecated]="version.deprecated">
+                                    <button mat-icon-button type="button" class="expand-version" (click)="toggleExpanded(version.version)"
+                                        [attr.aria-expanded]="isExpanded(version.version)"
+                                        [attr.aria-label]="(isExpanded(version.version) ? 'Hide details of ' : 'Show details of ') + version.version"
+                                        [matTooltip]="isExpanded(version.version) ? 'Hide details' : 'Show details'">
+                                        <mat-icon>{{isExpanded(version.version) ? 'expand_more' : 'chevron_right'}}</mat-icon>
+                                    </button>
+                                    <span class="version-name">
+                                        {{version.version}}
+                                        @if (isCurrent(version)) {
+                                            <span class="current-tag">current</span>
+                                        }
+                                        @if (version.deprecated) {
+                                            <span class="badge">deprecated</span>
+                                        }
+                                    </span>
+                                    <span class="version-image-cell" [matTooltip]="version.image">{{version.image}}</span>
+                                    <span class="version-ports">{{portsSummary(version)}}</span>
+                                    <span class="actions">
+                                        <button mat-icon-button type="button" class="toggle-deprecated" (click)="toggleDeprecated(version)"
+                                            [disabled]="versionActionsBlocked" [matTooltip]="version.deprecated ? 'Undeprecate' : 'Deprecate'"
+                                            [attr.aria-label]="(version.deprecated ? 'Undeprecate ' : 'Deprecate ') + version.version">
+                                            <mat-icon>{{version.deprecated ? 'undo' : 'block'}}</mat-icon>
+                                        </button>
+                                        <button mat-icon-button type="button" class="delete-version" (click)="deleteVersion(version)"
+                                            [disabled]="versionActionsBlocked" matTooltip="Delete version"
+                                            [attr.aria-label]="'Delete ' + version.version">
+                                            <mat-icon color="warn">delete</mat-icon>
+                                        </button>
+                                    </span>
+                                </div>
+                                @if (isExpanded(version.version)) {
+                                    <div class="version-details">
+                                        <div class="detail-line"><span class="detail-label">Version</span>{{version.version}}</div>
+                                        <div class="detail-line"><span class="detail-label">State</span>{{versionState(version)}}</div>
+                                        <div class="detail-line"><span class="detail-label">Image</span><span class="detail-image">{{version.image}}</span></div>
+                                        <senergy-operator-ports title="Inputs" noun="input" [ports]="version.inputs" [readonly]="true"></senergy-operator-ports>
+                                        <senergy-operator-ports title="Outputs" noun="output" [ports]="version.outputs" [readonly]="true"></senergy-operator-ports>
+                                        <senergy-operator-ports title="Config values" noun="config value" [ports]="version.config_values" [readonly]="true">
+                                        </senergy-operator-ports>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </mat-card>
+        }
     </div>
-    @for (item of operator.outputs; track item) {
-      <div class="layout-margin ly-row ly-align-center-center">
-        <mat-form-field color="accent" appearance="outline" class="layout-margin ly-flex">
-          <mat-label>Name</mat-label>
-          <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
-          <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
-        <mat-form-field color="accent" appearance="outline" class="layout-margin ly-flex">
-          <mat-label>Type</mat-label>
-          <mtx-select [(ngModel)]="item.type"  appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-            @for (option of dropdown; track option) {
-              <mtx-option [value]="option">
-                {{option}}
-              </mtx-option>
-            }
-          </mtx-select>
-          <mat-error senergyError label="Type"></mat-error>
-        </mat-form-field>
-        <button mat-icon-button (click)="deleteOutput(item)" [hidden]="!userHasWritePermission()">
-          <mat-icon color="warn">
-            delete
-          </mat-icon>
-        </button>
-      </div>
-    }
-    <div class="ly-row ly-align-center-center">
-      <button mat-raised-button color="accent" (click)="addConfig()" [disabled]="!userHasWritePermission()">Add Config
-      Value</button>
+
+    @if (dirty && userHasWritePermission()) {
+    <div class="save-bar">
+        <span class="save-bar-text" [class.invalid]="!valid">
+            {{valid ? 'Unsaved changes' : 'Fix the marked fields to save'}}
+        </span>
+        @if (versionChange) {
+            <span class="saves-as">Saves as</span>
+            <mat-form-field class="label-field" color="accent" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Version</mat-label>
+                <input matInput class="save-label" [(ngModel)]="versionLabel" [disabled]="isSaving"
+                    [errorStateMatcher]="labelMatcher">
+                <mat-error class="label-error">{{versionLabelError()}}</mat-error>
+            </mat-form-field>
+        }
+        <div class="spacer"></div>
+        <button mat-button type="button" class="cancel" (click)="discardChanges()" [disabled]="isSaving">Cancel</button>
+        <button mat-raised-button color="accent" type="button" class="save" (click)="saveOperator()"
+            [disabled]="!valid || isSaving || versionBusy">{{isSaving ? 'Saving...' : 'Save'}}</button>
     </div>
-    @for (item of operator.config_values; track item) {
-      <div class="layout-margin ly-row ly-align-center-center">
-        <mat-form-field color="accent" appearance="outline" class="layout-margin ly-flex">
-          <mat-label>Name</mat-label>
-          <input matInput [(ngModel)]="item.name" [disabled]="!userHasWritePermission()">
-          <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
-        <mat-form-field color="accent" appearance="outline" class="layout-margin ly-flex">
-          <mat-label>Type</mat-label>
-          <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor" [disabled]="!userHasWritePermission()">
-            @for (option of dropdown; track option) {
-              <mtx-option [value]="option">
-                {{option}}
-              </mtx-option>
-            }
-          </mtx-select>
-          <mat-error senergyError label="Type"></mat-error>
-        </mat-form-field>
-        <button mat-icon-button (click)="deleteConfig(item)" [hidden]="!userHasWritePermission()" >
-          <mat-icon color="warn">
-            delete
-          </mat-icon>
-        </button>
-      </div>
     }
-    <button mat-fab class="fab" (click)="saveOperator()" [hidden]="!userHasWritePermission()"  matTooltip="Save">
-      <mat-icon>save</mat-icon>
-    </button>
-  </div>
 </div>

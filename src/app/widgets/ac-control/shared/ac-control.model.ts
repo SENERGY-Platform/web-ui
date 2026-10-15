@@ -31,9 +31,6 @@ export interface AcControlPropertiesModel {
         setModeHeat?: AcControlElementModel;
         setModeVent?: AcControlElementModel;
         setModeDry?: AcControlElementModel;
-        getLocked?: AcControlElementModel;
-        setUnlocked?: AcControlElementModel;
-        setLocked?: AcControlElementModel;
         getTargetTemperature?: AcControlElementModel[];
         setTargetTemperature?: AcControlElementModel[];
         getTemperatureMeasurements?: AcControlElementModel[];
@@ -46,7 +43,8 @@ export interface AcControlPropertiesModel {
 }
 
 export interface AcControlElementModel {
-    aspectId: string;
+    aspectIds?: string[];
+    aspectId?: string; // widgets saved before aspectIds address their commands through this alias
     serviceId?: string;
     functionId: string;
     value?: any;

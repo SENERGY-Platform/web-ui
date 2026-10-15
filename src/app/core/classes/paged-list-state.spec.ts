@@ -106,6 +106,20 @@ describe('PagedListState', () => {
         expect(applied).toEqual(['new']);
     });
 
+    it('refresh keeps the page and drops the answer of the load it superseded', () => {
+        state.offset = 60;
+        paginator.pageIndex = 3;
+
+        state.refresh();
+        state.refresh();
+        loads[1].next('new');
+        loads[0].next('old');
+
+        expect(state.offset).toBe(60);
+        expect(paginator.pageIndex).toBe(3);
+        expect(applied).toEqual(['new']);
+    });
+
     it('a page change supersedes a reload and still reports the reload as done', () => {
         const done = jasmine.createSpy('done');
         state.reload(done);

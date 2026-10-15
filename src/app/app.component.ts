@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, inject, Injector, DestroyRef } from '@angular/core';
 import {ThemingService} from './core/services/theming.service';
 import {AuthorizationService} from './core/services/authorization.service';
 import { ToolbarComponent } from './core/components/toolbar/toolbar.component';
@@ -30,11 +30,30 @@ import { SidenavComponent } from './core/components/sidenav/sidenav.component';
 export class AppComponent implements OnInit {
     protected authorizationService = inject(AuthorizationService);
     private themingService = inject(ThemingService);
+    private injector = inject(Injector);
+    private destroyed = false;
+
+    constructor() {
+        inject(DestroyRef).onDestroy(() => (this.destroyed = true));
+    }
 
 
     ngOnInit(): void {
         this.setupLocalAndSessionStorage();
         this.themingService.applyTheme();
+        this.startGeneratedResourceJanitor();
+    }
+
+    // After the initializers (login, config); loaded lazily so the widget services it needs stay out of the first render.
+    private startGeneratedResourceJanitor(): void {
+        import('./widgets/shared/generated-resource-janitor')
+            // a component destroyed before the chunk loaded (tests) has no injector left to ask
+            .then((m) => {
+                if (!this.destroyed) {
+                    this.injector.get(m.GeneratedResourceJanitor).start();
+                }
+            })
+            .catch((err: unknown) => console.warn('Could not start the clean-up of generated resources', err));
     }
 
     setupLocalAndSessionStorage() {

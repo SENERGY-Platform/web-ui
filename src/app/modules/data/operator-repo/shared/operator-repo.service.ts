@@ -19,9 +19,8 @@ import {HttpClient, HttpResponse} from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map } from 'rxjs/operators';
-import {IOModel, OperatorModel} from './operator.model';
+import {IOModel, OperatorModel, OperatorVersionBody} from './operator.model';
 import { Observable } from 'rxjs';
-import { ExportService } from '../../../exports/shared/export.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 
@@ -85,10 +84,11 @@ export class OperatorRepoService {
         );
     }
 
-    saveOperator(operator: OperatorModel): Observable<HttpResponse<string> | null> {
+    /** A created operator is answered with {"_id": "..."} as the body; older repositories answer without one. */
+    saveOperator(operator: OperatorModel): Observable<HttpResponse<unknown> | null> {
         if (operator._id === undefined) {
             return this.http
-                .put<string>(environment.operatorRepoUrl + '/operator/', operator, {observe: 'response'})
+                .put<{_id?: string} | null>(environment.operatorRepoUrl + '/operator/', operator, {observe: 'response'})
                 .pipe(catchError(this.errorHandlerService.handleErrorWithSnackBar('Error saving operator',OperatorRepoService.name, 'saveOperator()', null )));
         } else {
             const id = operator._id;
@@ -99,26 +99,29 @@ export class OperatorRepoService {
         }
     }
 
-    /** Answers true when deleted and null when the request failed; the success body is empty. */
-    deleteOperator(operator: OperatorModel): Observable<true | null> {
-        return this.http.delete(environment.operatorRepoUrl + '/operator/' + operator._id + '/').pipe(
-            map((): true => true),
-            catchError(this.errorHandlerService.handleError<true | null>(OperatorRepoService.name, 'deleteOperator: Error', null)),
-        );
+    /** Errors are not swallowed: the caller has to tell a refused delete (409, 502) from a successful one. */
+    deleteOperator(operator: OperatorModel): Observable<unknown> {
+        return this.http.delete(environment.operatorRepoUrl + '/operator/' + operator._id + '/');
     }
 
-    /** Answers null when the request failed. */
-    deleteOperators(operators: string[]): Observable<{ status: number } | null> {
+    /** Creates or replaces one version (201 or 200). Errors are not swallowed: the caller reports a refused write. */
+    putOperatorVersion(id: string, version: string, body: OperatorVersionBody): Observable<unknown> {
+        return this.http.put(environment.operatorRepoUrl + '/operator/' + id + '/versions/' + version, body);
+    }
+
+    /** Errors are not swallowed, see deleteOperator: 409 and 502 mean the version is still there. */
+    deleteOperatorVersion(id: string, version: string): Observable<unknown> {
+        return this.http.delete(environment.operatorRepoUrl + '/operator/' + id + '/versions/' + version);
+    }
+
+    /** Errors are not swallowed, see deleteOperator. */
+    deleteOperators(operators: string[]): Observable<{ status: number }> {
         return this.http
             .request('DELETE', environment.operatorRepoUrl + '/operator', {
                 body: operators,
-                responseType: 'text',
                 observe: 'response',
             })
-            .pipe(
-                map((resp) => ({ status: resp.status })),
-                catchError(this.errorHandlerService.handleError<{ status: number } | null>(ExportService.name, 'deleteOperators: Error', null)),
-            );
+            .pipe(map((resp) => ({ status: resp.status })));
     }
 
     setPaths(om: OperatorModel | null): Map<string, string | undefined> {

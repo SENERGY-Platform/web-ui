@@ -45,6 +45,9 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import {deleteErrorMessage} from './shared/operator-delete-error';
+import {newestVersionLabel} from './shared/operator-version';
+import {HttpErrorResponse} from '@angular/common/http';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
@@ -71,7 +74,7 @@ export class OperatorRepoComponent implements OnInit {
 
     listSelection = new ListSelection<OperatorModel>(() => this.operatorsDataSource.connect().value, { mode: 'any' });
     selection = this.listSelection.model;
-    displayedColumns: string[] = ['select', 'pub', 'name', 'image'];
+    displayedColumns: string[] = ['select', 'pub', 'name', 'version', 'image'];
     totalCount = 0;
 
     operators = [] as OperatorModel[];
@@ -122,17 +125,28 @@ export class OperatorRepoComponent implements OnInit {
             .subscribe((operatorDelete: boolean | undefined) => {
                 if (operatorDelete) {
                     this.ready = false;
-                    this.operatorRepoService.deleteOperator(operator).subscribe((deleted) => {
-                        if (deleted === null) {
-                            this.ready = true;
-                            snackError(this.snackBar, 'Error while deleting operator!');
-                            return;
-                        }
-                        snackSuccess(this.snackBar, 'Operator deleted');
-                        this.getOperators(true);
+                    this.operatorRepoService.deleteOperator(operator).subscribe({
+                        next: () => {
+                            snackSuccess(this.snackBar, 'Operator deleted');
+                            this.getOperators(true);
+                        },
+                        error: (error: HttpErrorResponse) => this.showDeleteError(error, [operator]),
                     });
                 }
             });
+    }
+
+    /** The label of the newest version of the operator, "–" if it has none. */
+    versionLabel(operator: OperatorModel): string {
+        return newestVersionLabel(operator) ?? '–';
+    }
+
+    /** A refused delete leaves the list and the selection as they are. */
+    private showDeleteError(error: HttpErrorResponse, operators: OperatorModel[]) {
+        console.error('Error =>> Service: OperatorRepoComponent =>> Method: delete');
+        console.error(error);
+        this.ready = true;
+        snackError(this.snackBar, deleteErrorMessage(error, operators));
     }
 
     getOperatorUser(id: string | undefined) {
@@ -223,14 +237,12 @@ export class OperatorRepoComponent implements OnInit {
                         }
                     });
 
-                    this.operatorRepoService.deleteOperators(operatorIDs).subscribe((result) => {
-                        if (result === null) {
-                            this.ready = true;
-                            snackError(this.snackBar, 'Error while deleting operators!');
-                            return;
-                        }
-                        this.getOperators(true);
-                        this.selectionClear();
+                    this.operatorRepoService.deleteOperators(operatorIDs).subscribe({
+                        next: () => {
+                            this.getOperators(true);
+                            this.selectionClear();
+                        },
+                        error: (error: HttpErrorResponse) => this.showDeleteError(error, this.selection.selected),
                     });
                 }
             });

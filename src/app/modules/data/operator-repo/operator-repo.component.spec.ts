@@ -19,7 +19,7 @@ import { OperatorRepoComponent } from './operator-repo.component';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatDialogModule } from '@angular/material/dialog';
 import { AuthorizationServiceMock } from '../../../core/services/authorization.service.mock';
@@ -27,8 +27,9 @@ import { CoreModule } from '../../../core/core.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { of, throwError } from 'rxjs';
 import { OperatorModel } from './shared/operator.model';
 
 class MockOperatorRepoService {}
@@ -101,6 +102,71 @@ describe('OperatorRepoComponent', () => {
             expect(component.isAllSelected()).toBeFalse();
             component.masterToggle();
             expect(component.selection.selected.length).toBe(3);
+        });
+    });
+
+    describe('version column', () => {
+        it('comes after the name', () => {
+            const columns = fixture.componentInstance.displayedColumns;
+            expect(columns.indexOf('version')).toBe(columns.indexOf('name') + 1);
+        });
+
+        it('shows the newest label, whatever the order, and a dash without versions', () => {
+            const component = fixture.componentInstance;
+            const withVersions = {_id: 'a', versions: [{version: 'v1.2.0'}, {version: 'v1.10.0'}, {version: 'v1.9.0'}]} as OperatorModel;
+            expect(component.versionLabel(withVersions)).toBe('v1.10.0');
+            const deprecatedHighest = {_id: 'd', versions: [{version: 'v1.0.0'}, {version: 'v2.0.0', deprecated: true}]} as OperatorModel;
+            expect(component.versionLabel(deprecatedHighest)).toBe('v1.0.0');
+            expect(component.versionLabel({_id: 'b'} as OperatorModel)).toBe('–');
+            expect(component.versionLabel({_id: 'c', versions: []} as unknown as OperatorModel)).toBe('–');
+        });
+    });
+
+    describe('deleting', () => {
+        let component: OperatorRepoComponent;
+        let service: any;
+        let snackOpen: jasmine.Spy;
+        let reload: jasmine.Spy;
+        const operator = {_id: 'a', name: 'Alpha'} as OperatorModel;
+
+        beforeEach(() => {
+            component = fixture.componentInstance;
+            service = TestBed.inject(OperatorRepoService);
+            spyOn(TestBed.inject(DialogsService), 'openDeleteDialog').and.returnValue({afterClosed: () => of(true)} as any);
+            snackOpen = spyOn(TestBed.inject(MatSnackBar), 'open');
+            reload = spyOn(component as any, 'getOperators');
+        });
+
+        it('reloads and confirms after a successful delete', () => {
+            service.deleteOperator = () => of({});
+            component.deleteOperator(operator);
+            expect(snackOpen.calls.mostRecent().args[0]).toBe('Operator deleted');
+            expect(reload).toHaveBeenCalled();
+        });
+
+        it('names the users of an operator whose delete was refused and does not reload', () => {
+            service.deleteOperator = () => throwError(() => new HttpErrorResponse({status: 409, error: {error: 'in use', flows: 2, pipelines: 0}}));
+            component.deleteOperator(operator);
+            expect(snackOpen.calls.mostRecent().args[0]).toContain('2 flows');
+            expect(reload).not.toHaveBeenCalled();
+            expect(component.ready).toBeTrue();
+        });
+
+        it('keeps the selection and does not reload when a batch delete is refused', () => {
+            component.selection.select(operator);
+            service.deleteOperators = () => throwError(() => new HttpErrorResponse({status: 502, error: 'down'}));
+            component.deleteMultipleItems();
+            expect(snackOpen.calls.mostRecent().args[0]).toContain('nothing was deleted');
+            expect(reload).not.toHaveBeenCalled();
+            expect(component.selection.selected).toEqual([operator]);
+        });
+
+        it('reloads and clears the selection after a successful batch delete', () => {
+            component.selection.select(operator);
+            service.deleteOperators = () => of({status: 204});
+            component.deleteMultipleItems();
+            expect(reload).toHaveBeenCalled();
+            expect(component.selection.selected).toEqual([]);
         });
     });
 });

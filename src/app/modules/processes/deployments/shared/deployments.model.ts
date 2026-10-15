@@ -27,6 +27,7 @@ export interface DeploymentsModel {
     image: SafeUrl;
     selected: boolean;
     sync: boolean | undefined | null;
+    disabled?: boolean;
 }
 
 export interface DeploymentsOfflineReasonsModel {

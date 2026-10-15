@@ -80,6 +80,22 @@ export class DeploymentsService {
                     }
                     return deployment as DeploymentsModel;
                 }),
+                concatMap((deployment) => this.completeDisabledState(deployment)),
+            );
+    }
+
+    // process-deployment does not know the on/off state; the engine's definition carries it as `suspended`.
+    private completeDisabledState(deployment: DeploymentsModel | null): Observable<DeploymentsModel | null> {
+        if (!deployment) {
+            return of(deployment);
+        }
+        return this.http
+            .get<{ suspended?: boolean }[]>(
+                environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deployment.id) + '/definition',
+            )
+            .pipe(
+                map((definitions) => ({ ...deployment, disabled: (definitions || [])[0]?.suspended === true })),
+                catchError(() => of(deployment)),
             );
     }
 
@@ -200,6 +216,14 @@ export class DeploymentsService {
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null)));
     }
 
+    setDeploymentDisabled(deploymentId: string, disabled: boolean): Observable<{ disabled: boolean } | null> {
+        return this.http
+            .put<{ disabled: boolean }>(environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId) + '/disabled', {
+                disabled,
+            })
+            .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'setDeploymentDisabled', null)));
+    }
+
     getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null> {
         return this.http
             .get<Map<string, CamundaVariable>>(
@@ -241,8 +265,11 @@ export class DeploymentsService {
             );
     }
 
-    /** For clean-ups: a 404 means the deployment is already gone (answered quietly); other failures answer their real status. */
-    v2deleteDeploymentIfExists(deploymentId: string): Observable<{ status: number }> {
+    /**
+     * For clean-ups: a 404 means the deployment is already gone (answered quietly); other failures answer their real status.
+     * `quiet` logs such a failure without the error notice.
+     */
+    v2deleteDeploymentIfExists(deploymentId: string, quiet = false): Observable<{ status: number }> {
         return this.http
             .delete(environment.processDeploymentUrl + '/v3/deployments/' + encodeURIComponent(deploymentId), {
                 responseType: 'text',
@@ -250,13 +277,15 @@ export class DeploymentsService {
             })
             .pipe(
                 map((resp) => ({ status: resp.status })),
-                catchError((error: HttpErrorResponse) =>
-                    error?.status === 404
-                        ? this.errorHandlerService.handleErrorQuietly(DeploymentsService.name, 'v2deleteDeploymentIfExists: already gone', { status: 404 })(error)
-                        : this.errorHandlerService.handleError(DeploymentsService.name, 'v2deleteDeploymentIfExists', {
-                              status: error?.status >= 400 ? error.status : 500,
-                          })(error),
-                ),
+                catchError((error: HttpErrorResponse) => {
+                    const handlers = this.errorHandlerService;
+                    if (error?.status === 404) {
+                        return handlers.handleErrorQuietly(DeploymentsService.name, 'v2deleteDeploymentIfExists: already gone', { status: 404 })(error);
+                    }
+                    // bound, because the handlers use the service's own members
+                    const handle = quiet ? handlers.handleErrorQuietly.bind(handlers) : handlers.handleError.bind(handlers);
+                    return handle(DeploymentsService.name, 'v2deleteDeploymentIfExists', { status: error?.status >= 400 ? error.status : 500 })(error);
+                }),
             );
     }
 

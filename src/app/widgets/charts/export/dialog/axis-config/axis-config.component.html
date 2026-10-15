@@ -123,7 +123,7 @@
                                 <mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mtx-option>
                                 <mtx-option [value]="chartsExportDeviceGroupMergingStrategy.Merge">Merge</mtx-option>
-                                @if (groupType !== undefined) {
+                                @if (groupType) {
 <mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Sum">Sum</mtx-option>
 }

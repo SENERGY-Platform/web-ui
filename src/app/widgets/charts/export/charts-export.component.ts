@@ -205,7 +205,7 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                                 }
                                 // the bucket under the label, not the span to the next tick: ticks skip gaps and pad single buckets by 1 ms
                                 const grouped = (component.widget().properties.group?.type || '') !== '';
-                                const bucket = grouped ? clickedBucket(tick.value, component.chartjsDataTimes(chart), component.groupTime) : null;
+                                const bucket = grouped ? clickedBucket(tick.value, component.chartjsDataTimes(chart), component.groupTime, component.influxOnly()) : null;
                                 const newDetailLevel = finerDetailLevel(currentDetailLevel);
                                 component.groupTime = component.groupTimeFromDetailLevel(newDetailLevel);
                                 component.hAxisFormat = component.xAxisFormat(newDetailLevel);
@@ -386,6 +386,12 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
     resetGoogleZoom(event: MouseEvent, canvas: HTMLCanvasElement) {
         event.preventDefault();
         Chart.getChart(canvas)?.resetZoom();
+    }
+
+    /** Whether every axis reads from the internal Influx database. */
+    private influxOnly(): boolean {
+        const axes = this.modifiedVaxes || this.widget().properties.vAxes || [];
+        return axes.length > 0 && axes.every(axis => this.chartsExportService.isInfluxAxis(this.widget().properties, axis));
     }
 
     private chartjsDataTimes(chart: Chart): number[] {

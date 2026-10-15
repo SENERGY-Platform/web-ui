@@ -29,6 +29,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
+import { GeneratedResourceJanitor } from './widgets/shared/generated-resource-janitor';
 
 describe('AppComponent', () => {
     let component: AppComponent;
@@ -45,7 +46,15 @@ describe('AppComponent', () => {
 
     const notificationServiceSpy: Spy<NotificationService> = createSpyFromClass(NotificationService, {    });
     notificationServiceSpy.getNotifications.and.returnValue(of([]));
+    let start: jasmine.Spy;
+    // the clean-up chunk is loaded lazily; once the spec has it too, the component's import has resolved
+    const chunkLoaded = async () => {
+        await import('./widgets/shared/generated-resource-janitor');
+        await new Promise((resolve) => setTimeout(resolve));
+    };
+
     beforeEach(() => {
+        start = spyOn(GeneratedResourceJanitor.prototype, 'start');
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
             imports: [CoreModule, MatSnackBarModule, NoopAnimationsModule, AppComponent],
@@ -65,5 +74,21 @@ describe('AppComponent', () => {
 
     it('should create the app', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('starts the clean-up of generated resources once its chunk is loaded', async () => {
+        await chunkLoaded();
+
+        expect(start).toHaveBeenCalledTimes(1);
+    });
+
+    it('neither starts the clean-up nor warns when it was destroyed before the chunk loaded', async () => {
+        const warn = spyOn(console, 'warn');
+        TestBed.resetTestingModule();
+
+        await chunkLoaded();
+
+        expect(start).not.toHaveBeenCalled();
+        expect(warn).not.toHaveBeenCalled();
     });
 });

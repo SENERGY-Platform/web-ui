@@ -64,16 +64,21 @@ describe('stopPipelines', () => {
 describe('stopPipelineByIdIfExists', () => {
     const ladon = { getUserAuthorizationsForURI: () => ({}) } as unknown as LadonService;
     let reported: string[];
+    // reached through `this`, so a handler called unbound fails the spec
     const errorHandler = {
-        handleErrorQuietly: (_s: string, _m: string, result: unknown) => () => {
-            reported.push('quiet');
-            return of(result);
+        record(kind: string, result: unknown) {
+            return () => {
+                reported.push(kind);
+                return of(result);
+            };
         },
-        handleError: (_s: string, _m: string, result: unknown) => () => {
-            reported.push('snack');
-            return of(result);
+        handleErrorQuietly(_s: string, _m: string, result: unknown) {
+            return this.record('quiet', result);
         },
-    } as unknown as ErrorHandlerService;
+        handleError(_s: string, _m: string, result: unknown) {
+            return this.record('snack', result);
+        },
+    };
 
     beforeEach(() => (reported = []));
 
@@ -98,6 +103,14 @@ describe('stopPipelineByIdIfExists', () => {
         });
     });
 
+    it('logs another failure without the error notice when asked to be quiet', (done) => {
+        serviceFailingWith(502).stopPipelineByIdIfExists('e1', true).subscribe((result) => {
+            expect(result).toEqual({ status: 502 });
+            expect(reported).toEqual(['quiet']);
+            done();
+        });
+    });
+
     it('answers the real status of another failure, and 500 when there is none', (done) => {
         serviceFailingWith(502).stopPipelineByIdIfExists('e1').subscribe((result) => {
             expect(result).toEqual({ status: 502 });
@@ -107,6 +120,62 @@ describe('stopPipelineByIdIfExists', () => {
                 expect(noStatus).toEqual({ status: 500 });
                 done();
             });
+        });
+    });
+});
+
+describe('getAllExportsQuietly', () => {
+    const ladon = { getUserAuthorizationsForURI: () => ({}) } as unknown as LadonService;
+    let reported: string[];
+    let urls: string[];
+    const errorHandler = {
+        handleErrorQuietly: (_s: string, _m: string, result: unknown) => () => {
+            reported.push('quiet');
+            return of(result);
+        },
+        handleError: (_s: string, _m: string, result: unknown) => () => {
+            reported.push('snack');
+            return of(result);
+        },
+    } as unknown as ErrorHandlerService;
+
+    function serviceAnswering(answer: () => ReturnType<HttpClient['get']>): ExportService {
+        const http = {
+            get: (url: string) => {
+                urls.push(url);
+                return answer();
+            },
+        } as unknown as HttpClient;
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: HttpClient, useValue: http },
+                { provide: ErrorHandlerService, useValue: errorHandler },
+                { provide: LadonService, useValue: ladon },
+                { provide: DeviceInstancesService, useValue: {} },
+            ],
+        });
+        return TestBed.runInInjectionContext(() => new ExportService());
+    }
+
+    beforeEach(() => {
+        reported = [];
+        urls = [];
+    });
+
+    it('asks for every export unpaged, also outside the internal databases, and hands the answer on unchanged', (done) => {
+        serviceAnswering(() => of({})).getAllExportsQuietly().subscribe((result) => {
+            expect(urls.length).toBe(1);
+            expect(urls[0]).toMatch(/\/instance\?internal_only=false$/);
+            expect(result).toEqual({});
+            done();
+        });
+    });
+
+    it('answers null on an error and logs it without the error notice', (done) => {
+        serviceAnswering(() => throwError(() => new HttpErrorResponse({ status: 502 }))).getAllExportsQuietly().subscribe((result) => {
+            expect(result).toBeNull();
+            expect(reported).toEqual(['quiet']);
+            done();
         });
     });
 });

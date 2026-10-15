@@ -35,7 +35,7 @@ keep their own code.
 ## Behaviour that is easy to break
 
 - Server-paged lists return to page 1 on every reload from offset 0 (search, sort, reload after create or delete).
-  Smart-service instances is the exception: it restores page and scroll from the URL and keeps its page on sort and
-  refresh; only its page events go through the helper.
+  Smart-service instances restores page and scroll from the URL and keeps its page on refresh (`list.refresh()`);
+  sort and clearing the filters return to page 1.
 - Import instances waits for list and count together on reload, so rows never show with an outdated total.
 - Device instances lets a reload replace a load that is still running; there is no `init && !ready` guard any more.

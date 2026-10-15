@@ -20,10 +20,15 @@ import { DeploymentsService } from './deployments.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CamundaVariable } from './deployments-definition.model';
+import { DeploymentsModel } from './deployments.model';
 import { environment } from '../../../../../environments/environment';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
+import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
+import { LadonService } from '../../../admin/permissions/shared/services/ladom.service';
 
 describe('DeploymentsService', () => {
     beforeEach(() => {
@@ -91,4 +96,108 @@ describe('DeploymentsService', () => {
             expect(r.cancelled).toBeFalse();
         },
     ));
+
+    it('should put the disabled flag of a deployment and return the stored state', inject(
+        [DeploymentsService, HttpTestingController],
+        (service: DeploymentsService, http: HttpTestingController) => {
+            let received: { disabled: boolean } | null | undefined;
+            service.setDeploymentDisabled('deplid', true).subscribe((resp) => (received = resp));
+
+            const r = http.expectOne(environment.processServiceUrl + '/v2/deployments/deplid/disabled');
+            expect(r.request.method).toBe('PUT');
+            expect(r.request.body).toEqual({ disabled: true });
+            r.flush({ disabled: true });
+            expect(received).toEqual({ disabled: true });
+        },
+    ));
+
+    it('should send disabled false when a deployment is switched on again', inject(
+        [DeploymentsService, HttpTestingController],
+        (service: DeploymentsService, http: HttpTestingController) => {
+            service.setDeploymentDisabled('deplid', false).subscribe(() => {});
+
+            const r = http.expectOne(environment.processServiceUrl + '/v2/deployments/deplid/disabled');
+            expect(r.request.body).toEqual({ disabled: false });
+        },
+    ));
+
+    it('should take the disabled state of a single deployment from its engine definition', inject(
+        [DeploymentsService, HttpTestingController],
+        (service: DeploymentsService, http: HttpTestingController) => {
+            let received: DeploymentsModel[] | undefined;
+            service.list('', 1, 0, 'deploymentTime', 'desc', '', 'deplid').subscribe((resp) => (received = resp));
+
+            http.expectOne(environment.processDeploymentUrl + '/v3/deployments/deplid?with_options=false').flush({
+                id: 'deplid',
+                name: 'alarm',
+                diagram: { svg: '<svg></svg>' },
+            });
+            http.expectOne(environment.processServiceUrl + '/v2/deployments/deplid/definition').flush([{ suspended: true }]);
+            http.expectOne(environment.processDeploymentUrl + '/dependencies?ids=deplid').flush([]);
+            expect(received?.length).toBe(1);
+            expect(received?.[0].disabled).toBeTrue();
+        },
+    ));
+
+    it('should return null when switching a deployment on or off fails', inject(
+        [DeploymentsService, HttpTestingController],
+        (service: DeploymentsService, http: HttpTestingController) => {
+            let received: { disabled: boolean } | null | undefined;
+            service.setDeploymentDisabled('deplid', true).subscribe((resp) => (received = resp));
+
+            http.expectOne(environment.processServiceUrl + '/v2/deployments/deplid/disabled').flush('boom', {
+                status: 500,
+                statusText: 'Internal Server Error',
+            });
+            expect(received).toBeNull();
+        },
+    ));
 });
+
+describe('DeploymentsService.v2deleteDeploymentIfExists', () => {
+    let reported: string[];
+
+    function serviceFailingWith(status: number): DeploymentsService {
+        reported = [];
+        // reached through `this`, so a handler called unbound fails the spec
+        const handlers = {
+            record(kind: string, result: unknown) {
+                return () => {
+                    reported.push(kind);
+                    return of(result);
+                };
+            },
+            handleError(_s: string, _m: string, result: unknown) {
+                return this.record('notice', result);
+            },
+            handleErrorQuietly(_s: string, _m: string, result: unknown) {
+                return this.record('quiet', result);
+            },
+        };
+        TestBed.configureTestingModule({
+            providers: [
+                { provide: HttpClient, useValue: { delete: () => throwError(() => new HttpErrorResponse({ status })) } },
+                { provide: ErrorHandlerService, useValue: handlers },
+                { provide: LadonService, useValue: { getUserAuthorizationsForURI: () => ({}) } },
+            ],
+        });
+        return TestBed.runInInjectionContext(() => new DeploymentsService());
+    }
+
+    it('shows the error notice for a failure other than 404', (done) => {
+        serviceFailingWith(502).v2deleteDeploymentIfExists('d1').subscribe((result) => {
+            expect(result).toEqual({ status: 502 });
+            expect(reported).toEqual(['notice']);
+            done();
+        });
+    });
+
+    it('logs that failure without the error notice when asked to be quiet', (done) => {
+        serviceFailingWith(502).v2deleteDeploymentIfExists('d1', true).subscribe((result) => {
+            expect(result).toEqual({ status: 502 });
+            expect(reported).toEqual(['quiet']);
+            done();
+        });
+    });
+});
+
