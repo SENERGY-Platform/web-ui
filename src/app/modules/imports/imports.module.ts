@@ -26,7 +26,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -95,6 +95,7 @@ const instances: Route = {
         MatButtonModule,
         MatIconModule,
         MatFormFieldModule,
+        FormsModule,
         ReactiveFormsModule,
         MatInputModule,
         InfiniteScrollModule,

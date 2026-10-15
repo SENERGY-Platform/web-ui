@@ -36,3 +36,13 @@ th.mat-mdc-header-cell {
 .mat-mdc-dialog-content {
     padding-top: 8px;
 }
+
+.name-field {
+    width: 100%;
+    padding: 4px 0;
+}
+
+.name-summary {
+    display: block;
+    padding-top: 8px;
+}

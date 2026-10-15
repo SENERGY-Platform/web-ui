@@ -21,11 +21,19 @@ import {ImportTypesService} from '../../import-types/shared/import-types.service
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ImportTypeModel} from '../../import-types/shared/import-types.model';
 import {ExportService} from '../../../exports/shared/export.service';
-import {ExportModel, ExportValueModel} from '../../../exports/shared/export.model';
+import {
+    columnNameError,
+    duplicateValueNames,
+    ExportModel,
+    ExportValueModel,
+    invalidColumnNames,
+} from '../../../exports/shared/export.model';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatCheckboxChange} from '@angular/material/checkbox';
 import {MatTable} from '@angular/material/table';
 import {environment} from '../../../../../environments/environment';
+import {ErrorStateMatcher} from '@angular/material/core';
+import {stateMatcher} from '../../../data/operator-repo/shared/operator-validation';
 
 @Component({
     selector: 'senergy-import-instance-export-dialog',
@@ -37,10 +45,13 @@ export class ImportInstanceExportDialogComponent implements OnInit {
     ready = false;
     nameControl = new FormControl('', Validators.required);
     descControl = new FormControl('');
+    allMessagesControl = new FormControl(true);
 
     values: ExportValueModel[] = [];
     valueSelection = new SelectionModel<ExportValueModel>(true, []);
     tags: ExportValueModel[] = [];
+
+    private readonly nameMatchers = new WeakMap<ExportValueModel, ErrorStateMatcher>();
 
     @ViewChild(MatTable, { static: false }) table: MatTable<ExportValueModel> | undefined;
 
@@ -73,8 +84,8 @@ export class ImportInstanceExportDialogComponent implements OnInit {
     }
 
     create() {
-        const values = this.valueSelection.selected;
-        values.push(...this.tags);
+        // a copy: selected is the selection's own cached array, and a failed create would leave the tags in it
+        const values = this.exportedValues();
         const exp: ExportModel = {
             Name: this.nameControl.value,
             Description: this.descControl.value,
@@ -82,7 +93,7 @@ export class ImportInstanceExportDialogComponent implements OnInit {
             Filter: this.data.id,
             Topic: this.data.kafka_topic,
             Generated: false,
-            Offset: 'earliest',
+            Offset: this.allMessagesControl.value ? 'earliest' : 'largest',
             TimePath: 'time',
             Values: values,
             EntityName: this.data.name,
@@ -103,6 +114,37 @@ export class ImportInstanceExportDialogComponent implements OnInit {
 
     close() {
         this.dialogRef.close();
+    }
+
+    /** The values the export gets: the selected ones and all tags. */
+    private exportedValues(): ExportValueModel[] {
+        return [...this.valueSelection.selected, ...this.tags];
+    }
+
+    /** What stops the create for this value; only a selected value becomes a column. */
+    nameError(value: ExportValueModel): string {
+        if (!this.valueSelection.isSelected(value)) {
+            return '';
+        }
+        return columnNameError(value.Name, duplicateValueNames(this.exportedValues()));
+    }
+
+    nameMatcher(value: ExportValueModel): ErrorStateMatcher {
+        let matcher = this.nameMatchers.get(value);
+        if (matcher === undefined) {
+            matcher = stateMatcher(() => this.nameError(value) !== '');
+            this.nameMatchers.set(value, matcher);
+        }
+        return matcher;
+    }
+
+    /** Covers the tags too, which have no row of their own to show an error in. */
+    invalidNames(): string[] {
+        return invalidColumnNames(this.exportedValues());
+    }
+
+    hasNameErrors(): boolean {
+        return this.invalidNames().length > 0;
     }
 
     checkboxed(value: ExportValueModel, $event: MatCheckboxChange) {

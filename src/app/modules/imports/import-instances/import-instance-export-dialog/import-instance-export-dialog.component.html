@@ -30,6 +30,9 @@
             <mat-error senergyError label="Description"></mat-error>
         </mat-form-field>
     </div>
+    <div>
+        <mat-checkbox [formControl]="allMessagesControl">Consume all messages</mat-checkbox>
+    </div>
 
     <h4>Select Values</h4>
     <table mat-table
@@ -48,7 +51,10 @@
         <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Name</th>
             <td mat-cell *matCellDef="let m">
-                {{m.Name}}
+                <mat-form-field class="name-field" color="accent" appearance="outline" subscriptSizing="dynamic">
+                    <input matInput [(ngModel)]="m.Name" [errorStateMatcher]="nameMatcher(m)" aria-label="Name">
+                    <mat-error>{{nameError(m)}}</mat-error>
+                </mat-form-field>
             </td>
         </ng-container>
         <ng-container matColumnDef="path">
@@ -64,6 +70,7 @@
         <tr mat-row
             *matRowDef="let m; columns: ['check', 'name', 'path'];"></tr>
     </table>
+    <mat-error *ngIf="hasNameErrors()" class="name-summary">Names to change: {{invalidNames().join(', ')}}</mat-error>
 
 </mat-dialog-content>
 
@@ -71,6 +78,6 @@
 <mat-dialog-actions fxLayoutAlign="end center">
     <button mat-raised-button color="primary" (click)="close()">Cancel</button>
     <button mat-raised-button color="accent" (click)="create()"
-            [disabled]="nameControl.invalid || valueSelection.isEmpty()">Create
+            [disabled]="nameControl.invalid || valueSelection.isEmpty() || hasNameErrors()">Create
     </button>
 </mat-dialog-actions>
