@@ -27,9 +27,11 @@ mat-sidenav {
 
 /* The page sits on a white rounded surface; the canvas around it carries toolbar and navigation. */
 .app-surface {
+    /* Viewport height minus what the surface frame takes (12px margin, 2px border); pages size full-height areas from it. */
+    --app-page-height: calc(100vh - 10px);
     box-sizing: border-box;
-    min-height: calc(100% - 64px - 12px);
-    margin: 0 12px 12px 0;
+    min-height: calc(100% - 64px - 8px);
+    margin: 0 8px 8px 0;
     background: var(--mat-sys-surface);
     border: var(--app-hairline);
     border-radius: var(--app-radius-xl);
@@ -42,6 +44,7 @@ mat-sidenav {
         margin: 0;
         border-radius: 0;
         border: none;
+        --app-page-height: 100vh;
     }
 }
 
@@ -58,26 +61,26 @@ mat-sidenav {
 
 .side-menu .menu-toggle-list [mat-button] {
     display: block;
-    height: 36px;
-    padding: 0 12px 0 28px;
+    height: 32px;
+    padding: 0 10px 0 28px;
     text-transform: none;
     font-weight: 400;
 }
 
-/* The active page: brand tint, brand icon, dark text. */
+/* The active page: neutral grey background and dark text, no brand colour in the navigation. */
 .side-menu [mat-button].nav-active {
-    background-color: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
+    background-color: var(--app-selected);
     color: var(--mat-sys-on-surface);
-    font-weight: 600;
+    font-weight: 500;
 }
 
-.side-menu [mat-button].nav-active .mat-icon {
-    color: var(--mat-sys-primary);
+.side-menu [mat-button]:not(.nav-active):hover {
+    background-color: var(--app-muted-surface);
 }
 
 .side-menu [mat-button].nav-open {
     color: var(--mat-sys-on-surface);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .md-button-toggle .md-toggle-icon.toggled {
@@ -94,9 +97,9 @@ mat-sidenav {
 .side-menu .md-button-toggle .md-toggle-icon {
     display: inline-block;
     color: var(--mat-sys-outline);
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
     margin: auto 0 auto auto;
     transition: transform .3s linear;
     -webkit-transition: -webkit-transform .3s linear;
@@ -108,10 +111,10 @@ mat-sidenav {
 }
 
 .side-menu [mat-button] {
-    border-radius: 999px;
+    border-radius: var(--app-radius-sm);
     cursor: pointer;
     margin: 1px 0;
-    height: 40px;
+    height: 34px;
     overflow: hidden;
     padding: 0 1rem;
     text-align: left;
@@ -122,13 +125,13 @@ mat-sidenav {
     color: inherit;
     display: block;
     font-size: var(--app-text-sm);
-    font-weight: 500;
+    font-weight: 400;
 }
 
 [mat-button]>.mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
 }
 
 .menu-toggle-list {

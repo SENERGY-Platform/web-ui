@@ -44,12 +44,12 @@
 
 /* 100vh makes it scrollable because of the page header */
 .dashboard-container ::ng-deep .mat-mdc-tab-body-wrapper {
-  height: calc(100vh - 118px);
+  height: calc(var(--app-page-height, 100vh) - 118px);
 }
 
 .zoomed-widget {
   padding: 10px;
-  height: calc(100vh - 138px);
+  height: calc(var(--app-page-height, 100vh) - 138px);
 }
 
 .highlight {

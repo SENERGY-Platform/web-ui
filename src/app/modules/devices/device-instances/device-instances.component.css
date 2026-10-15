@@ -31,7 +31,7 @@
 }
 
 .height-chips {
-    max-height: calc(100vh - 260px);
+    max-height: calc(var(--app-page-height, 100vh) - 260px);
 }
 
 a {

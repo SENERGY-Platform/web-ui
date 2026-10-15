@@ -16,7 +16,7 @@
 
 .designs-container ::ng-deep .mat-mdc-tab-body {
     overflow: hidden;
-    height: calc(100vh - 118px);
+    height: calc(var(--app-page-height, 100vh) - 118px);
 }
 
 

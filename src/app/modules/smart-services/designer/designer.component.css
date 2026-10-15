@@ -16,7 +16,7 @@
 
 .canvas {
     position: relative;
-    height: calc(100vh - 118px);
+    height: calc(var(--app-page-height, 100vh) - 126px);
 }
 
 #js-properties-panel {
@@ -25,7 +25,7 @@
     border-top: 0;
     border-bottom: 0;
     width: 260px;
-    height: calc(100vh - 118px);
+    height: calc(var(--app-page-height, 100vh) - 126px);
     font-size: 12px;
     top: 0;
     bottom: 0;
