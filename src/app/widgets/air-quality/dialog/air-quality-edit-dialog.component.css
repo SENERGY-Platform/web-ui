@@ -109,14 +109,12 @@ table {
     align-items: center;
     justify-content: space-between;
     table-layout: fixed;
-    width: 740px;
+    width: 100%;
 }
 
 td {
-    border: 2px saddlebrown;
-    width: 33% !important;
-    padding: 0.2rem 1.3rem 0.2rem
-
+    width: 33%;
+    padding: 0.2rem 1.3rem 0.2rem;
 }
 
 senergy-widget-spinner {

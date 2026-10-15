@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Data Table</h2>
+<senergy-dialog-header title="Edit Data Table" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
   <senergy-widget-spinner [show]="!ready || saving"></senergy-widget-spinner>
@@ -25,7 +25,7 @@
         <tr>
           @if (userHasUpdateNameAuthorization) {
             <td>
-              <mat-form-field appearance="outline" color="accent">
+              <mat-form-field>
                 <mat-label>Widget Name</mat-label>
                 <input type="text" matInput formControlName="name" required>
                 <mat-error senergyError label="Widget Name"></mat-error>
@@ -34,7 +34,7 @@
           }
           @if (userHasUpdatePropertiesAuthorization) {
             <td>
-              <mat-form-field appearance="outline" color="accent" class="order-select">
+              <mat-form-field class="order-select">
                 <mat-label>Default Order</mat-label>
                 <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareIds"
                   required appendTo=".ng-select-anchor">
@@ -52,7 +52,7 @@
           }
           @if (userHasUpdatePropertiesAuthorization) {
             <td>
-              <mat-form-field appearance="outline" color="accent">
+              <mat-form-field>
                 <mat-label>Value Alias</mat-label>
                 <input type="text" matInput placeholder="Value" formControlName="valueAlias">
                 <mat-error senergyError label="Value Alias"></mat-error>
@@ -61,7 +61,7 @@
           }
           @if (userHasUpdatePropertiesAuthorization) {
             <td>
-              <mat-form-field appearance="outline" color="accent">
+              <mat-form-field>
                 <mat-label>Refresh Time</mat-label>
                 <input type="number" matInput formControlName="refreshTime">
                 <mat-error senergyError label="Refresh Time"></mat-error>
@@ -70,7 +70,7 @@
           }
           @if (userHasUpdatePropertiesAuthorization) {
             <td>
-              <mat-form-field appearance="outline" color="accent">
+              <mat-form-field>
                 <mat-label>Values per Element</mat-label>
                 <input type="number" matInput formControlName="valuesPerElement">
                 <mat-error senergyError label="Values per Element"></mat-error>
@@ -86,14 +86,14 @@
               <tr [formGroupName]="convertRuleIndex"
                 >
                 <td>
-                  <mat-form-field appearance="outline" color="accent">
+                  <mat-form-field>
                     <mat-label>Status</mat-label>
                     <input class="convert-input" type="text" matInput formControlName="status">
                     <mat-error senergyError label="Status"></mat-error>
                   </mat-form-field>
                 </td>
                 <td>
-                  <mat-form-field appearance="outline" color="accent">
+                  <mat-form-field>
                     <mat-label>Icon</mat-label>
                     <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input"
                       appendTo=".ng-select-anchor">
@@ -113,7 +113,7 @@
                   </mat-form-field>
                 </td>
                 <td>
-                  <mat-form-field appearance="outline" color="accent">
+                  <mat-form-field>
                     <mat-label>Color</mat-label>
                     <input class="convert-input" type="text" matInput formControlName="color">
                     <mat-error senergyError label="Color"></mat-error>
@@ -151,7 +151,7 @@
                   <table [formGroup]="getElement(index)">
                     <tr>
                       <td colspan="1">
-                        <mat-form-field appearance="outline" color="accent">
+                        <mat-form-field>
                           <mat-label>Alias</mat-label>
                           <input type="text" matInput required formControlName="name">
                           <mat-error senergyError label="Alias"></mat-error>
@@ -170,7 +170,7 @@
                     @if (isDevice(tab)) {
                       <tr formGroupName="elementDetails">
                         <td formGroupName="device">
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Aspect</mat-label>
                             <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
                               [items]="aspects" bindLabel="name" bindValue="id"
@@ -181,7 +181,7 @@
                           </mat-form-field>
                         </td>
                         <td formGroupName="device">
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Function</mat-label>
                             <mtx-select formControlName="functionId" required placeholder="Choose Function"
                               [items]="getFunctions(tab)" bindValue="id"
@@ -191,7 +191,7 @@
                           </mat-form-field>
                         </td>
                         <td formGroupName="device">
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Device</mat-label>
                             <mtx-select [compareWith]="compareSelectableDevices" formControlName="deviceId"
                               placeholder="Choose Device" required [items]="getSelectables(tab)"
@@ -206,7 +206,7 @@
                     @if (isDevice(tab)) {
                       <tr>
                         <td formGroupName="elementDetails">
-                          <mat-form-field appearance="outline" color="accent" formGroupName="device">
+                          <mat-form-field formGroupName="device">
                             <mat-label>Service</mat-label>
                             <mtx-select formControlName="serviceId" required placeholder="Choose Service"
                               [compareWith]="compareIds" [items]="getServices(tab)" bindValue="id"
@@ -216,7 +216,7 @@
                           </mat-form-field>
                         </td>
                         <td>
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Value</mat-label>
                             <mtx-select formControlName="exportValuePath" required
                               placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
@@ -231,7 +231,7 @@
                     @if (isPipeline(tab)) {
                       <tr>
                         <td formGroupName="elementDetails">
-                          <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
+                          <mat-form-field formGroupName="pipeline">
                             <mat-label>Pipeline</mat-label>
                             <mtx-select formControlName="pipelineId" required placeholder="Choose Pipeline"
                               [compareWith]="compareIds"
@@ -242,7 +242,7 @@
                           </mat-form-field>
                         </td>
                         <td formGroupName="elementDetails">
-                          <mat-form-field appearance="outline" color="accent" formGroupName="pipeline">
+                          <mat-form-field formGroupName="pipeline">
                             <mat-label>Operator</mat-label>
                             <mtx-select formControlName="operatorId" required placeholder="Choose Operator"
                               [compareWith]="compareIds" appendTo=".ng-select-anchor">
@@ -255,7 +255,7 @@
                           </mat-form-field>
                         </td>
                         <td>
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Value</mat-label>
                             <mtx-select formControlName="exportValuePath" required
                               placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
@@ -270,7 +270,7 @@
                     @if (isImport(tab)) {
                       <tr>
                         <td formGroupName="elementDetails">
-                          <mat-form-field appearance="outline" color="accent" formGroupName="import">
+                          <mat-form-field formGroupName="import">
                             <mat-label>Type</mat-label>
                             <mtx-select formControlName="typeId" required placeholder="Choose Type"
                               [items]="dataTableHelperService.getImportTypes()" bindValue="id"
@@ -280,7 +280,7 @@
                           </mat-form-field>
                         </td>
                         <td formGroupName="elementDetails">
-                          <mat-form-field appearance="outline" color="accent" formGroupName="import">
+                          <mat-form-field formGroupName="import">
                             <mat-label>Instance</mat-label>
                             <mtx-select formControlName="instanceId" required placeholder="Choose Instance"
                               [items]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
@@ -290,7 +290,7 @@
                           </mat-form-field>
                         </td>
                         <td>
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Value</mat-label>
                             <mtx-select formControlName="exportValuePath" required
                               placeholder="Choose Value"
@@ -305,7 +305,7 @@
                     @if (isDeviceGroup(tab)) {
                       <tr formGroupName="elementDetails">
                         <td formGroupName="deviceGroup">
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Device Group</mat-label>
                             <mtx-select placeholder="Choose Device Group" [items]="deviceGroups"
                               formControlName="deviceGroupId" bindLabel="name" bindValue="id"
@@ -315,7 +315,7 @@
                           </mat-form-field>
                         </td>
                         <td formGroupName="deviceGroup">
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Criteria</mat-label>
                             <mtx-select placeholder="Choose Criteria" formControlName="deviceGroupCriteria"
                               [compareWith]="compareCriteria" appendTo=".ng-select-anchor">
@@ -332,7 +332,7 @@
                     @if (isDeviceGroup(tab)) {
                       <tr>
                         <td>
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Unit</mat-label>
                             <mtx-select formControlName="unit" appendTo=".ng-select-anchor">
                               @for (option of getConcept(tab)?.characteristics || []; track option) {
@@ -344,7 +344,7 @@
                           </mat-form-field>
                         </td>
                         <td formGroupName="elementDetails">
-                          <mat-form-field appearance="outline" color="accent" formGroupName="deviceGroup">
+                          <mat-form-field formGroupName="deviceGroup">
                             <mat-label>Aggregation</mat-label>
                             <mtx-select [items]="aggregations" formControlName="deviceGroupAggregation"
                               appendTo=".ng-select-anchor">
@@ -357,7 +357,7 @@
                     <tr>
                       @if (!isDevice(tab) && !isDeviceGroup(tab)) {
                         <td>
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Export</mat-label>
                             <mtx-select formControlName="exportId" required placeholder="Choose Export"
                               [items]="getExports(tab)" bindLabel="Name" bindValue="ID"
@@ -370,7 +370,7 @@
                       @if (!isDevice(tab) && (tab.get('exportId') === null || tab.get('exportId')?.value !== undefined) && getTags(tab).length > 0) {
                         <td
                           >
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Tags</mat-label>
                             <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
                               formControlName="exportTagSelection" groupBy="group"
@@ -387,7 +387,7 @@
                       }
                       @if (!isDeviceGroup(tab)) {
                         <td>
-                          <mat-form-field appearance="outline" color="accent">
+                          <mat-form-field>
                             <mat-label>Unit</mat-label>
                             <input type="text" matInput formControlName="unit">
                             <mat-error senergyError label="Unit"></mat-error>
@@ -397,7 +397,7 @@
                     </tr>
                     <tr>
                       <td>
-                        <mat-form-field appearance="outline" color="accent"
+                        <mat-form-field
                           hintLabel="For use in Angular pipes">
                           <mat-label>Format</mat-label>
                           <input type="text" matInput formControlName="format">
@@ -405,7 +405,7 @@
                         </mat-form-field>
                       </td>
                       <td>
-                        <mat-form-field appearance="outline" color="accent">
+                        <mat-form-field>
                           <mat-label>Group Type</mat-label>
                           <mtx-select [items]="groupTypes" formControlName="groupType"
                             appendTo=".ng-select-anchor">
@@ -414,7 +414,7 @@
                         </mat-form-field>
                       </td>
                       <td>
-                        <mat-form-field appearance="outline" color="accent">
+                        <mat-form-field>
                           <mat-label>Group Time</mat-label>
                           <input type="text" matInput formControlName="groupTime">
                           <mat-error senergyError label="Group Time"></mat-error>
@@ -426,14 +426,14 @@
                         <mat-slide-toggle formControlName="enabled">Enable warnings</mat-slide-toggle>
                       </td>
                       <td>
-                        <mat-form-field appearance="outline" color="accent">
+                        <mat-form-field>
                           <mat-label>Lower Boundary</mat-label>
                           <input matInput type="number" formControlName="lowerBoundary">
                           <mat-error senergyError label="Lower Boundary"></mat-error>
                         </mat-form-field>
                       </td>
                       <td>
-                        <mat-form-field appearance="outline" color="accent">
+                        <mat-form-field>
                           <mat-label>Upper Boundary</mat-label>
                           <input matInput type="number" formControlName="upperBoundary">
                           <mat-error senergyError label="Upper Boundary"></mat-error>
@@ -478,11 +478,11 @@
 </mat-dialog-content>
 
 @if (ready && !saving) {
-  <mat-dialog-actions class="ly-row ly-align-end-center">
+  <mat-dialog-actions>
     @if (!formGroup.valid) {
       <span class="color-warn actions-warn">Widget not configured correctly</span>
     }
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="!formGroup.valid">Save</button>
+    <button matButton="outlined" (click)="close()">Cancel</button>
+    <button matButton="filled" (click)="save()" [disabled]="!formGroup.valid">Save</button>
   </mat-dialog-actions>
 }

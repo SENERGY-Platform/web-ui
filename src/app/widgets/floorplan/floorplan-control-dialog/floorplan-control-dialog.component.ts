@@ -15,7 +15,8 @@
  */
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { CapabilityCommandModel, CapabilityControlComponent } from '../shared/capability-control/capability-control.component';
 import { FloorplanControlModel } from '../shared/floorplan.model';
@@ -36,7 +37,7 @@ export interface FloorplanControlDialogData {
     templateUrl: './floorplan-control-dialog.component.html',
     styleUrl: './floorplan-control-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatIcon, CapabilityControlComponent, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatIcon, CapabilityControlComponent, MatDialogActions, MatButton]
 })
 export class FloorplanControlDialogComponent {
     private dialogRef = inject<MatDialogRef<FloorplanControlDialogComponent>>(MatDialogRef);

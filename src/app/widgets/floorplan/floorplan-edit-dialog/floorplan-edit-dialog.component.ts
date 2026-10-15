@@ -18,7 +18,8 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
@@ -66,7 +67,7 @@ import { ColorPickerDirective } from 'ngx-color-picker';
     templateUrl: './floorplan-edit-dialog.component.html',
     styleUrl: './floorplan-edit-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatIconButton, MatIcon, ImageCropperComponent, NgClass, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MtxSelect, MtxOption, MatHint, MtxSelectLabelTemplate, MtxSelectOptionTemplate, ColorPickerDirective, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatIconButton, MatIcon, ImageCropperComponent, NgClass, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MtxSelect, MtxOption, MatHint, MtxSelectLabelTemplate, MtxSelectOptionTemplate, ColorPickerDirective, MatDialogActions, MatButton]
 })
 export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   private dialogRef = inject<MatDialogRef<FloorplanEditDialogComponent>>(MatDialogRef);

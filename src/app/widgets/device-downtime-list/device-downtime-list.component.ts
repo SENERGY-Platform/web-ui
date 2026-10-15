@@ -24,6 +24,7 @@ import { humanizeDuration } from '../../core/time/humanize-duration';
 import { OfflineSinceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ConnectionHistoryDialogComponent } from '../shared/connection-history-dialog/connection-history-dialog.component';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { dialogSize } from '../../core/dialog-size';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
 import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
@@ -98,7 +99,7 @@ export class DeviceDowntimeListComponent implements OnInit {
 
     showConnectionHistoryChart(id: string) {
         const dialogConfig = new MatDialogConfig();
-              dialogConfig.width = '75vw';
+              Object.assign(dialogConfig, dialogSize('xl'));
               dialogConfig.disableClose = false;
               dialogConfig.data = {
                 id,

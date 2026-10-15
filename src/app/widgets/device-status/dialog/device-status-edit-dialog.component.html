@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Device Status</h2>
+<senergy-dialog-header title="Edit Device Status" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
   <form [formGroup]="formGroup">
@@ -22,7 +22,7 @@
       <tr>
         @if (userHasUpdateNameAuthorization) {
           <td>
-            <mat-form-field appearance="outline" color="accent">
+            <mat-form-field>
               <mat-label>Widget Name</mat-label>
               <input type="text" matInput formControlName="name">
               <mat-error senergyError label="Widget Name"></mat-error>
@@ -31,7 +31,7 @@
         }
         @if (userHasUpdatePropertiesAuthorization) {
           <td>
-            <mat-form-field appearance="outline" color="accent">
+            <mat-form-field>
               <mat-label>Refresh Time</mat-label>
               <input type="number" matInput formControlName="refreshTime">
               <mat-error senergyError label="Refresh Time"></mat-error>
@@ -51,14 +51,14 @@
             <tr [formGroupName]="convertRuleIndex"
               >
               <td>
-                <mat-form-field appearance="outline" color="accent">
+                <mat-form-field>
                   <mat-label>Status</mat-label>
                   <input class="convert-input" type="text" matInput formControlName="status">
                   <mat-error senergyError label="Status"></mat-error>
                 </mat-form-field>
               </td>
               <td>
-                <mat-form-field appearance="outline" color="accent">
+                <mat-form-field>
                   <mat-label>Icon</mat-label>
                   <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input"
                     appendTo=".ng-select-anchor">
@@ -78,7 +78,7 @@
                 </mat-form-field>
               </td>
               <td>
-                <mat-form-field appearance="outline" color="accent">
+                <mat-form-field>
                   <mat-label>Color</mat-label>
                   <input class="convert-input" type="text" matInput placeholder="Icon"
                     formControlName="color">
@@ -110,7 +110,7 @@
                 <table>
                   <tr>
                     <td>
-                      <mat-form-field appearance="outline" color="accent">
+                      <mat-form-field>
                         <mat-label>Alias</mat-label>
                         <input type="text" matInput required formControlName="name">
                         <mat-error senergyError label="Alias"></mat-error>
@@ -119,7 +119,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <mat-form-field appearance="outline" color="accent">
+                      <mat-form-field>
                         <mat-label>Aspect</mat-label>
                         <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
                           appendTo=".ng-select-anchor">
@@ -133,7 +133,7 @@
                       </mat-form-field>
                     </td>
                     <td>
-                      <mat-form-field appearance="outline" color="accent">
+                      <mat-form-field>
                         <mat-label>Function</mat-label>
                         <mtx-select formControlName="function" required placeholder="Choose Function"
                           [compareWith]="compareFunc" appendTo=".ng-select-anchor">
@@ -147,7 +147,7 @@
                       </mat-form-field>
                     </td>
                     <td>
-                      <mat-form-field appearance="outline" color="accent">
+                      <mat-form-field>
                         <mat-label>Device</mat-label>
                         <mtx-select formControlName="selectable" required placeholder="Choose Device"
                           [compareWith]="compareSelectables" appendTo=".ng-select-anchor">
@@ -164,7 +164,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <mat-form-field appearance="outline" color="accent">
+                      <mat-form-field>
                         <mat-label>Service</mat-label>
                         <mtx-select formControlName="service" required placeholder="Choose Service"
                           [compareWith]="compareServices" appendTo=".ng-select-anchor">
@@ -179,7 +179,7 @@
                       </mat-form-field>
                     </td>
                     <td>
-                      <mat-form-field appearance="outline" color="accent">
+                      <mat-form-field>
                         <mat-label>Value</mat-label>
                         <mtx-select formControlName="exportValues" required placeholder="Choose Value"
                           [compareWith]="compareValues" appendTo=".ng-select-anchor">
@@ -218,10 +218,10 @@
   </form>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
+<mat-dialog-actions>
   @if (!formGroup.valid) {
     <span class="color-warn actions-warn">Widget not configured correctly</span>
   }
-  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" [disabled]="formGroup.invalid" (click)="save()">Save</button>
+  <button matButton="outlined" (click)="close()">Cancel</button>
+  <button matButton="filled" [disabled]="formGroup.invalid" (click)="save()">Save</button>
 </mat-dialog-actions>

@@ -14,14 +14,14 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Chart Export</h2>
-<mat-dialog-content class="form">
+<senergy-dialog-header title="Edit Chart Export" (closed)="close()"></senergy-dialog-header>
+<mat-dialog-content>
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
 
   @if (ready) {
     <div class="ly-column" [formGroup]="formGroupController">
       @if (userHasUpdateNameAuthorization) {
-        <mat-form-field color="accent" appearance="outline">
+        <mat-form-field class="full-width">
           <mat-label>Widget Name</mat-label>
           <input type="text" matInput placeholder="Name" formControlName="name" required>
           <mat-error senergyError label="Widget Name"></mat-error>
@@ -32,7 +32,7 @@
           <table class="full-width">
             <tr>
               <td>
-                <mat-form-field color="accent" appearance="outline" class="full-width">
+                <mat-form-field class="full-width">
                   <mat-label>Chart Type</mat-label>
                   <mtx-select formControlName="chartType" required appendTo=".ng-select-anchor">
                     @for (chartType of chartTypes; track chartType) {
@@ -48,7 +48,7 @@
                 <td>
                   <mat-slide-toggle formControlName="curvedFunction"> Curved?
                   </mat-slide-toggle>
-                  <mat-form-field color="accent" appearance="outline" style="width: 140px">
+                  <mat-form-field style="width: 140px">
                     <mat-label>Zoom Time Factor</mat-label>
                     <input type="number" matInput formControlName="zoomTimeFactor">
                     <mat-error senergyError label="Zoom Time Factor"></mat-error>
@@ -78,28 +78,28 @@
           <table>
             <tr>
               <td>
-                <mat-form-field color="accent" appearance="outline" class="full-width">
+                <mat-form-field class="full-width">
                   <mat-label>X-Axis-Label</mat-label>
                   <input type="text" matInput formControlName="hAxisLabel">
                   <mat-error senergyError label="X-Axis-Label"></mat-error>
                 </mat-form-field>
               </td>
               <td>
-                <mat-form-field color="accent" appearance="outline" class="full-width">
+                <mat-form-field class="full-width">
                   <mat-label>X-Axis-Format</mat-label>
                   <input type="text" matInput formControlName="hAxisFormat" matTooltip="Date format string">
                   <mat-error senergyError label="X-Axis-Format"></mat-error>
                 </mat-form-field>
               </td>
               <td>
-                <mat-form-field color="accent" appearance="outline" class="full-width">
+                <mat-form-field class="full-width">
                   <mat-label>Y-Axis-Label</mat-label>
                   <input type="text" matInput formControlName="vAxisLabel">
                   <mat-error senergyError label="Y-Axis-Label"></mat-error>
                 </mat-form-field>
               </td>
               <td>
-                <mat-form-field color="accent" appearance="outline" class="full-width">
+                <mat-form-field class="full-width">
                   <mat-label>Second Y-Axis-Label</mat-label>
                   <input type="text" matInput placeholder="Second-Y-Axis-Label"
                     formControlName="secondVAxisLabel">
@@ -151,9 +151,9 @@
 </mat-dialog-content>
 
 @if (ready) {
-  <mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()"
+  <mat-dialog-actions>
+    <button matButton="outlined" (click)="close()">Cancel</button>
+    <button matButton="filled" (click)="save()"
       [disabled]="formGroupController.invalid || (formGroupController.get('properties.vAxes')?.value || []).length ===  0">
       Save
     </button>

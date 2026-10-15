@@ -18,10 +18,6 @@
     width: 100%;
 }
 
-.form {
-    min-width: 500px;
-}
-
 table {
     width: 100%;
     table-layout: fixed;
@@ -37,7 +33,6 @@ th, td {
 mat-form-field {
     width: 100%;
     min-width: 80px;
-    margin-right: 20px;
     padding-top: 8px;
 }
 

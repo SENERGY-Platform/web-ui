@@ -23,6 +23,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../../modules/dashboard/shared/dashboard.service';
 import { openWidgetEditDialog } from '../../../../modules/dashboard/shared/open-widget-edit-dialog';
 import { ChartsExportEditDialogComponent } from '../dialog/charts-export-edit-dialog.component';
+import { dialogSize } from '../../../../core/dialog-size';
 import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { ErrorModel } from '../../../../core/model/error.model';
 import {
@@ -75,7 +76,7 @@ export class ChartsExportService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '600px' });
+        }, dialogSize('l'));
     }
 
     getData(properties: WidgetPropertiesModels, fromTime?: string, toTime?: string, groupInterval?: string, lastOverride?: string): Observable<{ data: any[][][][] | null | ErrorModel; metadata: { exportId?: string; deviceId?: string; serviceId?: string; columnName?: string }[][] }> {

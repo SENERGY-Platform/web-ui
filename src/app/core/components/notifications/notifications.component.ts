@@ -32,6 +32,7 @@ import {
 } from './shared/notification.model';
 import { NotificationService } from './shared/notification.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { dialogSize } from '../../dialog-size';
 import { ConnectionHistoryDialogComponent } from 'src/app/widgets/shared/connection-history-dialog/connection-history-dialog.component';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -232,7 +233,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   openDowntimeDialog(notification: NotificationModel, id: string) {
     const dialogConfig = new MatDialogConfig();
-    dialogConfig.width = '75vw';
+    Object.assign(dialogConfig, dialogSize('xl'));
     dialogConfig.disableClose = false;
     dialogConfig.data = {
       id: id,

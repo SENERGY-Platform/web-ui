@@ -14,6 +14,8 @@
   ~ limitations under the License.
   -->
 
+<senergy-dialog-header title="Anomaly Reconstruction" (closed)="close()"></senergy-dialog-header>
+
 <mat-dialog-content class="ly-fill">
   @if (ready) {
     <div>
@@ -31,6 +33,6 @@
 
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="close()">Close</button>
+<mat-dialog-actions>
+  <button matButton="outlined" (click)="close()">Close</button>
 </mat-dialog-actions>

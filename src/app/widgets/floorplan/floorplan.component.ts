@@ -17,6 +17,7 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { dialogSize } from '../../core/dialog-size';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -327,7 +328,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
 
   edit() {
     const dialogConfig = new MatDialogConfig();
-    dialogConfig.width = '75vw';
+    Object.assign(dialogConfig, dialogSize('xl'));
     dialogConfig.disableClose = false;
     dialogConfig.data = {
       widgetId: this.widget().id,
@@ -606,6 +607,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       return;
     }
     const dialogConfig = new MatDialogConfig();
+    Object.assign(dialogConfig, dialogSize('s'));
     dialogConfig.disableClose = false;
     dialogConfig.data = {
       alias: placement.alias,
@@ -630,7 +632,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     }
     if (command.criteria.function_id === fpCriteriaConnectionStatus) {
       const dialogConfig = new MatDialogConfig();
-      dialogConfig.width = '75vw';
+      Object.assign(dialogConfig, dialogSize('xl'));
       dialogConfig.disableClose = false;
       dialogConfig.data = {
         id: deviceGroupId,

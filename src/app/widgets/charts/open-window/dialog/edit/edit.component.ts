@@ -17,6 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { dialogSize } from '../../../../../core/dialog-size';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { forkJoin } from 'rxjs';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -242,7 +243,8 @@ export class OpenWindowEditComponent implements OnInit {
 
     listRules(element: ChartsExportVAxesModel) {
         const dialog = this.dialog.open(ListRulesComponent, {
-            data: element.conversions || []
+            data: element.conversions || [],
+            ...dialogSize('m')
         });
 
         dialog.afterClosed().subscribe({

@@ -16,7 +16,8 @@
 
 import { AfterViewInit, Component, ElementRef, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ChartsExportVAxesModel } from '../../charts/export/shared/charts-export-properties.model';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { concatMap, map } from 'rxjs';
 import { detectAndMergeFlapping } from 'src/app/modules/devices/device-instances/shared/flapping.function';
@@ -31,7 +32,7 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './connection-history-dialog.component.html',
     styleUrl: './connection-history-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, TimelineComponent, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, TimelineComponent, MatDialogActions, MatButton]
 })
 export class ConnectionHistoryDialogComponent implements AfterViewInit {
     private el = inject(ElementRef);
@@ -61,8 +62,19 @@ export class ConnectionHistoryDialogComponent implements AfterViewInit {
 
         this.id = data.id;
     }
+
+    /** Inner width of the dialog content; clientWidth includes the padding, which the chart must not cover. */
+    private contentWidth(): number {
+        const content: HTMLElement | null = this.el.nativeElement.querySelector('mat-dialog-content');
+        if (content === null) {
+            return 0;
+        }
+        const style = getComputedStyle(content);
+        return content.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    }
+
     ngAfterViewInit(): void {
-       this.width = window.innerWidth * 0.75;
+       this.width = this.contentWidth() || window.innerWidth * 0.75;
        this.deviceInstancesService.getHistory({ ids: [this.id], range: '168h' }).pipe(
         map(m => {
             this.connectionHistory = [];

@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Air Quality Recommendation</h2>
+<senergy-dialog-header title="Edit Air Quality Recommendation" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
@@ -23,13 +23,13 @@
       @if (userHasUpdateNameAuthorization) {
         <mat-step label="Give the widget a name">
           <div class="step-content">
-            <mat-form-field appearance="outline" color="accent" class="input-field">
+            <mat-form-field class="input-field">
               <mat-label>Widget Name</mat-label>
               <input type="text" matInput [(ngModel)]="name" required>
               <mat-error senergyError label="Widget Name"></mat-error>
             </mat-form-field>
             <div class="nav-button">
-              <button mat-raised-button matStepperNext>Next</button>
+              <button matButton="outlined" matStepperNext>Next</button>
             </div>
           </div>
         </mat-step>
@@ -40,7 +40,7 @@
             <div class="step-content">
               @if (!changeLocation) {
                 <div class="button-alignment">
-                  <mat-form-field color="accent" appearance="outline" class="input-field location-field">
+                  <mat-form-field class="input-field location-field">
                     <mat-label>Location</mat-label>
                     <input matInput required [disabled]="true" value="{{formatted_address}}">
                   </mat-form-field>
@@ -56,7 +56,7 @@
               }
               @if (changeLocation) {
                 <div class="button-alignment">
-                  <mat-form-field color="accent" appearance="outline" class="input-field location-field">
+                  <mat-form-field class="input-field location-field">
                     <mat-label>Location</mat-label>
                     <input matInput required [matAutocomplete]="auto" [formControl]="searchFormControl">
                     <mat-error senergyError label="Location"></mat-error>
@@ -95,15 +95,15 @@
                 </div>
               }
               <div>
-                <button class="nav-button" mat-raised-button matStepperPrevious>Back</button>
-                <button class="nav-button" mat-raised-button matStepperNext>Next</button>
+                <button class="nav-button" matButton matStepperPrevious>Back</button>
+                <button class="nav-button" matButton="outlined" matStepperNext>Next</button>
               </div>
             </div>
           </mat-step>
           <mat-step label="Select additional measurements">
             <div class="step-content">
               <div>
-                <mat-form-field class="input-field" color="accent" appearance="outline">
+                <mat-form-field class="input-field">
                   <mat-label>Enable Measurements</mat-label>
                   <mtx-select multiple [(ngModel)]="measurementSelected"
                     (closed)="measurementsSelected(measurements, measurementSelected)"
@@ -118,7 +118,7 @@
                 </mat-form-field>
               </div>
               <div>
-                <mat-form-field class="input-field" color="accent" appearance="outline">
+                <mat-form-field class="input-field">
                   <mat-label>Enable Pollen Warnings</mat-label>
                   <mtx-select multiple [(ngModel)]="pollenSelected"
                     (closed)="measurementsSelected(pollen, pollenSelected)" appendTo=".ng-select-anchor">
@@ -132,8 +132,8 @@
                 </mat-form-field>
               </div>
               <div>
-                <button class="nav-button" mat-raised-button matStepperPrevious>Back</button>
-                <button class="nav-button" mat-raised-button matStepperNext>Next</button>
+                <button class="nav-button" matButton matStepperPrevious>Back</button>
+                <button class="nav-button" matButton="outlined" matStepperNext>Next</button>
               </div>
             </div>
           </mat-step>
@@ -171,7 +171,7 @@
                           <table>
                             <tr>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
+                                <mat-form-field class="ly-fill">
                                   <mat-label>Export</mat-label>
                                   <mtx-select [(ngModel)]="option.export"
                                     (ngModelChange)="insideExportChanged(option)"
@@ -183,7 +183,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
+                                <mat-form-field class="ly-fill">
                                   <mat-label>Value</mat-label>
                                   <mtx-select [(ngModel)]="option.data.column"
                                     [compareWith]="compareExportValueModels"
@@ -195,7 +195,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
+                                <mat-form-field class="ly-fill">
                                   <mat-label>Math</mat-label>
                                   <input matInput [(ngModel)]="option.math">
                                   <mat-error senergyError label="Math"></mat-error>
@@ -204,7 +204,7 @@
                             </tr>
                             <tr>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
+                                <mat-form-field class="ly-fill">
                                   <mat-label>Device</mat-label>
                                   <mtx-select [(ngModel)]="option.insideDeviceId"
                                     (ngModelChange)="insideDeviceChanged(option)" [items]="devices"
@@ -215,7 +215,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
+                                <mat-form-field class="ly-fill">
                                   <mat-label>Service</mat-label>
                                   <mtx-select [(ngModel)]="option.insideServiceId"
                                     [items]="(getServices(option.insideDeviceId) | async) || []"
@@ -226,7 +226,7 @@
                                 </mat-form-field>
                               </td>
                               <td>
-                                <mat-form-field color="accent" appearance="outline" class="ly-fill">
+                                <mat-form-field class="ly-fill">
                                   <mat-label>Value</mat-label>
                                   <mtx-select [(ngModel)]="option.insideDeviceValuePath"
                                     [items]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
@@ -255,7 +255,7 @@
                             <table>
                               <tr>
                                 <td>
-                                  <mat-form-field color="accent" appearance="outline">
+                                  <mat-form-field>
                                     <mat-label>Export</mat-label>
                                     <mtx-select [(ngModel)]="option.outsideExport"
                                       [compareWith]="compareExports" [items]="exports"
@@ -268,7 +268,7 @@
                                   </mat-form-field>
                                 </td>
                                 <td>
-                                  <mat-form-field color="accent" appearance="outline">
+                                  <mat-form-field>
                                     <mat-label>Value</mat-label>
                                     <mtx-select [(ngModel)]="option.outsideData.column"
                                       [compareWith]="compareExportValueModels"
@@ -279,7 +279,7 @@
                                   </mat-form-field>
                                 </td>
                                 <td>
-                                  <mat-form-field color="accent" appearance="outline">
+                                  <mat-form-field>
                                     <mat-label>Math</mat-label>
                                     <input matInput [(ngModel)]="option.outsideMath">
                                     <mat-error senergyError label="Math"></mat-error>
@@ -288,7 +288,7 @@
                               </tr>
                               <tr>
                                 <td>
-                                  <mat-form-field color="accent" appearance="outline">
+                                  <mat-form-field>
                                     <mat-label>Device</mat-label>
                                     <mtx-select [(ngModel)]="option.outsideDeviceId"
                                       (ngModelChange)="outsideDeviceChanged(option)" [items]="devices"
@@ -300,7 +300,7 @@
                                   </mat-form-field>
                                 </td>
                                 <td>
-                                  <mat-form-field color="accent" appearance="outline">
+                                  <mat-form-field>
                                     <mat-label>Service</mat-label>
                                     <mtx-select [(ngModel)]="option.outsideServiceId"
                                       [items]="(getServices(option.outsideDeviceId) | async) || []"
@@ -311,7 +311,7 @@
                                   </mat-form-field>
                                 </td>
                                 <td>
-                                  <mat-form-field color="accent" appearance="outline">
+                                  <mat-form-field>
                                     <mat-label>Value</mat-label>
                                     <mtx-select [(ngModel)]="option.outsideDeviceValuePath"
                                       [disabled]="option.outsideExport != null"
@@ -333,7 +333,7 @@
                               <p class="scale-heading">Warning Thresholds:</p>
                             </td>
                             <td>
-                              <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                              <mat-form-field class="threshold-field">
                                 <mat-label>Min. Warning</mat-label>
                                 <input class="right-aligned" type="number" matInput
                                   [(ngModel)]="option.boundaries.warn.lower" required>
@@ -344,7 +344,7 @@
                               </mat-form-field>
                             </td>
                             <td>
-                              <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                              <mat-form-field class="threshold-field">
                                 <mat-label>Max. Warning</mat-label>
                                 <input class="right-aligned" type="number" matInput
                                   [(ngModel)]="option.boundaries.warn.upper" required>
@@ -360,7 +360,7 @@
                               <p class="scale-heading"> Critical Warning Thresholds: </p>
                             </td>
                             <td>
-                              <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                              <mat-form-field class="threshold-field">
                                 <mat-label>Min. Critical Warning</mat-label>
                                 <input class="right-aligned" type="number" matInput
                                   [(ngModel)]="option.boundaries.critical.lower" required>
@@ -371,7 +371,7 @@
                               </mat-form-field>
                             </td>
                             <td>
-                              <mat-form-field class="threshold-field" color="accent" appearance="outline">
+                              <mat-form-field class="threshold-field">
                                 <mat-label>Max. Critical Warning</mat-label>
                                 <input class="right-aligned" type="number" matInput
                                   [(ngModel)]="option.boundaries.critical.upper" required>
@@ -408,7 +408,7 @@
                       </mat-expansion-panel-header>
                       <ng-template matExpansionPanelContent>
                         <div>
-                          <mat-form-field class="input-field" color="accent" appearance="outline">
+                          <mat-form-field class="input-field">
                             <mat-label>Warning Level</mat-label>
                             <mtx-select required placeholder="Select warning level"
                               [(ngModel)]="option.boundaries.warn.upper" appendTo=".ng-select-anchor">
@@ -422,7 +422,7 @@
                           </mat-form-field>
                         </div>
                         <div>
-                          <mat-form-field class="input-field" color="accent" appearance="outline">
+                          <mat-form-field class="input-field">
                             <mat-label>Critical Level</mat-label>
                             <mtx-select required placeholder="Select critical level"
                               [(ngModel)]="option.boundaries.critical.upper" appendTo=".ng-select-anchor">
@@ -447,8 +447,8 @@
               }
             </mat-accordion>
             <div>
-              <button class="nav-button" mat-raised-button matStepperPrevious>Back</button>
-              <button class="nav-button" mat-raised-button matStepperNext>Next</button>
+              <button class="nav-button" matButton matStepperPrevious>Back</button>
+              <button class="nav-button" matButton="outlined" matStepperNext>Next</button>
             </div>
           </mat-step>
           <mat-step label="Done">
@@ -476,7 +476,7 @@
               </mat-list-item>
             </mat-list>
             <div>
-              <button class="nav-button" mat-raised-button matStepperPrevious>Back</button>
+              <button class="nav-button" matButton matStepperPrevious>Back</button>
             </div>
           </mat-step>
         </span>
@@ -486,8 +486,8 @@
 </mat-dialog-content>
 
 @if (ready) {
-  <mat-dialog-actions class="ly-row ly-align-end-center">
-    <button class="nav-button" mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button class="nav-button" mat-raised-button color="accent" (click)="save()" [disabled]="disableSave">Save</button>
+  <mat-dialog-actions>
+    <button matButton="outlined" (click)="close()">Cancel</button>
+    <button matButton="filled" (click)="save()" [disabled]="disableSave">Save</button>
   </mat-dialog-actions>
 }

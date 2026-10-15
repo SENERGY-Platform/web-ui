@@ -21,6 +21,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {DashboardService} from '../../../modules/dashboard/shared/dashboard.service';
 import {openWidgetEditDialog} from '../../../modules/dashboard/shared/open-widget-edit-dialog';
 import {AirQualityEditDialogComponent} from '../dialog/air-quality-edit-dialog.component';
+import { dialogSize } from '../../../core/dialog-size';
 import {WidgetModel} from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {ErrorHandlerService} from '../../../core/services/error-handler.service';
 import {ExportService} from '../../../modules/exports/shared/export.service';
@@ -56,7 +57,7 @@ export class AirQualityService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '750px' });
+        }, dialogSize('l'));
     }
 
     readAllData(widget: WidgetModel): Observable<WidgetModel> {

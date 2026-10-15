@@ -23,6 +23,7 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
 import { ProcessSchedulerWidgetModel } from './shared/process-scheduler-widget.model';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { dialogSize } from '../../core/dialog-size';
 import { ProcessSchedulerScheduleDialogComponent } from './dialogs/process-scheduler-schedule-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
@@ -92,6 +93,7 @@ export class ProcessSchedulerComponent implements OnInit {
 
     add(item: ProcessSchedulerWidgetModel | null) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.disableClose = false;
         dialogConfig.data = item ? JSON.parse(JSON.stringify(item)) : null;
         const editDialogRef = this.dialog.open(ProcessSchedulerScheduleDialogComponent, dialogConfig);

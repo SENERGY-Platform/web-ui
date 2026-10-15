@@ -1082,6 +1082,21 @@ describe('DeviceStatusEditDialogComponent', () => {
                 );
 
                 it(
+                    'cleans up the unsaved resources when the dialog is closed from the header icon',
+                    waitForAsync(() => {
+                        failAtSchedule();
+                        component.save();
+
+                        (fixture.nativeElement.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
+                        fixture.destroy();
+
+                        expect(matDialogRefSpy.close.calls.mostRecent().args).toEqual([]);
+                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
+                        expect(pendingIds()).toEqual(['export_id_123']);
+                    }),
+                );
+
+                it(
                     'keeps a deployment logged whose delete failed when the dialog was closed and says it is retried',
                     waitForAsync(() => {
                         failAtSchedule();

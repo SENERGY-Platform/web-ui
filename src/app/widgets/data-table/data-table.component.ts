@@ -21,6 +21,7 @@ import { DashboardService } from '../../modules/dashboard/shared/dashboard.servi
 import { forkJoin, Observable, of } from 'rxjs';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { dialogSize } from '../../core/dialog-size';
 import { DataTableEditDialogComponent } from './dialog/data-table-edit-dialog.component';
 import {
     QueriesRequestElementInfluxModel,
@@ -132,7 +133,7 @@ export class DataTableComponent implements OnInit {
     edit() {
         const config: MatDialogConfig = {};
         config.data = { dashboardId: this.dashboardId, widgetId: this.widget.id, userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization, userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization };
-        config.minWidth = '800px';
+        Object.assign(config, dialogSize('xl'));
         this.dialog
             .open(DataTableEditDialogComponent, config)
             .afterClosed()
