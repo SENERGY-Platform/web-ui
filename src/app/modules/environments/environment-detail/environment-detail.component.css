@@ -50,7 +50,7 @@
     .tree-panel {
         width: 340px;
         min-width: 340px;
-        height: calc(100vh - 260px);
+        height: calc(var(--app-page-height, 100vh) - 260px);
     }
 }
 
@@ -109,7 +109,7 @@
    Same bound as the tree panel, so both columns end on one line. */
 @media screen and (min-width: 600px) {
     .node-editor-panel {
-        max-height: calc(100vh - 260px);
+        max-height: calc(var(--app-page-height, 100vh) - 260px);
     }
 }
 

@@ -34,7 +34,7 @@ table {
 }
 
 th {
-    background: var(--mat-sys-surface-container-low);
+    background: var(--app-muted-surface);
 }
 
 .clickable-row {
@@ -67,7 +67,8 @@ th {
     display: inline-block;
     padding: 2px 10px;
     border-radius: 999px;
-    background: var(--app-brand-tint);
+    background: var(--app-muted-surface);
+    border: var(--app-hairline);
     color: var(--mat-sys-on-surface);
     font-size: var(--app-text-xs);
     font-weight: 500;

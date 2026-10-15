@@ -158,14 +158,14 @@
   .mat-mdc-tab-nav-bar.mat-background-accent {
     --mat-tab-background-color: transparent;
     --mat-tab-foreground-color: var(--mat-sys-on-surface-variant);
-    --mat-tab-active-label-text-color: var(--mat-sys-primary);
-    --mat-tab-active-focus-label-text-color: var(--mat-sys-primary);
-    --mat-tab-active-hover-label-text-color: var(--mat-sys-primary);
+    --mat-tab-active-label-text-color: var(--mat-sys-on-surface);
+    --mat-tab-active-focus-label-text-color: var(--mat-sys-on-surface);
+    --mat-tab-active-hover-label-text-color: var(--mat-sys-on-surface);
     --mat-tab-inactive-label-text-color: var(--mat-sys-on-surface-variant);
     --mat-tab-inactive-hover-label-text-color: var(--mat-sys-on-surface);
-    --mat-tab-active-indicator-color: var(--mat-sys-primary);
-    --mat-tab-active-focus-indicator-color: var(--mat-sys-primary);
-    --mat-tab-active-hover-indicator-color: var(--mat-sys-primary);
+    --mat-tab-active-indicator-color: var(--mat-sys-on-surface);
+    --mat-tab-active-focus-indicator-color: var(--mat-sys-on-surface);
+    --mat-tab-active-hover-indicator-color: var(--mat-sys-on-surface);
     --mat-tab-divider-color: var(--mat-sys-outline-variant);
     --mat-tab-divider-height: 1px;
   }

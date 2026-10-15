@@ -32,10 +32,12 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
   --app-text-xl: 24px;
   --app-radius-sm: 8px;
   --app-radius-lg: 10px;
-  --app-radius-xl: 16px;
+  --app-radius-xl: 12px;
   --app-hairline: 1px solid var(--mat-sys-outline-variant);
-  // App background behind the page surface; a faint tenant tint on neutral grey.
-  --app-canvas: color-mix(in srgb, var(--mat-sys-primary) 4%, #f3f4f6);
+  // Neutral app background behind the page surface; the tenant colour stays on actions only.
+  --app-canvas: #fafafa;
+  --app-muted-surface: #f5f5f5;
+  --app-selected: #ebebeb;
   --app-hover: var(--mat-sys-surface-container-low);
   --app-brand-tint: color-mix(in srgb, var(--mat-sys-primary) 10%, var(--mat-sys-surface));
   // Destructive actions are the same red in every tenant; text on the tint keeps a contrast above 4.5:1.

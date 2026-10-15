@@ -37,7 +37,7 @@ mat-form-field {
 
 .outer {
     margin-left: 8px;
-    max-height: calc(100vh - 332px);
+    max-height: calc(var(--app-page-height, 100vh) - 332px);
     padding-bottom: 250px;
 }
 
