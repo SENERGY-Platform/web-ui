@@ -34,7 +34,8 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../core/components/spinner/spinner.component';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
@@ -48,7 +49,7 @@ export interface EnvironmentRow {
     templateUrl: './environments.component.html',
     styleUrls: ['./environments.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatSlideToggle, MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
+    imports: [MatSlideToggle, MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, PageHeaderComponent, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class EnvironmentsComponent implements OnInit {
     private environmentsService = inject(EnvironmentsService);
@@ -79,12 +80,7 @@ export class EnvironmentsComponent implements OnInit {
     @ViewChild('importInput') importInput: any;
 
     ngOnInit(): void {
-        this.displayedColumns.push('open');
-        this.displayedColumns.push('export');
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('share');
-            this.displayedColumns.push('delete');
-        }
+        this.displayedColumns.push('actions');
         this.reload();
     }
 

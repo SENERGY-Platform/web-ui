@@ -21,8 +21,8 @@
 }
 
 .app-toolbar {
+    --mat-toolbar-container-background-color: var(--app-canvas);
     padding-left: 8px;
-    border-bottom: var(--app-hairline);
     z-index: 1;
     position: relative;
 }

@@ -15,8 +15,34 @@
  */
 
 mat-sidenav {
-    width: 272px;
-    border-right: var(--app-hairline);
+    width: 264px;
+    border-right: none;
+}
+
+.sidenav-container {
+    --mat-sidenav-container-background-color: var(--app-canvas);
+    --mat-sidenav-content-background-color: var(--app-canvas);
+    --mat-sidenav-container-divider-color: transparent;
+}
+
+/* The page sits on a white rounded surface; the canvas around it carries toolbar and navigation. */
+.app-surface {
+    box-sizing: border-box;
+    min-height: calc(100% - 64px - 12px);
+    margin: 0 12px 12px 0;
+    background: var(--mat-sys-surface);
+    border: var(--app-hairline);
+    border-radius: var(--app-radius-xl);
+    /* clip, not hidden: hidden would make the surface a scroll container and break sticky headers. */
+    overflow: clip;
+}
+
+@media screen and (max-width: 959px) {
+    .app-surface {
+        margin: 0;
+        border-radius: 0;
+        border: none;
+    }
 }
 
 .side-menu, .side-menu ul {
@@ -32,7 +58,7 @@ mat-sidenav {
 
 .side-menu .menu-toggle-list [mat-button] {
     display: block;
-    height: 40px;
+    height: 36px;
     padding: 0 12px 0 28px;
     text-transform: none;
     font-weight: 400;
@@ -40,7 +66,7 @@ mat-sidenav {
 
 /* The active page: brand tint, brand icon, dark text. */
 .side-menu [mat-button].nav-active {
-    background-color: var(--app-brand-tint);
+    background-color: color-mix(in srgb, var(--mat-sys-primary) 12%, transparent);
     color: var(--mat-sys-on-surface);
     font-weight: 600;
 }
@@ -67,7 +93,10 @@ mat-sidenav {
 
 .side-menu .md-button-toggle .md-toggle-icon {
     display: inline-block;
-    color: inherit;
+    color: var(--mat-sys-outline);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
     margin: auto 0 auto auto;
     transition: transform .3s linear;
     -webkit-transition: -webkit-transform .3s linear;
@@ -79,10 +108,10 @@ mat-sidenav {
 }
 
 .side-menu [mat-button] {
-    border-radius: var(--app-radius-sm);
+    border-radius: 999px;
     cursor: pointer;
     margin: 1px 0;
-    height: 44px;
+    height: 40px;
     overflow: hidden;
     padding: 0 1rem;
     text-align: left;
@@ -92,11 +121,14 @@ mat-sidenav {
     margin-left: 8px;
     color: inherit;
     display: block;
+    font-size: var(--app-text-sm);
     font-weight: 500;
 }
 
 [mat-button]>.mat-icon {
-    font-size: 1.5em;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
 }
 
 .menu-toggle-list {
