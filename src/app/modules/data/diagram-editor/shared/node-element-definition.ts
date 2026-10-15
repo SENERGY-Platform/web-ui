@@ -65,6 +65,15 @@ export const NodeElementDefinition = dia.Element.define(
                 fontSize: 14,
                 fill: 'black',
             },
+            versionlabel: {
+                textVerticalAnchor: 'middle',
+                textAnchor: 'middle',
+                refX: '50%',
+                refY: '85%',
+                fontSize: 11,
+                fill: 'black',
+                pointerEvents: 'none',
+            },
             button: {
                 cursor: 'pointer',
                 ref: 'buttonLabel',
@@ -81,6 +90,14 @@ export const NodeElementDefinition = dia.Element.define(
                 refX: '-25%',
                 refY: '-25%',
             },
+            button3: {
+                cursor: 'pointer',
+                ref: 'buttonLabel3',
+                refWidth: '150%',
+                refHeight: '150%',
+                refX: '-25%',
+                refY: '-25%',
+            },
             buttonLabel: {
                 pointerEvents: 'none',
                 refX: '100%',
@@ -91,6 +108,13 @@ export const NodeElementDefinition = dia.Element.define(
             buttonLabel2: {
                 pointerEvents: 'none',
                 refX: '85%',
+                refY: '-5%',
+                textAnchor: 'middle',
+                textVerticalAnchor: 'middle',
+            },
+            buttonLabel3: {
+                pointerEvents: 'none',
+                refX: '65%',
                 refY: '-5%',
                 textAnchor: 'middle',
                 textVerticalAnchor: 'middle',
@@ -169,6 +193,10 @@ export const NodeElementDefinition = dia.Element.define(
                 selector: 'label',
             },
             {
+                tagName: 'text',
+                selector: 'versionlabel',
+            },
+            {
                 tagName: 'rect',
                 selector: 'button',
             },
@@ -183,6 +211,14 @@ export const NodeElementDefinition = dia.Element.define(
             {
                 tagName: 'text',
                 selector: 'buttonLabel2',
+            },
+            {
+                tagName: 'rect',
+                selector: 'button3',
+            },
+            {
+                tagName: 'text',
+                selector: 'buttonLabel3',
             },
         ],
         portMarkup: [
@@ -212,7 +248,8 @@ export const NodeElementDefinition = dia.Element.define(
             const inPortItems = this.createPortItems('in', inPorts);
             const outPortItems = this.createPortItems('out', outPorts);
 
-            this.prop('ports/items', inPortItems.concat(outPortItems));
+            // Without rewrite, prop merges the new array into the old one by index and leaves duplicate ids after a shrink.
+            this.prop('ports/items', inPortItems.concat(outPortItems), {rewrite: true});
         },
 
         createPortItem(group: string, port: string) {

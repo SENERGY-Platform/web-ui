@@ -124,3 +124,16 @@ mat-grid-list {
     right: 0;
     margin-top: 5px;
 }
+
+.deployment-disabled .footer-item-header,
+.deployment-disabled .footer-item-subtitle {
+    color: var(--mat-sys-outline-variant);
+}
+
+.deployment-disabled .widget-image {
+    opacity: 0.5;
+}
+
+.deployment-toggle {
+    margin-left: 8px;
+}

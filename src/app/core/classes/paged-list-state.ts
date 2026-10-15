@@ -73,6 +73,11 @@ export class PagedListState {
         this.run();
     }
 
+    /** Loads the current page again and drops the load in flight, without going back to the first page. */
+    refresh(): void {
+        this.run();
+    }
+
     /** Takes over the sort; the page reloads afterwards. `remap` translates column names to backend keys. */
     sortChanged(event: Sort, remap?: Record<string, string>): void {
         this.sortBy = remap?.[event.active] ?? event.active;

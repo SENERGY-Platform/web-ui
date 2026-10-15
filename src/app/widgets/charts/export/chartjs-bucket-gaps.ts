@@ -125,14 +125,15 @@ export function snapToData(time: number, dataTimes: number[], toleranceMs: numbe
 }
 
 const fixedUnitMs: { [unit: string]: number } = { ms: 1, s: 1000, m: 60 * 1000, h: 60 * 60 * 1000 };
+const influxFixedUnitMs: { [unit: string]: number } = { d: 24 * 60 * 60 * 1000, w: 7 * 24 * 60 * 60 * 1000 };
 const dstShiftMs = 60 * 60 * 1000;
 
 /**
  * The bucket a clicked tick stands for, as [from, to) in milliseconds. It starts at the bucket start the backend returned,
  * since exports and devices align buckets differently, and spans one grouping interval: by the local calendar for
- * d/w/months/y, in milliseconds below.
+ * d/w/months/y, in milliseconds below. Influx buckets are fixed-length, so with `influxOnly` d and w span milliseconds too.
  */
-export function clickedBucket(tick: number, dataTimes: number[], groupTime: string | null): { from: number; to: number } | null {
+export function clickedBucket(tick: number, dataTimes: number[], groupTime: string | null, influxOnly = false): { from: number; to: number } | null {
     const rgxRes = timeRgx.exec(groupTime || '');
     if (rgxRes === null || isNaN(tick)) {
         return null;
@@ -143,7 +144,7 @@ export function clickedBucket(tick: number, dataTimes: number[], groupTime: stri
         return null;
     }
     const end = (start: number): number => {
-        const unitMs = fixedUnitMs[unit];
+        const unitMs = fixedUnitMs[unit] ?? (influxOnly ? influxFixedUnitMs[unit] : undefined);
         if (unitMs !== undefined) {
             return start + amount * unitMs;
         }
@@ -158,7 +159,7 @@ export function clickedBucket(tick: number, dataTimes: number[], groupTime: stri
         from = containing.length > 0 ? containing.reduce((latest, t) => Math.max(latest, t), -Infinity) : tick;
     }
     let to = end(from);
-    if (fixedUnitMs[unit] === undefined) {
+    if (fixedUnitMs[unit] === undefined && !(influxOnly && influxFixedUnitMs[unit] !== undefined)) {
         // a next bucket within the DST hour of the calendar end is the backend's own boundary, e.g. of UTC-aligned buckets
         const next = dataTimes.filter(t => t > from).reduce((earliest, t) => Math.min(earliest, t), Infinity);
         if (Math.abs(next - to) <= dstShiftMs) {

@@ -36,6 +36,18 @@ describe('AcControlEditDialogComponent', () => {
     const deviceInstancesServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
     const deviceGroupsServiceSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
 
+    // the placeholders in environment.ts are the same string for every function and every aspect
+    const ids = {getTemperatureFunctionId: 'get-temperature', aspectTargetId: 'target', aspectReadingId: 'reading'};
+    let saved: Record<string, string> = {};
+
+    beforeEach(() => {
+        saved = {};
+        Object.keys(ids).forEach(k => saved[k] = (environment as any)[k]);
+        Object.assign(environment, ids);
+    });
+
+    afterEach(() => Object.assign(environment, saved));
+
     function init(widget: any) {
         deviceInstancesServiceSpy.getDeviceSelectionsFull.and.returnValue(of([]));
 
@@ -97,11 +109,11 @@ describe('AcControlEditDialogComponent', () => {
     }
 
     it(
-        'turns a content variable with several aspects into one measurement, using the alphabetically first as alias',
+        'turns a content variable with several aspects into one measurement, commanded with all of them',
         (done) => {
             const widget: any = {id: 'w1', name: 'ac', type: 'ac_control', properties: {}};
             init(widget);
-            deviceTypeServiceSpy.getDeviceType.and.returnValue(of(deviceTypeWithAspects(['room', 'air'])));
+            deviceTypeServiceSpy.getDeviceType.and.returnValue(of(deviceTypeWithAspects(['room', 'air', 'reading'])));
             dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({message: 'OK'}));
             component.form = new FormBuilder().group({
                 name: ['ac'], selectable: new FormControl<string | null | undefined>('device1'), minTarget: [15], maxTarget: [30],
@@ -111,7 +123,8 @@ describe('AcControlEditDialogComponent', () => {
             component.updateACProperties().subscribe(() => {
                 const measurements = widget.properties.acControl?.getTemperatureMeasurements;
                 expect(measurements?.length).toBe(1);
-                expect(measurements?.[0].aspectId).toBe('air');
+                expect(measurements?.[0].aspectIds).toEqual(['room', 'air', 'reading']);
+                expect(measurements?.[0].serviceId).toBe('service1');
                 done();
             });
         },

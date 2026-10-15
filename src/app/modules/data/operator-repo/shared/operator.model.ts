@@ -33,6 +33,49 @@ export interface OperatorModel {
     config_values: IOModel[] | undefined;
     cost?: number;
     version?: number;
+    versions?: OperatorVersionModel[];
+}
+
+export interface OperatorVersionModel {
+    version: string;
+    image: string;
+    inputs?: IOModel[];
+    outputs?: IOModel[];
+    config_values?: IOModel[];
+    deprecated?: boolean;
+}
+
+/** Body of PUT /operator/{id}/versions/{version}; the label is in the path. */
+export interface OperatorVersionBody {
+    image: string;
+    inputs: IOModel[];
+    outputs: IOModel[];
+    config_values: IOModel[];
+    deprecated: boolean;
+}
+
+export interface UsageReference {
+    id: string;
+    name: string;
+}
+
+/** What uses an operator; the lists hold only what the caller may read, so they can be shorter than the counts. */
+export interface OperatorUsage {
+    flows: number;
+    readable?: UsageReference[];
+    pipelines: number;
+    readable_pipelines?: UsageReference[];
+}
+
+/** Body of the 409 on deleting a single operator. */
+export interface OperatorInUseResponse extends OperatorUsage {
+    error: string;
+}
+
+/** Body of the 409 on deleting several operators. */
+export interface OperatorsInUseResponse {
+    error: string;
+    operators: (OperatorUsage & {id: string})[];
 }
 
 export interface IOModel {

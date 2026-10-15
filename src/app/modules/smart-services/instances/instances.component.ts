@@ -95,7 +95,6 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     loadingModulesByInstanceId = new Set<string>();
     upgradingInstanceIds = new Set<string>();
 
-
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('tableContainer', { static: false }) tableContainer?: ElementRef<HTMLDivElement>;
     ngOnInit(): void {
@@ -139,9 +138,9 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.restoreScrollPosition();
     }
 
-    /** Reloads the current page; only page changes go through `list`, which cancels the superseded one. */
+    /** Reloads the current page; `list` drops the load in flight, so an older answer cannot replace a newer one. */
     loadInstances(): void {
-        this.fetchInstances().subscribe();
+        this.list.refresh();
     }
 
     private fetchInstances(): Observable<unknown> {
@@ -326,7 +325,11 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
 
     matSortChange($event: Sort) {
         this.list.sortChanged($event);
-        this.loadInstances();
+        // the order changed, so the current page now holds other rows
+        this.pageIndex = 0;
+        this.paginator.pageIndex = 0;
+        this.updateQueryParams(true);
+        this.list.reload();
     }
 
     goToRelease(id: string) {
@@ -382,10 +385,12 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.expandedInstance = undefined;
         this.expandedInstanceId = undefined;
         this.tableScrollTop = 0;
+        // the navigation resets the page only after this load has started
+        this.pageIndex = 0;
         if (this.tableContainer?.nativeElement) {
             this.tableContainer.nativeElement.scrollTop = 0;
         }
-        this.loadInstances();
+        this.list.reload();
     }
 
     private restoreStateFromQueryParams(): void {

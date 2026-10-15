@@ -80,6 +80,22 @@ export class DeploymentsService {
                     }
                     return deployment as DeploymentsModel;
                 }),
+                concatMap((deployment) => this.completeDisabledState(deployment)),
+            );
+    }
+
+    // process-deployment does not know the on/off state; the engine's definition carries it as `suspended`.
+    private completeDisabledState(deployment: DeploymentsModel | null): Observable<DeploymentsModel | null> {
+        if (!deployment) {
+            return of(deployment);
+        }
+        return this.http
+            .get<{ suspended?: boolean }[]>(
+                environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deployment.id) + '/definition',
+            )
+            .pipe(
+                map((definitions) => ({ ...deployment, disabled: (definitions || [])[0]?.suspended === true })),
+                catchError(() => of(deployment)),
             );
     }
 
@@ -198,6 +214,14 @@ export class DeploymentsService {
         return this.http
             .get<any>(environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId) + '/start')
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'startDeployment', null)));
+    }
+
+    setDeploymentDisabled(deploymentId: string, disabled: boolean): Observable<{ disabled: boolean } | null> {
+        return this.http
+            .put<{ disabled: boolean }>(environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deploymentId) + '/disabled', {
+                disabled,
+            })
+            .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'setDeploymentDisabled', null)));
     }
 
     getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null> {

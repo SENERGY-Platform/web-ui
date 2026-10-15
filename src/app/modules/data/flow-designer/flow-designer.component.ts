@@ -36,6 +36,10 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton, MatFabButton } from '@angular/material/button';
 import { DatePipe } from '@angular/common';
 import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import {newerVersionLabel, portNames, resolveVersionData} from '../operator-repo/shared/operator-version';
+import {OperatorVersionDialogComponent, OperatorVersionDialogResult} from './version-dialog/operator-version-dialog.component';
+
+type NodeSource = Pick<OperatorModel, 'image' | 'inputs' | 'outputs' | 'config_values'>;
 
 @Component({
     selector: 'senergy-flow-designer',
@@ -84,17 +88,32 @@ export class FlowDesignerComponent implements AfterViewInit {
                                     console.error(`Operator mit ID ${cell.operatorId} nicht gefunden.`);
                                     continue;
                                 }
-                                if (cell.version !== operator?.version) {
+                                const pin = cell.operatorVersion || undefined;
+                                // A pinned node is refreshed from its pinned version, an unpinned one from the operator itself.
+                                let source: NodeSource | undefined = operator;
+                                if (pin !== undefined) {
+                                    source = resolveVersionData(operator, pin);
+                                    if (source === undefined) {
+                                        // Saving a pin the operator no longer lists is rejected by the flow repo.
+                                        this.snackBar.open(
+                                            `Version ${pin} of operator "${cell.name}" no longer exists, the node was left unchanged; saving will fail until another version is chosen`,
+                                            'OK',
+                                        );
+                                        this.addNodeToElements(cell, elements);
+                                        continue;
+                                    }
+                                }
+                                if (cell.version !== operator?.version && (pin === undefined || this.nodeDiffers(cell, source))) {
                                     const operatorsUpdated = {} as DialogData;
                                     console.log('operator version changed:' + cell.version + '!==' + operator?.version);
                                     operatorsUpdated.oldOperator = cell;
                                     operatorsUpdated.newOperator = {
                                         type: 'senergy.NodeElement',
-                                        inPorts: this.getPortNames(operator.inputs),
-                                        outPorts: this.getPortNames(operator.outputs),
-                                        config: operator.config_values,
+                                        inPorts: this.getPortNames(source.inputs),
+                                        outPorts: this.getPortNames(source.outputs),
+                                        config: source.config_values,
                                         name: operator.name,
-                                        image: operator.image,
+                                        image: source.image,
                                         operatorId: operator._id,
                                         deploymentType: operator.deploymentType,
                                         version: operator.version,
@@ -105,9 +124,9 @@ export class FlowDesignerComponent implements AfterViewInit {
                                         });
 
                                         dialogRef.afterClosed().subscribe(_ => {
-                                            cell.inPorts = this.getPortNames(operator.inputs);
-                                            cell.outPorts = this.getPortNames(operator.outputs);
-                                            cell.config = operator.config_values;
+                                            cell.inPorts = this.getPortNames(source.inputs);
+                                            cell.outPorts = this.getPortNames(source.outputs);
+                                            cell.config = source.config_values;
                                             cell.version = operator.version;
                                             this.addNodeToElements(cell, elements);
                                             resolve();
@@ -115,6 +134,10 @@ export class FlowDesignerComponent implements AfterViewInit {
                                     });
                                     dialogPromises.push(dialogPromise);
                                 } else {
+                                    if (pin !== undefined) {
+                                        // The revision moved but the pinned version did not change: nothing to confirm.
+                                        cell.version = operator.version;
+                                    }
                                     this.addNodeToElements(cell, elements);
                                 }
                             }
@@ -187,18 +210,19 @@ export class FlowDesignerComponent implements AfterViewInit {
     }
 
     private getPortNames(inputs: IOModel[] | undefined): string[] {
-        const ports = [];
-        if (inputs !== undefined) {
-            for (const input of inputs) {
-                if (input.name !== undefined) {
-                    ports.push(input.name);
-                }
-            }
-        }
-        return ports;
+        return portNames(inputs);
+    }
+
+    private nodeDiffers(cell: CellModel, source: NodeSource): boolean {
+        // The flow repo omits empty ports and the type of a config entry, so both sides are normalised before comparing.
+        const normalised = (inPorts: string[] | undefined, outPorts: string[] | undefined, config: IOModel[] | undefined) =>
+            JSON.stringify([inPorts ?? [], outPorts ?? [], (config ?? []).map(entry => ({name: entry.name, type: entry.type ?? ''}))]);
+        return normalised(cell.inPorts, cell.outPorts, cell.config) !==
+            normalised(this.getPortNames(source.inputs), this.getPortNames(source.outputs), source.config_values);
     }
 
     private createNode(type: 'local' | 'cloud' | '', cell: CellModel) {
+        const operator = this.getOperator(cell.operatorId);
         return this.diagram.createNode(
             type,
             cell.name,
@@ -209,8 +233,57 @@ export class FlowDesignerComponent implements AfterViewInit {
             cell.operatorId,
             cell.version,
             cell.position,
-            cell.id
+            cell.id,
+            cell.operatorVersion || undefined,
+            operator === null ? undefined : newerVersionLabel(operator, cell.operatorVersion),
         );
+    }
+
+    /** A second click of a double click on the Version button lands on the backdrop of the dialog the first one opened. */
+    private static readonly BACKDROP_GRACE_MS = 500;
+    private versionDialogOpen = false;
+
+    public openVersionDialog(nodeId: string) {
+        if (this.versionDialogOpen) {
+            return;
+        }
+        const node = this.diagram.getNodeInfo(nodeId);
+        const operator = node === undefined ? null : this.getOperator(node.operatorId);
+        if (node === undefined || operator === null) {
+            return;
+        }
+        if (operator.versions === undefined || operator.versions.length === 0) {
+            snackSuccess(this.snackBar, 'This operator has no versions');
+            return;
+        }
+        this.versionDialogOpen = true;
+        const openedAt = Date.now();
+        const dialogRef = this.dialog.open(OperatorVersionDialogComponent, {
+            data: {node, operator},
+            minWidth: '700px',
+            disableClose: true,
+        });
+        dialogRef.backdropClick().subscribe(() => {
+            if (Date.now() - openedAt >= FlowDesignerComponent.BACKDROP_GRACE_MS) {
+                dialogRef.close();
+            }
+        });
+        dialogRef.keydownEvents().subscribe((event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                dialogRef.close();
+            }
+        });
+        dialogRef.afterClosed().subscribe((result: OperatorVersionDialogResult | undefined) => {
+            this.versionDialogOpen = false;
+            if (result === undefined) {
+                return;
+            }
+            this.diagram.applyNodeVersion(nodeId, {
+                ...result,
+                newerVersion: newerVersionLabel(operator, result.operatorVersion),
+                version: operator.version,
+            });
+        });
     }
 
     public saveModel() {

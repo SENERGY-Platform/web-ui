@@ -47,6 +47,29 @@ describe('OperatorRepoService', () => {
         req.flush({ operators: [], totalCount: 0 });
     });
 
+    it('passes a refused single delete on to the caller', () => {
+        let status: number | undefined;
+        service.deleteOperator({_id: 'op-1'} as any).subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+
+        http.expectOne(environment.operatorRepoUrl + '/operator/op-1/').flush({error: 'in use', flows: 1, pipelines: 0}, {status: 409, statusText: 'Conflict'});
+
+        expect(status).toBe(409);
+    });
+
+    it('passes a refused batch delete on to the caller and succeeds on 204', () => {
+        let status: number | undefined;
+        service.deleteOperators(['a', 'b']).subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+        const refused = http.expectOne(environment.operatorRepoUrl + '/operator');
+        expect(refused.request.body).toEqual(['a', 'b']);
+        refused.flush({error: 'in use', operators: []}, {status: 409, statusText: 'Conflict'});
+        expect(status).toBe(409);
+
+        let ok: number | undefined;
+        service.deleteOperators(['a']).subscribe((resp) => (ok = resp.status));
+        http.expectOne(environment.operatorRepoUrl + '/operator').flush(null, {status: 204, statusText: 'No Content'});
+        expect(ok).toBe(204);
+    });
+
     it('passes the user filter through', () => {
         service.getAllOperators('user-a').subscribe();
 
@@ -55,21 +78,39 @@ describe('OperatorRepoService', () => {
         req.flush({ operators: [], totalCount: 0 });
     });
 
-    it('deleteOperator answers null on a failed request and true on an empty success', () => {
-        const results: unknown[] = [];
-        service.deleteOperator({ _id: 'o1' } as never).subscribe((r) => results.push(r));
-        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator/o1/' }).flush('down', { status: 500, statusText: 'Error' });
-        service.deleteOperator({ _id: 'o1' } as never).subscribe((r) => results.push(r));
-        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator/o1/' }).flush(null);
-        expect(results).toEqual([null, true]);
-    });
+    describe('versions', () => {
+        const body = {image: 'img:v1', inputs: [], outputs: [], config_values: [], deprecated: false};
 
-    it('deleteOperators answers null on a failed request and the status otherwise', () => {
-        const results: unknown[] = [];
-        service.deleteOperators(['o1']).subscribe((r) => results.push(r));
-        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator' }).flush('down', { status: 500, statusText: 'Error' });
-        service.deleteOperators(['o1']).subscribe((r) => results.push(r));
-        http.expectOne({ method: 'DELETE', url: environment.operatorRepoUrl + '/operator' }).flush('', { status: 200, statusText: 'OK' });
-        expect(results).toEqual([null, { status: 200 }]);
+        it('puts the version under its label and returns the answer', () => {
+            let done = false;
+            service.putOperatorVersion('op-1', 'v1.0.0', body).subscribe(() => (done = true));
+            const req = http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.0.0');
+            expect(req.request.method).toBe('PUT');
+            expect(req.request.body).toEqual(body);
+            req.flush({}, {status: 201, statusText: 'Created'});
+            expect(done).toBeTrue();
+        });
+
+        it('passes a refused put on to the caller', () => {
+            let status: number | undefined;
+            service.putOperatorVersion('op-1', 'v1.0.0', body).subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+            http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.0.0').flush('image in use', {status: 400, statusText: 'Bad Request'});
+            expect(status).toBe(400);
+        });
+
+        it('deletes the version under its label and passes a refused delete on', () => {
+            let ok = false;
+            service.deleteOperatorVersion('op-1', 'v1.0.0').subscribe(() => (ok = true));
+            const req = http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.0.0');
+            expect(req.request.method).toBe('DELETE');
+            req.flush(null, {status: 204, statusText: 'No Content'});
+            expect(ok).toBeTrue();
+
+            let status: number | undefined;
+            service.deleteOperatorVersion('op-1', 'v1.1.0').subscribe({next: () => fail('must not succeed'), error: (e) => (status = e.status)});
+            http.expectOne(environment.operatorRepoUrl + '/operator/op-1/versions/v1.1.0')
+                .flush({error: 'in use', flows: 1, pipelines: 0}, {status: 409, statusText: 'Conflict'});
+            expect(status).toBe(409);
+        });
     });
 });

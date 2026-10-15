@@ -357,6 +357,6 @@ export class ExportService {
     }
 
     getTimestampFormats(): string[]{
-        return ['%Y-%m-%dT%H:%M:%S.%fZ'];
+        return ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'];
     }
 }

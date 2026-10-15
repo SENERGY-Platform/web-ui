@@ -1,0 +1,70 @@
+<!--
+  ~ Copyright 2020 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<div class="ports-header">
+    <h3 [class.section-title]="section">{{title}} @if (rows.length > 0) {<span class="count">({{rows.length}})</span>}</h3>
+    <span class="spacer"></span>
+    @if (!readonly) {
+        <button mat-stroked-button color="accent" type="button" class="add-button" (click)="add()"
+            [disabled]="disabled">
+            <mat-icon>add</mat-icon>Add {{noun}}
+        </button>
+    }
+</div>
+@if (hint) {
+    <p class="hint">{{hint}}</p>
+}
+@if (rows.length === 0) {
+    <div class="empty">No {{noun}}s defined.</div>
+}
+@if (readonly) {
+    @for (item of rows; track item) {
+        <div class="port-row readonly-row">
+            <span class="port-name">{{item.name}}</span>
+            <span class="port-type">{{item.type}}</span>
+        </div>
+    }
+} @else {
+    @for (item of rows; track item) {
+        <div class="port-row">
+            <mat-form-field class="port-name" color="accent" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="item.name" [disabled]="disabled" [errorStateMatcher]="nameMatcher(item)">
+                <mat-error>{{nameError(item)}}</mat-error>
+                @if (nameWarning(item)) {
+                    <mat-hint class="name-warning">{{nameWarning(item)}}</mat-hint>
+                }
+            </mat-form-field>
+            <mat-form-field class="port-type" color="accent" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Type</mat-label>
+                <mtx-select [(ngModel)]="item.type" appendTo=".ng-select-anchor" [disabled]="disabled">
+                    @for (option of types; track option) {
+                        <mtx-option [value]="option">{{option}}</mtx-option>
+                    }
+                </mtx-select>
+                @if (typeError(item)) {
+                    <mat-hint class="type-required">{{typeError(item)}}</mat-hint>
+                }
+                @if (typeWarning(item)) {
+                    <mat-hint class="type-warning">{{typeWarning(item)}}</mat-hint>
+                }
+            </mat-form-field>
+            <button mat-icon-button type="button" class="remove-button" (click)="remove(item)" [hidden]="disabled"
+                matTooltip="Remove {{noun}}">
+                <mat-icon color="warn">delete</mat-icon>
+            </button>
+        </div>
+    }
+}

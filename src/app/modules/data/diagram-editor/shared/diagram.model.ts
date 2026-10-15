@@ -34,10 +34,39 @@ export interface CellModel {
     source: LinkIOModel;
     target: LinkIOModel;
     version?: number;
+    operatorVersion?: string;
     deploymentType: string;
 }
 export interface LinkIOModel {
     id: string;
     magnet: string;
     port: string;
+}
+export interface NodeLinkInfo {
+    id: string;
+    direction: 'in' | 'out';
+    port: string;
+    peerName: string;
+}
+
+export interface NodeInfo {
+    operatorId: string;
+    name: string;
+    image: string;
+    operatorVersion?: string;
+    inPorts: string[];
+    outPorts: string[];
+    config: IOModel[] | undefined;
+    links: NodeLinkInfo[];
+}
+
+export interface NodeVersionChange {
+    operatorVersion?: string;
+    newerVersion?: string;
+    version?: number;
+    image: string;
+    inPorts: string[];
+    outPorts: string[];
+    config: IOModel[];
+    removeLinkIds: string[];
 }

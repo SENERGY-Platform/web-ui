@@ -77,7 +77,7 @@
           <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
             formArrayName="repoItems">
             @for (item of repoItems.controls; track item; let i = $index) {
-              <mat-grid-tile class="mat-elevation-z1"
+              <mat-grid-tile class="mat-elevation-z1" [ngClass]="{'deployment-disabled': item.value.disabled}"
                 [formGroupName]="i">
                 <div class="ly-fill">
                   @if (item.value.metadataWarning) {
@@ -101,6 +101,12 @@
                     <div class="footer-buttons ly-row ly-align-center-center">
                       <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
                       </mat-checkbox>
+                      @if (!hub) {
+                        <mat-slide-toggle color="accent" class="deployment-toggle"
+                          [checked]="!item.value.disabled" matTooltip="Switch deployment on or off"
+                          (change)="toggleDeploymentEnabled(item, $event)">
+                        </mat-slide-toggle>
+                      }
                       @if (!item.value.online) {
                         <button mat-icon-button matTooltip="Missing Dependencies"
                           class="mat-warn" (click)="showOfflineReasons(item.value.offline_reasons)">
@@ -114,7 +120,7 @@
                       }
                       @if (!item.value.sync) {
                         <button mat-icon-button matTooltip="Run" color="accent"
-                          (click)="run(item.value.id)">
+                          (click)="run(item.value.id)" [disabled]="item.value.disabled">
                           <mat-icon>play_arrow</mat-icon>
                         </button>
                       }

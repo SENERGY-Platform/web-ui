@@ -17,7 +17,8 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 
 import { OperatorRepoComponent } from './operator-repo.component';
 import { OperatorRepoService } from './shared/operator-repo.service';
@@ -65,16 +66,16 @@ describe('OperatorRepoComponent delete', () => {
     });
 
     it('reloads and reports success when the operator was deleted', () => {
-        service.deleteOperator.and.returnValue(of(true));
+        service.deleteOperator.and.returnValue(of(null));
         component.deleteOperator(one);
         expect(snackBar.open).toHaveBeenCalledOnceWith('Operator deleted', undefined, { duration: 2000 });
         expect(reload).toHaveBeenCalledTimes(1);
     });
 
     it('reports an error and no success when deleting the operator failed', () => {
-        service.deleteOperator.and.returnValue(of(null));
+        service.deleteOperator.and.returnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
         component.deleteOperator(one);
-        expect(snackBar.open).toHaveBeenCalledOnceWith('Error while deleting operator!', 'close', { panelClass: 'snack-bar-error' });
+        expect(snackBar.open).toHaveBeenCalledOnceWith('Could not delete operator', 'close', { panelClass: 'snack-bar-error' });
         expect(reload).not.toHaveBeenCalled();
         expect(component.ready).toBeTrue();
     });
@@ -90,10 +91,10 @@ describe('OperatorRepoComponent delete', () => {
     });
 
     it('reports an error and keeps the selection when deleting the operators failed', () => {
-        service.deleteOperators.and.returnValue(of(null));
+        service.deleteOperators.and.returnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
         component.selection.select(one, two);
         component.deleteMultipleItems();
-        expect(snackBar.open).toHaveBeenCalledOnceWith('Error while deleting operators!', 'close', { panelClass: 'snack-bar-error' });
+        expect(snackBar.open).toHaveBeenCalledOnceWith('Could not delete operator', 'close', { panelClass: 'snack-bar-error' });
         expect(reload).not.toHaveBeenCalled();
         expect(component.selection.selected.length).toBe(2);
         expect(component.ready).toBeTrue();
