@@ -14,27 +14,29 @@
   ~ limitations under the License.
   -->
 
+<senergy-dialog-header [title]="title" (closed)="cancel()"></senergy-dialog-header>
+
 <mat-dialog-content>
-    <div [formGroup]="form" class="ly-column" >
-        <mat-form-field color="accent" appearance="outline">
+    <div [formGroup]="form">
+        <mat-form-field class="full-width">
             <mat-label>From</mat-label>
             <input matInput type="text" formControlName="from" required>
 			<mat-error senergyError label="From"></mat-error>
         </mat-form-field>
         
-        <mat-form-field color="accent" appearance="outline">
+        <mat-form-field class="full-width">
             <mat-label>To</mat-label>
             <input matInput type="text" formControlName="to" required>
 			<mat-error senergyError label="To"></mat-error>
         </mat-form-field>
 
-        <mat-form-field class="from-to-color" appearance="outline" color="accent">
+        <mat-form-field class="full-width">
             <mat-label>Color</mat-label>
             <input matInput type="text" formControlName="color">
             <mat-error senergyError label="Color"></mat-error>
         </mat-form-field>
 
-        <mat-form-field class="from-to-color" appearance="outline" color="accent">
+        <mat-form-field class="full-width">
             <mat-label>Alias</mat-label>
             <input matInput type="text" formControlName="alias">
             <mat-error senergyError label="Alias"></mat-error>
@@ -42,8 +44,8 @@
     </div>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="accent" type="submit" (click)="cancel()">Cancel</button>
-    <button mat-raised-button color="accent" type="submit" [disabled]="!form.valid" (click)="add()" >Add</button>
+<mat-dialog-actions>
+    <button matButton="outlined" type="submit" (click)="cancel()">Cancel</button>
+    <button matButton="filled" type="submit" [disabled]="!form.valid" (click)="add()" >Add</button>
 
 </mat-dialog-actions>

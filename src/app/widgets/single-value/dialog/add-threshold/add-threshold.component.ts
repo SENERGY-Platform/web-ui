@@ -25,13 +25,14 @@ import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 @Component({
     selector: 'single-value-add-threshold',
     templateUrl: './add-threshold.component.html',
     styleUrls: ['./add-threshold.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatDialogActions, MatButton]
 })
 export class AddThresholdComponent {
     private dialogRef = inject<MatDialogRef<AddThresholdComponent>>(MatDialogRef);
@@ -42,6 +43,7 @@ export class AddThresholdComponent {
         color: new FormControl('', {nonNullable: true, validators: Validators.required}),
         direction: new FormControl('', {nonNullable: true, validators: Validators.required}),
     });
+    title = 'Add threshold';
     submitButtonText = 'Add';
 
     constructor() {
@@ -51,6 +53,7 @@ export class AddThresholdComponent {
             this.form.controls.threshold.patchValue(config.threshold);
             this.form.controls.color.patchValue(config.color);
             this.form.controls.direction.patchValue(config.direction);
+            this.title = 'Edit threshold';
             this.submitButtonText = 'Update';
         }
     }

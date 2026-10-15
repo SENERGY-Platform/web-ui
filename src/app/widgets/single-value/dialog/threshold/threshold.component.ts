@@ -21,6 +21,7 @@ import { ValueHighlightConfig } from '../../shared/single-value.model';
 import { AddThresholdComponent } from '../add-threshold/add-threshold.component';
 import { MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Component({
     selector: 'single-value-threshold',
@@ -43,7 +44,7 @@ export class ThresholdComponent implements OnInit {
 
     edit(index: number) {
         const oldConfig = this.dataSource.data[index];
-        this.dialog.open(AddThresholdComponent, {data: oldConfig}).afterClosed().subscribe({
+        this.dialog.open(AddThresholdComponent, {data: oldConfig, ...dialogSize('s')}).afterClosed().subscribe({
             next: (rule: ValueHighlightConfig) => {
                 if(rule != null) {
                     const data = this.dataSource.data.slice();
@@ -66,7 +67,7 @@ export class ThresholdComponent implements OnInit {
     }
 
     add() {
-        this.dialog.open(AddThresholdComponent).afterClosed().subscribe({
+        this.dialog.open(AddThresholdComponent, dialogSize('s')).afterClosed().subscribe({
             next: (rule: ValueHighlightConfig) => {
                 if(rule != null) {
                     this.dataSource.data = [...this.dataSource.data, rule];

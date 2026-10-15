@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit Open Window</h2>
+<senergy-dialog-header title="Edit Open Window" (closed)="close()"></senergy-dialog-header>
 
 <mat-dialog-content>
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
@@ -22,7 +22,7 @@
     <div>
       <form class="ly-column" [formGroup]="form">
         @if (userHasUpdateNameAuthorization) {
-          <mat-form-field color="accent" appearance="outline">
+          <mat-form-field class="full-width">
             <mat-label>Widget Name</mat-label>
             <input type="text" matInput placeholder="Name" formControlName="name" required>
             <mat-error senergyError label="Widget Name"></mat-error>
@@ -35,14 +35,14 @@
           <h2>Configure Chart</h2>
           <div class="one-line-form-container">
             <div>
-              <mat-form-field color="accent" appearance="outline" class="full-width">
+              <mat-form-field class="full-width">
                 <mat-label>X-Axis-Label</mat-label>
                 <input type="text" matInput formControlName="hAxisLabel">
                 <mat-error senergyError label="X-Axis-Label"></mat-error>
               </mat-form-field>
             </div>
             <div>
-              <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-form-field class="full-width">
                 <mat-label>Y-Axis-Label</mat-label>
                 <input type="text" matInput formControlName="vAxisLabel">
                 <mat-error senergyError label="Y-Axis-Label"></mat-error>
@@ -69,7 +69,7 @@
           <ng-container matColumnDef="valueAlias">
             <th mat-header-cell *matHeaderCellDef>Alias</th>
             <td mat-cell *matCellDef="let element">
-              <mat-form-field appearance="outline" color="accent">
+              <mat-form-field class="full-width">
                 <mat-label>Value Alias</mat-label>
                 <input type="text" matInput [(ngModel)]="element.valueAlias">
                 <mat-error senergyError label="Value Alias"></mat-error>
@@ -97,7 +97,7 @@
     }
   </mat-dialog-content>
 
-  <mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
+  <mat-dialog-actions>
+    <button matButton="outlined" (click)="close()">Cancel</button>
+    <button matButton="filled" (click)="save()" [disabled]="form.invalid">Save</button>
   </mat-dialog-actions>

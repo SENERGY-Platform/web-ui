@@ -26,6 +26,7 @@ import { WidgetModel } from '../../../../../modules/dashboard/shared/dashboard-w
 import { DeviceDowntimeGatewayEditDialogComponent } from '../dialogs/device-downtime-gateway-edit-dialog.component';
 import { NetworksService } from '../../../../../modules/devices/networks/shared/networks.service';
 import { downtimePerGateway, GatewayDowntime } from './device-downtime-gateway-chart';
+import { dialogSize } from '../../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -44,7 +45,7 @@ export class DeviceDowntimeGatewayService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     /** The downtime share of every gateway over the week up to now; undefined without gateways. */

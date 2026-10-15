@@ -24,6 +24,7 @@ import { openWidgetEditDialog } from '../../../modules/dashboard/shared/open-wid
 import { DevicesStateEditDialogComponent } from '../dialog/devices-state-edit-dialog.component';
 import { map } from 'rxjs/operators';
 import { Attribute } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -40,7 +41,7 @@ export class DevicesStateService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        });
+        }, dialogSize('m'));
     }
 
     getDevicesStatus(properties?: DevicesStatePropertiesModel): Observable<DevicesStateModel> {

@@ -16,7 +16,7 @@
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { forkJoin, Observable, map, concatMap } from 'rxjs';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { saveWidgetEdits } from 'src/app/modules/dashboard/shared/save-widget-edits';
@@ -39,6 +39,7 @@ import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { DataSourceSelectorComponent } from '../../../charts/shared/data-source-selector/data-source-selector.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton } from '@angular/material/button';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
 const visualizationTypeLine =  {
     id: 'device',
@@ -55,7 +56,7 @@ const visualizationTypeTimeline = {
     templateUrl: './edit.component.html',
     styleUrls: ['./edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, DataSourceSelectorComponent, MtxOption, MatCheckbox, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, DataSourceSelectorComponent, MtxOption, MatCheckbox, MatDialogActions, MatButton]
 })
 export class EditComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<EditComponent>>(MatDialogRef);

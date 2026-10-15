@@ -24,6 +24,7 @@ import { environment } from 'src/environments/environment';
 import { ChartsExportRangeTimeTypeEnum } from '../../charts/export/shared/charts-export-range-time-type.enum';
 import { ChartsExportService } from '../../charts/export/shared/charts-export.service';
 import { PVPredictionEditComponent } from '../dialog/edit/edit.component';
+import { dialogSize } from '../../../core/dialog-size';
 import { PVPrediction, PVPredictionResult } from './prediction.model';
 
 @Injectable({
@@ -42,7 +43,7 @@ export class PvPredictionService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, { minWidth: '450px' });
+        }, dialogSize('m'));
     }
 
     getPVPrediction(exportID: string): Observable<PVPredictionResult> {
