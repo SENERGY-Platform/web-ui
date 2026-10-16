@@ -111,9 +111,9 @@ describe('OperatorRepoComponent', () => {
     });
 
     describe('version column', () => {
-        it('comes after the name', () => {
+        it('comes after the name and the access chip', () => {
             const columns = fixture.componentInstance.displayedColumns;
-            expect(columns.indexOf('version')).toBe(columns.indexOf('name') + 1);
+            expect(columns.indexOf('version')).toBe(columns.indexOf('name') + 2);
         });
 
         it('shows the newest label, whatever the order, and a dash without versions', () => {

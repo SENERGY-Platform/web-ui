@@ -131,4 +131,14 @@ describe('ImportDeployDialogComponent', () => {
         expect(r).toBeTrue();
         expect(importInstancesServiceSpy.saveImportInstance).toHaveBeenCalled();
     });
+
+    it('only shows the import when opened read-only', () => {
+        component.data.readOnly = true;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        const buttons = Array.from(fixture.nativeElement.querySelectorAll('mat-dialog-actions button')) as HTMLElement[];
+        expect(component.form.disabled).toBeTrue();
+        expect(buttons.map((b) => b.textContent?.trim())).toEqual(['Close']);
+    });
 });

@@ -15,11 +15,12 @@
  */
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { ImportInstancesModel } from './shared/import-instances.model';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
-import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
+import { ImportDeployEditDialogComponent, ImportDeployEditDialogData } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
@@ -31,21 +32,23 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
-import { UtilService } from 'src/app/core/services/util.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton } from '@angular/material/button';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
+import { MatChipSet, MatChip, MatChipRemove, MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { NgClass, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
@@ -53,7 +56,7 @@ import { snackError } from 'src/app/core/services/snack-bar-messages';
     templateUrl: './import-instances.component.html',
     styleUrls: ['./import-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgClass, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, MatChipListbox, MatChipOption, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class ImportInstancesComponent implements OnInit, AfterViewInit {
     private importInstancesService = inject(ImportInstancesService);
@@ -64,13 +67,13 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private searchbarService = inject(SearchbarService);
-    utilsService = inject(UtilService);
+    readonly dateFormat = LIST_DATE_FORMAT;
     private permissionsDialogService = inject(PermissionsDialogService);
     private permissionsService = inject(PermissionsService);
     private userService = inject(AuthorizationService);
     private preferencesService = inject(PreferencesService);
 
-    displayedColumns = ['select', 'status', 'name', 'image', 'created_at', 'updated_at', 'export'];
+    displayedColumns: string[] = [];
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
@@ -92,11 +95,20 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     userRoles: string[] = [];
     instanceId: string | null = null;
 
+    private paramsSeen = false;
+
     ngOnInit(): void {
+        this.checkAuthorization();
+        this.initSearch();
+        // The first emission only reads the filter; the search starts the first load.
         this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
-            this.instanceId = params.get('id');
-            this.initSearch();
-            this.getTotalNumberOfTypes();
+            const instanceId = params.get('id');
+            const changed = this.paramsSeen && instanceId !== this.instanceId;
+            this.instanceId = instanceId;
+            this.paramsSeen = true;
+            if (changed) {
+                this.reload();
+            }
         });
         const userIDResp = this.userService.getUserId();
         if(typeof(userIDResp) == 'string') {
@@ -126,7 +138,6 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
             this.searchText = searchText;
             this.reload();
         });
-        this.checkAuthorization();
     }
 
     ngAfterViewInit(): void {
@@ -136,21 +147,28 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
 
     checkAuthorization() {
         this.userHasUpdateAuthorization = this.importInstancesService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.importInstancesService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
-        this.displayedColumns.push('share');
         this.userHasCreateAuthorization = this.importInstancesService.userHasCreateAuthorization();
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name', 'status', 'image', 'created_at', 'updated_at', 'actions',
+        ];
     }
 
-    edit(m: ImportInstancesModel) {
+    get filtered(): boolean {
+        return this.searchText !== '' || this.excludeGenerated || this.instanceId !== null;
+    }
+
+    canEdit(m: ImportInstancesModel): boolean {
+        return this.userHasUpdateAuthorization && this.userHasEditPermission(m.id);
+    }
+
+    /** Opens the edit dialog; read-only it only shows the import, for rows the user may not update. */
+    edit(m: ImportInstancesModel, readOnly = false) {
+        const data: ImportDeployEditDialogData = readOnly ? { ...m, readOnly: true } : m;
         const config: MatDialogConfig = {
-            data: m,
+            data,
             minHeight: '400px',
             minWidth: '600px',
         };
@@ -253,8 +271,11 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
             });
     }
 
-    toggleExcludeGenerated() {
-        this.excludeGenerated = !this.excludeGenerated;
+    setExcludeGenerated(exclude: boolean) {
+        if (exclude === this.excludeGenerated) {
+            return;
+        }
+        this.excludeGenerated = exclude;
         localStorage.setItem('import.instances.excludeGenerated', '' + this.excludeGenerated);
         this.reload();
     }

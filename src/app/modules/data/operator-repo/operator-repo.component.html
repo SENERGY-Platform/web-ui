@@ -14,178 +14,130 @@
   ~ limitations under the License.
   -->
 
-<div class="search ly-column">
-  <senergy-searchbar class="ly-flex"></senergy-searchbar>
-</div>
+<senergy-page-header title="Operators" description="Analytics operators are the processing steps that flows combine and pipelines run.">
+  <ng-container pageActions>
+    @if (userHasCreateAuthorization) {
+      <button matButton="filled" routerLink="op">
+        <mat-icon>add</mat-icon> New operator
+      </button>
+    }
+  </ng-container>
+</senergy-page-header>
 
-<div class="layout-margin">
-  <div class="mat-elevation-z1" [hidden]="!ready || (operators.length === 0 && ready)">
-    <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
+<senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="refresh()">
+  <ng-container bulkActions>
+    @if (userHasDeleteAuthorization) {
+      <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    }
+  </ng-container>
+</senergy-list-toolbar>
+
+<div class="page-body">
+  <senergy-spinner [elementCount]="operators.length" [show]="!ready"></senergy-spinner>
+
+  @if (operators.length === 0 && ready) {
+    <senergy-empty-state icon="settings" [title]="searchText !== '' ? 'No matching operators' : 'No operators yet'"
+      [text]="searchText !== '' ? 'No operator matches the search.' : 'Operators are registered here and then used in flows.'">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || operators.length === 0">
+    <div class="table-container">
       <table #sort="matSort" mat-table [dataSource]="operatorsDataSource" matSort
         matSortActive="name"
         matSortDirection="asc" matSortDisableClear>
 
         <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef class="button-column">
+          <th mat-header-cell *matHeaderCellDef class="select-column">
             <mat-checkbox (change)="$event ? masterToggle() : null"
               [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()">
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              aria-label="Select all">
             </mat-checkbox>
           </th>
-          <td mat-cell *matCellDef="let row">
+          <td mat-cell *matCellDef="let row" class="select-column" (click)="$event.stopPropagation()">
             <mat-checkbox (click)="$event.stopPropagation()"
               (change)="$event ? selection.toggle(row) : null"
-              [checked]="selection.isSelected(row)">
+              [checked]="selection.isSelected(row)"
+              aria-label="Select row">
             </mat-checkbox>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="pub">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Access</th>
-          <td mat-cell *matCellDef="let element">
-            @if (userId !== element.userId) {
-              <mat-icon color="accent" (mouseover)="getOperatorUser(element.userId)"
-                matTooltip="Shared by {{shareUser}}">
-                share
-              </mat-icon>
-            }
-            @if (userId === element.userId) {
-              <mat-icon color="accent"
-                matTooltip="Owner">
-                person
-              </mat-icon>
-            }
           </td>
         </ng-container>
 
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
           <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.name}}
-            </div>
+            <div class="name-cell">{{element.name}}</div>
+            @if (element.description) {
+              <div class="muted truncate-cell" [matTooltip]="element.description">{{element.description}}</div>
+            }
           </td>
         </ng-container>
 
         <ng-container matColumnDef="version">
           <th mat-header-cell *matHeaderCellDef>Version</th>
-          <td mat-cell *matCellDef="let element" class="version-cell">{{versionLabel(element)}}</td>
+          <td mat-cell *matCellDef="let element" class="version-cell muted">{{versionLabel(element)}}</td>
         </ng-container>
 
         <ng-container matColumnDef="image">
           <th mat-header-cell *matHeaderCellDef>Image</th>
-          <td mat-cell *matCellDef="let element" class="truncate-cell" matTooltip="{{element.image}}">
+          <td mat-cell *matCellDef="let element" class="truncate-cell muted" [matTooltip]="element.image">
             {{element.image}}
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="details">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Details</th>
+        <ng-container matColumnDef="pub">
+          <th mat-header-cell *matHeaderCellDef>Access</th>
           <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="accent" routerLink="op/{{element._id}}"
-              matTooltip="{{element.description}}"
-              [disabled]="!userHasReadPermission(element._id)">
-              <mat-icon>info</mat-icon>
+            @if (userId === element.userId) {
+              <span class="type-chip">Owner</span>
+            } @else {
+              <span class="type-chip" (mouseover)="getOperatorUser(element.userId)" [matTooltip]="'Shared by ' + shareUser">Shared</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let element" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="pipeUsage">
-          <th mat-header-cell *matHeaderCellDef>Pipelines#</th>
-          <td mat-cell *matCellDef="let element" class="truncate-cell">
-            @if (getPipeUsageCount(element._id)) {
-              <button  (click)="showPipelines(element._id, element.name)" class="linkbutton color-accent"  matTooltip="uses of operator in pipelines">
-                {{getPipeUsageCount(element._id) || 0 }}
-              </button>
-            } @else {
-              0
-            }
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="flowUsage">
-          <th mat-header-cell *matHeaderCellDef>Flows#</th>
-          <td mat-cell *matCellDef="let element" class="truncate-cell">
-            @if (getFlowUsageCount(element._id)) {
-              <button  (click)="showFlows(element._id, element.name)" class="linkbutton color-accent"  matTooltip="uses of operator in flows">
-                {{getFlowUsageCount(element._id) || 0 }}
-              </button>
-            } @else {
-              0
-            }
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="share">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Share</th>
-          <td mat-cell *matCellDef="let element">
-            @if (element._id !== undefined) {
-              <button mat-icon-button color="accent"
-                matTooltip="Share" (click)="shareOperator(element)"
-                [disabled]="!userHasAdministratePermission(element._id)">
-                <mat-icon>share</mat-icon>
-              </button>
-            }
-          </td>
-        </ng-container>
-
-        @if (userHasUpdateAuthorization) {
-          <ng-container matColumnDef="edit">
-            <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
-            <td mat-cell *matCellDef="let element">
-              <button mat-icon-button color="accent" routerLink="op/{{element._id}}" matTooltip="Edit"
-                [disabled]="!userHasWritePermission(element._id)">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-        }
-
-        @if (userHasDeleteAuthorization) {
-          <span>
-            <ng-container matColumnDef="delete" >
-              <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
-              <td mat-cell *matCellDef="let element">
-                <button mat-icon-button color="accent"
-                  (click)="deleteOperator(element)" matTooltip="Delete"
-                  [disabled]="!userHasAdministratePermission(element._id)">
-                  <mat-icon>delete</mat-icon>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (canEdit(element)) {
+                <button mat-menu-item (click)="openOperator(element)"><mat-icon>edit</mat-icon> Edit</button>
+              } @else if (userHasReadPermission(element._id)) {
+                <button mat-menu-item (click)="openOperator(element)"><mat-icon>info</mat-icon> Details</button>
+              }
+              @if (getPipeUsageCount(element._id)) {
+                <button mat-menu-item (click)="showPipelines(element._id, element.name)">
+                  <mat-icon>account_tree</mat-icon> Pipelines ({{getPipeUsageCount(element._id)}})
                 </button>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="header-delete-all">
-              <th mat-header-cell *matHeaderCellDef colspan="10">
-                <div class="ly-row">
-                  <div class="ly-row ly-align-center-center">You have
-                    selected {{selection.selected.length}} items
-                  </div>
-                  <button matTooltip="Delete" mat-icon-button color="accent"
-                    (click)="deleteMultipleItems()">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </th>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-            [hidden]="selection.selected.length === 0"></tr>
-          </span>
-        }
+              }
+              @if (getFlowUsageCount(element._id)) {
+                <button mat-menu-item (click)="showFlows(element._id, element.name)">
+                  <mat-icon>device_hub</mat-icon> Flows ({{getFlowUsageCount(element._id)}})
+                </button>
+              }
+              @if (canShare(element)) {
+                <button mat-menu-item (click)="shareOperator(element)"><mat-icon>share</mat-icon> Share</button>
+              }
+              @if (canDelete(element)) {
+                <button mat-menu-item class="danger" (click)="deleteOperator(element)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.clickable-row]="userHasReadPermission(row._id)"
+          (click)="openOperator(row)"></tr>
       </table>
     </div>
     <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
       [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)"
     showFirstLastButtons></mat-paginator>
   </div>
-  @if (operators.length === 0 && ready) {
-    <div>No operator instances found.</div>
-  }
 </div>
-@if (userHasCreateAuthorization) {
-  <button mat-fab class="fab" routerLink="op" matTooltip="Register new Operator">
-    <mat-icon>add</mat-icon>
-  </button>
-}
-<senergy-spinner [show]="!ready"></senergy-spinner>

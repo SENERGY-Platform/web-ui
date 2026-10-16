@@ -13,7 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<h2 mat-dialog-title>Deploy Import</h2>
+<h2 mat-dialog-title>{{readOnly ? 'Import' : 'Deploy Import'}}</h2>
 
 <mat-dialog-content>
   <form [formGroup]="form" class="ly-column">
@@ -102,6 +102,8 @@
 
 
 <mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">{{readOnly ? 'Close' : 'Cancel'}}</button>
+  @if (!readOnly) {
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
+  }
 </mat-dialog-actions>

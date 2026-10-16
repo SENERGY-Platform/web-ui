@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
@@ -78,6 +79,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     listSelection = new ListSelection<WaitingDeviceModel>(() => this.devicesDataSource.connect().value);
 
     selection = this.listSelection.model;
+    readonly dateFormat = LIST_DATE_FORMAT;
     displayedColumns: string[] = ['select', 'name', 'status', 'created_at', 'updated_at', 'actions'];
     totalCount = 0;
 

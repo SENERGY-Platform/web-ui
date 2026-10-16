@@ -14,30 +14,9 @@
  * limitations under the License.
  */
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
-}
-
 .truncate-cell {
     max-width: 300px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.search {
-    padding-top: 12px;
-    padding-left: 8px;
-    padding-right: 8px;
-}
-
-.linkbutton {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-size: larger;
 }

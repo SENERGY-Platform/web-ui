@@ -44,6 +44,7 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
   --app-danger: #b3261e;
   --app-danger-tint: color-mix(in srgb, #b3261e 10%, var(--mat-sys-surface));
   --app-success: #1b6e3a;
+  --app-warning: #b26a00;
   --app-overlay-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
 
   // Floating overlays keep a subtle shadow; every other surface is flat.
@@ -291,7 +292,7 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     font-weight: 500;
   }
 
-  // Connection or visibility state in a table cell: a dot in front of the label; `.online` turns the dot green.
+  // Connection, run or visibility state in a table cell: a dot in front of the label; `.online` turns it green, `.warning` yellow, `.failed` red.
   .status-chip {
     display: inline-flex;
     align-items: center;
@@ -310,6 +311,38 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
 
   .status-chip.online::before {
     background: var(--app-success);
+  }
+
+  .status-chip.warning::before {
+    background: var(--app-warning);
+  }
+
+  .status-chip.failed::before {
+    background: var(--app-danger);
+  }
+
+  // Small image of a flow or process in a table cell, an <img> that scales its SVG into the box.
+  .svg-preview {
+    object-fit: contain;
+    width: 112px;
+    height: 44px;
+    padding: 2px;
+    box-sizing: border-box;
+    border: var(--app-hairline);
+    border-radius: var(--app-radius-sm);
+    background: var(--mat-sys-surface);
+  }
+
+  // The enlarged image shown while hovering a `.svg-preview`.
+  .svg-preview-large {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  // A chip right behind the name in a name cell.
+  .name-chip {
+    margin-left: 8px;
   }
 
   // A count in a table cell that opens the list behind it (usage dialogs); a button, so it is reachable by keyboard.

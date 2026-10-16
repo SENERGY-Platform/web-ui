@@ -16,11 +16,12 @@
 
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { ExportService } from './shared/export.service';
 import { ExportModel, ExportResponseModel } from './shared/export.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../core/services/dialogs.service';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, Subject, switchMap, tap } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -29,8 +30,7 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import { BrokerExportService } from './shared/broker-export.service';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { UtilService } from 'src/app/core/services/util.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
 import { environment } from '../../../environments/environment';
 import { PermissionsDialogService } from '../permissions/shared/permissions-dialog.service';
@@ -39,15 +39,18 @@ import { AuthorizationService } from 'src/app/core/services/authorization.servic
 import { PermissionsRightsModel } from '../permissions/shared/permissions-rights.model';
 import { PermissionsV2RightsAndIdModel } from '../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../core/components/searchbar/searchbar.component';
-import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { FormsModule } from '@angular/forms';
-import { MatErrorMessagesDirective } from '../../core/directives/matError.directive';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { NgClass, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
@@ -76,7 +79,7 @@ export function bulkDeleteOutcome(status: number, count: number): { message: str
     templateUrl: './export.component.html',
     styleUrls: ['./export.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatError, MatErrorMessagesDirective, MatIconButton, MatTooltip, MatIcon, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatFormField, MatLabel, MtxSelect, FormsModule, MtxOption, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatChipListbox, MatChipOption, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
 export class ExportComponent implements OnInit, AfterViewInit {
     private exportService = inject(ExportService);
@@ -86,7 +89,8 @@ export class ExportComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
     private brokerExportService = inject(BrokerExportService);
     private route = inject(ActivatedRoute);
-    utilsService = inject(UtilService);
+    private router = inject(Router);
+    readonly dateFormat = LIST_DATE_FORMAT;
     private exportDataService = inject(ExportDataService);
     private permissionsDialogService = inject(PermissionsDialogService);
     private permissionsService = inject(PermissionsService);
@@ -101,12 +105,7 @@ export class ExportComponent implements OnInit, AfterViewInit {
         { selectable: (row) => this.userHasAdministratePermission(row.ID || '') },
     );
     selection = this.listSelection.model;
-    displayedColumns: string[] = [
-        'select',
-        'filter_type',
-        'name',
-        'description'
-    ];
+    displayedColumns: string[] = [];
     totalCount = 0;
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -139,24 +138,38 @@ export class ExportComponent implements OnInit, AfterViewInit {
         ['Service', 'service_name'],
     ];
     public brokerMode = false;
+    private loadRequests = new Subject<void>();
 
     ngAfterViewInit(): void {
+        // set up once: every reload only triggers this pipeline, and a newer request drops the answer of an older one
+        this.loadRequests.pipe(
+            tap(() => this.ready = false),
+            switchMap(() => this.getExports().pipe(catchError(() => of(null)))),
+            takeUntilDestroyed(this.destroyRef),
+        ).subscribe(() => this.ready = true);
+
         this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.reload();
+            this.loadRequests.next();
         });
 
         this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.paginator.pageIndex = 0;
             this.selectionClear();
-            this.reload();
+            this.loadRequests.next();
         });
     }
 
+    /** The one reload path: search, search field, generated filter and the refresh button all end here, on page one. */
     reload() {
-        this.ready = false;
-        this.getExports().subscribe({
-            next: () => this.ready = true
-        });
+        if (this.paginator) {
+            this.paginator.pageIndex = 0;
+        }
+        this.selectionClear();
+        this.loadRequests.next();
+    }
+
+    get filtered(): boolean {
+        return this.searchText !== '' || this.showGenerated;
     }
 
     ngOnInit() {
@@ -170,42 +183,27 @@ export class ExportComponent implements OnInit, AfterViewInit {
                     this.brokerMode = true;
                 } else {
                     this.brokerMode = false;
-                    if (this.userHasReadUsageAuthorization) {
-                        this.displayedColumns.push('usage');
-                    }
                 }
 
-                this.displayedColumns.push(...[
+                // The selection column only exists for the bulk delete.
+                this.displayedColumns = [
+                    ...(this.userHasDeleteAuthorization ? ['select'] : []),
+                    'name',
+                    'filter_type',
+                    ...(!this.brokerMode && this.userHasReadUsageAuthorization ? ['usage'] : []),
                     'created_at',
                     'updated_at',
-                    'info'
-                ]);
-
-                if (this.userHasUpdateAuthorization) {
-                    this.displayedColumns.push('edit');
-                }
-                if (this.userHasDeleteAuthorization) {
-                    this.displayedColumns.push('delete');
-                }
-                this.displayedColumns.push('share');
+                    'actions',
+                ];
                 if (localStorage.getItem('data.exports.search') !== null) {
                     this.initSearchText = localStorage.getItem('data.exports.search') as string;
                 }
                 if (localStorage.getItem('data.exports.searchField') !== null) {
                     this.searchField = localStorage.getItem('data.exports.searchField') as string;
                 }
-                return null;
             }),
-            concatMap((_) => this.getExports()),
             takeUntilDestroyed(this.destroyRef),
-        ).subscribe({
-            next: () => {
-                this.ready = true;
-            },
-            error: () => {
-                this.ready = true;
-            }
-        });
+        ).subscribe();
     }
 
     checkAuthorization() {
@@ -226,31 +224,51 @@ export class ExportComponent implements OnInit, AfterViewInit {
                     obs.subscribe((response) => {
                         if (response.status === 204) {
                             snackSuccess(this.snackBar, 'Export deleted');
-                            // do deletion on the client instead of reloading, because of caching/slow deletion
-                            const index = this.exportsDataSource.data.findIndex(element => element.ID === exp.ID);
-                            const data = this.exportsDataSource.data.slice();
-                            data.splice(index, 1);
-                            this.exportsDataSource.data = data;
+                            this.reload();
                         } else {
                             snackError(this.snackBar, 'Export could not be deleted');
+                            this.ready = true;
                         }
-                        this.ready = true;
                     });
                 }
             });
     }
 
     searchFieldChanged() {
-        this.ready = false;
         localStorage.setItem('data.exports.searchField', String(this.searchField));
-        this.getExports().subscribe(_ => this.ready = true);
+        this.reload();
     }
 
-    showGeneratedChanged() {
-        this.ready = false;
-        this.showGenerated = !this.showGenerated;
+    setShowGenerated(show: boolean) {
+        if (show === this.showGenerated) {
+            return;
+        }
+        this.showGenerated = show;
         localStorage.setItem('data.exports.showGenerated', String(this.showGenerated));
-        this.getExports().subscribe(_ => this.ready = true);
+        this.reload();
+    }
+
+    /** The row click and the first menu entry. */
+    openDetails(exp: ExportModel) {
+        this.router.navigate(['/exports/details', exp.ID]);
+    }
+
+    editExport(exp: ExportModel) {
+        this.router.navigate(['/exports/edit', exp.ID]);
+    }
+
+    /** What the export reads from: a device, a pipeline or an import. */
+    sourceLabel(exp: ExportModel): string {
+        switch (exp.FilterType) {
+            case 'deviceId':
+                return 'Device';
+            case 'operatorId':
+                return 'Pipeline';
+            case 'import_id':
+                return 'Import';
+            default:
+                return '';
+        }
     }
 
     private getExports(): Observable<any> {
@@ -362,9 +380,7 @@ export class ExportComponent implements OnInit, AfterViewInit {
                         } else {
                             this.snackBar.open(outcome.message, 'close', { duration: outcome.pending ? undefined : 2000 });
                         }
-                        this.paginator.pageIndex = 0;
-                        this.selectionClear();
-                        this.getExports().subscribe(_ => this.ready = true);
+                        this.reload();
                     });
                 }
             });

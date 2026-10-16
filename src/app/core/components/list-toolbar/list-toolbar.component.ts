@@ -32,6 +32,8 @@ import { SearchbarComponent } from '../searchbar/searchbar.component';
 })
 export class ListToolbarComponent {
     @Input() selectedCount = 0;
+    /** Text the search starts with, for pages that restore the last search. */
+    @Input() searchTextIn = '';
     /** The search field's refresh button; pages that reload on it listen to `(refresh)`. */
     @Output() refresh = new EventEmitter<void>();
     @Output() clearSelection = new EventEmitter<void>();
