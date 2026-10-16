@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { of } from 'rxjs';
+
 import { FlowRepoComponent } from './flow-repo.component';
 import { FlowModel } from './shared/flow.model';
 import { FlowRepoService } from './shared/flow-repo.service';
@@ -28,68 +35,129 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PipelineRegistryService } from '../pipeline-registry/shared/pipeline-registry.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { CoreModule } from '../../../core/core.module';
 
-describe('FlowRepoComponent header checkbox', () => {
+describe('FlowRepoComponent list', () => {
     let component: FlowRepoComponent;
-    const row = (id: string) => ({ _id: id } as FlowModel);
-    const setRows = (ids: string[]) => (component.flowsDataSource.data = ids.map(row));
+    let fixture: ComponentFixture<FlowRepoComponent>;
+    let router: Router;
 
-    beforeEach(() => {
+    const service: Spy<FlowRepoService> = createSpyFromClass<FlowRepoService>(FlowRepoService);
+    const permissions: Spy<PermissionsService> = createSpyFromClass<PermissionsService>(PermissionsService);
+    const cost: Spy<CostService> = createSpyFromClass<CostService>(CostService);
+    const flow = { _id: 'flow-1', name: 'Smoothing', description: 'Averages values', image: '<svg viewbox="0 0 10 10"></svg>', userId: 'me' } as FlowModel;
+
+    function init(rights = { create: true, update: true, delete: true }, perms = { read: true, write: true, execute: true, administrate: true }) {
+        service.getFlows.and.returnValue(of({ flows: [flow], total: 1 }));
+        service.userHasCreateAuthorization.and.returnValue(rights.create);
+        service.userHasUpdateAuthorization.and.returnValue(rights.update);
+        service.userHasDeleteAuthorization.and.returnValue(rights.delete);
+        permissions.getComputedResourcePermissionsV2.and.returnValue(of([{ id: flow._id, ...perms } as any]));
+        cost.userMayGetFlowCostEstimations.and.returnValue(true);
+        cost.getFlowCostEstimations.and.returnValue(of([{ min: 1, max: 2, median: 1.5, mean: 1.5 } as any]));
+
         TestBed.configureTestingModule({
-            imports: [MatSnackBarModule, MatDialogModule],
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [CoreModule, RouterTestingModule, NoopAnimationsModule, MatSnackBarModule, MatDialogModule, MatPaginatorModule, FlowRepoComponent],
             providers: [
-                provideRouter([]),
-                { provide: FlowRepoService, useValue: {} },
-                { provide: FlowEngineService, useValue: {} },
+                { provide: FlowRepoService, useValue: service },
+                { provide: FlowEngineService, useValue: { userHasCreateAuthorization: () => true } },
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: PipelineRegistryService, useValue: {} },
-                { provide: AuthorizationService, useValue: {} },
+                { provide: AuthorizationService, useValue: { getUserId: () => 'me', userIsAdmin: () => false } },
                 { provide: DialogsService, useValue: {} },
-                { provide: SearchbarService, useValue: {} },
             ],
         }).overrideComponent(FlowRepoComponent, {
             set: {
-                template: '',
-                imports: [],
                 providers: [
-                    { provide: PermissionsService, useValue: {} },
-                    { provide: CostService, useValue: {} },
+                    { provide: PermissionsService, useValue: permissions },
+                    { provide: CostService, useValue: cost },
                 ],
             },
-        });
-        component = TestBed.createComponent(FlowRepoComponent).componentInstance;
+        }).compileComponents();
+        router = TestBed.inject(Router);
+        spyOn(router, 'navigate').and.resolveTo(true);
+        fixture = TestBed.createComponent(FlowRepoComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+        tick(400);
+        fixture.detectChanges();
+    }
+
+    afterEach(() => {
+        service.getFlows.calls.reset();
     });
 
-    it('is not all selected with no rows and nothing selected; toggle selects nothing', () => {
-        setRows([]);
-        expect(component.isAllSelected()).toBeFalse();
-        component.masterToggle();
-        expect(component.selection.selected).toEqual([]);
-    });
+    it('reloads exactly once when the refresh button is clicked', fakeAsync(() => {
+        init();
+        service.getFlows.calls.reset();
 
-    it('counts one selected row as all and clears on toggle', () => {
-        setRows(['a', 'b', 'c']);
-        expect(component.isAllSelected()).toBeFalse();
-        component.selection.select(component.flowsDataSource.data[1]);
-        expect(component.isAllSelected()).toBeTrue();
-        component.masterToggle();
-        expect(component.selection.selected).toEqual([]);
-    });
+        (fixture.nativeElement.querySelector('senergy-searchbar button') as HTMLButtonElement).click();
+        fixture.detectChanges();
+        tick(400);
+        discardPeriodicTasks();
 
-    it('selects every shown row when nothing is selected', () => {
-        setRows(['a', 'b', 'c']);
-        component.masterToggle();
-        expect(component.selection.selected.map((f) => f._id).sort()).toEqual(['a', 'b', 'c']);
-        expect(component.isAllSelected()).toBeTrue();
-    });
+        expect(service.getFlows).toHaveBeenCalledTimes(1);
+    }));
 
-    it('does not count more selected rows than shown as all; toggle then selects the shown rows', () => {
-        setRows(['a', 'b', 'c']);
-        component.masterToggle();
-        component.flowsDataSource.data = component.flowsDataSource.data.slice(0, 2);
-        expect(component.isAllSelected()).toBeFalse();
-        component.masterToggle();
-        expect(component.selection.selected.length).toBe(3);
-    });
+    it('loads the first page once at the start', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+
+        expect(service.getFlows).toHaveBeenCalledTimes(1);
+        expect(service.getFlows.calls.mostRecent().args.slice(3, 5)).toEqual(['dateUpdated', 'desc']);
+    }));
+
+    it('has no selection column and no FAB, the flow is deleted one at a time from the menu', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+
+        expect(component.displayedColumns).not.toContain('select');
+        expect(fixture.nativeElement.querySelector('button.fab')).toBeNull();
+        expect(component.canDelete(flow)).toBeTrue();
+    }));
+
+    it('offers the create button to everyone, as the page always did', fakeAsync(() => {
+        init({ create: false, update: true, delete: true });
+        discardPeriodicTasks();
+
+        expect(fixture.nativeElement.querySelector('senergy-page-header button').textContent).toContain('New flow');
+    }));
+
+    it('opens the designer on a row click for who may edit, otherwise the row is inert', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+
+        (fixture.nativeElement.querySelector('tr.clickable-row') as HTMLElement).click();
+        expect(router.navigate).toHaveBeenCalledWith(['/data/designer', 'flow-1']);
+
+        (router.navigate as jasmine.Spy).calls.reset();
+        component.permissionsPerFlows = [{ id: 'flow-1', read: true, write: false, execute: true, administrate: true }];
+        component.editFlow(flow);
+        expect(router.navigate).not.toHaveBeenCalled();
+    }));
+
+    it('shows the flow image as a preview and the cost estimate by flow id', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+
+        const row = fixture.nativeElement.querySelector('tr.clickable-row') as HTMLElement;
+        const img = row.querySelector('img.svg-preview') as HTMLImageElement;
+        expect(img.src).toMatch(/^data:image\/svg\+xml/);
+        expect(decodeURIComponent(img.src)).toContain('viewBox=');
+        expect(row.querySelector('svg')).toBeNull();
+        expect(component.flowEstimations.get('flow-1')?.max).toBe(2);
+    }));
+
+    it('shows an empty list as the empty state after the answer cleared the rows', fakeAsync(() => {
+        init();
+        service.getFlows.and.returnValue(of({ flows: [], total: 0 }));
+
+        component.reload();
+        fixture.detectChanges();
+        discardPeriodicTasks();
+
+        expect(component.flowsDataSource.data).toEqual([]);
+        expect(fixture.nativeElement.querySelector('senergy-empty-state')).not.toBeNull();
+    }));
 });

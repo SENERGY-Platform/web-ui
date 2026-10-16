@@ -96,12 +96,12 @@
 
         <ng-container matColumnDef="created_at">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Created</th>
-          <td mat-cell *matCellDef="let element" class="muted">{{element.created_at | date:'short'}}</td>
+          <td mat-cell *matCellDef="let element" class="muted">{{element.created_at | date:dateFormat}}</td>
         </ng-container>
 
         <ng-container matColumnDef="updated_at">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated</th>
-          <td mat-cell *matCellDef="let element" class="muted">{{element.updated_at | date:'short'}}</td>
+          <td mat-cell *matCellDef="let element" class="muted">{{element.updated_at | date:dateFormat}}</td>
         </ng-container>
 
         <ng-container matColumnDef="actions">

@@ -24,7 +24,7 @@ import { ListToolbarComponent } from './list-toolbar.component';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [ListToolbarComponent],
     template: `
-        <senergy-list-toolbar [selectedCount]="count" (clearSelection)="cleared = cleared + 1" (refresh)="refreshed = refreshed + 1">
+        <senergy-list-toolbar [selectedCount]="count" [searchTextIn]="initialSearch" (clearSelection)="cleared = cleared + 1" (refresh)="refreshed = refreshed + 1">
             <span toolbarFilters class="filter-slot">filter</span>
             <button bulkActions class="bulk-slot">bulk</button>
         </senergy-list-toolbar>
@@ -32,6 +32,7 @@ import { ListToolbarComponent } from './list-toolbar.component';
 })
 class HostComponent {
     count = 0;
+    initialSearch = '';
     cleared = 0;
     refreshed = 0;
 }
@@ -94,5 +95,14 @@ describe('ListToolbarComponent', () => {
     it('uses the compact search field without floating label', () => {
         expect(el('senergy-searchbar mat-label')).toBeNull();
         expect(el('senergy-searchbar input').getAttribute('placeholder')).toBe('Search');
+    });
+
+    it('starts the search field with the given text', () => {
+        const other = TestBed.createComponent(HostComponent);
+        other.componentInstance.initialSearch = 'last search';
+        other.detectChanges();
+
+        const input = other.nativeElement.querySelector('.toolbar-row input') as HTMLInputElement;
+        expect(input.value).toBe('last search');
     });
 });

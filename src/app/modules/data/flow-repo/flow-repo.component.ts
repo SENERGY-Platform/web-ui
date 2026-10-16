@@ -16,12 +16,14 @@
 
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {FilterSelection, FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {merge} from 'rxjs';
+import { confirmDelete } from '../../../core/services/delete-flows';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
+import {Observable, tap} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {FlowEngineService} from './shared/flow-engine.service';
@@ -37,22 +39,23 @@ import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-regi
 import {FlowUsage,} from '../pipeline-registry/shared/pipeline.model';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {MatPaginator} from '@angular/material/paginator';
 import {PreferencesService} from '../../../core/services/preferences.service';
-import {ListSelection} from 'src/app/core/classes/list-selection';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
-import {startWith, switchMap} from 'rxjs/operators';
+import {PagedListState} from 'src/app/core/classes/paged-list-state';
+import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { FlexibleConnectedPositionStrategy, Overlay, OverlayRef, CdkOverlayOrigin } from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
 import {FlowFilterDialogComponent} from './flow-filter-dialog/flow-filter-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
-import { NgClass, CurrencyPipe, DatePipe } from '@angular/common';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
@@ -70,7 +73,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
         }
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, CdkOverlayOrigin, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent, CurrencyPipe, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, CdkOverlayOrigin, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, CurrencyPipe, DatePipe]
 })
 export class FlowRepoComponent implements OnInit, AfterViewInit {
     private flowRepoService = inject(FlowRepoService);
@@ -86,7 +89,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
     protected permissionsService = inject(PermissionsService);
     private pipeService = inject(PipelineRegistryService);
     private router = inject(Router);
-    preferencesService = inject(PreferencesService);
+    private preferencesService = inject(PreferencesService);
     private overlay = inject(Overlay);
     private vcr = inject(ViewContainerRef);
     private dialog = inject(MatDialog);
@@ -94,27 +97,27 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
     private cd = inject(ChangeDetectorRef);
 
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
-    @ViewChild('sort', {static: false}) sort!: MatSort;
     @ViewChild('overlayTpl') overlayTpl!: TemplateRef<any>;
     flows: FlowModel[] = [];
 
+    readonly dateFormat = LIST_DATE_FORMAT;
     flowsDataSource = new MatTableDataSource<FlowModel>();
-    flowEstimations: CostEstimationModel [] = [];
-    listSelection = new ListSelection<FlowModel>(() => this.flowsDataSource.connect().value, { mode: 'any' });
-    selection = this.listSelection.model;
+    /** The cost estimation per flow id; it arrives after the list. */
+    flowEstimations = new Map<string, CostEstimationModel>();
     ready = false;
     userHasDeleteAuthorization = false;
     userHasUpdateAuthorization = false;
     userHasPipelineCreateAuthorization = false;
 
-    displayedColumns: string[] = ['select', 'pub', 'name', 'description','cost', 'dateUpdated'];
+    displayedColumns: string[] = ['image', 'name', 'pub', 'cost', 'dateUpdated', 'actions'];
     totalCount = 0;
+    list = new PagedListState(this.preferencesService, () => this.loadFlows(), { sortBy: 'dateUpdated', sortDirection: 'desc' });
 
     shareUser = '';
 
     flowUsagePerFlow: FlowUsage[] = [];
 
-    private searchText = '';
+    searchText = '';
 
     permissionsPerFlows: PermissionsV2RightsAndIdModel[] = [];
 
@@ -122,7 +125,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
 
     private overlayRef?: OverlayRef;
 
-    private svgCache = new Map<string, SafeHtml>();
+    private svgCache = new Map<string, SafeUrl>();
 
     routerOperator: string[] | undefined = undefined;
     routerOperatorNames: string[] | undefined = undefined;
@@ -131,20 +134,9 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
         this.userId = this.authService.getUserId();
         if (this.authService.userIsAdmin()) {
             this.loadFlowUsage();
-            this.displayedColumns.push('usage');
         }
-        this.displayedColumns.push('image');
-        this.displayedColumns.push('deploy');
         this.userHasUpdateAuthorization = this.flowRepoService.userHasUpdateAuthorization();
-        if (this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('share');
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.flowRepoService.userHasDeleteAuthorization();
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
         this.userHasPipelineCreateAuthorization = this.flowEngineService.userHasCreateAuthorization();
 
         this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
@@ -155,91 +147,82 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
                 this.routerOperatorNames = value.getAll('operatorName');
             }
         });
+
+        this.initSearch();
     }
 
     ngAfterViewInit() {
-        this.flowsDataSource.sort = this.sort;
-        setTimeout(() => {
-            this.sort.active = 'dateUpdated';
-            this.sort.direction = 'desc';
-            this.sort.sortChange.emit();
-        });
-        this.initSearchAndGetFlows();
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
-    deleteFlow(flow: FlowModel) {
-        this.dialogsService
-            .openDeleteDialog('flow ' + flow.name)
-            .afterClosed()
-            .subscribe((deleteFlow: boolean | undefined) => {
-                if (deleteFlow) {
-                    const index = this.flows.indexOf(flow);
-                    if (index > -1) {
-                        this.flows.splice(index, 1);
-                        this.flowEstimations.splice(index, 1);
-                    }
-                    this.flowRepoService.deleteFlow(flow).subscribe({
-                        next: _ => {
-                            snackSuccess(this.snackBar, 'Flow deleted');
-                        },
-                            error: _ => {
-                                snackError(this.snackBar, 'Flow could not be deleted');
-                        }
-                    });
-                    this.getFlows(true);
-                }
-            });
+    get filtered(): boolean {
+        return this.searchText !== '' || (this.routerOperator?.length ?? 0) > 0;
     }
 
-
-    getFlows(reset: boolean) {
-        if (reset) {
-            this.reset();
-        }
-        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.paginator.pageIndex = 0;
-            this.selectionClear();
+    private initSearch(): void {
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
+            this.searchText = searchText;
+            this.reload();
         });
+    }
 
+    matSortChange($event: Sort) {
+        this.list.sortChanged($event);
+        this.reload();
+    }
+
+    /** The one reload path: search, sort, filter, refresh button and delete all end here. */
+    reload() {
+        this.ready = false;
+        this.list.reload({ error: () => (this.ready = true) });
+    }
+
+    private loadFlows(): Observable<unknown> {
+        this.ready = false;
         let filter = undefined;
         if (this.routerOperator != null && this.routerOperator.length > 0){
             filter = 'operator:'+this.routerOperator!.toString();
         }
-        merge(this.sort.sortChange, this.paginator.page)
+        return this.flowRepoService
+            .getFlows(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection, filter)
             .pipe(
-                startWith({}),
-                switchMap(() => {
-                    this.ready = false;
-                    return this.flowRepoService
-                        .getFlows(this.searchText, this.paginator.pageSize,
-                            this.paginator.pageSize * this.paginator.pageIndex,
-                            this.sort.active,
-                            this.sort.direction,
-                            filter);
-                }),
-                takeUntilDestroyed(this.destroyRef),
-            )
-            .subscribe((resp: { flows: FlowModel[], total: number }) => {
-                if (resp.flows !== null && resp.flows.length > 0) {
-                    this.flows= resp.flows;
+                tap((resp: { flows: FlowModel[], total: number }) => {
+                    this.flows = resp.flows ?? [];
                     this.totalCount = resp.total;
                     this.flowsDataSource.data = this.flows;
-                    this.loadFlowsPermissions();
-                    this.ready = true;
-                }
-                if (this.costService.userMayGetFlowCostEstimations()) {
-                    if (resp.flows !== null && resp.flows.length > 0) {
-                        this.flowEstimations=[];
-                        this.costService.getFlowCostEstimations(this.flows.map(f => f._id || '')).subscribe(estimations => {
-                            this.flowEstimations.push(...estimations);
-                        });
-                    } else {
-                        this.ready = true;
+                    this.flowEstimations = new Map();
+                    if (this.flows.length > 0) {
+                        this.loadFlowsPermissions();
+                        this.loadFlowEstimations(this.flows.map(f => f._id || ''));
                     }
-                } else {
                     this.ready = true;
-                }
+                }),
+            );
+    }
+
+    private loadFlowEstimations(ids: string[]) {
+        if (!this.costService.userMayGetFlowCostEstimations()) {
+            return;
+        }
+        this.costService.getFlowCostEstimations(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(estimations => {
+            const byId = new Map<string, CostEstimationModel>();
+            ids.forEach((id, i) => byId.set(id, estimations[i]));
+            this.flowEstimations = byId;
+        });
+    }
+
+    deleteFlow(flow: FlowModel) {
+        confirmDelete(this.dialogsService, 'flow ' + flow.name).subscribe(() => {
+            this.flowRepoService.deleteFlow(flow).subscribe({
+                next: _ => {
+                    snackSuccess(this.snackBar, 'Flow deleted');
+                    this.reload();
+                },
+                error: _ => {
+                    snackError(this.snackBar, 'Flow could not be deleted');
+                },
             });
+        });
     }
 
     loadFlowsPermissions() {
@@ -255,17 +238,28 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
         this.permissionsDialogService.openPermissionV2Dialog('analytics-flows', flow._id, flow.name || '');
     }
 
-    private initSearchAndGetFlows(): void {
-        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
-            this.searchText = searchText;
-            this.getFlows(true);
-        });
+    /** The row click and the first menu entry: the designer, only for who may edit the flow. */
+    editFlow(flow: FlowModel) {
+        if (!this.canEdit(flow)) {
+            return;
+        }
+        this.router.navigate(['/data/designer', flow._id]);
     }
 
-    private reset() {
-        this.flows = [];
-        this.flowEstimations = [];
-        this.ready = false;
+    deployFlow(flow: FlowModel) {
+        this.router.navigate(['/data/flow-repo/deploy', flow._id]);
+    }
+
+    canEdit(flow: FlowModel): boolean {
+        return this.userHasUpdateAuthorization && flow._id !== undefined && this.userHasWritePermission(flow._id);
+    }
+
+    canShare(flow: FlowModel): boolean {
+        return this.userHasUpdateAuthorization && flow._id !== undefined && this.userHasAdministratePermission(flow._id);
+    }
+
+    canDelete(flow: FlowModel): boolean {
+        return this.userHasDeleteAuthorization && flow._id !== undefined && this.userHasAdministratePermission(flow._id);
     }
 
     openOverlay(origin: any, element: any) {
@@ -278,11 +272,11 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
                 .flexibleConnectedTo(origin.elementRef)
                 .withPositions([
                     {
-                        originX: 'start',
+                        originX: 'end',
                         originY: 'center',
-                        overlayX: 'end',
+                        overlayX: 'start',
                         overlayY: 'center',
-                        offsetY: -8,
+                        offsetX: 8,
                     },
                 ]);
 
@@ -324,24 +318,15 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
         }
     }
 
-    masterToggle() {
-        this.listSelection.masterToggle();
-    }
-
-    isAllSelected() {
-        return this.listSelection.isAllSelected();
-    }
-
-    selectionClear($event: PageEvent | undefined = undefined): void {
-        if ($event !== undefined) {
-            this.preferencesService.pageSize = $event.pageSize;
-        }
-        this.selection.clear();
-    }
-
-    getSafeSvgCached(id: string, svg: string): SafeHtml {
+    /**
+     * The stored flow image as an image URL, so it is only drawn and never run as markup. The designer writes
+     * `viewbox` in lower case, which an image document ignores, so the attribute name is fixed.
+     */
+    previewUrl(id: string, svg: string | unknown): SafeUrl {
         if (!this.svgCache.has(id)) {
-            this.svgCache.set(id, this.sanitizer.bypassSecurityTrustHtml(svg));
+            const fixed = String(svg).replace(/^(\s*<svg\b[^>]*?)\bviewbox=/i, '$1viewBox=');
+            const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fixed);
+            this.svgCache.set(id, this.sanitizer.bypassSecurityTrustUrl(url));
         }
         return this.svgCache.get(id)!;
     }
@@ -372,7 +357,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
                     this.cd.detectChanges();
 
                 }
-                this.getFlows(true);
+                this.reload();
             }
         });
     }
@@ -390,7 +375,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
                 queryParams
             },
         );
-        this.getFlows(true);
+        this.reload();
     }
 
     showPipelines(id: string, name: string) {

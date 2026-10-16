@@ -13,8 +13,8 @@ keep their own code.
 
 - `core/classes/list-selection.ts` `ListSelection<T>`: header checkbox logic over a `SelectionModel`. Default mode
   `'all'`: all rows selected counts as all, the toggle clears a full selection and otherwise selects every row; zero rows
-  count as all selected. `mode: 'any'`: any selection up to the number of visible rows counts as all (operator and flow
-  repository). `selectable`: only those rows count and get selected (export, import instances: rows the user may
+  count as all selected. `mode: 'any'`: any selection up to the number of visible rows counts as all (operator repository;
+  the flow repository has no selection). `selectable`: only those rows count and get selected (export, import instances: rows the user may
   administrate). Pages expose `selection = listSelection.model` and keep `isAllSelected()`/`masterToggle()` as one-line
   delegates, so templates bind as before.
 - `core/classes/paged-list-state.ts` `PagedListState`: page size from `PreferencesService`, offset, sort. `connect()`

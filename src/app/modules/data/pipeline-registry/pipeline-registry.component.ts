@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {FilterSelection, PipelineModel} from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
@@ -29,7 +29,6 @@ import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import {forkJoin, Observable, concatMap, of, map, finalize, tap} from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
@@ -37,11 +36,15 @@ import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
 import {MatDialog} from '@angular/material/dialog';
 import {PipelineFilterDialogComponent} from './pipeline-filter-dialog/pipeline-filter-dialog.component';
-import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import {SmartServiceModuleService} from '../../smart-services/instances/shared/modules.service';
 import {switchMap} from 'rxjs/operators';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton } from '@angular/material/button';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
@@ -61,7 +64,7 @@ function errorSuffix(err: unknown): string {
     templateUrl: './pipeline-registry.component.html',
     styleUrls: ['./pipeline-registry.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     private pipelineRegistryService = inject(PipelineRegistryService);
@@ -70,7 +73,6 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     snackBar = inject(MatSnackBar);
     private searchbarService = inject(SearchbarService);
     private dialogsService = inject(DialogsService);
-    utilsService = inject(UtilService);
     preferencesService = inject(PreferencesService);
     private permissionsDialogService = inject(PermissionsDialogService);
     protected permission = inject(PermissionsService);
@@ -81,9 +83,10 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     private router = inject(Router);
     private smartServiceModuleService = inject(SmartServiceModuleService);
 
+    readonly dateFormat = LIST_DATE_FORMAT;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
     ready = false;
-    displayedColumns: string[] = ['select', 'status','access', 'id', 'name','smartServiceInstanceId', 'createdat', 'updatedat', 'info'];
+    displayedColumns: string[] = [];
     listSelection = new ListSelection<PipelineModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 0;
@@ -110,15 +113,12 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     ngOnInit() {
         this.userId = this.auth.getUserId();
         this.userHasUpdateAuthorization = this.flowEngineService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('share');
-            this.displayedColumns.push('edit');
-
-        }
         this.userHasDeleteAuthorization = this.flowEngineService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name', 'status', 'access', 'createdat', 'updatedat', 'actions',
+        ];
         this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
            if (value.has('operator')){
                this.routerOperator = value.getAll('operator');
@@ -146,6 +146,23 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             }
             this.list.reload();
         });
+    }
+
+    get filtered(): boolean {
+        return this.search !== undefined || (this.routerOperator?.length ?? 0) > 0 || (this.routerFlow?.length ?? 0) > 0;
+    }
+
+    /** The row click and the first menu entry. */
+    openPipeline(pipeline: PipelineModel) {
+        this.router.navigate(['/data/pipelines/details', pipeline.id]);
+    }
+
+    editPipeline(pipeline: PipelineModel) {
+        this.router.navigate(['/data/pipelines/edit', pipeline.id]);
+    }
+
+    showSmartService(pipeline: PipelineModel) {
+        this.router.navigate(['/smart-services/instances'], { queryParams: { instance_id: pipeline.smartServiceInstanceId } });
     }
 
     matSortChange($event: Sort) {
@@ -349,18 +366,5 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
 
     userHasAdministratePermission(id: string): boolean {
         return this.permissionsPerPipeline.find(e => e.id === id)?.administrate || false;
-    }
-
-    private _chipDiv?: ElementRef;
-    @ViewChild('chipDiv')
-    set chipDivSetter(ref: ElementRef | undefined) {
-        this._chipDiv = ref;
-        this.cd.detectChanges();
-    }
-    calcTableMaxHeight(): string {
-        if (this._chipDiv === undefined) {
-            return '';
-        }
-        return 'calc(100vh - ' + (this._chipDiv.nativeElement.clientHeight + 216) + 'px - 1em)';
     }
 }

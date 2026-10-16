@@ -37,12 +37,14 @@ import {PipelineOperatorUsage} from '../pipeline-registry/shared/pipeline.model'
 import { Router, RouterLink } from '@angular/router';
 import {FlowRepoService} from '../flow-repo/shared/flow-repo.service';
 import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { NgClass } from '@angular/common';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import {deleteErrorMessage} from './shared/operator-delete-error';
@@ -53,7 +55,7 @@ import {HttpErrorResponse} from '@angular/common/http';
     templateUrl: './operator-repo.component.html',
     styleUrls: ['./operator-repo.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatIconButton, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent]
 })
 export class OperatorRepoComponent implements OnInit, AfterViewInit {
     private operatorRepoService = inject(OperatorRepoService);
@@ -74,7 +76,7 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
 
     listSelection = new ListSelection<OperatorModel>(() => this.operatorsDataSource.connect().value, { mode: 'any' });
     selection = this.listSelection.model;
-    displayedColumns: string[] = ['select', 'pub', 'name', 'version', 'image'];
+    displayedColumns: string[] = ['select', 'name', 'pub', 'version', 'image', 'actions'];
     totalCount = 0;
 
     operators = [] as OperatorModel[];
@@ -88,7 +90,7 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
     userHasUpdateAuthorization = false;
     userHasCreateAuthorization = false;
 
-    private searchText = '';
+    searchText = '';
     private reload = new Subject<void>();
 
     permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
@@ -97,25 +99,16 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization();
+        this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
+        this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization();
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [...(this.userHasDeleteAuthorization ? ['select'] : []), 'name', 'pub', 'version', 'image', 'actions'];
 
         this.userId = this.auth.getUserId();
         this.initSearchAndGetOperators();
         if (this.auth.userIsAdmin()){
             this.loadOperatorPipelineUsage();
-            this.displayedColumns.push('pipeUsage');
             this.loadOperatorFlowUsage();
-            this.displayedColumns.push('flowUsage');
-        }
-        this.displayedColumns.push('details');
-        this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
-        if (this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('share');
-            this.displayedColumns.push('edit');
-        }
-
-        this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization();
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
         }
     }
 
@@ -151,6 +144,31 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
                 this.loadOperatorPermissions();
                 this.ready = true;
             });
+    }
+
+    /** The refresh button of the toolbar: one load, through the pipeline set up in ngAfterViewInit. */
+    refresh() {
+        this.getOperators(true);
+    }
+
+    /** The row click and the first menu entry: the operator page, which edits or only shows depending on the rights. */
+    openOperator(operator: OperatorModel) {
+        if (operator._id === undefined || !this.userHasReadPermission(operator._id)) {
+            return;
+        }
+        this.router.navigate(['data/operator-repo/op', operator._id]);
+    }
+
+    canEdit(operator: OperatorModel): boolean {
+        return this.userHasUpdateAuthorization && operator._id !== undefined && this.userHasWritePermission(operator._id);
+    }
+
+    canShare(operator: OperatorModel): boolean {
+        return this.userHasUpdateAuthorization && operator._id !== undefined && this.userHasAdministratePermission(operator._id);
+    }
+
+    canDelete(operator: OperatorModel): boolean {
+        return this.userHasDeleteAuthorization && operator._id !== undefined && this.userHasAdministratePermission(operator._id);
     }
 
     deleteOperator(operator: OperatorModel) {

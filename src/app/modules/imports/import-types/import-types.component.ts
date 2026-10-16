@@ -36,12 +36,15 @@ import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { NgClass, CurrencyPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
 
@@ -50,7 +53,7 @@ import { snackError } from 'src/app/core/services/snack-bar-messages';
     templateUrl: './import-types.component.html',
     styleUrls: ['./import-types.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, CurrencyPipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, CurrencyPipe]
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit {
     private importTypesService = inject(ImportTypesService);
@@ -65,7 +68,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     private permissionsService = inject(PermissionsService);
     private prefeencesService = inject(PreferencesService);
 
-    displayedColumns = ['select', 'name', 'description', 'image', 'details', 'start', 'share'];
+    displayedColumns: string[] = ['name', 'description', 'image', 'actions'];
     dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     listSelection = new ListSelection<ImportTypeModel>(() => this.dataSource.connect().value);
@@ -90,20 +93,18 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
 
     checkAuthorization() {
         this.userHasUpdateAuthorization = this.importTypesService.userHasUpdateAuthorization();
-        if (this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.importTypesService.userHasDeleteAuthorization();
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
-
         this.userHasCreateAuthorization = this.importTypesService.userHasCreateAuthorization();
 
-        if (this.costService.userMayGetImportCostEstimations()) {
-            this.displayedColumns.splice(4, 0, 'cost');
-        }
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name',
+            'description',
+            'image',
+            ...(this.costService.userMayGetImportCostEstimations() ? ['cost'] : []),
+            'actions',
+        ];
     }
 
     private initSearch() {

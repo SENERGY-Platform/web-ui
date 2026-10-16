@@ -41,6 +41,9 @@ type ConfigGroup = FormGroup<{
     description: FormControl<string | null>;
 }>;
 
+/** The import to edit or start; `readOnly` only shows it. */
+export type ImportDeployEditDialogData = ImportInstancesModel & { readOnly?: boolean };
+
 @Component({
     selector: 'senergy-import-deploy-dialog',
     templateUrl: './import-deploy-edit-dialog.component.html',
@@ -49,7 +52,7 @@ type ConfigGroup = FormGroup<{
     imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatCheckbox, MatTooltip, MatDialogActions, MatButton]
 })
 export class ImportDeployEditDialogComponent implements OnInit {
-    data = inject<ImportInstancesModel>(MAT_DIALOG_DATA);
+    data = inject<ImportDeployEditDialogData>(MAT_DIALOG_DATA);
     private fb = inject(FormBuilder);
     private dialogRef = inject<MatDialogRef<ImportDeployEditDialogComponent>>(MatDialogRef);
     private importTypesService = inject(ImportTypesService);
@@ -70,6 +73,8 @@ export class ImportDeployEditDialogComponent implements OnInit {
     });
 
     editMode = false;
+    /** Without the right to update the dialog only shows the import. */
+    readOnly = false;
 
     STRING = 'https://schema.org/Text';
     INTEGER = 'https://schema.org/Integer';
@@ -94,6 +99,7 @@ export class ImportDeployEditDialogComponent implements OnInit {
         this.types.set(this.LIST, 'List');
 
         this.editMode = this.data.id !== undefined && this.data.id.length > 0;
+        this.readOnly = this.data.readOnly === true;
         this.form.patchValue(this.data);
         this.importTypesService.getImportType(this.data.import_type_id).subscribe(
             (type) => {
@@ -124,6 +130,9 @@ export class ImportDeployEditDialogComponent implements OnInit {
                     this.form.patchValue({ restart: type.default_restart });
                 }
                 this.configs = this.form.controls.configs.controls;
+                if (this.readOnly) {
+                    this.form.disable();
+                }
                 this.ready = true;
             },
             (err) => {
