@@ -15,15 +15,24 @@
  */
 
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
 
-/** Head of a page: title, optional one-line description, and the page actions (`[pageActions]`) on the right. */
+/**
+ * Head of a page: optional back link above the title, title, optional one-line description, and the page
+ * actions (`[pageActions]`) on the right.
+ */
 @Component({
     selector: 'senergy-page-header',
     templateUrl: './page-header.component.html',
     styleUrls: ['./page-header.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [RouterLink, MatIcon],
 })
 export class PageHeaderComponent {
     @Input({ required: true }) title = '';
     @Input() description = '';
+    /** Text and router link of the back link; shown only when both are set. */
+    @Input() backLabel = '';
+    @Input() backLink: string | unknown[] = '';
 }

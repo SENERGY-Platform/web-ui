@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -30,11 +31,14 @@ import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create
 import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
 import { PermissionsService } from '../permissions/shared/permissions.service';
 import { AuthorizationService } from '../../core/services/authorization.service';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../core/components/spinner/spinner.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { ListToolbarComponent } from '../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../core/components/empty-state/empty-state.component';
+import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
@@ -47,9 +51,8 @@ export interface EnvironmentRow {
 @Component({
     selector: 'senergy-environments',
     templateUrl: './environments.component.html',
-    styleUrls: ['./environments.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatSlideToggle, MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, PageHeaderComponent, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
+    imports: [MatChipListbox, MatChipOption, MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class EnvironmentsComponent implements OnInit {
     private environmentsService = inject(EnvironmentsService);
@@ -59,10 +62,13 @@ export class EnvironmentsComponent implements OnInit {
     private router = inject(Router);
     private permissionsService = inject(PermissionsService);
     private authorizationService = inject(AuthorizationService);
+    private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
 
     displayedColumns = ['name', 'type', 'owner', 'zones', 'assets', 'channels'];
     dataSource = new MatTableDataSource<EnvironmentRow>();
     dataReady = false;
+    searchText = '';
     environmentTypeLabel = environmentTypeLabel;
 
     userHasReadAuthorization = this.environmentsService.userHasReadAuthorization();
@@ -81,6 +87,13 @@ export class EnvironmentsComponent implements OnInit {
 
     ngOnInit(): void {
         this.displayedColumns.push('actions');
+        // Environments carry no description, so the search covers the name and the type label shown in the table.
+        this.dataSource.filterPredicate = (row, filter) =>
+            ((row.environment.name || '') + ' ' + environmentTypeLabel(row.environment.type)).toLowerCase().includes(filter);
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(text => {
+            this.searchText = text.trim();
+            this.dataSource.filter = this.searchText.toLowerCase();
+        });
         this.reload();
     }
 

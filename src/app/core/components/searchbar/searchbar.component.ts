@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {SearchbarService} from './shared/searchbar.service';
 import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
@@ -36,6 +36,10 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     @Input() searchTextIn = '';
     @Input() disable = false;
     @Input() supportRefresh = true;
+    /** Compact variant of the list toolbar: placeholder instead of floating label, 40px, no subscript line. */
+    @Input() compact = false;
+    /** Emitted by the refresh button besides re-sending the search text, for pages that reload on it. */
+    @Output() refresh = new EventEmitter<void>();
     formControl = new FormControl<string | null>(this.searchTextIn);
 
     ngOnInit(): void {
@@ -62,6 +66,11 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
                 this.formControl.enable();
             }
         }
+    }
+
+    onRefresh(): void {
+        this.changeSearchtext();
+        this.refresh.emit();
     }
 
     changeSearchtext(): void {

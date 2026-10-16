@@ -33,13 +33,15 @@ import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { NgClass } from '@angular/common';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { confirmDelete, countLabel } from 'src/app/core/services/delete-flows';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
@@ -47,7 +49,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './concepts.component.html',
     styleUrls: ['./concepts.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatTooltip, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class ConceptsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -60,7 +62,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     private dialogsService = inject(DialogsService);
     private preferencesService = inject(PreferencesService);
 
-    displayedColumns = ['select', 'name', 'info', 'characteristic'];
+    displayedColumns = ['select', 'name', 'characteristics', 'conversions', 'actions'];
     concepts: DeviceTypeConceptModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
@@ -81,15 +83,12 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
 
     checkAuthorization() {
         this.userHasUpdateAuthorization = this.conceptsService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.conceptsService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
+        this.userHasCreateAuthorization = this.conceptsService.userHasCreateAuthorization();
+        if (!this.userHasDeleteAuthorization) {
+            // The only bulk action is delete; without it a selection would only hide the search.
+            this.displayedColumns = this.displayedColumns.filter((column) => column !== 'select');
         }
-        this.userHasCreateAuthorization = this.conceptsService.userHasDeleteAuthorization();
     }
 
     ngAfterViewInit(): void {
@@ -144,6 +143,15 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /** Row click: the edit dialog, or the read-only view of the same dialog without update permission. */
+    openConcept(concept: DeviceTypeConceptModel): void {
+        if (this.userHasUpdateAuthorization) {
+            this.editConcept(concept);
+        } else {
+            this.showConcept(concept);
+        }
+    }
+
     showConcept(conceptInput: DeviceTypeConceptModel) {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
@@ -174,23 +182,18 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
                 this.reportBlockedDeletes([{ concept, functions }]);
                 return;
             }
-            this.dialogsService
-                .openDeleteDialog('concept ' + concept.name)
-                .afterClosed()
-                .subscribe((deleteConcept: boolean | undefined) => {
-                    if (deleteConcept) {
-                        this.ready = false;
-                        this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
-                            if (resp === true) {
-                                this.concepts.splice(this.concepts.indexOf(concept), 1);
-                                snackSuccess(this.snackBar, 'Concept deleted successfully.');
-                            } else {
-                                snackError(this.snackBar, 'Error while deleting the concept!');
-                            }
-                            this.reload();
-                        });
+            confirmDelete(this.dialogsService, 'concept ' + concept.name).subscribe(() => {
+                this.ready = false;
+                this.conceptsService.deleteConcept(concept.id).subscribe((resp: boolean) => {
+                    if (resp === true) {
+                        this.concepts.splice(this.concepts.indexOf(concept), 1);
+                        snackSuccess(this.snackBar, 'Concept deleted successfully.');
+                    } else {
+                        snackError(this.snackBar, 'Error while deleting the concept!');
                     }
+                    this.reload();
                 });
+            });
         });
     }
 
@@ -282,13 +285,8 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     deleteMultipleItems() {
         const selected = [...this.selection.selected];
 
-        this.dialogsService
-            .openDeleteDialog(selected.length + (selected.length > 1 ? ' concepts' : ' concept'))
-            .afterClosed()
-            .subscribe((deleteConcepts: boolean | undefined) => {
-                if (!deleteConcepts) {
-                    return;
-                }
+        confirmDelete(this.dialogsService, countLabel(selected.length, 'concept', 'concepts'))
+            .subscribe(() => {
                 this.ready = false;
                 this.functionsByConceptId(selected.map((concept) => concept.id)).subscribe((byConcept) => {
                     const blocked = selected

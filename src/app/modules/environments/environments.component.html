@@ -17,11 +17,6 @@
 <senergy-page-header title="Environments" description="Simulated sites with their zones, assets and data channels.">
   <ng-container pageActions>
     <input hidden type="file" accept=".json" #importInput (change)="importEnvironment($event)">
-    @if (userIsAdmin) {
-      <mat-slide-toggle [checked]="showAllEnvironments" (change)="toggleAllEnvironments($event.checked)">
-        All environments
-      </mat-slide-toggle>
-    }
     @if (userHasCreateAuthorization) {
       <button matButton="outlined" (click)="triggerImport()">
         <mat-icon>upload_file</mat-icon> Import
@@ -33,20 +28,29 @@
   </ng-container>
 </senergy-page-header>
 
+<senergy-list-toolbar (refresh)="reload()">
+  <ng-container toolbarFilters>
+    @if (userIsAdmin) {
+      <mat-chip-listbox aria-label="Filter">
+        <mat-chip-option [selected]="showAllEnvironments" (selectionChange)="toggleAllEnvironments($event.selected)">
+          All environments
+        </mat-chip-option>
+      </mat-chip-listbox>
+    }
+  </ng-container>
+</senergy-list-toolbar>
+
 <div class="page-body">
   <senergy-spinner [show]="!dataReady"></senergy-spinner>
 
   @if (dataReady && dataSource.data.length === 0) {
-    <div class="empty-state">
-      <mat-icon class="empty-icon">factory</mat-icon>
-      @if (userHasReadAuthorization) {
-        <p class="empty-title">No environments yet</p>
-        <p>Create a new one or import an exported environment to get started.</p>
-      } @else {
-        <p class="empty-title">No access</p>
-        <p>You do not have permission to view environments.</p>
-      }
-    </div>
+    @if (userHasReadAuthorization) {
+      <senergy-empty-state icon="factory" [title]="searchText ? 'No matching environments' : 'No environments yet'"
+        [text]="searchText ? 'No environment matches the search.' : 'Create a new one or import an exported environment to get started.'">
+      </senergy-empty-state>
+    } @else {
+      <senergy-empty-state icon="lock" title="No access" text="You do not have permission to view environments."></senergy-empty-state>
+    }
   }
 
   <div class="list-card" [hidden]="!dataReady || dataSource.data.length === 0">
