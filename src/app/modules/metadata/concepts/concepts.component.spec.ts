@@ -51,10 +51,11 @@ describe('ConceptsComponent', () => {
         return {id, name, display_name: name, description: '', rdf_type: '', concept_id: conceptId};
     }
 
-    function init() {
+    function init(rights = {delete: true, create: true}) {
         conceptsServiceSpy.getConcepts.and.returnValue(of({result: [], total: 0}));
         conceptsServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
-        conceptsServiceSpy.userHasDeleteAuthorization.and.returnValue(true);
+        conceptsServiceSpy.userHasDeleteAuthorization.and.returnValue(rights.delete);
+        conceptsServiceSpy.userHasCreateAuthorization.and.returnValue(rights.create);
         functionsServiceSpy.getFunctionsByConceptIds.and.returnValue(of([]));
 
         TestBed.configureTestingModule({
@@ -77,6 +78,17 @@ describe('ConceptsComponent', () => {
         functionsServiceSpy.getFunctionsByConceptIds.calls.reset();
         matDialogStub.open.calls.reset();
     });
+
+    it(
+        'takes create from the create right and drops the selection column without delete',
+        fakeAsync(() => {
+            init({delete: false, create: true});
+            discardPeriodicTasks();
+
+            expect(component.userHasCreateAuthorization).toBeTrue();
+            expect(component.displayedColumns).not.toContain('select');
+        }),
+    );
 
     it(
         'blocks a single delete while a function still references the concept, and never asks to confirm it',
@@ -191,6 +203,39 @@ describe('ConceptsComponent', () => {
             expect(navigateSpy).toHaveBeenCalledOnceWith(['/metadata/functions'], {
                 queryParams: {concept_ids: blocked.id + ',' + alsoBlocked.id},
             });
+        }),
+    );
+
+    it(
+        'opens the edit dialog on a row click with update permission, the read-only view without it',
+        fakeAsync(() => {
+            init();
+            const c = concept('urn:infai:ses:concept:temp', 'Temperature');
+            dialogReturns(undefined);
+
+            component.openConcept(c);
+            expect(matDialogStub.open.calls.mostRecent().args[1].data).toEqual({conceptId: c.id});
+
+            component.userHasUpdateAuthorization = false;
+            component.openConcept(c);
+            expect(matDialogStub.open.calls.mostRecent().args[1].data).toEqual({conceptId: c.id, disabled: true});
+            flush();
+            discardPeriodicTasks();
+        }),
+    );
+
+    it(
+        'shows the selection bar with the number of selected rows',
+        fakeAsync(() => {
+            init();
+            component.selection.select(concept('a', 'A'), concept('b', 'B'));
+            fixture.detectChanges();
+            flush();
+            discardPeriodicTasks();
+
+            const bar = fixture.nativeElement.querySelector('.selection-bar') as HTMLElement;
+            expect(bar.hidden).toBeFalse();
+            expect(bar.textContent).toContain('2 selected');
         }),
     );
 });

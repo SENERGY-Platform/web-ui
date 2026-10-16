@@ -16,6 +16,9 @@
 
 <header class="page-header">
   <div class="page-heading">
+    @if (backLabel && backLink) {
+      <a class="page-back" [routerLink]="backLink"><mat-icon>arrow_back</mat-icon>{{backLabel}}</a>
+    }
     <h2 class="page-title">{{title}}</h2>
     @if (description) {
       <p class="page-description">{{description}}</p>

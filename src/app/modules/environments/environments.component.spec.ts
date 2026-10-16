@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -23,7 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
@@ -32,11 +32,12 @@ import * as fileSaver from 'file-saver';
 
 import { EnvironmentsComponent } from './environments.component';
 import { EnvironmentsService } from './shared/environments.service';
-import { Environment } from './shared/environments.model';
+import { Environment, environmentTypeLabel } from './shared/environments.model';
 import { CoreModule } from '../../core/core.module';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { PermissionsService } from '../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../permissions/shared/permissions-user.model';
+import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { AuthorizationService } from '../../core/services/authorization.service';
 
 // e1 nests a zone within a zone, so a counting implementation without a
@@ -174,7 +175,7 @@ describe('EnvironmentsComponent', () => {
                 MatTooltipModule,
                 MatDialogModule,
                 MatSnackBarModule,
-                MatSlideToggleModule,
+                MatChipsModule,
                 MatMenuModule,
                 EnvironmentsComponent,
             ],
@@ -297,7 +298,7 @@ describe('EnvironmentsComponent', () => {
 
     it('should not render the "All environments" toggle for a non-admin', () => {
         fixture.detectChanges();
-        const toggle = fixture.nativeElement.querySelector('mat-slide-toggle');
+        const toggle = fixture.nativeElement.querySelector('mat-chip-option');
         expect(toggle).toBeNull();
     });
 
@@ -307,7 +308,7 @@ describe('EnvironmentsComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        const toggle = fixture.nativeElement.querySelector('mat-slide-toggle');
+        const toggle = fixture.nativeElement.querySelector('mat-chip-option');
         expect(toggle).not.toBeNull();
     });
 
@@ -322,6 +323,22 @@ describe('EnvironmentsComponent', () => {
         expect(component.showAllEnvironments).toBe(true);
         expect(environmentsService.listCalls).toEqual([false, true]);
     });
+
+    it('should filter the rows by name and type label from the search text', fakeAsync(() => {
+        fixture.detectChanges();
+        const search = TestBed.inject(SearchbarService);
+        const filtered = () => component.dataSource.filteredData.map(r => r.environment.id);
+
+        search.changeMessage('flat');
+        tick(300);
+        expect(filtered()).toEqual(['e2']);
+        search.changeMessage(environmentTypeLabel('industrial_site').toUpperCase());
+        tick(300);
+        expect(filtered()).toEqual(['e1']);
+        search.changeMessage('');
+        tick(300);
+        expect(filtered().length).toBe(2);
+    }));
 
     it('should open the share dialog for an environment', () => {
         fixture.detectChanges();

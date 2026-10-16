@@ -1,0 +1,33 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- Both rows stay in the DOM: destroying the searchbar would reset the search text (see SearchbarComponent.ngOnDestroy). -->
+<div class="toolbar-row" [hidden]="selectedCount > 0">
+  <senergy-searchbar [compact]="true" (refresh)="refresh.emit()"></senergy-searchbar>
+  <div class="toolbar-filters">
+    <ng-content select="[toolbarFilters]"></ng-content>
+  </div>
+</div>
+
+<div class="selection-bar" role="toolbar" aria-label="Selection" [hidden]="selectedCount === 0">
+  <span class="selection-count">{{selectedCount}} selected</span>
+  <div class="selection-actions">
+    <ng-content select="[bulkActions]"></ng-content>
+  </div>
+  <button mat-icon-button class="selection-clear" aria-label="Clear selection" (click)="clearSelection.emit()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>

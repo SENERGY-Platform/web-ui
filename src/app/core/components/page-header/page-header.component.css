@@ -47,3 +47,23 @@
     align-items: center;
     gap: 8px;
 }
+
+.page-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    font-size: var(--app-text-sm);
+    color: var(--mat-sys-on-surface-variant);
+    text-decoration: none;
+}
+
+.page-back:hover {
+    color: var(--mat-sys-on-surface);
+}
+
+.page-back mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+}

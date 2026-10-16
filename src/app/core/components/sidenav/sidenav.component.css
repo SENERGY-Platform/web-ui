@@ -27,7 +27,7 @@ mat-sidenav {
 
 /* The page sits on a white rounded surface; the canvas around it carries toolbar and navigation. */
 .app-surface {
-    /* Viewport height minus what the surface frame takes (12px margin, 2px border); pages size full-height areas from it. */
+    /* Viewport height minus what the surface frame takes (8px bottom margin, 2px border); pages size full-height areas from it. */
     --app-page-height: calc(100vh - 10px);
     box-sizing: border-box;
     min-height: calc(100% - 64px - 8px);

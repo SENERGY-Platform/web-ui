@@ -44,4 +44,17 @@ describe('SearchbarComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('keeps the label and long placeholder unless compact', () => {
+        expect(fixture.nativeElement.querySelector('mat-label')).not.toBeNull();
+        expect(fixture.nativeElement.querySelector('input').getAttribute('placeholder')).toBe('Please insert search text');
+    });
+
+    it('emits refresh from the refresh button', () => {
+        let count = 0;
+        component.refresh.subscribe(() => count++);
+        (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
+
+        expect(count).toBe(1);
+    });
 });

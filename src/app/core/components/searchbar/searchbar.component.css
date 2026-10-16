@@ -17,3 +17,16 @@
 .pointer {
     cursor: pointer;
 }
+
+/* Compact: 40px field, no outer padding, so it lines up with chips and buttons in a toolbar row. */
+.compact mat-form-field {
+    --mat-form-field-container-height: 40px;
+    --mat-form-field-container-vertical-padding: 8px;
+    padding: 0;
+}
+
+/* The suffix button would otherwise keep the field at its 48px state layer. */
+.compact button {
+    --mat-icon-button-state-layer-size: 40px;
+    padding: 8px;
+}

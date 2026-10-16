@@ -224,6 +224,78 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     color: var(--app-danger);
   }
 
+  // List pages: the table sits in a hairline card. Tables inside .list-card use header 44 / row 52; every other
+  // table (dialogs, embedded) keeps the global 48 from the table overrides above.
+  .page-body {
+    padding: 0 24px 24px;
+  }
+
+  .list-card {
+    border: var(--app-hairline);
+    border-radius: var(--app-radius-lg);
+    overflow: clip;
+
+    table {
+      --mat-table-header-container-height: 44px;
+      --mat-table-row-item-container-height: 52px;
+      --mat-table-background-color: var(--mat-sys-surface);
+    }
+
+    th {
+      background: var(--app-muted-surface);
+    }
+
+    // Checkbox column: 16px cell padding plus the 40px checkbox.
+    th.select-column, td.select-column {
+      width: 56px;
+      padding-right: 0;
+    }
+  }
+
+  .clickable-row {
+    cursor: pointer;
+  }
+
+  .clickable-row:hover {
+    background: var(--app-hover);
+  }
+
+  .name-cell {
+    font-weight: 600;
+  }
+
+  .muted {
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  // th/td.num: the element in front keeps these above the table's own cell alignment.
+  th.num, td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th.actions-column, td.actions-column {
+    width: 56px;
+    text-align: right;
+  }
+
+  .type-chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--app-muted-surface);
+    border: var(--app-hairline);
+    color: var(--mat-sys-on-surface);
+    font-size: var(--app-text-xs);
+    font-weight: 500;
+  }
+
+  // Delete entry in a row menu.
+  [mat-menu-item].danger {
+    color: var(--app-danger);
+    --mat-menu-item-icon-color: var(--app-danger);
+  }
+
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }

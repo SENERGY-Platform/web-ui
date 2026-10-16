@@ -14,19 +14,22 @@
   ~ limitations under the License.
   -->
 
-<div class="searchbar-container ly-row">
-  <mat-form-field appearance="outline" color="accent" floatLabel="always" class="ly-flex">
-    <mat-label>Search</mat-label>
+<div class="searchbar-container ly-row" [class.compact]="compact">
+  <mat-form-field appearance="outline" color="accent" floatLabel="always" class="ly-flex"
+    [subscriptSizing]="compact ? 'dynamic' : 'fixed'">
+    @if (!compact) {
+      <mat-label>Search</mat-label>
+    }
     @if (formControl.value === '') {
       <mat-icon matPrefix>search</mat-icon>
     }
     @if (formControl.value !== '') {
       <mat-icon class="pointer" matPrefix (click)="resetSearchtext()">close</mat-icon>
     }
-    <input (keyup)="changeSearchtext()" type="text" matInput placeholder="Please insert search text"
+    <input (keyup)="changeSearchtext()" type="text" matInput [placeholder]="compact ? 'Search' : 'Please insert search text'"
       [formControl]="formControl">
     @if (supportRefresh) {
-      <button matSuffix matTooltip="refresh" mat-icon-button (click)="changeSearchtext()">
+      <button matSuffix matTooltip="refresh" mat-icon-button (click)="onRefresh()">
         <mat-icon>refresh</mat-icon>
       </button>
     }
