@@ -43,6 +43,7 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
   // Destructive actions are the same red in every tenant; text on the tint keeps a contrast above 4.5:1.
   --app-danger: #b3261e;
   --app-danger-tint: color-mix(in srgb, #b3261e 10%, var(--mat-sys-surface));
+  --app-success: #1b6e3a;
   --app-overlay-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
 
   // Floating overlays keep a subtle shadow; every other surface is flat.
@@ -288,6 +289,27 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     color: var(--mat-sys-on-surface);
     font-size: var(--app-text-xs);
     font-weight: 500;
+  }
+
+  // Connection or visibility state in a table cell: a dot in front of the label; `.online` turns the dot green.
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--app-text-sm, 13px);
+    white-space: nowrap;
+  }
+
+  .status-chip::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mat-sys-outline);
+  }
+
+  .status-chip.online::before {
+    background: var(--app-success);
   }
 
   // A count in a table cell that opens the list behind it (usage dialogs); a button, so it is reachable by keyboard.

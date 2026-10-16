@@ -50,6 +50,7 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
         userHasUpdateAttributesAuthorization: boolean;
         action?: string;
         localIdIsEditable?: boolean;
+        readOnly?: boolean;
     }>(MAT_DIALOG_DATA);
 
     @ViewChild('qrVideo') qrVideo?: ElementRef<HTMLVideoElement>;
@@ -60,6 +61,8 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
     nicknameAttributeOrigin = 'shared';
     action = 'Edit';
     localIdIsEditable = false;
+    /** Without any right to change the device the dialog only shows it. */
+    readOnly = false;
     knownAttributes = ['anomaly-detector', 'timezone', 'inactive', 'last_message_max_age', 'monitor_connection_state', 'platform/mute-format-error', 'senergy/snowflake-canary-device', 'senergy/canary-device', 'senergy/lora/dev-addr', 'senergy/lora/app-key', 'senergy/lora/gen-app-key', 'senergy/lora/nwk-key', 'senergy/lora/app-s-key', 'senergy/lora/nwk-s-enc-key', 'senergy/lora/s-nwk-s-int-key', 'senergy/lora/f-nwk-s-int-key', 'senergy/lora/join-eui', 'senergy/lora/duplicate', 'wmbus/driver'];
 
     protocolConstraints: string[] = [];
@@ -78,6 +81,7 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
 
         this.userHasUpdateDisplayNameAuthorization = data.userHasUpdateDisplayNameAuthorization;
         this.userHasUpdateAttributesAuthorization = data.userHasUpdateAttributesAuthorization;
+        this.readOnly = !!data.readOnly;
         this.device = data.device;
         this.qrScanSupported = !!navigator.mediaDevices?.getUserMedia;
         let supportsOTAA = false;

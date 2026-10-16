@@ -31,12 +31,13 @@ import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
@@ -46,7 +47,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './locations.component.html',
     styleUrls: ['./locations.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatTooltip, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class LocationsComponent implements OnInit, AfterViewInit {
     private locationsService = inject(LocationsService);
@@ -58,7 +59,7 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     preferencesService = inject(PreferencesService);
     private permissionsDialogService = inject(PermissionsDialogService);
 
-    displayedColumns = ['select', 'name', 'show'];
+    displayedColumns: string[] = [];
     ready = false;
     instances = [];
     totalCount = 200;
@@ -84,21 +85,23 @@ export class LocationsComponent implements OnInit, AfterViewInit {
 
     checkAuthorization() {
         this.userHasCreateAuthorization = this.locationsService.userHasCreateAuthorization();
-
         this.userHasShareAuthorization = this.locationsService.userHasShareAuthorization();
-        if(this.userHasShareAuthorization) {
-            this.displayedColumns.push('share');
-        }
-
         this.userHasUpdateAuthorization = this.locationsService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.locationsService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
+
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name',
+            'description',
+            'devices',
+            'groups',
+            'actions',
+        ];
+    }
+
+    get filtered(): boolean {
+        return this.searchText !== '';
     }
 
     matSortChange($event: Sort) {

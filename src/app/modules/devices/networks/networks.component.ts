@@ -35,13 +35,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { StateIconComponent } from '../../../core/components/state-icon/state-icon.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
@@ -49,7 +51,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './networks.component.html',
     styleUrls: ['./networks.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, StateIconComponent, MatIcon, MatTooltip, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIcon, MatTooltip, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class NetworksComponent implements OnInit, AfterViewInit {
     private networksService = inject(NetworksService);
@@ -64,10 +66,10 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     private permissionsService = inject(PermissionsService);
     private preferencesService = inject(PreferencesService);
 
-    displayedColumns = ['select', 'connection', 'shared', 'name', 'number_devices', 'show', 'clear'];
-    dataSource = new MatTableDataSource<HubModel>();
+    displayedColumns: string[] = [];
+    dataSource = new MatTableDataSource<ExtendedHubModel>();
     list = new PagedListState(this.preferencesService, () => this.getNetworks(), { sortBy: 'name', sortDirection: 'asc' });
-    listSelection = new ListSelection<HubModel>(() => this.dataSource.connect().value);
+    listSelection = new ListSelection<ExtendedHubModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     searchText = '';
     totalCount = 200;
@@ -77,6 +79,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization = false;
     userHasShareAuthorization = false;
     userHasCreateAuthorization = false;
+    userHasLoraCertAuthorization = false;
 
     userIdToName: { [key: string]: string } = {};
 
@@ -88,25 +91,34 @@ export class NetworksComponent implements OnInit, AfterViewInit {
 
     checkAuthorization() {
         this.userHasShareAuthorization = this.networksService.userHasShareAuthorization();
-        if (this.userHasShareAuthorization) {
-            this.displayedColumns.push('share');
-        }
-
-        if (this.networksService.userHasLoraCertAuthorization()) {
-            this.displayedColumns.push('certs');
-        }
-
+        this.userHasLoraCertAuthorization = this.networksService.userHasLoraCertAuthorization();
         this.userHasUpdateAuthorization = this.networksService.userHasUpdateAuthorization();
-        if (this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.networksService.userHasDeleteAuthorization();
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
-
         this.userHasCreateAuthorization = this.networksService.userHasCreateAuthorization();
+
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name',
+            'connection',
+            'number_devices',
+            'shared',
+            'actions',
+        ];
+    }
+
+    /** Whether the user may edit this network: the update right and the write right on the network itself. */
+    canEdit(network: ExtendedHubModel): boolean {
+        return this.userHasUpdateAuthorization && !!network.permissions?.write;
+    }
+
+    /** Row click: the edit dialog, or the read-only view of it without the right to edit. */
+    open(network: ExtendedHubModel): void {
+        this.edit(network, !this.canEdit(network));
+    }
+
+    get filtered(): boolean {
+        return this.searchText !== '';
     }
 
     private initSearch() {
@@ -126,8 +138,8 @@ export class NetworksComponent implements OnInit, AfterViewInit {
         this.list.connect(this.paginator, this.destroyRef);
     }
 
-    edit(network?: HubModel) {
-        this.networksService.openNetworkEditDialog(network);
+    edit(network?: HubModel, readOnly = false) {
+        this.networksService.openNetworkEditDialog(network, readOnly);
     }
 
     showDevices(network: HubModel) {
@@ -165,7 +177,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
         });
     }
 
-    private getNetworks(): Observable<HubModel[]> {
+    private getNetworks(): Observable<ExtendedHubModel[]> {
         return this.networksService
             .listExtendedHubs({ limit: this.list.pageSize, offset: this.list.offset, sortBy: this.list.sortBy, sortDesc: this.list.sortDirection !== 'asc', searchText: this.searchText })
             .pipe(

@@ -127,15 +127,15 @@ export class NetworksService {
             );
     }
 
-    openNetworkEditDialog(network?: HubModel): void {
+    openNetworkEditDialog(network?: HubModel, readOnly = false): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
-        dialogConfig.data = network;
+        dialogConfig.data = { network, readOnly };
         dialogConfig.width = '80vw';
         const editDialogRef = this.dialog.open(NetworksEditDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((newNetwork: HubModel) => {
-            if (newNetwork !== undefined) {
+            if (newNetwork !== undefined && !readOnly) {
                 if (network === undefined) {
                     this.create(newNetwork).subscribe();
                     return;

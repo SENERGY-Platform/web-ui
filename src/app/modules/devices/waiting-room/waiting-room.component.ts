@@ -30,7 +30,6 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeDelete, WaitingRoomEventTypeSet, WaitingRoomEventTypeUse} from './shared/waiting-room.model';
 import {startWith, switchMap} from 'rxjs/operators';
 import {WaitingRoomService} from './shared/waiting-room.service';
-import {DeviceInstanceModel} from '../device-instances/shared/device-instances.model';
 import {WaitingRoomDeviceEditDialogComponent} from './dialogs/waiting-room-device-edit-dialog.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {
@@ -39,8 +38,12 @@ import {
 import {ClosableSnackBarComponent} from '../../../core/components/closable-snack-bar/closable-snack-bar.component';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { TableRowAnimations } from 'src/app/core/animations/table-animation';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton } from '@angular/material/button';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -54,7 +57,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     styleUrls: ['./waiting-room.component.css'],
     animations: [TableRowAnimations.getRowAnimation()],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatChipListbox, MatChipOption, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
 export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -75,7 +78,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     listSelection = new ListSelection<WaitingDeviceModel>(() => this.devicesDataSource.connect().value);
 
     selection = this.listSelection.model;
-    displayedColumns: string[] = ['select', 'name', 'created_at', 'updated_at', 'edit', 'use', 'toggle_hide', 'delete'];
+    displayedColumns: string[] = ['select', 'name', 'status', 'created_at', 'updated_at', 'actions'];
     totalCount = 0;
 
     // devices: WaitingDeviceModel[] = [] as WaitingDeviceModel[];
@@ -104,8 +107,21 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         TableRowAnimations.getAnimationParams().subscribe(p => this.animationParams = p);
     }
 
-    showHiddenChanged() {
-        this.showHidden = !this.showHidden;
+    get filtered(): boolean {
+        return this.searchText !== '';
+    }
+
+    reload() {
+        this.selectionClear();
+        this.getDevices(true);
+    }
+
+    showHiddenChanged(show: boolean) {
+        // Setting the chip's `selected` from the state emits selectionChange again; without this guard it would toggle forever.
+        if (show === this.showHidden) {
+            return;
+        }
+        this.showHidden = show;
         localStorage.setItem('devices.waiting-room.showHidden', String(this.showHidden));
         this.getDevices(true);
     }
@@ -182,7 +198,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.listSelection.masterToggle();
     }
 
-    openEditDialog(device: DeviceInstanceModel): void {
+    openEditDialog(device: WaitingDeviceModel): void {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.disableClose = false;
         dialogConfig.data = {

@@ -33,12 +33,15 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
@@ -48,7 +51,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './device-groups.component.html',
     styleUrls: ['./device-groups.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatChipListbox, MatChipOption, MatTooltip, MatIcon, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     private deviceGroupsService = inject(DeviceGroupsService);
@@ -61,7 +64,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     private permissionsService = inject(PermissionsService);
     private preferencesService = inject(PreferencesService);
 
-    displayedColumns = ['select', 'name', 'show'];
+    displayedColumns: string[] = [];
     listSelection = new ListSelection<DeviceGroupModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
@@ -92,15 +95,24 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     checkAuthorization() {
         this.userHasCreateAuthorization = this.deviceGroupsService.userHasCreateAuthorization();
         this.userHasUpdateAuthorization = this.deviceGroupsService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.deviceGroupsService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
-        this.displayedColumns.push('share');
+
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name',
+            'devices',
+            'generated',
+            'actions',
+        ];
+    }
+
+    get filtered(): boolean {
+        return this.searchText !== '' || !this.hideGenerated;
+    }
+
+    canEdit(group: DeviceGroupModel): boolean {
+        return this.userHasUpdateAuthorization && this.userHasEditPermission(group.id);
     }
 
     matSortChange($event: Sort) {
@@ -152,8 +164,11 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     }
 
     setHideGenerated(hide: boolean){
+        if (hide === this.hideGenerated) {
+            return;
+        }
         this.hideGenerated = hide;
-        this.getDeviceGroups().subscribe();
+        this.reload();
     }
 
     private getDeviceGroups(): Observable<DeviceGroupModel[]> {

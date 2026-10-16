@@ -14,23 +14,17 @@
   ~ limitations under the License.
   -->
 
-<div class="device-instance-container layout-margin ly-column">
-  <span class="search-button-container ly-row">
-    <senergy-searchbar></senergy-searchbar>
-    <button mat-icon-button (click)="openFilterDialog()" matTooltip="Filter" color="accent" class="suffix-button">
-      <mat-icon>filter_alt</mat-icon>
+<senergy-page-header title="Devices" description="Device instances on the platform with their connection state and attributes.">
+</senergy-page-header>
+
+<senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
+  <ng-container toolbarFilters>
+    <button matButton="outlined" (click)="openFilterDialog()">
+      <mat-icon>filter_alt</mat-icon> Filter
     </button>
-    @if (userHasDefaultAttributesAuthoriation) {
-      <button mat-icon-button (click)="openDefaultAttributesDialog()" matTooltip="Default Attributes" color="accent" class="suffix-button">
-        <mat-icon>settings</mat-icon>
-      </button>
-    }
-  </span>
-  <div style="padding-bottom: 1em;" #chipDiv>
-    <mat-chip-set>
+    <mat-chip-set aria-label="Active filters">
       @if (routerConnectionState !== undefined && routerConnectionState !== null && routerConnectionState !== DeviceInstancesRouterStateTabEnum.ALL) {
-        <mat-chip
-          >
+        <mat-chip>
           <mat-icon matChipAvatar>cloud</mat-icon>
           @if (routerConnectionState === DeviceInstancesRouterStateTabEnum.OFFLINE) {
             <span>Offline</span>
@@ -41,7 +35,7 @@
           @if (routerConnectionState === DeviceInstancesRouterStateTabEnum.UNKNOWN) {
             <span>Unknown</span>
           }
-          <button matChipRemove (click)="this.routerConnectionState = undefined; updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the connection filter" (click)="this.routerConnectionState = undefined; updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -50,7 +44,7 @@
         <mat-chip>
           <mat-icon matChipAvatar>device_hub</mat-icon>
           {{routerNetworkName}}
-          <button matChipRemove (click)="this.routerNetwork = undefined; updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the network filter" (click)="this.routerNetwork = undefined; updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -59,7 +53,7 @@
         <mat-chip>
           <mat-icon matChipAvatar>place</mat-icon>
           {{routerLocationName}}
-          <button matChipRemove (click)="this.routerLocation = undefined; updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the location filter" (click)="this.routerLocation = undefined; updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -68,7 +62,7 @@
         <mat-chip>
           <mat-icon matChipAvatar>important_devices</mat-icon>
           {{routerDeviceTypeNames[i]}}
-          <button matChipRemove (click)="this.routerDeviceType!.splice(i, 1); this.routerDeviceTypeNames.splice(i, 1); updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the device type filter" (click)="this.routerDeviceType!.splice(i, 1); this.routerDeviceTypeNames.splice(i, 1); updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -77,7 +71,7 @@
         <mat-chip>
           <mat-icon matChipAvatar>devices</mat-icon>
           {{routerDeviceIds.length}} Device Ids
-          <button matChipRemove (click)="this.routerDeviceIds = undefined; updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the device id filter" (click)="this.routerDeviceIds = undefined; updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -86,7 +80,7 @@
         <mat-chip>
           <mat-icon matChipAvatar>sell</mat-icon>
           {{key}}
-          <button matChipRemove (click)="this.routerAttributeKeys.splice(i, 1); updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the attribute key filter" (click)="this.routerAttributeKeys.splice(i, 1); updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -95,7 +89,7 @@
         <mat-chip>
           <mat-icon matChipAvatar>label</mat-icon>
           {{value}}
-          <button matChipRemove (click)="this.routerAttributeValues.splice(i, 1); updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the attribute value filter" (click)="this.routerAttributeValues.splice(i, 1); updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
@@ -104,89 +98,99 @@
         <mat-chip>
           <mat-icon matChipAvatar>sell</mat-icon>
           {{routerDeviceAttributeBlacklist?.length}} Attribute{{(routerDeviceAttributeBlacklist || []).length > 1 ? 's' : ''}}
-          <button matChipRemove (click)="this.routerDeviceAttributeBlacklist = undefined; updateQueryParams(); reload()">
+          <button matChipRemove aria-label="Remove the attribute filter" (click)="this.routerDeviceAttributeBlacklist = undefined; updateQueryParams(); reload()">
             <mat-icon>cancel</mat-icon>
           </button>
         </mat-chip>
       }
     </mat-chip-set>
-  </div>
+    @if (userHasDefaultAttributesAuthoriation) {
+      <button mat-icon-button (click)="openDefaultAttributesDialog()" matTooltip="Default attributes" aria-label="Default attributes">
+        <mat-icon>settings</mat-icon>
+      </button>
+    }
+  </ng-container>
+  <ng-container bulkActions>
+    @if (userHasShareAuthoriation) {
+      <button matButton="outlined" (click)="shareMultipleDevices()" [disabled]="administrableSelection().length === 0">
+        <mat-icon>share</mat-icon> Share
+      </button>
+    }
+    @if (userHasDeleteAuthorization) {
+      <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    }
+  </ng-container>
+</senergy-list-toolbar>
+
+<div class="page-body">
+  <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
   @if (dataSource.data.length === 0 && ready) {
-    <div>No devices found.</div>
+    <senergy-empty-state icon="devices" [title]="filtered ? 'No matching devices' : 'No devices yet'"
+      [text]="filtered ? 'No device matches the search or the filters.' : 'Devices are created from a device type, in the device types list.'">
+    </senergy-empty-state>
   }
-  <senergy-spinner [show]="!ready"></senergy-spinner>
 
-  <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
-    <div class="table-container" [style.max-height]="calcTableMaxHeight()">
+  <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container">
       <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
         [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection">
         <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef class="button-column">
+          <th mat-header-cell *matHeaderCellDef class="select-column">
             <mat-checkbox (change)="$event ? masterToggle() : null"
               [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()">
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              aria-label="Select all">
             </mat-checkbox>
           </th>
-          <td mat-cell *matCellDef="let row">
+          <td mat-cell *matCellDef="let row" class="select-column" (click)="$event.stopPropagation()">
             <mat-checkbox (click)="$event.stopPropagation()"
-              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+              aria-label="Select row">
             </mat-checkbox>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="display_name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let device" class="name-cell">{{device.display_name || device.name}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="log_state">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Connection</th>
           <td mat-cell *matCellDef="let device">
-            {{device.display_name || device.name}}
+            @if (!isActive(device)) {
+              <span class="status-chip muted">Inactive</span>
+            } @else {
+              @switch (device.connection_state) {
+                @case ('online') { <span class="status-chip online">Online</span> }
+                @case ('offline') { <span class="status-chip">Offline</span> }
+                @default { <span class="status-chip muted">Unknown</span> }
+              }
+            }
           </td>
         </ng-container>
 
         <ng-container matColumnDef="device_type">
           <th mat-header-cell *matHeaderCellDef>Type</th>
-          <td mat-cell *matCellDef="let device">
+          <td mat-cell *matCellDef="let device" (click)="$event.stopPropagation()">
             <a [routerLink]="'/metadata/devicetypesoverview/devicetypes/' + device.device_type_id"
             [queryParams]="{'function': 'details'}">{{device.device_type_name}}</a>
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="log_state">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Connection
-          </th>
-          <td mat-cell *matCellDef="let device">
-            @if (isActive(device)) {
-              <senergy-state-icon
-              [state]="device.connection_state"></senergy-state-icon>
-            }
-            @if (!isActive(device)) {
-              <senergy-state-icon [state]="'inactive'"></senergy-state-icon>
-            }
-          </td>
-        </ng-container>
-
         <ng-container matColumnDef="usage">
-          <th mat-header-cell *matHeaderCellDef>Storage
-          </th>
-          <td mat-cell *matCellDef="let device" [matTooltip]="getUsageTooltip(device)">
+          <th mat-header-cell *matHeaderCellDef class="num">Storage</th>
+          <td mat-cell *matCellDef="let device" class="num" [matTooltip]="getUsageTooltip(device)">
             {{formatBytes(getUsage(device)?.bytes || -1)}}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="shared">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear class="button-column">Shared</th>
-          <td mat-cell *matCellDef="let device">
-            @if (device.shared) {
-              <mat-icon matTooltip="Device is shared by {{userIdToName[device.creator]}}"
-                class="color-sidenav info-icon">
-                share
-              </mat-icon>
-            }
           </td>
         </ng-container>
 
         <ng-container matColumnDef="attributes">
           <th mat-header-cell *matHeaderCellDef>Attributes</th>
-          <td mat-cell *matCellDef="let device">
+          <td mat-cell *matCellDef="let device" (click)="$event.stopPropagation()">
             <div class="attribute-chips">
               @for (attr of shownAttributes(device); track attr) {
                 <button type="button" class="attribute-chip"
@@ -208,101 +212,45 @@
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="info">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
+        <ng-container matColumnDef="shared">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Sharing</th>
           <td mat-cell *matCellDef="let device">
-            <button mat-icon-button color="accent" matTooltip="Info" (click)="showInfoOfDevice(device)">
-              <mat-icon>info</mat-icon>
-            </button>
+            @if (device.shared) {
+              <span class="type-chip" matTooltip="Shared by {{userIdToName[device.owner_id] || 'another user'}}">Shared</span>
+            }
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="share">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
-          <td mat-cell *matCellDef="let device">
-            <button mat-icon-button color="accent" matTooltip="Share" (click)="shareDevice(device)"
-              [disabled]="!device.permissions.administrate">
-              <mat-icon>share</mat-icon>
-
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let device" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="replace">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Replace</th>
-          <td mat-cell *matCellDef="let device">
-            <button mat-icon-button color="accent" matTooltip="Replace" (click)="replaceDevice(device)"
-              [disabled]="!device.permissions.write">
-              <mat-icon>build_circle</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="duplicate">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Duplicate</th>
-          <td mat-cell *matCellDef="let device">
-            <button mat-icon-button color="accent" matTooltip="Duplicate" (click)="duplicateDevice(device)"
-              [disabled]="!device.permissions.write">
-              <mat-icon>content_copy</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="edit">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
-          <td mat-cell *matCellDef="let device">
-            <button mat-icon-button color="accent" matTooltip="Edit" (click)="editDevice(device)"
-              [disabled]="!device.permissions.write">
-              <mat-icon>edit</mat-icon>
-
-            </button>
-          </td>
-        </ng-container>
-
-        @if (userHasDeleteAuthorization) {
-          <span>
-            <ng-container matColumnDef="delete">
-              <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
-              <td mat-cell *matCellDef="let device">
-                <button mat-icon-button color="accent" matTooltip="Delete" (click)="deleteDevice(device)"
-                  [disabled]="!device.permissions.administrate">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-          </span>
-        }
-
-        <ng-container matColumnDef="header-delete-all">
-          <th mat-header-cell *matHeaderCellDef colspan="10">
-            <div class="ly-row">
-              <div class="ly-row ly-align-center-center">You have
-                selected {{selection.selected.length}} items
-              </div>
-              @if (userHasShareAuthoriation) {
-                <button matTooltip="Share" mat-icon-button color="accent"
-                  (click)="shareMultipleDevices()" [disabled]="administrableSelection().length === 0">
-                  <mat-icon>share</mat-icon>
-                </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (canEdit(device)) {
+                <button mat-menu-item (click)="editDevice(device)"><mat-icon>edit</mat-icon> Edit</button>
+              } @else {
+                <button mat-menu-item (click)="editDevice(device, true)"><mat-icon>info</mat-icon> Details</button>
               }
-              @if (userHasDeleteAuthorization) {
-                <button matTooltip="Delete" mat-icon-button
-                  color="accent" (click)="deleteMultipleItems()">
-                  <mat-icon>delete</mat-icon>
-                </button>
+              <button mat-menu-item (click)="showInfoOfDevice(device)"><mat-icon>account_tree</mat-icon> Services</button>
+              @if (userHasCreateAuthoriation && device.permissions?.write) {
+                <button mat-menu-item (click)="replaceDevice(device)"><mat-icon>build_circle</mat-icon> Replace</button>
+                <button mat-menu-item (click)="duplicateDevice(device)"><mat-icon>content_copy</mat-icon> Duplicate</button>
               }
-            </div>
-          </th>
+              @if (userHasShareAuthoriation && device.permissions?.administrate) {
+                <button mat-menu-item (click)="shareDevice(device)"><mat-icon>share</mat-icon> Share</button>
+              }
+              @if (userHasDeleteAuthorization && device.permissions?.administrate) {
+                <button mat-menu-item class="danger" (click)="deleteDevice(device)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
+          </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-          [hidden]="selection.selected.length === 0 || (!userHasDeleteAuthorization && !userHasShareAuthoriation)">
-        </tr>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true">
-        </tr>
-        <tr mat-row *matRowDef="let m; columns: displayedColumns;" [ngClass]="{'inactive': m.active === false}">
-        </tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let device; columns: displayedColumns;" class="clickable-row"
+          [class.inactive]="device.active === false" (click)="openDevice(device)"></tr>
       </table>
 
       <mat-menu #attributeMenu="matMenu" [overlapTrigger]="false">
@@ -311,7 +259,7 @@
             <button mat-menu-item
               [matTooltip]="attributeChipTooltip(attr)" (click)="toggleAttributeFilter(attr)">
               <mat-icon [class.invisible]="!isAttributeFiltered(attr)" class="color-accent">check</mat-icon>
-              <span [ngClass]="{'color-accent': isAttributeFiltered(attr)}">{{attr.key}} =
+              <span [class.color-accent]="isAttributeFiltered(attr)">{{attr.key}} =
               {{attr.value}}</span>
             </button>
           }
@@ -320,6 +268,6 @@
     </div>
 
     <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
-    [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
+      [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
   </div>
 </div>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { DeviceInstancesService } from './shared/device-instances.service';
@@ -46,16 +46,16 @@ import { concatMap } from 'rxjs/operators';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { DeviceInstancesDefaultAttributesDialogComponent } from './dialogs/device-instances-default-attributes-dialog.component';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton } from '@angular/material/button';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { StateIconComponent } from '../../../core/components/state-icon/state-icon.component';
 import { MatMenuTrigger, MatMenu, MatMenuContent, MatMenuItem } from '@angular/material/menu';
-import { NgClass } from '@angular/common';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 export interface DeviceInstancesRouterState {
@@ -77,7 +77,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     templateUrl: './device-instances.component.html',
     styleUrls: ['./device-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, StateIconComponent, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, NgClass, MatMenu, MatMenuContent, MatMenuItem, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatMenu, MatMenuContent, MatMenuItem, MatPaginator]
 })
 export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     private deviceInstancesService = inject(DeviceInstancesService);
@@ -96,7 +96,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     private cd = inject(ChangeDetectorRef);
     private activatedRoute = inject(ActivatedRoute);
 
-    displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'attributes', 'info'];
+    displayedColumns: string[] = [];
     maxShownAttributes = 3;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     listSelection = new ListSelection<DeviceInstanceModel>(() => this.dataSource.connect().value);
@@ -150,38 +150,40 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     checkAuthorization() {
-        this.userHasShareAuthoriation =  this.deviceInstancesService.userHasDeleteAuthorization();
-        if (this.userHasShareAuthoriation) {
-            this.displayedColumns.push('share');
-        }
+        this.userHasShareAuthoriation = this.deviceInstancesService.userHasShareAuthorization();
         this.userHasReadDeviceUsageAuthorization = this.exportDataService.userHasUsageAuthroization();
-        if (this.userHasReadDeviceUsageAuthorization) {
-            this.displayedColumns.splice(4, 0, 'usage');
-        }
-
         this.userHasDeleteAuthorization = this.deviceInstancesService.userHasDeleteAuthorization();
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
-
-        if (this.deviceTypesService.userHasReadAuthorization()) {
-            this.displayedColumns.splice(4, 0, 'device_type');
-        }
-
         this.userHasCreateAuthoriation = this.deviceInstancesService.userHasCreateAuthorization();
-        if (this.userHasCreateAuthoriation) {
-            this.displayedColumns.push('replace');
-            this.displayedColumns.push('duplicate');
-        }
-
         this.userHasUpdateDisplayNameAuthorization = this.deviceInstancesService.userHasUpdateDisplayNameAuthorization();
         this.userHasUpdateAttributesAuthorization = this.deviceInstancesService.userHasUpdateAttributesAuthorization();
         this.userHasUpdateAuthorization = this.deviceInstancesService.userHasUpdateAuthorization();
-
-        if (this.userHasUpdateDisplayNameAuthorization || this.userHasUpdateAttributesAuthorization) {
-            this.displayedColumns.push('edit');
-        }
         this.userHasDefaultAttributesAuthoriation = this.deviceInstancesService.userHasDefaultAttributesPermissions();
+
+        // The selection column only exists for the bulk actions.
+        this.displayedColumns = [
+            ...(this.userHasShareAuthoriation || this.userHasDeleteAuthorization ? ['select'] : []),
+            'display_name',
+            'log_state',
+            ...(this.deviceTypesService.userHasReadAuthorization() ? ['device_type'] : []),
+            ...(this.userHasReadDeviceUsageAuthorization ? ['usage'] : []),
+            'attributes',
+            'shared',
+            'actions',
+        ];
+    }
+
+    /** Whether the user may change this device: a right to change name or attributes and the write right on the device. */
+    canEdit(device: DeviceInstanceModel): boolean {
+        return (this.userHasUpdateDisplayNameAuthorization || this.userHasUpdateAttributesAuthorization) && !!device.permissions?.write;
+    }
+
+    get filtered(): boolean {
+        const connectionFiltered = this.routerConnectionState !== undefined && this.routerConnectionState !== null
+            && this.routerConnectionState !== DeviceInstancesRouterStateTabEnum.ALL;
+        return this.searchText !== '' || connectionFiltered || !!this.routerNetwork || !!this.routerLocation
+            || (this.routerDeviceType?.length ?? 0) > 0 || this.routerDeviceIds !== undefined
+            || this.routerAttributeKeys.length > 0 || this.routerAttributeValues.length > 0
+            || (this.routerDeviceAttributeBlacklist?.length ?? 0) > 0;
     }
 
     private initSearch() {
@@ -356,12 +358,17 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         this.deviceInstancesDialogService.openDeviceServiceDialog(device);
     }
 
-    editDevice(device: DeviceInstanceModel): void {
+    /** Row click: the edit dialog, read-only without the right to change this device. */
+    openDevice(device: DeviceInstanceModel): void {
+        this.editDevice(device, !this.canEdit(device));
+    }
+
+    editDevice(device: DeviceInstanceModel, readOnly = false): void {
         this.deviceInstancesDialogService.openDeviceEditDialog(
             device,
-            this.userHasUpdateAuthorization,
-            this.userHasUpdateDisplayNameAuthorization,
-            this.userHasUpdateAttributesAuthorization,
+            this.userHasUpdateAuthorization && !readOnly,
+            this.userHasUpdateDisplayNameAuthorization && !readOnly,
+            this.userHasUpdateAttributesAuthorization && !readOnly,
             (spinnerState: boolean) => {
                 this.ready = !spinnerState;
             }).subscribe({
@@ -590,19 +597,6 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
 
     isActive(device: DeviceInstanceModel): boolean {
         return device.attributes?.find(a => a.key === 'inactive' && a.value === 'true') === undefined;
-    }
-
-    private _chipDiv?: ElementRef;
-    @ViewChild('chipDiv')
-    set chipDivSetter(ref: ElementRef | undefined) {
-        this._chipDiv = ref;
-        this.cd.detectChanges();
-    }
-    calcTableMaxHeight(): string {
-        if (this._chipDiv === undefined) {
-            return '';
-        }
-        return 'calc(100vh - ' + (this._chipDiv.nativeElement.clientHeight + 216) + 'px - 1em)';
     }
 
     updateQueryParams() {
