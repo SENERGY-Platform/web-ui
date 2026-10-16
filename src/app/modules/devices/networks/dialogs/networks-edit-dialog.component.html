@@ -23,7 +23,7 @@
   </mat-form-field>
   <mat-form-field appearance="outline" class="full-width" color="accent">
     <mat-label>Name</mat-label>
-    <input matInput [(ngModel)]="network.name">
+    <input matInput [(ngModel)]="network.name" [disabled]="readOnly">
   </mat-form-field>
 
   <div class="attributes">
@@ -37,7 +37,7 @@
           <mat-form-field appearance="outline" class="third-width" color="accent">
             <mat-label>Key</mat-label>
             <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-              [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
+              [disabled]="readOnly || !editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
             [addTag]="addAttribute()"></mtx-select>
             <mat-error senergyError label="Key"></mat-error>
           </mat-form-field>
@@ -50,13 +50,13 @@
               }
               @default {
                 <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
-                  [disabled]="!editableAttribute(attr)">
+                  [disabled]="readOnly || !editableAttribute(attr)">
               }
             }
             <mat-error senergyError label="Value"></mat-error>
           </mat-form-field>
           <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">
-            <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
+            <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="readOnly || !editableAttribute(attr)">
               @if (!editableAttribute(attr)) {
                 <mat-icon>conversion_path</mat-icon>
               }
@@ -68,7 +68,9 @@
         }
       </div>
     }
-    <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+    @if (!readOnly) {
+      <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+    }
   </div>
   <div class="divider">
     <div style="display: flex; justify-content: space-between;">
@@ -89,6 +91,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="save()">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">{{readOnly ? 'Close' : 'Cancel'}}</button>
+  @if (!readOnly) {
+    <button mat-raised-button color="accent" (click)="save()">Save</button>
+  }
 </mat-dialog-actions>

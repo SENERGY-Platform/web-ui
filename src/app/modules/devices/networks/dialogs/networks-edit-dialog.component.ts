@@ -47,6 +47,11 @@ import { MatIcon } from '@angular/material/icon';
 import { MapComponent } from '../../map/map.component';
 import { DatePipe } from '@angular/common';
 
+export interface NetworksEditDialogData {
+    network?: HubModel;
+    readOnly?: boolean;
+}
+
 @Component({
     templateUrl: './networks-edit-dialog.component.html',
     styleUrls: ['./networks-edit-dialog.component.css'],
@@ -58,6 +63,8 @@ export class NetworksEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<NetworksEditDialogComponent>>(MatDialogRef);
 
     network: HubModel;
+    /** Without the right to update the dialog only shows the network. */
+    readOnly = false;
     knownAttributes = ['last_message_max_age', 'senergy/lora/eui'];
     hiddenAttributes = ['location-lat', 'location-lon'];
     @ViewChild('content') content: ElementRef | undefined;
@@ -83,7 +90,9 @@ export class NetworksEditDialogComponent implements OnInit {
     zoomControl: Control | undefined;
 
     constructor() {
-        const network = inject<HubModel | undefined>(MAT_DIALOG_DATA);
+        const data = inject<NetworksEditDialogData | undefined>(MAT_DIALOG_DATA);
+        const network = data?.network;
+        this.readOnly = !!data?.readOnly;
 
         this.network = network || {
             id: '',
@@ -149,6 +158,7 @@ export class NetworksEditDialogComponent implements OnInit {
 
         // allow translating (dragging) the feature and update attributes on drop
         this.translateInteraction = new Translate({ features: featureCollection });
+        this.translateInteraction.setActive(!this.readOnly);
         this.map.addInteraction(this.translateInteraction);
         this.translateInteraction.on('translatestart', () => {
             this.isTranslating = true;

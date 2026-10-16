@@ -14,26 +14,6 @@
  * limitations under the License.
  */
 
-.main-panel-alternative {
-    height: calc(100% - 106px);
-    overflow-y: auto;
-}
-
-.offset {
-    margin-top: 4px;
-}
-
-.device-instance-container {
-}
-
-.search-refresh .suffix-button {
-    margin-top: -20px;
-}
-
-.height-chips {
-    max-height: calc(var(--app-page-height, 100vh) - 260px);
-}
-
 a {
     text-decoration: none;
     color: var(--mat-sys-primary);

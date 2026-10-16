@@ -13,125 +13,111 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-groups-container layout-margin">
-  <span class="search-button-container ly-row">
-    <senergy-searchbar></senergy-searchbar>
-    @if (!this.hideGenerated) {
-      <button matTooltip="hide generated" mat-icon-button color="accent" (click)="setHideGenerated(true)"
-        >
-        <mat-icon>visibility_off</mat-icon>
-      </button>
-    }
-    @if (this.hideGenerated) {
-      <button matTooltip="show generated" mat-icon-button color="accent" (click)="setHideGenerated(false)"
-        >
-        <mat-icon>visibility</mat-icon>
-      </button>
-    }
-  </span>
 
+<senergy-page-header title="Device groups" description="Collections of devices that are controlled together by the functions they have in common.">
+  <ng-container pageActions>
+    @if (userHasCreateAuthorization) {
+      <button matButton="filled" (click)="newDeviceGroup()">
+        <mat-icon>add</mat-icon> New device group
+      </button>
+    }
+  </ng-container>
+</senergy-page-header>
+
+<senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
+  <ng-container toolbarFilters>
+    <mat-chip-listbox aria-label="Filter">
+      <mat-chip-option [selected]="!hideGenerated" (selectionChange)="setHideGenerated(!$event.selected)">
+        Show generated
+      </mat-chip-option>
+    </mat-chip-listbox>
+  </ng-container>
+  <ng-container bulkActions>
+    @if (userHasDeleteAuthorization) {
+      <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    }
+  </ng-container>
+</senergy-list-toolbar>
+
+<div class="page-body">
   <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+
   @if (dataSource.data.length === 0 && ready) {
-    <div>No device group found.</div>
+    <senergy-empty-state icon="devices_other" [title]="filtered ? 'No matching device groups' : 'No device groups yet'"
+      [text]="filtered ? 'No device group matches the search or the filter.' : 'Device groups bundle devices so that they can be controlled together.'">
+    </senergy-empty-state>
   }
 
-  <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
-    <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
-      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)" [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection">
+  <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
+        [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection">
         <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef class="button-column">
+          <th mat-header-cell *matHeaderCellDef class="select-column">
             <mat-checkbox (change)="$event ? masterToggle() : null"
               [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()">
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              aria-label="Select all">
             </mat-checkbox>
           </th>
-          <td mat-cell *matCellDef="let row">
+          <td mat-cell *matCellDef="let row" class="select-column" (click)="$event.stopPropagation()">
             <mat-checkbox (click)="$event.stopPropagation()"
-              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+              aria-label="Select row">
             </mat-checkbox>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let group" class="name-cell">{{group.name}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="devices">
+          <th mat-header-cell *matHeaderCellDef class="num">Devices</th>
+          <td mat-cell *matCellDef="let group" class="num">{{group.device_ids?.length || 0}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="generated">
+          <th mat-header-cell *matHeaderCellDef>Origin</th>
           <td mat-cell *matCellDef="let group">
-            {{group.name}}
+            @if (group.auto_generated_by_device) {
+              <span class="type-chip" matTooltip="Generated from a single device">Generated</span>
+            }
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="show">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Show</th>
-          <td mat-cell *matCellDef="let group">
-            <button (click)="showDevices(group)" mat-icon-button color="accent"
-              matTooltip="Show Devices">
-              <mat-icon>important_devices</mat-icon>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let group" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (canEdit(group)) {
+                <button mat-menu-item (click)="editDeviceGroup(group)"><mat-icon>edit</mat-icon> Edit</button>
+              } @else {
+                <button mat-menu-item (click)="editDeviceGroup(group)"><mat-icon>info</mat-icon> Details</button>
+              }
+              <button mat-menu-item (click)="showDevices(group)"><mat-icon>important_devices</mat-icon> Show devices</button>
+              @if (userHasAdministratePermission(group.id)) {
+                <button mat-menu-item (click)="shareDeviceGroup(group)"><mat-icon>share</mat-icon> Share</button>
+              }
+              @if (userHasDeleteAuthorization && userHasAdministratePermission(group.id)) {
+                <button mat-menu-item class="danger" (click)="deleteDeviceGroup(group)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
           </td>
         </ng-container>
-
-        @if (userHasUpdateAuthorization) {
-          <ng-container matColumnDef="edit">
-            <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
-            <td mat-cell *matCellDef="let group">
-              <button (click)="editDeviceGroup(group)" [disabled]="!userHasEditPermission(group.id)" mat-icon-button
-                color="accent" matTooltip="Edit">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-        }
-
-        <ng-container matColumnDef="share">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Share</th>
-          <td mat-cell *matCellDef="let group">
-            <button mat-icon-button color="accent" matTooltip="Share" (click)="shareDeviceGroup(group)"
-              [disabled]="!userHasAdministratePermission(group.id)">
-              <mat-icon>share</mat-icon>
-
-            </button>
-          </td>
-        </ng-container>
-
-        @if (userHasDeleteAuthorization) {
-          <span>
-            <ng-container matColumnDef="delete">
-              <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
-              <td mat-cell *matCellDef="let group">
-                <button (click)="deleteDeviceGroup(group)" [disabled]="!userHasAdministratePermission(group.id)" mat-icon-button
-                  color="accent" matTooltip="Delete">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="header-delete-all">
-              <th mat-header-cell *matHeaderCellDef colspan="10">
-                <div class="ly-row">
-                  <div class="ly-row ly-align-center-center">You have
-                    selected {{selection.selected.length}} items
-                  </div>
-                  <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </th>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['header-delete-all']" [hidden]="selection.selected.length === 0">
-            </tr>
-          </span>
-        }
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let m; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let group; columns: displayedColumns;" class="clickable-row" (click)="editDeviceGroup(group)"></tr>
       </table>
     </div>
 
     <mat-paginator #paginator [length]="totalCount" [pageSize]="list.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-    showFirstLastButtons></mat-paginator>
+      showFirstLastButtons></mat-paginator>
   </div>
 </div>
-
-@if (userHasCreateAuthorization) {
-  <button mat-fab class="fab" matTooltip="Add new device class" (click)="newDeviceGroup()">
-    <mat-icon>add</mat-icon>
-  </button>
-}

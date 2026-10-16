@@ -37,11 +37,11 @@
       </div>
     }
 
-    @if (userHasUpdateDisplayNameAuthorization) {
+    @if (userHasUpdateDisplayNameAuthorization || readOnly) {
       <div>
         <mat-form-field appearance="outline" class="full-width" color="accent">
           <mat-label>Display Name</mat-label>
-          <input cdkFocusInitial matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}">
+          <input cdkFocusInitial matInput [(ngModel)]="displayname" [ngModelOptions]="{standalone: true}" [disabled]="readOnly">
           <mat-error senergyError label="Display Name"></mat-error>
         </mat-form-field>
       </div>
@@ -52,13 +52,13 @@
         <mat-form-field appearance="outline" class="full-width" color="accent">
           <mat-label>Local ID</mat-label>
           <input matInput [(ngModel)]="device.local_id" [ngModelOptions]="{standalone: true}"
-            [generic_validator]="isValidLocalIdValidator">
+            [generic_validator]="isValidLocalIdValidator" [disabled]="readOnly">
           <mat-error senergyError label="Local ID"></mat-error>
         </mat-form-field>
       </div>
     }
 
-    @if (userHasUpdateAttributesAuthorization) {
+    @if (userHasUpdateAttributesAuthorization || readOnly) {
       <div class="attributes">
         <div class="divider">
           Attributes
@@ -70,7 +70,7 @@
               <mat-form-field appearance="outline" class="third-width" color="accent">
                 <mat-label>Key</mat-label>
                 <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-                  [disabled]="!editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
+                  [disabled]="readOnly || !editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
                 [addTag]="addAttribute()"></mtx-select>
                 <mat-error senergyError label="Key"></mat-error>
               </mat-form-field>
@@ -78,12 +78,12 @@
               <mat-form-field appearance="outline" class="third-width" color="accent">
                 <mat-label>Value</mat-label>
                 <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
-                  [disabled]="!editableAttribute(attr)">
+                  [disabled]="readOnly || !editableAttribute(attr)">
                 <mat-error senergyError label="Value"></mat-error>
               </mat-form-field>
               <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">
                 <button mat-icon-button color="warn" (click)="removeAttr(i)"
-                  [disabled]="!editableAttribute(attr)">
+                  [disabled]="readOnly || !editableAttribute(attr)">
                   @if (!editableAttribute(attr)) {
                     <mat-icon>conversion_path</mat-icon>
                   }
@@ -95,13 +95,17 @@
             }
           </div>
         }
-        <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+        @if (!readOnly) {
+          <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
+        }
       </div>
     }
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="save()" [disabled]="!isValid()">Save</button>
+  <button mat-raised-button color="primary" (click)="close()">{{readOnly ? 'Close' : 'Cancel'}}</button>
+  @if (!readOnly) {
+    <button mat-raised-button color="accent" (click)="save()" [disabled]="!isValid()">Save</button>
+  }
 </mat-dialog-actions>

@@ -1,0 +1,147 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatDialog } from '@angular/material/dialog';
+import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
+import { delay } from 'rxjs/operators';
+import { of } from 'rxjs';
+
+import { DeviceInstancesComponent } from './device-instances.component';
+import { DeviceInstancesService } from './shared/device-instances.service';
+import { DeviceInstancesDialogService } from './shared/device-instances-dialog.service';
+import { DeviceInstanceModel } from './shared/device-instances.model';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { DialogsService } from '../../../core/services/dialogs.service';
+import { CoreModule } from '../../../core/core.module';
+
+describe('DeviceInstancesComponent list', () => {
+    let component: DeviceInstancesComponent;
+    let fixture: ComponentFixture<DeviceInstancesComponent>;
+
+    const service: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
+    const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
+    const exportDataService: Spy<ExportDataService> = createSpyFromClass<ExportDataService>(ExportDataService);
+    const dialogService: Spy<DeviceInstancesDialogService> = createSpyFromClass<DeviceInstancesDialogService>(DeviceInstancesDialogService);
+    const device = (write: boolean): DeviceInstanceModel => ({
+        id: 'urn:device:1', name: 'meter', display_name: 'Meter', device_type_id: 'dt', device_type_name: 'Smart meter',
+        connection_state: 'online', shared: false, attributes: [{ key: 'inactive', value: 'true', origin: 'web-ui' }],
+        permissions: { read: true, write, administrate: write, execute: true },
+    } as unknown as DeviceInstanceModel);
+
+    function init(share = true, nameRight = true) {
+        service.getDeviceInstances.and.returnValue(of({ result: [device(true)], total: 1 }).pipe(delay(1)));
+        service.userHasShareAuthorization.and.returnValue(share);
+        service.userHasDeleteAuthorization.and.returnValue(true);
+        service.userHasCreateAuthorization.and.returnValue(true);
+        service.userHasUpdateAuthorization.and.returnValue(true);
+        service.userHasUpdateDisplayNameAuthorization.and.returnValue(nameRight);
+        service.userHasUpdateAttributesAuthorization.and.returnValue(false);
+        service.userHasDefaultAttributesPermissions.and.returnValue(true);
+        deviceTypeService.userHasReadAuthorization.and.returnValue(true);
+        exportDataService.userHasUsageAuthroization.and.returnValue(false);
+        dialogService.openDeviceEditDialog.and.returnValue(of(null));
+
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [CoreModule, RouterTestingModule, NoopAnimationsModule, MatSnackBarModule, MatPaginatorModule, DeviceInstancesComponent],
+            providers: [
+                { provide: DeviceInstancesService, useValue: service },
+                { provide: DeviceInstancesDialogService, useValue: dialogService },
+                { provide: DeviceTypeService, useValue: deviceTypeService },
+                { provide: ExportDataService, useValue: exportDataService },
+                { provide: PermissionsService, useValue: {} },
+                { provide: PermissionsDialogService, useValue: {} },
+                { provide: DialogsService, useValue: {} },
+                { provide: MatDialog, useValue: { open: jasmine.createSpy('open') } },
+            ],
+        }).compileComponents();
+        spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+        fixture = TestBed.createComponent(DeviceInstancesComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+        tick(400);
+        fixture.detectChanges();
+    }
+
+    afterEach(() => {
+        service.getDeviceInstances.calls.reset();
+        dialogService.openDeviceEditDialog.calls.reset();
+    });
+
+    it('reloads exactly once when the refresh button is clicked', fakeAsync(() => {
+        init();
+        service.getDeviceInstances.calls.reset();
+
+        (fixture.nativeElement.querySelector('senergy-searchbar button') as HTMLButtonElement).click();
+        fixture.detectChanges();
+        tick(400);
+        discardPeriodicTasks();
+
+        expect(service.getDeviceInstances).toHaveBeenCalledTimes(1);
+    }));
+
+    it('takes the bulk share from the share right, not from the delete right', fakeAsync(() => {
+        init(false);
+        discardPeriodicTasks();
+
+        expect(component.userHasShareAuthoriation).toBeFalse();
+        expect(component.displayedColumns).toContain('select');
+    }));
+
+    it('puts the filter button, the default attributes button and the active filter chips into the toolbar', fakeAsync(() => {
+        init();
+        component.routerNetwork = 'n1';
+        component.routerNetworkName = 'Gateway';
+        fixture.detectChanges();
+        discardPeriodicTasks();
+
+        const filters = fixture.nativeElement.querySelector('senergy-list-toolbar .toolbar-filters') as HTMLElement;
+        expect(filters.textContent).toContain('Filter');
+        expect(filters.querySelector('mat-chip')?.textContent).toContain('Gateway');
+        expect(filters.querySelector('[aria-label="Default attributes"]')).not.toBeNull();
+        expect(component.filtered).toBeTrue();
+    }));
+
+    it('opens the edit dialog on a row click, read-only without the right to change this device', fakeAsync(() => {
+        init();
+        component.openDevice(device(true));
+        expect(dialogService.openDeviceEditDialog.calls.mostRecent().args[2]).toBeTrue();
+
+        component.openDevice(device(false));
+        expect(dialogService.openDeviceEditDialog.calls.mostRecent().args.slice(1, 4)).toEqual([false, false, false]);
+        discardPeriodicTasks();
+    }));
+
+    it('shows the connection state and an inactive device as status chips', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+
+        expect(fixture.nativeElement.querySelector('tr.clickable-row .status-chip').textContent).toBe('Inactive');
+        component.dataSource.data = [{ ...device(true), attributes: [] } as DeviceInstanceModel];
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('tr.clickable-row .status-chip.online').textContent).toBe('Online');
+    }));
+});

@@ -27,7 +27,7 @@ describe('DeviceInstancesEditDialogComponent', () => {
     let dialogRefSpy: Spy<MatDialogRef<DeviceInstancesEditDialogComponent>>;
     let deviceTypeServiceSpy: Spy<DeviceTypeService>;
 
-    const newComponent = (device: DeviceInstanceModel) => {
+    const newComponent = (device: DeviceInstanceModel, readOnly?: boolean) => {
         dialogRefSpy = createSpyFromClass(MatDialogRef<DeviceInstancesEditDialogComponent>);
         deviceTypeServiceSpy = createSpyFromClass(DeviceTypeService);
         deviceTypeServiceSpy.getProtocols.and.returnValue(of([]));
@@ -44,6 +44,7 @@ describe('DeviceInstancesEditDialogComponent', () => {
                         device,
                         userHasUpdateDisplayNameAuthorization: true,
                         userHasUpdateAttributesAuthorization: true,
+                        readOnly,
                     },
                 },
             ],
@@ -81,5 +82,10 @@ describe('DeviceInstancesEditDialogComponent', () => {
         const closedWith = dialogRefSpy.close.calls.mostRecent().args[0] as DeviceInstanceModel;
         expect(closedWith.attributes?.find((attr) => attr.key === 'shared/nickname')?.value).toBe('new-nickname');
         expect(closedWith.display_name).toBe('new-nickname');
+    });
+
+    it('is editable by default and read-only when opened with readOnly', () => {
+        expect(newComponent(deviceWithNickname()).readOnly).toBeFalse();
+        expect(newComponent(deviceWithNickname(), true).readOnly).toBeTrue();
     });
 });
