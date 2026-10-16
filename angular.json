@@ -136,12 +136,6 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
-            },
-            "preview": {
-              "optimization": false,
-              "sourceMap": false,
-              "budgets": [],
-              "browser": "src/main-preview.ts"
             }
           },
           "defaultConfiguration": "production"
@@ -157,9 +151,6 @@
             },
             "dev": {
               "buildTarget": "senergy-web-ui:build:dev"
-            },
-            "preview": {
-              "buildTarget": "senergy-web-ui:build:preview"
             }
           }
         },

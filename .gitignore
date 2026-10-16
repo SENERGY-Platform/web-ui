@@ -57,3 +57,6 @@ set-env.js
 .eslintcache
 
 stats.html
+# Local preview harness (login-free views with fixture data), kept out of the repository
+/src/preview/
+/src/main-preview.ts
