@@ -13,88 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-.container {
-    height: calc(100% - 84px);
-    overflow-y: auto;
-}
-
-.search {
+.title-line {
 	display: flex;
-	width: 100%;
-	margin-bottom: 8px;
-}
-
-.search > senergy-searchbar {
-	flex: 1 1 auto;
-	width: 100%;
-}
-
-.bulk-actions {
-	display: flex;
-	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 8px;
-	padding: 8px 12px;
-	border-radius: 8px;
-	background: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
+	gap: 8px;
 }
 
-.table-wrapper {
-	border-radius: 8px;
-}
-
-.notifications-table-container {
-	overflow-x: auto;
-}
-
-mat-paginator {
-	border-top: 1px solid color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);
-}
-
-.notification-table {
-	width: 100%;
-	min-width: 900px;
-}
-
-.title-cell {
-	font-weight: 500;
-}
-
-.title-content {
-	position: relative;
-	display: inline-block;
-	padding-right: 16px;
-}
-
-.unread-badge {
-	position: absolute;
-	top: -2px;
-	right: 0;
+.unread-dot {
+	flex: none;
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
-	background: #ff1744;
-	box-shadow: 0 0 0 2px rgba(255, 23, 68, 0.28), 0 0 8px rgba(255, 23, 68, 0.9);
+	background: var(--mat-sys-primary);
 }
 
-.message-cell {
+.message-line {
+	max-width: 640px;
 	white-space: pre-wrap;
 	word-break: break-word;
 	line-height: 1.35;
-}
-
-.actions-cell {
-	white-space: nowrap;
-}
-
-.empty-state {
-	padding: 24px;
-	text-align: center;
-	border-radius: 8px;
-	background: color-mix(in srgb, var(--mat-sys-on-surface) 3%, transparent);
-}
-
-.sb-button {
-    margin-top: .5em;
 }

@@ -21,17 +21,20 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { CertificatesService } from './shared/certificates.service';
-import { concatMap, map, Observable, of } from 'rxjs';
+import { concatMap, map, Observable, of, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { CertificateRevokeDialogComponent } from './certificate-revoke-dialog/certificate-revoke-dialog.component';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { NgClass, DatePipe, KeyValuePipe } from '@angular/common';
-import { MatTooltip } from '@angular/material/tooltip';
+import { DatePipe, KeyValuePipe } from '@angular/common';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 
@@ -40,7 +43,7 @@ import { MatIcon } from '@angular/material/icon';
     templateUrl: './certificates.component.html',
     styleUrl: './certificates.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, NgClass, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe, KeyValuePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatMenu, MatMenuItem, MatMenuTrigger, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe, KeyValuePipe]
 })
 export class CertificatesComponent implements OnInit, AfterViewInit {
   private preferencesService = inject(PreferencesService);
@@ -52,7 +55,9 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
 
 
   dataReady = false;
-  displayedColumns = ['serial_number', 'metadata', 'issued_at', 'not_before', 'expiry', 'revoked_at', 'reason'];
+  displayedColumns = ['serial_number', 'status', 'metadata', 'issued_at', 'not_before', 'expiry'];
+  readonly dateFormat = LIST_DATE_FORMAT;
+  searchText = '';
   pageSize = this.preferencesService.pageSize;
   dataSource = new MatTableDataSource<CertificateInfo>();
   @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -65,11 +70,12 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.initSearch();
     if (this.userHasRevokeAuthorization) {
-      this.displayedColumns.push('revoke');
+      this.displayedColumns.push('actions');
     }
   }
 
   ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
     if (this.sort) {
       this.dataSource.sort = this.sort;
     }
@@ -103,21 +109,30 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
     }));
   }
 
+  /** The refresh button of the toolbar: loads the certificates again and keeps the search. */
+  refresh() {
+    this.reload().subscribe(() => this.applySearch(this.searchText));
+  }
+
+  private applySearch(searchText: string) {
+    this.paginator?.firstPage();
+    this.dataSource.data = this.certs.filter(c => {
+      if (c.serial_number.indexOf(searchText) !== -1) {
+        return true;
+      }
+      if (this.stringifyMetadata(c).indexOf(searchText) !== -1) {
+        return true;
+      }
+      return false;
+    });
+  }
+
   private initSearch() {
     this.searchbarService.currentSearchText.pipe(
+      tap(searchText => this.searchText = searchText),
       concatMap((searchText: string) => this.reload().pipe(map(_ => searchText))),
       takeUntilDestroyed(this.destroyRef),
-    ).subscribe(searchText => {
-      this.dataSource.data = this.certs.filter(c => {
-        if (c.serial_number.indexOf(searchText) !== -1) {
-          return true;
-        }
-        if (this.stringifyMetadata(c).indexOf(searchText) !== -1) {
-          return true;
-        }
-        return false;
-      });
-    });
+    ).subscribe(searchText => this.applySearch(searchText));
   }
 
   stringifyMetadata(a: any): string {

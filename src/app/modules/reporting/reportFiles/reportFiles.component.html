@@ -13,91 +13,81 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<senergy-page-header [title]="report.name || 'Report files'" description="Files generated for this report."
+  backLabel="Reports" backLink="/reporting/reports">
+</senergy-page-header>
 
+<senergy-list-toolbar [showSearch]="false" (refresh)="refresh()"></senergy-list-toolbar>
 
-<div class="layout-margin">
+<div class="page-body">
   <senergy-spinner [show]="!ready || downloading"></senergy-spinner>
-  @if (ready && report.name) {
-    <div class="report-name">{{report.name}}</div>
-  }
+
+  <!-- A report file that is still being built: kept because it is the only place that shows the progress and a failure. -->
   @if (reportJob !== null) {
-    <div class="job-status mat-elevation-z1">
+    <div class="job-status">
       @if (reportJobRunning) {
         <mat-icon>hourglass_empty</mat-icon>
       }
       @if (reportJobFailed) {
-        <mat-icon color="warn">warning</mat-icon>
+        <mat-icon class="job-failed">warning</mat-icon>
       }
       @if (!reportJobRunning && !reportJobFailed) {
-        <mat-icon class="color-accent">check_circle</mat-icon>
+        <mat-icon class="job-done">check_circle</mat-icon>
       }
       <div class="job-status-body">
         <span>{{reportJobLabel}}</span>
         @if (reportJobRunning) {
-          <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         }
       </div>
     </div>
   }
-  <div class="mat-elevation-z1" [hidden]="!ready || reportsDataSource.data.length === 0">
+
+  @if (ready && reportsDataSource.data.length === 0) {
+    <senergy-empty-state icon="folder_open" title="No files yet"
+      text="Files appear here once the report has been created.">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || reportsDataSource.data.length === 0">
     <div class="table-container">
       <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="createdAt"
         matSortDirection="desc" matSortDisableClear>
 
-        <ng-container matColumnDef="id">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Created</th>
           <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.id}}
-            </div>
+            <div class="name-cell">{{element.createdAt | date: dateFormat}}</div>
+            <div class="muted id-line">{{element.id}}</div>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="type">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>Typ</th>
-          <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.type}}
-            </div>
-          </td>
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let element"><span class="type-chip">{{element.type}}</span></td>
         </ng-container>
 
-        <ng-container matColumnDef="createdAt">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>createdAt</th>
-          <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.createdAt | date:"medium"}}
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="download">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Download</th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="accent" [disabled]="downloading"
-              (click)="download($event, element)" matTooltip="Download">
-              <mat-icon>download-circle</mat-icon>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let element" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="delete">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="warn" (click)="delete($event, element)" matTooltip="Delete">
-              <mat-icon>delete</mat-icon>
-            </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              <button mat-menu-item [disabled]="downloading" (click)="download($event, element)"><mat-icon>download</mat-icon> Download</button>
+              @if (userMayDelete) {
+                <button mat-menu-item class="danger" (click)="delete($event, element)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row"
+          (click)="!downloading && download($event, row)"></tr>
       </table>
     </div>
     <mat-paginator #paginator [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
     showFirstLastButtons></mat-paginator>
   </div>
-  @if (ready && reportsDataSource.data.length === 0) {
-    <div>No report files found.</div>
-  }
 </div>

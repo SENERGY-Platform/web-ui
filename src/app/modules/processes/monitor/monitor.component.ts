@@ -33,16 +33,18 @@ import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MonitorFogFactory } from './shared/monitor-fog.service';
-import { UtilService } from 'src/app/core/services/util.service';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
-import { NgClass, DatePipe } from '@angular/common';
-import { MatChipListbox, MatChipOption, MatChipRemove, MatChipSet, MatChipRow } from '@angular/material/chips';
+import { DatePipe } from '@angular/common';
+import { MatChipRemove, MatChipSet, MatChip } from '@angular/material/chips';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 
@@ -51,7 +53,7 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
     templateUrl: './monitor.component.html',
     styleUrls: ['./monitor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatTabGroup, MatTab, SearchbarComponent, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, NgClass, MatChipListbox, MatChipOption, MatChipRemove, MatChipSet, MatChipRow, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
+    imports: [MatTabGroup, MatTab, PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatChip, MatChipRemove, MatChipSet, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
 })
 export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
@@ -61,14 +63,14 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     private route = inject(ActivatedRoute);
     private hubsService = inject(NetworksService);
     private fogMonitorFactory = inject(MonitorFogFactory);
-    utilsService = inject(UtilService);
+    readonly dateFormat = LIST_DATE_FORMAT;
     preferencesService = inject(PreferencesService);
     private destroyRef = inject(DestroyRef);
 
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
-    displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
-    displayedColumnsRunning: string[] = ['select', 'definitionName', 'id', 'startTime', 'action'];
+    displayedColumnsFinished: string[] = ['select', 'definitionName', 'status', 'startTime', 'endTime', 'duration', 'actions'];
+    displayedColumnsRunning: string[] = ['select', 'definitionName', 'status', 'startTime', 'actions'];
     listSelection = new ListSelection<MonitorProcessModel>(() => this.dataSourceFinished.connect().value);
     listSelectionRunning = new ListSelection<MonitorProcessModel>(() => this.dataSourceRunning.connect().value);
     selection = this.listSelection.model;
@@ -220,6 +222,30 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
             this.isLoadingResultsFinished = true;
         }
         this.reload();
+    }
+
+    /** True while the search or a filter narrows the list; picks the empty-state text. */
+    get filtered(): boolean {
+        return this.searchText !== '' || this.selectedDeployment !== null || !!this.businessKeyFilter;
+    }
+
+    /** A placeholder waits for the hub to sync; the platform knows no instance to show details of yet. */
+    isPlaceholder(process: MonitorProcessModel): boolean {
+        const p = process as MonitorProcessModel & { is_placeholder?: boolean; marked_for_delete?: boolean };
+        return !!(p.is_placeholder || p.marked_for_delete);
+    }
+
+    stateLabel(state: string): string {
+        switch (state) {
+            case 'COMPLETED':
+                return 'Completed';
+            case 'EXTERNALLY_TERMINATED':
+                return 'Stopped';
+            case 'INTERNALLY_TERMINATED':
+                return 'Aborted';
+            default:
+                return state;
+        }
     }
 
     openDetailsDialog(id: string): void {
@@ -470,7 +496,7 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private reload() {
+    reload() {
         if (this.activeIndex === 0) {
             this.reloadRunningSub.emit(true);
         } else {

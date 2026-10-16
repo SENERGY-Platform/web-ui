@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {TimescaleRulesService} from './shared/timescale-rules.service';
 import {TimescaleRuleModel, TimescaleRuleTemplateModel} from './shared/timescale-rule.model';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import {ImportTypeModel} from '../../imports/import-types/shared/import-types.model';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {TimescaleRulesCreateEditComponent} from './timescale-rules-create-edit/timescale-rules-create-edit.component';
 import {DialogsService} from '../../../core/services/dialogs.service';
@@ -29,10 +29,17 @@ import {map} from 'rxjs/operators';
 import {
     TimescaleRulesCreateEditTemplateComponent
 } from './timescale-rules-create-edit-template/timescale-rules-create-edit-template.component';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatPaginator } from '@angular/material/paginator';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { loadAllPages } from '../../../core/classes/load-all-pages';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
@@ -40,7 +47,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     templateUrl: './timescale-rules.component.html',
     styleUrls: ['./timescale-rules.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatIconButton, MatIcon, SpinnerComponent, InfiniteScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class TimescaleRulesComponent implements OnInit {
     private timescaleRuleService = inject(TimescaleRulesService);
@@ -48,19 +55,38 @@ export class TimescaleRulesComponent implements OnInit {
     private dialogsService = inject(DialogsService);
     private authService = inject(AuthorizationService);
 
-    @ViewChild(MatTable, {static: false}) table!: MatTable<ImportTypeModel>;
+    private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
+    preferencesService = inject(PreferencesService);
+
+    /** The rule manager has no total, so every rule is loaded and the list pages on the client. */
+    @ViewChild('paginator', { static: false })
+    set paginator(value: MatPaginator | undefined) {
+        if (value) {
+            this.dataSource.paginator = value;
+        }
+    }
 
     rules: TimescaleRuleModel[] = [];
+    dataSource = new MatTableDataSource<TimescaleRuleModel>();
+    displayedColumns = ['description', 'group', 'priority', 'users', 'roles', 'status', 'actions'];
+    searchText = '';
     dataReady = false;
-    limitInit = 100;
-    limit = this.limitInit;
-    offset = 0;
     dialogWidth = 700;
     roles: string[] = [];
     users: any[] = [];
     templates: TimescaleRuleTemplateModel[] = [];
 
     ngOnInit(): void {
+        this.dataSource.filterPredicate = (rule, filter) => {
+            const needle = filter.trim().toLowerCase();
+            return [rule.description, rule.group, this.usernames(rule.users), (rule.roles || []).join(' ')].join(' ').toLowerCase().includes(needle);
+        };
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((text) => {
+            this.searchText = text;
+            this.dataSource.filter = text;
+            this.dataSource.paginator?.firstPage();
+        });
         forkJoin([
             this.load(false),
             this.authService.loadAllRoles().pipe(map((roles: any | { error: string }) => {
@@ -84,11 +110,9 @@ export class TimescaleRulesComponent implements OnInit {
     }
 
     load(setReady: boolean = true): Observable<any> {
-        return this.timescaleRuleService.getRules(this.limit, this.offset).pipe(map(rules => {
-            this.rules.push(...rules);
-            if (this.table !== undefined) {
-                this.table.renderRows();
-            }
+        return loadAllPages((limit, offset) => this.timescaleRuleService.getRules(limit, offset)).pipe(map(rules => {
+            this.rules = rules;
+            this.refreshTable();
             if (setReady) {
                 this.dataReady = true;
             }
@@ -96,16 +120,15 @@ export class TimescaleRulesComponent implements OnInit {
     }
 
     reload() {
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.rules = [];
         this.load().subscribe();
     }
 
-    onScroll() {
-        this.limit += this.limitInit;
-        this.offset = this.rules.length;
-        this.load().subscribe();
+    hasErrors(rule: TimescaleRuleModel): boolean {
+        return rule.errors !== undefined && rule.errors !== null && rule.errors.length > 0;
+    }
+
+    private refreshTable() {
+        this.dataSource.data = this.rules;
     }
 
     add() {
@@ -124,7 +147,7 @@ export class TimescaleRulesComponent implements OnInit {
             .subscribe((rule) => {
                 if (rule !== undefined) {
                     this.rules.push(rule);
-                    this.table.renderRows();
+                    this.refreshTable();
                 }
             });
     }
@@ -146,7 +169,7 @@ export class TimescaleRulesComponent implements OnInit {
             .subscribe((rule) => {
                 if (rule !== undefined) {
                     this.rules.push(rule);
-                    this.table.renderRows();
+                    this.refreshTable();
                 }
             });
     }
@@ -184,7 +207,7 @@ export class TimescaleRulesComponent implements OnInit {
                 .subscribe((rule) => {
                     if (rule !== undefined) {
                         this.rules[this.rules.indexOf(r)] = rule;
-                        this.table.renderRows();
+                        this.refreshTable();
 
                     }
                 });
@@ -195,7 +218,7 @@ export class TimescaleRulesComponent implements OnInit {
                 .subscribe((rule) => {
                     if (rule !== undefined) {
                         this.rules[this.rules.indexOf(r)] = rule;
-                        this.table.renderRows();
+                        this.refreshTable();
                     }
                 });
         }
@@ -207,8 +230,11 @@ export class TimescaleRulesComponent implements OnInit {
                 if (del === true) {
                     this.timescaleRuleService.deleteRule(r.id).subscribe(t => {
                         if (t) {
-                            this.rules.splice(this.rules.indexOf(r));
-                            this.table.renderRows();
+                            const index = this.rules.indexOf(r);
+                            if (index !== -1) {
+                                this.rules.splice(index, 1);
+                                this.refreshTable();
+                            }
                         }
                     });
                 }

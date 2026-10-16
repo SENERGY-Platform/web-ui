@@ -18,6 +18,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatTabGroup, MatTabsModule } from '@angular/material/tabs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideFormFieldDefaults } from './form-field-defaults';
 
@@ -28,7 +29,23 @@ import { provideFormFieldDefaults } from './form-field-defaults';
 })
 class PlainFieldComponent {}
 
+@Component({
+    template: '<mat-tab-group><mat-tab label="One">a</mat-tab><mat-tab label="Two">b</mat-tab></mat-tab-group>',
+    imports: [MatTabsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+})
+class PlainTabsComponent {}
+
 describe('provideFormFieldDefaults', () => {
+    it('keeps the tab headers at the width of their labels', () => {
+        TestBed.configureTestingModule({ imports: [PlainTabsComponent, NoopAnimationsModule], providers: [provideFormFieldDefaults()] });
+        const fixture = TestBed.createComponent(PlainTabsComponent);
+        fixture.detectChanges();
+
+        const group = fixture.debugElement.query((el) => el.componentInstance instanceof MatTabGroup).componentInstance as MatTabGroup;
+        expect(group.stretchTabs).toBeFalse();
+    });
+
     it('makes a field without attributes outlined, with a fixed subscript line', () => {
         TestBed.configureTestingModule({ imports: [PlainFieldComponent, NoopAnimationsModule], providers: [provideFormFieldDefaults()] });
         const fixture = TestBed.createComponent(PlainFieldComponent);

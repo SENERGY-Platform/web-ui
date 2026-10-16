@@ -34,6 +34,12 @@ export class ListToolbarComponent {
     @Input() selectedCount = 0;
     /** Text the search starts with, for pages that restore the last search. */
     @Input() searchTextIn = '';
+    /** False for lists whose backend has no search: a plain refresh button replaces the search field. */
+    @Input() showSearch = true;
+    /** False for live lists that have nothing to reload. */
+    @Input() supportRefresh = true;
+    /** Disables the search field, e.g. while another filter replaces it. */
+    @Input() searchDisabled = false;
     /** The search field's refresh button; pages that reload on it listen to `(refresh)`. */
     @Output() refresh = new EventEmitter<void>();
     @Output() clearSelection = new EventEmitter<void>();

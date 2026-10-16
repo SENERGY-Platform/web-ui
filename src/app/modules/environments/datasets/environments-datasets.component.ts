@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EnvironmentsService } from '../shared/environments.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { confirmDelete } from '../../../core/services/delete-flows';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { DatasetMeta } from '../shared/environments.model';
 import { formatBytes } from '../shared/environments-format';
 import { EnvironmentsDatasetUploadDialogComponent } from './dialogs/environments-dataset-upload-dialog.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { MatTooltip } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
@@ -35,17 +44,30 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './environments-datasets.component.html',
     styleUrls: ['./environments-datasets.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatButton, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIcon, SpinnerComponent, MatMenu, MatMenuItem, MatMenuTrigger, MatPaginator, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
 })
 export class EnvironmentsDatasetsComponent implements OnInit {
     private environmentsService = inject(EnvironmentsService);
     private dialog = inject(MatDialog);
     private dialogsService = inject(DialogsService);
     private snackBar = inject(MatSnackBar);
+    private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
+    preferencesService = inject(PreferencesService);
+
+    /** The dataset endpoint lists everything, so search and paging run on the client. */
+    @ViewChild('paginator', { static: false })
+    set paginator(value: MatPaginator | undefined) {
+        if (value) {
+            this.dataSource.paginator = value;
+        }
+    }
 
     displayedColumns = ['name', 'timezone', 'columns', 'size', 'created'];
     dataSource = new MatTableDataSource<DatasetMeta>();
     dataReady = false;
+    searchText = '';
+    readonly dateFormat = LIST_DATE_FORMAT;
     formatBytes = formatBytes;
 
     userHasReadAuthorization = this.environmentsService.userHasDatasetReadAuthorization();
@@ -54,8 +76,14 @@ export class EnvironmentsDatasetsComponent implements OnInit {
 
     ngOnInit(): void {
         if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
+            this.displayedColumns.push('actions');
         }
+        this.dataSource.filterPredicate = (ds, filter) => (ds.name || '').toLowerCase().includes(filter.trim().toLowerCase());
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((text) => {
+            this.searchText = text;
+            this.dataSource.filter = text;
+            this.dataSource.paginator?.firstPage();
+        });
         this.reload();
     }
 
@@ -79,23 +107,19 @@ export class EnvironmentsDatasetsComponent implements OnInit {
     }
 
     delete(ds: DatasetMeta): void {
-        this.dialogsService
-            .openConfirmDialog(
-                'Delete dataset',
-                'Delete "' + (ds.name || ds.id) + '"? Channels still referencing this dataset stop playing on their next reload.',
-            )
-            .afterClosed()
-            .subscribe((confirmed: boolean | undefined) => {
-                if (confirmed && ds.id) {
-                    this.environmentsService.deleteDataset(ds.id).subscribe((ok) => {
-                        if (ok) {
-                            snackSuccess(this.snackBar, 'Dataset deleted successfully.');
-                        } else {
-                            snackError(this.snackBar, 'Error while deleting the dataset!');
-                        }
-                        this.reload();
-                    });
-                }
-            });
+        confirmDelete(this.dialogsService, 'dataset ' + (ds.name || ds.id), {
+            note: 'Channels still referencing this dataset stop playing on their next reload.',
+        }).subscribe(() => {
+            if (ds.id) {
+                this.environmentsService.deleteDataset(ds.id).subscribe((ok) => {
+                    if (ok) {
+                        snackSuccess(this.snackBar, 'Dataset deleted successfully.');
+                    } else {
+                        snackError(this.snackBar, 'Error while deleting the dataset!');
+                    }
+                    this.reload();
+                });
+            }
+        });
     }
 }

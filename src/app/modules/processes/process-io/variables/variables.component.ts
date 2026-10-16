@@ -30,14 +30,17 @@ import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
-import { UtilService } from 'src/app/core/services/util.service';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../../core/components/empty-state/empty-state.component';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
-import { NgClass, JsonPipe, DatePipe } from '@angular/common';
+import { JsonPipe, DatePipe } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { ShortKeyPipe } from '../shared/short-key.pipe';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
@@ -49,7 +52,7 @@ import { snackError } from 'src/app/core/services/snack-bar-messages';
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, JsonPipe, DatePipe, ShortKeyPipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatButton, MatMenu, MatMenuItem, MatMenuTrigger, JsonPipe, DatePipe, ShortKeyPipe]
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     private processIoService = inject(ProcessIoService);
@@ -58,7 +61,6 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     private dialog = inject(MatDialog);
     private searchbarService = inject(SearchbarService);
     private destroyRef = inject(DestroyRef);
-    utilsService = inject(UtilService);
     private preferencesService = inject(PreferencesService);
 
     sort = 'unix_timestamp_in_s.desc';
@@ -74,7 +76,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     selection = this.listSelection.model;
 
     dataSource = new MatTableDataSource<ProcessIoVariable>();
-    displayedColumns: string[] = ['select', 'unix_timestamp_in_s', 'key', 'process_instance_id', 'process_definition_id', 'value'];
+    displayedColumns: string[] = [];
+    readonly dateFormat = LIST_DATE_FORMAT;
     list = new PagedListState(this.preferencesService, () => this.fetchVariables(), { sortBy: 'unix_timestamp_in_s', sortDirection: 'desc' });
 
 
@@ -82,14 +85,14 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
         this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization();
 
         this.userHasUpdateAuthorization = this.processIoService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
-
         this.userHasDeleteAuthorization = this.processIoService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
+
+        // The selection column only exists for the bulk delete, the menu column only with an action in it.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'key', 'value', 'process_instance_id', 'process_definition_id', 'unix_timestamp_in_s',
+            ...(this.userHasUpdateAuthorization || this.userHasDeleteAuthorization ? ['actions'] : []),
+        ];
 
         this.updateTotal();
     }

@@ -14,28 +14,35 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {BudgetService} from './shared/budget.service';
 import {BudgetModel} from './shared/budget.model';
 import {forkJoin, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {AuthorizationService} from '../../../core/services/authorization.service';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import {BudgetCreateEditComponent} from './budget-create-edit/budget-create-edit.component';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatPaginator } from '@angular/material/paginator';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { loadAllPages } from '../../../core/classes/load-all-pages';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
-import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'senergy-budget',
     templateUrl: './budget.component.html',
     styleUrls: ['./budget.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatIconButton, MatIcon, SpinnerComponent, InfiniteScrollDirective, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatFabButton, MatTooltip]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class BudgetComponent implements OnInit {
     private authService = inject(AuthorizationService);
@@ -43,18 +50,37 @@ export class BudgetComponent implements OnInit {
     private dialog = inject(MatDialog);
     private dialogsService = inject(DialogsService);
 
-    @ViewChild(MatTable, {static: false}) table!: MatTable<BudgetModel>;
+    private searchbarService = inject(SearchbarService);
+    private destroyRef = inject(DestroyRef);
+    preferencesService = inject(PreferencesService);
+
+    /** The budget API has no total, so every budget is loaded and the list pages on the client. */
+    @ViewChild('paginator', { static: false })
+    set paginator(value: MatPaginator | undefined) {
+        if (value) {
+            this.dataSource.paginator = value;
+        }
+    }
 
     budgets: BudgetModel[] = [];
+    dataSource = new MatTableDataSource<BudgetModel>();
+    displayedColumns = ['budget_identifier', 'user', 'value', 'actions'];
+    searchText = '';
     dataReady = false;
-    limitInit = 100;
-    limit = this.limitInit;
-    offset = 0;
     dialogWidth = 700;
     roles: string[] = [];
     users: any[] = [];
 
     ngOnInit(): void {
+        this.dataSource.filterPredicate = (budget, filter) => {
+            const needle = filter.trim().toLowerCase();
+            return [budget.budget_identifier, this.subjectName(budget), budget.value].join(' ').toLowerCase().includes(needle);
+        };
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((text) => {
+            this.searchText = text;
+            this.dataSource.filter = text;
+            this.dataSource.paginator?.firstPage();
+        });
         forkJoin([
             this.load(false),
             this.authService.loadAllRoles().pipe(map((roles: any | { error: string }) => {
@@ -77,11 +103,9 @@ export class BudgetComponent implements OnInit {
     }
 
     load(setReady: boolean = true): Observable<any> {
-        return this.budgetService.getBudgets(this.limit, this.offset).pipe(map(budgets => {
-            this.budgets.push(...budgets);
-            if (this.table !== undefined) {
-                this.table.renderRows();
-            }
+        return loadAllPages((limit, offset) => this.budgetService.getBudgets(limit, offset)).pipe(map(budgets => {
+            this.budgets = budgets;
+            this.refreshTable();
             if (setReady) {
                 this.dataReady = true;
             }
@@ -89,16 +113,11 @@ export class BudgetComponent implements OnInit {
     }
 
     reload() {
-        this.limit = this.limitInit;
-        this.offset = 0;
-        this.budgets = [];
         this.load().subscribe();
     }
 
-    onScroll() {
-        this.limit += this.limitInit;
-        this.offset = this.budgets.length;
-        this.load().subscribe();
+    private refreshTable() {
+        this.dataSource.data = this.budgets;
     }
 
     add() {
@@ -161,8 +180,11 @@ export class BudgetComponent implements OnInit {
                 if (del === true) {
                     this.budgetService.deleteBudget(b).subscribe(t => {
                         if (t) {
-                            this.budgets.splice(this.budgets.indexOf(b));
-                            this.table.renderRows();
+                            const index = this.budgets.indexOf(b);
+                            if (index !== -1) {
+                                this.budgets.splice(index, 1);
+                                this.refreshTable();
+                            }
                         }
                     });
                 }
@@ -171,5 +193,10 @@ export class BudgetComponent implements OnInit {
 
     getUsername(userid: string) {
         return this.users.find(u => u.id === userid)?.username;
+    }
+
+    /** The user name for a user budget, the role for a role budget. */
+    subjectName(b: BudgetModel): string {
+        return (b.user_id ? this.getUsername(b.user_id) : undefined) ?? b.role ?? '';
     }
 }

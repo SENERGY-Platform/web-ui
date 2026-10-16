@@ -26,15 +26,18 @@ import {
 } from '../shared/reporting.model';
 import { ReportingService } from '../shared/reporting.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Observable, concatMap, map } from 'rxjs';
+import { Observable, concatMap, map, tap } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { Router, RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { DatePipe } from '@angular/common';
 
@@ -43,7 +46,7 @@ import { DatePipe } from '@angular/common';
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatTooltip, RouterLink, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, RouterLink, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class ReportsComponent implements OnInit, AfterViewInit {
     snackBar = inject(MatSnackBar);
@@ -53,25 +56,30 @@ export class ReportsComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
     private dialogsService = inject(DialogsService);
     private preferencesService = inject(PreferencesService);
+    private router = inject(Router);
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild(MatSort, { static: false }) sort?: MatSort;
 
     reports: ReportModel[] = [];
     reportsDataSource = new MatTableDataSource<ReportModel>();
-    displayedColumns: string[] = ['id', 'name', 'createdAt', 'updatedAt'];
+    displayedColumns: string[] = ['name', 'templateName', 'files', 'createdAt', 'updatedAt'];
+    readonly dateFormat = LIST_DATE_FORMAT;
+    searchText = '';
+    userMayCreate = false;
+    userMayReadFiles = false;
+    userMayUpdate = false;
+    userMayDelete = false;
     pageSize = this.preferencesService.pageSize;
     ready = false;
 
     ngOnInit() {
-        if (this.reportingService.userHasReadReportFileAuthorization()) {
-            this.displayedColumns.push('files');
-        }
-        if (this.reportingService.userHasUpdateReportAuthorization()) {
-            this.displayedColumns.push('edit');
-        }
-        if (this.reportingService.userHasDeleteReportAuthorization()) {
-            this.displayedColumns.push('delete');
+        this.userMayCreate = this.reportingService.userHasCreateReportAuthorization();
+        this.userMayReadFiles = this.reportingService.userHasReadReportFileAuthorization();
+        this.userMayUpdate = this.reportingService.userHasUpdateReportAuthorization();
+        this.userMayDelete = this.reportingService.userHasDeleteReportAuthorization();
+        if (this.userMayReadFiles || this.userMayUpdate || this.userMayDelete) {
+            this.displayedColumns.push('actions');
         }
         this.initSearch();
     }
@@ -88,6 +96,36 @@ export class ReportsComponent implements OnInit, AfterViewInit {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
         });
+    }
+
+    hasFiles(report: ReportModel): boolean {
+        return !!report.reportFiles && report.reportFiles.length > 0;
+    }
+
+    /** The row opens the report for editing, or its files without the update right. */
+    canOpen(report: ReportModel): boolean {
+        return this.userMayUpdate || (this.userMayReadFiles && this.hasFiles(report));
+    }
+
+    open(report: ReportModel) {
+        if (this.userMayUpdate) {
+            this.edit(report);
+        } else if (this.userMayReadFiles && this.hasFiles(report)) {
+            this.openFiles(report);
+        }
+    }
+
+    edit(report: ReportModel) {
+        this.router.navigateByUrl('/reporting/edit/' + report.id);
+    }
+
+    openFiles(report: ReportModel) {
+        this.router.navigateByUrl('/reporting/files/' + report.id);
+    }
+
+    /** The refresh button of the toolbar: loads the reports again and keeps the search. */
+    refresh() {
+        this.reload().subscribe(() => this.filter(this.searchText));
     }
 
     deleteReport(report: ReportModel) {
@@ -117,6 +155,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
 
     private initSearch() {
         this.searchbarService.currentSearchText.pipe(
+            tap((searchText: string) => this.searchText = searchText),
             concatMap((searchText: string) => this.reload().pipe(map(() => searchText))),
             takeUntilDestroyed(this.destroyRef),
         ).subscribe((searchText: string) => this.filter(searchText));
