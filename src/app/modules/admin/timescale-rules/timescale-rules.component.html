@@ -15,98 +15,78 @@
   ~   limitations under the License.
   ~
   -->
-
-
-<div class="container">
-  <span class="search-button-container ly-row">
-    <span class="ly-flex"></span>
-    <button mat-icon-button (click)="reload()" color="accent" class="refresh">
-      <mat-icon>refresh</mat-icon>
+<senergy-page-header title="Timescale rules" description="Rules that run commands on the time-series tables of selected users and roles.">
+  <ng-container pageActions>
+    <button matButton="filled" (click)="addFromTemplate()">
+      <mat-icon>add</mat-icon> New rule
     </button>
-  </span>
+  </ng-container>
+</senergy-page-header>
+
+<senergy-list-toolbar (refresh)="reload()"></senergy-list-toolbar>
+
+<div class="page-body">
   <senergy-spinner [show]="!dataReady"></senergy-spinner>
 
-  @if (dataReady) {
-    <div class="mat-elevation-z1 ly-column"
-      infiniteScroll
-      [infiniteScrollDistance]="1"
-      [infiniteScrollThrottle]="50"
-      [infiniteScrollContainer]="'.container'"
-      [fromRoot]="true"
-      (scrolled)="onScroll()">
-      <table mat-table [dataSource]="rules">
+  @if (dataReady && dataSource.filteredData.length === 0) {
+    <senergy-empty-state icon="rule" [title]="searchText !== '' ? 'No matching rules' : 'No rules yet'"
+      [text]="searchText !== '' ? 'No rule matches the search.' : 'Rules are created from a template.'">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!dataReady || dataSource.filteredData.length === 0">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource">
         <ng-container matColumnDef="description">
           <th mat-header-cell *matHeaderCellDef>Description</th>
-          <td mat-cell *matCellDef="let m">{{m.description}}</td>
+          <td mat-cell *matCellDef="let m" class="name-cell">{{m.description}}</td>
         </ng-container>
         <ng-container matColumnDef="group">
           <th mat-header-cell *matHeaderCellDef>Group</th>
-          <td mat-cell *matCellDef="let m">{{m.group}}</td>
+          <td mat-cell *matCellDef="let m" class="muted">{{m.group}}</td>
         </ng-container>
         <ng-container matColumnDef="priority">
-          <th mat-header-cell *matHeaderCellDef>Priority</th>
-          <td mat-cell *matCellDef="let m">{{m.priority}}</td>
+          <th mat-header-cell *matHeaderCellDef class="num">Priority</th>
+          <td mat-cell *matCellDef="let m" class="num muted">{{m.priority}}</td>
         </ng-container>
         <ng-container matColumnDef="users">
           <th mat-header-cell *matHeaderCellDef>Users</th>
-          <td mat-cell *matCellDef="let m">{{usernames(m.users)}}</td>
+          <td mat-cell *matCellDef="let m" class="muted">{{usernames(m.users)}}</td>
         </ng-container>
         <ng-container matColumnDef="roles">
           <th mat-header-cell *matHeaderCellDef>Roles</th>
-          <td mat-cell *matCellDef="let m">{{m.roles}}</td>
+          <td mat-cell *matCellDef="let m" class="muted">{{m.roles?.join(', ')}}</td>
         </ng-container>
-        <ng-container matColumnDef="errors">
-          <th mat-header-cell *matHeaderCellDef>Errors</th>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let m">
-            @if (m.errors !== undefined && m.errors !== null && m.errors.length > 0) {
-              <mat-icon color="warn" [matTooltip]="m.errors.join('\n')">highlight_off</mat-icon>
-            }
-            @if ((m.errors === undefined || m.errors === null || m.errors.length === 0) && m.completed_run === true) {
-              <mat-icon>check_circle_outline</mat-icon>
-            }
-            @if ((m.errors === undefined || m.errors === null || m.errors.length === 0) && m.completed_run !== true) {
-              <mat-icon>help_outline</mat-icon>
+            @if (hasErrors(m)) {
+              <span class="status-chip failed" [matTooltip]="m.errors.join('\n')">Failed</span>
+            } @else if (m.completed_run === true) {
+              <span class="status-chip online">Completed</span>
+            } @else {
+              <span class="status-chip">Not run yet</span>
             }
           </td>
         </ng-container>
-        <ng-container matColumnDef="details">
-          <th mat-header-cell *matHeaderCellDef>Details</th>
-          <td mat-cell *matCellDef="let m">
-            <button mat-icon-button (click)="details(m)" color="accent">
-              <mat-icon>info</mat-icon>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let m" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              <button mat-menu-item (click)="details(m)"><mat-icon>info</mat-icon> Details</button>
+              <button mat-menu-item (click)="edit(m)"><mat-icon>edit</mat-icon> Edit</button>
+              <button mat-menu-item class="danger" (click)="delete(m)"><mat-icon>delete</mat-icon> Delete</button>
+            </mat-menu>
           </td>
         </ng-container>
-        <ng-container matColumnDef="edit">
-          <th mat-header-cell *matHeaderCellDef>Edit</th>
-          <td mat-cell *matCellDef="let m">
-            <button mat-icon-button (click)="edit(m)" color="accent">
-              <mat-icon>edit</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="delete">
-          <th mat-header-cell *matHeaderCellDef>Delete</th>
-          <td mat-cell *matCellDef="let m">
-            <button mat-icon-button (click)="delete(m)" color="accent">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-        <tr mat-header-row
-        *matHeaderRowDef="['description', 'group', 'priority', 'users', 'roles', 'errors', 'details', 'edit', 'delete']; sticky: true"></tr>
-        <tr mat-row
-        *matRowDef="let m; columns: ['description', 'group', 'priority', 'users', 'roles', 'errors', 'details', 'edit', 'delete'];"></tr>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let m; columns: displayedColumns;" class="clickable-row" (click)="details(m)"></tr>
       </table>
     </div>
-  }
-
-  <button mat-fab class="fab" (click)="addFromTemplate()" matTooltip="Add new rule from template">
-    <mat-icon>add</mat-icon>
-  </button>
-  <!--
-  <button mat-fab class="fab" (click)="add()" matTooltip="Add new custom rule">
-    <mat-icon>add</mat-icon>
-  </button>
-  -->
+    <mat-paginator #paginator [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+      (page)="preferencesService.pageSize = $event.pageSize" showFirstLastButtons></mat-paginator>
+  </div>
 </div>

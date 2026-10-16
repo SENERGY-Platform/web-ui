@@ -24,23 +24,25 @@ import { TemplateListResponseModel, TemplateModel } from '../shared/reporting.mo
 import { ReportingService } from '../shared/reporting.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { saveAs } from 'file-saver';
-import { Observable, concatMap, map } from 'rxjs';
+import { Observable, concatMap, map, tap } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { reportFileName } from '../shared/report-file-name';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 
 @Component({
     selector: 'senergy-reporting-templates',
     templateUrl: './templates.component.html',
     styleUrls: ['./templates.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatTooltip, MatIcon, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class TemplatesComponent implements OnInit, AfterViewInit {
     snackBar = inject(MatSnackBar);
@@ -49,21 +51,25 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
     private reportingService = inject(ReportingService);
     private searchbarService = inject(SearchbarService);
     private preferencesService = inject(PreferencesService);
+    private router = inject(Router);
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild(MatSort, { static: false }) sort?: MatSort;
 
     templates: TemplateModel[] = [];
     templatesDataSource = new MatTableDataSource<TemplateModel>();
-    displayedColumns: string[] = ['id', 'name', 'type'];
+    displayedColumns: string[] = ['name', 'type'];
+    userMayCreate = false;
+    searchText = '';
     pageSize = this.preferencesService.pageSize;
     ready = false;
     downloading = false;
 
     ngOnInit() {
-        if (this.reportingService.userHasCreateReportAuthorization()) {
-            this.displayedColumns.push('preview');
-            this.displayedColumns.push('create');
+        // Preview and creating a report are both behind the create right, so the menu only exists with it.
+        this.userMayCreate = this.reportingService.userHasCreateReportAuthorization();
+        if (this.userMayCreate) {
+            this.displayedColumns.push('actions');
         }
         this.initSearch();
     }
@@ -82,6 +88,15 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
         });
     }
 
+    create(template: TemplateModel) {
+        this.router.navigateByUrl('/reporting/new/' + template.id);
+    }
+
+    /** The refresh button of the toolbar: loads the templates again and keeps the search. */
+    refresh() {
+        this.reload().subscribe(() => this.filter(this.searchText));
+    }
+
     downloadPreview($event: Event, template: TemplateModel) {
         $event.stopPropagation();
         this.downloading = true;
@@ -95,6 +110,7 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
 
     private initSearch() {
         this.searchbarService.currentSearchText.pipe(
+            tap((searchText: string) => this.searchText = searchText),
             concatMap((searchText: string) => this.reload().pipe(map(() => searchText))),
             takeUntilDestroyed(this.destroyRef),
         ).subscribe((searchText: string) => this.filter(searchText));

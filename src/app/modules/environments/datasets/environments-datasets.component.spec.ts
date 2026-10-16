@@ -81,7 +81,7 @@ class MockEnvironmentsService {
 class MockDialogsService {
     confirmed = true;
 
-    openConfirmDialog(_title: string, _text: string): any {
+    openDeleteDialog(_text: string, _options?: unknown): any {
         return { afterClosed: () => of(this.confirmed) };
     }
 }
@@ -130,18 +130,18 @@ describe('EnvironmentsDatasetsComponent', () => {
         expect(component.dataSource.data[0].name).toBe('profile.csv');
     });
 
-    it('should show the delete column only with delete authorization', () => {
+    it('should show the action column only with delete authorization', () => {
         fixture.detectChanges();
-        expect(component.displayedColumns).toContain('delete');
+        expect(component.displayedColumns).toContain('actions');
     });
 
-    it('should hide the delete column without delete authorization', () => {
+    it('should hide the action column without delete authorization', () => {
         environmentsService.deleteAuthorized = false;
         fixture = TestBed.createComponent(EnvironmentsDatasetsComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
 
-        expect(component.displayedColumns).not.toContain('delete');
+        expect(component.displayedColumns).not.toContain('actions');
     });
 
     it('should delete a dataset after the deletion was confirmed and reload the list', () => {

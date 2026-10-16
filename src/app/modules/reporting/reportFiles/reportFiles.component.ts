@@ -34,10 +34,14 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { reportFileName } from '../shared/report-file-name';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -45,7 +49,7 @@ import { DatePipe } from '@angular/common';
     templateUrl: './reportFiles.component.html',
     styleUrls: ['./reportFiles.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SpinnerComponent, MatIcon, MatProgressBar, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatIcon, MatProgressBar, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     private route = inject(ActivatedRoute);
@@ -62,7 +66,9 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     report: ReportModel = {} as ReportModel;
     reportsDataSource = new MatTableDataSource<ReportFileModel>();
-    displayedColumns: string[] = ['id', 'type', 'createdAt', 'download'];
+    displayedColumns: string[] = ['createdAt', 'type', 'actions'];
+    readonly dateFormat = LIST_DATE_FORMAT;
+    userMayDelete = false;
     pageSize = this.preferencesService.pageSize;
     ready = false;
     downloading = false;
@@ -75,9 +81,7 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit() {
-        if (this.reportingService.userHasDeleteReportFileAuthorization()) {
-            this.displayedColumns.push('delete');
-        }
+        this.userMayDelete = this.reportingService.userHasDeleteReportFileAuthorization();
         if (this.reportId === null) {
             this.ready = true;
             return;
@@ -115,6 +119,13 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
         });
+    }
+
+    /** The refresh button of the toolbar: loads the report and its files again. */
+    refresh() {
+        if (this.reportId !== null) {
+            this.loadReport(this.reportId);
+        }
     }
 
     download($event: Event, reportFile: ReportFileModel) {

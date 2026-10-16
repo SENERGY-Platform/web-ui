@@ -16,7 +16,13 @@
 
 <!-- Both rows stay in the DOM: destroying the searchbar would reset the search text (see SearchbarComponent.ngOnDestroy). -->
 <div class="toolbar-row" [hidden]="selectedCount > 0">
-  <senergy-searchbar [compact]="true" [searchTextIn]="searchTextIn" (refresh)="refresh.emit()"></senergy-searchbar>
+  @if (showSearch) {
+    <senergy-searchbar [compact]="true" [searchTextIn]="searchTextIn" [supportRefresh]="supportRefresh" [disable]="searchDisabled" (refresh)="refresh.emit()"></senergy-searchbar>
+  } @else if (supportRefresh) {
+    <button mat-icon-button class="toolbar-refresh" aria-label="Refresh" (click)="refresh.emit()">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  }
   <div class="toolbar-filters">
     <ng-content select="[toolbarFilters]"></ng-content>
   </div>

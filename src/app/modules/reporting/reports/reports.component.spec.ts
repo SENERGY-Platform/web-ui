@@ -54,6 +54,10 @@ class MockReportingService {
         return of(new HttpResponse<string>({ status: 200 }));
     }
 
+    userHasCreateReportAuthorization(): boolean {
+        return this.authorized;
+    }
+
     userHasReadReportFileAuthorization(): boolean {
         return this.authorized;
     }
@@ -131,9 +135,10 @@ describe('ReportsComponent', () => {
         fixture.detectChanges();
         tick(300);
 
-        expect(component.displayedColumns).toContain('files');
-        expect(component.displayedColumns).toContain('edit');
-        expect(component.displayedColumns).toContain('delete');
+        expect(component.displayedColumns).toContain('actions');
+        expect(component.userMayUpdate).toBeTrue();
+        expect(component.userMayDelete).toBeTrue();
+        expect(component.userMayReadFiles).toBeTrue();
         fixture.destroy();
     }));
 

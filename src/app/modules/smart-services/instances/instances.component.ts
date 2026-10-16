@@ -38,11 +38,16 @@ import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { environment } from 'src/environments/environment';
 import { smartServiceLogsUrl } from './shared/opensearch';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { JsonPipe, DatePipe } from '@angular/common';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
@@ -62,7 +67,7 @@ import { ChangedResourcesHintComponent } from '../changed-resources/changed-reso
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatButton, JsonPipe, DatePipe, ChangedResourcesHintComponent]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatMenu, MatMenuItem, MatMenuTrigger, SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, JsonPipe, DatePipe, ChangedResourcesHintComponent]
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     private instancesService = inject(SmartServiceInstanceService);
@@ -83,7 +88,10 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization = false;
     ready = false;
 
-    displayedColumns = ['pub', 'name', 'description', 'error', 'created_at', 'updated_at', 'release', 'edit', 'upgrade', 'share'];
+    displayedColumns = ['expand', 'name', 'error', 'created_at', 'updated_at', 'actions'];
+    readonly dateFormat = LIST_DATE_FORMAT;
+    /** The log lines only help someone who reads them, and need to know where OpenSearch is. */
+    showLogs = false;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
     totalCount = 200;
@@ -105,14 +113,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     @ViewChild('tableContainer', { static: false }) tableContainer?: ElementRef<HTMLDivElement>;
     ngOnInit(): void {
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
-        // the log lines are only of use to someone who reads them, and the column is dead weight for
-        // everyone else - it also stays hidden while the deployment has not said where OpenSearch is
-        if (this.authorizationService.userIsDeveloper() && environment.openSearchDashboardsUrl && environment.openSearchSmartServiceIndexId) {
-            this.displayedColumns.push('logs');
-        }
-        if (this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete', 'force-delete');
-        }
+        this.showLogs = this.authorizationService.userIsDeveloper() && !!environment.openSearchDashboardsUrl && !!environment.openSearchSmartServiceIndexId;
         this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             this.releaseId = params.get('release_id') || undefined;
             this.instanceId = params.get('instance_id') || undefined;
@@ -144,8 +145,15 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.restoreScrollPosition();
     }
 
-    /** Reloads the current page; `list` drops the load in flight, so an older answer cannot replace a newer one. */
+    /**
+     * Reloads what is shown: the single instance of an `instance_id` link, otherwise the current page. `list` drops
+     * the load in flight, so an older answer cannot replace a newer one.
+     */
     loadInstances(): void {
+        if (this.instanceId) {
+            this.loadSingleInstance(this.instanceId);
+            return;
+        }
         this.list.refresh();
     }
 
@@ -387,11 +395,9 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         );
     }
 
-    calcMaxHeight(): string {
-        if (this.releaseId) {
-            return 'calc(100vh - 199px)';
-        }
-        return 'calc(100vh - 145px)';
+    /** Edit, upgrade, share and delete need administrate; a missing flag counts as allowed, as before. */
+    mayAdminister(instance: SmartServiceInstanceModel): boolean {
+        return instance.permissions_info?.permissions?.administrate !== false;
     }
 
     shareInstance(instance: SmartServiceInstanceModel) {

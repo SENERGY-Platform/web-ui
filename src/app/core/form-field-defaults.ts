@@ -17,6 +17,7 @@
 import { Provider } from '@angular/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS, MatFormFieldDefaultOptions } from '@angular/material/form-field';
 import { MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS } from '@angular/material/slide-toggle';
+import { MAT_TABS_CONFIG } from '@angular/material/tabs';
 
 /**
  * Every form field is outlined with a floating label. The subscript keeps its fixed line, so a validation
@@ -29,5 +30,7 @@ export function provideFormFieldDefaults(): Provider[] {
         { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: FORM_FIELD_DEFAULTS },
         // Toggles show no check or minus glyph in the handle; position and colour carry the state.
         { provide: MAT_SLIDE_TOGGLE_DEFAULT_OPTIONS, useValue: { hideIcon: true } },
+        // Tab headers keep the width of their labels and sit on the left instead of filling the row.
+        { provide: MAT_TABS_CONFIG, useValue: { stretchTabs: false } },
     ];
 }

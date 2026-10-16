@@ -13,30 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-table {
-    width: 100%;
-}
-
 :host {
     --mat-tab-container-height: 54px;
 }
 
 .table-container {
-    position: relative;
-    max-height: calc(var(--app-page-height, 100vh) - 260px);
-    overflow: auto;
+    max-height: calc(var(--app-page-height, 100vh) - 330px);
 }
 
-.offset {
-    margin-right: 8px;
-    padding-top: 4px;
+.id-line {
+    font-size: var(--app-text-xs);
 }
 
 .hub-selected {
     background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
-}
-
-.filter-chip-row {
-    margin-top: 4px;
 }

@@ -25,7 +25,7 @@ import { Subject, takeUntil, debounceTime } from 'rxjs';
 import {
   NotificationModel,
   NotificationTopic,
-  getTopicIcon,
+  getTopicInfo,
   notificationTopicDeviceOffline,
   notificationTopicIncident,
   notificationTopicSmartService,
@@ -37,9 +37,12 @@ import { ConnectionHistoryDialogComponent } from 'src/app/widgets/shared/connect
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from '../../services/snack-bar-messages';
-import { SearchbarComponent } from '../searchbar/searchbar.component';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
+import { PageHeaderComponent } from '../page-header/page-header.component';
+import { ListToolbarComponent } from '../list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
+import { LIST_DATE_FORMAT } from '../../classes/list-date-format';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -54,7 +57,7 @@ interface NotificationDisplayModel extends NotificationModel {
     templateUrl: './notifications.component.html',
     styleUrl: './notifications.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatIcon, SpinnerComponent, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
   @ViewChild('paginator', { static: false })
@@ -85,7 +88,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   notifications: NotificationDisplayModel[] = [];
   dataSource = new MatTableDataSource<NotificationDisplayModel>();
   selection = new SelectionModel<NotificationDisplayModel>(true, []);
-  displayedColumns: string[] = ['select', 'topic', 'title', 'message', 'details', 'created_at', 'actions'];
+  displayedColumns: string[] = ['select', 'title', 'topic', 'created_at', 'actions'];
+  readonly dateFormat = LIST_DATE_FORMAT;
 
   private readonly deviceReferencePattern = /device (.+?)\s*\((urn:infai:ses:device:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\)/;
 
@@ -216,8 +220,17 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       });
   }
 
-  getTopicIcon(topic?: NotificationTopic): string {
-    return getTopicIcon(topic);
+  topicLabel(topic?: NotificationTopic): string {
+    return getTopicInfo(topic)?.label ?? 'Misc';
+  }
+
+  get unreadCount(): number {
+    return this.notifications.filter((n) => !n.isRead).length;
+  }
+
+  /** Runs the notification's own action (dialog or page); notifications without one do nothing. */
+  open(notification: NotificationDisplayModel): void {
+    notification.action?.();
   }
 
   trackByNotificationId(_: number, notification: NotificationModel): string {

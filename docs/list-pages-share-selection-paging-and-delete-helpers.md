@@ -28,6 +28,9 @@ keep their own code.
   Cancelling does nothing at all: no request, no flag change, the selection stays. A service that answers a failure with
   a fallback value must be given a success rule, otherwise the fallback counts as success. `countLabel(n, one, many)`
   builds "1 function" / "2 functions".
+- `core/classes/load-all-pages.ts` `loadAllPages`: reads every page of an API that has limit and offset but no total
+  (timescale rules, budgets), so the page can use a client-side paginator. Notifications (websocket), datasets and
+  certificates also page and search on the client.
 - `core/services/snack-bar-messages.ts`: `snackSuccess` (2 s, no action) and `snackError` (stays, `close`, error style).
   Calls with their own duration, label or position keep calling `MatSnackBar.open`. How they interact with the central
   HTTP error notice is in `docs/http-errors-name-the-backend-in-a-snack-bar.md`.

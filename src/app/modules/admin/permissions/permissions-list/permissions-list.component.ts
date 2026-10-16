@@ -19,7 +19,7 @@
 import {SelectionModel} from '@angular/cdk/collections';
 import { AfterViewInit, Component, isDevMode, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import { MatSort, Sort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -38,8 +38,15 @@ import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.com
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { MatCard, MatCardTitle, MatCardContent } from '@angular/material/card';
-import { MatFormField, MatLabel, MatError, MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../../core/components/empty-state/empty-state.component';
+import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
+import { SearchbarService } from '../../../../core/components/searchbar/shared/searchbar.service';
+import { PermissionsFilterDialogComponent, PermissionsFilterDialogData, PermissionsFilterSelection } from '../permissions-filter-dialog/permissions-filter-dialog.component';
+import { MatChip, MatChipAvatar, MatChipRemove, MatChipSet } from '@angular/material/chips';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatInput } from '@angular/material/input';
 import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
@@ -47,8 +54,7 @@ import { MatOption } from '@angular/material/core';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatIcon } from '@angular/material/icon';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
 import { AsyncPipe } from '@angular/common';
 
@@ -57,7 +63,7 @@ import { AsyncPipe } from '@angular/common';
     templateUrl: './permissions-list.component.html',
     styleUrls: ['./permissions-list.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatCard, MatCardTitle, MatCardContent, MatFormField, MatLabel, MtxSelect, MtxOption, MatInput, FormsModule, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatError, MatErrorMessagesDirective, MatCheckbox, MatIcon, MatPrefix, MatIconButton, MatSuffix, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, MatFabButton, AsyncPipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, FormSectionComponent, MatFormField, MatLabel, MtxSelect, MtxOption, MatInput, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatError, MatErrorMessagesDirective, MatCheckbox, MatIcon, MatButton, MatIconButton, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatMenu, MatMenuItem, MatMenuTrigger, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, AsyncPipe]
 })
 export class PermissionsListComponent implements OnInit, AfterViewInit {
     private authService = inject(AuthorizationService);
@@ -68,13 +74,16 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     private kongService = inject(KongService);
     private dialogsService = inject(DialogsService);
     private snackBar = inject(MatSnackBar);
+    private searchbarService = inject(SearchbarService);
     preferencesService = inject(PreferencesService);
 
 
-    public displayedColumns = ['select', 'mode', 'subject', 'resource', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'edit', 'delete'];
+    public displayedColumns = ['select', 'subject', 'resource', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'actions'];
     public policies: PermissionModel[] = [];
     public userIsAdmin = false;
     public sortedData: PermissionModel[] = [];
+    /** The policies that pass the search and the filters, before sorting and paging. */
+    private matching: PermissionModel[] = [];
     selection = new SelectionModel<PermissionModel>(true, []);
     public matPolicies: MatTableDataSource<PermissionModel> = new MatTableDataSource<PermissionModel>([]);
     public query = '';
@@ -151,12 +160,18 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
         this.loadPolicies();
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initAutoComplete();
+        this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((text) => {
+            this.query = text;
+            if (this.ready) {
+                this.filter();
+            }
+        });
     }
 
     ngAfterViewInit() {
         this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
-            this.sortData(this.sort, this.policies, e);
+            this.sortData(this.sort, this.matching, e);
         });
     }
 
@@ -185,7 +200,9 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
         this.selection.clear();
         this.ladonService.getAllPolicies().subscribe((response) => {
             this.policies = response;
-            this.sortedData = this.policies;
+            // A reload keeps the active search and filters.
+            this.matching = this.matchingPolicies() ?? this.policies;
+            this.sortedData = this.matching;
 
             if (this.sort == null) {
                 this.sortData({active: 'subject', direction: 'asc'});
@@ -201,7 +218,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
             setTimeout(() => this.addModes(), 100);
             return;
         }
-        this.sortedData.forEach(policy => {
+        this.policies.forEach(policy => {
             if (this.roles.some((e) => e.name === policy.subject)) {
                 policy.mode = 'role';
             } else if (this.users.some((e) => e.username === policy.subject)) {
@@ -258,9 +275,12 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
 
     public sortData(sort: Sort, policies: PermissionModel[] | undefined = undefined, pageEvent: PageEvent | undefined = undefined) {
         this.sort = sort;
-        policies = policies || this.policies;
-        const pageSize = pageEvent?.pageSize || 20;
+        policies = policies || this.matching;
+        const pageSize = pageEvent?.pageSize || this.paginator?.pageSize || 20;
         const pageIndex = pageEvent?.pageIndex || 0;
+        if (!pageEvent && this.paginator) {
+            this.paginator.pageIndex = 0;
+        }
         if (sort == null) {
             this.total = policies.length;
             this.sortedData = policies.slice(pageSize * pageIndex, pageSize * (pageIndex + 1));
@@ -364,9 +384,81 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
         snackError(this.snackBar, 'Could not import the policies');
     }
 
-    filter(_: any) {
+    /** True while the search or a filter narrows the list; picks the empty-state text. */
+    get filtered(): boolean {
+        return this.query !== '' || !!(this.selectedUser || this.selectedRole || this.selectedClientID || this.selectedEndpoint);
+    }
+
+    /** The subject's kind; looked up at render time, because the policies can arrive before the subject lists. */
+    policyMode(policy: PermissionModel): string | undefined {
+        if (policy.mode) {
+            return policy.mode;
+        }
+        if (this.roles.some((e) => e.name === policy.subject)) {
+            return 'role';
+        }
+        if (this.users.some((e) => e.username === policy.subject)) {
+            return 'user';
+        }
+        return this.clients.some((e) => e.clientId === policy.subject) ? 'client' : undefined;
+    }
+
+    modeLabel(mode: string): string {
+        return mode.charAt(0).toUpperCase() + mode.slice(1);
+    }
+
+    openFilterDialog() {
+        const data: PermissionsFilterDialogData = {
+            selection: { user: this.selectedUser, role: this.selectedRole, client: this.selectedClientID, endpoint: this.selectedEndpoint },
+            users: this.users.map((u) => u.username),
+            roles: this.roles.map((r) => r.name),
+            clients: this.clients.map((c) => c.clientId),
+            endpoints: this.uris,
+        };
+        this.dialog.open<PermissionsFilterDialogComponent, PermissionsFilterDialogData, PermissionsFilterSelection>(PermissionsFilterDialogComponent, { data, minWidth: '50vw' })
+            .afterClosed().subscribe((result) => {
+                if (result) {
+                    this.selectedUser = result.user;
+                    this.selectedRole = result.role;
+                    this.selectedClientID = result.client;
+                    this.selectedEndpoint = result.endpoint;
+                    this.filter();
+                }
+            });
+    }
+
+    removeFilter(which: 'user' | 'role' | 'client' | 'endpoint') {
+        switch (which) {
+        case 'user': this.selectedUser = ''; break;
+        case 'role': this.selectedRole = ''; break;
+        case 'client': this.selectedClientID = ''; break;
+        case 'endpoint': this.selectedEndpoint = ''; break;
+        }
+        this.filter();
+    }
+
+    /** Applies the search and the filters to the loaded policies and shows the first page. */
+    filter() {
+        const matching = this.matchingPolicies();
+        if (matching) {
+            this.matching = matching;
+            this.sortData(this.sort);
+        }
+    }
+
+    /** The policies that pass the search and the filters; undefined while the search is an invalid regular expression. */
+    private matchingPolicies(): PermissionModel[] | undefined {
         const filtered: PermissionModel[] = [];
-        const query = new RegExp(this.query, 'i');
+        let query: RegExp;
+        try {
+            query = new RegExp(this.query, 'i');
+        } catch (e) {
+            // An invalid regex while typing leaves the list as it is.
+            if (isDevMode()) {
+                console.error('Error filtering policies', e);
+            }
+            return undefined;
+        }
         this.policies.forEach((policy) => {
             try {
                 if(
@@ -392,13 +484,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
 
         });
 
-        this.sortData(this.sort, filtered);
-    }
-
-    public clearSearch() {
-        this.query = '';
-        this.sortedData = this.policies;
-        this.sortData(this.sort);
+        return filtered;
     }
 
     isAllSelected() {

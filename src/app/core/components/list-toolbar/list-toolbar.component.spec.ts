@@ -37,6 +37,65 @@ class HostComponent {
     refreshed = 0;
 }
 
+@Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [ListToolbarComponent],
+    template: `
+        <senergy-list-toolbar [showSearch]="showSearch" [supportRefresh]="supportRefresh" [searchDisabled]="searchDisabled" (refresh)="refreshed = refreshed + 1"></senergy-list-toolbar>
+    `,
+})
+class OptionsHostComponent {
+    showSearch = true;
+    supportRefresh = true;
+    searchDisabled = false;
+    refreshed = 0;
+}
+
+describe('ListToolbarComponent options', () => {
+    let fixture: ComponentFixture<OptionsHostComponent>;
+    let host: OptionsHostComponent;
+
+    const el = (selector: string) => fixture.nativeElement.querySelector(selector) as HTMLElement | null;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({ imports: [OptionsHostComponent, NoopAnimationsModule] });
+        fixture = TestBed.createComponent(OptionsHostComponent);
+        host = fixture.componentInstance;
+    });
+
+    it('replaces the search field with a refresh button when the list has no search', () => {
+        host.showSearch = false;
+        fixture.detectChanges();
+
+        expect(el('senergy-searchbar')).toBeNull();
+        el('.toolbar-refresh')!.click();
+        expect(host.refreshed).toBe(1);
+    });
+
+    it('offers no refresh at all for a live list', () => {
+        host.showSearch = false;
+        host.supportRefresh = false;
+        fixture.detectChanges();
+
+        expect(el('.toolbar-refresh')).toBeNull();
+    });
+
+    it('hides the refresh button of the search field when refresh is not supported', () => {
+        host.supportRefresh = false;
+        fixture.detectChanges();
+
+        expect(el('senergy-searchbar')).not.toBeNull();
+        expect(el('senergy-searchbar button')).toBeNull();
+    });
+
+    it('disables the search field on request', () => {
+        host.searchDisabled = true;
+        fixture.detectChanges();
+
+        expect((el('.toolbar-row input') as HTMLInputElement).disabled).toBeTrue();
+    });
+});
+
 describe('ListToolbarComponent', () => {
     let fixture: ComponentFixture<HostComponent>;
     let host: HostComponent;

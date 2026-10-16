@@ -13,72 +13,57 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<senergy-page-header title="Report templates" description="Templates a report is created from; click one to start a new report.">
+</senergy-page-header>
 
+<senergy-list-toolbar (refresh)="refresh()"></senergy-list-toolbar>
 
-<div class="layout-margin">
-  <span class="search-button-container ly-row">
-    <senergy-searchbar></senergy-searchbar>
-  </span>
+<div class="page-body">
   <senergy-spinner [show]="!ready || downloading"></senergy-spinner>
-  <div class="mat-elevation-z1" [hidden]="!ready || templatesDataSource.data.length === 0">
+
+  @if (ready && templatesDataSource.data.length === 0) {
+    <senergy-empty-state icon="description" [title]="searchText !== '' ? 'No matching templates' : 'No templates yet'"
+      [text]="searchText !== '' ? 'No template matches the search.' : 'Report templates are provided by the reporting service.'">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || templatesDataSource.data.length === 0">
     <div class="table-container">
       <table mat-table [dataSource]="templatesDataSource" matSort matSortActive="name"
         matSortDirection="asc" matSortDisableClear>
 
-        <ng-container matColumnDef="id">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>
-          <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.id}}
-            </div>
-          </td>
-        </ng-container>
-
         <ng-container matColumnDef="name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.name}}
-            </div>
+            <div class="name-cell">{{element.name}}</div>
+            <div class="muted id-line">{{element.id}}</div>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="type">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>Typ</th>
-          <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.type}}
-            </div>
-          </td>
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let element"><span class="type-chip">{{element.type}}</span></td>
         </ng-container>
 
-        <ng-container matColumnDef="preview">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Preview</th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="accent" [disabled]="downloading"
-              (click)="downloadPreview($event, element)" matTooltip="Preview">
-              <mat-icon>preview</mat-icon>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let element" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="create">
-          <th mat-header-cell *matHeaderCellDef class="button-column">New</th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="accent" routerLink="/reporting/new/{{element.id}}" matTooltip="New">
-              <mat-icon>add-circle</mat-icon>
-            </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              <button mat-menu-item (click)="create(element)"><mat-icon>add</mat-icon> New report</button>
+              <button mat-menu-item [disabled]="downloading" (click)="downloadPreview($event, element)"><mat-icon>preview</mat-icon> Preview</button>
+            </mat-menu>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.clickable-row]="userMayCreate"
+          (click)="userMayCreate && create(row)"></tr>
       </table>
     </div>
     <mat-paginator #paginator [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
     showFirstLastButtons></mat-paginator>
   </div>
-  @if (ready && templatesDataSource.data.length === 0) {
-    <div>No templates found.</div>
-  }
 </div>

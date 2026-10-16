@@ -13,89 +13,86 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+<senergy-page-header title="Reports" description="Reports created from a template, with the files they generated.">
+  <ng-container pageActions>
+    @if (userMayCreate) {
+      <button matButton="filled" routerLink="/reporting/templates">
+        <mat-icon>add</mat-icon> New report
+      </button>
+    }
+  </ng-container>
+</senergy-page-header>
 
+<senergy-list-toolbar (refresh)="refresh()"></senergy-list-toolbar>
 
-<div class="layout-margin">
-  <span class="search-button-container ly-row">
-    <senergy-searchbar></senergy-searchbar>
-  </span>
+<div class="page-body">
   <senergy-spinner [show]="!ready"></senergy-spinner>
-  <div class="mat-elevation-z1" [hidden]="!ready || reportsDataSource.data.length === 0">
+
+  @if (ready && reportsDataSource.data.length === 0) {
+    <senergy-empty-state icon="assessment" [title]="searchText !== '' ? 'No matching reports' : 'No reports yet'"
+      [text]="searchText !== '' ? 'No report matches the search.' : 'A report is created from a template, in the templates list.'">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || reportsDataSource.data.length === 0">
     <div class="table-container">
       <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="name"
         matSortDirection="asc" matSortDisableClear>
 
-        <ng-container matColumnDef="id">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>
-          <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.id}}
-            </div>
-          </td>
-        </ng-container>
-
         <ng-container matColumnDef="name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
           <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.name}}
-            </div>
+            <div class="name-cell">{{element.name}}</div>
+            <div class="muted id-line">{{element.id}}</div>
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="createdAt">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>createdAt</th>
-          <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.createdAt | date:"medium"}}
-            </div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="updatedAt">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>updatedAt</th>
-          <td mat-cell *matCellDef="let element">
-            <div>
-              {{element.updatedAt | date:"medium"}}
-            </div>
-          </td>
+        <ng-container matColumnDef="templateName">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Template</th>
+          <td mat-cell *matCellDef="let element" class="muted">{{element.templateName}}</td>
         </ng-container>
 
         <ng-container matColumnDef="files">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Files</th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="accent" [disabled]="!element.reportFiles || element.reportFiles.length === 0" routerLink="/reporting/files/{{element.id}}" matTooltip="Files">
-              <mat-icon>folder</mat-icon>
-            </button>
-          </td>
+          <th mat-header-cell *matHeaderCellDef class="num">Files</th>
+          <td mat-cell *matCellDef="let element" class="num muted">{{element.reportFiles?.length || 0}}</td>
         </ng-container>
 
-        <ng-container matColumnDef="edit">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Edit</th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="accent" routerLink="/reporting/edit/{{element.id}}" matTooltip="Edit">
-              <mat-icon>edit-circle</mat-icon>
-            </button>
-          </td>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let element" class="muted">{{element.createdAt | date: dateFormat}}</td>
         </ng-container>
 
-        <ng-container matColumnDef="delete">
-          <th mat-header-cell *matHeaderCellDef class="button-column">Delete</th>
-          <td mat-cell *matCellDef="let element">
-            <button mat-icon-button color="warn" (click)="deleteReport(element)" matTooltip="Delete">
-              <mat-icon>delete</mat-icon>
+        <ng-container matColumnDef="updatedAt">
+          <th mat-header-cell mat-sort-header *matHeaderCellDef>Updated</th>
+          <td mat-cell *matCellDef="let element" class="muted">{{element.updatedAt | date: dateFormat}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let element" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (userMayUpdate) {
+                <button mat-menu-item (click)="edit(element)"><mat-icon>edit</mat-icon> Edit</button>
+              }
+              @if (userMayReadFiles) {
+                <button mat-menu-item [disabled]="!hasFiles(element)" (click)="openFiles(element)"><mat-icon>folder</mat-icon> Files</button>
+              }
+              @if (userMayDelete) {
+                <button mat-menu-item class="danger" (click)="deleteReport(element)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.clickable-row]="canOpen(row)"
+          (click)="open(row)"></tr>
       </table>
     </div>
     <mat-paginator #paginator [pageSize]="pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
     showFirstLastButtons></mat-paginator>
   </div>
-  @if (ready && reportsDataSource.data.length === 0) {
-    <div>No reports found.</div>
-  }
 </div>
