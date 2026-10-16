@@ -167,4 +167,41 @@ describe('ImportTypesService', () => {
             },
         ] as ExportValueModel[]);
     });
+
+    it('names values whose leaf names repeat or take the time column by their full path', () => {
+        const leaf = (name: string, type: string, useAsTag = false) => ({
+            name,
+            type,
+            characteristic_id: '',
+            sub_content_variables: null,
+            use_as_tag: useAsTag,
+        });
+        const structure = (name: string, subs: any[]) => ({
+            name,
+            type: 'https://schema.org/StructuredValue',
+            characteristic_id: '',
+            sub_content_variables: subs,
+            use_as_tag: false,
+        });
+        const type = {
+            ...testType,
+            output: structure('root', [
+                structure('value', [
+                    structure('indoor', [leaf('temperature', 'https://schema.org/Float', true)]),
+                    structure('outdoor', [leaf('temperature', 'https://schema.org/Float', true)]),
+                    leaf('humidity', 'https://schema.org/Float'),
+                    leaf('time', 'https://schema.org/Text'),
+                ]),
+            ]),
+        } as ImportTypeModel;
+
+        expect(service.parseImportTypeExportValues(type)).toEqual([
+            {Name: 'value.indoor.temperature', Path: 'value.indoor.temperature', Type: 'float', Tag: false},
+            {Name: 'value.indoor.temperature_tag', Path: 'value.indoor.temperature', Type: 'string', Tag: true},
+            {Name: 'value.outdoor.temperature', Path: 'value.outdoor.temperature', Type: 'float', Tag: false},
+            {Name: 'value.outdoor.temperature_tag', Path: 'value.outdoor.temperature', Type: 'string', Tag: true},
+            {Name: 'humidity', Path: 'value.humidity', Type: 'float', Tag: false},
+            {Name: 'value.time', Path: 'value.time', Type: 'string', Tag: false},
+        ] as ExportValueModel[]);
+    });
 });

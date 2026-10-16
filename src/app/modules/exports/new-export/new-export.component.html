@@ -184,8 +184,8 @@
                 <mat-form-field color="accent" appearance="outline" class="layout-value ly-flex">
                   <mat-label>{{exportForm.get('targetSelector')?.value === targetDb ? 'Name' :
                   'Topic'}}</mat-label>
-                  <input #input matInput formControlName="Name" />
-                  <mat-error senergyError label="Name"></mat-error>
+                  <input #input matInput formControlName="Name" [errorStateMatcher]="nameMatcher(group)" />
+                  <mat-error>{{nameError(group)}}</mat-error>
                 </mat-form-field>
                 <mat-form-field color="accent" appearance="outline" class="layout-value ly-flex">
                   <mat-label>Path</mat-label>
@@ -223,6 +223,9 @@
             [pageSizeOptions]="[20, 50, 75, 100]" (page)="movePage($event)" showFirstLastButtons
             aria-label="Select page">
           </mat-paginator>
+          @if (invalidNames().length > 0) {
+            <mat-error>Names to change: {{invalidNames().join(', ')}}</mat-error>
+          }
           <div class="button-footer ly-row">
             <div class="ly-column ly-flex ly-align-center-start">
               <button type="button" mat-raised-button color="accent" (click)="autofillValues()"

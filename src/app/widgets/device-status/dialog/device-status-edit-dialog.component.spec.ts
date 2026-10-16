@@ -21,7 +21,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { of, Subject } from 'rxjs';
+import { EMPTY, of, Subject } from 'rxjs';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DeviceStatusElementModel } from '../shared/device-status-properties.model';
@@ -583,6 +583,21 @@ describe('DeviceStatusEditDialogComponent', () => {
                 component.save();
                 expectNoWidgetSave();
                 expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the schedule for living room');
+            }),
+        );
+
+        it(
+            'does not save the widget when a step completes without a value, and accepts a new save',
+            waitForAsync(() => {
+                prepareElement(true);
+                exportServiceSpy.startPipeline.and.returnValue(EMPTY);
+                component.save();
+                expectNoWidgetSave();
+                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+
+                exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
+                component.save();
+                expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
             }),
         );
 
@@ -1186,6 +1201,43 @@ describe('DeviceStatusEditDialogComponent', () => {
             });
         });
     });
+
+    it(
+        'saves a widget without elements and closes the dialog',
+        waitForAsync(() => {
+            component.userHasUpdateNameAuthorization = true;
+            component.userHasUpdatePropertiesAuthorization = true;
+            component.formGroup.get('name')?.setValue('renamed');
+            expect(component.elements.length).toBe(0);
+            dashboardServiceSpy.updateWidgetName.calls.reset();
+            dashboardServiceSpy.updateWidgetProperty.calls.reset();
+            matDialogRefSpy.close.calls.reset();
+
+            component.save();
+
+            expect(dashboardServiceSpy.updateWidgetName.calls.count()).toBe(1);
+            expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(1);
+            expect(matDialogRefSpy.close.calls.count()).toBe(1);
+        }),
+    );
+
+    it(
+        'closes the dialog without elements and without update authorization, and accepts a new save',
+        waitForAsync(() => {
+            component.userHasUpdateNameAuthorization = false;
+            component.userHasUpdatePropertiesAuthorization = false;
+            dashboardServiceSpy.updateWidgetName.calls.reset();
+            dashboardServiceSpy.updateWidgetProperty.calls.reset();
+            matDialogRefSpy.close.calls.reset();
+
+            component.save();
+            component.save();
+
+            expect(dashboardServiceSpy.updateWidgetName.calls.count()).toBe(0);
+            expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(0);
+            expect(matDialogRefSpy.close.calls.count()).toBe(2);
+        }),
+    );
 
     describe('results of two elements of which the first is skipped', () => {
         const addElementWithService = (index: number, serviceId: string) => {

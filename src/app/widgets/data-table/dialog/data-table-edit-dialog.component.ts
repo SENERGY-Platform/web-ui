@@ -1196,6 +1196,8 @@ export class DataTableEditDialogComponent implements OnInit {
             preparedExport.Description = 'generated Export';
             preparedExport.ExportDatabaseID = environment.exportDatabaseIdInternalTimescaleDb;
 
+            // the column is named by the export that is created now, which may differ from the name stored with the widget
+            const value = preparedExport.Values?.find((v) => v.Path === element.get('exportValuePath')?.value);
             observables.push(
                 this.exportService.startPipeline(preparedExport).pipe(
                     map((model) => {
@@ -1203,7 +1205,7 @@ export class DataTableEditDialogComponent implements OnInit {
                             return new SaveStepFailure('export', this.elementLabel(element));
                         }
                         this.unsaved.record({ kind: 'export', id: model.ID || '', label: this.elementLabel(element) });
-                        element.patchValue({ exportId: model.ID });
+                        element.patchValue(value === undefined ? { exportId: model.ID } : { exportId: model.ID, exportValueName: value.Name });
                         return null;
                     }),
                 ),

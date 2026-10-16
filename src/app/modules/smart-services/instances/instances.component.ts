@@ -32,7 +32,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { SmartServiceModuleService } from './shared/modules.service';
 import { SmartServiceModuleModel } from './shared/modules.model';
 import { SmartServiceInstanceDialogService } from './shared/instance-dialog.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
@@ -45,6 +45,9 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { JsonPipe, DatePipe } from '@angular/common';
+import { SmartServiceReleasesService } from '../releases/shared/release.service';
+import { SmartServiceChangedResource } from '../releases/shared/release.model';
+import { ChangedResourcesHintComponent } from '../changed-resources/changed-resources-hint.component';
 
 
 @Component({
@@ -59,7 +62,7 @@ import { JsonPipe, DatePipe } from '@angular/common';
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatButton, JsonPipe, DatePipe]
+    imports: [SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatButton, JsonPipe, DatePipe, ChangedResourcesHintComponent]
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     private instancesService = inject(SmartServiceInstanceService);
@@ -73,6 +76,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     private modulesService = inject(SmartServiceModuleService);
     private instanceDialogService = inject(SmartServiceInstanceDialogService);
     private authorizationService = inject(AuthorizationService);
+    private releasesService = inject(SmartServiceReleasesService);
 
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
 
@@ -94,6 +98,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     modulesByInstanceId = new Map<string, SmartServiceModuleModel[]>();
     loadingModulesByInstanceId = new Set<string>();
     upgradingInstanceIds = new Set<string>();
+    changedResourcesByReleaseId = new Map<string, SmartServiceChangedResource[]>();
+    private changedResourcesSubscription?: Subscription;
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('tableContainer', { static: false }) tableContainer?: ElementRef<HTMLDivElement>;
@@ -148,10 +154,26 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
             tap((instances) => {
                 this.dataSource.data = instances.instances;
                 this.totalCount = instances.total;
+                this.loadChangedResources(instances.instances);
                 this.ready = true;
                 this.restoreStateFromQueryParams();
             })
         );
+    }
+
+    /** One request for all releases on the page, not one per instance; a lookup for an older page is dropped. */
+    private loadChangedResources(instances: SmartServiceInstanceModel[]): void {
+        this.changedResourcesSubscription?.unsubscribe();
+        const ids = Array.from(new Set(instances.map(i => i.release_id).filter(id => !!id)));
+        if (ids.length === 0) {
+            this.changedResourcesByReleaseId = new Map();
+            return;
+        }
+        this.changedResourcesSubscription = this.releasesService.getExtendedReleaseList(ids.length, 0, '', 'r', false, ids).subscribe((answer) => {
+            this.changedResourcesByReleaseId = new Map(answer.releases
+                .filter(r => r.changed_resources && r.changed_resources.length > 0)
+                .map(r => [r.id, r.changed_resources as SmartServiceChangedResource[]]));
+        });
     }
 
     loadSingleInstance(id: string): void {
@@ -162,6 +184,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
             }
             this.dataSource.data = data;
             this.totalCount = 1;
+            this.loadChangedResources(data);
             this.ready = true;
             this.restoreStateFromQueryParams();
         });

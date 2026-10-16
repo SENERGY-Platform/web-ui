@@ -20,7 +20,7 @@ import { environment } from '../../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { delay } from 'rxjs/operators';
-import { ExportValueModel } from '../../../exports/shared/export.model';
+import { duplicateValueNames, ExportValueModel, timescaleTimeColumn } from '../../../exports/shared/export.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 
@@ -107,6 +107,13 @@ export class ImportTypesService {
         }
         const values: ExportValueModel[] = [];
         this.fillValuesAndTags(values, exportContent, '', includeComplex);
+        // A name is the leaf of its path and repeats across structures, but each value needs a column of its own,
+        // and none may take the time column. The full path tells them apart; a tag keeps its suffix, because its
+        // path is that of the value it tags.
+        const duplicates = duplicateValueNames(values);
+        values
+            .filter((value) => duplicates.has(value.Name) || value.Name === timescaleTimeColumn)
+            .forEach((value) => (value.Name = value.Path.slice(0, value.Path.lastIndexOf('.') + 1) + value.Name));
         return values;
     }
 

@@ -43,6 +43,7 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { DatePipe } from '@angular/common';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
+import { ChangedResourcesHintComponent } from '../changed-resources/changed-resources-hint.component';
 
 const grids = new Map([
     ['xs', 1],
@@ -57,7 +58,7 @@ const grids = new Map([
     templateUrl: './releases.component.html',
     styleUrls: ['./releases.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, SpinnerComponent, DatePipe]
+    imports: [SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatMenuTrigger, MatMenu, MatMenuItem, RouterLink, SpinnerComponent, DatePipe, ChangedResourcesHintComponent]
 })
 export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
     private permissionsDialogService = inject(PermissionsDialogService);
@@ -210,6 +211,7 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
                     permissions: repoItem.permissions_info.permissions,
                     created_at: repoItem.created_at,
                     error: repoItem.error,
+                    changed_resources: [repoItem.changed_resources],
                     metadataWarning: '',
                 }),
             );

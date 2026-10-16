@@ -28,10 +28,12 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { SmartServiceModuleService } from './shared/modules.service';
 import { SmartServiceInstanceDialogService } from './shared/instance-dialog.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { SmartServiceReleasesService } from '../releases/shared/release.service';
 
 describe('SmartServiceInstancesComponent', () => {
     let getInstances: jasmine.Spy;
     let navigate: jasmine.Spy;
+    let getExtendedReleaseList: jasmine.Spy;
     let component: SmartServiceInstancesComponent;
 
     const answer = (name: string) => ({ instances: [{ id: name, name } as any], total: 100 });
@@ -50,6 +52,7 @@ describe('SmartServiceInstancesComponent', () => {
                 { provide: SmartServiceModuleService, useValue: {} },
                 { provide: SmartServiceInstanceDialogService, useValue: {} },
                 { provide: AuthorizationService, useValue: { userIsDeveloper: () => false } },
+                { provide: SmartServiceReleasesService, useValue: { getExtendedReleaseList } },
             ],
         });
         component = TestBed.runInInjectionContext(() => new SmartServiceInstancesComponent());
@@ -58,6 +61,7 @@ describe('SmartServiceInstancesComponent', () => {
 
     beforeEach(() => {
         getInstances = jasmine.createSpy('getInstances').and.returnValue(of(answer('first')));
+        getExtendedReleaseList = jasmine.createSpy('getExtendedReleaseList').and.returnValue(of({ releases: [], total: 0 }));
     });
 
     it('restores the page of the URL on the first load', () => {
@@ -103,5 +107,39 @@ describe('SmartServiceInstancesComponent', () => {
         older.next(answer('older'));
 
         expect(component.dataSource.data.map(i => i.name)).toEqual(['newer']);
+    });
+
+    it('maps the changed resources of the releases to their instances with one request', () => {
+        const changed = [{ kind: 'flow', id: 'f1', reason: 'gone', at: 1 }];
+        getInstances.and.returnValue(of({
+            instances: [{ id: 'a', release_id: 'r1' }, { id: 'b', release_id: 'r1' }, { id: 'c', release_id: 'r2' }],
+            total: 3,
+        }));
+        getExtendedReleaseList.and.returnValue(of({ releases: [{ id: 'r1', changed_resources: changed }, { id: 'r2' }], total: 2 }));
+        create({});
+        component.ngOnInit();
+
+        expect(getExtendedReleaseList.calls.count()).toBe(1);
+        expect(getExtendedReleaseList.calls.mostRecent().args[5]).toEqual(['r1', 'r2']);
+        expect(component.changedResourcesByReleaseId.get('r1')).toEqual(changed as any);
+        expect(component.changedResourcesByReleaseId.has('r2')).toBeFalse();
+    });
+
+    it('keeps the changed resources of the newest page when an older lookup is answered last', () => {
+        const older = new Subject<any>();
+        const newer = new Subject<any>();
+        getInstances.and.returnValues(
+            of({ instances: [{ id: 'a', release_id: 'r1' }], total: 2 }),
+            of({ instances: [{ id: 'b', release_id: 'r2' }], total: 2 }),
+        );
+        getExtendedReleaseList.and.returnValues(older as Observable<any>, newer as Observable<any>);
+        create({});
+        component.ngOnInit();
+        component.loadInstances();
+
+        newer.next({ releases: [{ id: 'r2', changed_resources: [{ kind: 'flow', id: 'f2', reason: 'changed', at: 2 }] }], total: 1 });
+        older.next({ releases: [{ id: 'r1', changed_resources: [{ kind: 'flow', id: 'f1', reason: 'gone', at: 1 }] }], total: 1 });
+
+        expect(Array.from(component.changedResourcesByReleaseId.keys())).toEqual(['r2']);
     });
 });

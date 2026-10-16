@@ -65,6 +65,49 @@ export interface ExportValueModel extends ExportValueBaseModel {
     LastTimeStamp?: string;
 }
 
+/** A value as far as its column name goes; the value of a typed form row has a nullable, optional name. */
+interface ColumnNamed {
+    Name?: string | null;
+}
+
+/** The column analytics-serving adds to every timescale export for the timestamp. */
+export const timescaleTimeColumn = 'time';
+
+/** The value names that occur more than once; a timescale export needs a column name of its own per value. Values without a name are skipped. */
+export function duplicateValueNames(values: ColumnNamed[]): Set<string> {
+    const counts = new Map<string, number>();
+    for (const value of values) {
+        if (value.Name) {
+            counts.set(value.Name, (counts.get(value.Name) ?? 0) + 1);
+        }
+    }
+    return new Set([...counts].filter(([, count]) => count > 1).map(([name]) => name));
+}
+
+/**
+ * Why a name cannot be a column of a database export, or '' if it can. analytics-serving splits "name:type" at the colon,
+ * and the worker quotes column names without escaping them.
+ */
+export function columnNameError(name: string | null | undefined, duplicates: Set<string>): string {
+    if (!name?.trim()) {
+        return 'Name required';
+    }
+    if (name === timescaleTimeColumn) {
+        return 'Name is taken by the time column';
+    }
+    if (/[:"]/.test(name)) {
+        return 'Name must not contain : or "';
+    }
+    return duplicates.has(name) ? 'Name is used more than once' : '';
+}
+
+/** The distinct names among the values that cannot be columns, for a summary where not every row is on screen. */
+export function invalidColumnNames(values: ColumnNamed[]): string[] {
+    const duplicates = duplicateValueNames(values);
+    const invalid = values.filter((value) => columnNameError(value.Name, duplicates) !== '');
+    return [...new Set(invalid.map((value) => (value.Name?.trim() ? value.Name : '(empty)')))];
+}
+
 export interface ExportValueCharacteristicModel extends ExportValueBaseModel {
     characteristicId: string;
 }

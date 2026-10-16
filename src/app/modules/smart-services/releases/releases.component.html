@@ -82,6 +82,8 @@
                             matTooltip="Released {{item.value.created_at * 1000 | date:'dd.MM.yy, HH:mm'}}">
                             {{item.value.created_at * 1000 | date:'dd.MM.yy'}}
                           </span>
+                          <senergy-changed-resources-hint
+                            [resources]="item.value.changed_resources"></senergy-changed-resources-hint>
                           @if (item.value.error) {
                             <mat-icon matTooltip="{{item.value.error}}"
                               color="warn">warning

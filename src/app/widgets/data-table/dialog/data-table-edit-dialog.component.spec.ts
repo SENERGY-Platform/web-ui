@@ -1578,4 +1578,31 @@ describe('DataTableEditDialogComponent', () => {
             });
         });
     });
+
+    it('takes the column name of an import value from the export it creates', () => {
+        dataTableHelperServiceSpy.getFullImportType.and.returnValue({ name: 'an import type' } as any);
+        dataTableHelperServiceSpy.getImportInstancesOfType.and.returnValue([{ id: 'instance', kafka_topic: 'topic' } as any]);
+        dataTableHelperServiceSpy.getImportTypeValues.and.returnValue([
+            { Name: 'value.indoor.temperature', Path: 'value.indoor.temperature', Type: 'float' } as any,
+        ]);
+        const fixture = TestBed.createComponent(DataTableEditDialogComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        const element = component.getElements().at(0);
+        element.controls.elementDetails.patchValue(
+            { elementType: DataTableElementTypesEnum.IMPORT, import: { typeId: 'type', instanceId: 'instance' } },
+            { emitEvent: false },
+        );
+        // stored before the parser named repeating leaves by their full path
+        element.patchValue(
+            { exportCreatedByWidget: true, exportValuePath: 'value.indoor.temperature', exportValueName: 'temperature' },
+            { emitEvent: false },
+        );
+
+        component.save();
+
+        expect(exportServiceSpy.startPipeline.calls.mostRecent().args[0].Values[0].Name).toBe('value.indoor.temperature');
+        expect(element.get('exportValueName')?.value).toBe('value.indoor.temperature');
+    });
 });

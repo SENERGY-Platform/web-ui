@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { OperatorModel } from './shared/operator.model';
 import { OperatorRepoService } from './shared/operator-repo.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
-import { merge } from 'rxjs';
+import { Subject, merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
-import { startWith, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
@@ -55,7 +55,7 @@ import {HttpErrorResponse} from '@angular/common/http';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SearchbarComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatIconButton, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton, SpinnerComponent]
 })
-export class OperatorRepoComponent implements OnInit {
+export class OperatorRepoComponent implements OnInit, AfterViewInit {
     private operatorRepoService = inject(OperatorRepoService);
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthorizationService);
@@ -89,6 +89,7 @@ export class OperatorRepoComponent implements OnInit {
     userHasCreateAuthorization = false;
 
     private searchText = '';
+    private reload = new Subject<void>();
 
     permissionsPerOperator: PermissionsV2RightsAndIdModel[] = [];
     pipeOperatorUsagePerOperator: PipelineOperatorUsage[] = [];
@@ -116,6 +117,40 @@ export class OperatorRepoComponent implements OnInit {
         if (this.userHasDeleteAuthorization) {
             this.displayedColumns.push('delete');
         }
+    }
+
+    ngAfterViewInit() {
+        this.operatorsDataSource.sort = this.sort;
+        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.paginator.pageIndex = 0;
+            this.selectionClear();
+        });
+
+        // set up once: a search or reload only triggers this pipeline, a new one per call would multiply the requests
+        merge(this.sort.sortChange, this.paginator.page, this.reload)
+            .pipe(
+                switchMap(() => {
+                    this.ready = false;
+                    return this.operatorRepoService.getOperators(
+                        this.searchText,
+                        this.paginator.pageSize,
+                        this.paginator.pageSize * this.paginator.pageIndex,
+                        this.sort.active,
+                        this.sort.direction,
+                    );
+                }),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
+                if (resp.operators.length > 0) {
+                    this.operators = resp.operators;
+                    this.operatorsDataSource.data = this.operators;
+
+                    this.totalCount = resp.totalCount;
+                }
+                this.loadOperatorPermissions();
+                this.ready = true;
+            });
     }
 
     deleteOperator(operator: OperatorModel) {
@@ -161,37 +196,7 @@ export class OperatorRepoComponent implements OnInit {
         if (reset) {
             this.reset();
         }
-        this.operatorsDataSource.sort = this.sort;
-        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.paginator.pageIndex = 0;
-            this.selectionClear();
-        });
-
-        merge(this.sort.sortChange, this.paginator.page)
-            .pipe(
-                startWith({}),
-                switchMap(() => {
-                    this.ready = false;
-                    return this.operatorRepoService.getOperators(
-                        this.searchText,
-                        this.paginator.pageSize,
-                        this.paginator.pageSize * this.paginator.pageIndex,
-                        this.sort.active,
-                        this.sort.direction,
-                    );
-                }),
-                takeUntilDestroyed(this.destroyRef),
-            )
-            .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
-                if (resp.operators.length > 0) {
-                    this.operators = resp.operators;
-                    this.operatorsDataSource.data = this.operators;
-
-                    this.totalCount = resp.totalCount;
-                }
-                this.loadOperatorPermissions();
-                this.ready = true;
-            });
+        this.reload.next();
     }
 
     private reset() {

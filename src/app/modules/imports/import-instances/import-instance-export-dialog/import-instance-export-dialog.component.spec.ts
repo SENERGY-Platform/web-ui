@@ -19,7 +19,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog.component';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { ImportTypesService } from '../../import-types/shared/import-types.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ImportInstancesModel } from '../shared/import-instances.model';
 import { MatButtonModule } from '@angular/material/button';
@@ -126,7 +126,7 @@ describe('ImportInstanceExportDialogComponent', () => {
         owner: 'test-owner',
     };
     importTypesServiceSpy.getImportType.and.returnValue(of(testType));
-    importTypesServiceSpy.parseImportTypeExportValues.and.returnValue([
+    const parsedValues = [
         {
             Name: 'value',
             Path: 'value.value',
@@ -157,7 +157,9 @@ describe('ImportInstanceExportDialogComponent', () => {
             Type: 'string',
             Tag: true,
         },
-    ]);
+    ];
+    // fresh objects per dialog, because the dialog edits the names in place
+    importTypesServiceSpy.parseImportTypeExportValues.and.callFake(() => parsedValues.map((v) => ({...v})) as any);
 
     const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
     exportServiceSpy.startPipeline.and.returnValue(of(true));
@@ -285,5 +287,69 @@ describe('ImportInstanceExportDialogComponent', () => {
         exportServiceSpy.startPipeline.and.returnValue(of(true));
         expect(r).toBeUndefined();
         expect(open).toHaveBeenCalledWith('Error creating export', 'close', { panelClass: 'snack-bar-error' });
+    });
+
+    it('starts at the newest message when not all messages are to be consumed', () => {
+        exportServiceSpy.startPipeline.calls.reset();
+        component.allMessagesControl.setValue(false);
+        component.create();
+        expect(exportServiceSpy.startPipeline.calls.mostRecent().args[0].Offset).toBe('largest');
+    });
+
+    it('saves a renamed value under its new name', () => {
+        exportServiceSpy.startPipeline.calls.reset();
+        component.values[0].Name = 'renamed';
+        component.create();
+        expect(exportServiceSpy.startPipeline.calls.mostRecent().args[0].Values[0].Name).toBe('renamed');
+    });
+
+    it('stops the create while two exported values share a name', () => {
+        const [first, second] = component.values;
+        second.Name = first.Name;
+        expect(component.nameError(first)).toBe('Name is used more than once');
+        expect(component.nameError(second)).toBe('Name is used more than once');
+        expect(component.hasNameErrors()).toBeTrue();
+
+        component.valueSelection.deselect(second);
+        expect(component.nameError(first)).toBe('');
+        expect(component.hasNameErrors()).toBeFalse();
+    });
+
+    it('stops the create when a value takes the name of a tag', () => {
+        component.values[0].Name = 'tag2';
+        expect(component.nameError(component.values[0])).toBe('Name is used more than once');
+        expect(component.hasNameErrors()).toBeTrue();
+    });
+
+    it('stops the create when a selected value has no name', () => {
+        component.values[0].Name = ' ';
+        expect(component.nameError(component.values[0])).toBe('Name required');
+        expect(component.hasNameErrors()).toBeTrue();
+    });
+
+    it('stops the create when a value takes the time column or a character the backend splits at', () => {
+        component.values[0].Name = 'time';
+        expect(component.nameError(component.values[0])).toBe('Name is taken by the time column');
+        component.values[0].Name = 'a:b';
+        expect(component.nameError(component.values[0])).toBe('Name must not contain : or "');
+        expect(component.hasNameErrors()).toBeTrue();
+    });
+
+    it('lists a name that two tags share, though no row shows it', () => {
+        component.tags[1].Name = component.tags[0].Name;
+        expect(component.values.every((value) => component.nameError(value) === '')).toBeTrue();
+        expect(component.invalidNames()).toEqual(['tag1_tag']);
+        expect(component.hasNameErrors()).toBeTrue();
+    });
+
+    it('sends the tags once when a failed create is repeated', () => {
+        spyOn(console, 'error');
+        exportServiceSpy.startPipeline.and.returnValue(throwError(() => new Error('failed')));
+        component.create();
+        exportServiceSpy.startPipeline.and.returnValue(of(true));
+        component.create();
+        const names = exportServiceSpy.startPipeline.calls.mostRecent().args[0].Values.map((v: any) => v.Name);
+        expect(names).toEqual(['value', 'value2', 'tag1', 'tag1_tag', 'tag2']);
+        expect(component.hasNameErrors()).toBeFalse();
     });
 });

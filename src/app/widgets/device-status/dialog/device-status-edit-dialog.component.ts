@@ -393,10 +393,11 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         });
     }
 
-    // forkJoin over an empty list completes without a value; the flag must not stay set then or on an error.
+    // No steps (a widget without elements, no update authorization) is an empty answer, since forkJoin([]) never emits;
+    // a step that completes without a value ends the attempt, so the flag must not stay set then or on an error.
     private runStep<T>(steps: Observable<T>[], next: (results: T[]) => void): void {
         let emitted = false;
-        forkJoin(steps).subscribe({
+        (steps.length === 0 ? of([] as T[]) : forkJoin(steps)).subscribe({
             next: (results) => {
                 emitted = true;
                 next(results);

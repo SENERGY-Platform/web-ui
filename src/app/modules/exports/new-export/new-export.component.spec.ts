@@ -128,10 +128,12 @@ const existingImportExport = () =>
 interface Harness {
     component: NewExportComponent;
     saved: () => ExportModel | undefined;
+    failNextSave: () => void;
 }
 
 const openForEditing = (exp: ExportModel = existingExport(), id: string | null = 'export-1'): Harness => {
     let saved: ExportModel | undefined;
+    let fail = false;
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
         providers: [
@@ -147,8 +149,10 @@ const openForEditing = (exp: ExportModel = existingExport(), id: string | null =
                     getExportDatabases: () => of([]),
                     getExport: () => of(exp),
                     editExport: (_id: string, edited: ExportModel) => {
-                        saved = edited;
-                        return of({status: 200});
+                        saved = {...edited};
+                        const status = fail ? 400 : 200;
+                        fail = false;
+                        return of({status});
                     },
                     startPipeline: (created: ExportModel) => {
                         saved = created;
@@ -185,7 +189,7 @@ const openForEditing = (exp: ExportModel = existingExport(), id: string | null =
     component.ngOnInit();
     tick(200); // the load defers twice: once for the form, once for onChanges
 
-    return {component, saved: () => saved};
+    return {component, saved: () => saved, failNextSave: () => (fail = true)};
 };
 
 interface CreateHarness {
@@ -333,5 +337,52 @@ describe('NewExportComponent', () => {
         expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%SZ');
         component.onSubmit();
         expect(saved()?.TimestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
+    }));
+
+    it('shows an export created from the import dialog as consuming all messages and keeps its offset', fakeAsync(() => {
+        const {component, saved} = openForEditing({...existingImportExport(), Offset: 'earliest'});
+
+        expect(component.exportForm.getRawValue().allMessages).toBeTrue();
+        component.onSubmit();
+        expect(saved()?.Offset).toBe('earliest');
+    }));
+
+    it('keeps the earliest offset when a save that changed it failed and the change is undone', fakeAsync(() => {
+        const {component, saved, failNextSave} = openForEditing({...existingImportExport(), Offset: 'earliest'});
+
+        failNextSave();
+        component.exportForm.patchValue({allMessages: false});
+        component.onSubmit();
+        expect(saved()?.Offset).toBe('largest');
+
+        component.exportForm.patchValue({allMessages: true});
+        component.onSubmit();
+        expect(saved()?.Offset).toBe('earliest');
+    }));
+
+    it('stops the save of a database export while two values share a name or one takes the time column', fakeAsync(() => {
+        const {component} = openForEditing(existingImportExport());
+
+        component.addValue('value', 'value.other', 'float');
+        expect(component.exportForm.valid).toBeFalse();
+        expect(component.nameError(component.exportValues.at(1))).toBe('Name is used more than once');
+        expect(component.invalidNames()).toEqual(['value']);
+
+        component.exportValues.at(1).patchValue({Name: 'time'});
+        expect(component.nameError(component.exportValues.at(1))).toBe('Name is taken by the time column');
+        expect(component.exportForm.valid).toBeFalse();
+
+        component.exportValues.at(1).patchValue({Name: 'other'});
+        expect(component.exportForm.valid).toBeTrue();
+        expect(component.invalidNames()).toEqual([]);
+    }));
+
+    it('lets a broker export send two values under one name', fakeAsync(() => {
+        const {component} = openForEditing(existingImportExport());
+        component.exportForm.get('targetSelector')?.setValue(component.targetBroker, {emitEvent: false});
+
+        component.addValue('value', 'value.other', 'float');
+        expect(component.exportForm.valid).toBeTrue();
+        expect(component.nameError(component.exportValues.at(1))).toBe('');
     }));
 });
