@@ -1,133 +1,118 @@
 <!--
-    ~ Copyright 2021 InfAI (CC SES)
-    ~
-    ~ Licensed under the Apache License, Version 2.0 (the "License");
-    ~ you may not use this file except in compliance with the License.
-    ~ You may obtain a copy of the License at
-    ~
-    ~     http://www.apache.org/licenses/LICENSE-2.0
-    ~
-    ~ Unless required by applicable law or agreed to in writing, software
-    ~ distributed under the License is distributed on an "AS IS" BASIS,
-    ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    ~ See the License for the specific language governing permissions and
-    ~ limitations under the License.
-    -->
+  ~ Copyright 2021 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 
-<div class="layout-margin">
-  <span class="search-button-container">
-    <senergy-searchbar></senergy-searchbar>
-  </span>
+<senergy-page-header title="Device types" description="Templates that describe what a kind of device offers, with its services and their inputs and outputs.">
+  <ng-container pageActions>
+    @if (userHasCreateAuthorization) {
+      <button matButton="filled" (click)="createDeviceType()">
+        <mat-icon>add</mat-icon> New device type
+      </button>
+    }
+  </ng-container>
+</senergy-page-header>
 
-  @if (dataSource.data.length === 0 && ready) {
-    <div>No device types found.</div>
-  }
+<senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
+  <ng-container bulkActions>
+    @if (userHasDeleteAuthorization) {
+      <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    }
+  </ng-container>
+</senergy-list-toolbar>
+
+<div class="page-body">
   <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
 
-  <div class="mat-elevation-z1" [hidden]="!ready || dataSource.data.length === 0">
-    <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
+  @if (dataSource.data.length === 0 && ready) {
+    <senergy-empty-state icon="devices_other" [title]="filtered ? 'No matching device types' : 'No device types yet'"
+      [text]="filtered ? 'No device type matches the search.' : 'A device type describes the services of a kind of device, so that devices can be created from it.'">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container">
       <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
         [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection">
         <ng-container matColumnDef="select">
-          <th mat-header-cell *matHeaderCellDef class="button-column">
+          <th mat-header-cell *matHeaderCellDef class="select-column">
             <mat-checkbox (change)="$event ? masterToggle() : null"
               [checked]="selection.hasValue() && isAllSelected()"
-              [indeterminate]="selection.hasValue() && !isAllSelected()">
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              aria-label="Select all">
             </mat-checkbox>
           </th>
-          <td mat-cell *matCellDef="let row">
+          <td mat-cell *matCellDef="let row" class="select-column" (click)="$event.stopPropagation()">
             <mat-checkbox (click)="$event.stopPropagation()"
-              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)">
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+              aria-label="Select row">
             </mat-checkbox>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let function">
-            {{function.name}}
-          </td>
+          <td mat-cell *matCellDef="let deviceType" class="name-cell">{{deviceType.name}}</td>
         </ng-container>
 
-        <ng-container matColumnDef="info">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Info</th>
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let deviceType" class="muted description-cell" [title]="deviceType.description">{{deviceType.description}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="deviceClass">
+          <th mat-header-cell *matHeaderCellDef>Device class</th>
           <td mat-cell *matCellDef="let deviceType">
-            <button mat-icon-button color="accent" (click)="detailsDeviceType(deviceType.id)">
-              <mat-icon>info</mat-icon>
-            </button>
+            @if (deviceClassName(deviceType.device_class_id)) {
+              <span class="type-chip">{{deviceClassName(deviceType.device_class_id)}}</span>
+            }
           </td>
         </ng-container>
 
-        @if (userHasUpdateAuthorization) {
-          <ng-container matColumnDef="edit">
-            <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Edit</th>
-            <td mat-cell *matCellDef="let deviceType">
-              <button mat-icon-button color="accent" [disabled]="deviceType.permissions?.w"
-                (click)="editDeviceType(deviceType.id)">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-        }
+        <ng-container matColumnDef="services">
+          <th mat-header-cell *matHeaderCellDef class="num count-column">Services</th>
+          <td mat-cell *matCellDef="let deviceType" class="num">{{deviceType.services?.length || 0}}</td>
+        </ng-container>
 
-        <ng-container matColumnDef="copy">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Copy</th>
-          <td mat-cell *matCellDef="let deviceType">
-            <button mat-icon-button color="accent" (click)="copyDeviceType(deviceType.id)">
-              <mat-icon>content_copy</mat-icon>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let deviceType" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
             </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (userHasUpdateAuthorization) {
+                <button mat-menu-item (click)="editDeviceType(deviceType.id)"><mat-icon>edit</mat-icon> Edit</button>
+              } @else {
+                <button mat-menu-item (click)="detailsDeviceType(deviceType.id)"><mat-icon>info</mat-icon> Details</button>
+              }
+              @if (userHasCreateAuthorization) {
+                <button mat-menu-item (click)="copyDeviceType(deviceType.id)"><mat-icon>content_copy</mat-icon> Copy</button>
+              }
+              <button mat-menu-item (click)="newInstance(deviceType)"><mat-icon>add_box</mat-icon> New device</button>
+              <button mat-menu-item (click)="showDevices(deviceType)"><mat-icon>important_devices</mat-icon> Show devices</button>
+              @if (userHasDeleteAuthorization) {
+                <button mat-menu-item class="danger" (click)="delete(deviceType)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
           </td>
         </ng-container>
 
-        <ng-container matColumnDef="new">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Add</th>
-          <td mat-cell *matCellDef="let deviceType">
-            <button mat-icon-button color="accent" (click)="newInstance(deviceType)">
-              <mat-icon>add_box</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="show">
-          <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Show devices</th>
-          <td mat-cell *matCellDef="let deviceType">
-            <button mat-icon-button color="accent" (click)="showDevices(deviceType)">
-              <mat-icon>important_devices</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        @if (userHasDeleteAuthorization) {
-          <span>
-            <ng-container matColumnDef="delete">
-              <th mat-header-cell *matHeaderCellDef disableClear class="button-column">Delete</th>
-              <td mat-cell *matCellDef="let deviceType">
-                <button mat-icon-button color="accent" (click)="delete(deviceType)"
-                  [disabled]="deviceType.permissions?.a">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-            <ng-container matColumnDef="header-delete-all">
-              <th mat-header-cell *matHeaderCellDef colspan="10">
-                <div class="ly-row">
-                  <div class="ly-row ly-align-center-center">You have
-                    selected {{selection.selected.length}} items
-                  </div>
-                  <button matTooltip="Delete" mat-icon-button color="accent"
-                    (click)="deleteMultipleItems()">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </th>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="['header-delete-all']"
-              [hidden]="selection.selected.length === 0">
-            </tr>
-          </span>
-        }
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let m; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let deviceType; columns: displayedColumns;" class="clickable-row" (click)="openDeviceType(deviceType)"></tr>
       </table>
     </div>
 
@@ -135,9 +120,3 @@
     showFirstLastButtons></mat-paginator>
   </div>
 </div>
-
-@if (userHasCreateAuthorization) {
-  <button mat-fab class="fab" (click)="createDeviceType()" matTooltip="Add new device type">
-    <mat-icon>add</mat-icon>
-  </button>
-}

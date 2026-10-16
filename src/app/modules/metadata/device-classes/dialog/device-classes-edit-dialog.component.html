@@ -37,8 +37,10 @@
 </mat-dialog-content>
 
 <mat-dialog-actions class="ly-row ly-align-end-center">
-    <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-    <button mat-raised-button color="accent" [disabled]="deviceClassFormGroup.invalid"
-            (click)="save()">Save
-    </button>
+    <button mat-raised-button color="primary" (click)="close()">{{disabled ? 'Close' : 'Cancel'}}</button>
+    @if (!disabled) {
+        <button mat-raised-button color="accent" [disabled]="deviceClassFormGroup.invalid"
+                (click)="save()">Save
+        </button>
+    }
 </mat-dialog-actions>

@@ -290,6 +290,21 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     font-weight: 500;
   }
 
+  // A count in a table cell that opens the list behind it (usage dialogs); a button, so it is reachable by keyboard.
+  .count-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    color: var(--mat-sys-primary);
+    cursor: pointer;
+  }
+
+  .count-link:hover {
+    text-decoration: underline;
+  }
+
   // Delete entry in a row menu.
   [mat-menu-item].danger {
     color: var(--app-danger);

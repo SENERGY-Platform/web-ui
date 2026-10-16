@@ -106,6 +106,17 @@ describe('FunctionsComponent concept filter', () => {
         expect(chip?.textContent).toContain('Temperature, Pressure');
     }));
 
+    it('falls back to the id for a concept whose lookup fails and still lists the functions', fakeAsync(() => {
+        open('/metadata/functions?concept_ids=' + temperature.id + ',urn:unknown');
+        tick(400);
+        flush();
+        harness.detectChanges();
+        discardPeriodicTasks();
+
+        expect(functionsServiceSpy.getFunctions).toHaveBeenCalledTimes(1);
+        expect(harness.routeNativeElement?.querySelector('.filter-chips')?.textContent).toContain('Temperature, urn:unknown');
+    }));
+
     it('clearing the filter removes the query parameter and lists all functions again', fakeAsync(() => {
         open('/metadata/functions?concept_ids=' + temperature.id);
         tick(400);
