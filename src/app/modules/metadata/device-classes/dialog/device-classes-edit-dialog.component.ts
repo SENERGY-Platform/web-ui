@@ -38,13 +38,19 @@ export class DeviceClassesEditDialogComponent {
     private _formBuilder = inject(FormBuilder);
 
     deviceClassFormGroup!: FormGroup;
+    disabled = false;
 
     constructor() {
         const data = inject<{
             deviceClass: DeviceTypeDeviceClassModel;
+            disabled?: boolean;
         }>(MAT_DIALOG_DATA);
 
+        this.disabled = !!data.disabled;
         this.initDeviceClassFormGroup(data.deviceClass);
+        if (this.disabled) {
+            this.deviceClassFormGroup.disable();
+        }
     }
 
     close(): void {

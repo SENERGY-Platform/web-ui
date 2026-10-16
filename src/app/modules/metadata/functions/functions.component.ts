@@ -24,10 +24,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import {FunctionsService} from './shared/functions.service';
-import {DeviceTypeFunctionModel} from '../device-types-overview/shared/device-type.model';
+import {DeviceTypeFunctionModel, functionTypes} from '../device-types-overview/shared/device-type.model';
 import {FunctionsEditDialogComponent} from './dialog/functions-edit-dialog.component';
 import {FunctionsCreateDialogComponent} from './dialog/functions-create-dialog.component';
-import {AuthorizationService} from '../../../core/services/authorization.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
@@ -41,14 +40,16 @@ import {
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
@@ -56,7 +57,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './functions.component.html',
     styleUrls: ['./functions.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTooltip, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTooltip, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class FunctionsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -64,7 +65,6 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
     private functionsService = inject(FunctionsService);
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
-    private authService = inject(AuthorizationService);
     private deviceTypeService = inject(DeviceTypeService);
     private preferencesService = inject(PreferencesService);
     private route = inject(ActivatedRoute);
@@ -72,14 +72,13 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
     private conceptsService = inject(ConceptsService);
     private destroyRef = inject(DestroyRef);
 
-    displayedColumns = ['select', 'name'];
+    displayedColumns: string[] = [];
     dataSource = new MatTableDataSource<DeviceTypeFunctionModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     listSelection = new ListSelection<DeviceTypeFunctionModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 200;
     ready = false;
-    userIsAdmin = false;
     list = new PagedListState(this.preferencesService, () => this.getFunctions(), { sortBy: 'name', sortDirection: 'asc' });
     searchText = '';
     userHasUpdateAuthorization = false;
@@ -91,7 +90,6 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
     conceptNames: string[] = [];
 
     ngOnInit() {
-        this.userIsAdmin = this.authService.userIsAdmin();
         this.readConceptFilter(this.route.snapshot.queryParamMap);
         this.initSearch();
         this.route.queryParamMap.pipe(skip(1), takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -139,21 +137,36 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
 
     checkAuthorization() {
         this.userHasUsedInAuthorization = this.deviceTypeService.userHasUsedInAuthorization();
-        if(this.userHasUsedInAuthorization) {
-            this.displayedColumns.push('useCount');
-        }
-
-        this.displayedColumns.push('info');
-
         this.userHasUpdateAuthorization = this.functionsService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
         this.userHasDeleteAuthorization = this.functionsService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
         this.userHasCreateAuthorization = this.functionsService.userHasCreateAuthorization();
+
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name',
+            'display_name',
+            'type',
+            ...(this.userHasUsedInAuthorization ? ['useCount'] : []),
+            'actions',
+        ];
+    }
+
+    /** Row click: the edit dialog, or the read-only view of the same dialog without update permission. */
+    openFunction(func: DeviceTypeFunctionModel): void {
+        if (this.userHasUpdateAuthorization) {
+            this.editFunction(func);
+        } else {
+            this.showFunction(func);
+        }
+    }
+
+    typeLabel(rdfType: string): string {
+        return functionTypes.find((type) => type.rdf_type === rdfType)?.text || '';
+    }
+
+    get filtered(): boolean {
+        return this.searchText !== '' || this.conceptIds.length > 0;
     }
 
     private initSearch() {

@@ -21,6 +21,7 @@ import { MatInputModule } from '@angular/material/input';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { SearchbarService } from './shared/searchbar.service';
 
 describe('SearchbarComponent', () => {
     let component: SearchbarComponent;
@@ -56,5 +57,23 @@ describe('SearchbarComponent', () => {
         (fixture.nativeElement.querySelector('button') as HTMLButtonElement).click();
 
         expect(count).toBe(1);
+    });
+
+    it('re-sends the search text on refresh unless compact', () => {
+        const send = spyOn(TestBed.inject(SearchbarService), 'changeMessage');
+        component.onRefresh();
+
+        expect(send).toHaveBeenCalledTimes(1);
+    });
+
+    it('only emits refresh in compact mode, without re-sending the search text', () => {
+        const send = spyOn(TestBed.inject(SearchbarService), 'changeMessage');
+        let emitted = 0;
+        component.refresh.subscribe(() => emitted++);
+        component.compact = true;
+        component.onRefresh();
+
+        expect(emitted).toBe(1);
+        expect(send).not.toHaveBeenCalled();
     });
 });

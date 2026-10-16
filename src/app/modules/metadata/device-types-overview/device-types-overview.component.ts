@@ -32,13 +32,14 @@ import { PagedListState } from 'src/app/core/classes/paged-list-state';
 import { FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
@@ -46,7 +47,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './device-types-overview.component.html',
     styleUrls: ['./device-types-overview.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, SpinnerComponent, NgClass, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatIcon, MatTooltip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
 })
 export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
@@ -58,7 +59,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     private deviceInstancesDialogService = inject(DeviceInstancesDialogService);
     private preferencesSerivce = inject(PreferencesService);
 
-    displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];
+    displayedColumns: string[] = [];
     deviceTypes: DeviceTypeModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     dataSource = new MatTableDataSource<DeviceTypeModel>();
@@ -87,14 +88,35 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
 
     checkAuthorization() {
         this.userHasUpdateAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
-        if(this.userHasUpdateAuthorization) {
-            this.displayedColumns.push('edit');
-        }
         this.userHasDeleteAuthorization = this.deviceTypeService.userHasDeleteAuthorization();
-        if(this.userHasDeleteAuthorization) {
-            this.displayedColumns.push('delete');
-        }
         this.userHasCreateAuthorization = this.deviceTypeService.userHasCreateAuthorization();
+
+        // The selection column only exists for the bulk delete.
+        this.displayedColumns = [
+            ...(this.userHasDeleteAuthorization ? ['select'] : []),
+            'name',
+            'description',
+            'deviceClass',
+            'services',
+            'actions',
+        ];
+    }
+
+    /** Row click: the page in edit mode with update permission, in details mode without it. */
+    openDeviceType(deviceType: DeviceTypeModel): void {
+        if (this.userHasUpdateAuthorization) {
+            this.editDeviceType(deviceType.id);
+        } else {
+            this.detailsDeviceType(deviceType.id);
+        }
+    }
+
+    deviceClassName(deviceClassId: string): string {
+        return this.deviceClasses.find((deviceClass) => deviceClass.id === deviceClassId)?.name || '';
+    }
+
+    get filtered(): boolean {
+        return this.searchText !== '';
     }
 
     ngAfterViewInit(): void {
@@ -184,7 +206,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     }
 
 
-    private reload() {
+    reload() {
         this.ready = false;
         this.selectionClear();
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Router } from '@angular/router';
@@ -236,6 +236,22 @@ describe('ConceptsComponent', () => {
             const bar = fixture.nativeElement.querySelector('.selection-bar') as HTMLElement;
             expect(bar.hidden).toBeFalse();
             expect(bar.textContent).toContain('2 selected');
+        }),
+    );
+
+    it(
+        'reloads exactly once when the refresh button is clicked',
+        fakeAsync(() => {
+            init();
+            tick(400);
+            conceptsServiceSpy.getConcepts.calls.reset();
+
+            (fixture.nativeElement.querySelector('senergy-searchbar button') as HTMLButtonElement).click();
+            fixture.detectChanges();
+            tick(400);
+            discardPeriodicTasks();
+
+            expect(conceptsServiceSpy.getConcepts).toHaveBeenCalledTimes(1);
         }),
     );
 });

@@ -24,7 +24,7 @@
   </ng-container>
 </senergy-page-header>
 
-<senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()">
+<senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
   <ng-container bulkActions>
     @if (userHasDeleteAuthorization) {
       <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">

@@ -38,7 +38,7 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     @Input() supportRefresh = true;
     /** Compact variant of the list toolbar: placeholder instead of floating label, 40px, no subscript line. */
     @Input() compact = false;
-    /** Emitted by the refresh button besides re-sending the search text, for pages that reload on it. */
+    /** Emitted by the refresh button; in compact mode it is the only effect, the search text is not re-sent. */
     @Output() refresh = new EventEmitter<void>();
     formControl = new FormControl<string | null>(this.searchTextIn);
 
@@ -69,7 +69,9 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     }
 
     onRefresh(): void {
-        this.changeSearchtext();
+        if (!this.compact) {
+            this.changeSearchtext();
+        }
         this.refresh.emit();
     }
 

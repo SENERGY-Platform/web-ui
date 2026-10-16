@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-.device-icon {
-    max-width: 70%;
-    max-height: 70%;
+.count-column {
+    width: 120px;
 }
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
-}
-
-.footer-item-header {
-    min-height: 20px;
-    padding: 5px;
-    margin-bottom: 8px;
-    font-size: 20px;
-    font-weight: 500;
-}
-
-.footer-buttons {
-    max-height: 30px;
+.description-cell {
+    max-width: 360px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
