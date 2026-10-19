@@ -151,6 +151,20 @@ describe('ProcessDeploymentsComponent', () => {
         expect(getAll).toHaveBeenCalledTimes(1);
     });
 
+    it('reports a delete on a hub as sent, not as done', () => {
+        component.hub = hub;
+        (component as any).showDeleteSuccess(false);
+
+        expect(snackBar.open.calls.mostRecent().args[0]).toBe('Delete sent to the hub; the deployment disappears once the hub confirms.');
+    });
+
+    it('reports a delete on the platform as done', () => {
+        component.hub = null;
+        (component as any).showDeleteSuccess(true);
+
+        expect(snackBar.open.calls.mostRecent().args[0]).toBe('Deployments deleted successfully.');
+    });
+
     it('treats a hub deployment as gone once the DELETE was accepted', (done) => {
         const fog = new DeploymentsFogService('hub-1', {} as HttpClient, {} as ErrorHandlerService, {} as NetworksService);
         fog.checkForDeletedDeploymentWithRetries('d1', 10, 100).subscribe((exists) => {

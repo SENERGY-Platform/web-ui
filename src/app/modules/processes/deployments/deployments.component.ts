@@ -285,7 +285,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                                     if (exists) {
                                         this.showSnackBarError('deleting the deployment!');
                                     } else {
-                                        this.showSnackBarSuccess('Deployment deleted');
+                                        this.showDeleteSuccess(false);
                                     }
                                     this.serverOffset = Math.max(0, this.serverOffset - 1);
                                     this.setRepoItemsParams(1);
@@ -390,7 +390,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                                 this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!',
                             );
                         } else {
-                            this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Deployment deleted' : 'Deployments deleted');
+                            this.showDeleteSuccess(this.selectedItems.length !== 1);
                         }
                         this.getRepoItems(true);
                     });
@@ -583,6 +583,19 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     private showSnackBarError(text: string): void {
         this.snackBar.open('Error while ' + text + ' !', 'close', { panelClass: 'snack-bar-error' });
+    }
+
+    // A hub removes the deployment only after it confirms the delete command, so success there means "sent".
+    private showDeleteSuccess(plural: boolean): void {
+        if (this.hub) {
+            this.snackBar.open(
+                'Delete sent to the hub; the ' + (plural ? 'deployments disappear' : 'deployment disappears') + ' once the hub confirms.',
+                undefined,
+                { duration: 4000 },
+            );
+            return;
+        }
+        this.showSnackBarSuccess(plural ? 'Deployments deleted' : 'Deployment deleted');
     }
 
     private showSnackBarSuccess(text: string): void {
