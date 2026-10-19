@@ -196,8 +196,10 @@ export class DeploymentsFogService {
         );
     }
 
+    // Returns whether the deployment still exists. process-sync removes it only after the hub confirms, so there is
+    // nothing to wait for; the DELETE status already tells success.
     checkForDeletedDeploymentWithRetries(_: string, _1: number, _2: number): Observable<boolean> {
-        return of(true);
+        return of(false);
     }
 
     getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null> {
