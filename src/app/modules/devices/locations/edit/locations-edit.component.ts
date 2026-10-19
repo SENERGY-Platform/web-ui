@@ -31,19 +31,22 @@ import { DeviceGroupsDialogService } from '../../device-groups/shared/device-gro
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
-import { MatCard, MatCardTitle, MatCardActions } from '@angular/material/card';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatDivider } from '@angular/material/divider';
+import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+
+const LIST_ROUTE = 'devices/locations';
 
 @Component({
     selector: 'senergy-locations-edit',
     templateUrl: './locations-edit.component.html',
     styleUrls: ['./locations-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatCard, MatCardTitle, MatTooltip, MatCardActions, MatIconButton, MatIcon, MatButton, MatDivider]
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatTooltip, MatIconButton, MatIcon, MatButton, PageHeaderComponent, FormSectionComponent, SaveBarComponent]
 })
 export class LocationsEditComponent implements OnInit {
     private _formBuilder = inject(FormBuilder);
@@ -69,6 +72,15 @@ export class LocationsEditComponent implements OnInit {
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
     isSaving = false;
+
+    /** Name as loaded; the page title, so it does not follow the name field while typing. */
+    savedName = '';
+    /** Editable state as loaded, serialized; the save bar shows while the current state differs. */
+    private savedState = '';
+    private savedDescription = '';
+    private savedImage = '';
+    private savedDeviceIds: string[] = [];
+    private savedDeviceGroupIds: string[] = [];
 
     constructor() {
         this.getRouterParams();
@@ -176,11 +188,67 @@ export class LocationsEditComponent implements OnInit {
 
     close(): void {}
 
+    /** True while the editable fields differ from the loaded state; always true for a new location. */
+    hasChanges(): boolean {
+        return !!this.locationForm && (this.id === '' || this.currentState() !== this.savedState);
+    }
+
+    saveDisabled(): boolean {
+        return this.isSaving || this.locationForm.invalid;
+    }
+
+    saveStatus(): string {
+        if (this.isSaving) {
+            return 'Saving...';
+        }
+        if (this.locationForm.invalid) {
+            return 'Name is required to save.';
+        }
+        return this.id === '' ? 'New location' : 'Unsaved changes';
+    }
+
+    /** Restores the loaded state; a new location has none, so it returns to the list. */
+    discard(): void {
+        if (this.isSaving) {
+            return;
+        }
+        if (this.id === '') {
+            this.router.navigate([LIST_ROUTE]);
+            return;
+        }
+        this.locationForm.patchValue({
+            name: this.savedName,
+            description: this.savedDescription,
+            image: this.savedImage,
+            device_ids: [...this.savedDeviceIds],
+            device_group_ids: [...this.savedDeviceGroupIds],
+        });
+    }
+
+    private currentState(): string {
+        const raw = this.locationForm.getRawValue();
+        return this.stateOf(raw.name, raw.description, raw.image, raw.device_ids, raw.device_group_ids);
+    }
+
+    private stateOf(name: string, description: string, image: string, deviceIds: string[], deviceGroupIds: string[]): string {
+        return JSON.stringify([name ?? '', description ?? '', image ?? '', deviceIds, deviceGroupIds]);
+    }
+
+    private markSaved(location: LocationModel) {
+        this.savedName = location.name ?? '';
+        this.savedDescription = location.description ?? '';
+        this.savedImage = location.image ?? '';
+        this.savedDeviceIds = [...(location.device_ids || [])];
+        this.savedDeviceGroupIds = [...(location.device_group_ids || [])];
+        this.savedState = this.stateOf(this.savedName, this.savedDescription, this.savedImage, this.savedDeviceIds, this.savedDeviceGroupIds);
+    }
+
     save(): void {
         this.saveLocation(this.getLocationFromForm());
     }
 
     private initLocationFormGroup(location: LocationModel) {
+        this.markSaved(location);
         this.locationForm = this.createLocationFormGroup(location);
         const that = this;
 
