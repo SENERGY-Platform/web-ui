@@ -5,9 +5,8 @@
 Writing or changing a list page with a `mat-table`, a paginator, a header checkbox, single or bulk delete, or a success
 or error snack bar. State of the upgrade branch (2026-10).
 
-**Not this if**: the page is a card grid with infinite scroll (process repo, deployments, releases, designs) or deletes
-through one batch call without a report (operator repo, waiting room, notifications, monitor, permissions list); those
-keep their own code.
+**Not this if**: the page deletes through one batch call without a report (operator repo, waiting room, notifications,
+monitor, permissions list); those keep their own code.
 
 ## The helpers
 
@@ -29,8 +28,8 @@ keep their own code.
   a fallback value must be given a success rule, otherwise the fallback counts as success. `countLabel(n, one, many)`
   builds "1 function" / "2 functions".
 - `core/classes/load-all-pages.ts` `loadAllPages`: reads every page of an API that has limit and offset but no total
-  (timescale rules, budgets), so the page can use a client-side paginator. Notifications (websocket), datasets and
-  certificates also page and search on the client.
+  (timescale rules, budgets, deployments, smart service designs), so the page can use a client-side paginator.
+  Notifications (websocket), datasets and certificates also page and search on the client.
 - `core/services/snack-bar-messages.ts`: `snackSuccess` (2 s, no action) and `snackError` (stays, `close`, error style).
   Calls with their own duration, label or position keep calling `MatSnackBar.open`. How they interact with the central
   HTTP error notice is in `docs/http-errors-name-the-backend-in-a-snack-bar.md`.

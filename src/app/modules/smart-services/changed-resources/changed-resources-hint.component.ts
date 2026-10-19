@@ -27,18 +27,25 @@ const kindLabels: { [kind: string]: string } = {
 };
 
 /**
- * Warning icon for a release whose process model, flow or import type changed or disappeared after
+ * Warning icon (or status chip) for a release whose process model, flow or import type changed or disappeared after
  * the release was created. The repository only hints at it, so the text says so.
  */
 @Component({
     selector: 'senergy-changed-resources-hint',
-    template: `@if (resources && resources.length > 0) {<mat-icon class="changed-resources-hint" color="warn"
-        matTooltipClass="multiline-tooltip" [matTooltip]="tooltip">warning</mat-icon>}`,
+    template: `@if (resources && resources.length > 0) {
+        @if (chip) {
+            <span class="status-chip warning" matTooltipClass="multiline-tooltip" [matTooltip]="tooltip">Resources changed</span>
+        } @else {
+            <mat-icon class="changed-resources-hint" color="warn" matTooltipClass="multiline-tooltip" [matTooltip]="tooltip">warning</mat-icon>
+        }
+    }`,
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [MatIcon, MatTooltip],
 })
 export class ChangedResourcesHintComponent {
     @Input() resources?: SmartServiceChangedResource[];
+    /** Shows a status chip with the label instead of the icon, for list columns. */
+    @Input() chip = false;
 
     get tooltip(): string {
         const lines = (this.resources || []).map((r) =>

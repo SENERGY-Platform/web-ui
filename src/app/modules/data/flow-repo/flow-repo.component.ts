@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, TemplateRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -43,8 +43,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import {PreferencesService} from '../../../core/services/preferences.service';
 import {PagedListState} from 'src/app/core/classes/paged-list-state';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
-import { FlexibleConnectedPositionStrategy, Overlay, OverlayRef, CdkOverlayOrigin } from '@angular/cdk/overlay';
-import {TemplatePortal} from '@angular/cdk/portal';
+import { HoverPreviewComponent } from '../../../core/components/hover-preview/hover-preview.component';
 import {FlowFilterDialogComponent} from './flow-filter-dialog/flow-filter-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
@@ -73,7 +72,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
         }
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, CdkOverlayOrigin, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, CurrencyPipe, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, HoverPreviewComponent, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, CurrencyPipe, DatePipe]
 })
 export class FlowRepoComponent implements OnInit, AfterViewInit {
     private flowRepoService = inject(FlowRepoService);
@@ -90,14 +89,11 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
     private pipeService = inject(PipelineRegistryService);
     private router = inject(Router);
     private preferencesService = inject(PreferencesService);
-    private overlay = inject(Overlay);
-    private vcr = inject(ViewContainerRef);
     private dialog = inject(MatDialog);
     private activatedRoute = inject(ActivatedRoute);
     private cd = inject(ChangeDetectorRef);
 
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
-    @ViewChild('overlayTpl') overlayTpl!: TemplateRef<any>;
     flows: FlowModel[] = [];
 
     readonly dateFormat = LIST_DATE_FORMAT;
@@ -122,8 +118,6 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
     permissionsPerFlows: PermissionsV2RightsAndIdModel[] = [];
 
     userId = {} as string | Error;
-
-    private overlayRef?: OverlayRef;
 
     private svgCache = new Map<string, SafeUrl>();
 
@@ -260,44 +254,6 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
 
     canDelete(flow: FlowModel): boolean {
         return this.userHasDeleteAuthorization && flow._id !== undefined && this.userHasAdministratePermission(flow._id);
-    }
-
-    openOverlay(origin: any, element: any) {
-        if (this.overlayRef) {
-            return;
-        }
-
-        const positionStrategy: FlexibleConnectedPositionStrategy =
-            this.overlay.position()
-                .flexibleConnectedTo(origin.elementRef)
-                .withPositions([
-                    {
-                        originX: 'end',
-                        originY: 'center',
-                        overlayX: 'start',
-                        overlayY: 'center',
-                        offsetX: 8,
-                    },
-                ]);
-
-        this.overlayRef = this.overlay.create({
-            positionStrategy,
-            scrollStrategy: this.overlay.scrollStrategies.reposition(),
-            hasBackdrop: false,
-        });
-
-        const portal = new TemplatePortal(
-            this.overlayTpl,
-            this.vcr,
-            { element }
-        );
-
-        this.overlayRef.attach(portal);
-    }
-
-    closeOverlay() {
-        this.overlayRef?.detach();
-        this.overlayRef = undefined;
     }
 
     loadFlowUsage() {

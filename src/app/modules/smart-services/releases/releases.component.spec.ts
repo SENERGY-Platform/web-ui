@@ -16,38 +16,44 @@
 
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MATERIAL_ANIMATIONS } from '@angular/material/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { SmartServiceReleasesComponent } from './releases.component';
 import { SmartServiceReleasesService } from './shared/release.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { ResponsiveService } from '../../../core/services/responsive.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { UtilService } from '../../../core/services/util.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { SmartServiceInstanceDialogService } from '../instances/shared/instance-dialog.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 
 describe('SmartServiceReleasesComponent', () => {
     let fixture: ComponentFixture<SmartServiceReleasesComponent>;
+    let component: SmartServiceReleasesComponent;
+    let getList: jasmine.Spy;
 
-    const release = (id: string, changed?: any[]) => ({
-        id, name: id, description: '', design_id: 'd', created_at: 1760000000, svg_xml: '', bpmn_xml: '',
-        permissions_info: { shared: false, permissions: { a: true, x: true, r: true, w: true } },
-        changed_resources: changed,
+    const release = (id: string, extra: object = {}, permissions = { a: true, x: true, r: true, w: true }) => ({
+        id, name: id, description: 'about ' + id, design_id: 'd', created_at: 1760000000, svg_xml: '', bpmn_xml: '',
+        permissions_info: { shared: false, permissions },
+        ...extra,
     });
 
-    beforeEach(() => {
-        const list = { releases: [release('plain'), release('changed', [{ kind: 'flow', id: 'flow-1', reason: 'gone', at: 1760000000 }])], total: 2 };
-        TestBed.configureTestingModule({
-            imports: [SmartServiceReleasesComponent],
+    async function init(releases: object[], deleteRight = true, total = releases.length) {
+        getList = jasmine.createSpy('getExtendedReleaseList').and.callFake(() => of({ releases, total }));
+        await TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [NoopAnimationsModule, SmartServiceReleasesComponent],
             providers: [
-                { provide: SmartServiceReleasesService, useValue: { userHasDeleteAuthorization: () => false, getExtendedReleaseList: () => of(list) } },
+                { provide: SmartServiceReleasesService, useValue: { userHasDeleteAuthorization: () => deleteRight, getExtendedReleaseList: getList } },
                 { provide: SearchbarService, useValue: { currentSearchText: of(''), changeMessage: () => undefined } },
-                { provide: ResponsiveService, useValue: { getActiveMqAlias: () => 'lg', observeMqAlias: () => of('lg') } },
+                { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: UtilService, useValue: { convertSVGtoBase64: () => '' } },
                 { provide: MetadataExistenceService, useValue: { warningsForBpmn: () => of(new Map()) } },
                 { provide: ActivatedRoute, useValue: { queryParamMap: of({ get: () => null }) } },
@@ -56,19 +62,103 @@ describe('SmartServiceReleasesComponent', () => {
                 { provide: DialogsService, useValue: {} },
                 { provide: Router, useValue: {} },
                 { provide: SmartServiceInstanceDialogService, useValue: {} },
+                { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
             ],
-        });
+        }).compileComponents();
         fixture = TestBed.createComponent(SmartServiceReleasesComponent);
-    });
-
-    it('renders releases with and without changed resources and hints only at the changed one', () => {
+        component = fixture.componentInstance;
         // the stubbed answer is synchronous, so ready flips inside the first check; the app gets it asynchronously
         fixture.detectChanges(false);
         fixture.detectChanges();
+    }
 
-        expect(fixture.debugElement.queryAll(By.css('mat-grid-tile')).length).toBe(2);
-        const icons = fixture.debugElement.queryAll(By.css('senergy-changed-resources-hint mat-icon'));
-        expect(icons.length).toBe(1);
-        expect(icons[0].injector.get(MatTooltip).message).toContain('Flow flow-1: gone on');
+    const rows = (): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('tr[mat-row]'));
+
+    async function menuLabels(row: number): Promise<string[]> {
+        (fixture.nativeElement.querySelectorAll('tr[mat-row] button[aria-label="Actions"]')[row] as HTMLButtonElement).click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+        return Array.from(document.querySelectorAll('.mat-mdc-menu-panel button')).map((b) => (b.textContent || '').replace(/\s+/g, ' ').trim().replace(/^\w+ /, ''));
+    }
+
+    it('renders releases with and without changed resources and a chip only at the changed one', async () => {
+        await init([release('plain'), release('changed', { changed_resources: [{ kind: 'flow', id: 'flow-1', reason: 'gone', at: 1760000000 }] })]);
+
+        expect(rows().length).toBe(2);
+        const chips = fixture.debugElement.queryAll(By.css('senergy-changed-resources-hint .status-chip.warning'));
+        expect(chips.length).toBe(1);
+        expect(chips[0].injector.get(MatTooltip).message).toContain('Flow flow-1: gone on');
+    });
+
+    it('shows name, description, the release date and whether a newer release exists', async () => {
+        await init([release('current'), release('old', { new_release_id: 'current' }, undefined), release('shared', { permissions_info: { shared: true, permissions: { a: true, x: true } } })]);
+
+        const [current, old, shared] = rows();
+        expect(current.querySelector('.name-cell')?.textContent).toContain('current');
+        expect(current.textContent).toContain('about current');
+        expect(current.querySelector('td.muted')?.textContent).toContain('2025');
+        expect(current.querySelector('.status-chip.online')?.textContent).toContain('Latest');
+        expect(old.textContent).toContain('Superseded');
+        expect(shared.querySelector('.name-chip')?.textContent).toContain('Shared');
+    });
+
+    it('shows an error as a failed status chip with the error as tooltip', async () => {
+        await init([release('broken', { error: 'module failed' })]);
+
+        const chip = fixture.debugElement.query(By.css('.status-chip.failed'));
+        expect(chip.injector.get(MatTooltip).message).toBe('module failed');
+    });
+
+    it('loads one page from the server and hands the total to the paginator', async () => {
+        await init([release('a')], true, 45);
+
+        expect(getList).toHaveBeenCalledWith(20, 0, '', 'r', true, undefined, 'name.asc');
+        expect(component.totalCount).toBe(45);
+    });
+
+    it('reloads exactly once when the refresh button is clicked', async () => {
+        await init([release('a')]);
+        getList.calls.reset();
+
+        (fixture.nativeElement.querySelector('senergy-searchbar button') as HTMLButtonElement).click();
+
+        expect(getList).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends the sort column to the server', async () => {
+        await init([release('a')]);
+        getList.calls.reset();
+
+        component.matSortChange({ active: 'created_at', direction: 'desc' });
+
+        expect(getList.calls.mostRecent().args[6]).toBe('created_at.desc');
+    });
+
+    it('asks for older releases too when the filter is on', async () => {
+        await init([release('a')]);
+        getList.calls.reset();
+
+        component.showOlder(true);
+
+        expect(getList).toHaveBeenCalledTimes(1);
+        expect(getList.calls.mostRecent().args[4]).toBeFalse();
+    });
+
+    it('offers the menu actions in the fixed order with delete last', async () => {
+        await init([release('a')]);
+
+        expect(await menuLabels(0)).toEqual(['Launch instance', 'Show instances', 'Export to designer', 'Download BPMN', 'Download SVG', 'Share', 'Delete']);
+    });
+
+    it('hides launch, share and delete instead of disabling them without the matching right', async () => {
+        await init([release('a', {}, { a: false, x: false, r: true, w: false })]);
+
+        expect(await menuLabels(0)).toEqual(['Show instances', 'Export to designer', 'Download BPMN', 'Download SVG']);
+    });
+
+    it('hides delete without the delete right of the service', async () => {
+        await init([release('a')], false);
+
+        expect(await menuLabels(0)).not.toContain('Delete');
     });
 });

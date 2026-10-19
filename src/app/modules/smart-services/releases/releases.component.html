@@ -13,137 +13,121 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="releases-container layout-margin">
-  <div class="ly-column">
-    <div class="search-button-container">
-      <senergy-searchbar></senergy-searchbar>
-      @if (this.latest) {
-        <button matTooltip="show old deployments" mat-icon-button color="accent" (click)="toggleLatest()"
-          class="suffix">
-          <mat-icon>visibility</mat-icon>
-        </button>
-      }
-      @if (!this.latest) {
-        <button matTooltip="hide old deployments" mat-icon-button color="accent" (click)="toggleLatest()"
-          class="suffix">
-          <mat-icon>visibility_off</mat-icon>
-        </button>
-      }
-    </div>
-    <div style="padding-bottom: 1em;" #chipDiv>
-      <mat-chip-set>
-        @if (id !== undefined) {
-          <mat-chip>
-            <mat-icon matChipAvatar>cloud</mat-icon>
-            <span>Filter by ID</span>
-            <button matChipRemove (click)="this.id = undefined; updateQueryParams(); getRepoItems(true)">
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip>
-        }
+
+<senergy-page-header title="Smart service releases" description="Released versions of smart service designs; start a release to create an instance of it.">
+</senergy-page-header>
+
+<senergy-list-toolbar (refresh)="reload()">
+  <ng-container toolbarFilters>
+    <mat-chip-listbox aria-label="Filter">
+      <mat-chip-option [selected]="!latest" (selectionChange)="showOlder($event.selected)">
+        Show older releases
+      </mat-chip-option>
+    </mat-chip-listbox>
+    @if (id !== undefined) {
+      <mat-chip-set aria-label="Release filter">
+        <mat-chip (removed)="removeIdFilter()">
+          <mat-icon matChipAvatar>cloud</mat-icon>
+          Filter by ID
+          <button matChipRemove aria-label="Remove the ID filter"><mat-icon>cancel</mat-icon></button>
+        </mat-chip>
       </mat-chip-set>
-    </div>
-    <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
-      [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>
-      @if (animationDone) {
-        <div class="ly-column" [formGroup]="formGroup">
-          @if (repoItems.length > 0) {
-            <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
-              formArrayName="repoItems">
-              @for (item of repoItems.controls; track item; let i = $index) {
-                <mat-grid-tile class="mat-elevation-z1"
-                  [formGroupName]="i">
-                  <div class="ly-fill">
-                    @if (item.value.metadataWarning) {
-                      <mat-icon
-                        matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
-                        class="color-warn metadata-warning-icon">
-                        report_problem
-                      </mat-icon>
-                    }
-                    <img class="widget-image" [src]="item.value.image">
-                  </div>
-                  <mat-grid-tile-footer>
-                    <div class="ly-column ly-fill">
-                      <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
-                        {{item.value.name}}
-                      </div>
-                      <div class="truncate footer-item-subtitle" matTooltip="{{item.value.description}}">
-                        {{item.value.description}}
-                      </div>
-                      <div class="footer-buttons ly-row ly-align-center-center">
-                        <div class="footer-meta">
-                          @if (item.value.shared) {
-                            <mat-icon matTooltip="Release is shared"
-                              class="color-sidenav">share
-                            </mat-icon>
-                          }
-                          <span class="footer-date"
-                            matTooltip="Released {{item.value.created_at * 1000 | date:'dd.MM.yy, HH:mm'}}">
-                            {{item.value.created_at * 1000 | date:'dd.MM.yy'}}
-                          </span>
-                          <senergy-changed-resources-hint
-                            [resources]="item.value.changed_resources"></senergy-changed-resources-hint>
-                          @if (item.value.error) {
-                            <mat-icon matTooltip="{{item.value.error}}"
-                              color="warn">warning
-                            </mat-icon>
-                          }
-                        </div>
-                        <div class="ly-flex"></div>
-                        <button mat-icon-button matTooltip="Launch a new instance of this release"
-                          color="accent" (click)="launchRelease(item.value)"
-                          [disabled]="item.value.permissions.x === false">
-                          <mat-icon>play_arrow</mat-icon>
-                        </button>
-                        @if (userHasDeleteAuthorization) {
-                          <button mat-icon-button matTooltip="Delete"
-                            color="accent" (click)="deleteRelease(item.value)"
-                            [disabled]="item.value.permissions.a === false">
-                            <mat-icon>delete</mat-icon>
-                          </button>
-                        }
-                        <button mat-icon-button [matMenuTriggerFor]="subMenu" color="accent"
-                          matTooltip="More">
-                          <mat-icon>more_vert</mat-icon>
-                        </button>
-                        <mat-menu #subMenu="matMenu" [overlapTrigger]="false">
-                          <button mat-menu-item (click)="permission(item.value)"
-                            [disabled]="item.value.permissions.a === false">
-                            <mat-icon>share</mat-icon>
-                            <span>Share</span>
-                          </button>
-                          <button mat-menu-item
-                            routerLink="/smart-services/releases/designer/{{item.value.id}}">
-                            <mat-icon>edit</mat-icon>
-                            <span>Export to Designer</span>
-                          </button>
-                          <button mat-menu-item (click)="downloadDiagram(item.value)">
-                            <mat-icon>cloud_download</mat-icon>
-                            <span>Download BPMN</span>
-                          </button>
-                          <button mat-menu-item (click)="downloadSvg(item.value)">
-                            <mat-icon>insert_photo</mat-icon>
-                            <span>Download SVG</span>
-                          </button>
-                          <button mat-menu-item (click)="showInstances(item.value.id)">
-                            <mat-icon>input_circle</mat-icon>
-                            <span>Show Instances</span>
-                          </button>
-                        </mat-menu>
-                      </div>
-                    </div>
-                  </mat-grid-tile-footer>
-                </mat-grid-tile>
+    }
+  </ng-container>
+</senergy-list-toolbar>
+
+<div class="page-body">
+  <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+
+  @if (dataSource.data.length === 0 && ready) {
+    <senergy-empty-state icon="inventory_2" [title]="filtered ? 'No matching releases' : 'No releases yet'"
+      [text]="filtered ? 'No release matches the search or the filters.' : 'Release a design in the smart service designer to see it here.'">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort
+        [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection" matSortDisableClear
+        (matSortChange)="matSortChange($event)">
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef class="preview-column"><span class="cdk-visually-hidden">Preview</span></th>
+          <td mat-cell *matCellDef="let row" class="preview-column">
+            @if (previewUrl(row); as url) {
+              <senergy-hover-preview [src]="url" [onWhite]="true" alt="Preview of the release"></senergy-hover-preview>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="name">Name</th>
+          <td mat-cell *matCellDef="let row">
+            <div>
+              <span class="name-cell">{{row.name}}</span>
+              @if (row.permissions_info.shared) {
+                <span class="type-chip name-chip" matTooltip="Release is shared">Shared</span>
               }
-            </mat-grid-list>
-          }
-          @if (repoItems.length === 0 && ready) {
-            <div>No process models found.</div>
-          }
-          <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
-        </div>
-      }
+              @if (metadataWarnings.get(row.id); as warning) {
+                <span class="status-chip warning name-chip" [matTooltip]="warning" matTooltipClass="multiline-tooltip">Metadata missing</span>
+              }
+            </div>
+            @if (row.description) {
+              <div class="muted">{{row.description}}</div>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="status-cell">
+              @if (row.new_release_id) {
+                <span class="status-chip" matTooltip="A newer release of this design exists">Superseded</span>
+              } @else {
+                <span class="status-chip online">Latest</span>
+              }
+              @if (row.error) {
+                <span class="status-chip failed" [matTooltip]="row.error">Error</span>
+              }
+              <senergy-changed-resources-hint [chip]="true" [resources]="row.changed_resources"></senergy-changed-resources-hint>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="created_at">Released</th>
+          <td mat-cell *matCellDef="let row" class="muted">{{releasedAt(row) | date:dateFormat}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let row" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (canLaunch(row)) {
+                <button mat-menu-item (click)="launchRelease(row)"><mat-icon>play_arrow</mat-icon> Launch instance</button>
+              }
+              <button mat-menu-item (click)="showInstances(row.id)"><mat-icon>input_circle</mat-icon> Show instances</button>
+              <button mat-menu-item (click)="exportToDesigner(row)"><mat-icon>edit</mat-icon> Export to designer</button>
+              <button mat-menu-item (click)="downloadDiagram(row)"><mat-icon>cloud_download</mat-icon> Download BPMN</button>
+              <button mat-menu-item (click)="downloadSvg(row)"><mat-icon>insert_photo</mat-icon> Download SVG</button>
+              @if (canAdministrate(row)) {
+                <button mat-menu-item (click)="permission(row)"><mat-icon>share</mat-icon> Share</button>
+              }
+              @if (userHasDeleteAuthorization && canAdministrate(row)) {
+                <button mat-menu-item class="danger" (click)="deleteRelease(row)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
     </div>
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="list.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+      showFirstLastButtons></mat-paginator>
   </div>
 </div>

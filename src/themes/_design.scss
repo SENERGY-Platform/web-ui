@@ -333,6 +333,11 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     background: var(--mat-sys-surface);
   }
 
+  // Column holding a `.svg-preview`.
+  th.preview-column, td.preview-column {
+    width: 136px;
+  }
+
   // The enlarged image shown while hovering a `.svg-preview`.
   .svg-preview-large {
     width: 100%;
