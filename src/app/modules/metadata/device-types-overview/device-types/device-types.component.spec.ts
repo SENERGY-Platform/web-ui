@@ -40,6 +40,72 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
+/** The update payload the page sent for the unchanged test device type before the one-page change (captured from that code). */
+const PAYLOAD = {
+    id: 'device_id_4711',
+    name: 'device_type_name',
+    description: 'desc',
+    attributes: [],
+    services: [
+        {
+            id: 'service_id_1',
+            local_id: 'local_id_1',
+            service_group_key: null,
+            name: 'service1',
+            description: 'serv_desc',
+            protocol_id: 'protocol_1',
+            interaction: 'event',
+            inputs: [
+                {
+                    id: 'input_id_1',
+                    name: 'metadata',
+                    serialization: 'json',
+                    protocol_segment_id: 'protocol_segment_1',
+                    show: true,
+                    content_variable: {
+                        id: 'content_variable_1',
+                        name: 'power_comsumption',
+                        type: 'https://schema.org/StructuredValue',
+                        sub_content_variables: [
+                            {
+                                id: 'sub_content_variable_1',
+                                characteristic_id: 'char_1',
+                                name: 'level',
+                                type: 'https://schema.org/Float',
+                                value: 0
+                            },
+                            {
+                                id: 'sub_content_variable_2',
+                                characteristic_id: 'char_1',
+                                name: 'level2',
+                                type: 'https://schema.org/Float',
+                                value: 0
+                            }
+                        ]
+                    }
+                }
+            ],
+            outputs: [
+                {
+                    id: 'output_id_1',
+                    name: 'data',
+                    serialization: 'json',
+                    protocol_segment_id: 'protocol_segment_2',
+                    show: true,
+                    content_variable: {
+                        id: 'content_variable_out_1',
+                        name: 'brightness',
+                        type: 'https://schema.org/Float'
+                    }
+                }
+            ],
+            attributes: []
+        }
+    ],
+    service_groups: [],
+    device_class_id: 'device_class_1'
+};
+
 describe('DeviceTypesComponent', () => {
     let component: DeviceTypesComponent;
     let fixture: ComponentFixture<DeviceTypesComponent>;
@@ -53,7 +119,8 @@ describe('DeviceTypesComponent', () => {
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
     const aspectClassesServiceSpy: Spy<AspectClassesService> = createSpyFromClass<AspectClassesService>(AspectClassesService);
 
-    function init(id: string, func: string) {
+    function init(id: string, func: string, canEdit = true, attributes: { key: string; value: string; origin: string }[] = []) {
+        deviceTypeServiceSpy.userHasUpdateAuthorization.and.returnValue(canEdit);
         deviceTypeServiceSpy.getLeafCharacteristics.and.returnValue(
             of([
                 {
@@ -89,6 +156,7 @@ describe('DeviceTypesComponent', () => {
             name: 'device_type_name',
             description: 'desc',
             device_class_id: 'device_class_1',
+            ...(attributes.length > 0 ? { attributes } : {}),
             services: [
                 {
                     id: 'service_id_1',
@@ -466,16 +534,14 @@ describe('DeviceTypesComponent', () => {
         );
 
         it(
-            'discards an edit by opening the read-only view of the device type',
+            'discards an edit by reloading the stored device type',
             waitForAsync(() => {
                 init('device_id_4711', 'edit');
                 const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
 
                 component.discard();
 
-                expect(navigate).toHaveBeenCalledWith(['metadata/devicetypesoverview/devicetypes/device_id_4711'], {
-                    queryParams: { function: 'details' },
-                });
+                expect(navigate).toHaveBeenCalledWith(['metadata/devicetypesoverview/devicetypes/device_id_4711']);
             }),
         );
 
@@ -488,6 +554,116 @@ describe('DeviceTypesComponent', () => {
                 component.discard();
 
                 expect(navigate).toHaveBeenCalledWith(['metadata/devicetypesoverview']);
+            }),
+        );
+    });
+
+    describe('one page for every mode', () => {
+        async function show() {
+            await fixture.whenStable();
+            component.ready = true;
+            fixture.detectChanges();
+        }
+
+        it(
+            'is editable with the update right whatever the query parameter says',
+            waitForAsync(async () => {
+                for (const func of ['', 'edit', 'details']) {
+                    TestBed.resetTestingModule();
+                    init('device_id_4711', func);
+                    await show();
+                    expect(component.editable).withContext(func).toBeTrue();
+                    expect(fixture.nativeElement.querySelector('senergy-save-bar')).withContext(func).not.toBeNull();
+                }
+            }),
+        );
+
+        it(
+            'is read-only without the update right: no save bar, no add or remove controls',
+            waitForAsync(async () => {
+                init('device_id_4711', 'edit', false);
+                await show();
+
+                expect(component.editable).toBeFalse();
+                expect(component.firstFormGroup.disabled).toBeTrue();
+                const el: HTMLElement = fixture.nativeElement;
+                expect(el.querySelector('senergy-save-bar')).toBeNull();
+                expect(el.querySelector('button[aria-label="Delete attribute"]')).toBeNull();
+                expect(el.textContent).not.toContain('Add attribute');
+                expect(el.textContent).not.toContain('Add service');
+            }),
+        );
+
+        it(
+            'titles a stored type by its name and a new or copied one as new',
+            waitForAsync(async () => {
+                init('device_id_4711', '');
+                await show();
+                expect(fixture.nativeElement.querySelector('.page-title').textContent).toContain('device_type_name');
+
+                TestBed.resetTestingModule();
+                init('device_id_4711', 'copy');
+                await show();
+                expect(fixture.nativeElement.querySelector('.page-title').textContent).toContain('New device type');
+            }),
+        );
+
+        it(
+            'saves the stored type unchanged: the update payload equals the loaded device type',
+            fakeAsync(() => {
+                init('device_id_4711', 'edit');
+                component.save();
+                fixture.detectChanges();
+                tick();
+                flush();
+
+                expect(JSON.parse(JSON.stringify(deviceTypeServiceSpy.updateDeviceType.calls.mostRecent().args[0]))).toEqual(PAYLOAD);
+            }),
+        );
+
+        it(
+            'has no submit button in its forms, so Enter in a field cannot click a remove or add control',
+            waitForAsync(async () => {
+                init('device_id_4711', 'edit', true, [
+                    { key: 'senergy/zigbee-vendor', value: 'Acme', origin: 'web-ui' },
+                    { key: 'senergy/zigbee-model', value: 'CS-1', origin: 'web-ui' },
+                ]);
+                await show();
+                const el: HTMLElement = fixture.nativeElement;
+                expect(component.deviceTypeAttributes.length).toBe(2);
+                expect(el.querySelectorAll('input[formcontrolname="value"]').length).toBe(2);
+
+                // Enter in a text field clicks the first submit button of its form.
+                el.querySelectorAll('form').forEach((form) => {
+                    const implicit = form.querySelector('button:not([type="button"])') as HTMLButtonElement | null;
+                    implicit?.click();
+                    expect(implicit).withContext('implicit submit button').toBeNull();
+                });
+                expect(component.deviceTypeAttributes.length).toBe(2);
+            }),
+        );
+
+        it(
+            'keeps a new or copied type editable and saves it without the update right',
+            fakeAsync(() => {
+                for (const func of ['create', 'copy']) {
+                    TestBed.resetTestingModule();
+                    init(func === 'copy' ? 'device_id_4711' : '', func, false);
+                    expect(component.editable).withContext(func).toBeTrue();
+                    expect(component.firstFormGroup.enabled).withContext(func).toBeTrue();
+                    if (func === 'create') {
+                        component.firstFormGroup.patchValue({ name: 'new type', description: 'new desc', device_class_id: 'device_class_1' });
+                    }
+                    component.save();
+                    fixture.detectChanges();
+                    tick();
+                    flush();
+
+                    const sent = deviceTypeServiceSpy.createDeviceType.calls.mostRecent().args[0];
+                    expect(sent.name).withContext(func).toBe(func === 'create' ? 'new type' : 'device_type_name');
+                    expect(sent.description).withContext(func).toBe(func === 'create' ? 'new desc' : 'desc');
+                    expect(sent.device_class_id).withContext(func).toBe('device_class_1');
+                }
             }),
         );
     });

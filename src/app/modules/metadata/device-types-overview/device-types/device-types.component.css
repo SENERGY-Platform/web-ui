@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+/* A fixed height makes the container the scroll area, so the save bar sticks to its bottom edge; 64px is the toolbar. */
 .device-type-container {
-    height: calc(100% - 64px);
-    overflow: auto;
+    height: calc(var(--app-page-height, 100vh) - 64px);
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
 }
@@ -100,10 +101,15 @@ table {
     color: var(--mat-sys-on-surface-variant);
 }
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
+.service-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
+.group-title {
+    margin: 0 0 8px;
+    font-size: var(--app-text-sm);
+    font-weight: 600;
+    color: var(--mat-sys-on-surface-variant);
+}

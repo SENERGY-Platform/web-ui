@@ -63,11 +63,12 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
-import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
 import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
 import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
 
@@ -81,7 +82,7 @@ interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     templateUrl: './device-types.component.html',
     styleUrls: ['./device-types.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SpinnerComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatIcon, MatButton, MatExpansionPanelContent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle, MatTabGroup, MatTab, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTooltip, MatNestedTreeNode, MatTreeNodeOutlet, MatFabButton, FormSectionComponent, SaveBarComponent]
+    imports: [SpinnerComponent, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatIcon, MatButton, MatExpansionPanelContent, CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle, MatTabGroup, MatTab, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatTooltip, MatNestedTreeNode, MatTreeNodeOutlet, PageHeaderComponent, FormSectionComponent, SaveBarComponent]
 })
 export class DeviceTypesComponent implements OnInit {
     private _formBuilder = inject(FormBuilder);
@@ -117,6 +118,8 @@ export class DeviceTypesComponent implements OnInit {
     concepts: ConceptsCharacteristicsModel[] = [];
     equivalentProtocolSegments: string[][] = [[]];
     ready = false;
+    /** Name as loaded; the page title, so it does not follow the name field while typing. */
+    savedName = '';
     userHasEditAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
 
     timeAttributeKey = 'senergy/time_path';
@@ -443,8 +446,9 @@ export class DeviceTypesComponent implements OnInit {
         };
     }
 
-    editDeviceType() {
-        this.reload({ id: this.id } as DeviceTypeModel); // no more info needed
+    /** True for a type that is not stored yet: created from scratch or copied. */
+    get isNew(): boolean {
+        return this.id === '' || this.queryParamFunction === 'copy';
     }
 
     /** True while any form section blocks saving; the same condition as the "Please fix" status. */
@@ -467,10 +471,10 @@ export class DeviceTypesComponent implements OnInit {
         return this.firstFormGroup.dirty || this.attrFormGroup.dirty || this.secondFormGroup.dirty ? 'Unsaved changes' : 'Editing';
     }
 
-    /** Leaves editing without saving: back to the read-only view, or to the list for a new or copied type. */
+    /** Reloads the stored type, which drops all edits; a new or copied type has none, so it returns to the list. */
     discard() {
-        if (this.queryParamFunction === 'edit' && this.id !== '') {
-            this.reload({ id: this.id } as DeviceTypeModel, 'details');
+        if (!this.isNew) {
+            this.reload({ id: this.id } as DeviceTypeModel); // no more info needed
         } else {
             this.router.navigate(['metadata/devicetypesoverview']);
         }
@@ -515,6 +519,7 @@ export class DeviceTypesComponent implements OnInit {
             return this.deviceTypeService.getDeviceType(this.id).pipe(
                 map((deviceType: DeviceTypeModel | null) => {
                     if (deviceType !== null) {
+                        this.savedName = deviceType.name;
                         this.initFirstFormGroup(deviceType);
                         this.initSecondFormGroup(deviceType);
                         this.initAttrFormGroup(deviceType);
@@ -754,15 +759,13 @@ export class DeviceTypesComponent implements OnInit {
         }
     }
 
-    private reload(deviceType: DeviceTypeModel | null, queryParamFunction = 'edit') {
+    private reload(deviceType: DeviceTypeModel | null) {
         if (deviceType) {
             this.router.routeReuseStrategy.shouldReuseRoute = function () {
                 return false;
             };
             this.router.onSameUrlNavigation = 'reload';
-            this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceType.id], {
-                queryParams: { function: queryParamFunction },
-            });
+            this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceType.id]);
         }
     }
 
@@ -851,7 +854,8 @@ export class DeviceTypesComponent implements OnInit {
     private getRouterParams(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';
         this.queryParamFunction = this.route.snapshot.queryParamMap.get('function') || '';
-        this.editable = this.deviceTypeHelperService.isEditable(this.queryParamFunction);
+        // One page for every mode: a stored type is editable with the update right, a new or copied one always was.
+        this.editable = this.isNew || this.userHasEditAuthorization;
     }
 
     private deleteIds(): void {

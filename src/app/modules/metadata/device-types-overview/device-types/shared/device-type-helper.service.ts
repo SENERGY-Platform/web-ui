@@ -24,32 +24,6 @@ import * as _ from 'lodash';
 export class DeviceTypeHelperService {
     constructor() {}
 
-    isEditable(queryParamFunction: string): boolean {
-        let editable;
-        switch (queryParamFunction) {
-        case 'copy': {
-            editable = true;
-            break;
-        }
-        case 'edit': {
-            editable = true;
-            break;
-        }
-        case 'create': {
-            editable = true;
-            break;
-        }
-        case 'details': {
-            editable = false;
-            break;
-        }
-        default: {
-            editable = false;
-        }
-        }
-        return editable;
-    }
-
     checkIfContentExists(contentVariable: DeviceTypeContentVariableModel[] | null | undefined, serialization: string | null): boolean {
         if (
             contentVariable === undefined ||

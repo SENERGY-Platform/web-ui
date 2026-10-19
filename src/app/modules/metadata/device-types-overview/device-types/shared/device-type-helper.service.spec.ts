@@ -45,15 +45,6 @@ describe('DeviceTypeHelperService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('test isEditable', () => {
-        expect(service.isEditable('')).toBe(false);
-        expect(service.isEditable('xxx')).toBe(false);
-        expect(service.isEditable('create')).toBe(true);
-        expect(service.isEditable('copy')).toBe(true);
-        expect(service.isEditable('edit')).toBe(true);
-        expect(service.isEditable('details')).toBe(false);
-    });
-
     it('test checkIfContentExists', () => {
         expect(service.checkIfContentExists(undefined, null)).toBe(false);
         expect(service.checkIfContentExists([], null)).toBe(false);
