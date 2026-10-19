@@ -31,7 +31,9 @@ import { of, Subject } from 'rxjs';
 
 import { ProcessDeploymentsComponent } from './deployments.component';
 import { DeploymentsService } from './shared/deployments.service';
-import { DeploymentsFogFactory } from './shared/deployments-fog.service';
+import { DeploymentsFogFactory, DeploymentsFogService } from './shared/deployments-fog.service';
+import { HttpClient } from '@angular/common/http';
+import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { DeploymentsModel } from './shared/deployments.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
@@ -55,8 +57,8 @@ class MockDeploymentsService {
         return true;
     }
 
-    getAll() {
-        return of(this.items);
+    getAll(_query: string, _limit: number, offset: number) {
+        return of(offset === 0 ? this.items : []);
     }
 
     setDeploymentDisabled(id: string, disabled: boolean) {
@@ -114,6 +116,15 @@ describe('ProcessDeploymentsComponent', () => {
         fixture.detectChanges();
     }
 
+    // the test panel has no height, so the chunk size derived from it would be 0
+    function renderWithChunkSize(size: number): void {
+        fixture.detectChanges();
+        (component as any).limitInit = size;
+        (component as any).limit = size;
+        searchText.next('');
+        fixture.detectChanges();
+    }
+
     function toggleChange(checked: boolean): MatSlideToggleChange {
         return { checked, source: { checked } } as MatSlideToggleChange;
     }
@@ -121,6 +132,32 @@ describe('ProcessDeploymentsComponent', () => {
     function toggles(): HTMLElement[] {
         return Array.from(fixture.nativeElement.querySelectorAll('mat-slide-toggle'));
     }
+
+    it('keeps loading after a short chunk and stops only at an empty one', () => {
+        // the wrapper drops deployments without a virtual id, so the first chunk comes back short
+        const chunks = [[deployment('a')], [deployment('b')], []];
+        const getAll = spyOn(service, 'getAll').and.callFake(() => of(chunks.shift() || []));
+        renderWithChunkSize(2);
+
+        expect(getAll.calls.allArgs().map((args) => [args[1], args[2]])).toEqual([[2, 0], [2, 2], [2, 4]]);
+        expect(component.repoItems.value.map((d: DeploymentsModel) => d.id)).toEqual(['a', 'b']);
+    });
+
+    it('does not ask for the next chunk after an empty one', () => {
+        const getAll = spyOn(service, 'getAll').and.returnValue(of([]));
+        renderWithChunkSize(2);
+        component.onScroll();
+
+        expect(getAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats a hub deployment as gone once the DELETE was accepted', (done) => {
+        const fog = new DeploymentsFogService('hub-1', {} as HttpClient, {} as ErrorHandlerService, {} as NetworksService);
+        fog.checkForDeletedDeploymentWithRetries('d1', 10, 100).subscribe((exists) => {
+            expect(exists).toBeFalse();
+            done();
+        });
+    });
 
     it('shows an on/off toggle per deployment, on only for the ones that are not disabled', () => {
         render();

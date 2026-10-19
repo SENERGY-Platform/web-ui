@@ -64,6 +64,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
+    // Engine rows consumed so far; differs from repoItems.length because the wrapper drops deployments without a virtual id.
+    private serverOffset = 0;
     private sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private getAllSub = new Subscription();
@@ -285,8 +287,9 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                                     } else {
                                         this.showSnackBarSuccess('Deployment deleted');
                                     }
+                                    this.serverOffset = Math.max(0, this.serverOffset - 1);
                                     this.setRepoItemsParams(1);
-                                    this.getRepoItems(false);
+                                    this.getRepoItems(false, true);
                                 });
                         } else {
                             this.showSnackBarError('deleting the deployment!');
@@ -456,7 +459,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         }
     }
 
-    private getRepoItems(reset: boolean) {
+    /** @param refill fetches the row that moved up after a delete; its result says nothing about the end of the list. */
+    private getRepoItems(reset: boolean, refill = false) {
         if (reset) {
             this.setRepoItemsParams(this.limitInit);
             this.reset();
@@ -478,10 +482,18 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.getAllSub = this.deploymentsService
             .getAll(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.source)
             .subscribe((repoItems: DeploymentsModel[]) => {
-                if (repoItems.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
+                this.serverOffset = this.offset + this.limit;
                 this.addToFormArray(repoItems);
+                if (!refill) {
+                    // A short chunk is not the end, the wrapper may have dropped rows from it; only an empty one is.
+                    if (repoItems.length === 0 && this.limit > 0) {
+                        this.allDataLoaded = true;
+                    } else if (repoItems.length < this.limit) {
+                        this.setRepoItemsParams(this.limitInit);
+                        this.getRepoItems(false);
+                        return;
+                    }
+                }
                 this.ready = true;
             });
     }
@@ -494,6 +506,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private reset() {
         this.repoItems.clear();
         this.offset = 0;
+        this.serverOffset = 0;
         this.allDataLoaded = false;
         this.ready = false;
         this.selectedItems = [];
@@ -502,7 +515,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private setRepoItemsParams(limit: number) {
         this.ready = false;
         this.limit = limit;
-        this.offset = this.repoItems.length;
+        this.offset = this.serverOffset;
     }
 
     get repoItems(): FormArray {
