@@ -324,6 +324,16 @@ describe('ProcessDeploymentsComponent', () => {
             expect(service.getAllArgs.filter((args) => args[2] === 0).length).toBe(1);
             expect(snackBar.open).toHaveBeenCalledWith('Deployments deleted successfully.', undefined, { duration: 2000 });
         });
+
+        it('reports a delete on a hub as sent, not as done', () => {
+            render();
+            component.hub = hub;
+            component.selection.select(component.dataSource.data[0]);
+
+            component.deleteMultipleItems();
+
+            expect(snackBar.open.calls.mostRecent().args[0]).toBe('Delete sent to the hub; the deployment disappears once the hub confirms.');
+        });
     });
 
     describe('while a delete is verified', () => {

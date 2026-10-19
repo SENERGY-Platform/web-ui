@@ -329,7 +329,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                             if (exists) {
                                 this.showSnackBarError('deleting the deployment!');
                             } else {
-                                this.showSnackBarSuccess('Deployment deleted');
+                                snackSuccess(this.snackBar, this.deleteSuccessText(false));
                             }
                             this.reload();
                         });
@@ -405,7 +405,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             },
             jobs: () => selected.map((item) => this.deleteAndVerify(item)),
             isSuccess: everyTrue,
-            successMessage: many ? 'Deployments deleted successfully.' : 'Deployment deleted successfully.',
+            successMessage: this.deleteSuccessText(many),
             errorMessage: this.errorText(many ? 'deleting the deployments!' : 'deleting the deployment!'),
             after: () => this.reload(),
         });
@@ -543,7 +543,12 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         snackError(this.snackBar, this.errorText(text));
     }
 
-    private showSnackBarSuccess(text: string): void {
-        snackSuccess(this.snackBar, text + ' successfully.');
+    // A hub removes the deployment only after it confirms the delete command, so success there means "sent".
+    private deleteSuccessText(many: boolean): string {
+        if (this.hub) {
+            return 'Delete sent to the hub; the ' + (many ? 'deployments disappear' : 'deployment disappears') + ' once the hub confirms.';
+        }
+        return many ? 'Deployments deleted successfully.' : 'Deployment deleted successfully.';
     }
+
 }
