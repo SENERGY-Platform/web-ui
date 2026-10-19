@@ -16,6 +16,8 @@
 <senergy-spinner [show]="!ready"></senergy-spinner>
 <div class="device-type-container">
   @if (ready) {
+    <senergy-page-header [title]="isNew ? 'New device type' : (savedName || 'Device type')"
+      backLabel="Device types" backLink="/metadata/devicetypesoverview"></senergy-page-header>
     <div class="page">
       <senergy-form-section title="Information">
         <form [formGroup]="firstFormGroup">
@@ -45,10 +47,12 @@
         </form>
       </senergy-form-section>
       <senergy-form-section title="Attributes" hint="Key and value pairs that platform services read for this device type.">
-        <button sectionActions matButton (click)="addDeviceTypeAttr()" [disabled]="!editable">
-          <mat-icon>add</mat-icon>
-          Add attribute
-        </button>
+        @if (editable) {
+          <button type="button" sectionActions matButton (click)="addDeviceTypeAttr()">
+            <mat-icon>add</mat-icon>
+            Add attribute
+          </button>
+        }
         <form [formGroup]="attrFormGroup">
           <div formArrayName="attributes">
             @for (attr of deviceTypeAttributes.controls; track attr; let i = $index) {
@@ -65,10 +69,12 @@
                   <input matInput formControlName="value">
                   <mat-error senergyError label="Value"></mat-error>
                 </mat-form-field>
-                <button mat-icon-button color="warn" [disabled]="!editable"
-                  (click)="removeDeviceTypeAttr(i)" aria-label="Delete attribute">
-                  <mat-icon>delete</mat-icon>
-                </button>
+                @if (editable) {
+                  <button type="button" mat-icon-button color="warn"
+                    (click)="removeDeviceTypeAttr(i)" aria-label="Delete attribute">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
               </div>
             } @empty {
               <p class="empty">No attributes.</p>
@@ -76,17 +82,15 @@
           </div>
         </form>
       </senergy-form-section>
-      <senergy-form-section title="Services" hint="Services grouped as the device offers them, with their inputs and outputs. Drag a service onto a group to move it.">
+      <senergy-form-section title="Services" [hint]="editable ? 'Services grouped as the device offers them, with their inputs and outputs. Drag a service onto a group to move it.' : 'Services grouped as the device offers them, with their inputs and outputs.'">
         <form [formGroup]="secondFormGroup">
-          <mat-accordion formArrayName="services" cdkDropListGroup multi>
+          <div formArrayName="services" cdkDropListGroup class="service-groups">
             @for (group of serviceGroupsAndUngroupedServices; track trackByKey($index, group)) {
-              <mat-expansion-panel
-                [expanded]="serviceGroupsAndUngroupedServices.length === 1" cdkDropList
+              <div class="service-group" cdkDropList
                 (cdkDropListDropped)="moveServiceToGroup($event, group.key)">
-                <mat-expansion-panel-header>
-                  {{group.title}}
-                </mat-expansion-panel-header>
-                <ng-template matExpansionPanelContent>
+                @if (group.isGroup || serviceGroupsAndUngroupedServices.length > 1) {
+                  <h4 class="group-title">{{group.title}}</h4>
+                }
                   @if (group.isGroup) {
                     <div [formGroup]="getServiceGroup(group.key)">
                       <mat-form-field class="full-width">
@@ -197,17 +201,20 @@
                                     }
                                     <mat-error senergyError label="Value"></mat-error>
                                   </mat-form-field>
-                                  <button mat-icon-button color="warn"
-                                    [disabled]="!editable || attr.get('key')?.value === timeAttributeKey"
-                                    (click)="removeServiceAttr(serviceAndIndex.service, i)">
-                                    <mat-icon>delete</mat-icon>
-                                  </button>
+                                  @if (editable) {
+                                    <button type="button" mat-icon-button color="warn"
+                                      [disabled]="attr.get('key')?.value === timeAttributeKey"
+                                      (click)="removeServiceAttr(serviceAndIndex.service, i)">
+                                      <mat-icon>delete</mat-icon>
+                                    </button>
+                                  }
                                 </div>
                               }
-                              <button matButton="outlined"
-                                class="button-margin"
-                                (click)="addServiceAttr(serviceAndIndex.service)"
-                                [disabled]="!editable"><mat-icon>add</mat-icon>Add attribute</button>
+                              @if (editable) {
+                                <button type="button" matButton="outlined"
+                                  class="button-margin"
+                                  (click)="addServiceAttr(serviceAndIndex.service)"><mat-icon>add</mat-icon>Add attribute</button>
+                              }
                             </mat-tab>
                             @for (tab of [{label: 'Input', formArrayName: 'inputs'},{label: 'Output', formArrayName: 'outputs'}]; track tab) {
                               <mat-tab label="{{tab.label}}"
@@ -218,7 +225,7 @@
                                   <div [formGroupName]="i"
                                     >
                                     <div class="ly-row ly-align-start-center">
-                                      <button mat-icon-button
+                                      <button type="button" mat-icon-button
                                         (click)="expand(serviceAndIndex.service, tab.formArrayName, i)">
                                         <mat-icon>{{inOut.show ? 'expand_less' :
                                           'expand_more'}}</mat-icon>
@@ -236,19 +243,19 @@
                                           <mat-error senergyError
                                             label="Serialization"></mat-error>
                                         </mat-form-field>
-                                        @if (inOut.dataSource) {
+                                        @if (inOut.dataSource && editable) {
                                           <div>
-                                            <button matButton="outlined"
+                                            <button type="button" matButton="outlined"
                                               class="button-margin"
                                               (click)="addContentVariable(tab.label === 'Input', inOut, [])"
-                                              [disabled]="inOut.dataSource.data.length === 1 || !editable">
+                                              [disabled]="inOut.dataSource.data.length === 1">
                                               <mat-icon>add</mat-icon>
                                               Add content variable
                                             </button>
-                                            <button matButton="outlined"
+                                            <button type="button" matButton="outlined"
                                               class="button-margin"
                                               (click)="addContentVariableFromJson(inOut,[])"
-                                              [disabled]="inOut.dataSource.data.length === 1 || !editable">
+                                              [disabled]="inOut.dataSource.data.length === 1">
                                               <mat-icon>data_object</mat-icon>
                                               Import JSON as content variable
                                             </button>
@@ -265,17 +272,18 @@
                                                 matTreeNodeToggle>
                                                 <li class="mat-tree-node">
                                                   <!-- use a disabled button to provide padding for tree leaf -->
-                                                  <button mat-icon-button
+                                                  <button type="button" mat-icon-button
                                                     disabled></button>
-                                                  <button mat-stroked-button
+                                                  <button type="button" mat-stroked-button
                                                     (click)="editContent(tab.label === 'Input', node, inOut)">
                                                     {{node.name}}
                                                   </button>
-                                                  <button mat-icon-button
-                                                    [disabled]="!editable"
-                                                    (click)="deleteContentVariable(inOut, node.indices)">
-                                                    <mat-icon>delete_outline</mat-icon>
-                                                  </button>
+                                                  @if (editable) {
+                                                    <button type="button" mat-icon-button
+                                                      (click)="deleteContentVariable(inOut, node.indices)">
+                                                      <mat-icon>delete_outline</mat-icon>
+                                                    </button>
+                                                  }
                                                   @if (!node.type) {
                                                     <mat-icon
                                                       color="warn"
@@ -288,7 +296,7 @@
                                                 *matTreeNodeDef="let node; when: hasChild">
                                                 <li>
                                                   <div class="mat-tree-node">
-                                                    <button mat-icon-button
+                                                    <button type="button" mat-icon-button
                                                       matTreeNodeToggle
                                                       [attr.aria-label]="'toggle ' + node.name">
                                                       <mat-icon
@@ -299,26 +307,24 @@
                                                         'chevron_right'}}
                                                       </mat-icon>
                                                     </button>
-                                                    <button mat-stroked-button
+                                                    <button type="button" mat-stroked-button
                                                       (click)="editContent(tab.label === 'Input', node, inOut)">
                                                       {{node.name}}
                                                     </button>
-                                                    <button mat-icon-button
-                                                      [disabled]="!editable"
-                                                      (click)="deleteContentVariable(inOut, node.indices)">
-                                                      <mat-icon>delete_outline</mat-icon>
-                                                    </button>
                                                     @if (editable) {
-                                                      <button mat-icon-button
+                                                      <button type="button" mat-icon-button
+                                                        (click)="deleteContentVariable(inOut, node.indices)">
+                                                        <mat-icon>delete_outline</mat-icon>
+                                                      </button>
+                                                      <button type="button" mat-icon-button
                                                         (click)="addContentVariableFromJson(inOut, node.indices)">
                                                         <mat-icon>data_object</mat-icon>
                                                       </button>
+                                                      <button type="button" mat-icon-button
+                                                        (click)="addContentVariable(tab.label === 'Input', inOut, node.indices)">
+                                                        <mat-icon>add</mat-icon>
+                                                      </button>
                                                     }
-                                                    <button mat-icon-button
-                                                      [disabled]="!editable"
-                                                      (click)="addContentVariable(tab.label === 'Input', inOut, node.indices)">
-                                                      <mat-icon>add</mat-icon>
-                                                    </button>
                                                     @if (!node.type) {
                                                       <mat-icon
                                                         color="warn"
@@ -342,47 +348,47 @@
                               </mat-tab>
                             }
                           </mat-tab-group>
-                          <div class="ly-row ly-align-end-center" cdkDragHandle>
-                            <button (click)="cloneService(serviceAndIndex.index)"
-                              mat-icon-button
-                              matTooltip="clone service" [disabled]="!editable">
-                              <mat-icon>content_copy</mat-icon>
-                            </button>
-                            <button (click)="deleteService(serviceAndIndex.service.value)"
-                              mat-icon-button color="warn"
-                              matTooltip="delete service" [disabled]="!editable">
-                              <mat-icon>delete</mat-icon>
-                            </button>
-                          </div>
+                          @if (editable) {
+                            <div class="ly-row ly-align-end-center" cdkDragHandle>
+                              <button type="button" (click)="cloneService(serviceAndIndex.index)"
+                                mat-icon-button
+                                matTooltip="clone service">
+                                <mat-icon>content_copy</mat-icon>
+                              </button>
+                              <button type="button" (click)="deleteService(serviceAndIndex.service.value)"
+                                mat-icon-button color="warn"
+                                matTooltip="delete service">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                            </div>
+                          }
                         </ng-template>
                       </mat-expansion-panel>
                     }
                   </mat-accordion>
                   @if (editable) {
                     <div class="button-margin ly-row ly-align-center-center">
-                      <button matButton="outlined" (click)="addService(group.key)"><mat-icon>add</mat-icon>Add service</button>
+                      <button type="button" matButton="outlined" (click)="addService(group.key)"><mat-icon>add</mat-icon>Add service</button>
                     </div>
+                    @if (group.isGroup) {
+                      <div class="ly-row ly-align-end-center">
+                        <button type="button" (click)="cloneServiceGroup(group)" mat-icon-button matTooltip="clone service group">
+                          <mat-icon>content_copy</mat-icon>
+                        </button>
+                        <button type="button" (click)="deleteServiceGroup(group.key)" mat-icon-button
+                          color="warn" matTooltip="delete service group"
+                          [disabled]="group.serviceAndIndices.length > 0">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    }
                   }
-                  @if (group.isGroup) {
-                    <div class="ly-row ly-align-end-center">
-                      <button (click)="cloneServiceGroup(group)" mat-icon-button matTooltip="clone service group"
-                        [disabled]="!editable">
-                        <mat-icon>content_copy</mat-icon>
-                      </button>
-                      <button (click)="deleteServiceGroup(group.key)" mat-icon-button
-                        color="warn" matTooltip="delete service group"
-                        [disabled]="!editable || group.serviceAndIndices.length > 0">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </div>
-                  }
-                </ng-template>
-              </mat-expansion-panel>
+              </div>
             }
-          </mat-accordion>
+          </div>
           @if (editable) {
             <div class="button-margin ly-row ly-align-center-center">
-              <button matButton="outlined" (click)="addServiceGroup()"><mat-icon>add</mat-icon>Add service group</button>
+              <button type="button" matButton="outlined" (click)="addServiceGroup()"><mat-icon>add</mat-icon>Add service group</button>
             </div>
           }
         </form>
@@ -391,11 +397,5 @@
     @if (editable) {
       <senergy-save-bar [saveDisabled]="saveBlocked()" [status]="saveStatus()" (save)="save()" (discard)="discard()"></senergy-save-bar>
     }
-  }
-  @if (!editable && userHasEditAuthorization) {
-    <button mat-fab class="fab" (click)="editDeviceType()"
-      matTooltip="Edit device type">
-      <mat-icon>edit</mat-icon>
-    </button>
   }
 </div>

@@ -21,7 +21,7 @@ import {
     UsedInDeviceTypeResponseElement
 } from '../shared/used-in-device-type.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import {AuthorizationService} from '../../../../core/services/authorization.service';
+import { DeviceTypeService } from '../shared/device-type.service';
 import { Router, RouterLink } from '@angular/router';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
@@ -36,7 +36,7 @@ import { DialogHeaderComponent } from '../../../../core/components/dialog-header
 })
 export class UsedInDeviceTypesDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<UsedInDeviceTypesDialogComponent>>(MatDialogRef);
-    private authService = inject(AuthorizationService);
+    private deviceTypeService = inject(DeviceTypeService);
     private router = inject(Router);
 
     dataSource = new MatTableDataSource<UsedInDeviceTypeResponseDeviceTypeRef>();
@@ -52,7 +52,7 @@ export class UsedInDeviceTypesDialogComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.userHasUpdateAuthorization = this.authService.userIsAdmin();
+        this.userHasUpdateAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
             this.displayedColumns.push('edit');
         } else {

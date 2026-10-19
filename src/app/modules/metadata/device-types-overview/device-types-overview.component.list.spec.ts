@@ -76,16 +76,12 @@ describe('DeviceTypesOverviewComponent list', () => {
         expect(service.getDeviceTypes).toHaveBeenCalledTimes(1);
     }));
 
-    it('opens the page in edit mode on a row click with update permission, in details mode without it', fakeAsync(() => {
+    it('opens the one device type page on a row click, with no mode in the URL', fakeAsync(() => {
         init();
         const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
 
         component.openDeviceType(plug);
-        expect(navigate.calls.mostRecent().args[1]).toEqual({ queryParams: { function: 'edit' } });
-
-        component.userHasUpdateAuthorization = false;
-        component.openDeviceType(plug);
-        expect(navigate.calls.mostRecent().args[1]).toEqual({ queryParams: { function: 'details' } });
+        expect(navigate).toHaveBeenCalledWith(['metadata/devicetypesoverview/devicetypes/' + plug.id]);
         discardPeriodicTasks();
     }));
 

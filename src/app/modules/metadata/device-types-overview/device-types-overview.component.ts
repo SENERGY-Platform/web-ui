@@ -102,13 +102,9 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
         ];
     }
 
-    /** Row click: the page in edit mode with update permission, in details mode without it. */
+    /** Row click and menu entry: the one device type page, editable with the update right. */
     openDeviceType(deviceType: DeviceTypeModel): void {
-        if (this.userHasUpdateAuthorization) {
-            this.editDeviceType(deviceType.id);
-        } else {
-            this.detailsDeviceType(deviceType.id);
-        }
+        this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceType.id]);
     }
 
     deviceClassName(deviceClassId: string): string {
@@ -142,18 +138,6 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     copyDeviceType(deviceTypeId: string): void {
         this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceTypeId], {
             queryParams: { function: 'copy' },
-        });
-    }
-
-    editDeviceType(deviceTypeId: string): void {
-        this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceTypeId], {
-            queryParams: { function: 'edit' },
-        });
-    }
-
-    detailsDeviceType(deviceTypeId: string): void {
-        this.router.navigate(['metadata/devicetypesoverview/devicetypes/' + deviceTypeId], {
-            queryParams: { function: 'details' },
         });
     }
 
