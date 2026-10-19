@@ -24,13 +24,13 @@ import { ProcessRepoService } from './shared/process-repo.service';
 import { ProcessModel } from './shared/process.model';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { ResponsiveService } from '../../../core/services/responsive.service';
 import { UtilService } from '../../../core/services/util.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
-import { PermissionsMockService } from '../../permissions/shared/permissions.service.mock';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 
 interface ListResponse {
     result: ProcessModel[];
@@ -41,9 +41,14 @@ function process(id: string, owner: string): ProcessModel {
     return { _id: id, name: id, date: 0, svgXML: '', bpmn_xml: '', publish: false, owner };
 }
 
+function rights(id: string): PermissionsV2RightsAndIdModel {
+    return { id, read: true, write: true, execute: true, administrate: true } as PermissionsV2RightsAndIdModel;
+}
+
 describe('ProcessRepoComponent', () => {
     let component: ProcessRepoComponent;
     let repoService: jasmine.SpyObj<ProcessRepoService>;
+    let permissionsService: jasmine.SpyObj<PermissionsService>;
     let responses: Subject<ListResponse>[];
 
     beforeEach(() => {
@@ -59,6 +64,9 @@ describe('ProcessRepoComponent', () => {
             responses.push(response);
             return response;
         });
+        permissionsService = jasmine.createSpyObj<PermissionsService>('PermissionsService', ['getComputedResourcePermissionsV2', 'getUserById']);
+        permissionsService.getComputedResourcePermissionsV2.and.callFake((_, ids) => of(ids.map(rights)));
+        permissionsService.getUserById.and.returnValue(of({ id: 'u2', username: 'other' }) as ReturnType<PermissionsService['getUserById']>);
 
         TestBed.configureTestingModule({
             imports: [ProcessRepoComponent],
@@ -66,11 +74,11 @@ describe('ProcessRepoComponent', () => {
             providers: [
                 { provide: ProcessRepoService, useValue: repoService },
                 { provide: AuthorizationService, useValue: { getUserId: () => 'u1' } },
-                { provide: PermissionsService, useClass: PermissionsMockService },
+                { provide: PermissionsService, useValue: permissionsService },
                 { provide: MetadataExistenceService, useValue: { warningsForBpmn: () => of(new Map<string, string>()) } },
                 { provide: UtilService, useValue: { convertSVGtoBase64: () => '' } },
                 { provide: SearchbarService, useValue: { currentSearchText: of('') } },
-                { provide: ResponsiveService, useValue: { getActiveMqAlias: () => 'md', observeMqAlias: () => of('md') } },
+                { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: DialogsService, useValue: {} },
                 { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
@@ -78,12 +86,11 @@ describe('ProcessRepoComponent', () => {
             ],
         });
         component = TestBed.createComponent(ProcessRepoComponent).componentInstance;
-        (component as any).limitInit = 2;
     });
 
     const load = (tab: number) => {
         component.activeIndex = tab;
-        (component as any).getRepoItems(true);
+        component.reload();
     };
 
     const ownerFilterOfCall = (i: number) => repoService.getProcessModels.calls.argsFor(i)[5];
@@ -103,14 +110,25 @@ describe('ProcessRepoComponent', () => {
         expect(ownerFilterOfCall(0)).toBeUndefined();
     });
 
-    it('keeps the permissions of earlier pages after loading the next one', () => {
+    it('asks for the page size and offset of the list and takes the total from the answer', () => {
+        load(0);
+        responses[0].next({ result: [process('a', 'u1')], total: 57 });
+
+        expect(repoService.getProcessModels.calls.argsFor(0).slice(1, 5)).toEqual([20, 0, 'date', 'desc']);
+        expect(component.totalCount).toBe(57);
+        expect(component.dataSource.data.map((p) => p._id)).toEqual(['a']);
+        expect(component.ready).toBeTrue();
+    });
+
+    it('loads the rights of the page shown and drops those of the previous page', () => {
         load(0);
         responses[0].next({ result: [process('a', 'u1'), process('b', 'u2')], total: 3 });
-        component.onScroll();
+        component.list.refresh();
         responses[1].next({ result: [process('c', 'u1')], total: 3 });
 
-        expect(component.hasXPermission({ _id: 'a' })).toBeTrue();
+        expect(permissionsService.getComputedResourcePermissionsV2).toHaveBeenCalledTimes(2);
         expect(component.hasXPermission({ _id: 'c' })).toBeTrue();
+        expect(component.hasXPermission({ _id: 'a' })).toBeFalse();
     });
 
     it('drops the answer of a superseded listing', () => {
@@ -119,6 +137,30 @@ describe('ProcessRepoComponent', () => {
         responses[0].next({ result: [process('other', 'u2')], total: 1 });
         responses[1].next({ result: [process('own', 'u1')], total: 1 });
 
-        expect(component.repoItems.value.map((p: ProcessModel) => p._id)).toEqual(['own']);
+        expect(component.dataSource.data.map((p) => p._id)).toEqual(['own']);
+    });
+
+    it('goes back to the default sort and clears the search when the tab changes', () => {
+        component.list.sortBy = 'name';
+        component.list.sortDirection = 'asc';
+        component.searchText = 'abc';
+
+        component.setIndex(2);
+
+        expect(component.list.sortBy).toBe('date');
+        expect(component.list.sortDirection).toBe('desc');
+        expect(component.searchText).toBe('');
+        expect(ownerFilterOfCall(0)).toEqual({ notOwner: 'u1' });
+    });
+
+    it('clears the selection when a page has loaded', () => {
+        load(0);
+        responses[0].next({ result: [process('a', 'u1')], total: 1 });
+        component.selection.select(component.dataSource.data[0]);
+
+        component.list.refresh();
+        responses[1].next({ result: [process('b', 'u1')], total: 1 });
+
+        expect(component.selection.selected).toEqual([]);
     });
 });

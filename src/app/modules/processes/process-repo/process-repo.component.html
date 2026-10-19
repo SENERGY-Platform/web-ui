@@ -14,126 +14,131 @@
   ~ limitations under the License.
   -->
 
-<div class="process-repo-container">
 
-  <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight (selectedIndexChange)="setIndex($event)"
-    (animationDone)="animation()">
-    <!-- <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Marketplace', 'Shared']"> -->
-    @for (tab of ['All', 'Own', 'Shared']; track tab) {
-      <mat-tab label="{{tab}}">
-        <div class="layout-margin">
-          <div class="search-button-container ly-row">
-            <senergy-searchbar class="ly-flex"></senergy-searchbar>
-            @if (selectedItems.length > 0 && ready) {
-              <button matTooltip="Delete" mat-icon-button color="accent" class="suffix-del"
-                (click)="deleteMultipleItems()">
-                <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn" aria-hidden="false">delete</mat-icon>
-              </button>
-            }
-            <senergy-sort class="suffix" [sortAttributes]="sortAttributes"
-            (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-          </div>
-          <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
-            [scrollWindow]="false" (scrolled)="onScroll()" #mainPanel>
-            @if (animationDone) {
-              <div class="ly-column" [formGroup]="formGroup">
-                @if (repoItems.length > 0) {
-                  <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
-                    formArrayName="repoItems">
-                    @for (item of repoItems.controls; track item; let i = $index) {
-                      <mat-grid-tile class="mat-elevation-z1"
-                        [formGroupName]="i">
-                        <div class="ly-fill">
-                          @if (item.value.owner !== userID) {
-                            <mat-icon matTooltip="Process is shared by {{userIdToName[item.value.owner]}}" class="color-sidenav shared-icon">
-                              share
-                            </mat-icon>
-                          }
-                          @if (item.value.metadataWarning) {
-                            <mat-icon
-                              matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
-                              class="color-warn metadata-warning-icon">
-                              report_problem
-                            </mat-icon>
-                          }
-                          <img class="widget-image" [src]="item.value.image">
-                        </div>
-                        <mat-grid-tile-footer>
-                          <div class="ly-column ly-fill">
-                            <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
-                              {{item.value.name}}
-                            </div>
-                            <div class="truncate footer-item-subtitle"
-                              matTooltip="{{item.value.date | date:'medium'}}">
-                              {{item.value.date | date:"medium"}}
-                            </div>
-                            <div class="footer-buttons ly-row ly-align-center-center">
-                              <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
-                              </mat-checkbox>
-                              <div class="ly-flex"></div>
-                              @if (userHasUpdateAuthorization) {
-                                <button mat-icon-button color="accent" matTooltip="Edit"
-                                  routerLink="/processes/designer/{{item.value._id}}">
-                                  <mat-icon>edit</mat-icon>
-                                </button>
-                              }
-                              <button mat-icon-button matTooltip="Deploy" color="accent"
-                                (click)="deployProcess(item.value._id)"
-                                [disabled]="!hasXPermission(item.value)">
-                                <mat-icon>publish</mat-icon>
-                              </button>
-                              @if (userHasDeleteAuthorization) {
-                                <button mat-icon-button matTooltip="Delete" color="accent"
-                                  (click)="deleteProcess(item.value)"
-                                  [disabled]="selectedItems.length > 0">
-                                  <mat-icon>delete</mat-icon>
-                                </button>
-                              }
-                              <button mat-icon-button [matMenuTriggerFor]="processMenu" color="accent"
-                                matTooltip="More">
-                                <mat-icon>more_vert</mat-icon>
-                              </button>
-                              <mat-menu #processMenu="matMenu" [overlapTrigger]="false">
-                                <button mat-menu-item (click)="copyProcess(item.value)">
-                                  <mat-icon>content_copy</mat-icon>
-                                  <span>Copy</span>
-                                </button>
-                                <button mat-menu-item (click)="permission(item.value)"
-                                  [disabled]="!hasAPermission(item.value)">
-                                  <mat-icon>share</mat-icon>
-                                  <span>Share</span>
-                                </button>
-                                <button mat-menu-item (click)="downloadDiagram(item.value)">
-                                  <mat-icon>cloud_download</mat-icon>
-                                  <span>Download BPMN</span>
-                                </button>
-                                <button mat-menu-item (click)="downloadSvg(item.value)">
-                                  <mat-icon>insert_photo</mat-icon>
-                                  <span>Download SVG</span>
-                                </button>
-                              </mat-menu>
-                            </div>
-                          </div>
-                        </mat-grid-tile-footer>
-                      </mat-grid-tile>
-                    }
-                  </mat-grid-list>
-                }
-                @if (repoItems.length === 0 && ready) {
-                  <div>No process models found.</div>
-                }
-                <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
-              </div>
-            }
-          </div>
-        </div>
-      </mat-tab>
+<senergy-page-header title="Process models" description="BPMN models of business processes, drawn in the designer and deployed to the platform.">
+  <ng-container pageActions>
+    @if (userHasCreateAuthorization) {
+      <button matButton="filled" routerLink="/processes/designer">
+        <mat-icon>add</mat-icon> New process model
+      </button>
     }
-  </mat-tab-group>
+  </ng-container>
+</senergy-page-header>
+
+<mat-tab-group dynamicHeight (selectedIndexChange)="setIndex($event)">
+  @for (tab of tabs; track tab) {
+    <mat-tab [label]="tab">
+      <senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
+        <ng-container bulkActions>
+          @if (userHasDeleteAuthorization) {
+            <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">
+              <mat-icon>delete</mat-icon> Delete
+            </button>
+          }
+        </ng-container>
+      </senergy-list-toolbar>
+    </mat-tab>
+  }
+</mat-tab-group>
+
+<div class="page-body">
+  <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+
+  @if (dataSource.data.length === 0 && ready) {
+    <senergy-empty-state icon="account_tree" [title]="filtered ? 'No matching process models' : 'No process models yet'"
+      [text]="emptyText">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort
+        [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection" matSortDisableClear
+        (matSortChange)="matSortChange($event)">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef class="select-column">
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              aria-label="Select all">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row" class="select-column" (click)="$event.stopPropagation()">
+            <mat-checkbox (click)="$event.stopPropagation()"
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+              aria-label="Select row">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef class="preview-column"><span class="cdk-visually-hidden">Preview</span></th>
+          <td mat-cell *matCellDef="let row" class="preview-column">
+            @if (previewUrl(row); as url) {
+              <img class="svg-preview process-preview" #trigger="cdkOverlayOrigin" cdkOverlayOrigin alt="Preview of the process model"
+                (mouseenter)="openOverlay(trigger, row)" (mouseleave)="closeOverlay()" [src]="url">
+            }
+          </td>
+        </ng-container>
+
+        <ng-template #overlayTpl let-process="process">
+          <div class="svg-wrapper">
+            <img class="svg-preview-large" alt="Preview of the process model" [src]="previewUrl(process)">
+          </div>
+        </ng-template>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+          <td mat-cell *matCellDef="let row">
+            <div>
+              <span class="name-cell">{{row.name}}</span>
+              @if (row.owner !== userID) {
+                <span class="type-chip name-chip" matTooltip="Process model is shared by {{userIdToName[row.owner]}}">Shared by {{userIdToName[row.owner] || '...'}}</span>
+              }
+              @if (metadataWarnings.get(row._id); as warning) {
+                <span class="status-chip warning name-chip" [matTooltip]="warning" matTooltipClass="multiline-tooltip">Metadata missing</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated</th>
+          <td mat-cell *matCellDef="let row" class="muted">{{row.date | date:dateFormat}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let row" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (userHasUpdateAuthorization) {
+                <button mat-menu-item (click)="editProcess(row)"><mat-icon>edit</mat-icon> Edit</button>
+              }
+              @if (hasXPermission(row)) {
+                <button mat-menu-item (click)="deployProcess(row)"><mat-icon>publish</mat-icon> Deploy</button>
+              }
+              <button mat-menu-item (click)="copyProcess(row)"><mat-icon>content_copy</mat-icon> Copy</button>
+              <button mat-menu-item (click)="downloadDiagram(row)"><mat-icon>cloud_download</mat-icon> Download BPMN</button>
+              <button mat-menu-item (click)="downloadSvg(row)"><mat-icon>insert_photo</mat-icon> Download SVG</button>
+              @if (hasAPermission(row)) {
+                <button mat-menu-item (click)="permission(row)"><mat-icon>share</mat-icon> Share</button>
+              }
+              @if (userHasDeleteAuthorization) {
+                <button mat-menu-item class="danger" (click)="deleteProcess(row)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.clickable-row]="userHasUpdateAuthorization"
+          (click)="openProcess(row)"></tr>
+      </table>
+    </div>
+    <mat-paginator #paginator [length]="totalCount" [pageSize]="list.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+      showFirstLastButtons></mat-paginator>
+  </div>
 </div>
-<senergy-spinner [elementCount]="0" [show]="!animationDone"></senergy-spinner>
-@if (userHasCreateAuthorization) {
-  <button mat-fab class="fab" matTooltip="Create new process model" routerLink="/processes/designer">
-    <mat-icon>add</mat-icon>
-  </button>
-}

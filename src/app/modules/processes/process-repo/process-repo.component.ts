@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthorizationService } from '../../../core/services/authorization.service';
-import { SortModel } from '../../../core/components/sort/shared/sort.model';
-import { concatMap, forkJoin, map, Observable, Subscription } from 'rxjs';
+import { concatMap, map, Observable, of, tap } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { ResponsiveService } from '../../../core/services/responsive.service';
 import { ProcessModel } from './shared/process.model';
 import { ProcessRepoService } from './shared/process-repo.service';
 import { UtilService } from '../../../core/services/util.service';
@@ -31,128 +29,157 @@ import { saveAs } from 'file-saver';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { MatTabGroup, MatTab } from '@angular/material/tabs';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatBadge } from '@angular/material/badge';
-import { SortComponent } from '../../../core/components/sort/sort.component';
-import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
-import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler } from '@angular/material/grid-list';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
+import { MatPaginator } from '@angular/material/paginator';
+import { CdkOverlayOrigin, FlexibleConnectedPositionStrategy, Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { DatePipe } from '@angular/common';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
+import { ListSelection } from '../../../core/classes/list-selection';
+import { PagedListState } from '../../../core/classes/paged-list-state';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { bulkDelete, confirmDelete, countLabel, noneNullOrServerError } from '../../../core/services/delete-flows';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
-
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
-
-const sortingAttributes = [new SortModel('Date', 'date', 'desc'), new SortModel('Name', 'name', 'asc')];
 
 @Component({
     selector: 'senergy-process-repo',
     templateUrl: './process-repo.component.html',
     styleUrls: ['./process-repo.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatTabGroup, MatTab, SearchbarComponent, MatIconButton, MatTooltip, MatIcon, MatBadge, SortComponent, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, SpinnerComponent, MatFabButton, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTabGroup, MatTab, MatButton, MatIconButton, MatTooltip, MatIcon, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, CdkOverlayOrigin, DatePipe]
 })
-export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ProcessRepoComponent implements OnInit, AfterViewInit {
     private sanitizer = inject(DomSanitizer);
     private utilService = inject(UtilService);
     private searchbarService = inject(SearchbarService);
     private processRepoService = inject(ProcessRepoService);
-    private responsiveService = inject(ResponsiveService);
-    protected auth = inject(AuthorizationService);
     private authorizationService = inject(AuthorizationService);
     private permissionsDialogService = inject(PermissionsDialogService);
     private dialogsService = inject(DialogsService);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
-    private _formBuilder = inject(FormBuilder);
     private permissionsService = inject(PermissionsService);
     private metadataExistenceService = inject(MetadataExistenceService);
+    private preferencesService = inject(PreferencesService);
+    private overlay = inject(Overlay);
+    private vcr = inject(ViewContainerRef);
     private destroyRef = inject(DestroyRef);
 
-    formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
+    readonly tabs = ['All', 'Own', 'Shared'];
+    readonly dateFormat = LIST_DATE_FORMAT;
+    displayedColumns = ['select', 'image', 'name', 'date', 'actions'];
     activeIndex = 0;
-    gridCols = 0;
-    animationDone = true;
-    sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;
     userID: string;
     ready = false;
-    searchInitialized = false;
     searchText = '';
-    selectedItems: ProcessModel[] = [];
-    rowHeight = 282;
+    totalCount = 0;
+    dataSource = new MatTableDataSource<ProcessModel>([]);
+    listSelection = new ListSelection<ProcessModel>(() => this.dataSource.data);
+    selection = this.listSelection.model;
+    list = new PagedListState(this.preferencesService, () => this.loadProcesses(), { sortBy: 'date', sortDirection: 'desc' });
     permissionsPerModel: PermissionsV2RightsAndIdModel[] = [];
+    userIdToName: { [key: string]: string } = {};
+    /** Metadata warning per process id of the page shown. */
+    metadataWarnings = new Map<string, string>();
 
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
 
-    private limitInit = 54;
-    private limit = this.limitInit;
-    private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
-    // one listing in flight at a time: an answer for a previous tab or search must not be appended
-    private loadSub: Subscription = new Subscription();
-    private allDataLoaded = false;
-    private gridColChangeTimeout: number | undefined;
-    private knownMainPanelOffsetHeight = 0;
+    private searchInitialized = false;
+    private overlayRef?: OverlayRef;
+    private images = new Map<string, SafeUrl>();
 
-    userIdToName: { [key: string]: string } = {};
-
-    @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
+    @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
+    @ViewChild('overlayTpl') overlayTpl!: TemplateRef<unknown>;
 
     constructor() {
         const sub = this.authorizationService.getUserId();
-        if (typeof sub === 'string') {
-            this.userID = sub;
-        } else {
-            this.userID = '';
-        }
+        this.userID = typeof sub === 'string' ? sub : '';
+        this.destroyRef.onDestroy(() => this.closeOverlay());
     }
 
     ngOnInit() {
         this.userHasCreateAuthorization = this.processRepoService.userHasCreateAuthorization();
         this.userHasUpdateAuthorization = this.processRepoService.userHasUpdateAuthorization();
         this.userHasDeleteAuthorization = this.processRepoService.userHasDeleteAuthorization();
-
-        this.initGridCols();
+        if (!this.userHasDeleteAuthorization) {
+            // The only bulk action is delete; without it a selection would only hide the search.
+            this.displayedColumns = this.displayedColumns.filter((column) => column !== 'select');
+        }
+        this.initSearch();
     }
 
     ngAfterViewInit() {
-        this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
-        this.limitInit = this.maxItemsDisplayed;
-        this.limit = this.limitInit;
-        this.initSearchAndGetDevices();
+        this.list.connect(this.paginator, this.destroyRef);
     }
 
-    ngOnDestroy() {
-        this.loadSub.unsubscribe();
+    get filtered(): boolean {
+        return this.searchText !== '';
     }
 
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.setRepoItemsParams(this.limitInit);
-            this.getRepoItems(false);
+    get emptyText(): string {
+        if (this.filtered) {
+            return 'No process model matches the search.';
+        }
+        return ['Process models are drawn in the designer and then deployed.', 'You have not created a process model yet.', 'No process model is shared with you.'][this.activeIndex];
+    }
+
+    /** The one reload path: search, sort, tab, refresh button and every write end here. */
+    reload(): void {
+        this.ready = false;
+        this.selection.clear();
+        this.list.reload({ next: () => (this.ready = true), error: () => (this.ready = true) });
+    }
+
+    setIndex(index: number): void {
+        this.activeIndex = index;
+        this.searchText = '';
+        this.list.sortBy = 'date';
+        this.list.sortDirection = 'desc';
+        this.reload();
+    }
+
+    matSortChange(event: Sort): void {
+        this.list.sortChanged(event);
+        this.reload();
+    }
+
+    isAllSelected(): boolean {
+        return this.listSelection.isAllSelected();
+    }
+
+    masterToggle(): void {
+        this.listSelection.masterToggle();
+    }
+
+    selectionClear(): void {
+        this.selection.clear();
+    }
+
+    /** Row click: the designer, for users who may update; others have nothing to open. */
+    openProcess(process: ProcessModel): void {
+        if (this.userHasUpdateAuthorization) {
+            this.editProcess(process);
         }
     }
 
-    receiveSortingAttribute(sortAttribute: SortModel) {
-        this.sortAttribute = sortAttribute;
-        this.getRepoItems(true);
+    editProcess(process: ProcessModel): void {
+        this.router.navigateByUrl('/processes/designer/' + process._id);
     }
 
     permission(process: ProcessModel): void {
@@ -175,163 +202,135 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     deleteProcess(process: ProcessModel): void {
-        this.dialogsService
-            .openDeleteDialog('process')
-            .afterClosed()
-            .subscribe((deleteProcess: boolean | undefined) => {
-                if (deleteProcess) {
-                    this.processRepoService.deleteProcess(process._id).subscribe((resp: { status: number }) => {
-                        if (resp.status === 200) {
-                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => process._id === item._id));
-                            this.showSnackBarSuccess('Process deleted');
-                            this.setRepoItemsParams(1);
-                            this.getRepoItems(false);
-                        } else {
-                            this.showSnackBarError('deleting the process!');
-                        }
-                    });
+        confirmDelete(this.dialogsService, 'process ' + process.name).subscribe(() => {
+            this.processRepoService.deleteProcess(process._id).subscribe((resp: { status: number }) => {
+                if (resp.status === 200) {
+                    snackSuccess(this.snackBar, 'Process deleted successfully.');
+                } else {
+                    snackError(this.snackBar, 'Error while deleting the process!');
                 }
+                this.reload();
             });
+        });
     }
 
     copyProcess(process: ProcessModel): void {
-        this.reset();
         this.processRepoService.getProcessModel(process._id).subscribe((processModel: DesignerProcessModel | null) => {
             if (processModel) {
-                const newProcess = processModel.bpmn_xml;
                 this.processRepoService
-                    .saveProcess('', newProcess, processModel.svgXML)
+                    .saveProcess('', processModel.bpmn_xml, processModel.svgXML)
                     .subscribe((processResp: DesignerProcessModel | null) => {
                         if (processResp === null) {
-                            this.showSnackBarError('copying the process!');
-                            this.getRepoItems(true);
+                            snackError(this.snackBar, 'Error while copying the process!');
                         } else {
-                            this.showSnackBarSuccess('Process copied');
-                            this.getRepoItems(true);
+                            snackSuccess(this.snackBar, 'Process copied successfully.');
                         }
+                        this.reload();
                     });
             }
         });
     }
 
-    deployProcess(processId: string): void {
-        this.router.navigateByUrl('/processes/deployments/config?processId=' + processId);
-    }
-
-    setIndex(event: number) {
-        this.activeIndex = event;
-        this.animationDone = false;
-        this.searchText = '';
-        this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;
-        this.sortAttribute = this.sortAttributes[0];
-    }
-
-    animation(): void {
-        if (this.searchInitialized) {
-            this.getRepoItems(true);
-        }
+    deployProcess(process: ProcessModel): void {
+        this.router.navigateByUrl('/processes/deployments/config?processId=' + process._id);
     }
 
     deleteMultipleItems(): void {
-        this.dialogsService
-            .openDeleteDialog(this.selectedItems.length + (this.selectedItems.length === 1 ? ' process' : ' processes'))
-            .afterClosed()
-            .subscribe((deleteProcess: boolean | undefined) => {
-                if (deleteProcess) {
-                    // clear repoItems and ready, that spinner occurs
-                    this.repoItems.clear();
-                    this.ready = false;
-                    const array: Observable<boolean>[] = [];
-                    this.selectedItems.forEach((item: ProcessModel) => {
-                        this.processRepoService.deleteProcess(item._id).subscribe((resp: { status: number }) => {
-                            if (resp.status !== 200) {
-                                this.showSnackBarError(
-                                    this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!',
-                                );
-                            }
-                        });
-                    });
-                    forkJoin(array).subscribe((resp: boolean[]) => {
-                        const error = resp.some((item: boolean) => item === true);
-                        if (error) {
-                            this.showSnackBarError(this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!');
-                        } else {
-                            this.showSnackBarSuccess(this.selectedItems.length === 1 ? 'Process deleted' : 'Processes deleted');
-                        }
-                        this.getRepoItems(true);
-                    });
-                }
-            });
-    }
-
-    countCheckboxes(): void {
-        this.selectedItems = this.repoItems.value.filter((item: ProcessModel) => item.selected === true);
-    }
-
-    hasAPermission(m: {_id: string}): boolean {
-        return this.permissionsPerModel.find(t => t.id === m._id)?.administrate || false;
-    }
-
-    hasXPermission(m: {_id: string}): boolean {
-        return this.permissionsPerModel.find(t => t.id === m._id)?.execute || false;
-    }
-
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((mqAlias) => {
-            const gridCols = grids.get(mqAlias) || 0;
-            if (gridCols > this.gridCols) {
-                clearTimeout(this.gridColChangeTimeout);
-                this.gridColChangeTimeout = this.adjustForResize(2);
-            }
-            this.gridCols = gridCols;
+        const selected = [...this.selection.selected];
+        const many = selected.length > 1;
+        bulkDelete(this.dialogsService, this.snackBar, {
+            text: countLabel(selected.length, 'process', 'processes'),
+            jobs: () => selected.map((item) => this.processRepoService.deleteProcess(item._id)),
+            isSuccess: noneNullOrServerError,
+            successMessage: many ? 'Processes deleted successfully.' : 'Process deleted successfully.',
+            errorMessage: many ? 'Error while deleting the processes!' : 'Error while deleting the process!',
+            after: () => this.reload(),
         });
     }
 
-    private initSearchAndGetDevices() {
+    hasAPermission(m: { _id: string }): boolean {
+        return this.permissionsPerModel.find((t) => t.id === m._id)?.administrate || false;
+    }
+
+    hasXPermission(m: { _id: string }): boolean {
+        return this.permissionsPerModel.find((t) => t.id === m._id)?.execute || false;
+    }
+
+    /** The stored SVG as an image URL, so it is only drawn and never run as markup. */
+    previewUrl(process: ProcessModel): SafeUrl | undefined {
+        return this.images.get(process._id);
+    }
+
+    openOverlay(origin: CdkOverlayOrigin, process: ProcessModel): void {
+        if (this.overlayRef) {
+            return;
+        }
+        const positionStrategy: FlexibleConnectedPositionStrategy = this.overlay
+            .position()
+            .flexibleConnectedTo(origin.elementRef)
+            .withPositions([
+                { originX: 'end', originY: 'center', overlayX: 'start', overlayY: 'center', offsetX: 8 },
+                { originX: 'start', originY: 'center', overlayX: 'end', overlayY: 'center', offsetX: -8 },
+            ]);
+        this.overlayRef = this.overlay.create({
+            positionStrategy,
+            scrollStrategy: this.overlay.scrollStrategies.reposition(),
+            hasBackdrop: false,
+        });
+        this.overlayRef.attach(new TemplatePortal(this.overlayTpl, this.vcr, { process }));
+    }
+
+    closeOverlay(): void {
+        this.overlayRef?.dispose();
+        this.overlayRef = undefined;
+    }
+
+    private initSearch(): void {
         this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
+            // A tab change destroys the old searchbar, which re-sends the already reset empty text.
+            if (this.searchInitialized && searchText === this.searchText) {
+                return;
+            }
             this.searchInitialized = true;
             this.searchText = searchText;
-            this.getRepoItems(true);
+            this.reload();
         });
     }
 
-    private getRepoItems(reset: boolean) {
-        if (reset) {
-            this.setRepoItemsParams(this.limitInit);
-            this.reset();
-        }
-
-        this.loadSub.unsubscribe();
-        this.loadSub = this.processRepoService
-            .getProcessModels(
-                this.searchText,
-                this.limit,
-                this.offset,
-                this.sortAttribute.value,
-                this.sortAttribute.order,
-                this.getOwnerFilter(),
-            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processmodel', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = this.permissionsPerModel.concat(perm)), map(_ => x))))
-            .subscribe(repoItems => {
-                this.loadUserNames(repoItems.result);
-                this.animationDone = true;
-                this.addToFormArray(repoItems.result);
-                if (repoItems.result.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
-                this.ready = true;
-            });
+    private loadProcesses(): Observable<unknown> {
+        return this.processRepoService
+            .getProcessModels(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy, this.list.sortDirection, this.getOwnerFilter())
+            .pipe(
+                concatMap((resp) => {
+                    const ids = resp.result.map((e) => e._id);
+                    const permissions = ids.length > 0 ? this.permissionsService.getComputedResourcePermissionsV2('processmodel', ids) : of([]);
+                    return permissions.pipe(
+                        tap((perm) => (this.permissionsPerModel = perm)),
+                        map(() => resp),
+                    );
+                }),
+                tap((resp) => {
+                    this.closeOverlay();
+                    this.selection.clear();
+                    this.totalCount = resp.total;
+                    this.metadataWarnings = new Map();
+                    this.images = new Map(resp.result.map((process) => [process._id, this.provideImg(process.svgXML)]));
+                    this.dataSource.data = resp.result;
+                    this.loadUserNames(resp.result);
+                    this.markMissingMetadata(resp.result);
+                }),
+            );
     }
 
-    private loadUserNames(elements: { owner: string }[]) {
+    private loadUserNames(elements: { owner: string }[]): void {
         const missingCreators: string[] = [];
-        elements?.forEach(element => {
+        elements.forEach((element) => {
             if (element.owner !== this.userID && !this.userIdToName[element.owner] && !missingCreators.includes(element.owner)) {
                 missingCreators.push(element.owner);
             }
         });
-        missingCreators.forEach(creator => {
-            this.permissionsService.getUserById(creator).subscribe(value => {
+        missingCreators.forEach((creator) => {
+            this.permissionsService.getUserById(creator).subscribe((value) => {
                 if (value) {
                     this.userIdToName[value.id] = value.username;
                 }
@@ -339,101 +338,31 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    private addToFormArray(repoItems: ProcessModel[]): void {
-        repoItems.forEach((repoItem: ProcessModel) => {
-            this.repoItems.push(
-                this._formBuilder.group({
-                    _id: repoItem._id,
-                    name: repoItem.name,
-                    date: repoItem.date,
-                    svgXML: repoItem.svgXML,
-                    bpmn_xml: repoItem.bpmn_xml,
-                    publish: repoItem.publish,
-                    owner: repoItem.owner,
-                    image: this.provideImg(repoItem.svgXML),
-                    selected: false,
-                    metadataWarning: '',
-                }),
-            );
-        });
-        this.markMissingMetadata(repoItems);
-    }
-
-    private markMissingMetadata(repoItems: ProcessModel[]): void {
+    private markMissingMetadata(processes: ProcessModel[]): void {
+        const shown = this.dataSource.data;
         this.metadataExistenceService
-            .warningsForBpmn(repoItems.map((repoItem) => ({ key: repoItem._id, bpmnXml: repoItem.bpmn_xml })))
+            .warningsForBpmn(processes.map((process) => ({ key: process._id, bpmnXml: process.bpmn_xml })))
             .subscribe((warnings) => {
-                this.repoItems.controls.forEach((control) => {
-                    const warning = warnings.get(control.value._id);
-                    if (warning) {
-                        control.patchValue({ metadataWarning: warning });
-                    }
-                });
+                // Warnings of a page that was replaced meanwhile are dropped.
+                if (shown === this.dataSource.data) {
+                    this.metadataWarnings = warnings;
+                }
             });
     }
 
-    private reset() {
-        this.repoItems.clear();
-        this.permissionsPerModel = [];
-        this.offset = 0;
-        this.allDataLoaded = false;
-        this.ready = false;
-        this.selectedItems = [];
-    }
-
-    private provideImg(jsonSVG: string): SafeUrl {
-        const base64 = this.utilService.convertSVGtoBase64(jsonSVG);
+    private provideImg(svg: string): SafeUrl {
+        const base64 = this.utilService.convertSVGtoBase64(svg);
         return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
     }
 
     private getOwnerFilter(): { owner?: string; notOwner?: string } | undefined {
         switch (this.activeIndex) {
         case 1:
-            // own
             return { owner: this.userID };
         case 2:
-            // shared
             return { notOwner: this.userID };
         default:
-            // all
             return undefined;
         }
-    }
-
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.repoItems.length;
-    }
-
-    get repoItems(): FormArray {
-        return this.formGroup.get('repoItems') as FormArray;
-    }
-
-    private showSnackBarError(text: string): void {
-        snackError(this.snackBar, 'Error while ' + text + ' !');
-    }
-
-    private showSnackBarSuccess(text: string): void {
-        snackSuccess(this.snackBar, text + ' successfully.');
-    }
-
-    private get maxItemsDisplayed(): number {
-        return this.gridCols * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight);
-    }
-
-    private adjustForResize(timeout: number): number {
-        return window.setTimeout(() => {
-            if (this.mainPanel.nativeElement.offsetHeight === this.knownMainPanelOffsetHeight) {
-                // redrawing might be unfinished even after gridCols have been changed.
-                // Wait for resize of DOM element to be finished before determining the number of items to load.
-                this.gridColChangeTimeout = this.adjustForResize(timeout * timeout);
-            } else {
-                this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
-                this.limitInit = this.maxItemsDisplayed;
-                this.setRepoItemsParams(this.repoItems.length + this.limitInit);
-                this.getRepoItems(false);
-            }
-        }, timeout);
     }
 }
