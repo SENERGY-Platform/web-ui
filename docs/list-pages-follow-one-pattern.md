@@ -38,7 +38,8 @@ classes get their own pattern; a list never invents its own variant.
   (`core/classes/load-all-pages.ts`) and paged on the client; every reload, sort and page change goes
   through the filtered rows.
 - Columns: selection, name first (description as a muted second line), then chips, data and counts
-  (right-aligned), dates last, row menu. A visual identifier (flow preview) may precede the name.
+  (right-aligned), dates last, row menu. A visual identifier (flow or BPMN
+  preview, `senergy-hover-preview`: a small image that enlarges beside it on hover) may precede the name.
 - Dates: `LIST_DATE_FORMAT` (`core/classes/list-date-format.ts`, `dd.MM.yyyy HH:mm`), muted, headers
   "Created" and "Updated".
 - Tab groups are left-aligned (Material tabs default in `core/form-field-defaults.ts`).

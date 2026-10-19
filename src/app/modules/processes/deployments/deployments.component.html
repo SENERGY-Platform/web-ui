@@ -13,158 +13,158 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="deployments-container layout-margin">
-  <div class="search-button-container ly-row">
-    <senergy-searchbar class="ly-flex"></senergy-searchbar>
 
-    @if (selectedItems.length > 0 && ready) {
-      <button matTooltip="Delete" mat-icon-button color="accent" (click)="deleteMultipleItems()"
-        >
-        <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn" class="suffix-sort">delete</mat-icon>
+<senergy-page-header title="Deployments" description="Process models that are deployed and can be started, on the platform or on a hub.">
+  <ng-container pageActions>
+    @if (refreshSyncF) {
+      <button matButton="outlined" (click)="refreshSync()">
+        <mat-icon>sync</mat-icon> Refresh hub sync
       </button>
     }
-    <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment" matTooltip="Deployment Environment"
-      color="accent" class="suffix">
-      <mat-icon>device_hub</mat-icon>
+    <button matButton="outlined" [disabled]="!ready || metadataCheckRunning" (click)="checkMissingMetadata()"
+      matTooltip="Reads the diagram of every deployment on the page and marks those that reference missing metadata">
+      <mat-icon>rule</mat-icon> Check metadata
+    </button>
+  </ng-container>
+</senergy-page-header>
+
+<senergy-list-toolbar [searchDisabled]="deploymentIdFilter !== null" [selectedCount]="selection.selected.length"
+  (clearSelection)="selectionClear()" (refresh)="reload()">
+  <ng-container toolbarFilters>
+    <button matButton="outlined" [matMenuTriggerFor]="deploymentEnvironment">
+      <mat-icon>device_hub</mat-icon> {{hub ? hub.name : 'Senergy-Platform'}}
     </button>
     <mat-menu #deploymentEnvironment="matMenu">
-      <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHub(null)">Senergy-Platform</button>
-      @for (h of hubList; track h) {
-        <button mat-menu-item [ngClass]="{'hub-selected': hub?.id === h.id}"
-        (click)="selectHub(h)">{{h.name}}</button>
+      <button mat-menu-item [class.hub-selected]="!hub" (click)="selectHub(null)">Senergy-Platform</button>
+      @for (h of hubList; track h.id) {
+        <button mat-menu-item [class.hub-selected]="hub?.id === h.id" (click)="selectHub(h)">{{h.name}}</button>
       }
     </mat-menu>
-    @if (!this.showGenerated) {
-      <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)"
-        class="suffix">
-        <mat-icon>visibility</mat-icon>
-      </button>
-    }
-    @if (this.showGenerated) {
-      <button matTooltip="hide generated" mat-icon-button color="accent" (click)="filterItems(false)"
-        class="suffix">
-        <mat-icon>visibility_off</mat-icon>
-      </button>
-    }
-    <button matTooltip="Check for missing metadata" mat-icon-button color="accent"
-      (click)="checkMissingMetadata()" [disabled]="!ready || metadataCheckRunning" class="suffix">
-      <mat-icon>rule</mat-icon>
-    </button>
-    <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
-    (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-    @if (this.refreshSyncF) {
-      <button matTooltip="refresh fog deployment sync" mat-icon-button color="accent" (click)="refreshSync()"
-        class="suffix">
-        <mat-icon>refresh</mat-icon>
-      </button>
-    }
-  </div>
-  @if (deploymentIdFilter) {
-    <div class="deployment-filter-row">
+    <mat-chip-listbox aria-label="Filter">
+      <mat-chip-option [selected]="showGenerated" (selectionChange)="filterItems($event.selected)">
+        Show generated
+      </mat-chip-option>
+    </mat-chip-listbox>
+    @if (deploymentIdFilter) {
       <mat-chip-set aria-label="Deployment filter">
-        <mat-chip-row [removable]="true" (removed)="removeDeploymentIdFilter()">
+        <mat-chip (removed)="removeDeploymentIdFilter()">
           Deployment ID: {{deploymentIdFilter}}
-          <mat-icon matChipRemove>cancel</mat-icon>
-        </mat-chip-row>
+          <button matChipRemove aria-label="Remove the deployment filter"><mat-icon>cancel</mat-icon></button>
+        </mat-chip>
       </mat-chip-set>
-    </div>
+    }
+  </ng-container>
+  <ng-container bulkActions>
+    <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">
+      <mat-icon>delete</mat-icon> Delete
+    </button>
+  </ng-container>
+</senergy-list-toolbar>
+
+<div class="page-body">
+  <senergy-spinner [elementCount]="dataSource.data.length" [show]="!ready"></senergy-spinner>
+
+  @if (dataSource.data.length === 0 && ready) {
+    <senergy-empty-state icon="rocket_launch" [title]="filtered ? 'No matching deployments' : 'No deployments yet'"
+      [text]="filtered ? 'No deployment matches the search or the filters.' : 'Deploy a process model from the process models list to see it here.'">
+    </senergy-empty-state>
   }
-  <div class="deployments-scroll" #mainPanel [ngClass]="{'with-filter': deploymentIdFilter}">
-    <div infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
-      [infiniteScrollContainer]="'.deployments-scroll'" [fromRoot]="true" (scrolled)="onScroll()">
-      <div class="ly-column" [formGroup]="formGroup">
-        @if (repoItems.length > 0) {
-          <mat-grid-list cols="{{gridCols}}" rowHeight="{{rowHeight}}px" gutterSize="16px"
-            formArrayName="repoItems">
-            @for (item of repoItems.controls; track item; let i = $index) {
-              <mat-grid-tile class="mat-elevation-z1" [ngClass]="{'deployment-disabled': item.value.disabled}"
-                [formGroupName]="i">
-                <div class="ly-fill">
-                  @if (item.value.metadataWarning) {
-                    <mat-icon
-                      matTooltip="{{item.value.metadataWarning}}" matTooltipClass="multiline-tooltip"
-                      class="color-warn metadata-warning-icon">
-                      report_problem
-                    </mat-icon>
-                  }
-                  <img class="widget-image" [src]="item.value.image">
-                </div>
-                <mat-grid-tile-footer>
-                  <div class="ly-column ly-fill">
-                    <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
-                      {{item.value.name}}
-                    </div>
-                    <div class="truncate footer-item-subtitle"
-                      matTooltip="{{item.value.deploymentTime | date:'medium'}}">
-                      {{item.value.deploymentTime | date:"medium"}}
-                    </div>
-                    <div class="footer-buttons ly-row ly-align-center-center">
-                      <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
-                      </mat-checkbox>
-                      @if (!hub) {
-                        <mat-slide-toggle color="accent" class="deployment-toggle"
-                          [checked]="!item.value.disabled" matTooltip="Switch deployment on or off"
-                          (change)="toggleDeploymentEnabled(item, $event)">
-                        </mat-slide-toggle>
-                      }
-                      @if (!item.value.online) {
-                        <button mat-icon-button matTooltip="Missing Dependencies"
-                          class="mat-warn" (click)="showOfflineReasons(item.value.offline_reasons)">
-                          <mat-icon>warning</mat-icon>
-                        </button>
-                      }
-                      <div class="ly-flex"></div>
-                      @if (item.value.sync) {
-                        <mat-icon color="warn" class="icon-spin"
-                        matTooltip="waiting for sync with hub">sync</mat-icon>
-                      }
-                      @if (!item.value.sync) {
-                        <button mat-icon-button matTooltip="Run" color="accent"
-                          (click)="run(item.value.id)" [disabled]="item.value.disabled">
-                          <mat-icon>play_arrow</mat-icon>
-                        </button>
-                      }
-                      <button mat-icon-button matTooltip="Copy Deployment" color="accent"
-                        (click)="copyDeployment(item.value.id)">
-                        <mat-icon>content_copy</mat-icon>
-                      </button>
-                      @if (userHasDeleteAuthorization) {
-                        <button mat-icon-button matTooltip="Delete" color="accent"
-                          (click)="deleteDeployment(item.value)"
-                          [disabled]="selectedItems.length > 0">
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                      }
-                      <button mat-icon-button [matMenuTriggerFor]="deploymentMenu" color="accent"
-                        matTooltip="More">
-                        <mat-icon>more_vert</mat-icon>
-                      </button>
-                      <mat-menu #deploymentMenu="matMenu" [overlapTrigger]="false">
-                        <button mat-menu-item (click)="copyEndpoint(item.value.id)">
-                          <mat-icon>content_copy</mat-icon>
-                          <span>Copy Endpoint to Clipboard</span>
-                        </button>
-                        <button mat-menu-item (click)="navigateToMonitorSection(item.value, 0)">
-                          <mat-icon>play_circle_outline</mat-icon>
-                          <span>Show Running</span>
-                        </button>
-                        <button mat-menu-item (click)="navigateToMonitorSection(item.value, 1)">
-                          <mat-icon>history</mat-icon>
-                          <span>Show History</span>
-                        </button>
-                      </mat-menu>
-                    </div>
-                  </div>
-                </mat-grid-tile-footer>
-              </mat-grid-tile>
+
+  <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort matSortActive="deploymentTime" matSortDirection="desc" matSortDisableClear
+        (matSortChange)="matSortChange($event)">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef class="select-column">
+            <mat-checkbox (change)="$event ? masterToggle() : null"
+              [checked]="selection.hasValue() && isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              aria-label="Select all">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row" class="select-column" (click)="$event.stopPropagation()">
+            <mat-checkbox (click)="$event.stopPropagation()"
+              (change)="$event ? selection.toggle(row) : null" [checked]="selection.isSelected(row)"
+              aria-label="Select row">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef class="preview-column"><span class="cdk-visually-hidden">Preview</span></th>
+          <td mat-cell *matCellDef="let row" class="preview-column">
+            <senergy-hover-preview [src]="row.image" [onWhite]="true" alt="Preview of the deployment"></senergy-hover-preview>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="name">Name</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="name-cell">{{row.name}}</span>
+            @if (metadataWarnings.get(row.id); as warning) {
+              <span class="status-chip warning name-chip" [matTooltip]="warning" matTooltipClass="multiline-tooltip">Metadata missing</span>
             }
-          </mat-grid-list>
-        }
-        @if (repoItems.length === 0 && ready) {
-          <div>No process models found.</div>
-        }
-        <senergy-spinner [elementCount]="repoItems.length" [show]="!ready"></senergy-spinner>
-      </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="status-cell">
+              @if (!hub) {
+                @if (row.disabled) {
+                  <span class="status-chip">Switched off</span>
+                } @else {
+                  <span class="status-chip online">Switched on</span>
+                }
+              }
+              @if (row.sync) {
+                <span class="status-chip warning" matTooltip="Waiting for sync with hub">Syncing</span>
+              }
+              @if (!row.online) {
+                <button type="button" class="status-chip warning chip-button" matTooltip="Show the missing dependencies"
+                  (click)="showOfflineReasons(row.offline_reasons)">Missing dependencies</button>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="deploymentTime">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="deploymentTime">Deployed</th>
+          <td mat-cell *matCellDef="let row" class="muted">{{row.deploymentTime | date:dateFormat}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let row" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              @if (!row.sync) {
+                <button mat-menu-item [disabled]="row.disabled" (click)="run(row.id)"><mat-icon>play_arrow</mat-icon> Run</button>
+              }
+              <button mat-menu-item (click)="navigateToMonitorSection(row, 0)"><mat-icon>play_circle_outline</mat-icon> Show running</button>
+              <button mat-menu-item (click)="navigateToMonitorSection(row, 1)"><mat-icon>history</mat-icon> Show history</button>
+              <button mat-menu-item (click)="copyDeployment(row.id)"><mat-icon>content_copy</mat-icon> Copy deployment</button>
+              <button mat-menu-item (click)="copyEndpoint(row.id)"><mat-icon>link</mat-icon> Copy endpoint</button>
+              @if (!hub) {
+                <button mat-menu-item (click)="toggleDeploymentEnabled(row)">
+                  <mat-icon>{{row.disabled ? 'toggle_on' : 'toggle_off'}}</mat-icon> {{row.disabled ? 'Switch on' : 'Switch off'}}
+                </button>
+              }
+              @if (userHasDeleteAuthorization) {
+                <button mat-menu-item class="danger" (click)="deleteDeployment(row)"><mat-icon>delete</mat-icon> Delete</button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.deployment-disabled]="row.disabled"></tr>
+      </table>
     </div>
+    <mat-paginator #paginator [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+      (page)="preferencesService.pageSize = $event.pageSize; selectionClear()" showFirstLastButtons></mat-paginator>
   </div>
 </div>

@@ -75,17 +75,10 @@
           <th mat-header-cell *matHeaderCellDef class="preview-column"><span class="cdk-visually-hidden">Preview</span></th>
           <td mat-cell *matCellDef="let row" class="preview-column">
             @if (previewUrl(row); as url) {
-              <img class="svg-preview process-preview" #trigger="cdkOverlayOrigin" cdkOverlayOrigin alt="Preview of the process model"
-                (mouseenter)="openOverlay(trigger, row)" (mouseleave)="closeOverlay()" [src]="url">
+              <senergy-hover-preview [src]="url" [onWhite]="true" alt="Preview of the process model"></senergy-hover-preview>
             }
           </td>
         </ng-container>
-
-        <ng-template #overlayTpl let-process="process">
-          <div class="svg-wrapper">
-            <img class="svg-preview-large" alt="Preview of the process model" [src]="previewUrl(process)">
-          </div>
-        </ng-template>
 
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>

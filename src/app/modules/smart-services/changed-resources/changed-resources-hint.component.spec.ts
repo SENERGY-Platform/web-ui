@@ -51,4 +51,15 @@ describe('ChangedResourcesHintComponent', () => {
         fixture.detectChanges();
         expect(fixture.debugElement.query(By.css('mat-icon'))).toBeNull();
     });
+
+    it('shows a status chip with the same tooltip instead of the icon when asked for', () => {
+        fixture.componentInstance.chip = true;
+        fixture.componentInstance.resources = [{ kind: 'flow', id: 'flow-1', reason: 'gone', at: 1760000000 }];
+        fixture.detectChanges();
+
+        const chip = fixture.debugElement.query(By.css('.status-chip.warning'));
+        expect(chip.nativeElement.textContent).toContain('Resources changed');
+        expect(chip.injector.get(MatTooltip).message).toContain('Flow flow-1: gone on');
+        expect(fixture.debugElement.query(By.css('mat-icon'))).toBeNull();
+    });
 });

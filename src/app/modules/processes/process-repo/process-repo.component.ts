@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnInit, TemplateRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { concatMap, map, Observable, of, tap } from 'rxjs';
@@ -41,9 +41,8 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
-import { CdkOverlayOrigin, FlexibleConnectedPositionStrategy, Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
 import { DatePipe } from '@angular/common';
+import { HoverPreviewComponent } from '../../../core/components/hover-preview/hover-preview.component';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
 import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
@@ -60,7 +59,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './process-repo.component.html',
     styleUrls: ['./process-repo.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTabGroup, MatTab, MatButton, MatIconButton, MatTooltip, MatIcon, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, CdkOverlayOrigin, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTabGroup, MatTab, MatButton, MatIconButton, MatTooltip, MatIcon, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, HoverPreviewComponent, DatePipe]
 })
 export class ProcessRepoComponent implements OnInit, AfterViewInit {
     private sanitizer = inject(DomSanitizer);
@@ -75,8 +74,6 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
     private permissionsService = inject(PermissionsService);
     private metadataExistenceService = inject(MetadataExistenceService);
     private preferencesService = inject(PreferencesService);
-    private overlay = inject(Overlay);
-    private vcr = inject(ViewContainerRef);
     private destroyRef = inject(DestroyRef);
 
     readonly tabs = ['All', 'Own', 'Shared'];
@@ -101,16 +98,13 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
     userHasDeleteAuthorization = false;
 
     private searchInitialized = false;
-    private overlayRef?: OverlayRef;
     private images = new Map<string, SafeUrl>();
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    @ViewChild('overlayTpl') overlayTpl!: TemplateRef<unknown>;
 
     constructor() {
         const sub = this.authorizationService.getUserId();
         this.userID = typeof sub === 'string' ? sub : '';
-        this.destroyRef.onDestroy(() => this.closeOverlay());
     }
 
     ngOnInit() {
@@ -261,30 +255,6 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
         return this.images.get(process._id);
     }
 
-    openOverlay(origin: CdkOverlayOrigin, process: ProcessModel): void {
-        if (this.overlayRef) {
-            return;
-        }
-        const positionStrategy: FlexibleConnectedPositionStrategy = this.overlay
-            .position()
-            .flexibleConnectedTo(origin.elementRef)
-            .withPositions([
-                { originX: 'end', originY: 'center', overlayX: 'start', overlayY: 'center', offsetX: 8 },
-                { originX: 'start', originY: 'center', overlayX: 'end', overlayY: 'center', offsetX: -8 },
-            ]);
-        this.overlayRef = this.overlay.create({
-            positionStrategy,
-            scrollStrategy: this.overlay.scrollStrategies.reposition(),
-            hasBackdrop: false,
-        });
-        this.overlayRef.attach(new TemplatePortal(this.overlayTpl, this.vcr, { process }));
-    }
-
-    closeOverlay(): void {
-        this.overlayRef?.dispose();
-        this.overlayRef = undefined;
-    }
-
     private initSearch(): void {
         this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             // A tab change destroys the old searchbar, which re-sends the already reset empty text.
@@ -310,7 +280,6 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
                     );
                 }),
                 tap((resp) => {
-                    this.closeOverlay();
                     this.selection.clear();
                     this.totalCount = resp.total;
                     this.metadataWarnings = new Map();

@@ -14,126 +14,28 @@
  * limitations under the License.
  */
 
-.deployments-container {
-    height: calc(100% - 64px);
-    overflow-y: hidden;
-}
-
-.deployments-scroll {
-    height: calc(100% - 85px);
-    overflow-y: auto;
-}
-
-.deployments-scroll.with-filter {
-    height: calc(100% - 125px);
-}
-
-.deployment-filter-row {
-    padding: 4px 0 8px;
-}
-
-mat-grid-tile {
-    background: var(--mat-sys-surface-container-low);
-    transition: box-shadow 280ms cubic-bezier(.4,0,.2,1);
-    border-radius: 4px;
-}
-
-mat-grid-tile mat-grid-tile-footer {
-    height: 110px;
-    background-color: var(--mat-sys-surface);
-    color: var(--mat-sys-on-surface);
-    padding: 8px;
-}
-
-.footer-item-header {
-    min-height: 20px;
-    padding: 5px;
-    margin-bottom: 8px;
-    font-size: 20px;
-    font-weight: 500;
-}
-
-.footer-item-subtitle {
-    min-height: 20px;
-    margin-top: -4px;
-    padding: 5px;
-    margin-bottom: 16px;
-}
-
-mat-grid-list {
-    margin-bottom: 100px;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
-}
-
-.footer-buttons {
-    max-height: 30px;
-}
-
-.widget-image {
-    height: 156px;
-    width: 100%;
-    background-color: var(--mat-sys-surface-container-low);
-}
-
-.icon-spin {
-    -webkit-animation: icon-spin 2s infinite linear;
-    animation: icon-spin 2s infinite linear;
-}
-
-@-webkit-keyframes icon-spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -webkit-transform: rotate(-359deg);
-        transform: rotate(-359deg);
-    }
-}
-@keyframes icon-spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -webkit-transform: rotate(-359deg);
-        transform: rotate(-359deg);
-    }
-}
-
 .hub-selected {
     background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
 }
 
-.metadata-warning-icon {
-    padding-left: 5px;
-    padding-right: 5px;
-    position: absolute;
-    right: 0;
-    margin-top: 5px;
+.status-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
 }
 
-.deployment-disabled .footer-item-header,
-.deployment-disabled .footer-item-subtitle {
-    color: var(--mat-sys-outline-variant);
+/* A status chip that opens the dialog behind it; a button, so the keyboard reaches it. */
+button.chip-button {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-size: var(--app-text-sm, 13px);
+    color: inherit;
+    cursor: pointer;
 }
 
-.deployment-disabled .widget-image {
-    opacity: 0.5;
-}
-
-.deployment-toggle {
-    margin-left: 8px;
+.deployment-disabled .preview-column,
+.deployment-disabled .name-cell {
+    opacity: 0.6;
 }

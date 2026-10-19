@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
-import { ProcessModel } from '../../processes/process-repo/shared/process.model';
 import { SmartServiceDesignsService } from './shared/designs.service';
 import { SmartServiceDesignModel } from './shared/design.model';
-import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ResponsiveService } from '../../../core/services/responsive.service';
 import { saveAs } from 'file-saver';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -29,202 +27,116 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UtilService } from '../../../core/services/util.service';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
-import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
-import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
-import { MatGridList, MatGridTile, MatGridTileText, MatGridTileFooterCssMatStyler } from '@angular/material/grid-list';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
-import { RouterLink } from '@angular/router';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { Router, RouterLink } from '@angular/router';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { HoverPreviewComponent } from '../../../core/components/hover-preview/hover-preview.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { loadAllPages } from '../../../core/classes/load-all-pages';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { confirmDelete } from '../../../core/services/delete-flows';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
-const grids = new Map([
-    ['xs', 1],
-    ['sm', 3],
-    ['md', 3],
-    ['lg', 4],
-    ['xl', 6],
-]);
+/** Designs carry their diagrams, so they are read in small chunks. */
+const CHUNK = 50;
 
 @Component({
     selector: 'senergy-smart-service-designs',
     templateUrl: './designs.component.html',
     styleUrls: ['./designs.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SearchbarComponent, InfiniteScrollDirective, FormsModule, ReactiveFormsModule, MatGridList, MatGridTile, MatIcon, MatTooltip, MatGridTileText, MatGridTileFooterCssMatStyler, MatIconButton, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, SpinnerComponent, MatFabButton]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, HoverPreviewComponent, SpinnerComponent, MatButton, MatIconButton, MatIcon, MatTooltip, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, MatPaginator, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
-export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
+export class SmartServiceDesignsComponent implements OnInit {
     private searchbarService = inject(SearchbarService);
     private destroyRef = inject(DestroyRef);
     private designsService = inject(SmartServiceDesignsService);
     private releaseService = inject(SmartServiceReleasesService);
-    private responsiveService = inject(ResponsiveService);
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
     private sanitizer = inject(DomSanitizer);
     private utilService = inject(UtilService);
-    private _formBuilder = inject(FormBuilder);
     private metadataExistenceService = inject(MetadataExistenceService);
+    private router = inject(Router);
+    preferencesService = inject(PreferencesService);
 
-    formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
-
-    gridCols = 0;
-    animationDone = true;
+    displayedColumns = ['image', 'name', 'actions'];
+    /** The design API has no total, so every design is loaded and the list pages on the client. */
+    dataSource = new MatTableDataSource<SmartServiceDesignModel>([]);
     ready = false;
-    searchInitialized = false;
     searchText = '';
-    selectedItems: ProcessModel[] = [];
-    rowHeight = 282;
+    /** Metadata warning per design id of the pages shown so far. */
+    metadataWarnings = new Map<string, string>();
 
     userHasDeleteAuthorization = false;
     userHasUpdateAuthorization = false;
     userHasCreateAuthorization = false;
 
-    private limitInit = 54;
-    private limit = this.limitInit;
-    private offset = 0;
-    private allDataLoaded = false;
-    private gridColChangeTimeout: number | undefined;
-    private knownMainPanelOffsetHeight = 0;
+    private images = new Map<string, SafeUrl>();
+    private metadataChecked = new Set<string>();
+    private loadSub = new Subscription();
 
-    @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
+    @ViewChild('paginator', { static: false })
+    set paginator(value: MatPaginator | undefined) {
+        if (value) {
+            this.dataSource.paginator = value;
+        }
+    }
 
     ngOnInit() {
         this.userHasDeleteAuthorization = this.designsService.userHasDeleteAuthorization();
         this.userHasUpdateAuthorization = this.designsService.userHasUpdateAuthorization();
         this.userHasCreateAuthorization = this.designsService.userHasCreateAuthorization();
+        this.destroyRef.onDestroy(() => this.loadSub.unsubscribe());
 
-        this.initGridCols();
-    }
-
-    ngAfterViewInit() {
-        this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
-        this.limitInit = this.maxItemsDisplayed;
-        this.limit = this.limitInit;
-        this.initSearchAndGetDevices();
-    }
-
-    onScroll() {
-        if (!this.allDataLoaded && this.ready) {
-            this.setRepoItemsParams(this.limitInit);
-            this.getRepoItems(false);
-        }
-    }
-
-    private initGridCols(): void {
-        this.gridCols = grids.get(this.responsiveService.getActiveMqAlias()) || 0;
-        this.responsiveService.observeMqAlias().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((mqAlias) => {
-            const gridCols = grids.get(mqAlias) || 0;
-            if (gridCols > this.gridCols) {
-                clearTimeout(this.gridColChangeTimeout);
-                this.gridColChangeTimeout = this.adjustForResize(2);
-            }
-            this.gridCols = gridCols;
-        });
-    }
-
-    private get maxItemsDisplayed(): number {
-        return this.gridCols * Math.ceil(this.knownMainPanelOffsetHeight / this.rowHeight);
-    }
-
-    private initSearchAndGetDevices() {
+        // Metadata is checked for the page that is shown, not for every design at once.
+        this.dataSource.connect().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((rows) => this.markMissingMetadata(rows));
         this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
-            this.searchInitialized = true;
             this.searchText = searchText;
-            this.getRepoItems(true);
+            this.reload();
         });
     }
 
-    private getRepoItems(reset: boolean) {
-        if (reset) {
-            this.setRepoItemsParams(this.limitInit);
-            this.reset();
-        }
+    get filtered(): boolean {
+        return this.searchText !== '';
+    }
 
-        this.designsService
-            .getDesignList(
-                this.limit,
-                this.offset,
-                this.searchText
-            )
-            .subscribe((repoItems: SmartServiceDesignModel[]) => {
-                this.animationDone = true;
-                this.addToFormArray(repoItems);
-                if (repoItems.length !== this.limit) {
-                    this.allDataLoaded = true;
-                }
+    /** The one reload path: search, refresh button and every write end here; only the latest load stays subscribed. */
+    reload(): void {
+        this.loadSub.unsubscribe();
+        this.ready = false;
+        this.metadataChecked.clear();
+        this.metadataWarnings = new Map();
+        this.loadSub = loadAllPages((limit, offset) => this.designsService.getDesignList(limit, offset, this.searchText), CHUNK).subscribe(
+            (designs) => {
+                this.images = new Map(designs.map((design) => [design.id, this.provideImg(design.svg_xml)]));
+                this.dataSource.data = designs;
+                this.dataSource.paginator?.firstPage();
                 this.ready = true;
-            });
+            },
+        );
     }
 
-    private setRepoItemsParams(limit: number) {
-        this.ready = false;
-        this.limit = limit;
-        this.offset = this.repoItems.length;
+    previewUrl(design: SmartServiceDesignModel): SafeUrl | undefined {
+        return this.images.get(design.id);
     }
 
-    private reset() {
-        this.repoItems.clear();
-        this.offset = 0;
-        this.allDataLoaded = false;
-        this.ready = false;
-        this.selectedItems = [];
+    /** Row click: the designer, for users who may update; others have nothing to open. */
+    openDesign(design: SmartServiceDesignModel): void {
+        if (this.userHasUpdateAuthorization) {
+            this.editDesign(design);
+        }
     }
 
-    get repoItems(): FormArray {
-        return this.formGroup.get('repoItems') as FormArray;
-    }
-
-    private addToFormArray(repoItems: SmartServiceDesignModel[]): void {
-        repoItems.forEach((repoItem: SmartServiceDesignModel) => {
-            this.repoItems.push(
-                this._formBuilder.group({
-                    id: repoItem.id,
-                    name: repoItem.name,
-                    description: repoItem.description,
-                    svg_xml: repoItem.svg_xml,
-                    bpmn_xml: repoItem.bpmn_xml,
-                    image: this.provideImg(repoItem.svg_xml),
-                    metadataWarning: '',
-                }),
-            );
-        });
-        this.markMissingMetadata(repoItems);
-    }
-
-    private markMissingMetadata(repoItems: SmartServiceDesignModel[]): void {
-        this.metadataExistenceService
-            .warningsForBpmn(repoItems.map((repoItem) => ({ key: repoItem.id, bpmnXml: repoItem.bpmn_xml })))
-            .subscribe((warnings) => {
-                this.repoItems.controls.forEach((control) => {
-                    const warning = warnings.get(control.value.id);
-                    if (warning) {
-                        control.patchValue({ metadataWarning: warning });
-                    }
-                });
-            });
-    }
-
-    private provideImg(jsonSVG: string): SafeUrl {
-        const base64 = this.utilService.convertSVGtoBase64(jsonSVG);
-        return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
-    }
-
-    private adjustForResize(timeout: number): number {
-        return window.setTimeout(() => {
-            if (this.mainPanel.nativeElement.offsetHeight === this.knownMainPanelOffsetHeight) {
-                // redrawing might be unfinished even after gridCols have been changed.
-                // Wait for resize of DOM element to be finished before determining the number of items to load.
-                this.gridColChangeTimeout = this.adjustForResize(timeout * timeout);
-            } else {
-                this.knownMainPanelOffsetHeight = this.mainPanel.nativeElement.offsetHeight;
-                this.limitInit = this.maxItemsDisplayed;
-                this.setRepoItemsParams(this.repoItems.length + this.limitInit);
-                this.getRepoItems(false);
-            }
-        }, timeout);
+    editDesign(design: SmartServiceDesignModel): void {
+        this.router.navigateByUrl('/smart-services/designer/' + design.id);
     }
 
     downloadDiagram(design: SmartServiceDesignModel): void {
@@ -238,20 +150,15 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
     }
 
     deleteDesign(design: SmartServiceDesignModel): void {
-        this.dialogsService
-            .openDeleteDialog('design')
-            .afterClosed()
-            .subscribe((deleteProcess: boolean | undefined) => {
-                if (deleteProcess) {
-                    this.designsService.deleteDesign(design.id).subscribe((resp: { status: number }) => {
-                        if (resp.status === 200) {
-                            this.repoItems.removeAt(this.repoItems.value.findIndex((item: ProcessModel) => design.id === item._id));
-                        } else {
-                            this.showSnackBarError('deleting the design');
-                        }
-                    });
+        confirmDelete(this.dialogsService, 'design').subscribe(() => {
+            this.designsService.deleteDesign(design.id).subscribe((resp: { status: number }) => {
+                if (resp.status === 200) {
+                    this.reload();
+                } else {
+                    this.showSnackBarError('deleting the design');
                 }
             });
+        });
     }
 
     releaseDesign(design: SmartServiceDesignModel): void {
@@ -269,6 +176,28 @@ export class SmartServiceDesignsComponent implements OnInit, AfterViewInit {
                     }
                 });
             });
+    }
+
+    private markMissingMetadata(rows: SmartServiceDesignModel[]): void {
+        const unchecked = rows.filter((design) => !this.metadataChecked.has(design.id));
+        if (unchecked.length === 0) {
+            return;
+        }
+        unchecked.forEach((design) => this.metadataChecked.add(design.id));
+        const shown = this.dataSource.data;
+        this.metadataExistenceService
+            .warningsForBpmn(unchecked.map((design) => ({ key: design.id, bpmnXml: design.bpmn_xml })))
+            .subscribe((warnings) => {
+                // Warnings of a list that was replaced meanwhile are dropped.
+                if (shown === this.dataSource.data) {
+                    warnings.forEach((warning, id) => this.metadataWarnings.set(id, warning));
+                }
+            });
+    }
+
+    private provideImg(jsonSVG: string): SafeUrl {
+        const base64 = this.utilService.convertSVGtoBase64(jsonSVG);
+        return this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + base64);
     }
 
     private showSnackBarError(text: string): void {
