@@ -13,94 +13,74 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="location-edit-container ly-column">
-  <h2>Location</h2>
+@if (locationForm) {
+  <div class="container">
+    <senergy-page-header [title]="id === '' ? 'New location' : (savedName || 'Location')"
+      backLabel="Locations" backLink="/devices/locations"></senergy-page-header>
+    <div class="page">
+      <senergy-form-section title="General">
+        <div [formGroup]="locationForm">
+          <mat-form-field class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error senergyError label="Name"></mat-error>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description"></textarea>
+            <mat-error senergyError label="Description"></mat-error>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Image</mat-label>
+            <input matInput formControlName="image">
+            <mat-error senergyError label="Image"></mat-error>
+          </mat-form-field>
+        </div>
+      </senergy-form-section>
 
-  @if (locationForm) {
-    <div [formGroup]="locationForm">
-      <mat-form-field appearance="outline" class="full-width" color="accent">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" required>
-        <mat-error senergyError label="Name"></mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width" color="accent">
-        <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description"></textarea>
-        <mat-error senergyError label="Description"></mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width" color="accent">
-        <mat-label>Image</mat-label>
-        <input matInput formControlName="image">
-        <mat-error senergyError label="Image"></mat-error>
-      </mat-form-field>
+      <senergy-form-section title="Device groups">
+        <button sectionActions matButton type="button" [disabled]="isSaving" (click)="selectAndAddGroups()">
+          <mat-icon>add</mat-icon>
+          Add groups
+        </button>
+        <div class="device-list">
+          @for (item of deviceGroupsForm.value; track item.id) {
+            <div class="device-row">
+              <span class="device-name" [matTooltip]="item.name">{{item.name}}</span>
+              <button mat-icon-button type="button" [disabled]="isSaving" (click)="removeDeviceGroup(item.id)"
+                matTooltip="Remove" aria-label="Remove device group">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          } @empty {
+            <p class="empty">No device groups.</p>
+          }
+        </div>
+      </senergy-form-section>
+
+      <senergy-form-section title="Devices">
+        <button sectionActions matButton type="button" [disabled]="isSaving" (click)="selectAndAddDevices()">
+          <mat-icon>add</mat-icon>
+          Add devices
+        </button>
+        <div class="device-list">
+          @for (item of devicesForm.value; track item.id) {
+            <div class="device-row">
+              <span class="device-name" [matTooltip]="item.name">{{item.name}}</span>
+              <button mat-icon-button type="button" [disabled]="isSaving" (click)="removeDevice(item.id)"
+                matTooltip="Remove" aria-label="Remove device">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          } @empty {
+            <p class="empty">No devices.</p>
+          }
+        </div>
+      </senergy-form-section>
     </div>
-  }
-
-  <div class="devices-container">
-    <h2>Device-Groups</h2>
-    @if (deviceGroupsForm.value.length > 0) {
-      <div>
-        @for (item of deviceGroupsForm.value; track item) {
-          <mat-card appearance="outlined" class="device-card ly-row ly-align-between-center">
-            <mat-card-title>
-              <div class="device-info">
-                <div matTooltip="{{item.name}}" class="device-name">
-                  {{item.name}}
-                </div>
-              </div>
-            </mat-card-title>
-            <mat-card-actions>
-              <div class="device-ctrl">
-                <button mat-icon-button color="accent" (click)="removeDeviceGroup(item.id)" matTooltip="Remove">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-            </mat-card-actions>
-          </mat-card>
-        }
-      </div>
+    @if (hasChanges() || isSaving) {
+      <senergy-save-bar [saveDisabled]="saveDisabled()" [status]="saveStatus()" (save)="save()"
+        (discard)="discard()"></senergy-save-bar>
     }
-    <button mat-raised-button color="accent" (click)="selectAndAddGroups()">Add Groups</button>
   </div>
-  <mat-divider></mat-divider>
-  <div class="devices-container">
-    <h2>Devices</h2>
-    @if (devicesForm.value.length > 0) {
-      <div>
-        @for (item of devicesForm.value; track item) {
-          <mat-card appearance="outlined" class="device-card ly-row ly-align-between-center">
-            <mat-card-title>
-              <div class="device-info">
-                <div matTooltip="{{item.name}}" class="device-name">
-                  {{item.name}}
-                </div>
-              </div>
-            </mat-card-title>
-            <mat-card-actions>
-              <div class="device-ctrl">
-                <button mat-icon-button color="accent" (click)="removeDevice(item.id)" matTooltip="Remove">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </div>
-            </mat-card-actions>
-          </mat-card>
-        }
-      </div>
-    }
-    <button mat-raised-button color="accent" (click)="selectAndAddDevices()">Add Devices</button>
-  </div>
-
-  <div class="controls ly-row ly-align-end-center">
-    <button mat-raised-button color="accent"
-      [class.spinner]="isSaving"
-      [disabled]="isSaving"
-      (click)="save()">Save
-    </button>
-  </div>
-</div>
-
-
-
-
-
-
+}

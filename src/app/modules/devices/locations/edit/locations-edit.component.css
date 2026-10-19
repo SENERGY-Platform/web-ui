@@ -14,124 +14,59 @@
  * limitations under the License.
  */
 
-
-@keyframes spinner {
-    to {transform: rotate(360deg);}
+/* A fixed height makes the container the scroll area, so the save bar sticks to its bottom edge; 64px is the toolbar. */
+.container {
+    height: calc(var(--app-page-height, 100vh) - 64px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.spinner:before {
-    content: '';
+.page {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 1040px;
     box-sizing: border-box;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin-top: -10px;
-    margin-left: -10px;
-    border-radius: 50%;
-    border: 2px solid var(--mat-sys-surface);
-    border-top-color: var(--mat-sys-on-surface);
-    animation: spinner .8s linear infinite;
-}
-
-.location-edit-container {
-    height: calc(100% - 64px);
-    overflow-y: auto;
-    padding: 8px 8px 8px
-}
-
-.location-state {
-    margin: 8px 8px 8px 8px;
-}
-
-.location-state-large {
-    height: 100%;
-    overflow-y: auto;
-}
-
-.devices-container {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.capabilities-container {
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
-
-.device-card {
-    margin-bottom: 10px;
-}
-
-.device-info{
-    width: calc(100% - 40px);
-}
-
-.device-id {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: smaller;
-    width: 100%;
-}
-
-.pointer {
-    cursor: pointer;
-}
-
-.controls {
-    margin-bottom: 8px;
-}
-
-
-
-.form {
-    width: 100%;
+    padding: 0 24px 24px;
 }
 
 .full-width {
     width: 100%;
 }
 
-.buttons button:not(:last-child) {
-    margin-right: 8px;
+.device-list {
+    border: var(--app-hairline);
+    border-radius: var(--app-radius-lg);
+    max-height: 360px;
+    overflow-y: auto;
 }
 
-.button-margin {
-    margin-top: 16px;
+.device-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 4px 0 16px;
 }
 
-.divider-margin {
-    margin-left: 8px;
-    margin-right: 8px;
+.device-row + .device-row {
+    border-top: var(--app-hairline);
 }
 
-.word-wrap {
-    white-space: pre-wrap;
-    white-space: -moz-pre-wrap;
-    white-space: -o-pre-wrap;
-}
-.table-button-size {
-    width: 40px;
+.device-row:hover {
+    background-color: var(--app-hover);
 }
 
-table {
-    border-spacing: 0px;
+.device-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.example-tree-invisible {
-    display: none;
-}
-
-.example-tree ul,
-.example-tree li {
-    margin-top: 0;
-    margin-bottom: 0;
-    list-style-type: none;
-}
-
-mat-card-title {
-    padding-left: 8px;
-    width: 100%;
+.empty {
+    margin: 0;
+    padding: 12px 16px;
+    color: var(--mat-sys-on-surface-variant);
 }
