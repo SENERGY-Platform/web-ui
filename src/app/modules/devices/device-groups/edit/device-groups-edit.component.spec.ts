@@ -765,4 +765,50 @@ describe('DeviceGroupsEditComponent', () => {
             );
         }),
     );
+    it(
+        'shows the title and the save bar only while there are changes',
+        fakeAsync(() => {
+            fixture.detectChanges();
+            const el: HTMLElement = fixture.nativeElement;
+            expect(el.querySelector('senergy-page-header')?.textContent).toContain('group-name');
+            expect(el.querySelector('senergy-save-bar')).toBeNull();
+
+            component.addDevice('device:id-4');
+            fixture.detectChanges();
+            tick(100);
+            flush();
+            fixture.detectChanges();
+            expect(el.querySelector('senergy-save-bar')).not.toBeNull();
+
+            component.removeDevice('device:id-4');
+            fixture.detectChanges();
+            tick(100);
+            flush();
+            fixture.detectChanges();
+            expect(el.querySelector('senergy-save-bar')).toBeNull();
+        }),
+    );
+
+    it(
+        'discard restores the loaded name, devices and attributes',
+        fakeAsync(() => {
+            component.addDevice('device:id-4');
+            component.deviceGroupForm.get('name')?.setValue('other');
+            component.addAttr();
+            fixture.detectChanges();
+            tick(100);
+            flush();
+            expect(component.hasChanges()).toBeTrue();
+
+            component.discard();
+            fixture.detectChanges();
+            tick(100);
+            flush();
+
+            expect(component.hasChanges()).toBeFalse();
+            expect(component.deviceGroupForm.getRawValue()).toEqual(exampleGroup);
+            expect(component.attributes).toEqual([]);
+            expect(component.selectedForm.value.length).toBe(2);
+        }),
+    );
 });

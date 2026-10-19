@@ -37,21 +37,24 @@ import { AddTagFn } from '../../../../core/model/mtx-select.model';
 import { MatFormField, MatLabel, MatError, MatPrefix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
-import { MatChipListbox, MatChipOption } from '@angular/material/chips';
-import { MatCard, MatCardTitle, MatCardActions } from '@angular/material/card';
+import { MatChipSet, MatChip } from '@angular/material/chips';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatDivider } from '@angular/material/divider';
 import { MtxSelect } from '@ng-matero/extensions/select';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
+
+const LIST_ROUTE = 'devices/devicegroups';
 
 @Component({
     selector: 'senergy-device-groups-edit',
     templateUrl: './device-groups-edit.component.html',
     styleUrls: ['./device-groups-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatChipListbox, MatChipOption, MatCard, MatCardTitle, MatCardActions, MatIconButton, MatTooltip, MatIcon, MatDivider, MtxSelect, MatButton, MatPrefix]
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatChipSet, MatChip, MatIconButton, MatTooltip, MatIcon, MtxSelect, MatButton, MatPrefix, PageHeaderComponent, FormSectionComponent, SaveBarComponent]
 })
 export class DeviceGroupsEditComponent implements OnInit {
     private _formBuilder = inject(FormBuilder);
@@ -82,6 +85,14 @@ export class DeviceGroupsEditComponent implements OnInit {
     debounceTimeInMs = 500;
     rerouteAfterSaveDelayInMs = 2000;
     isSaving = false;
+
+    /** Name as loaded or last saved; the page title, so it does not follow the name field while typing. */
+    savedName = '';
+    /** Editable state as loaded or last saved, serialized; the save bar shows while the current state differs. */
+    private savedState = '';
+    private savedImage = '';
+    private savedAttributes: Attribute[] = [];
+    private savedDeviceIds: string[] = [];
 
     constructor() {
         this.getRouterParams();
@@ -130,6 +141,59 @@ export class DeviceGroupsEditComponent implements OnInit {
         const deviceGroup = this.getDeviceGroupFromForm();
         deviceGroup.attributes = this.attributes;
         this.saveDeviceGroup(deviceGroup);
+    }
+
+    /** True while the editable fields differ from the loaded or last saved state; always true for a new group. */
+    hasChanges(): boolean {
+        return !!this.deviceGroupForm && (this.id === '' || this.currentState() !== this.savedState);
+    }
+
+    saveDisabled(): boolean {
+        return this.isSaving || this.deviceGroupForm.invalid;
+    }
+
+    saveStatus(): string {
+        if (this.isSaving) {
+            return 'Saving...';
+        }
+        if (this.deviceGroupForm.invalid) {
+            return 'Name is required to save.';
+        }
+        return this.id === '' ? 'New device group' : 'Unsaved changes';
+    }
+
+    /** Restores the loaded or last saved state; a new group has none, so it returns to the list. */
+    discard(): void {
+        if (this.isSaving) {
+            return;
+        }
+        if (this.id === '') {
+            this.router.navigate([LIST_ROUTE]);
+            return;
+        }
+        this.attributes = this.savedAttributes.map((a) => ({ ...a }));
+        this.deviceGroupForm.patchValue({
+            name: this.savedName,
+            image: this.savedImage,
+            device_ids: [...this.savedDeviceIds],
+        });
+    }
+
+    private currentState(): string {
+        const raw = this.deviceGroupForm.getRawValue();
+        return this.stateOf(raw.name, raw.image, raw.device_ids, this.attributes);
+    }
+
+    private stateOf(name: string, image: string, deviceIds: string[], attributes: Attribute[]): string {
+        return JSON.stringify([name ?? '', image ?? '', deviceIds, (attributes || []).map((a) => [a.key, a.value, a.origin])]);
+    }
+
+    private markSaved(deviceGroup: DeviceGroupModel) {
+        this.savedName = deviceGroup.name ?? '';
+        this.savedImage = deviceGroup.image ?? '';
+        this.savedDeviceIds = [...(deviceGroup.device_ids || [])];
+        this.savedAttributes = (deviceGroup.attributes || []).map((a) => ({ ...a }));
+        this.savedState = this.stateOf(this.savedName, this.savedImage, this.savedDeviceIds, this.savedAttributes);
     }
 
     removeAttr(i: number) {
@@ -208,6 +272,8 @@ export class DeviceGroupsEditComponent implements OnInit {
 
     private saveDeviceGroup(deviceGroup: DeviceGroupModel) {
         this.isSaving = true;
+        // what is saved, so edits made while the request runs stay unsaved
+        const sent: DeviceGroupModel = JSON.parse(JSON.stringify(deviceGroup));
         if (deviceGroup.id === '' || deviceGroup.id === undefined) {
             this.deviceGroupService
                 .createDeviceGroup(deviceGroup)
@@ -223,6 +289,9 @@ export class DeviceGroupsEditComponent implements OnInit {
                 .pipe(delay(this.rerouteAfterSaveDelayInMs))
                 .subscribe((deviceGroupSaved: DeviceGroupModel | null) => {
                     this.showMessage(deviceGroupSaved);
+                    if (deviceGroupSaved) {
+                        this.markSaved(sent);
+                    }
                     this.pipelineRegistryService.getPipelinesWithSelectable(deviceGroupSaved?.id || '').subscribe((pipelines) => {
                         this.isSaving = false;
                         if (pipelines.length === 0) {
@@ -262,6 +331,7 @@ export class DeviceGroupsEditComponent implements OnInit {
                 if (deviceGroup !== null) {
                     this.initDeviceGroupFormGroup(deviceGroup);
                     this.attributes = deviceGroup.attributes || [];
+                    this.markSaved(deviceGroup);
                     this.attributes.forEach(a => {
                         if (this.knownAttributes.indexOf(a.key) === -1) {
                             this.addAttributeKey()(a.key);
@@ -277,6 +347,7 @@ export class DeviceGroupsEditComponent implements OnInit {
                 device_ids: [],
                 criteria: [],
             });
+            this.markSaved({ id: '', image: '', name: '', device_ids: [], criteria: [] });
         }
     }
 
