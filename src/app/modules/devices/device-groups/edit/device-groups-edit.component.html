@@ -13,146 +13,129 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="device-group-edit-container ly-column ly-row-gt-xs">
+@if (deviceGroupForm) {
+  <div class="container">
+    <senergy-page-header [title]="id === '' ? 'New device group' : (savedName || 'Device group')"
+      backLabel="Device groups" backLink="/devices/devicegroups"></senergy-page-header>
+    <div class="page">
+      <senergy-form-section title="General">
+        <div [formGroup]="deviceGroupForm">
+          <mat-form-field class="full-width">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" required>
+            <mat-error senergyError label="Name"></mat-error>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>Image</mat-label>
+            <input matInput formControlName="image">
+            <mat-error senergyError label=""></mat-error>
+          </mat-form-field>
+        </div>
+      </senergy-form-section>
 
-  <div class="device-group-state ly-column ly-flex">
-    <h2>Device-Group</h2>
-
-    @if (deviceGroupForm) {
-      <div [formGroup]="deviceGroupForm">
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-          <mat-label>Name</mat-label>
-          <input matInput formControlName="name" required>
-          <mat-error senergyError label="Name"></mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="full-width" color="accent">
-          <mat-label>Image</mat-label>
-          <input matInput formControlName="image">
-          <mat-error senergyError label=""></mat-error>
-        </mat-form-field>
-      </div>
-    }
-
-    <div class="capabilities-container">
-      <mat-label>Capabilities</mat-label>
-      <mat-chip-listbox aria-label="Capabilities">
-        @for (capability of capabilities.value; track capability) {
-          <mat-chip-option>
-            {{capability.interaction}} {{capability.function_description || capability.function_name ||
-            capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
-          </mat-chip-option>
-        }
-      </mat-chip-listbox>
-    </div>
-
-    <div class="selected-devices-container">
-      <mat-label>Selected Devices</mat-label>
-      @if (selectedForm.value.length > 0) {
-        <div>
-          @for (item of selectedForm.value; track item) {
-            <mat-card appearance="outlined" class="selected-device-card ly-row ly-align-between-center">
-              <mat-card-title>
-                <div class="selected-device-info">
-                  <div class="selected-device-name">
-                    {{item.display_name || item.name || item.id}}
-                  </div>
-                </div>
-              </mat-card-title>
-              <mat-card-actions>
-                <div class="selected-device-ctrl">
-                  <button mat-icon-button color="accent" [disabled]="isSaving" (click)="removeDevice(item.id)"
-                    matTooltip="Remove">
-                    <mat-icon>delete</mat-icon>
+      <senergy-form-section title="Devices" hint="Add devices from the right; the capabilities below follow the selection.">
+        <div class="device-panes">
+          <div class="device-pane">
+            <h4 class="pane-title">Selected ({{selectedForm.value.length}})</h4>
+            <div class="device-list">
+              @for (item of selectedForm.value; track item.id) {
+                <div class="device-row">
+                  <span class="device-name">{{item.display_name || item.name || item.id}}</span>
+                  <button mat-icon-button type="button" [disabled]="isSaving" (click)="removeDevice(item.id)"
+                    matTooltip="Remove" aria-label="Remove device">
+                    <mat-icon>close</mat-icon>
                   </button>
                 </div>
-              </mat-card-actions>
-            </mat-card>
-          }
-        </div>
-      }
-
-    </div>
-
-    <div class="attributes">
-      <div class="divider">
-        Attributes
-        <mat-divider></mat-divider>
-      </div>
-      @for (attr of attributes; track attr; let i = $index) {
-        <div class="attribute ly-row">
-          <mat-form-field appearance="outline" class="third-width ly-flex" color="accent">
-            <mat-label>Key</mat-label>
-            <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-              [disabled]="!editableAttribute(attr)" appendTo=".ng-select-anchor" [items]="knownAttributes"
-            [addTag]="addAttributeKey()"></mtx-select>
-            <mat-error senergyError label="Key"></mat-error>
-          </mat-form-field>
-          <span style="width: 2em"></span>
-          <mat-form-field appearance="outline" class="third-width ly-flex" color="accent">
-            <mat-label>Value</mat-label>
-            <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
-              [disabled]="!editableAttribute(attr)">
-            <mat-error senergyError label="Value"></mat-error>
-          </mat-form-field>
-          <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="!editableAttribute(attr)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      }
-      <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
-    </div>
-
-    <div class="controls ly-row ly-align-end-center">
-      <button mat-raised-button color="accent" [class.spinner]="isSaving" [disabled]="isSaving"
-        (click)="save()">Save
-      </button>
-    </div>
-  </div>
-  <div Class="selectables ly-column">
-    <h2>Selectable-Devices</h2>
-    <mat-form-field appearance="outline" class="full-width" color="accent">
-      <mat-label>Search</mat-label>
-      <input matInput [formControl]="searchText">
-      @if (searchText.value === '') {
-        <mat-icon matPrefix>search</mat-icon>
-      }
-      @if (searchText.value !== '') {
-        <mat-icon class="pointer" matPrefix (click)="resetSearchText()">close
-        </mat-icon>
-      }
-      <mat-error senergyError label="Search"></mat-error>
-    </mat-form-field>
-    <div class="selectable-devices">
-      @for (option of selectableForm.value; track option) {
-        <mat-card appearance="outlined"
-          class="selectable-card ly-row ly-align-between-center">
-          <mat-card-title>
-            <div class="selectable-device-info">
-              <div matTooltip="{{option.device.display_name || option.device.name || option.device.id}}"
-                class="selectable-device-name">
-                {{option.device.display_name || option.device.name || option.device.id}}
-              </div>
-            </div>
-          </mat-card-title>
-          <mat-card-actions>
-            <div class="selectable-device-ctrl">
-              @if (option.maintains_group_usability) {
-                <button mat-icon-button color="accent" [disabled]="isSaving"
-                  (click)="addDevice(option.device.id)" matTooltip="Add"
-                  >
-                  <mat-icon>add</mat-icon>
-                </button>
-              }
-              @if (!option.maintains_group_usability) {
-                <button mat-icon-button color="warn" [disabled]="isSaving" (click)="addDevice(option.device.id)"
-                  matTooltip="Add (wont maintain group usability)">
-                  <mat-icon>add</mat-icon>
-                </button>
+              } @empty {
+                <p class="empty">No devices selected.</p>
               }
             </div>
-          </mat-card-actions>
-        </mat-card>
-      }
+          </div>
+          <div class="device-pane">
+            <h4 class="pane-title">Available</h4>
+            <mat-form-field class="full-width">
+              <mat-label>Search</mat-label>
+              <input matInput [formControl]="searchText">
+              @if (searchText.value === '') {
+                <mat-icon matPrefix>search</mat-icon>
+              } @else {
+                <mat-icon class="pointer" matPrefix (click)="resetSearchText()">close</mat-icon>
+              }
+              <mat-error senergyError label="Search"></mat-error>
+            </mat-form-field>
+            <div class="device-list">
+              @for (option of selectableForm.value; track option.device.id) {
+                <div class="device-row">
+                  <span class="device-name"
+                    [matTooltip]="option.device.display_name || option.device.name || option.device.id">
+                    {{option.device.display_name || option.device.name || option.device.id}}
+                  </span>
+                  @if (!option.maintains_group_usability) {
+                    <span class="status-chip warning">Breaks group usability</span>
+                  }
+                  <button mat-icon-button type="button" [disabled]="isSaving" (click)="addDevice(option.device.id)"
+                    [color]="option.maintains_group_usability ? undefined : 'warn'"
+                    [matTooltip]="option.maintains_group_usability ? 'Add' : 'Add (wont maintain group usability)'"
+                    aria-label="Add device">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              } @empty {
+                <p class="empty">No devices to add.</p>
+              }
+            </div>
+          </div>
+        </div>
+      </senergy-form-section>
+
+      <senergy-form-section title="Capabilities" hint="What every device of the group can do, derived from the selected devices.">
+        @if (capabilities.value.length > 0) {
+          <mat-chip-set aria-label="Capabilities">
+            @for (capability of capabilities.value; track capability) {
+              <mat-chip>
+                {{capability.interaction}} {{capability.function_description || capability.function_name ||
+                capability.function_id}} {{capability.aspect_name || capability.device_class_name}}
+              </mat-chip>
+            }
+          </mat-chip-set>
+        } @else {
+          <p class="section-empty">No common capabilities.</p>
+        }
+      </senergy-form-section>
+
+      <senergy-form-section title="Attributes">
+        <button sectionActions matButton type="button" (click)="addAttr()">
+          <mat-icon>add</mat-icon>
+          Add attribute
+        </button>
+        @for (attr of attributes; track attr; let i = $index) {
+          <div class="attribute ly-row ly-gap-8">
+            <mat-form-field class="ly-flex">
+              <mat-label>Key</mat-label>
+              <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+                [disabled]="!editableAttribute(attr)" appendTo=".ng-select-anchor" [items]="knownAttributes"
+                [addTag]="addAttributeKey()"></mtx-select>
+              <mat-error senergyError label="Key"></mat-error>
+            </mat-form-field>
+            <mat-form-field class="ly-flex">
+              <mat-label>Value</mat-label>
+              <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
+                [disabled]="!editableAttribute(attr)">
+              <mat-error senergyError label="Value"></mat-error>
+            </mat-form-field>
+            <button mat-icon-button type="button" color="warn" (click)="removeAttr(i)"
+              [disabled]="!editableAttribute(attr)" aria-label="Remove attribute">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        } @empty {
+          <p class="section-empty">No attributes.</p>
+        }
+      </senergy-form-section>
     </div>
+    @if (hasChanges() || isSaving) {
+      <senergy-save-bar [saveDisabled]="saveDisabled()" [status]="saveStatus()" (save)="save()"
+        (discard)="discard()"></senergy-save-bar>
+    }
   </div>
-</div>
+}
