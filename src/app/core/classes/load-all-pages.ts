@@ -19,11 +19,16 @@ import { expand, reduce } from 'rxjs/operators';
 
 /**
  * Reads every page of an API that takes limit and offset but reports no total, for lists that page on the client.
- * A page shorter than `chunk` ends the loop.
+ * A page shorter than `chunk` ends the loop; with `untilEmpty` only an empty page does, for APIs that drop rows
+ * from a page after applying limit and offset.
  */
-export function loadAllPages<T>(fetchPage: (limit: number, offset: number) => Observable<T[]>, chunk = 500): Observable<T[]> {
+export function loadAllPages<T>(
+    fetchPage: (limit: number, offset: number) => Observable<T[]>,
+    chunk = 500,
+    untilEmpty = false,
+): Observable<T[]> {
     return fetchPage(chunk, 0).pipe(
-        expand((page, index) => page.length === chunk ? fetchPage(chunk, (index + 1) * chunk) : EMPTY),
+        expand((page, index) => (untilEmpty ? page.length > 0 : page.length === chunk) ? fetchPage(chunk, (index + 1) * chunk) : EMPTY),
         reduce((all: T[], page: T[]) => all.concat(page), []),
     );
 }

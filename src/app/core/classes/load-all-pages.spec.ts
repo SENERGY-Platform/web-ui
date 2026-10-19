@@ -41,6 +41,16 @@ describe('loadAllPages', () => {
         });
     });
 
+    it('goes on after a short page until an empty one when asked to', (done) => {
+        const pages = [[1], [2, 3], []];
+        fetchPage.and.callFake(() => of(pages.shift() || []));
+        loadAllPages(fetchPage, 3, true).subscribe((all) => {
+            expect(all).toEqual([1, 2, 3]);
+            expect(fetchPage.calls.allArgs()).toEqual([[3, 0], [3, 3], [3, 6]]);
+            done();
+        });
+    });
+
     it('answers an empty list with one request', (done) => {
         fetchPage.and.returnValue(of([]));
         loadAllPages(fetchPage).subscribe((all) => {

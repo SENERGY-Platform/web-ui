@@ -23,6 +23,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ClipboardService } from 'ngx-clipboard';
 import { Observable, of, Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { ProcessDeploymentsComponent } from './deployments.component';
 import { DeploymentsService } from './shared/deployments.service';
@@ -218,22 +219,35 @@ describe('ProcessDeploymentsComponent', () => {
     describe('loading', () => {
         beforeEach(() => setup());
 
+        // one load reads chunks until an empty one, so loads are counted by their first chunk
+        const firstChunks = () => service.getAllArgs.filter((args) => args[2] === 0);
+
         it('reloads exactly once when the refresh button is clicked', () => {
             render();
             service.getAllArgs = [];
 
             (fixture.nativeElement.querySelector('senergy-searchbar button') as HTMLButtonElement).click();
 
-            expect(service.getAllArgs.length).toBe(1);
+            expect(firstChunks().length).toBe(1);
         });
 
         it('reads every chunk and shows the first page only', () => {
             service.items = Array.from({ length: 60 }, (_, i) => deployment('d' + i));
             render();
 
-            expect(service.getAllArgs.map((args) => [args[1], args[2]])).toEqual([[50, 0], [50, 50]]);
+            expect(service.getAllArgs.map((args) => [args[1], args[2]])).toEqual([[50, 0], [50, 50], [50, 100]]);
             expect(component.dataSource.data.length).toBe(60);
             expect(rows().length).toBe(20);
+        });
+
+        it('reads on after a chunk the engine wrapper shortened', () => {
+            // the wrapper drops deployments without a virtual id, so the first chunk holds 49 of 50 rows
+            service.items = Array.from({ length: 60 }, (_, i) => deployment('d' + i));
+            const getAll = service.getAll.bind(service);
+            service.getAll = (...args: unknown[]) => getAll(...args).pipe(map((page) => (args[2] === 0 ? page.slice(1) : page)));
+            render();
+
+            expect(component.dataSource.data.length).toBe(59);
         });
 
         it('asks for the generated deployments only when the filter is on', () => {
@@ -242,8 +256,8 @@ describe('ProcessDeploymentsComponent', () => {
 
             component.filterItems(true);
 
-            expect(service.getAllArgs.length).toBe(1);
-            expect(service.getAllArgs[0][5]).toBe('');
+            expect(firstChunks().length).toBe(1);
+            expect(firstChunks()[0][5]).toBe('');
         });
 
         it('sends the sort of the column header to the server', () => {
@@ -307,7 +321,7 @@ describe('ProcessDeploymentsComponent', () => {
             component.deleteMultipleItems();
 
             expect(service.deleted).toEqual(['on', 'off']);
-            expect(service.getAllArgs.length).toBe(1);
+            expect(service.getAllArgs.filter((args) => args[2] === 0).length).toBe(1);
             expect(snackBar.open).toHaveBeenCalledWith('Deployments deleted successfully.', undefined, { duration: 2000 });
         });
     });

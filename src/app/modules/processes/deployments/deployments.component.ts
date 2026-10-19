@@ -474,6 +474,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                   (limit, offset) =>
                       this.deploymentsService.getAll(this.searchText, limit, offset, this.sortBy, this.sortOrder, this.source),
                   CHUNK,
+                  // the engine wrapper drops deployments without a virtual id, so a short chunk is not the last one
+                  true,
               );
         return loaded.pipe(
             map((deployments) =>
