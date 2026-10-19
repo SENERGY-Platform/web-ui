@@ -113,6 +113,34 @@ describe('ProcessRepoComponent', () => {
         expect(component.hasXPermission({ _id: 'c' })).toBeTrue();
     });
 
+    it('reports and reloads once after deleting several selected process models', () => {
+        const dialogs = TestBed.inject(DialogsService) as any;
+        dialogs.openDeleteDialog = () => ({ afterClosed: () => of(true) });
+        repoService.deleteProcess = jasmine.createSpy('deleteProcess').and.returnValue(of({ status: 200 }));
+        const snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+        component.selectedItems = [process('a', 'u1'), process('b', 'u1')];
+
+        component.deleteMultipleItems();
+
+        expect(repoService.deleteProcess).toHaveBeenCalledTimes(2);
+        expect(snackBar.open).toHaveBeenCalledOnceWith('Processes deleted successfully.', undefined, jasmine.anything());
+        expect(repoService.getProcessModels).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports one error when deleting one of several selected process models fails', () => {
+        const dialogs = TestBed.inject(DialogsService) as any;
+        dialogs.openDeleteDialog = () => ({ afterClosed: () => of(true) });
+        repoService.deleteProcess = jasmine.createSpy('deleteProcess').and.returnValues(of({ status: 200 }), of({ status: 500 }));
+        const snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+        component.selectedItems = [process('a', 'u1'), process('b', 'u1')];
+
+        component.deleteMultipleItems();
+
+        expect(snackBar.open).toHaveBeenCalledTimes(1);
+        expect(snackBar.open.calls.argsFor(0)[0]).toContain('deleting the processes!');
+        expect(repoService.getProcessModels).toHaveBeenCalledTimes(1);
+    });
+
     it('drops the answer of a superseded listing', () => {
         load(0);
         load(1);

@@ -225,16 +225,9 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                     // clear repoItems and ready, that spinner occurs
                     this.repoItems.clear();
                     this.ready = false;
-                    const array: Observable<boolean>[] = [];
-                    this.selectedItems.forEach((item: ProcessModel) => {
-                        this.processRepoService.deleteProcess(item._id).subscribe((resp: { status: number }) => {
-                            if (resp.status !== 200) {
-                                this.showSnackBarError(
-                                    this.selectedItems.length === 1 ? 'deleting the process!' : 'deleting the processes!',
-                                );
-                            }
-                        });
-                    });
+                    const array: Observable<boolean>[] = this.selectedItems.map((item: ProcessModel) =>
+                        this.processRepoService.deleteProcess(item._id).pipe(map((resp: { status: number }) => resp.status !== 200)),
+                    );
                     forkJoin(array).subscribe((resp: boolean[]) => {
                         const error = resp.some((item: boolean) => item === true);
                         if (error) {
