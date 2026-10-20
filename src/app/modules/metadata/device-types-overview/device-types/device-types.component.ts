@@ -71,6 +71,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
 import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
 import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
 import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
+import { dialogSize } from '../../../../core/dialog-size';
 
 interface DeviceTypeContentEditModel extends DeviceTypeContentModel {
     tree?: NestedTreeControl<DeviceTypeContentVariableModel>;
@@ -182,6 +183,7 @@ export class DeviceTypesComponent implements OnInit {
     addContentVariable(isInput: boolean, inOut: DeviceTypeContentTreeModel, indices: number[]): void {
         const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         let node = inOut.dataSource.data[indices[0]];
         indices.slice(1).forEach(i => node = node.sub_content_variables !== undefined ? node.sub_content_variables[i] : node);
@@ -207,6 +209,7 @@ export class DeviceTypesComponent implements OnInit {
 
     addContentVariableFromJson(inOut: DeviceTypeContentTreeModel, indices: number[]): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         let node = inOut.dataSource.data[indices[0]];
         indices.slice(1).forEach(i => node = node.sub_content_variables !== undefined ? node.sub_content_variables[i] : node);
@@ -232,6 +235,7 @@ export class DeviceTypesComponent implements OnInit {
     editContent(isInput: boolean, node: DeviceTypeContentVariableModel, inOut: DeviceTypeContentTreeModel): void {
         const disabled = !this.editable;
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             contentVariable: node,

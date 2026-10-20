@@ -127,6 +127,72 @@ describe('DashboardComponent', () => {
         }),
     );
 
+    describe('dashboard menu', () => {
+        const openMenu = () => {
+            (fixture.nativeElement.querySelector('.dashboard-menu-trigger') as HTMLButtonElement).click();
+            fixture.detectChanges();
+        };
+        const items = () => Array.from(document.querySelectorAll('.cdk-overlay-container button[mat-menu-item]')) as HTMLButtonElement[];
+        const pick = (cls: string) => document.querySelector(`.cdk-overlay-container .${cls}`) as HTMLButtonElement;
+
+        afterEach(() => {
+            document.querySelectorAll('.cdk-overlay-container').forEach((container) => (container.innerHTML = ''));
+        });
+
+        it('lists the actions in the agreed order with Delete last and marked', () => {
+            component.userHasMoveWidgetAuthorization = true;
+            fixture.detectChanges();
+            openMenu();
+
+            const classes = items().map((item) => item.className.split(' ').find((c) => c.startsWith('menu-')));
+            expect(classes).toEqual(['menu-refresh-time', 'menu-layout', 'menu-columns', 'menu-rename', 'menu-move-left', 'menu-move-right', 'menu-reorder', 'menu-delete']);
+            expect(pick('menu-delete').classList).toContain('danger');
+        });
+
+        it('opens the rename dialog', () => {
+            spyOn(component, 'openEditDashboardDialog');
+            openMenu();
+            pick('menu-rename').click();
+
+            expect(component.openEditDashboardDialog).toHaveBeenCalled();
+        });
+
+        it('opens the delete dialog', () => {
+            spyOn(component, 'openDeleteDashboardDialog');
+            openMenu();
+            pick('menu-delete').click();
+
+            expect(component.openDeleteDashboardDialog).toHaveBeenCalled();
+        });
+
+        it('moves the dashboard right but not left from the first tab', () => {
+            spyOn(component, 'moveDashboard');
+            openMenu();
+
+            expect(pick('menu-move-left').disabled).toBeTrue();
+            pick('menu-move-right').click();
+            expect(component.moveDashboard).toHaveBeenCalledWith(false);
+        });
+
+        it('hides the reorder entry without the right to move widgets', () => {
+            component.userHasMoveWidgetAuthorization = false;
+            fixture.detectChanges();
+            openMenu();
+
+            expect(pick('menu-reorder')).toBeNull();
+        });
+
+        it('shows Add widget only with the right to create widgets', () => {
+            component.userHasCreateWidgetAuthorization = false;
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('.add-widget')).toBeNull();
+
+            component.userHasCreateWidgetAuthorization = true;
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('.add-widget')).not.toBeNull();
+        });
+    });
+
     describe('refresh time', () => {
         it('stores the picked time on the dashboard', () => {
             dashboardServiceSpy.updateDashboard.and.nextOneTimeWith({} as DashboardModel);

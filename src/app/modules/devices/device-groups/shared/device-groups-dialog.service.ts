@@ -18,6 +18,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { DeviceGroupsSelectDialogComponent } from '../dialog/device-groups-select-dialog.component';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -28,6 +29,7 @@ export class DeviceGroupsDialogService {
 
     openDeviceGroupSelectDialog(): Observable<string[] | null | undefined> {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.disableClose = false;
         const editDialogRef = this.dialog.open(DeviceGroupsSelectDialogComponent, dialogConfig);
         return editDialogRef.afterClosed();

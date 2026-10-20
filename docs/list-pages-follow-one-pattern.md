@@ -42,6 +42,12 @@ classes get their own pattern; a list never invents its own variant.
   preview, `senergy-hover-preview`: a small image that enlarges beside it on hover) may precede the name.
 - Dates: `LIST_DATE_FORMAT` (`core/classes/list-date-format.ts`, `dd.MM.yyyy HH:mm`), muted, headers
   "Created" and "Updated".
+- One vertical scroller: `src/themes/_design.scss` bounds the chain surface, routed host, `.page-body`, `.list-card`,
+  `.table-container` (matched with `:has`), so the table scrolls inside its card with header and paginator in view
+  and the page itself does not scroll. A page whose `.page-body` is not a direct child of its host (the monitor's
+  tabs) is outside the chain and sets its own `max-height` on `.table-container`.
+- Dialogs: pass `dialogSize()` at the opener; a dialog content scrolls only past `100vh - 14rem`.
+- Form pages use the full page width; a single-line field gets `.field-limit` (40rem).
 - Tab groups are left-aligned (Material tabs default in `core/form-field-defaults.ts`).
 - Stored user content is never inserted as trusted HTML; a stored SVG is shown as an `<img>` with a
   `data:image/svg+xml` URL (see flow-repo `previewUrl()`).

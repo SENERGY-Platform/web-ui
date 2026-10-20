@@ -47,6 +47,7 @@ import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/mate
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Component({
     selector: 'senergy-characteristic',
@@ -128,6 +129,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
 
     newCharacteristic() {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(CharacteristicsEditDialogComponent, dialogConfig);
 
@@ -187,6 +189,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
 
     editCharacteristic(inputCharacteristic: CharacteristicsPermSearchModel): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             characteristic: JSON.parse(JSON.stringify(inputCharacteristic)), // create copy of object
@@ -216,6 +219,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
 
     showCharacteristic(inputCharacteristic: CharacteristicsPermSearchModel): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             characteristic: JSON.parse(JSON.stringify(inputCharacteristic)), // create copy of object

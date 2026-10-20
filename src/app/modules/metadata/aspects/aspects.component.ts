@@ -57,6 +57,7 @@ import { NgClass } from '@angular/common';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 /**
  * A row that stands for an aspect class rather than an aspect. It is shaped like an aspect so the
@@ -378,6 +379,7 @@ export class AspectsComponent implements OnInit {
      */
     convertToAspectClass(node: DeviceTypeAspectModel) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             aspectName: node.name,

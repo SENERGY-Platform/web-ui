@@ -276,11 +276,12 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
 
     /**
      * The stored flow image as an image URL, so it is only drawn and never run as markup. The designer writes
-     * `viewbox` in lower case, which an image document ignores, so the attribute name is fixed.
+     * `viewbox` in lower case, which an image document ignores, so the attribute name is fixed on the first
+     * `<svg` start tag; the stored document starts with an XML prolog, so it is not anchored to the text start.
      */
     previewUrl(id: string, svg: string | unknown): SafeUrl {
         if (!this.svgCache.has(id)) {
-            const fixed = String(svg).replace(/^(\s*<svg\b[^>]*?)\bviewbox=/i, '$1viewBox=');
+            const fixed = String(svg).replace(/<svg\b[^>]*>/i, (tag) => tag.replace(/\bviewbox=/i, 'viewBox='));
             const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fixed);
             this.svgCache.set(id, this.sanitizer.bypassSecurityTrustUrl(url));
         }

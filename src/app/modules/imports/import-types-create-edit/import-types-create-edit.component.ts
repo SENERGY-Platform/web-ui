@@ -29,9 +29,11 @@ import {ContentVariableDialogComponent} from './content-variable-dialog/content-
 import {environment} from '../../../../environments/environment';
 import { MatTree, MatTreeNestedDataSource, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet } from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
+import {catchError} from 'rxjs/operators';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {convertPunctuation, typeValueValidator} from '../validators/type-value-validator';
+import {PermissionsService} from '../../permissions/shared/permissions.service';
 import {ConceptsService} from '../../metadata/concepts/shared/concepts.service';
 import {
     contentVariableAspectIds,
@@ -51,6 +53,7 @@ import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
 import { SaveBarComponent } from '../../../core/components/save-bar/save-bar.component';
 
@@ -66,7 +69,7 @@ type ConfigGroup = FormGroup<{
     templateUrl: './import-types-create-edit.component.html',
     styleUrls: ['./import-types-create-edit.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatIconButton, MatIcon, MtxSelect, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet, MatCheckbox, MatTooltip, MatButton, FormSectionComponent, SaveBarComponent]
+    imports: [WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MatIconButton, MatIcon, MtxSelect, MtxOption, MatTree, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet, MatCheckbox, MatTooltip, MatButton, PageHeaderComponent, FormSectionComponent, SaveBarComponent]
 })
 export class ImportTypesCreateEditComponent implements OnInit {
     private route = inject(ActivatedRoute);
@@ -80,6 +83,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
     private changeDetectorRef = inject(ChangeDetectorRef);
     private snackBar = inject(MatSnackBar);
     private deviceTypeService = inject(DeviceTypeService);
+    private permissionsService = inject(PermissionsService);
 
 
     static STRING = 'https://schema.org/Text';
@@ -91,8 +95,12 @@ export class ImportTypesCreateEditComponent implements OnInit {
 
     ready = false;
     id: string | null = null;
-    editMode = false;
-    detailsMode = false;
+    /** A type that is not stored yet; anyone who reached the page may fill it. */
+    isNew = false;
+    /** Editable for a new type, and for a stored one with the update right and the write permission on it. */
+    editable = false;
+    /** Name as loaded; the page title, so it does not follow the name field while typing. */
+    savedName = '';
     functions: DeviceTypeFunctionModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
     typeConceptCharacteristics: Map<string, Map<string, DeviceTypeCharacteristicsModel[]>> = new Map();
@@ -169,7 +177,8 @@ export class ImportTypesCreateEditComponent implements OnInit {
     ngOnInit(): void {
         this.route.url.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((url) => {
             if (url[url.length - 1]?.toString() === 'new') {
-                this.editMode = false;
+                this.isNew = true;
+                this.editable = true;
                 if (this.defaultOutput.sub_content_variables !== null) {
                     this.dataSource.data = this.defaultOutput.sub_content_variables[2].sub_content_variables || [];
                 }
@@ -179,14 +188,9 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 if (this.id === null || !this.id.startsWith('urn:infai:ses:import-type:')) {
                     console.error('edit mode opened with invalid id', this.id);
                 }
-                if (url[url.length - 2]?.toString() === 'details') {
-                    this.detailsMode = true;
-                    this.form.disable();
-                } else if (url[url.length - 2]?.toString() === 'edit') {
-                    this.editMode = true;
-                }
                 this.importTypesService.getImportType(this.id || '').subscribe(
                     (type) => {
+                        this.savedName = type.name;
                         this.form.patchValue(type);
                         type.configs.forEach((config) => this.addConfig(config));
                         const value = type.output.sub_content_variables?.find(
@@ -203,7 +207,7 @@ export class ImportTypesCreateEditComponent implements OnInit {
                             this.dataSource.data = [type.output];
                         }
 
-                        this.ready = true;
+                        this.loadEditable();
                     },
                     (err) => {
                         console.log(err);
@@ -252,6 +256,21 @@ export class ImportTypesCreateEditComponent implements OnInit {
                 this.navigateToList();
             },
         );
+    }
+
+    /** The page opens read-only unless the update right and the write permission on this type are known. */
+    private loadEditable() {
+        const update = this.importTypesService.userHasUpdateAuthorization();
+        const permissions$ = update ? this.permissionsService.getComputedResourcePermissionsV2('import-types', [this.id || '']) : of([]);
+        permissions$.pipe(catchError(() => of([]))).subscribe((permissions) => {
+            this.editable = update && permissions.find((p) => p.id === this.id)?.write === true;
+            if (!this.editable) {
+                this.form.disable();
+                this.timeAspect.disable();
+            }
+            this.ready = true;
+            this.changeDetectorRef.markForCheck();
+        });
     }
 
     save() {
@@ -311,9 +330,6 @@ export class ImportTypesCreateEditComponent implements OnInit {
             },
             { validators: typeValueValidator('type', 'default_value') },
         );
-        if (this.detailsMode) {
-            group.disable();
-        }
         if (config === undefined) {
             this.form.markAsDirty();
         } else {

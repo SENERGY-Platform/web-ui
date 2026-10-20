@@ -100,10 +100,9 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #rowMenu="matMenu" xPosition="before">
-              <button mat-menu-item (click)="details(m)"><mat-icon>info</mat-icon> Details</button>
-              @if (userHasUpdateAuthorization && hasWPermission(m)) {
-                <button mat-menu-item (click)="edit(m)"><mat-icon>edit</mat-icon> Edit</button>
-              }
+              <button mat-menu-item (click)="openImportType(m)">
+                <mat-icon>{{canEdit(m) ? 'edit' : 'info'}}</mat-icon> {{canEdit(m) ? 'Edit' : 'Details'}}
+              </button>
               @if (hasXPermission(m)) {
                 <button mat-menu-item (click)="start(m)"><mat-icon>play_arrow</mat-icon> Start import</button>
               }
@@ -121,7 +120,7 @@
           *matHeaderRowDef="displayedColumns; sticky: true">
         </tr>
         <tr mat-row
-          *matRowDef="let m; columns: displayedColumns;" class="clickable-row" (click)="details(m)">
+          *matRowDef="let m; columns: displayedColumns;" class="clickable-row" (click)="openImportType(m)">
         </tr>
       </table>
     </div>

@@ -47,11 +47,12 @@ import {
     MIN_UNIT_PX,
 } from './shared/dashboard.model';
 import { NgClass } from '@angular/common';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { MatDivider } from '@angular/material/divider';
+import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { WidgetComponent } from '../../widgets/widget.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from '../../core/services/snack-bar-messages';
@@ -61,7 +62,7 @@ import { snackError } from '../../core/services/snack-bar-messages';
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatTabGroup, MatTab, MatTabLabel, NgClass, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider, WidgetComponent, GridstackComponent, GridstackItemComponent, MatFabButton]
+    imports: [MatTabGroup, MatTab, MatTabLabel, NgClass, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatDivider, WidgetComponent, GridstackComponent, GridstackItemComponent, MatButton, PageHeaderComponent]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     private dashboardService = inject(DashboardService);
@@ -130,6 +131,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
      */
     gridOptions: GridStackOptions = {};
     readonly layoutModes = LAYOUT_MODES;
+    readonly refreshOptions = [
+        { seconds: 5, label: '5 seconds' },
+        { seconds: 15, label: '15 seconds' },
+        { seconds: 30, label: '30 seconds' },
+        { seconds: 60, label: '1 minute' },
+        { seconds: 0, label: 'no refresh' },
+    ];
     /** Width the grid is held to, so no column falls below MIN_UNIT_PX - the wrapper scrolls instead. */
     gridMinWidth = MIN_UNIT_PX;
     readonly columnChoices = Array.from(
@@ -364,7 +372,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private refreshGridOptions() {
         const fixed = this.fixedColumns();
         const options: GridStackOptions = {
-            margin: 5,
+            margin: 6,
             handleClass: 'drag-handler',
             disableDrag: !this.inDragMode,
             disableResize: !this.userHasMoveWidgetAuthorization,

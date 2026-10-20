@@ -106,12 +106,12 @@ describe('ImportTypesComponent list', () => {
         expect(component.displayedColumns).not.toContain('select');
     }));
 
-    it('opens the details page on a row click', fakeAsync(() => {
+    it('opens the one import type page on a row click, with no mode in the URL', fakeAsync(() => {
         init();
         discardPeriodicTasks();
 
         (fixture.nativeElement.querySelector('tr.clickable-row') as HTMLElement).click();
-        expect(router.navigateByUrl).toHaveBeenCalledWith('/imports/types/details/type-1');
+        expect(router.navigateByUrl).toHaveBeenCalledWith('/imports/types/type-1');
     }));
 
     it('keeps one action column instead of one column per action', fakeAsync(() => {

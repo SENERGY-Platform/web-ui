@@ -51,6 +51,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { DatePipe } from '@angular/common';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -202,6 +203,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
 
     openEditDialog(device: WaitingDeviceModel): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object
@@ -243,6 +245,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
 
     useDevice(device: WaitingDeviceModel) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             device: JSON.parse(JSON.stringify(device)), // create copy of object
@@ -307,6 +310,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
 
     useMultipleDevicesWithWmbusKeyEditDialog(): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             devices: this.selection.selected.filter(this.hasMissingAttribute),

@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* A fixed height makes the container the scroll area, so the save bar sticks to its bottom edge; 64px is the toolbar. */
 .container {
-    height: calc(100% - 64px);
+    height: calc(var(--app-page-height, 100vh) - 64px);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -23,13 +24,8 @@
 .page {
     flex: 1 0 auto;
     width: 100%;
-    max-width: 960px;
     box-sizing: border-box;
-    padding: 8px 24px 24px;
-}
-
-.page-header {
-    margin-left: -8px;
+    padding: 0 24px 24px;
 }
 
 .config + .config {
