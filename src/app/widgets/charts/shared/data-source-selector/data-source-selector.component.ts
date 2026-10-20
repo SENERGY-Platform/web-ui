@@ -32,6 +32,7 @@ import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MatInput } from '@angular/material/input';
 import { ChartsExportVAxesModelWithGroup, DataSourceOptionsService } from './data-source-options.service';
+import { groupTimeLevels, groupTypeOptions } from './group-options';
 
 export interface DataSourceConfig {
     exports?: (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel | LocationDisplayModel)[];
@@ -150,40 +151,7 @@ export class DataSourceSelectorComponent implements OnInit {
         return this.options.scrollDynReloadLimit;
     }
 
-    levels = [
-        {
-            name: 'Miliseconds',
-            value: 'ms'
-        },
-        {
-            name: 'Seconds',
-            value: 's'
-        },
-        {
-            name: 'Minutes',
-            value: 'm'
-        },
-        {
-            name: 'Hours',
-            value: 'h'
-        },
-        {
-            name: 'Days',
-            value: 'd'
-        },
-        {
-            name: 'Weeks',
-            value: 'w'
-        },
-        {
-            name: 'Months',
-            value: 'months'
-        },
-        {
-            name: 'Years',
-            value: 'y'
-        }
-    ];
+    levels = groupTimeLevels;
     groupTypes: any = [];
 
     @Input() dataSourceConfig?: DataSourceConfig;
@@ -489,86 +457,10 @@ export class DataSourceSelectorComponent implements OnInit {
 
 
     setupGroupTypes() {
-        const res = [
-            {
-                value: 'mean',
-                name: 'Mean'
-            },
-            {
-                value: 'sum',
-                name: 'Sum'
-            },
-            {
-                value: 'count',
-                name: 'Count'
-            },
-            {
-                value: 'median',
-                name: 'Median'
-            },
-            {
-                value: 'min',
-                name: 'Minimum'
-            },
-            {
-                value: 'max',
-                name: 'Maximum'
-            },
-            {
-                value: 'first',
-                name: 'First'
-            },
-            {
-                value: 'last',
-                name: 'Last'
-            },
-            {
-                value: 'difference-first',
-                name: 'Difference-First'
-            },
-            {
-                value: 'difference-last',
-                name: 'Difference-Last'
-            },
-            {
-                value: 'difference-min',
-                name: 'Difference-Minimum'
-            },
-            {
-                value: 'difference-max',
-                name: 'Difference-Maximum'
-            },
-            {
-                value: 'difference-count',
-                name: 'Difference-Count'
-            },
-            {
-                value: 'difference-mean',
-                name: 'Difference-Mean'
-            },
-            {
-                value: 'difference-sum',
-                name: 'Difference-Sum'
-            },
-            {
-                value: 'difference-median',
-                name: 'Difference-Median'
-            }
-        ];
         const influxExp = (this.form.get('exports')?.value as (ChartsExportMeasurementDisplayModel | DeviceInstanceModel | DeviceGroupDisplayModel)[])
             ?.find(exp => (exp as DeviceInstanceModel).device_type_id === undefined &&
                 (((exp as ChartsExportMeasurementDisplayModel).exportDatabaseId === undefined && (exp as DeviceGroupDisplayModel).criteria === undefined) || (exp as ChartsExportMeasurementDisplayModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb));
-        if (influxExp === undefined) {
-            res.push({
-                value: 'time-weighted-mean-linear',
-                name: 'Time weighted mean linear'
-            });
-            res.push({
-                value: 'time-weighted-mean-locf',
-                name: 'Time weighted mean LOCF'
-            });
-        }
-        this.groupTypes = res;
+        this.groupTypes = groupTypeOptions(influxExp !== undefined);
     }
 
     validateInterval: ValidatorFn = (control: AbstractControl) => {

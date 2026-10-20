@@ -32,6 +32,7 @@ import {
     ChartsExportPropertiesModel,
     ChartsExportVAxesModel
 } from './charts-export-properties.model';
+import { ownAxisGroup } from './charts-export-axis-group';
 import { ChartsExportRequestPayloadGroupModel } from './charts-export-request-payload.model';
 import { ChartsExportRangeTimeTypeEnum } from './charts-export-range-time-type.enum';
 import { ExportDataService } from '../../../shared/export-data.service';
@@ -113,16 +114,20 @@ export class ChartsExportService {
         const timescaleResultMapper: number[] = [];
 
         widgetProperties.vAxes?.forEach((vAxis: ChartsExportVAxesModel, index) => {
+            // an own grouping keeps its time under the zoom override; raw leaves out both fields
+            const own = ownAxisGroup(vAxis, widgetProperties.chartType);
+            const axisGroup = own === undefined ? group : own.type === '' ? undefined : own;
             const newField: QueriesRequestElementInfluxModel | QueriesRequestV2ElementTimescaleModel = {
                 columns: [
                     {
                         name: vAxis.criteria === undefined ? vAxis.valueName : undefined,
-                        math: vAxis.math !== '' ? vAxis.math : undefined,
-                        groupType: group?.type !== null ? group?.type : undefined,
+                        // the Math field is hidden for a difference group, so a stale value is not sent for an own one
+                        math: vAxis.math !== '' && !(own !== undefined && own.type.startsWith('difference')) ? vAxis.math : undefined,
+                        groupType: axisGroup?.type !== null ? axisGroup?.type : undefined,
                         criteria: vAxis.criteria,
                     },
                 ],
-                groupTime: group?.time !== '' ? group?.time : undefined,
+                groupTime: axisGroup?.time !== '' ? axisGroup?.time : undefined,
                 limit,
                 time,
                 orderDirection: 'desc',

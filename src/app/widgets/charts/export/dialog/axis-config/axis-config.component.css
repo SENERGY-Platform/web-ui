@@ -67,3 +67,8 @@ mat-form-field {
 .drop-zone-active {
     border-top: dotted;
 }
+
+.group-error {
+    align-self: center;
+    color: var(--mat-sys-error);
+}

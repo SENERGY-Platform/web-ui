@@ -34,6 +34,8 @@ import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devi
 import { AspectsPermSearchModel } from 'src/app/modules/metadata/aspects/shared/aspects-perm-search.model';
 import { ConceptsCharacteristicsModel } from 'src/app/modules/metadata/concepts/shared/concepts-characteristics.model';
 import { DataSourceConfig, DataSourceSelectorComponent } from '../../shared/data-source-selector/data-source-selector.component';
+import { GroupOption, groupTypeOptions, isAxisGroupInterval } from '../../shared/data-source-selector/group-options';
+import { effectiveGroupType, supportsAxisGroup } from '../shared/charts-export-axis-group';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { hashCode } from 'src/app/core/services/util.service';
@@ -309,8 +311,17 @@ export class ChartsExportEditDialogComponent implements OnInit {
             const val = value as string;
             this.groupTypeIsDifference = val.startsWith ? val.startsWith('difference') : false;
             if (this.groupTypeIsDifference) {
-                this.dataSource.data.forEach((element) => (element.math = ''));
+                // an axis with its own grouping keeps its Math
+                this.dataSource.data
+                    .filter(element => effectiveGroupType(element, this.chartType.value ?? undefined, val)?.startsWith('difference'))
+                    .forEach(element => element.math = '');
             }
+        });
+        // back on a line chart the own difference groups apply again, and their Math field is hidden
+        this.chartType.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+            this.dataSource.data
+                .filter(element => this.axisGroupAllowed && element.ownGroup?.type.startsWith('difference'))
+                .forEach(element => element.math = '');
         });
         widget.properties.exports?.forEach((exp) => {
             if ((exp as DeviceInstanceModel).device_type_id === undefined &&
@@ -515,6 +526,25 @@ export class ChartsExportEditDialogComponent implements OnInit {
 
     describeCriteria(): (criteria: DeviceGroupCriteriaModel) => string {
         return criteria => (this.functions.find(f => f.id === criteria.function_id)?.display_name || criteria.function_id) + ' ' + (criteria.device_class_id !== '' ? this.deviceClasses.find(dc => dc.id === criteria.device_class_id)?.name || '' : '') + ' ' + (criteria.aspect_id !== '' ? this.aspects.find(a => a.id === criteria.aspect_id)?.name || '' : '');
+    }
+
+    /** Group types the axis can choose; the time weighted ones are for non-Influx exports only. */
+    private readonly influxGroupTypes = groupTypeOptions(true);
+    private readonly otherGroupTypes = groupTypeOptions(false);
+
+    get axisGroupAllowed(): boolean {
+        return supportsAxisGroup(this.chartType.value ?? undefined);
+    }
+
+    axisGroupTypes(axis: ChartsExportVAxesModel): GroupOption[] {
+        const exp = (this.exports.value || []).find(e => e.id === axis.instanceId);
+        const influx = exp !== undefined && ((exp as ChartsExportMeasurementModel).exportDatabaseId === undefined || (exp as ChartsExportMeasurementModel).exportDatabaseId === environment.exportDatabaseIdInternalInfluxDb);
+        return influx ? this.influxGroupTypes : this.otherGroupTypes;
+    }
+
+    /** An own group type needs a valid time; the backend rejects the whole request otherwise. */
+    get axisGroupsValid(): boolean {
+        return !this.axisGroupAllowed || this.dataSource.data.every(axis => axis.ownGroup === undefined || axis.ownGroup.type === '' || isAxisGroupInterval(axis.ownGroup.time));
     }
 
     treeControl = new NestedTreeControl<ChartsExportVAxesModel>((node) => node.subAxes);

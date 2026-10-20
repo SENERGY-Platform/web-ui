@@ -42,6 +42,26 @@ function table(data: any[][][][], properties: ChartsExportPropertiesModel, group
 }
 
 describe('chartsExportTable', () => {
+    it('suffixes the label of an axis with an own grouping unless it has an alias', () => {
+        const result = table(
+            [[[[t1, 1]]], [[[t1, 2]]], [[[t1, 3]]]],
+            {
+                chartType: 'LineChart',
+                vAxes: [
+                    axis('Vorlauf', { ownGroup: { type: '', time: '' } }),
+                    axis('Vorlauf', { ownGroup: { type: 'median', time: '1h' } }),
+                    axis('Vorlauf', { valueAlias: 'Mittel', ownGroup: { type: 'median', time: '1d' } }),
+                ],
+            },
+        );
+        expect(result.table.data[0]).toEqual(['time', 'Vorlauf (raw)', 'Vorlauf (median 1h)', 'Mittel']);
+    });
+
+    it('leaves the label alone on a chart that is not a line chart', () => {
+        const result = table([[[[t1, 1]]]], { chartType: 'ColumnChart', vAxes: [axis('Vorlauf', { ownGroup: { type: 'median', time: '1h' } })] });
+        expect(result.table.data[0]).toEqual(['time', 'Vorlauf']);
+    });
+
     it('labels each series by alias or value name and merges the series per timestamp', () => {
         const result = table(
             [[[[t2, 1], [t1, 2]]], [[[t2, 10], [t1, 20]]]],
@@ -250,6 +270,18 @@ describe('chartsExportChart', () => {
 
     it('drops the colours of series missing from the table', () => {
         const chart = chartsExportChart(widget({ chartType: 'LineChart', vAxes: [axis('a', { color: '#111111' }), axis('b', { color: '#222222' })] }), new ChartDataTableModel([['time', 'b']]));
+        expect(chart.colors).toEqual(['#222222']);
+    });
+
+    it('finds the series of an axis with an own grouping by its suffixed label when pruning colours', () => {
+        const chart = chartsExportChart(widget({
+            chartType: 'LineChart',
+            vAxes: [
+                axis('a', { color: '#111111', ownGroup: { type: '', time: '' } }),
+                axis('a', { color: '#222222', ownGroup: { type: 'median', time: '1h' } }),
+                axis('b', { color: '#333333' }),
+            ],
+        }), new ChartDataTableModel([['time', 'a (median 1h)']]));
         expect(chart.colors).toEqual(['#222222']);
     });
 

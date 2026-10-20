@@ -65,15 +65,52 @@
                   <mat-error senergyError label="Color"></mat-error>
                 </mat-form-field>
               </div>
-              <div [hidden]="groupTypeIsDifference">
+              <div [hidden]="effectiveGroupIsDifference">
                 <mat-form-field>
                   <mat-label>Math</mat-label>
                   <input type="text" matInput placeholder="e.g. / 1000" [(ngModel)]="element.math"
-                    [disabled]="groupTypeIsDifference">
+                    [disabled]="effectiveGroupIsDifference">
                   <mat-error senergyError label="Math"></mat-error>
                 </mat-form-field>
               </div>
             </div>
+            @if (axisGroupAllowed && !subElement) {
+              <div class="row w-100">
+                <div>
+                  <mat-form-field>
+                    <mat-label>Aggregation</mat-label>
+                    <mtx-select [(ngModel)]="groupChoice" appendTo=".ng-select-anchor">
+                      <mtx-option [value]="likeWidget">Like widget</mtx-option>
+                      <mtx-option [value]="''">None (raw)</mtx-option>
+                      @for (option of groupTypes; track option.value) {
+                        <mtx-option [value]="option.value">{{option.name}}</mtx-option>
+                      }
+                    </mtx-select>
+                  </mat-form-field>
+                </div>
+                @if (element.ownGroup !== undefined && element.ownGroup.type !== '') {
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Time</mat-label>
+                      <input type="text" matInput placeholder="e.g. 15, 1" [(ngModel)]="groupTimeValue">
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Interval</mat-label>
+                      <mtx-select [(ngModel)]="groupTimeLevel" appendTo=".ng-select-anchor">
+                        @for (level of groupTimeLevels; track level.value) {
+                          <mtx-option [value]="level.value">{{level.name}}</mtx-option>
+                        }
+                      </mtx-select>
+                    </mat-form-field>
+                  </div>
+                  @if (groupTimeInvalid) {
+                    <div class="group-error">An aggregation needs a time and an interval, e.g. 1 hour.</div>
+                  }
+                }
+              </div>
+            }
             <div class="row w-100">
               <div>
                 <mat-form-field>
@@ -123,7 +160,7 @@
                                 <mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Separate">Separate</mtx-option>
                                 <mtx-option [value]="chartsExportDeviceGroupMergingStrategy.Merge">Merge</mtx-option>
-                                @if (groupType) {
+                                @if (effectiveGroupType) {
 <mtx-option
                                     [value]="chartsExportDeviceGroupMergingStrategy.Sum">Sum</mtx-option>
 }
@@ -151,6 +188,7 @@
                         [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
                         [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
                         [subElement]="true" [exportTags]="exportTags" [groupType]="groupType"
+                        [axisGroupAllowed]="false"
                         (dragStart)="dragStart.emit(null)" (dragEnd)="dragEnd.emit(null)"
                         [enableDragDrop]="enableDragDrop" (dropped)="dropped.emit($event)"
                         [connectedNodes]="connectedNodes" [dragging]="dragging">

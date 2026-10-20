@@ -31,7 +31,7 @@ export function removeWidgetStorage(widget: WidgetModel) {
  * A refresh sends the widget unchanged, so the state survives it.
  */
 export function cleanupStaleViewState(widgetId: string, before: WidgetPropertiesModels | undefined, after: WidgetPropertiesModels | undefined) {
-    const changed = (...keys: (keyof WidgetPropertiesModels)[]) => keys.some(k => JSON.stringify(settingValue(before?.[k])) !== JSON.stringify(settingValue(after?.[k])));
+    const changed = (...keys: (keyof WidgetPropertiesModels)[]) => keys.some(k => JSON.stringify(settingValue(viewSetting(k, before))) !== JSON.stringify(settingValue(viewSetting(k, after))));
     const remove = (...keys: string[]) => keys.forEach(k => localStorage.removeItem(widgetId + k));
     if (changed('vAxes', 'stacked')) {
         remove('_modifiedvAxes', '_drillStack', '_chooseColors', '_stacked');
@@ -39,6 +39,15 @@ export function cleanupStaleViewState(widgetId: string, before: WidgetProperties
     if (changed('group', 'time', 'timeRangeType', 'hAxisFormat', 'chartType')) {
         remove('_groupTime', '_hAxisFormat', '_from', '_to');
     }
+}
+
+/** The property to compare; an axis' own group is marked as set, since the raw choice `{ type: '', time: '' }` would otherwise read as unset. */
+function viewSetting(key: keyof WidgetPropertiesModels, properties: WidgetPropertiesModels | undefined): unknown {
+    const value: unknown = properties?.[key];
+    if (key !== 'vAxes' || !Array.isArray(value)) {
+        return value;
+    }
+    return (value as { ownGroup?: object | null }[]).map(axis => axis?.ownGroup === undefined || axis.ownGroup === null ? axis : { ...axis, ownGroup: { ...axis.ownGroup, set: true } });
 }
 
 /**

@@ -17,6 +17,8 @@ widget (`widgets/charts/export`). State since 2026-10-10 (master v0.42.2, ported
   exact across daylight-saving days).
 - Charts without grouping (`group.type` empty) keep the old tick-to-next-tick zoom on every click.
 - Weekly charts zoom into the days of the clicked week. Zoom-out starts at the first of the month or year.
+- The x-label zoom and the gap markers exist on the column chart only. A grouping per axis (`ownGroup`) applies to line charts
+  only, so the column chart's buckets always follow the widget's grouping.
 
 ## Column drill
 

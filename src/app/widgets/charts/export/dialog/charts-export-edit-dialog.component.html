@@ -122,6 +122,7 @@
           [groupTypeIsDifference]="groupTypeIsDifference"
           [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
           [exportTags]="exportTags" [groupType]="formGroupController.get('properties.group.type')?.value"
+          [axisGroupAllowed]="axisGroupAllowed" [groupTypes]="axisGroupTypes(node)"
           (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)" (dragStart)="startDrag()"
           (dragEnd)="stopDrag()"
           [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
@@ -135,6 +136,7 @@
           [groupTypeIsDifference]="groupTypeIsDifference"
           [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
           [exportTags]="exportTags" [groupType]="formGroupController.get('properties.group.type')?.value"
+          [axisGroupAllowed]="axisGroupAllowed" [groupTypes]="axisGroupTypes(node)"
           (copyClicked)="duplicate(node)" (deleteClicked)="deleteDuplicate(node)" (dragStart)="startDrag()"
           (dragEnd)="stopDrag()"
           [enableDragDrop]="formGroupController.get('properties.chartType')?.value === 'ColumnChart'"
@@ -154,7 +156,7 @@
   <mat-dialog-actions>
     <button matButton="outlined" (click)="close()">Cancel</button>
     <button matButton="filled" (click)="save()"
-      [disabled]="formGroupController.invalid || (formGroupController.get('properties.vAxes')?.value || []).length ===  0">
+      [disabled]="formGroupController.invalid || !axisGroupsValid || (formGroupController.get('properties.vAxes')?.value || []).length ===  0">
       Save
     </button>
   </mat-dialog-actions>

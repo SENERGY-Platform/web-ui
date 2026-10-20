@@ -18,6 +18,7 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject
 import { MatDialog } from '@angular/material/dialog';
 import { dialogSize } from '../../../../../core/dialog-size';
 import { ChartsExportVAxesModel, ChartsExportDeviceGroupMergingStrategy, ChartsExportConversion } from '../../shared/charts-export-properties.model';
+import { GroupOption, groupTimeLevels, isAxisGroupInterval, splitGroupTime } from '../../../shared/data-source-selector/group-options';
 import { ListRulesComponent } from '../list-rules/list-rules.component';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { CdkDragDrop, CdkDrag, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
@@ -48,6 +49,9 @@ export class AxisConfigComponent {
     @Input() userHasUpdatePropertiesAuthorization = false;
     @Input() exportTags: Map<string, Map<string, { value: string; parent: string }[]>> = new Map();
     @Input() groupType?: string | null;
+    /** Whether the chart type takes a grouping per axis (line charts); the field is hidden otherwise. */
+    @Input() axisGroupAllowed = false;
+    @Input() groupTypes: GroupOption[] = [];
     @Input() element: ChartsExportVAxesModel = {} as ChartsExportVAxesModel;
     @Input() treeControl: NestedTreeControl<ChartsExportVAxesModel> = new NestedTreeControl<ChartsExportVAxesModel>((node) => node.subAxes);
     @Input() enableDragDrop = false;
@@ -63,6 +67,8 @@ export class AxisConfigComponent {
 
     chartsExportDeviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy;
     super = ChartsExportEditDialogComponent;
+    groupTimeLevels = groupTimeLevels;
+    readonly likeWidget = 'widget';
 
     listRules(element: ChartsExportVAxesModel) {
         const dialog = this.dialog.open(ListRulesComponent, {
@@ -118,6 +124,77 @@ export class AxisConfigComponent {
 
     getTagValue(a: { value: string; parent: string }): string {
         return a.parent + '!' + a.value;
+    }
+
+    /** The grouping this axis is read with: its own on a line chart, else the widget's. */
+    get effectiveGroupType(): string | null | undefined {
+        return this.axisGroupAllowed && this.element.ownGroup !== undefined ? this.element.ownGroup.type : this.groupType;
+    }
+
+    get effectiveGroupIsDifference(): boolean {
+        return this.axisGroupAllowed && this.element.ownGroup !== undefined ? this.element.ownGroup.type.startsWith('difference') : this.groupTypeIsDifference;
+    }
+
+    get groupChoice(): string {
+        return this.element.ownGroup === undefined ? this.likeWidget : this.element.ownGroup.type;
+    }
+
+    set groupChoice(choice: string) {
+        if (choice === this.likeWidget || choice === null || choice === undefined) {
+            delete this.element.ownGroup;
+        } else {
+            this.element.ownGroup = { type: choice, time: this.element.ownGroup?.time ?? '' };
+            if (choice.startsWith('difference')) {
+                this.element.math = '';
+            }
+        }
+        // Sum adds values with the same timestamp, which only buckets guarantee; its option is hidden without a group type
+        if (!this.effectiveGroupType && this.element.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum) {
+            this.element.deviceGroupMergingStrategy = ChartsExportDeviceGroupMergingStrategy.Separate;
+        }
+    }
+
+    /** Number and unit are kept apart: a half typed `1.` or an unset number would otherwise lose the chosen unit. */
+    private timeParts = { composed: undefined as string | undefined, value: '', level: '' };
+
+    private syncTimeParts(): void {
+        const time = this.element.ownGroup?.time ?? '';
+        if (time !== this.timeParts.composed) {
+            const split = splitGroupTime(time);
+            this.timeParts = { composed: time, value: split.value, level: split.level };
+        }
+    }
+
+    get groupTimeValue(): string {
+        this.syncTimeParts();
+        return this.timeParts.value;
+    }
+
+    set groupTimeValue(value: string) {
+        this.syncTimeParts();
+        this.setGroupTime(value, this.timeParts.level);
+    }
+
+    get groupTimeLevel(): string {
+        this.syncTimeParts();
+        return this.timeParts.level;
+    }
+
+    set groupTimeLevel(level: string) {
+        this.syncTimeParts();
+        this.setGroupTime(this.timeParts.value, level);
+    }
+
+    get groupTimeInvalid(): boolean {
+        return this.element.ownGroup !== undefined && this.element.ownGroup.type !== '' && !isAxisGroupInterval(this.element.ownGroup.time);
+    }
+
+    private setGroupTime(value: string | number | null, level: string | null): void {
+        const composed = (value ?? '') + (level ?? '');
+        this.timeParts = { composed, value: String(value ?? ''), level: level ?? '' };
+        if (this.element.ownGroup !== undefined) {
+            this.element.ownGroup.time = composed;
+        }
     }
 
     get expanded(): boolean {

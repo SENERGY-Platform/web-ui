@@ -178,6 +178,92 @@ describe('ChartsExportService', () => {
         });
     });
 
+    describe('grouping per axis', () => {
+        const axis = (valueName: string, extra: Partial<ChartsExportVAxesModel> = {}): ChartsExportVAxesModel => ({
+            instanceId: 'export-1', exportName: 'weather', valueName, valueType: 'number', math: '', color: '', ...extra,
+        });
+        const properties = (vAxes: ChartsExportVAxesModel[], extra: Partial<ChartsExportPropertiesModel> = {}): ChartsExportPropertiesModel => ({
+            chartType: 'LineChart',
+            exports: [timescaleExport()],
+            vAxes,
+            group: { time: '15m', type: 'mean' },
+            timeRangeType: 'relative',
+            time: { last: '1d' } as any,
+            ...extra,
+        });
+        /** The elements as they go over the wire, where undefined fields are left out. */
+        const wireElements = (props: ChartsExportPropertiesModel, groupInterval?: string): any[] => {
+            service.getData(props as any, groupInterval === undefined ? undefined : '2026-10-05T00:00:00Z', groupInterval === undefined ? undefined : '2026-10-06T00:00:00Z', groupInterval).subscribe();
+            const req = httpMock.expectOne(r => r.url === environment.timescaleAPIURL + '/queries/v2');
+            req.flush((props.vAxes || []).map((_, requestIndex) => ({ requestIndex, data: [] })));
+            return JSON.parse(JSON.stringify(req.request.body));
+        };
+        const columnOf = (element: any) => element.columns[0];
+
+        it('sends the widget grouping for axes without an own one, as before', () => {
+            const elements = wireElements(properties([axis('a'), axis('b', { math: '*2' })]));
+            const element = (name: string, math?: string) => ({
+                columns: [{ name, groupType: 'mean', ...(math === undefined ? {} : { math }) }],
+                groupTime: '15m',
+                time: { last: '1d' },
+                orderDirection: 'desc',
+                exportId: 'export-1',
+                orderColumnIndex: 0,
+            });
+            expect(elements).toEqual([element('a'), element('b', '*2')]);
+        });
+
+        it('drops a stale Math from an axis whose own grouping is a difference', () => {
+            const elements = wireElements(properties([
+                axis('own', { math: '*2', ownGroup: { type: 'difference-last', time: '1d' } }),
+                axis('widget', { math: '*2' }),
+            ]));
+            expect('math' in columnOf(elements[0])).toBeFalse();
+            expect(columnOf(elements[1]).math).toBe('*2');
+        });
+
+        it('sends a raw axis without groupType and groupTime next to grouped ones', () => {
+            const elements = wireElements(properties([
+                axis('widget'),
+                axis('raw', { ownGroup: { type: '', time: '' } }),
+                axis('median', { ownGroup: { type: 'median', time: '1h' } }),
+            ]));
+            expect(elements[0].groupTime).toBe('15m');
+            expect(columnOf(elements[0]).groupType).toBe('mean');
+            expect('groupTime' in elements[1]).toBeFalse();
+            expect('groupType' in columnOf(elements[1])).toBeFalse();
+            expect(columnOf(elements[2]).groupType).toBe('median');
+            expect(elements[2].groupTime).toBe('1h');
+        });
+
+        it('keeps the time of an own grouping when the zoom changes the interval', () => {
+            const elements = wireElements(properties([
+                axis('widget'),
+                axis('median', { ownGroup: { type: 'median', time: '1d' } }),
+            ]), '1h');
+            expect(elements.map(e => e.groupTime)).toEqual(['1h', '1d']);
+            expect(elements.map(e => e.time.start)).toEqual(['2026-10-05T00:00:00.000Z', '2026-10-05T00:00:00.000Z']);
+        });
+
+        it('lets an own grouping stand when the widget has none', () => {
+            const elements = wireElements(properties([axis('raw'), axis('median', { ownGroup: { type: 'median', time: '1h' } })], { group: { time: '', type: '' } }));
+            expect('groupTime' in elements[0]).toBeFalse();
+            expect(elements[1].groupTime).toBe('1h');
+        });
+
+        it('ignores an own grouping on a chart that is not a line chart', () => {
+            const elements = wireElements(properties([axis('raw', { ownGroup: { type: '', time: '' } }), axis('median', { ownGroup: { type: 'median', time: '1d' } })], { chartType: 'ColumnChart' }));
+            expect(elements.map(columnOf).map(c => c.groupType)).toEqual(['mean', 'mean']);
+            expect(elements.map(e => e.groupTime)).toEqual(['15m', '15m']);
+        });
+
+        it('falls back to the widget when an own type has no valid time', () => {
+            const elements = wireElements(properties([axis('median', { ownGroup: { type: 'median', time: '' } })]));
+            expect(columnOf(elements[0]).groupType).toBe('mean');
+            expect(elements[0].groupTime).toBe('15m');
+        });
+    });
+
     describe('chart data of a column chart', () => {
         const axis = (alias: string, extra: Partial<ChartsExportVAxesModel> = {}): ChartsExportVAxesModel => ({
             deviceId: 'dev-' + alias,

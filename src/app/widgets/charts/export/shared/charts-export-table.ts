@@ -19,6 +19,7 @@ import { ChartDataTableModel } from '../../../../core/model/chart/chart-data-tab
 import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
 import { ChartsExportVAxesModel } from './charts-export-properties.model';
+import { axisLabel } from './charts-export-axis-group';
 
 export const chartsExportDefaultColor = '#4484ce';
 
@@ -160,7 +161,7 @@ export function chartsExportTable(data: any[][][][], properties: WidgetPropertie
                     });
                     // metadata is kept per request, so the series index within the request finds it
                     const metadataIndex = i;
-                    let head = vAxis.valueAlias || vAxis.valueName;
+                    let head = axisLabel(vAxis, properties.chartType);
 
                     if (repeats[index] > 1) {
                         // distinction required
@@ -358,7 +359,7 @@ export function chartsExportChart(widget: WidgetModel, dataTable: ChartDataTable
     if (widget.properties.vAxes && dataTable.data.length > 0 && chartType !== 'PieChart' && dataTable.data[0].length !== colors.length + 1) {
         const deleteColorIndices: number[] = [];
         widget.properties.vAxes.forEach((vAxes, index) => {
-            if (dataTable.data[0].indexOf(vAxes.valueAlias || vAxes.valueName) === -1) {
+            if (dataTable.data[0].indexOf(axisLabel(vAxes, chartType)) === -1) {
                 deleteColorIndices.push(index);
             }
         });

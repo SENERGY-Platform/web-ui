@@ -56,6 +56,19 @@ describe('widget storage', () => {
             expect(stored()).toEqual([...drillKeys, ...zoomKeys]);
         });
 
+        it('drops the drill state when an axis changes to raw, which reads as no own group once empty strings count as unset', () => {
+            const after = before();
+            after.vAxes![0].ownGroup = { type: '', time: '' };
+            cleanupStaleViewState(id, before(), after);
+            expect(stored()).toEqual(zoomKeys);
+        });
+
+        it('keeps the drill state when the own group is unchanged', () => {
+            const withGroup = () => ({ ...before(), vAxes: [{ ...before().vAxes![0], ownGroup: { type: '', time: '' } }] }) as WidgetPropertiesModels;
+            cleanupStaleViewState(id, withGroup(), withGroup());
+            expect(stored()).toEqual([...drillKeys, ...zoomKeys]);
+        });
+
         it('drops the drill state when the axes changed', () => {
             const after = before();
             after.vAxes![0].color = '#fff';

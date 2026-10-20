@@ -89,5 +89,7 @@ export interface ChartsExportVAxesModel {
     deviceGroupId?: string;
     deviceGroupMergingStrategy?: ChartsExportDeviceGroupMergingStrategy;
     locationId?: string;
+    /** Absent: like the widget; type '' draws raw values; line charts only. Not `group`, which holds the picker's option label. */
+    ownGroup?: { type: string; time: string };
     subAxes?: ChartsExportVAxesModel[];
 }

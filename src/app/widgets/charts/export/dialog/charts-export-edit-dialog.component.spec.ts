@@ -64,4 +64,55 @@ describe('ChartsExportEditDialogComponent', () => {
             expect(component.dataSource.data.map(x => x.valueName + (x.isDuplicate ? '*' : ''))).toEqual(['a', 'a*']);
         });
     });
+
+    describe('grouping per axis', () => {
+        it('keeps the own grouping of an axis when the properties are saved', () => {
+            open([axis('a'), axis('a', { isDuplicate: true, ownGroup: { type: 'median', time: '1h' } }), axis('b', { ownGroup: { type: '', time: '' } })]);
+
+            component.updateProperties().subscribe();
+
+            const properties = dashboardService.updateWidgetProperty.calls.mostRecent().args[3] as { vAxes: ChartsExportVAxesModel[] };
+            expect(properties.vAxes.map(x => x.ownGroup)).toEqual([undefined, { type: 'median', time: '1h' }, { type: '', time: '' }]);
+        });
+
+        it('clears Math on the switch to a difference widget group only on axes that follow it', () => {
+            open([axis('a', { math: '*2' }), axis('b', { math: '*2', ownGroup: { type: 'median', time: '1h' } }), axis('c', { math: '*2', ownGroup: { type: '', time: '' } })]);
+
+            component.formGroupController.get('properties.group.type')?.setValue('difference-last');
+
+            expect(component.dataSource.data.map(x => x.math)).toEqual(['', '*2', '*2']);
+        });
+
+        it('clears the Math of an own difference group when the chart type is a line chart again', () => {
+            open([axis('a', { math: '*2', ownGroup: { type: 'difference-last', time: '1d' } }), axis('b', { math: '*2' })], 'ColumnChart');
+
+            component.chartType.setValue('LineChart');
+
+            expect(component.dataSource.data.map(x => x.math)).toEqual(['', '*2']);
+        });
+
+        it('offers the field on line charts only', () => {
+            open([axis('a')]);
+            expect(component.axisGroupAllowed).toBeTrue();
+            component.chartType.setValue('ColumnChart');
+            expect(component.axisGroupAllowed).toBeFalse();
+        });
+
+        it('holds back a type without a valid time, but only while the field applies', () => {
+            open([axis('a', { ownGroup: { type: 'median', time: '' } })]);
+            expect(component.axisGroupsValid).toBeFalse();
+            component.dataSource.data[0].ownGroup = { type: 'median', time: '1months' };
+            expect(component.axisGroupsValid).toBeTrue();
+            component.dataSource.data[0].ownGroup = { type: 'median', time: '1x' };
+            component.chartType.setValue('ColumnChart');
+            expect(component.axisGroupsValid).toBeTrue();
+        });
+
+        it('offers the time weighted types for non-Influx exports only', () => {
+            open([axis('a')]);
+            const types = (a: ChartsExportVAxesModel) => component.axisGroupTypes(a).map(o => o.value);
+            expect(types(axis('a', { instanceId: 'export-1' }))).not.toContain('time-weighted-mean-linear');
+            expect(types(axis('a', { instanceId: undefined, deviceId: 'dev' }))).toContain('time-weighted-mean-linear');
+        });
+    });
 });
