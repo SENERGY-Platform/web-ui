@@ -15,7 +15,8 @@
  */
 
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, SecurityContext } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -147,6 +148,20 @@ describe('FlowRepoComponent list', () => {
         expect(decodeURIComponent(img.src)).toContain('viewBox=');
         expect(row.querySelector('svg')).toBeNull();
         expect(component.flowEstimations.get('flow-1')?.max).toBe(2);
+    }));
+
+    it('fixes the lower-case viewbox of a stored image that starts with an XML prolog', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+
+        const stored = '<?xml version="1.0" standalone="no"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="10 20 300 120"><g></g></svg>';
+        const safe = component.previewUrl('flow-prolog', stored);
+        const url = TestBed.inject(DomSanitizer).sanitize(SecurityContext.URL, safe) as string;
+        const decoded = decodeURIComponent(url.substring(url.indexOf(',') + 1));
+        expect(url).toMatch(/^data:image\/svg\+xml/);
+        expect(decoded).toContain('viewBox="10 20 300 120"');
+        expect(decoded).not.toContain('viewbox=');
+        expect(decoded.startsWith('<?xml')).toBeTrue();
     }));
 
     it('shows an empty list as the empty state after the answer cleared the rows', fakeAsync(() => {
