@@ -48,6 +48,13 @@ const types: Route = {
     component: ImportTypesComponent,
     data: { header: 'Types' },
 };
+// The one page for viewing and editing; the edit and details routes below stay for old links.
+const openType: Route = {
+    path: 'imports/types/:id',
+    pathMatch: 'full',
+    component: ImportTypesCreateEditComponent,
+    data: { header: 'Types' },
+};
 const editType: Route = {
     path: 'imports/types/edit/:id',
     pathMatch: 'full',
@@ -76,7 +83,7 @@ const instances: Route = {
 @NgModule({
     imports: [
         CommonModule,
-        RouterModule.forChild([types, instances, editType, createType, detailsType]),
+        RouterModule.forChild([types, instances, editType, createType, detailsType, openType]),
         WidgetModule,
         MatSortModule,
         MatPaginatorModule,

@@ -23,7 +23,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { AspectsService } from '../../metadata/aspects/shared/aspects.service';
-import { of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { CoreModule } from '../../../core/core.module';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { WidgetModule } from '../../../widgets/widget.module';
@@ -44,6 +44,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 
 describe('ImportTypesCreateEditComponent', () => {
 
@@ -53,7 +55,10 @@ describe('ImportTypesCreateEditComponent', () => {
     const aspectsServiceSpy: Spy<AspectsService> = createSpyFromClass(AspectsService);
     const conceptsServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
     const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
+    const permissionsServiceSpy: Spy<PermissionsService> = createSpyFromClass(PermissionsService);
 
+    importTypesServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
+    permissionsServiceSpy.getComputedResourcePermissionsV2.and.returnValue(of([{ id: 'urn:infai:ses:import-type:1234', read: true, write: true, administrate: false, execute: false }]));
     deviceTypeService.getMeasuringFunctions.and.returnValue(of([]));
     deviceTypeService.getAspects.and.returnValue(of([]));
     conceptsServiceSpy.getConceptsWithCharacteristics.and.returnValue(of([]));
@@ -185,6 +190,7 @@ describe('ImportTypesCreateEditComponent', () => {
                 { provide: AspectsService, useValue: aspectsServiceSpy },
                 { provide: ImportTypesService, useValue: importTypesServiceSpy },
                 { provide: ConceptsService, useValue: conceptsServiceSpy },
+                { provide: PermissionsService, useValue: permissionsServiceSpy },
                 {
                     provide: ActivatedRoute,
                     useValue: {
@@ -370,5 +376,271 @@ describe('ImportTypesCreateEditComponent', () => {
             expect(navigate).toHaveBeenCalled();
             expect(importTypesServiceSpy.saveImportType).not.toHaveBeenCalled();
         });
+    });
+});
+
+/** Pins the payload the page sends to the import repo, which import deployment and the content repo read. */
+describe('ImportTypesCreateEditComponent payload', () => {
+    const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
+    const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService);
+    const conceptsServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
+    const aspectsServiceSpy: Spy<AspectsService> = createSpyFromClass(AspectsService);
+    const permissionsSpy: Spy<PermissionsService> = createSpyFromClass(PermissionsService);
+
+    const TEXT = 'https://schema.org/Text';
+    const FLOAT = 'https://schema.org/Float';
+    const STRUCT = 'https://schema.org/StructuredValue';
+    const stored: ImportTypeModel = {
+        id: 'urn:infai:ses:import-type:pin',
+        name: 'pinned',
+        description: 'desc',
+        image: 'img:1',
+        default_restart: false,
+        cost: 2.5,
+        configs: [
+            { name: 'text', description: 'a', type: TEXT, default_value: '12' },
+            { name: 'int', description: 'b', type: 'https://schema.org/Integer', default_value: 7 },
+            { name: 'float', description: 'c', type: FLOAT, default_value: 1.5 },
+            { name: 'bool', description: 'd', type: 'https://schema.org/Boolean', default_value: true },
+            { name: 'list', description: 'e', type: 'https://schema.org/ItemList', default_value: [1, 2] },
+        ],
+        output: {
+            name: 'root', type: STRUCT, characteristic_id: '', use_as_tag: false,
+            sub_content_variables: [
+                { name: 'import_id', type: TEXT, characteristic_id: '', sub_content_variables: [], use_as_tag: false },
+                { name: 'time', type: TEXT, characteristic_id: environment.timeStampCharacteristicId, function_id: environment.getTimestampFunctionId, sub_content_variables: [], use_as_tag: false, aspect_id: 'urn:infai:ses:aspect:t', aspect_ids: ['urn:infai:ses:aspect:t'] },
+                { name: 'value', type: STRUCT, characteristic_id: '', use_as_tag: false, sub_content_variables: [
+                    { name: 'v', type: FLOAT, characteristic_id: 'urn:infai:ses:characteristic:c', sub_content_variables: [], use_as_tag: false },
+                ] },
+            ],
+        },
+        owner: 'someone',
+    };
+
+    function setup(url: string[], id: string | null, update: boolean, write: boolean, type: ImportTypeModel = stored) {
+        deviceTypeService.getMeasuringFunctions.and.returnValue(of([]));
+        deviceTypeService.getAspects.and.returnValue(of([]));
+        conceptsServiceSpy.getConceptsWithCharacteristics.and.returnValue(of({ result: [], total: 0 }));
+        importTypesServiceSpy.getImportType.and.returnValue(of(JSON.parse(JSON.stringify(type))));
+        importTypesServiceSpy.saveImportType.and.returnValue(of(true));
+        importTypesServiceSpy.userHasUpdateAuthorization.and.returnValue(update);
+        permissionsSpy.getComputedResourcePermissionsV2.and.returnValue(of([{ id: id || '', read: true, write, administrate: false, execute: false }]));
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [
+                RouterModule.forRoot([{ path: 'imports/types/list', component: ImportTypesComponent }], {}),
+                NoopAnimationsModule,
+                ImportTypesCreateEditComponent,
+            ],
+            providers: [
+                { provide: DeviceTypeService, useValue: deviceTypeService },
+                { provide: AspectsService, useValue: aspectsServiceSpy },
+                { provide: ImportTypesService, useValue: importTypesServiceSpy },
+                { provide: ConceptsService, useValue: conceptsServiceSpy },
+                { provide: PermissionsService, useValue: permissionsSpy },
+                { provide: ActivatedRoute, useValue: { url: of(url), snapshot: { paramMap: new Map(id ? [['id', id]] : []) } } },
+                provideHttpClient(withInterceptorsFromDi()),
+            ],
+        });
+        const fixture = TestBed.createComponent(ImportTypesCreateEditComponent);
+        fixture.detectChanges();
+        return fixture;
+    }
+
+    const saved = (): ImportTypeModel => importTypesServiceSpy.saveImportType.calls.mostRecent().args[0];
+
+    it('sends an opened type back with every config value parsed to its type', () => {
+        const fixture = setup(['edit', 'pin'], stored.id, true, true);
+        importTypesServiceSpy.saveImportType.calls.reset();
+
+        fixture.componentInstance.save();
+
+        expect(saved()).toEqual(stored);
+    });
+
+    it('sends the edits of a stored type: renamed, a config changed, one added and a float with a comma', () => {
+        const fixture = setup(['edit', 'pin'], stored.id, true, true);
+        const c = fixture.componentInstance;
+        c.form.controls.name.setValue('renamed');
+        c.getConfigsFormArray().at(1).controls.default_value.setValue('8');
+        c.getConfigsFormArray().at(2).controls.default_value.setValue('2,25');
+        c.deleteConfig(4);
+        c.addConfig(undefined);
+        const added = c.getConfigsFormArray().at(4);
+        added.patchValue({ name: 'extra', description: '', type: TEXT, default_value: 'x' });
+        importTypesServiceSpy.saveImportType.calls.reset();
+
+        c.save();
+
+        const expected: ImportTypeModel = JSON.parse(JSON.stringify(stored));
+        expected.name = 'renamed';
+        expected.configs[1].default_value = 8;
+        expected.configs[2].default_value = 2.25;
+        expected.configs[4] = { name: 'extra', description: '', type: TEXT, default_value: 'x' };
+        expect(saved()).toEqual(expected);
+    });
+
+    it('sends a new type with the default output, the chosen time aspect and no id or owner', () => {
+        const fixture = setup(['new'], null, true, false);
+        const c = fixture.componentInstance;
+        c.form.patchValue({ name: 'fresh', image: 'img:2' });
+        c.timeAspect.setValue('urn:infai:ses:aspect:n');
+        importTypesServiceSpy.saveImportType.calls.reset();
+
+        c.save();
+
+        expect(saved()).toEqual({
+            id: '', name: 'fresh', description: '', image: 'img:2', default_restart: true, cost: 0, configs: [], owner: '',
+            output: {
+                name: 'root', type: STRUCT, characteristic_id: '', use_as_tag: false,
+                sub_content_variables: [
+                    { name: 'import_id', type: TEXT, characteristic_id: '', sub_content_variables: [], use_as_tag: false },
+                    { name: 'time', type: TEXT, characteristic_id: environment.timeStampCharacteristicId, function_id: environment.getTimestampFunctionId, sub_content_variables: [], use_as_tag: false, aspect_id: 'urn:infai:ses:aspect:n', aspect_ids: ['urn:infai:ses:aspect:n'] },
+                    { name: 'value', type: STRUCT, characteristic_id: '', sub_content_variables: [], use_as_tag: false },
+                ],
+            },
+        } as ImportTypeModel);
+    });
+
+    it('sends an output that is not the default root structure as it was stored', () => {
+        const custom: ImportTypeModel = JSON.parse(JSON.stringify(stored));
+        custom.output = { name: 'data', type: STRUCT, characteristic_id: '', use_as_tag: false, sub_content_variables: [{ name: 'x', type: TEXT, characteristic_id: '', sub_content_variables: [], use_as_tag: true }] };
+        const fixture = setup(['edit', 'pin'], stored.id, true, true, custom);
+        importTypesServiceSpy.saveImportType.calls.reset();
+
+        fixture.componentInstance.save();
+
+        expect(saved()).toEqual(custom);
+    });
+});
+
+describe('ImportTypesCreateEditComponent rights', () => {
+    const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
+    const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass(DeviceTypeService);
+    const conceptsServiceSpy: Spy<ConceptsService> = createSpyFromClass(ConceptsService);
+    const permissionsSpy: Spy<PermissionsService> = createSpyFromClass(PermissionsService);
+    const id = 'urn:infai:ses:import-type:r';
+    const type: ImportTypeModel = {
+        id, name: 'Stored type', description: '', image: 'img', default_restart: true, cost: 0,
+        configs: [{ name: 'c', description: '', type: 'https://schema.org/Text', default_value: 'v' }],
+        output: {
+            name: 'root', type: 'https://schema.org/StructuredValue', characteristic_id: '', use_as_tag: false,
+            sub_content_variables: [
+                { name: 'import_id', type: 'https://schema.org/Text', characteristic_id: '', sub_content_variables: [], use_as_tag: false },
+                { name: 'time', type: 'https://schema.org/Text', characteristic_id: environment.timeStampCharacteristicId, sub_content_variables: [], use_as_tag: false, aspect_ids: [] },
+                { name: 'value', type: 'https://schema.org/StructuredValue', characteristic_id: '', use_as_tag: false, sub_content_variables: [
+                    { name: 'v', type: 'https://schema.org/Float', characteristic_id: '', sub_content_variables: [], use_as_tag: false },
+                ] },
+            ],
+        },
+        owner: '',
+    };
+
+    function open(url: string[], update: boolean, permissions: Observable<PermissionsV2RightsAndIdModel[]>) {
+        deviceTypeService.getMeasuringFunctions.and.returnValue(of([]));
+        deviceTypeService.getAspects.and.returnValue(of([]));
+        conceptsServiceSpy.getConceptsWithCharacteristics.and.returnValue(of({ result: [], total: 0 }));
+        importTypesServiceSpy.getImportType.and.returnValue(of(JSON.parse(JSON.stringify(type))));
+        importTypesServiceSpy.userHasUpdateAuthorization.and.returnValue(update);
+        permissionsSpy.getComputedResourcePermissionsV2.and.returnValue(permissions);
+        permissionsSpy.getComputedResourcePermissionsV2.calls.reset();
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [RouterModule.forRoot([{ path: 'imports/types/list', component: ImportTypesComponent }], {}), NoopAnimationsModule, ImportTypesCreateEditComponent],
+            providers: [
+                { provide: DeviceTypeService, useValue: deviceTypeService },
+                { provide: AspectsService, useValue: createSpyFromClass(AspectsService) },
+                { provide: ImportTypesService, useValue: importTypesServiceSpy },
+                { provide: ConceptsService, useValue: conceptsServiceSpy },
+                { provide: PermissionsService, useValue: permissionsSpy },
+                { provide: ActivatedRoute, useValue: { url: of(url), snapshot: { paramMap: new Map(url[url.length - 1] === 'new' ? [] : [['id', id]]) } } },
+                provideHttpClient(withInterceptorsFromDi()),
+            ],
+        });
+        const fixture = TestBed.createComponent(ImportTypesCreateEditComponent);
+        fixture.detectChanges();
+        return fixture;
+    }
+
+    const write = (w: boolean) => of([{ id, read: true, write: w, administrate: false, execute: false }]);
+    const q = (f: ComponentFixture<unknown>, sel: string) => (f.nativeElement as HTMLElement).querySelector(sel);
+    const hasAddConfig = (f: ComponentFixture<unknown>) =>
+        Array.from((f.nativeElement as HTMLElement).querySelectorAll('button')).some((b) => b.textContent?.includes('Add config'));
+
+    it('is editable with the update right and the write permission, whatever the URL says', () => {
+        for (const url of [[id], ['edit', id], ['details', id]]) {
+            TestBed.resetTestingModule();
+            const f = open(url, true, write(true));
+            expect(f.componentInstance.editable).withContext(url.join('/')).toBeTrue();
+            expect(f.componentInstance.form.enabled).toBeTrue();
+        }
+    });
+
+    it('is read-only without the update right and does not ask for permissions', () => {
+        const f = open([id], false, write(true));
+
+        expect(f.componentInstance.editable).toBeFalse();
+        expect(permissionsSpy.getComputedResourcePermissionsV2).not.toHaveBeenCalledWith('import-types', [id]);
+    });
+
+    it('is read-only without the write permission on the type', () => {
+        const f = open([id], true, write(false));
+
+        expect(f.componentInstance.editable).toBeFalse();
+    });
+
+    it('is read-only when the permissions cannot be loaded', () => {
+        const f = open([id], true, throwError(() => new Error('down')));
+
+        expect(f.componentInstance.editable).toBeFalse();
+        expect(f.componentInstance.ready).toBeTrue();
+    });
+
+    it('shows no add, delete or edit control, no save bar and disabled fields when read-only', () => {
+        const f = open([id], true, write(false));
+        f.componentInstance.form.markAsDirty();
+        f.detectChanges();
+
+        expect(f.componentInstance.form.disabled).toBeTrue();
+        expect(f.componentInstance.timeAspect.disabled).toBeTrue();
+        expect(q(f, 'senergy-save-bar')).toBeNull();
+        expect(q(f, '[aria-label="Delete config"]')).toBeNull();
+        expect(hasAddConfig(f)).toBeFalse();
+        expect(Array.from((f.nativeElement as HTMLElement).querySelectorAll('button mat-icon')).map((i) => i.textContent?.trim())).not.toContain('edit');
+        expect(Array.from((f.nativeElement as HTMLElement).querySelectorAll('button mat-icon')).map((i) => i.textContent?.trim())).toContain('info');
+        expect(q(f, 'input[formcontrolname="name"]')?.hasAttribute('disabled')).toBeTrue();
+    });
+
+    it('shows the add and edit controls and enables the fields when editable', () => {
+        const f = open([id], true, write(true));
+
+        expect(hasAddConfig(f)).toBeTrue();
+        expect(q(f, '[aria-label="Delete config"]')).not.toBeNull();
+        expect(q(f, 'input[formcontrolname="name"]')?.hasAttribute('disabled')).toBeFalse();
+    });
+
+    it('lets anyone who reached the create page fill it, without asking for permissions', () => {
+        const f = open(['new'], false, write(false));
+
+        expect(f.componentInstance.editable).toBeTrue();
+        expect(f.componentInstance.isNew).toBeTrue();
+        expect(permissionsSpy.getComputedResourcePermissionsV2).not.toHaveBeenCalledWith('import-types', [id]);
+        expect(q(f, '.page-title')?.textContent).toContain('New import type');
+    });
+
+    it('titles a stored type by its name and keeps the title while the name is edited', () => {
+        const f = open([id], true, write(true));
+        f.componentInstance.form.controls.name.setValue('typing');
+        f.detectChanges();
+
+        expect(q(f, '.page-title')?.textContent).toContain('Stored type');
+    });
+
+    it('does not submit a form button when Enter is pressed in a field', () => {
+        const f = open([id], true, write(true));
+
+        const buttons = Array.from((f.nativeElement as HTMLElement).querySelectorAll('form button')) as HTMLButtonElement[];
+        expect(buttons.length).toBeGreaterThan(0);
+        expect(buttons.every((b) => b.type === 'button')).toBeTrue();
     });
 });

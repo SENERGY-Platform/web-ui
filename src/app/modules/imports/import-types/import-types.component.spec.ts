@@ -148,14 +148,22 @@ describe('ImportTypesComponent', () => {
         expect(importTypesServiceSpy.listImportTypes.calls.mostRecent().args[0]).toEqual('search');
     });
 
-    it('should open the edit view', () => {
-        component.edit(permSearchModelExample);
-        expect(routerSpy.navigateByUrl.calls.mostRecent().args[0]).toEqual('/imports/types/edit/0');
+    it('should open the one import type page without a mode in the URL', () => {
+        component.openImportType(permSearchModelExample);
+        expect(routerSpy.navigateByUrl.calls.mostRecent().args[0]).toEqual('/imports/types/0');
     });
 
-    it('should open the detail view', () => {
-        component.details(permSearchModelExample);
-        expect(routerSpy.navigateByUrl.calls.mostRecent().args[0]).toEqual('/imports/types/details/0');
+    it('offers Edit with the update and write rights and Details otherwise', () => {
+        component.userHasUpdateAuthorization = true;
+        component.permissionsPerType = [{ id: '0', read: true, write: true, administrate: false, execute: false }];
+        expect(component.canEdit(permSearchModelExample)).toBeTrue();
+
+        component.permissionsPerType = [{ id: '0', read: true, write: false, administrate: false, execute: false }];
+        expect(component.canEdit(permSearchModelExample)).toBeFalse();
+
+        component.permissionsPerType = [{ id: '0', read: true, write: true, administrate: false, execute: false }];
+        component.userHasUpdateAuthorization = false;
+        expect(component.canEdit(permSearchModelExample)).toBeFalse();
     });
 
     it('should open the add view', () => {

@@ -114,8 +114,9 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
         });
     }
 
-    details(m: ImportTypeModel) {
-        this.router.navigateByUrl('/imports/types/details/' + m.id);
+    /** Row click and menu entry: the one import type page, editable with the update and write rights. */
+    openImportType(m: ImportTypeModel) {
+        this.router.navigateByUrl('/imports/types/' + m.id);
     }
 
     start(m: ImportTypeModel) {
@@ -139,10 +140,6 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
 
     share(m: ImportTypeModel) {
         this.permissionsDialogService.openPermissionV2Dialog('import-types', m.id, m.name);
-    }
-
-    edit(m: ImportTypeModel) {
-        this.router.navigateByUrl('/imports/types/edit/' + m.id);
     }
 
     delete(m: ImportTypeModel) {
@@ -232,6 +229,11 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
             onError: (err) => console.error(err),
             after: () => this.reload(),
         });
+    }
+
+    /** The same right the page checks to be editable. */
+    canEdit(m: ImportTypeModel): boolean {
+        return this.userHasUpdateAuthorization && this.hasWPermission(m);
     }
 
     hasWPermission(m: ImportTypeModel): boolean {
