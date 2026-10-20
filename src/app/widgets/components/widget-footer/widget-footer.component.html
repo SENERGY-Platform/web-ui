@@ -15,52 +15,47 @@
   -->
 
 @if (!zoom) {
-  <mat-card-actions class="ly-row">
-    @for (icon of optionCustomIcon; track icon; let i = $index) {
-      <div>
-        <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]" [matTooltip]="optionCustomTooltip[i]">
-          <mat-icon>{{icon}}</mat-icon>
-        </button>
-      </div>
-    }
-    @if (optionAdd) {
-      <div>
-        <button mat-icon-button color="accent" (click)="add()" matTooltip="Add Element">
-          <mat-icon>add</mat-icon>
-        </button>
-      </div>
-    }
-    <div class="drag-handler ly-flex"></div>
-    <div>
-      <button mat-icon-button color="accent" (click)="refresh()" matTooltip="Refresh" [disabled]="refreshing">
-        @if (!refreshing) {
-          <mat-icon>refresh</mat-icon>
-        }
-        @if (refreshing) {
-          <mat-icon>sync</mat-icon>
-        }
-      </button>
-    </div>
+  <button mat-icon-button class="widget-menu-trigger" [matMenuTriggerFor]="widgetMenu" aria-label="Widget actions">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <mat-menu #widgetMenu="matMenu" xPosition="before">
+    <button mat-menu-item class="menu-refresh" (click)="refresh()" [disabled]="refreshing">
+      <mat-icon>{{refreshing ? 'sync' : 'refresh'}}</mat-icon> Refresh
+    </button>
     @if (optionZoom) {
-      <div>
-        <button mat-icon-button color="accent" (click)="zoomWidget()" matTooltip="Maximize">
-          <mat-icon>zoom_out_map</mat-icon>
-        </button>
-      </div>
+      <button mat-menu-item class="menu-maximise" (click)="zoomWidget()">
+        <mat-icon>zoom_out_map</mat-icon> Maximise
+      </button>
     }
-    <div>
-      @if ((widgetHasUpdateableProperties && userHasUpdatePropertiesAuthorization) || userHasUpdateNameAuthorization) {
-        <button mat-icon-button color="accent" (click)="edit()" matTooltip="Edit">
-          <mat-icon>edit</mat-icon>
-        </button>
+    @if ((widgetHasUpdateableProperties && userHasUpdatePropertiesAuthorization) || userHasUpdateNameAuthorization) {
+      <button mat-menu-item class="menu-edit" (click)="edit()">
+        <mat-icon>edit</mat-icon> Edit
+      </button>
+    }
+    @if (userHasDeleteAuthorization) {
+      <mat-divider></mat-divider>
+      <button mat-menu-item class="menu-delete danger" (click)="delete()">
+        <mat-icon>delete</mat-icon> Delete
+      </button>
+    }
+  </mat-menu>
+  @if (optionCustomIcon.length > 0 || optionAdd) {
+    <mat-card-actions class="ly-row">
+      @for (icon of optionCustomIcon; track icon; let i = $index) {
+        <div>
+          <button mat-icon-button color="accent" (click)="custom(i)" [disabled]="optionCustomDisabled[i]" [matTooltip]="optionCustomTooltip[i]">
+            <mat-icon>{{icon}}</mat-icon>
+          </button>
+        </div>
       }
-    </div>
-    <div>
-      @if (userHasDeleteAuthorization) {
-        <button mat-icon-button color="accent" (click)="delete()" matTooltip="Delete">
-          <mat-icon>delete</mat-icon>
-        </button>
+      @if (optionAdd) {
+        <div>
+          <button mat-icon-button color="accent" (click)="add()" matTooltip="Add Element">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
       }
-    </div>
-  </mat-card-actions>
+      <div class="drag-handler ly-flex"></div>
+    </mat-card-actions>
+  }
 }

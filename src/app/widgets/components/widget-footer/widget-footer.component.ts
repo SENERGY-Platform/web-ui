@@ -23,13 +23,15 @@ import { MatCardActions } from '@angular/material/card';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
 
 @Component({
     selector: 'senergy-widget-footer',
     templateUrl: './widget-footer.component.html',
     styleUrls: ['./widget-footer.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatCardActions, MatIconButton, MatTooltip, MatIcon]
+    imports: [MatCardActions, MatIconButton, MatTooltip, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatDivider]
 })
 export class WidgetFooterComponent {
     private widgetHeaderService = inject(WidgetFooterService);

@@ -441,6 +441,13 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     --mat-menu-item-icon-color: var(--app-danger);
   }
 
+  // Widgets reserved 72px for header and footer in their own CSS; the content takes whatever the slimmer
+  // frame leaves instead, so no widget needs its own number changed.
+  senergy-widget mat-card-content {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
