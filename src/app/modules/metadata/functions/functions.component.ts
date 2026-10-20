@@ -51,6 +51,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Component({
     selector: 'senergy-functions',
@@ -178,6 +179,7 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
 
     editFunction(inputFunction: DeviceTypeFunctionModel): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             function: JSON.parse(JSON.stringify(inputFunction)), // create copy of object
@@ -196,6 +198,7 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
 
     showFunction(inputFunction: DeviceTypeFunctionModel): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             function: JSON.parse(JSON.stringify(inputFunction)), // create copy of object
@@ -215,6 +218,7 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
 
     newFunction(): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
 
         const editDialogRef = this.dialog.open(FunctionsCreateDialogComponent, dialogConfig);

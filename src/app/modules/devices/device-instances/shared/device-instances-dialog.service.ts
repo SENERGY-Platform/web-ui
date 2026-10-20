@@ -48,6 +48,7 @@ export class DeviceInstancesDialogService {
 
     openDeviceSelectDialog(): Observable<string[] | null | undefined> {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.disableClose = false;
         const editDialogRef = this.dialog.open(DeviceInstancesSelectDialogComponent, dialogConfig);
         return editDialogRef.afterClosed();

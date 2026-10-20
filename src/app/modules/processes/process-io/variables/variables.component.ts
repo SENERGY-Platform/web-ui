@@ -44,6 +44,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { ShortKeyPipe } from '../shared/short-key.pipe';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../../core/dialog-size';
 
 
 
@@ -152,6 +153,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
 
     edit(variable: ProcessIoVariable){
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             variable: JSON.parse(JSON.stringify(variable)), // create copy of object
@@ -177,6 +179,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
 
     add(){
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.data = {
             variable: {

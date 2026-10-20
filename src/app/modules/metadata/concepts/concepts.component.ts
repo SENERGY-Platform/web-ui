@@ -43,6 +43,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { confirmDelete, countLabel } from 'src/app/core/services/delete-flows';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Component({
     selector: 'senergy-concepts',
@@ -104,6 +105,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
 
     newConcept() {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('s'));
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(ConceptsNewDialogComponent, dialogConfig);
 
@@ -123,6 +125,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
 
     editConcept(conceptInput: DeviceTypeConceptModel) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             conceptId: conceptInput.id,
@@ -154,6 +157,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
 
     showConcept(conceptInput: DeviceTypeConceptModel) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             conceptId: conceptInput.id,

@@ -23,6 +23,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionTestResponse } from '../../admin/permissions/shared/permission.model';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -42,6 +43,7 @@ export class SettingsDialogService {
 
     openSettingsDialog() {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.disableClose = false;
         // dialogConfig.data = {
         //     name: name,

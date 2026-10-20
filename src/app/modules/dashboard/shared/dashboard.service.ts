@@ -35,6 +35,7 @@ import { PermissionTestResponse } from '../../admin/permissions/shared/permissio
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from '../../../core/services/snack-bar-messages';
+import { dialogSize } from '../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -192,6 +193,7 @@ export class DashboardService {
 
     openNewDashboardDialog(nextIndex: number): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('s'));
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(DashboardNewDialogComponent, dialogConfig);
 
@@ -210,6 +212,7 @@ export class DashboardService {
 
     openNewWidgetDialog(dashboardId: string): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
         const editDialogRef = this.dialog.open(DashboardNewWidgetDialogComponent, dialogConfig);
 
@@ -245,6 +248,7 @@ export class DashboardService {
 
     openEditDashboardDialog(dashboard: DashboardModel): void {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('s'));
         dialogConfig.autoFocus = true;
         dialogConfig.data = {
             dashboard: JSON.parse(JSON.stringify(dashboard)), // create copy of object

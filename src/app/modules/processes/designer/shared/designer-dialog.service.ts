@@ -38,6 +38,7 @@ import { ProcessIoDesignerDialogComponent } from '../dialogs/process-io-designer
 import { ConditionalEventDialogComponent } from '../dialogs/conditional-event-dialog/conditional-event-dialog.component';
 import { IncidentDialogComponent } from '../dialogs/incident-dialog/incident-dialog.component';
 import { ProcessIncidentsConfig } from '../../incidents/shared/process-incidents.model';
+import { dialogSize } from '../../../../core/dialog-size';
 
 @Injectable({
     providedIn: 'root',
@@ -48,6 +49,7 @@ export class DesignerDialogService {
 
     openEditOutputDialog(outputs: BpmnParameter[], callback: () => void) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.disableClose = false;
         dialogConfig.data = { outputs };
         const editDialogRef = this.dialog.open(EditOutputDialogComponent, dialogConfig);
@@ -96,6 +98,7 @@ export class DesignerDialogService {
 
     openHistoricDataConfigDialog(existingConfig: HistoricDataConfig, callback: (result: HistoricDataConfig) => void) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
         dialogConfig.data = { initial: existingConfig };
@@ -109,6 +112,7 @@ export class DesignerDialogService {
 
     openEmailConfigDialog(to: string, subj: string, content: string, callback: (to_: string, subj_: string, content_: string) => void) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
         dialogConfig.data = { to, subj, content };
@@ -122,6 +126,7 @@ export class DesignerDialogService {
 
     openNotificationConfigDialog(subj: string, content: string, callback: (subj_: string, content_: string) => void) {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
         dialogConfig.data = { subj, content };
@@ -135,6 +140,7 @@ export class DesignerDialogService {
 
     openTaskConfigDialog(defaultSelection: DeviceTypeSelectionRefModel): Observable<DeviceTypeSelectionResultModel> {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.disableClose = false;
         dialogConfig.data = { selection: JSON.parse(JSON.stringify(defaultSelection || null)) }; // create copy of object
         return this.dialog.open(TaskConfigDialogComponent, dialogConfig).afterClosed();
@@ -142,6 +148,7 @@ export class DesignerDialogService {
 
     openConditionalEventDialog(msg: ConditionalEventEditModel): Observable<ConditionalEventEditModel> {
         const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.disableClose = false;
         dialogConfig.data = { msg };
         return this.dialog.open(ConditionalEventDialogComponent, dialogConfig).afterClosed();

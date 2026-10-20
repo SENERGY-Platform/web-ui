@@ -41,6 +41,7 @@ import { EmptyStateComponent } from '../../core/components/empty-state/empty-sta
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { dialogSize } from '../../core/dialog-size';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
 export interface EnvironmentRow {
@@ -189,7 +190,7 @@ export class EnvironmentsComponent implements OnInit {
     }
 
     newEnvironment(): void {
-        this.dialog.open(EnvironmentsCreateDialogComponent).afterClosed().subscribe((env: Environment | undefined) => {
+        this.dialog.open(EnvironmentsCreateDialogComponent, dialogSize('m')).afterClosed().subscribe((env: Environment | undefined) => {
             if (env) {
                 this.environmentsService.createEnvironment(env).subscribe(result => {
                     this.afterCreate(result, 'creating');

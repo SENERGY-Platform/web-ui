@@ -21,22 +21,22 @@
     <div class="page">
       <senergy-form-section title="Information">
         <form [formGroup]="firstFormGroup">
-          <mat-form-field class="full-width">
+          <mat-form-field class="full-width field-limit">
             <mat-label>ID</mat-label>
             <input matInput formControlName="id">
             <mat-error senergyError label="ID"></mat-error>
           </mat-form-field>
-          <mat-form-field class="full-width">
+          <mat-form-field class="full-width field-limit">
             <mat-label>Name</mat-label>
             <input matInput formControlName="name" required>
             <mat-error senergyError label="Name"></mat-error>
           </mat-form-field>
-          <mat-form-field class="full-width">
+          <mat-form-field class="full-width field-limit">
             <mat-label>Description</mat-label>
             <input matInput formControlName="description">
             <mat-error senergyError label="Description"></mat-error>
           </mat-form-field>
-          <mat-form-field class="full-width">
+          <mat-form-field class="full-width field-limit">
             <mat-label>Device Class</mat-label>
             <mtx-select formControlName="device_class_id" required
               [items]="deviceTypeDeviceClasses" bindLabel="name" bindValue="id"
@@ -93,12 +93,12 @@
                 }
                   @if (group.isGroup) {
                     <div [formGroup]="getServiceGroup(group.key)">
-                      <mat-form-field class="full-width">
+                      <mat-form-field class="full-width field-limit">
                         <mat-label>Name</mat-label>
                         <input matInput formControlName="name">
                         <mat-error senergyError label="Name"></mat-error>
                       </mat-form-field>
-                      <mat-form-field class="full-width">
+                      <mat-form-field class="full-width field-limit">
                         <mat-label>Description</mat-label>
                         <input matInput formControlName="description">
                         <mat-error senergyError label="Description"></mat-error>

@@ -175,6 +175,17 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     border: var(--app-hairline);
   }
 
+  // The content scrolls only once title, actions and a 2rem margin are used up, instead of at Material's 65vh.
+  // Fields in a dialog keep the 20px of subscript space between them; the 0.5em padding in styles.css is for pages.
+  .mat-mdc-dialog-container .mat-mdc-dialog-content {
+    max-height: calc(100vh - 14rem);
+
+    .mat-mdc-form-field {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+
   .mat-mdc-select-panel,
   .mat-mdc-autocomplete-panel,
   .mat-mdc-menu-panel {
@@ -252,6 +263,65 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
       width: 56px;
       padding-right: 0;
     }
+
+    // The page chain below bounds the card; without it the table grows and the page scrolls.
+    .table-container {
+      max-height: none;
+    }
+
+    // display: flex above would otherwise override the hidden attribute.
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  // A list page fills the surface and its table scrolls inside the card, so the page has exactly one vertical
+  // scroller and keeps the header and paginator in view. The chain is surface, routed host, .page-body,
+  // .list-card, .table-container; below 560px of height the page scrolls as a whole instead.
+  @media (min-height: 560px) {
+    .app-surface:has(> router-outlet + * > .page-body > .list-card) {
+      display: flex;
+      flex-direction: column;
+      // The surface's min-height in sidenav.component.css: viewport minus the 64px toolbar and the 8px margin.
+      height: calc(100% - 64px - 8px);
+    }
+
+    .app-surface > router-outlet + *:has(> .page-body > .list-card) {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
+
+      > .page-body {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+
+        > .list-card {
+          display: flex;
+          flex: 0 1 auto;
+          flex-direction: column;
+          min-height: 0;
+
+          &[hidden] {
+            display: none;
+          }
+
+          > .table-container {
+            flex: 0 1 auto;
+            min-height: 0;
+            overflow: auto;
+          }
+        }
+      }
+    }
+  }
+
+  // A single-line field on a full-width form page stops at 40rem; rows of fields and lists use the page width.
+  .mat-mdc-form-field.field-limit {
+    display: flex;
+    max-width: 40rem;
   }
 
   .clickable-row {
