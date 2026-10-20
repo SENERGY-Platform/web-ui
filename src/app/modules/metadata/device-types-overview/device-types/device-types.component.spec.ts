@@ -31,12 +31,14 @@ import {AspectClassesService} from '../../aspects/shared/aspect-classes.service'
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
 import {DeviceTypeModel, DeviceTypeProtocolModel, DeviceTypeServiceModel} from '../shared/device-type.model';
+import {Attribute} from '../../../devices/device-instances/shared/device-instances.model';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import { FlexLayoutModule } from '@ngbracket/ngx-layout';
 import {v4 as uuid} from 'uuid';
 import {MatTreeModule} from '@angular/material/tree';
+import {MtxSelectModule} from '@ng-matero/extensions/select';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
@@ -54,7 +56,7 @@ describe('DeviceTypesComponent', () => {
     const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
     const aspectClassesServiceSpy: Spy<AspectClassesService> = createSpyFromClass<AspectClassesService>(AspectClassesService);
 
-    function init(id: string, func: string) {
+    function init(id: string, func: string, attributes?: Attribute[]) {
         deviceTypeServiceSpy.getLeafCharacteristics.and.returnValue(
             of([
                 {
@@ -140,6 +142,7 @@ describe('DeviceTypesComponent', () => {
                     ],
                 },
             ] as DeviceTypeServiceModel[],
+            attributes,
         };
         deviceTypeServiceSpy.getDeviceType.and.returnValue(of(args));
         deviceTypeServiceSpy.getDeviceClasses.and.returnValue(of());
@@ -166,7 +169,8 @@ describe('DeviceTypesComponent', () => {
         MatTooltipModule,
         FlexLayoutModule,
         NoopAnimationsModule,
-        MatTreeModule],
+        MatTreeModule,
+        MtxSelectModule],
     providers: [
         {
             provide: ActivatedRoute,
@@ -421,6 +425,31 @@ describe('DeviceTypesComponent', () => {
                         ],
                     },
                 ]);
+        }),
+    );
+
+    it(
+        'has no submit button in its forms, so Enter in a field cannot click a remove or add control',
+        waitForAsync(async () => {
+            init('device_id_4711', 'edit', [
+                {key: 'senergy/zigbee-vendor', value: 'Acme', origin: 'web-ui'},
+                {key: 'senergy/zigbee-model', value: 'CS-1', origin: 'web-ui'},
+            ]);
+            // The stubs for device classes and functions complete without a value, so loadData never emits.
+            component.ready = true;
+            fixture.detectChanges();
+            await fixture.whenStable();
+            const el: HTMLElement = fixture.nativeElement;
+            expect(component.deviceTypeAttributes.length).toBe(2);
+            expect(el.querySelectorAll('input[formcontrolname="value"]').length).toBe(2);
+
+            // Enter in a text field clicks the first submit button of its form.
+            el.querySelectorAll('form').forEach((form) => {
+                const implicit = form.querySelector('button:not([type="button"])') as HTMLButtonElement | null;
+                implicit?.click();
+                expect(implicit).withContext('implicit submit button').toBeNull();
+            });
+            expect(component.deviceTypeAttributes.length).toBe(2);
         }),
     );
 });
