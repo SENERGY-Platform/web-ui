@@ -10,9 +10,9 @@ import * as camundaimport from 'bpmn-js-properties-panel/lib/provider/camunda' ;
 
 var CamundaProvider = camundaimport.propertiesProvider[1];
 
-import { textBox } from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
-import { nextId } from 'bpmn-js-properties-panel/lib/Utils';
+import { textBox, textField } from 'bpmn-js-properties-panel/lib/factory/EntryFactory';
 import { augmentScriptEntries } from '../../../processes/designer/bpmn-js/properties-provider/ScriptEditorEntry';
+import { doneEventVariable, MESSAGE_NAME_ATTRIBUTE, waitsForDoneEvent } from './done-event';
 /* never used
 const typeString = "https://schema.org/Text";
 const typeInteger = "https://schema.org/Integer";
@@ -22,12 +22,15 @@ const typeList = "https://schema.org/ItemList";
 const typeStructure = "https://schema.org/StructuredValue"; */
 
 
-const ADD_DONE_EVENT = false;
+// a process_deployment or device_repository task gets an event that waits for its done_event; the
+// automation-engine queues that message, so it is not lost when the task completes before the wait
+const ADD_DONE_EVENT = true;
 
 function SmartServicePropertiesProvider(eventBus, canvas, bpmnFactory, elementFactory, autoPlace, elementRegistry, elementTemplates, bpmnjs, replace, selection, modeling, translate) {
     this.getTabs = function(element) {
         var camunda = new CamundaProvider(eventBus, canvas, bpmnFactory, elementRegistry, elementTemplates, translate);
         var camundaTabs = camunda.getTabs(element);
+        camundaTabs[0].groups.unshift(createMessageNameGroup());
         camundaTabs[0].groups.unshift(createDescriptionGroup());
         camundaTabs[0].groups.unshift(createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection));
         camundaTabs[0].groups.unshift(createSmartServiceInputsGroup(element, bpmnjs, eventBus, bpmnFactory, replace, selection));
@@ -83,6 +86,24 @@ function createDescriptionGroup(){
         enabled: isCollaborationOrProcess
     };
     return descGroup;
+}
+
+function createMessageNameGroup(){
+    return {
+        id: 'message-name',
+        label: 'Wait for Message',
+        entries: [
+            textField({
+                id : 'senergy-message-name',
+                label : 'Message Name (JavaScript)',
+                description : 'Expression for the name of the awaited message, e.g. Task_1_done_event to wait for the completion of task Task_1. Replaces a message name like ${...}.',
+                modelProperty : MESSAGE_NAME_ATTRIBUTE
+            })
+        ],
+        enabled: function (element) {
+            return is(element, "bpmn:IntermediateCatchEvent") && isMsgEvent(element);
+        }
+    };
 }
 
 function createTaskGroup(element, bpmnjs, eventBus, bpmnFactory, elementFactory, autoPlace, replace, selection){
@@ -159,9 +180,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                 }
 
                 if (ADD_DONE_EVENT) {
-                    let doneEventName = taskId+"_done_event";
-                    let doneEventNameRef = "${"+doneEventName+"}";
-                    let doneEvent = findMessageEventElement(element, doneEventNameRef);
+                    let doneEvent = findMessageEventElement(element, taskId);
 
                     let usesWaitParam = function (prefix) {
                         return !!taskInfo.inputs.find(value => {
@@ -170,10 +189,10 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                     }
 
                     if (taskInfo.topic === "process_deployment" && !doneEvent){
-                        createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, doneEventNameRef)
+                        createIntermediateCatchMessageEvent(elementFactory, autoPlace, element, doneEventVariable(taskId))
                     }
                     if (taskInfo.topic === "device_repository" && !doneEvent && !usesWaitParam("device_repository")){
-                        createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, element, doneEventNameRef)
+                        createIntermediateCatchMessageEvent(elementFactory, autoPlace, element, doneEventVariable(taskId))
                     }
                 }
 
@@ -211,7 +230,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_process_deployment_id", "${process_deployment_id}"));
                             let fogInput = inputs.find(value => value.name === "process_deployment.prefer_fog_deployment");
                             if (ADD_DONE_EVENT){
-                                outputs.push(createTextOutputParameter(bpmnjs, doneEventName, "${done_event}"));
+                                outputs.push(createTextOutputParameter(bpmnjs, doneEventVariable(taskId), "${done_event}"));
                             }
                             if(fogInput && fogInput.value === "true") {
                                 outputs.push(createTextOutputParameter(bpmnjs, taskId+"_is_fog_deployment", "${is_fog_deployment}"));
@@ -231,7 +250,7 @@ function createTaskEntries(group, element, bpmnjs, eventBus, bpmnFactory, elemen
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_id", "${device_group_id}"));
                             outputs.push(createTextOutputParameter(bpmnjs, taskId+"_device_group_selection", "${device_group_iot_option}"));
                             if (ADD_DONE_EVENT){
-                                outputs.push(createTextOutputParameter(bpmnjs, doneEventName, "${done_event}"));
+                                outputs.push(createTextOutputParameter(bpmnjs, doneEventVariable(taskId), "${done_event}"));
                             }
                             break;
                     }
@@ -500,7 +519,8 @@ var findStartElement = function (element, done){
     return null;
 }
 
-function findMessageEventElement(element, msgRefName, done) {
+// the message catch event after the element that waits for the done event of the task
+function findMessageEventElement(element, taskId, done) {
     if(!done) {
         done = [];
     }
@@ -511,15 +531,11 @@ function findMessageEventElement(element, msgRefName, done) {
     if(element.outgoing && element.outgoing.length) {
         for (let index = 0; index < element.outgoing.length; index++) {
             const outgoing = element.outgoing[index].target;
-            if (outgoing.businessObject.$type === "bpmn:IntermediateCatchEvent" &&
-                outgoing.businessObject.eventDefinitions &&
-                outgoing.businessObject.eventDefinitions[0] &&
-                outgoing.businessObject.eventDefinitions[0].messageRef &&
-                outgoing.businessObject.eventDefinitions[0].messageRef.name === msgRefName) {
+            if (waitsForDoneEvent(outgoing.businessObject, taskId)) {
                 return outgoing
             }
 
-            var sub = findMessageEventElement(outgoing, msgRefName, done);
+            var sub = findMessageEventElement(outgoing, taskId, done);
             if(sub) {
                 return sub;
             }
@@ -636,27 +652,10 @@ var createProperties = function (bpmnjs, properties) {
     });
 }
 
-function createIntermediateCatchMessageEvent(bpmnFactory, elementFactory, autoPlace, replace, parent, topic){
+// appends a message catch event that waits for the message named by the JavaScript expression
+function createIntermediateCatchMessageEvent(elementFactory, autoPlace, parent, messageNameExpression){
     let element = elementFactory.createShape(assign({ type: "bpmn:IntermediateCatchEvent", eventDefinitionType: 'bpmn:MessageEventDefinition'}));
-
-    //find existing msg ref
-    let msgRef = null
-    parent.businessObject.$parent.$parent.rootElements.forEach(function (e) {
-        if(e.name === topic) {
-            msgRef = e;
-        }
-    })
-
-    //create msgRef if none exist
-    if (!msgRef) {
-        msgRef = bpmnFactory.create("bpmn:Message")
-        msgRef.name = topic;
-        msgRef.id = nextId("Message_");
-        parent.businessObject.$parent.$parent.rootElements.push(msgRef);
-    }
-
-    element.businessObject.eventDefinitions[0].messageRef = msgRef;
-
+    element.businessObject.set(MESSAGE_NAME_ATTRIBUTE, messageNameExpression);
     autoPlace.append(parent, element);
 }
 
