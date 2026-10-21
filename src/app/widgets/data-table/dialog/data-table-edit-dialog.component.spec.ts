@@ -26,7 +26,8 @@ import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import {
     DeviceTypeInteractionEnum
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
+import { EngineDeployment, EngineSchedule } from '../../../core/model/automation-engine.model';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
@@ -35,14 +36,9 @@ import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { environment } from '../../../../environments/environment';
 import { DataTableEditDialogComponent } from './data-table-edit-dialog.component';
-import {
-    V2DeploymentsPreparedDiagramModel,
-    V2DeploymentsPreparedModel,
-} from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import { DataTableHelperService } from '../shared/data-table-helper.service';
 import { WidgetModule } from '../../widget.module';
 import { DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import {v4 as uuid} from 'uuid';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
@@ -57,11 +53,10 @@ describe('DataTableEditDialogComponent', () => {
 
     // By assigning the value in beforeEach, call counters get resets before each test
     let exportServiceSpy: Spy<ExportService>;
-    let deploymentsServiceSpy: Spy<DeploymentsService>;
+    let engineSpy: Spy<AutomationEngineService>;
     let matDialogRefSpy: Spy<MatDialogRef<DataTableEditDialogComponent>>;
     let dashboardServiceSpy: Spy<DashboardService>;
     let dataTableHelperServiceSpy: Spy<DataTableHelperService>;
-    let processSchedulerServiceSpy: Spy<ProcessSchedulerService>;
     let deviceGroupServiceSpy: Spy<DeviceGroupsService>;
     let conceptsServiceSpy: Spy<ConceptsService>;
 
@@ -89,11 +84,10 @@ describe('DataTableEditDialogComponent', () => {
     beforeEach(
         fakeAsync(() => {
             exportServiceSpy = createSpyFromClass(ExportService);
-            deploymentsServiceSpy = createSpyFromClass<DeploymentsService>(DeploymentsService);
+            engineSpy = createSpyFromClass<AutomationEngineService>(AutomationEngineService);
             matDialogRefSpy = createSpyFromClass<MatDialogRef<DataTableEditDialogComponent>>(MatDialogRef);
             dashboardServiceSpy = createSpyFromClass<DashboardService>(DashboardService);
             dataTableHelperServiceSpy = createSpyFromClass<DataTableHelperService>(DataTableHelperService);
-            processSchedulerServiceSpy = createSpyFromClass<ProcessSchedulerService>(ProcessSchedulerService);
             deviceGroupServiceSpy = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
             conceptsServiceSpy = createSpyFromClass<ConceptsService>(ConceptsService);
 
@@ -113,18 +107,7 @@ describe('DataTableEditDialogComponent', () => {
             exportServiceSpy.prepareDeviceServiceExport.and.returnValue([exampleExport]);
             exportServiceSpy.getExportTags.and.returnValue(of({}));
 
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: uuid() }));
-            deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(
-                of({
-                    id: '0',
-                    name: 'unknown',
-                    description: '',
-                    diagram: {} as V2DeploymentsPreparedDiagramModel,
-                    elements: [],
-                    executable: true,
-                    version: 3
-                } as V2DeploymentsPreparedModel),
-            );
+            engineSpy.createDeployment.and.returnValue(of({ id: uuid() } as EngineDeployment));
 
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
             dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
@@ -168,7 +151,7 @@ describe('DataTableEditDialogComponent', () => {
             dataTableHelperServiceSpy.getExportTags.and.returnValue(of(new Map()));
             dataTableHelperServiceSpy.preloadFullImportType.and.returnValue(of(undefined));
 
-            processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+            engineSpy.createSchedule.and.returnValue(of(null));
 
             dataTableHelperServiceSpy.preloadMeasuringFunctionsOfAspect.and.returnValue(of([{ id: 'aspectId' }]));
             const m = new Map();
@@ -190,11 +173,8 @@ describe('DataTableEditDialogComponent', () => {
                 },
             ]);
 
-            deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(
-                of({ name: '', elements: [{ task: { selection: { selected_device_id: null, selected_service_id: null } } }] }),
-            );
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deploymentId' }));
-            processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'scheduleId' }));
+            engineSpy.createDeployment.and.returnValue(of({ id: 'deploymentId' } as EngineDeployment));
+            engineSpy.createSchedule.and.returnValue(of({ id: 'scheduleId' } as EngineSchedule));
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'exportId' }));
             deviceGroupServiceSpy.getDeviceGroups.and.returnValue(of({result: []}));
             deviceGroupServiceSpy.getAspectListByIds.and.returnValue(of([]));
@@ -214,11 +194,10 @@ describe('DataTableEditDialogComponent', () => {
     providers: [
         provideRouter([]),
         { provide: DashboardService, useValue: dashboardServiceSpy },
-        { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+        { provide: AutomationEngineService, useValue: engineSpy },
         { provide: ExportService, useValue: exportServiceSpy },
         { provide: MatDialogRef, useValue: matDialogRefSpy },
         { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
-        { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
         { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
         { provide: ConceptsService, useValue: conceptsServiceSpy },
         {
@@ -337,11 +316,18 @@ describe('DataTableEditDialogComponent', () => {
             expect(component.formGroup.valid).toBe(true);
 
             component.save();
-            expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(1);
-            expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(1);
+            expect(engineSpy.createDeployment.calls.count()).toBe(1);
+            const input = engineSpy.createDeployment.calls.mostRecent().args[0];
+            expect(input.source).toBe('generated');
+            expect(input.selections).toEqual({ Task_0os5tro: { device_id: 'deviceId', service_id: 'service_1' } });
             expect(elementDetails?.get('device')?.get('requestDevice')?.value).toBe(true);
             expect(elementDetails?.get('device')?.get('deploymentId')?.value).toBe('deploymentId');
-            expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(1);
+            expect(engineSpy.createSchedule.calls.count()).toBe(1);
+            expect(engineSpy.createSchedule.calls.mostRecent().args[0]).toEqual({
+                created_by: component.widgetId,
+                deployment_id: 'deploymentId',
+                cron: '0/10 * * * * *',
+            });
             expect(elementDetails?.get('device')?.get('scheduleId')?.value).toBe('scheduleId');
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
             expect(element?.get('exportId')?.value).toBe(null);
@@ -465,9 +451,8 @@ describe('DataTableEditDialogComponent', () => {
 
             expect(component.getElements().at(0).get('elementDetails')?.get('device')?.get('requestDevice')?.value).toBe(false);
             component.save();
-            expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
-            expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
-            expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+            expect(engineSpy.createDeployment.calls.count()).toBe(0);
+            expect(engineSpy.createSchedule.calls.count()).toBe(0);
         }),
     );
 

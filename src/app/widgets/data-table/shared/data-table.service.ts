@@ -19,8 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { ExportService } from '../../../modules/exports/shared/export.service';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
 import { DataTableElementModel } from './data-table.model';
 import { Observable } from 'rxjs';
 
@@ -32,8 +31,7 @@ export class DataTableService {
         private dialog: MatDialog,
         private dashboardService: DashboardService,
         private exportService: ExportService,
-        private deploymentsService: DeploymentsService,
-        private processSchedulerService: ProcessSchedulerService,
+        private automationEngineService: AutomationEngineService,
     ) {}
 
     deleteElements(elements: DataTableElementModel[] | undefined): void {
@@ -62,10 +60,10 @@ export class DataTableService {
             observables.push(this.exportService.stopPipeline({ ID: element.exportId } as ExportModel));
         }
         if (element.elementDetails.device?.deploymentId) {
-            observables.push(this.deploymentsService.v2deleteDeployment(element.elementDetails.device?.deploymentId));
+            observables.push(this.automationEngineService.deleteDeployment(element.elementDetails.device?.deploymentId));
         }
         if (element.elementDetails.device?.scheduleId) {
-            observables.push(this.processSchedulerService.deleteSchedule(element.elementDetails.device?.scheduleId));
+            observables.push(this.automationEngineService.deleteSchedule(element.elementDetails.device?.scheduleId));
         }
         if (shouldSubscribe) {
             observables.forEach((o) => o.subscribe());

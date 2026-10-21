@@ -20,9 +20,8 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { DeviceStatusElementModel } from './device-status-properties.model';
 import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { ExportService } from '../../../modules/exports/shared/export.service';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { HttpClient } from '@angular/common/http';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
 
 @Injectable({
     providedIn: 'root',
@@ -32,8 +31,7 @@ export class DeviceStatusService {
         private dialog: MatDialog,
         private dashboardService: DashboardService,
         private exportService: ExportService,
-        private deploymentsService: DeploymentsService,
-        private processSchedulerService: ProcessSchedulerService,
+        private automationEngineService: AutomationEngineService,
         private http: HttpClient,
     ) {}
 
@@ -44,10 +42,10 @@ export class DeviceStatusService {
                     this.exportService.stopPipeline({ ID: element.exportId } as ExportModel).subscribe();
                 }
                 if (element.deploymentId) {
-                    this.deploymentsService.v2deleteDeployment(element.deploymentId).subscribe();
+                    this.automationEngineService.deleteDeployment(element.deploymentId).subscribe();
                 }
                 if (element.scheduleId) {
-                    this.processSchedulerService.deleteSchedule(element.scheduleId).subscribe();
+                    this.automationEngineService.deleteSchedule(element.scheduleId).subscribe();
                 }
             });
         }

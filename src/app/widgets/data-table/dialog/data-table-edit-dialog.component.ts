@@ -20,7 +20,6 @@ import {
     MatDialogRef
 } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import {
     ExportModel,
     ExportValueBaseModel,
@@ -49,10 +48,9 @@ import { DeviceInstanceModel, DeviceSelectablesModel } from '../../../modules/de
 import { DataTableHelperService, DeviceTypeAspectNodeModelWithRootName } from '../shared/data-table-helper.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { PipelineModel, PipelineOperatorModel } from '../../../modules/data/pipeline-registry/shared/pipeline.model';
-import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import { forkJoin, Observable, of } from 'rxjs';
 import { flatMap, map, mergeMap } from 'rxjs/operators';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
 import { DataTableService } from '../shared/data-table.service';
 import { boundaryValidator, elementDetailsValidator, exportValidator } from './data-table-edit-dialog.validators';
 import { environment } from '../../../../environments/environment';
@@ -64,6 +62,9 @@ import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/share
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { SingleValueAggregations } from '../../single-value/shared/single-value.model';
 import { CompareWithFn, GroupValueFn } from '@ng-matero/extensions/select';
+
+/** the id of the service task in the generated BPMN, the key of its device selection */
+const GENERATED_TASK_ID = 'Task_0os5tro';
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
@@ -140,11 +141,10 @@ export class DataTableEditDialogComponent implements OnInit {
         private dialogRef: MatDialogRef<DataTableEditDialogComponent>,
         public dataTableHelperService: DataTableHelperService,
         private dataTableService: DataTableService,
-        private deploymentsService: DeploymentsService,
         private dashboardService: DashboardService,
         private exportService: ExportService,
         private fb: UntypedFormBuilder,
-        private processSchedulerService: ProcessSchedulerService,
+        private automationEngineService: AutomationEngineService,
         private cdref: ChangeDetectorRef,
         private deviceGroupsService: DeviceGroupsService,
         private conceptsService: ConceptsService,
@@ -1168,38 +1168,17 @@ export class DataTableEditDialogComponent implements OnInit {
                     '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n' +
                     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="112" height="92" viewBox="254 74 112 92" version="1.1"><defs><marker id="sequenceflow-end-white-black-8shwih7rrgzkmm4pwfqg6rb2a" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="10" orient="auto"><path d="M 1 5 L 11 10 L 1 15 Z" style="fill: black; stroke-width: 1px; stroke-linecap: round; stroke-dasharray: 10000, 1; stroke: black;"/></marker></defs><g class="djs-group"><g class="djs-element djs-shape" data-element-id="Task_10z5wf9" style="display: block;" transform="matrix(1 0 0 1 260 80)"><g class="djs-visual"><rect x="0" y="0" width="100" height="80" rx="10" ry="10" style="stroke: black; stroke-width: 2px; fill: white; fill-opacity: 0.95;"/><text lineHeight="1.2" class="djs-label" style="font-family: Arial, sans-serif; font-size: 12px; font-weight: normal; fill: black;"><tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan></text></g><rect x="0" y="0" width="100" height="80" class="djs-hit" style="fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;"/><rect x="-6" y="-6" width="112" height="92" class="djs-outline" style="fill: none;"/></g></g></svg>';
                 observables.push(
-                    this.deploymentsService
-                        .v2getPreparedDeploymentsByXml(xml, svg)
-                        .pipe(
-                            map((pD: V2DeploymentsPreparedModel | null) => {
-                                if (
-                                    pD !== null &&
-                                    pD.elements.length === 1 &&
-                                    pD.elements[0].task !== null &&
-                                    pD.elements[0].task.selection !== undefined
-                                ) {
-                                    const name = this.formGroup.get('name')?.value;
-                                    if (name !== undefined && name !== null) {
-                                        pD.name = name;
-                                    }
-                                    pD.elements[0].task.selection.selected_device_id = deviceId;
-                                    pD.elements[0].task.selection.selected_service_id = serviceId;
-                                    return pD;
-                                }
-                                return null;
-                            }),
-                        )
-                        .pipe(
-                            flatMap((pD) => {
-                                if (pD !== null) {
-                                    return this.deploymentsService.v2postDeployments(pD, 'generated');
-                                }
-                                return of(null);
-                            }),
-                        )
+                    this.automationEngineService
+                        .createDeployment({
+                            name: this.formGroup.get('name')?.value || 'generatedByProcessStatusWidget',
+                            xml,
+                            svg,
+                            source: 'generated',
+                            selections: { [GENERATED_TASK_ID]: { device_id: deviceId, service_id: serviceId } },
+                        })
                         .pipe(
                             flatMap((deployment) => {
-                                if (deployment !== null && deployment.status === 200) {
+                                if (deployment !== null) {
                                     element.get('elementDetails')?.get('device')?.patchValue({ deploymentId: deployment.id });
                                     // spread process starts
                                     let cron =
@@ -1209,11 +1188,10 @@ export class DataTableEditDialogComponent implements OnInit {
                                             '/' +
                                             refreshTime;
                                     cron += ' * * * * *';
-                                    return this.processSchedulerService.createSchedule({
+                                    return this.automationEngineService.createSchedule({
                                         created_by: this.widgetId,
-                                        process_deployment_id: deployment.id,
+                                        deployment_id: deployment.id,
                                         cron,
-                                        id: '',
                                     });
                                 } else {
                                     return of(null);
