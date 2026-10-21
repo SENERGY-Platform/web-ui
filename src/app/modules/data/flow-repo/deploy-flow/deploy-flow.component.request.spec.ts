@@ -308,6 +308,72 @@ describe('DeployFlowComponent pipeline request', () => {
         expect(req.nodes[1].inputs?.map((i) => i.filterType)).toEqual(['ImportId']);
     });
 
+    /** Fills a pipeline of two nodes: three inputs with a device, a group with two devices and a pipeline operator, a config and persistData. */
+    function fillWholePipeline() {
+        component.form.patchValue({ windowTime: '45', consume_all_msgs: true });
+        node(0).controls.persistData.setValue(true);
+        node(0).controls.configs.at(0).patchValue({ value: '5' });
+        node(0).controls.configs.at(1).patchValue({ value: 'kWh' });
+        select(0, 0, 'urn:infai:ses:device:d1', [['urn:infai:ses:device:d1$mod', [path('value.temp')]]], ['urn:infai:ses:aspect:water', 'urn:infai:ses:aspect:air']);
+        select(0, 1, groupId, [['urn:infai:ses:device:d1', [path('value.hum')]], ['urn:infai:ses:device:d2', [path('value.hum')]]]);
+        select(0, 2, null, []);
+        pipelineOf(0, 2, 'pipe1', 'opA', 'analytics-A', 'value.x');
+        select(1, 0, importId, [[importId, [{ serviceId: 'urn:infai:ses:import-type:t1', path: 'value.i' }]]]);
+    }
+
+    const wholeNodes = [
+        {
+            inputSelections: [
+                {
+                    inputName: 'in1', aspectId: 'urn:infai:ses:aspect:air', aspectIds: ['urn:infai:ses:aspect:air', 'urn:infai:ses:aspect:water'],
+                    characteristicIds: ['c1'], functionId: 'fn', selectableId: 'urn:infai:ses:device:d1',
+                },
+                { inputName: 'in2', aspectId: null, characteristicIds: ['c1'], functionId: 'fn', selectableId: groupId },
+                { inputName: 'in3', aspectId: null, characteristicIds: ['c1'], functionId: 'fn', selectableId: null },
+            ],
+            inputs: [
+                { filterType: 'operatorId', filterIds: 'opA:pipe1', topicName: 'analytics-A', values: [{ name: 'in3', path: 'value.x' }] },
+                { filterType: 'deviceId', filterIds: 'urn:infai:ses:device:d1', topicName: 'urn_infai_ses_service_s1', values: [{ name: 'in1', path: 'value.temp' }] },
+                {
+                    filterType: 'deviceId', filterIds: 'urn:infai:ses:device:d1,urn:infai:ses:device:d2', topicName: 'urn_infai_ses_service_s1',
+                    values: [{ name: 'in2', path: 'value.hum' }],
+                },
+            ],
+            config: [{ name: 'threshold', value: '5' }, { name: 'unit', value: 'kWh' }],
+            deploymentType: 'cloud',
+            nodeId: 'op1',
+            persistData: true,
+        },
+        {
+            inputSelections: [{ inputName: 'x', aspectId: null, characteristicIds: ['c1'], functionId: 'fn', selectableId: importId }],
+            inputs: [{
+                filterType: 'ImportId', filterIds: importId, topicName: 'urn_infai_ses_import-type_t1', values: [{ name: 'x', path: 'value.i' }],
+            }],
+            config: [],
+            deploymentType: 'local',
+            nodeId: 'op2',
+            persistData: false,
+        },
+    ];
+
+    it('sends the whole request body of a new pipeline', () => {
+        init();
+        fillWholePipeline();
+        expect(JSON.parse(JSON.stringify(request()))).toEqual({
+            id: null, flowId: 'flow', name: 'Pipeline', description: 'Desc', windowTime: 45, mergeStrategy: 'outer', metrics: true,
+            consumeAllMessages: true, nodes: wholeNodes,
+        });
+    });
+
+    it('sends the whole request body of an updated pipeline', () => {
+        init({ edit: true });
+        fillWholePipeline();
+        expect(JSON.parse(JSON.stringify(request()))).toEqual({
+            id: 'p1', flowId: 'flow', name: 'Pipeline', description: 'Desc', windowTime: 45, mergeStrategy: 'outer', metrics: true,
+            consumeAllMessages: true, nodes: wholeNodes,
+        });
+    });
+
     it('sends even without a name, because the reset form carries no validator', () => {
         init();
         component.form.patchValue({ name: '' });

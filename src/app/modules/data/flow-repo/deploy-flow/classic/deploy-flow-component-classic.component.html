@@ -13,132 +13,87 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="main-panel">
+<div class="deploy-container">
+  <senergy-spinner [elementCount]="inputs.length" [show]="!ready"></senergy-spinner>
   @if (inputs.length > 0 && ready === true) {
-    <div class="layout-margin ly-column">
-      <mat-accordion class="example-headers-align" multi>
-        <mat-expansion-panel expanded>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <div class="ly-row ly-align-start-center">
-                <mat-icon>folder</mat-icon>
-                <div class="ly-offset-5">General</div>
-              </div>
-            </mat-panel-title>
-            <mat-panel-description>
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-          <ng-template matExpansionPanelContent>
-            <div class="ly-column">
-              <mat-form-field class="ly-flex" color="accent" appearance="outline">
-                <mat-label>Name</mat-label>
-                <input matInput [(ngModel)]="name">
-                <mat-error senergyError label="Name"></mat-error>
+    <senergy-page-header title="New pipeline (classic)" backLabel="Flows" backLink="/data/flow-repo"></senergy-page-header>
+    <div class="page">
+      <senergy-form-section title="General">
+        <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput [(ngModel)]="name">
+          <mat-error senergyError label="Name"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput [(ngModel)]="description">
+          <mat-error senergyError label="Description"></mat-error>
+        </mat-form-field>
+      </senergy-form-section>
+
+      @for (input of inputs; track input; let operatorKey = $index) {
+        <senergy-form-section [title]="input.name" [hint]="input.id">
+          @for (port of input.inPorts; track port; let deviceKey = $index) {
+            <div class="block">
+              <h4 class="block-title">{{ port }}</h4>
+              <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
+                <mat-label>Device</mat-label>
+                <mtx-select [items]="devices[operatorKey][deviceKey]" bindLabel="display_name"
+                              (ngModelChange)="deviceChanged($event, input.id, port, operatorKey,
+                                      deviceKey)" ngDefaultControl
+                  [(ngModel)]="selectedValues.get(input.id).get(port).device" multiple
+                  appendTo=".ng-select-anchor">
+                </mtx-select>
+                <mat-error senergyError label="Device"></mat-error>
               </mat-form-field>
-              <mat-form-field class="ly-flex" color="accent" appearance="outline">
-                <mat-label>Description</mat-label>
-                <input matInput [(ngModel)]="description">
-                <mat-error senergyError label="Description"></mat-error>
+              <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
+                <mat-label>Service</mat-label>
+                <mtx-select (ngModelChange)="serviceChanged($event, input.id, port)"
+                  [(ngModel)]="selectedValues.get(input.id).get(port).service"
+                  [items]="deviceTypes[input.id][port].services" bindLabel="name"
+                  appendTo=".ng-select-anchor">
+                </mtx-select>
+                <mat-error senergyError label="Service"></mat-error>
+              </mat-form-field>
+              <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
+                <mat-label>Path</mat-label>
+                <mtx-select [(ngModel)]="selectedValues.get(input.id).get(port).path"
+                  [items]="paths[input.id][port]" appendTo=".ng-select-anchor">
+                </mtx-select>
+                <mat-error senergyError label="Path"></mat-error>
               </mat-form-field>
             </div>
-          </ng-template>
-        </mat-expansion-panel>
-        @for (input of inputs; track input; let operatorKey = $index) {
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                <div class="ly-row ly-align-start-center">
-                  <mat-icon>poll</mat-icon>
-                  <div class="ly-offset-5">{{input.name}}</div>
-                </div>
-              </mat-panel-title>
-              <mat-panel-description>
-                {{input.id}}
-              </mat-panel-description>
-            </mat-expansion-panel-header>
-            <ng-template matExpansionPanelContent>
-              @for (port of input.inPorts; track port; let deviceKey = $index) {
-                <div class="ly-column">
-                  <h4>{{ port }}</h4>
-                  <div class="ly-row ly-flex">
-                    <mat-form-field class="ly-flex" color="accent" appearance="outline">
-                      <mat-label>Device</mat-label>
-                      <mtx-select [items]="devices[operatorKey][deviceKey]" bindLabel="display_name"
-                                    (ngModelChange)="deviceChanged($event, input.id, port, operatorKey,
-                                            deviceKey)" ngDefaultControl
-                        [(ngModel)]="selectedValues.get(input.id).get(port).device" multiple
-                        appendTo=".ng-select-anchor">
-                      </mtx-select>
-                      <mat-error senergyError label="Device"></mat-error>
-                    </mat-form-field>
-                  </div>
-                  <mat-form-field class="ly-flex" color="accent" appearance="outline">
-                    <mat-label>Service</mat-label>
-                    <mtx-select (ngModelChange)="serviceChanged($event, input.id, port)"
-                      [(ngModel)]="selectedValues.get(input.id).get(port).service"
-                      [items]="deviceTypes[input.id][port].services" bindLabel="name"
-                      appendTo=".ng-select-anchor">
-                    </mtx-select>
-                    <mat-error senergyError label="Service"></mat-error>
-                  </mat-form-field>
-                  <mat-form-field class="ly-fill" color="accent" appearance="outline">
-                    <mat-label>Path</mat-label>
-                    <mtx-select [(ngModel)]="selectedValues.get(input.id).get(port).path"
-                      [items]="paths[input.id][port]" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                    <mat-error senergyError label="Path"></mat-error>
-                  </mat-form-field>
-                </div>
-              }
-              @if (input.config !== undefined && input.config !== null) {
-                <h4>Configuration</h4>
-              }
+          }
+          @if (input.config !== undefined && input.config !== null) {
+            <div class="block">
+              <h4 class="block-title">Configuration</h4>
               @for (conf of input.config; track conf) {
-                <div class="ly-column">
-                  <mat-form-field class="ly-fill" color="accent" appearance="outline">
-                    <mat-label>{{ conf.name }}</mat-label>
-                    <input matInput [ngModel]="selectedValues.get(input.id).get('_config').get(conf.name)"
-                      (ngModelChange)="selectedValues.get(input.id).get('_config').set(conf.name, $event)"
-                      placeholder="conf.name">
-                    <mat-error senergyError label="{{ conf.name }}"></mat-error>
-                  </mat-form-field>
-                </div>
+                <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
+                  <mat-label>{{ conf.name }}</mat-label>
+                  <input matInput [ngModel]="selectedValues.get(input.id).get('_config').get(conf.name)"
+                    (ngModelChange)="selectedValues.get(input.id).get('_config').set(conf.name, $event)"
+                    placeholder="conf.name">
+                  <mat-error senergyError label="{{ conf.name }}"></mat-error>
+                </mat-form-field>
               }
-            </ng-template>
-          </mat-expansion-panel>
-        }
-        <!--
-        Global Settings
-        -->
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <div class="ly-row ly-align-start-center">
-                <mat-icon>settings</mat-icon>
-                <div class="ly-offset-5">Global Settings</div>
-              </div>
-            </mat-panel-title>
-            <mat-panel-description>
-              Only change, if you know what you are doing
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-          <mat-form-field class="full-width" color="accent" appearance="outline">
-            <mat-label>Window Time</mat-label>
-            <input matInput [(ngModel)]="windowTime">
-            <mat-error senergyError label="Window Time"></mat-error>
-          </mat-form-field>
-          <section class="checkbox-section">
-            <mat-checkbox class="checkbox-margin" [(ngModel)]="metrics" disabled>Enable
-            Metrics</mat-checkbox>
-            <mat-checkbox class="checkbox-margin" [(ngModel)]="allMessages">Consume all messages
-            </mat-checkbox>
-          </section>
-        </mat-expansion-panel>
-      </mat-accordion>
-      <div class="ly-row ly-align-start-center" style="margin-top:8px;">
-        <button mat-raised-button color="accent" (click)="startPipeline()">Start</button>
-      </div>
+            </div>
+          }
+        </senergy-form-section>
+      }
+
+      <senergy-form-section title="Global settings" hint="Only change, if you know what you are doing">
+        <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
+          <mat-label>Window Time</mat-label>
+          <input matInput [(ngModel)]="windowTime">
+          <mat-error senergyError label="Window Time"></mat-error>
+        </mat-form-field>
+        <div class="checkbox-row">
+          <mat-checkbox [(ngModel)]="metrics" disabled>Enable Metrics</mat-checkbox>
+          <mat-checkbox [(ngModel)]="allMessages">Consume all messages</mat-checkbox>
+        </div>
+      </senergy-form-section>
     </div>
+    <senergy-save-bar saveLabel="Deploy" status="Ready to deploy" (save)="startPipeline()"
+      (discard)="discard()"></senergy-save-bar>
   }
-  <senergy-spinner [elementCount]="inputs.length" [show]="!ready"></senergy-spinner>
 </div>

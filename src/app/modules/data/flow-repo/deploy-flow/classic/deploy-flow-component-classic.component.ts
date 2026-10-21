@@ -30,16 +30,16 @@ import { FlowEngineService } from '../../shared/flow-engine.service';
 import { NodeInput, NodeModel, NodeValue, PipelineRequestModel } from '../shared/pipeline-request.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatErrorMessagesDirective } from '../../../../../core/directives/matError.directive';
 import { MtxSelect } from '@ng-matero/extensions/select';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatButton } from '@angular/material/button';
 import { SpinnerComponent } from '../../../../../core/components/spinner/spinner.component';
+import { PageHeaderComponent } from '../../../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../../../core/components/save-bar/save-bar.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
@@ -47,7 +47,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './deploy-flow-component-classic.component.html',
     styleUrls: ['./deploy-flow-component-classic.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatExpansionPanelDescription, MatExpansionPanelContent, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MatCheckbox, MatButton, SpinnerComponent]
+    imports: [MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MtxSelect, MatCheckbox, SpinnerComponent, PageHeaderComponent, FormSectionComponent, SaveBarComponent]
 })
 export class DeployFlowClassicComponent {
     private parserService = inject(ParserService);
@@ -106,6 +106,10 @@ export class DeployFlowClassicComponent {
 
         this.parserService.getInputs(this.id).subscribe((resp: ParseModel[]) => {
             this.inputs = resp;
+            // every operator renders at once, so each port needs a list before the devices arrive
+            this.inputs?.forEach((input, operatorKey) => {
+                this.devices[operatorKey] = (input.inPorts ?? []).map(() => []);
+            });
             this.deviceInstanceService.getDeviceInstances({limit: 9999, offset: 0}).subscribe((deviceTotal) => {
                 const devices = deviceTotal.result;
                 this.allDevices = devices;
@@ -119,6 +123,11 @@ export class DeployFlowClassicComponent {
             this.createMappingVars();
             this.ready = true;
         });
+    }
+
+    /** There is nothing stored to restore on a new pipeline, so Discard returns to the flows. */
+    discard() {
+        this.router.navigate(['/data/flow-repo']);
     }
 
     trimExtendedId(id: string): string{

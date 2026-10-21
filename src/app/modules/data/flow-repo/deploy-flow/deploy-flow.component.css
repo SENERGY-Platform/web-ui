@@ -14,88 +14,73 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px;
-}
-
-
-mat-grid-list {
-    margin-bottom: 100px;
-}
-
-.panel_content {
-    padding-top: 10px;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.background {
-    background-image: url('/src/img/background_deviceTypes.png');
-    background-size: contain;
-}
-
-.device-icon {
-    top: 40px;
-    max-height: 100px;
-    max-width: 200px;
-    margin: auto;
-    display: block;
-    position: relative;
-}
-
-.main-panel {
-    height: calc(100% - 64px);
+/* A fixed height makes the container the scroll area, so the save bar sticks to its bottom edge; 64px is the toolbar. */
+.deploy-container {
+    height: calc(var(--app-page-height, 100vh) - 64px);
     overflow-y: auto;
-}
-
-
-
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
-}
-
-.checkbox-section {
     display: flex;
-    align-content: center;
-    align-items: center;
-    height: 60px;
+    flex-direction: column;
 }
 
-.checkbox-margin {
-    margin: 0 10px;
+.page {
+    flex: 1 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 24px 24px;
 }
 
 .full-width {
     width: 100%;
 }
 
-.warn-text {
-    padding-bottom: 20px;
-    padding-left: 5px;
+.field-limit-host {
+    display: block;
+    max-width: 40rem;
+}
+
+/* One block per operator input, and one for the operator's configuration. */
+.block {
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 6px;
+    padding: 12px 16px 0;
+    margin-bottom: 16px;
+}
+
+.block-title {
+    margin: 0 0 12px;
+    font-size: var(--app-text-md);
+    font-weight: 500;
+}
+
+.add-pipeline-button {
+    margin-bottom: 16px;
+}
+
+.pipeline-block {
+    border-left: 3px solid var(--mat-sys-outline-variant);
+    padding-left: 12px;
+    margin-bottom: 16px;
+}
+
+.remove-pipeline-button {
+    color: var(--app-danger);
+    margin-bottom: 16px;
+}
+
+.persist-data {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.checkbox-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 16px;
+    margin-bottom: 12px;
 }
 
 .device-type-not-used-label {
     font-weight: bold;
-}
-
-.radio-option {
-    padding: 8px;
-}
-
-.add-pipeline-button {
-    max-width: fit-content;
-    margin-bottom: 16px;
-}
-
-.post-pipeline-divider {
-    padding-bottom: 16px;
 }
 
 .widget-image {
@@ -103,19 +88,36 @@ mat-grid-list {
     width: 100%;
 }
 
-.fill-delete {
-    width: calc(100% - 1em);
-}
-
-.operator-accordion {
+.operator-picker {
+    max-width: 40rem;
     border: 1px solid var(--mat-sys-outline-variant);
-    margin-bottom: 1em;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 16px;
 }
 
-.operator-accordion mat-expansion-panel {
-    margin-bottom: 0 !important;
+.operator-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-size: 14px;
 }
 
-.operator-accordion .mat-expansion-panel .mat-expansion-panel-header {
-    padding-left: 0.75em;
+.operator-title {
+    font-weight: 500;
+}
+
+.operator-selected,
+.operator-hint {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.operator-hint {
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+.operator-image {
+    margin-top: 12px;
+    overflow: auto;
 }

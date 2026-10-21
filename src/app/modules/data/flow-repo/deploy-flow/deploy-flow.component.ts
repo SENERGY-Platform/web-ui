@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ParserService } from '../shared/parser.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
 import { ParseModel } from '../shared/parse.model';
 import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
@@ -35,8 +35,8 @@ import { FlowEngineService } from '../shared/flow-engine.service';
 import { PipelineInputSelectionModel } from './shared/pipeline-request.model';
 import { buildPipelineRequest, IMPORT_PREFIX, PipelineFormValue, sortedAspectIds } from './shared/pipeline-request.builder';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { concatMap, first, map, tap } from 'rxjs/operators';
-import { forkJoin, Observable, of, Subscription } from 'rxjs';
+import { concatMap, first, map, takeUntil, tap } from 'rxjs/operators';
+import { forkJoin, MonoTypeOperatorFunction, Observable, of, Subject, Subscription } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
 import { AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -50,19 +50,19 @@ import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.se
 import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
-import { MatButton, MatIconButton, MatFabButton } from '@angular/material/button';
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
-import { MatDivider } from '@angular/material/divider';
 import { AspectSelectComponent } from '../../../../core/components/aspect-select/aspect-select.component';
 import { NgClass } from '@angular/common';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatTooltip } from '@angular/material/tooltip';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
+import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { parseSvgImage, svgImageMarkup } from '../../../../core/svg-image';
 
@@ -128,7 +128,7 @@ type DeployFlowForm = FormGroup<{
     templateUrl: './deploy-flow.component.html',
     styleUrls: ['./deploy-flow.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatButton, FormsModule, ReactiveFormsModule, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatExpansionPanelDescription, MatExpansionPanelContent, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MatIconButton, MatDivider, AspectSelectComponent, NgClass, MtxOption, MatCheckbox, MatFabButton, MatTooltip, SpinnerComponent]
+    imports: [MatButton, FormsModule, ReactiveFormsModule, MatIcon, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, AspectSelectComponent, NgClass, MtxOption, MatCheckbox, SpinnerComponent, PageHeaderComponent, FormSectionComponent, SaveBarComponent]
 })
 export class DeployFlowComponent implements OnInit {
     private parserService = inject(ParserService);
@@ -148,6 +148,11 @@ export class DeployFlowComponent implements OnInit {
     private importInstancesService = inject(ImportInstancesService);
     private flowEngineService = inject(FlowEngineService);
     private aspectClassesService = inject(AspectClassesService);
+    /** Ends the change handlers of the current form when Discard replaces it; each handler keeps the subject of its own form. */
+    private detach$ = new Subject<void>();
+    private urlSegments: UrlSegment[] = [];
+    /** Image markup per pipeline and selected operator; change detection calls getImage on every pass. */
+    private imageCache = new Map<string, { image: PipelineModel['image']; markup: SafeHtml | undefined }>();
 
 
     static DEVICE_KEY = 'Devices';
@@ -160,6 +165,8 @@ export class DeployFlowComponent implements OnInit {
     flowId = '';
     pipelineId = '';
     editMode = false;
+    /** The name the pipeline was loaded with, for the page title. */
+    savedName = '';
     allDevices: DeviceInstanceWithDeviceTypeModel[] = [];
     pipelines: PipelineModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
@@ -222,68 +229,79 @@ export class DeployFlowComponent implements OnInit {
             .listImportInstances('', undefined, undefined, 'name.asc')
             .pipe(map(instances => (this.importInstances = instances))));
         obs.push(this.route.url.pipe(first(), concatMap(url => {
+            this.urlSegments = url;
             this.ready = false;
-            this.resetForm();
-            let id = this.route.snapshot.paramMap.get('id');
-            if (id === null) {
-                console.error('id not set!');
-                return of(null);
-            }
-            if (url[url.length - 2]?.path === 'edit') {
-                this.editMode = true;
-                return this.pipelineRegistryService.getPipeline(id || '').pipe(map((pipeline: PipelineModel | null) => {
-                    if (pipeline === null || pipeline.id.length === 0) {
-                        // does not 404
-                        snackSuccess(this.snackBar, 'Unknown pipeline');
-                        return;
-                    }
-                    id = pipeline.flowId;
-                    this.flowId = pipeline.flowId;
-                    this.pipelineId = pipeline.id;
-                    this.form.patchValue({
-                        name: pipeline.name,
-                        description: pipeline.description,
-                        windowTime: pipeline.windowTime || 30,
-                        enable_metrics: pipeline.metrics || true,
-                        consume_all_msgs: pipeline.consumeAllMessages || false,
-                        mergeStrategy: pipeline.mergeStrategy || 'inner',
-                    });
-                    return { pipeline, id };
-                }), concatMap(res => {
-                    if (res === undefined) {
-                        return of(null);
-                    }
-                    return this.parserService.getInputs(res.id).pipe(concatMap((parseModels: ParseModel[]) => {
-                        return this.deviceInstanceService
-                            .getDeviceInstancesWithDeviceType({ limit: 9999, offset: 0 })
-                            .pipe(concatMap(deviceTotal => {
-                                this.allDevices = deviceTotal.result;
-                                const observables: Observable<any>[] = [];
-                                parseModels.forEach((input) => {
-                                    const operator = res.pipeline.operators.find((o) => o.id === input.id);
-                                    observables.push(
-                                        this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics, operator?.persistData),
-                                    );
-                                });
-                                return forkJoin(observables);
-                            }));
-                    }));
-                }));
-            } else {
-                this.flowId = id || '';
-                return this.parserService.getInputs(this.flowId).pipe(concatMap((resp: ParseModel[]) => {
+            return this.loadForm(url);
+        })));
+        forkJoin(obs).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(_ => this.ready = true);
+    }
+
+    /**
+     * Builds the form for the route: empty for a flow to deploy, filled from the stored pipeline when editing. Emits
+     * whether the form was built, so Discard can keep the current form when the pipeline could not be loaded again.
+     */
+    private loadForm(url: UrlSegment[]): Observable<boolean> {
+        this.resetForm();
+        let id = this.route.snapshot.paramMap.get('id');
+        if (id === null) {
+            console.error('id not set!');
+            return of(false);
+        }
+        if (url[url.length - 2]?.path === 'edit') {
+            this.editMode = true;
+            return this.pipelineRegistryService.getPipeline(id || '').pipe(map((pipeline: PipelineModel | null) => {
+                if (pipeline === null || pipeline.id.length === 0) {
+                    // does not 404
+                    snackSuccess(this.snackBar, 'Unknown pipeline');
+                    return;
+                }
+                id = pipeline.flowId;
+                this.flowId = pipeline.flowId;
+                this.pipelineId = pipeline.id;
+                this.savedName = pipeline.name ?? '';
+                this.form.patchValue({
+                    name: pipeline.name,
+                    description: pipeline.description,
+                    windowTime: pipeline.windowTime || 30,
+                    enable_metrics: pipeline.metrics || true,
+                    consume_all_msgs: pipeline.consumeAllMessages || false,
+                    mergeStrategy: pipeline.mergeStrategy || 'inner',
+                });
+                return { pipeline, id };
+            }), concatMap(res => {
+                if (res === undefined) {
+                    return of(false);
+                }
+                return this.parserService.getInputs(res.id).pipe(concatMap((parseModels: ParseModel[]) => {
                     return this.deviceInstanceService
                         .getDeviceInstancesWithDeviceType({ limit: 9999, offset: 0 })
-                        .pipe(map(deviceTotal => {
+                        .pipe(concatMap(deviceTotal => {
                             this.allDevices = deviceTotal.result;
-                            resp.forEach((input) => {
-                                this.addNode(input, []);
+                            const observables: Observable<any>[] = [];
+                            parseModels.forEach((input) => {
+                                const operator = res.pipeline.operators.find((o) => o.id === input.id);
+                                observables.push(
+                                    this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics, operator?.persistData),
+                                );
                             });
+                            return forkJoin(observables).pipe(map(() => parseModels.length > 0));
                         }));
                 }));
-            }
-        })));
-        forkJoin(obs).subscribe(_ => this.ready = true);
+            }));
+        } else {
+            this.flowId = id || '';
+            return this.parserService.getInputs(this.flowId).pipe(concatMap((resp: ParseModel[]) => {
+                return this.deviceInstanceService
+                    .getDeviceInstancesWithDeviceType({ limit: 9999, offset: 0 })
+                    .pipe(map(deviceTotal => {
+                        this.allDevices = deviceTotal.result;
+                        resp.forEach((input) => {
+                            this.addNode(input, []);
+                        });
+                        return true;
+                    }));
+            }));
+        }
     }
 
     private resetForm() {
@@ -298,6 +316,11 @@ export class DeployFlowComponent implements OnInit {
         });
     }
 
+    /** Ends a form handler when its form is replaced (`detach`) or the page goes, even if it subscribes after that. */
+    private untilDetached<T>(detach: Subject<void>): MonoTypeOperatorFunction<T> {
+        return (source) => source.pipe(takeUntil(detach), takeUntilDestroyed(this.destroyRef));
+    }
+
     private addNode(
         newNode: ParseModel,
         inputSelections: PipelineInputSelectionModel[],
@@ -305,6 +328,7 @@ export class DeployFlowComponent implements OnInit {
         inputTopics: OperatorInputTopic[] = [],
         persistData = false,
     ): Observable<null[]> {
+        const detach = this.detach$;
         const observables: Observable<null>[] = [];
         const node: NodeGroup = this.fb.group({
             id: '',
@@ -337,14 +361,14 @@ export class DeployFlowComponent implements OnInit {
                 pipelines: this.fb.array<PipelineGroup>([]),
             });
             let aspectFunctionsSubscription: Subscription | undefined;
-            inputGroup.get('aspectIds')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((aspectIds: string[] | null) => {
+            inputGroup.get('aspectIds')?.valueChanges.pipe(this.untilDetached(detach)).subscribe((aspectIds: string[] | null) => {
                 aspectFunctionsSubscription?.unsubscribe();
                 aspectFunctionsSubscription = this.loadAspectFunctions(aspectIds || []).subscribe();
                 inputGroup.patchValue({
                     functionId: null,
                 });
             });
-            inputGroup.get('functionId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((functionId) => {
+            inputGroup.get('functionId')?.valueChanges.pipe(this.untilDetached(detach)).subscribe((functionId) => {
                 this.prepareSelectables(inputGroup).subscribe();
                 const func = this.getAspectFunctions(inputGroup.get('aspectIds')?.value).find((f) => f.id === functionId);
                 if (func !== undefined) {
@@ -356,13 +380,13 @@ export class DeployFlowComponent implements OnInit {
                 }
                
             });
-            inputGroup.get('characteristics')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
+            inputGroup.get('characteristics')?.valueChanges.pipe(this.untilDetached(detach)).subscribe((_) => {
                 this.prepareSelectables(inputGroup).subscribe();
                 inputGroup.patchValue({
                     selectableId: null,
                 });
             });
-            inputGroup.get('selectableId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selectableId) => {
+            inputGroup.get('selectableId')?.valueChanges.pipe(this.untilDetached(detach)).subscribe((selectableId) => {
                 inputGroup.patchValue({
                     filter: new Map<string, { serviceId: string; path: string }[]>(), // deviceId to serviceId and path
                     devices: [],
@@ -370,7 +394,7 @@ export class DeployFlowComponent implements OnInit {
                 inputGroup.controls.deviceTypes.clear();
                 this.selectableSelected(inputGroup, selectableId);
             });
-            inputGroup.get('devices')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((_) => {
+            inputGroup.get('devices')?.valueChanges.pipe(this.untilDetached(detach)).subscribe((_) => {
                 const formArray = inputGroup.controls.deviceTypes;
                 formArray.clear();
                 const deviceTypes = this.getDeviceTypes(inputGroup);
@@ -383,7 +407,7 @@ export class DeployFlowComponent implements OnInit {
                     formArray.push(deviceTypeGroup);
                     deviceTypeGroup
                         .get('selection')
-                        ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value as string, value as { service_id: string; path: string }[] | null));
+                        ?.valueChanges.pipe(this.untilDetached(detach)).subscribe((value) => this.servicePathSelected(inputGroup, deviceTypeGroup.get('id')?.value as string, value as { service_id: string; path: string }[] | null));
                     const options = this.getServiceOptions(inputGroup, deviceTypeGroup.get('id')?.value);
                     if (options.length === 1) {
                         deviceTypeGroup.patchValue({ selection: options });
@@ -406,7 +430,7 @@ export class DeployFlowComponent implements OnInit {
                     const operatorId = split[0];
                     inputTopic.mappings.forEach((mapping) => {
                         if (mapping.dest === input) {
-                            this.addPipeline(inputGroup, pipelineId, operatorId, mapping.source);
+                            this.addPipeline(inputGroup, pipelineId, operatorId, mapping.source, detach);
                         }
                     });
                 }
@@ -420,24 +444,26 @@ export class DeployFlowComponent implements OnInit {
                 );
                 observables.push(
                     new Observable<null>((obs) => {
-                        this.loadAspectFunctions(aspectIds).subscribe((functions) => {
+                        // unsubscribing ends the whole chain, so a load cut off on destroy patches nothing later
+                        const chain = new Subscription();
+                        chain.add(this.loadAspectFunctions(aspectIds).subscribe((functions) => {
                             const selectedFunction = functions.find((f) => f.id === inputSelection.functionId);
                             if (selectedFunction !== undefined) {
-                                return this.loadFunctionCharacteristics(selectedFunction).subscribe((_) => {
+                                chain.add(this.loadFunctionCharacteristics(selectedFunction).subscribe((_) => {
                                     inputGroup.patchValue({
                                         aspectIds,
                                         functionId: inputSelection.functionId,
                                         characteristics: inputSelection.characteristicIds,
                                         selectableId: inputSelection.selectableId,
                                     });
-                                    return this.prepareSelectables(inputGroup).subscribe((_1) => {
+                                    chain.add(this.prepareSelectables(inputGroup).subscribe((_1) => {
                                         let o: Observable<any>;
                                         if (inputSelection.selectableId?.startsWith(DeployFlowComponent.GROUP_PREFIX)) {
                                             o = this.loadDeviceGroup(inputSelection.selectableId);
                                         } else {
                                             o = of(null);
                                         }
-                                        return o.subscribe((_2) => {
+                                        chain.add(o.subscribe((_2) => {
                                             inputGroup.patchValue({
                                                 aspectIds,
                                                 functionId: inputSelection.functionId,
@@ -489,15 +515,15 @@ export class DeployFlowComponent implements OnInit {
                                             });
                                             obs.next(null);
                                             obs.complete();
-                                        });
-                                    });
-                                });
+                                        }));
+                                    }));
+                                }));
                             } else {
                                 obs.next(null);
                                 obs.complete();
                             }
-                            return;
-                        });
+                        }));
+                        return chain;
                     }),
                 );
             }
@@ -867,6 +893,54 @@ export class DeployFlowComponent implements OnInit {
         this.router.navigateByUrl('data/flow-repo/deploy-classic/' + this.flowId);
     }
 
+    /** The list the page belongs to: the pipelines when one is edited, else the flows a new one is deployed from. */
+    get listLink(): string {
+        return this.editMode ? '/data/pipelines' : '/data/flow-repo';
+    }
+
+    /** What the save bar says: what blocks saving, else whether anything changed. */
+    saveStatus(): string {
+        if (!this.form.valid) {
+            return 'Fill in the required fields to ' + (this.editMode ? 'update the pipeline' : 'deploy the flow');
+        }
+        return this.form.dirty ? 'Unsaved changes' : (this.editMode ? 'Editing' : 'Ready to deploy');
+    }
+
+    /**
+     * Loads the stored pipeline again; a new pipeline has nothing stored, so it returns to the flows. loadForm replaces
+     * the form at once and the template stays hidden until the reload ends; a failed reload puts the edited form back.
+     */
+    discard() {
+        if (!this.editMode) {
+            this.router.navigate([this.listLink]);
+            return;
+        }
+        if (!this.ready) {
+            return;
+        }
+        const previousForm = this.form;
+        const previousDetach = this.detach$;
+        this.detach$ = new Subject<void>();
+        this.ready = false;
+        let loaded = false;
+        // an error ends the stream without complete, so both paths settle here
+        const settle = (built: boolean) => {
+            if (built) {
+                previousDetach.next();
+            } else {
+                this.detach$.next();
+                this.detach$ = previousDetach;
+                this.form = previousForm;
+            }
+            this.ready = true;
+        };
+        this.loadForm(this.urlSegments).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: (built) => (loaded = built),
+            error: () => settle(false),
+            complete: () => settle(loaded),
+        });
+    }
+
     getServiceOptions(input: InputGroup, id: string | null | undefined): {group?: string; path: string; service_id: string }[] {
         const functionId = input.get('functionId')?.value;
         const aspectsKey = DeployFlowComponent.aspectsKey(input.get('aspectIds')?.value);
@@ -970,7 +1044,7 @@ export class DeployFlowComponent implements OnInit {
         };
     }
 
-    addPipeline(input: InputGroup, pipelineId: string = '', operatorId: string = '', path: string = '') {
+    addPipeline(input: InputGroup, pipelineId: string = '', operatorId: string = '', path: string = '', detach = this.detach$) {
         const pipelineOperator = this.getPipelineById(pipelineId)?.operators.find((o) => o.id === operatorId);
         const pipelineGroup: PipelineGroup = this.fb.group({
             pipelineId: '',
@@ -978,7 +1052,7 @@ export class DeployFlowComponent implements OnInit {
             topic: pipelineOperator !== undefined ? 'analytics-' + pipelineOperator.name : '',
             path: '',
         });
-        pipelineGroup.get('pipelineId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((newPipelineId) => {
+        pipelineGroup.get('pipelineId')?.valueChanges.pipe(this.untilDetached(detach)).subscribe((newPipelineId) => {
             const pipeline = this.getPipelineById(newPipelineId);
             if (pipeline !== undefined && pipeline.operators.length === 1) {
                 pipelineGroup.patchValue({
@@ -989,7 +1063,7 @@ export class DeployFlowComponent implements OnInit {
                 pipelineGroup.patchValue({ operatorId: '', topic: '' });
             }
         });
-        pipelineGroup.get('operatorId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((newOperatorId) => {
+        pipelineGroup.get('operatorId')?.valueChanges.pipe(this.untilDetached(detach)).subscribe((newOperatorId) => {
             const newPipelineId = pipelineGroup.get('pipelineId')?.value;
             if (newPipelineId !== undefined && newPipelineId !== '' && newOperatorId !== '') {
                 const newPipelineOperator = this.getPipelineById(newPipelineId)?.operators.find((o) => o.id === newOperatorId);
@@ -1036,18 +1110,32 @@ export class DeployFlowComponent implements OnInit {
         if (pipeline === undefined) {
             return undefined;
         }
-        const svg = parseSvgImage(pipeline.image);
+        const operatorId = pipelineGroup.get('operatorId')?.value ?? '';
+        const key = pipeline.id + '\n' + operatorId;
+        const cached = this.imageCache.get(key);
+        if (cached !== undefined && cached.image === pipeline.image) {
+            return cached.markup;
+        }
+        const markup = this.renderImage(pipeline.image, operatorId);
+        this.imageCache.set(key, { image: pipeline.image, markup });
+        return markup;
+    }
+
+    private renderImage(image: PipelineModel['image'], operatorId: string): SafeHtml | undefined {
+        const svg = parseSvgImage(image);
         if (svg === null) {
             return undefined;
         }
-        const viewbox = svg.getAttribute('viewbox')!.split(' ');
-        svg.setAttribute('height', viewbox[3]);
-        const elements = svg.getElementsByClassName('joint-cell') as any;
-        for (const element of elements) {
-            if (element.attributes['model-id'].value === pipelineGroup.get('operatorId')?.value) {
-                for (const node of element.childNodes) {
-                    if (node.attributes['stroke'] !== undefined && node.attributes['stroke'].value === 'black') {
-                        node.attributes['stroke'].value = 'red';
+        // the designer writes a lowercase viewbox; without either spelling the image keeps its own height
+        const height = (svg.getAttribute('viewbox') ?? svg.getAttribute('viewBox'))?.trim().split(/[\s,]+/)[3];
+        if (height !== undefined) {
+            svg.setAttribute('height', height);
+        }
+        for (const element of Array.from(svg.getElementsByClassName('joint-cell'))) {
+            if (element.getAttribute('model-id') === operatorId) {
+                for (const node of Array.from(element.children)) {
+                    if (node.getAttribute('stroke') === 'black') {
+                        node.setAttribute('stroke', 'red');
                     }
                 }
             }
@@ -1072,17 +1160,18 @@ export class DeployFlowComponent implements OnInit {
         const pipelines = this.getSubElementAsGroupArray(inputGroup, 'pipelines');
         pipelines.splice(index, 1);
         inputGroup.patchValue({ pipelines } as never); // the controls themselves, which patchValue only re-evaluates
+        this.form.markAsDirty();
     }
 
     selectOperator($event: MouseEvent, pipeline: PipelineGroup) {
-        for (const operatorNode of ($event.target as any)?.viewportElement?.getElementsByClassName('joint-cells-layer')[0].childNodes || []) {
-            if (
-                operatorNode.attributes['data-type'] !== undefined &&
-                operatorNode.attributes['data-type'].value === 'senergy.NodeElement'
-            ) {
+        const layer = ($event.target as SVGElement | null)?.viewportElement?.getElementsByClassName('joint-cells-layer')[0];
+        for (const operatorNode of Array.from(layer?.children ?? [])) {
+            const modelId = operatorNode.getAttribute('model-id');
+            if (operatorNode.getAttribute('data-type') === 'senergy.NodeElement' && modelId !== null) {
                 const rect: DOMRect = operatorNode.getBoundingClientRect();
                 if ($event.x < rect.right && $event.x > rect.left && $event.y > rect.top && $event.y < rect.bottom) {
-                    pipeline.patchValue({ operatorId: operatorNode.attributes['model-id'].value });
+                    pipeline.patchValue({ operatorId: modelId });
+                    this.form.markAsDirty();
                     return;
                 }
             }
