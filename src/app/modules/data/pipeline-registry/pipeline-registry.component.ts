@@ -16,7 +16,7 @@
 
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {FilterSelection, PipelineModel} from './shared/pipeline.model';
+import {FilterSelection, isPipelineEditable, PipelineModel} from './shared/pipeline.model';
 import { PipelineRegistryService } from './shared/pipeline-registry.service';
 import { FlowEngineService } from '../flow-repo/shared/flow-engine.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
@@ -262,7 +262,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     }
 
     isEditable(pipe: PipelineModel): boolean {
-        return pipe.operators.findIndex((op) => op.inputSelections !== undefined && op.inputSelections.length > 0) !== -1;
+        return isPipelineEditable(pipe);
     }
 
     isAllSelected() {

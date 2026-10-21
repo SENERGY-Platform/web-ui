@@ -14,73 +14,98 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px;
-}
-
-table {
-    width: 100%;
-}
-
-.v-align-middle {
-    vertical-align: middle;
-}
-
-.pipe-operator {
-    padding-left: 30px;
-}
-
-.operator-input {
-    padding-left: 60px;
-}
-
-.operator-mapping {
-    padding-left: 90px;
-}
-
-mat-grid-list {
-    margin-bottom: 100px;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.background {
-    background-image: url('/src/img/background_deviceTypes.png');
-    background-size: contain;
-}
-
-.device-icon {
-    top: 40px;
-    max-height: 100px;
-    max-width: 200px;
-    margin: auto;
-    display: block;
-    position: relative;
-}
-
-.main-panel {
-    height: calc(100% - 32px);
+/* A fixed height makes the container the scroll area; 64px is the toolbar. */
+.details-container {
+    height: calc(var(--app-page-height, 100vh) - 64px);
     overflow-y: auto;
 }
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
+.page {
+    padding: 0 24px 24px;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.facts {
+    margin: 0;
+}
+
+.fact {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 4px 16px;
+    padding: 6px 0;
+}
+
+.fact dt {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.fact dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.operator + .operator {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.operator-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+    font-size: var(--app-text-md);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.input {
+    margin-top: 8px;
+    padding-left: 16px;
+}
+
+.input-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-wrap: anywhere;
+}
+
+.rows {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 32px;
+}
+
+.rows li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    color: var(--mat-sys-on-surface-variant);
+    overflow-wrap: anywhere;
 }
 
 .widget-image {
-    height: auto;
     width: 100%;
     text-align: center;
 }
 
-/* Drawn at its viewBox size and centred, as the inline svg drew it, and scaled down to fit the card. */
+/* Drawn at its viewBox size and centred, as the inline svg drew it, and scaled down to fit the page. */
 .widget-image img {
     max-width: 100%;
+}
+
+@media (max-width: 600px) {
+    .fact {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }

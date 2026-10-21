@@ -14,107 +14,94 @@
   ~ limitations under the License.
   -->
 
-<div class="main-panel">
-  <div class="main-panel">
-    <div class="layout-margin ly-column">
-      <div class="ly-row ly-align-start-center" style="margin-bottom:8px;">
-        <button mat-raised-button color="accent" (click)="back()">back</button>
-      </div>
-      <mat-card appearance="outlined" style="margin-bottom:10px;">
-        <mat-card-header>
-          <div mat-card-avatar>
-            <mat-icon>timeline</mat-icon>
-          </div>
-          <mat-card-title>{{pipe.name}}</mat-card-title>
-          <mat-card-subtitle>Id: {{pipe.id}}</mat-card-subtitle>
-          <mat-card-subtitle>Flow Id: <a routerLink="/data/designer/{{pipe.flowId}}">{{pipe.flowId}}</a>
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="ly-column">
-          {{pipe.description}}
+<div class="details-container">
+  <senergy-spinner [elementCount]="1" [show]="!ready"></senergy-spinner>
+  @if (ready) {
+    <senergy-page-header [title]="pipe.name || 'Pipeline'" [description]="pipe.description || ''"
+      backLabel="Pipelines" backLink="/data/pipelines">
+      @if (pipe.id) {
+        <div pageActions class="actions">
+          @if (canEdit) {
+            <button matButton="filled" type="button" [routerLink]="['/data/pipelines/edit', pipe.id]">
+              <mat-icon>edit</mat-icon> Edit
+            </button>
+          }
+          <a matButton="outlined" [routerLink]="['/data/designer', pipe.flowId]">
+            <mat-icon>account_tree</mat-icon> Open in designer
+          </a>
         </div>
-      </mat-card-content>
-    </mat-card>
-    <mat-card appearance="outlined" class="config">
-      <mat-card-content>
+      }
+    </senergy-page-header>
+    <div class="page">
+      <senergy-form-section title="General">
+        <dl class="facts">
+          <div class="fact">
+            <dt>Id</dt>
+            <dd>{{pipe.id}}</dd>
+          </div>
+          <div class="fact">
+            <dt>Flow Id</dt>
+            <dd><a [routerLink]="['/data/designer', pipe.flowId]">{{pipe.flowId}}</a></dd>
+          </div>
+        </dl>
+      </senergy-form-section>
+      <senergy-form-section title="Operators">
+        <mat-checkbox sectionActions [(ngModel)]="showAll" [ngModelOptions]="{standalone: true}">Show All</mat-checkbox>
         @for (operator of pipe.operators; track operator) {
-          <div class="ly-column">
-            <h3>
-              <mat-icon class="v-align-middle">poll</mat-icon>
-            {{ operator.name }} - {{ operator.id }} - {{ operator.imageId }}</h3>
-            @for (config of getConfigByOperatorId(operator.id); track config) {
-              <div>
-                <h4>
-                  <mat-icon
-                    class="v-align-middle material-icons-outlined">build
-                  </mat-icon>
+          <div class="operator">
+            <h4 class="operator-name">
+              <mat-icon>poll</mat-icon>
+              {{ operator.name }} - {{ operator.id }} - {{ operator.imageId }}
+            </h4>
+            <ul class="rows">
+              @for (config of getConfigByOperatorId(operator.id); track config) {
+                <li>
+                  <mat-icon class="material-icons-outlined">build</mat-icon>
                   {{config[0]}}: {{config[1]}}
-                </h4>
-              </div>
-            }
+                </li>
+              }
+            </ul>
             @for (topic of operator.inputTopics; track topic) {
-              <div class="pipe-operator">
-                @if (show(topic)) {
-                  <div>
-                    <h4>
-                      <mat-icon
-                        class="v-align-middle material-icons-outlined">miscellaneous_services
-                      </mat-icon>
-                    {{ topic.name }} </h4>
-                    @if (topic.filterType !=='DeviceId') {
-                      <div class="operator-input">
-                        <h4>
-                          <mat-icon class="v-align-middle material-icons-outlined">poll</mat-icon>
-                        {{ getOperatorPipelineStr(topic.filterValue) }}</h4>
-                        @for (mapping of topic.mappings; track mapping) {
-                          <div class="operator-mapping">
-                            <h4>
-                              <mat-icon class="v-align-middle material-icons-outlined">map</mat-icon>
-                              {{mapping.source}} --> {{ mapping.dest}}
-                            </h4>
-                          </div>
-                        }
-                      </div>
-                    }
-                    @if (topic.filterType === 'DeviceId') {
-                      <div class="operator-input">
-                        @for (device of topic.devices; track device) {
-                          <h4>
-                            <mat-icon class="v-align-middle material-icons-outlined">devices</mat-icon>
-                            {{device}}
-                          </h4>
-                        }
-                        @for (mapping of topic.mappings; track mapping) {
-                          <div class="operator-mapping">
-                            <h4>
-                              <mat-icon class="v-align-middle material-icons-outlined">map</mat-icon>
-                              {{mapping.source}} --> {{ mapping.dest}}
-                            </h4>
-                          </div>
-                        }
-                      </div>
-                    }
+              @if (show(topic)) {
+                <div class="input">
+                  <div class="input-name">
+                    <mat-icon class="material-icons-outlined">miscellaneous_services</mat-icon>
+                    {{ topic.name }}
                   </div>
-                }
-              </div>
+                  <ul class="rows">
+                    @if (topic.filterType !== 'DeviceId') {
+                      <li>
+                        <mat-icon class="material-icons-outlined">poll</mat-icon>
+                        {{ getOperatorPipelineStr(topic.filterValue) }}
+                      </li>
+                    } @else {
+                      @for (device of topic.devices; track device) {
+                        <li>
+                          <mat-icon class="material-icons-outlined">devices</mat-icon>
+                          {{device}}
+                        </li>
+                      }
+                    }
+                    @for (mapping of topic.mappings; track mapping) {
+                      <li>
+                        <mat-icon class="material-icons-outlined">map</mat-icon>
+                        {{mapping.source}} --> {{ mapping.dest}}
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
             }
           </div>
         }
-      </mat-card-content>
-    </mat-card>
-    <mat-card appearance="outlined" style="margin-top: 10px;">
-      <div class="widget-image">
-        @if (imageUrl) {
-          <img [src]="imageUrl" alt="Pipeline image">
-        }
-      </div>
-    </mat-card>
-    <section class="checkbox-section">
-      <mat-checkbox class="checkbox-margin" [(ngModel)]="showAll" [ngModelOptions]="{standalone: true}">Show
-        All
-      </mat-checkbox>
-    </section>
-  </div>
-</div>
+      </senergy-form-section>
+      @if (imageUrl) {
+        <senergy-form-section title="Image">
+          <div class="widget-image">
+            <img [src]="imageUrl" alt="Pipeline image">
+          </div>
+        </senergy-form-section>
+      }
+    </div>
+  }
 </div>

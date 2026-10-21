@@ -90,3 +90,8 @@ export interface FilterSelection {
     flows?: string[];
     flowNames: string[];
 }
+
+/** Pipelines deployed before input selections existed carry none and cannot be edited. */
+export function isPipelineEditable(pipe: PipelineModel): boolean {
+    return pipe.operators.findIndex((op) => op.inputSelections !== undefined && op.inputSelections.length > 0) !== -1;
+}
