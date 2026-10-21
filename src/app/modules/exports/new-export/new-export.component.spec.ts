@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import { Location } from '@angular/common';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { NewExportComponent } from './new-export.component';
 import { ExportModel } from '../shared/export.model';
+import { DeviceTypeModel, DeviceTypeServiceModel } from '../../metadata/device-types-overview/shared/device-type.model';
+import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
 import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
@@ -37,6 +38,7 @@ import { ImportInstancesModel } from '../../imports/import-instances/shared/impo
 import { BrokerExportService } from '../shared/broker-export.service';
 import { ExportService } from '../shared/export.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { environment } from '../../../../environments/environment';
 import { liveMarkup, withHostileMarkup } from '../../../core/svg-image.mock';
 
 // The component is built in an injection context instead of rendered: what is covered here is
@@ -139,15 +141,16 @@ const IMAGE_TEMPLATE = '<span class="widget-image" [innerHtml]="image" (click)="
 const openForEditing = (
     exp: ExportModel = existingExport(),
     id: string | null = 'export-1',
-    rendered?: {image: string; fixture: (fixture: ComponentFixture<NewExportComponent>) => void},
+    rendered?: {image: string; fixture: (fixture: ComponentFixture<NewExportComponent>) => void; realTemplate?: boolean; loadDelay?: number},
 ): Harness => {
     let saved: ExportModel | undefined;
     let fail = false;
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
         providers: [
+            // the router providers come first: they bring an ActivatedRoute of their own
+            ...(rendered?.realTemplate ? [provideRouter([{path: 'exports/db', children: []}])] : []),
             { provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => id}}} },
-            { provide: Location, useValue: {} },
             { provide: PipelineRegistryService, useValue: {getPipelines: () => of([rendered === undefined ? pipeline : {...pipeline, image: rendered.image}])} },
             { provide: DeviceInstancesService, useValue: {getDeviceInstances: () => of({result: [], total: 0})} },
             { provide: DeviceTypeService, useValue: {} },
@@ -156,7 +159,7 @@ const openForEditing = (
                 useValue: {
                     getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'],
                     getExportDatabases: () => of([]),
-                    getExport: () => of(exp),
+                    getExport: () => (rendered?.loadDelay ? of(exp).pipe(delay(rendered.loadDelay)) : of(exp)),
                     editExport: (_id: string, edited: ExportModel) => {
                         saved = {...edited};
                         const status = fail ? 400 : 200;
@@ -169,7 +172,7 @@ const openForEditing = (
                     },
                 },
             },
-            { provide: BrokerExportService, useValue: {} },
+            { provide: BrokerExportService, useValue: {getExport: () => of(exp)} },
             {
                 provide: OperatorRepoService,
                 useValue: {
@@ -177,7 +180,7 @@ const openForEditing = (
                     setPaths: () => new Map<string, string | undefined>([['analytics.overall_confidence', 'float']]),
                 },
             },
-            { provide: Router, useValue: {navigate: () => undefined} },
+            ...(rendered?.realTemplate ? [] : [{ provide: Router, useValue: {navigate: () => undefined} }]),
             // a rendered spec keeps the real DomSanitizer, so what reaches the page is what Angular lets through
             ...(rendered === undefined ? [{ provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} }] : []),
             { provide: MatSnackBar, useValue: {open: () => undefined} },
@@ -199,7 +202,9 @@ const openForEditing = (
         component = TestBed.runInInjectionContext(() => new NewExportComponent());
         component.ngOnInit();
     } else {
-        TestBed.overrideTemplate(NewExportComponent, IMAGE_TEMPLATE);
+        if (!rendered.realTemplate) {
+            TestBed.overrideTemplate(NewExportComponent, IMAGE_TEMPLATE);
+        }
         const fixture = TestBed.createComponent(NewExportComponent);
         component = fixture.componentInstance;
         rendered.fixture(fixture);
@@ -217,17 +222,19 @@ interface CreateHarness {
 }
 
 // Opens the form for a new export of a device, with the given answer of the export service.
-const openForCreating = (startPipeline: () => Observable<ExportModel | null>): CreateHarness => {
+const openForCreating = (
+    startPipeline: (created: ExportModel) => Observable<ExportModel | null>,
+    deviceType: DeviceTypeModel | null = null,
+): CreateHarness => {
     const navigate = jasmine.createSpy('navigate');
     const snackOpen = jasmine.createSpy('open');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
         providers: [
             { provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => null}}} },
-            { provide: Location, useValue: {} },
             { provide: PipelineRegistryService, useValue: {getPipelines: () => of([])} },
             { provide: DeviceInstancesService, useValue: {getDeviceInstances: () => of({result: [], total: 0})} },
-            { provide: DeviceTypeService, useValue: {getDeviceType: () => of(null)} },
+            { provide: DeviceTypeService, useValue: {getDeviceType: () => of(deviceType)} },
             {
                 provide: ExportService,
                 useValue: {
@@ -236,7 +243,7 @@ const openForCreating = (startPipeline: () => Observable<ExportModel | null>): C
                     startPipeline,
                 },
             },
-            { provide: BrokerExportService, useValue: {} },
+            { provide: BrokerExportService, useValue: {startPipeline} },
             { provide: OperatorRepoService, useValue: {} },
             { provide: Router, useValue: {navigate} },
             { provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} },
@@ -434,4 +441,267 @@ describe('NewExportComponent', () => {
         expect(component.exportForm.valid).toBeTrue();
         expect(component.nameError(component.exportValues.at(1))).toBe('');
     }));
+
+    describe('saved payload', () => {
+        const wire = (created: ExportModel | undefined) => JSON.parse(JSON.stringify(created));
+        const FLOAT = 'https://schema.org/Float';
+        const STRUCTURE = 'https://schema.org/StructuredValue';
+        const service = {
+            id: 'urn:infai:ses:service:abc#1',
+            name: 'get_temperature',
+            outputs: [{
+                content_variable: {
+                    name: 'metrics',
+                    type: STRUCTURE,
+                    sub_content_variables: [
+                        {name: 'level', type: FLOAT},
+                        {name: 'time', type: 'https://schema.org/Text', characteristic_id: environment.timeStampCharacteristicId},
+                    ],
+                },
+            }],
+        };
+        const device = {id: 'urn:infai:ses:device:1', name: 'a device', device_type_id: 'dt-1'};
+
+        it('sends a new database export of a device as before', fakeAsync(() => {
+            let sent: ExportModel | undefined;
+            const {component} = openForCreating((created) => (sent = created, of(created)), {services: [service]} as unknown as DeviceTypeModel);
+            component.exportForm.patchValue({device: device as unknown as DeviceInstanceModel});
+            component.exportForm.patchValue({name: 'a name', description: 'a description', exportDatabaseId: 'timescale-db', service: service as unknown as DeviceTypeServiceModel});
+            tick();
+            component.exportForm.patchValue({allMessages: true});
+
+            component.onSubmit();
+
+            expect(wire(sent)).toEqual({
+                Name: 'a name',
+                Description: 'a description',
+                TimePath: 'value.metrics.time',
+                Values: [{Name: 'level', Path: 'value.metrics.level', Type: 'float', Tag: false}],
+                ExportDatabaseID: 'timescale-db',
+                TimestampFormat: null,
+                EntityName: 'a device',
+                Filter: 'urn:infai:ses:device:1',
+                FilterType: 'deviceId',
+                ServiceName: 'get_temperature',
+                Topic: 'urn_infai_ses_service_abc_1',
+                Offset: 'smallest',
+            });
+        }));
+
+        it('sends a new broker export with its own broker as before', fakeAsync(() => {
+            let sent: ExportModel | undefined;
+            const {component} = openForCreating((created) => (sent = created, of(created)), {services: [service]} as unknown as DeviceTypeModel);
+            component.exportForm.patchValue({device: device as unknown as DeviceInstanceModel});
+            component.exportForm.patchValue({name: 'a name', service: service as unknown as DeviceTypeServiceModel});
+            tick();
+            component.exportForm.controls.targetSelector.setValue(component.targetBroker);
+            component.exportForm.controls.customBrokerEnabled.setValue(true);
+            component.exportForm.patchValue({
+                customMqttBroker: 'tcp://broker:1883',
+                customMqttUser: 'a user',
+                customMqttPassword: 'a password',
+                customMqttBaseTopic: 'base/',
+            });
+
+            component.onSubmit();
+
+            expect(wire(sent)).toEqual({
+                Name: 'a name',
+                Description: null,
+                TimePath: 'value.metrics.time',
+                Values: [
+                    {Name: 'value/metrics', Path: 'value.metrics', Type: 'string_json', Tag: false},
+                    {Name: 'value/metrics/level', Path: 'value.metrics.level', Type: 'float', Tag: false},
+                    {Name: 'value/metrics/time', Path: 'value.metrics.time', Type: 'string', Tag: false},
+                ],
+                CustomMqttBroker: 'tcp://broker:1883',
+                CustomMqttUser: 'a user',
+                CustomMqttPassword: 'a password',
+                CustomMqttBaseTopic: 'base/',
+                ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
+                TimestampFormat: null,
+                EntityName: 'a device',
+                Filter: 'urn:infai:ses:device:1',
+                FilterType: 'deviceId',
+                ServiceName: 'get_temperature',
+                Topic: 'urn_infai_ses_service_abc_1',
+                Offset: 'largest',
+            });
+        }));
+
+        it('sends an edited export of a pipeline as before', fakeAsync(() => {
+            const {component, saved} = openForEditing();
+            component.exportForm.patchValue({name: 'renamed', description: 'described', allMessages: true});
+            component.addValue('extra', 'analytics.extra', 'string', true);
+
+            component.onSubmit();
+
+            expect(wire(saved())).toEqual({
+                ID: 'export-1',
+                Name: 'renamed',
+                Description: 'described',
+                Filter: PIPELINE_ID + ':' + OPERATOR_ID,
+                FilterType: 'operatorId',
+                EntityName: OPERATOR_ID,
+                ServiceName: 'first',
+                Topic: 'analytics-first',
+                TimePath: 'analytics.stopping_time',
+                ExportDatabaseID: 'timescale-db',
+                TimestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ',
+                Offset: 'smallest',
+                Values: [
+                    {Name: 'overall_confidence', Path: 'analytics.overall_confidence', Type: 'float', Tag: false},
+                    {Name: 'extra', Path: 'analytics.extra', Type: 'string', Tag: true},
+                ],
+            });
+        }));
+
+        it('sends an edited export of an import as before', fakeAsync(() => {
+            const {component, saved} = openForEditing(existingImportExport());
+            component.exportForm.patchValue({name: 'renamed'});
+            component.exportValues.at(0).patchValue({Name: 'renamed_value'});
+
+            component.onSubmit();
+
+            expect(wire(saved())).toEqual({
+                ID: 'export-2',
+                Name: 'renamed',
+                Filter: IMPORT_ID,
+                FilterType: 'import_id',
+                EntityName: 'an import',
+                ServiceName: IMPORT_TYPE_ID,
+                Topic: 'import-topic',
+                TimePath: 'time',
+                ExportDatabaseID: 'timescale-db',
+                Offset: 'largest',
+                Values: [{Name: 'renamed_value', Path: 'value', Type: 'float', Tag: false}],
+            });
+        }));
+    });
+
+    describe('page', () => {
+        let fixture: ComponentFixture<NewExportComponent>;
+        const render = (exp: ExportModel = existingExport(), id: string | null = 'export-1') =>
+            openForEditing(exp, id, {image: PIPELINE_IMAGE, fixture: (f) => (fixture = f), realTemplate: true});
+        const el = (selector: string) => fixture.nativeElement.querySelector(selector) as HTMLElement;
+        const status = () => el('senergy-save-bar .status').textContent;
+        const barButton = (name: string) => el('senergy-save-bar button.' + name) as HTMLButtonElement;
+
+        it('titles an export that is edited by its stored name and links back to its list', fakeAsync(() => {
+            const {component} = render();
+            fixture.detectChanges();
+
+            expect(el('.page-title').textContent).toBe('an export of a pipeline');
+            expect(el('a.page-back').getAttribute('href')).toBe('/exports/db');
+            expect(barButton('save').textContent?.trim()).toBe('Save');
+            expect(barButton('save').disabled).toBeFalse();
+            expect(status()).toBe('Editing');
+            expect(component.listLink).toBe('/exports/db');
+        }));
+
+        it('titles a new export and starts it only once the form is valid', fakeAsync(() => {
+            render(existingExport(), null);
+            fixture.detectChanges();
+
+            expect(el('.page-title').textContent).toBe('New export');
+            expect(barButton('save').textContent?.trim()).toBe('Start export');
+            expect(barButton('save').disabled).toBeTrue();
+            expect(status()).toBe('Fill in the required fields to start the export');
+        }));
+
+        it('links an export of the broker list back to it', fakeAsync(() => {
+            const {component} = openForEditing(existingExport(), BrokerExportService.ID_PREFIX + 'one');
+            expect(component.listLink).toBe('/exports/broker');
+        }));
+
+        it('has no submit button in the form, so Enter in a field neither submits nor removes a value', fakeAsync(() => {
+            render();
+            fixture.detectChanges();
+
+            const submits = Array.from(fixture.nativeElement.querySelectorAll('form button') as NodeListOf<HTMLButtonElement>).filter((b) => b.type === 'submit');
+            expect(submits).toEqual([]);
+        }));
+
+        it('saves from the save bar', fakeAsync(() => {
+            const {saved} = render();
+            fixture.detectChanges();
+
+            barButton('save').click();
+
+            expect(saved()?.Name).toBe('an export of a pipeline');
+        }));
+
+        it('reloads the stored export when Discard is clicked, dropping every edit', fakeAsync(() => {
+            const {component, saved} = render();
+            fixture.detectChanges();
+            component.operatorChanged(pipeline.operators[1]);
+            tick();
+            component.exportForm.patchValue({name: 'changed', allMessages: false});
+            component.exportForm.markAsDirty();
+            component.deleteValue(0);
+            component.addValue('extra', 'analytics.extra', 'string');
+            fixture.detectChanges();
+            expect(status()).toBe('Unsaved changes');
+
+            barButton('discard').click();
+            tick(200);
+            fixture.detectChanges();
+
+            expect(component.exportForm.getRawValue().name).toBe('an export of a pipeline');
+            expect(component.exportForm.getRawValue().allMessages).toBeTrue();
+            expect(component.exportForm.getRawValue().timePath).toBe('analytics.stopping_time');
+            expect(component.exportValues.getRawValue().map((v) => v.Name)).toEqual(['overall_confidence']);
+            expect(component.operator.id).toBe(OPERATOR_ID);
+            expect(component.exportForm.dirty).toBeFalse();
+            expect(status()).toBe('Editing');
+            expect(el('.operator-selected').textContent).toContain(OPERATOR_ID);
+            component.onSubmit();
+            expect(saved()?.Filter).toBe(PIPELINE_ID + ':' + OPERATOR_ID);
+            expect(saved()?.Name).toBe('an export of a pipeline');
+            expect(saved()?.Offset).toBe('smallest');
+        }));
+
+        it('loads the stored values once when Discard is clicked while the export is still loading', fakeAsync(() => {
+            const {component} = openForEditing(existingExport(), 'export-1', {image: PIPELINE_IMAGE, fixture: (f) => (fixture = f), realTemplate: true, loadDelay: 1000});
+            fixture.detectChanges();
+
+            barButton('discard').click();
+            tick(2000);
+            fixture.detectChanges();
+
+            expect(component.exportValues.getRawValue().map((v) => v.Name)).toEqual(['overall_confidence']);
+            expect(status()).toBe('Editing');
+        }));
+
+        it('keeps the edits when Discard cannot load the stored export again', fakeAsync(() => {
+            const {component, saved} = render();
+            fixture.detectChanges();
+            component.exportForm.patchValue({name: 'changed'});
+            component.exportForm.markAsDirty();
+            component.addValue('extra', 'analytics.extra', 'string');
+            fixture.detectChanges();
+            TestBed.inject(ExportService).getExport = () => of(null);
+
+            barButton('discard').click();
+            tick(200);
+            fixture.detectChanges();
+
+            expect(component.exportForm.getRawValue().name).toBe('changed');
+            expect(component.exportValues.getRawValue().map((v) => v.Name)).toEqual(['overall_confidence', 'extra']);
+            expect(status()).toBe('Unsaved changes');
+            component.onSubmit();
+            expect(saved()?.Filter).toBe(PIPELINE_ID + ':' + OPERATOR_ID);
+        }));
+
+        it('leaves for the list of the chosen target when Discard is clicked on a new export', fakeAsync(() => {
+            const {component, navigate} = openForCreating(() => of(null));
+
+            component.discard();
+            expect(navigate).toHaveBeenCalledWith(['/exports/db']);
+
+            component.exportForm.controls.targetSelector.setValue(component.targetBroker);
+            component.discard();
+            expect(navigate).toHaveBeenCalledWith(['/exports/broker']);
+        }));
+    });
 });

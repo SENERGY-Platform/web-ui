@@ -14,104 +14,100 @@
  * limitations under the License.
  */
 
-.layout-margin {
-    margin: 8px;
-    padding: 12px;
+/* A fixed height makes the container the scroll area, so the save bar sticks to its bottom edge; 64px is the toolbar. */
+.export-container {
+    height: calc(var(--app-page-height, 100vh) - 64px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
-.layout-value {
-    padding-top: 8px;
+.page {
+    flex: 1 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 24px 24px;
 }
 
-.layout-value {
-    padding-top: 8px;
-    padding-right: 24px;
+.full-width {
+    width: 100%;
 }
 
-.main-panel {
-    padding-bottom: 150px;
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 16px;
+    margin-bottom: 12px;
 }
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
+.consume-all {
+    display: block;
+    margin-bottom: 8px;
 }
 
-.radio-button {
-    margin: 5px;
+.toggle-row {
+    margin-bottom: 16px;
 }
 
-.inline {
-    padding-bottom: 1.25em;
-}
-
-.pad-right {
-    padding-right: 30px;
-}
-
-.operator-accordion {
+.operator-picker {
+    max-width: 40rem;
     border: 1px solid var(--mat-sys-outline-variant);
     border-radius: 6px;
-    margin-bottom: 1.34375em;
+    padding: 12px;
+    margin-bottom: 16px;
 }
 
-.operator-accordion-error {
+.operator-picker-error {
     border: 2px solid var(--mat-sys-error);
-    margin-bottom: 0;
+    margin-bottom: 4px;
 }
 
-.operator-titel {
+.operator-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
     font-size: 14px;
 }
 
-.operator-titel-error {
+.operator-title {
+    font-weight: 500;
+}
+
+.operator-picker-error .operator-title {
     color: var(--mat-sys-error);
 }
 
-.operator-accordion mat-expansion-panel {
-    margin-bottom: 0;
-    background-color: transparent;
+.operator-selected,
+.operator-hint {
+    color: var(--mat-sys-on-surface-variant);
 }
 
-.operator-accordion .mat-expansion-panel .mat-expansion-panel-header {
-    padding-left: 0.75em;
+.operator-hint {
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+.operator-image {
+    margin-top: 12px;
+    overflow: auto;
 }
 
 .operator-error {
     font-size: 75%;
-    font-weight: 400;
     padding-left: 10px;
-    margin-top: 0.6666666667em;
-    margin-bottom: 0.3333333em;
+    margin-bottom: 16px;
     line-height: 1.125;
     color: var(--mat-sys-error);
 }
 
-.button-header {
-    padding-left: 8px;
-    padding-top: 7px;
-    padding-bottom: 7px;
-    overflow: hidden;
+.value-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 12px;
 }
 
-.source-label {
-    padding-right: 4px;
-    margin-top: auto;
-    margin-bottom: auto;
+.value-field {
+    flex: 1 1 12rem;
+    min-width: 0;
 }
-
-.source-container {
-    padding-bottom: 1.34375em;
-}
-
-.button-footer {
-    margin-top: 8px;
-}
-
-:host mat-form-field {
-    padding-bottom: 5pt;
-    padding-top: 2pt;
-}
-

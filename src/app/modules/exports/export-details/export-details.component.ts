@@ -15,9 +15,9 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Location, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {ExportModel, ExportValueBaseModel} from '../shared/export.model';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {ExportService} from '../shared/export.service';
 import {ExportDataService} from '../../../widgets/shared/export-data.service';
 import {
@@ -32,14 +32,14 @@ import {AuthorizationService} from '../../../core/services/authorization.service
 import {environment} from '../../../../environments/environment';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ClipboardService} from 'ngx-clipboard';
-import { MatIconButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
-import { MatList, MatListItem, MatListItemIcon, MatListItemLine } from '@angular/material/list';
-import { MatDivider } from '@angular/material/divider';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 @Component({
@@ -47,14 +47,14 @@ import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
     templateUrl: './export-details.component.html',
     styleUrls: ['./export-details.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatIconButton, MatTooltip, MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, MatList, MatListItem, MatListItemIcon, MatListItemLine, MatDivider, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, SpinnerComponent, DatePipe]
+    imports: [MatButton, MatIconButton, MatTooltip, MatIcon, RouterLink, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, SpinnerComponent, DatePipe, PageHeaderComponent, FormSectionComponent]
 })
 export class ExportDetailsComponent implements OnInit {
     private route = inject(ActivatedRoute);
-    private location = inject(Location);
     private snackBar = inject(MatSnackBar);
     private clipboardService = inject(ClipboardService);
     private exportService = inject(ExportService);
+    private permissionsService = inject(PermissionsService);
     private authorizationService = inject(AuthorizationService);
     private brokerExportService = inject(BrokerExportService);
     private exportDataService = inject(ExportDataService);
@@ -71,10 +71,17 @@ export class ExportDetailsComponent implements OnInit {
     lastValuesReady = false;
     lastValuesRequestElementModels: (LastValuesRequestElementInfluxModel | LastValuesRequestElementTimescaleModel)[] = [];
     showPassword = false;
+    /** Whether the Edit action is offered: the same two conditions as the Edit entry of the export list. */
+    canEdit = false;
 
     ngOnInit() {
         this.id = this.route.snapshot.paramMap.get('id');
         if (this.id !== null) {
+            const id = this.id;
+            if (this.exportService.userHasUpdateAuthorization()) {
+                this.permissionsService.getComputedResourcePermissionsV2('export-instances', [id])
+                    .subscribe((permissions) => (this.canEdit = permissions.find((p) => p.id === id)?.write === true));
+            }
             if (this.brokerMode) {
                 this.hasLastValues = true;
                 this.displayedColumns = ['Name', 'Path', 'CopyClipboard'];
@@ -145,8 +152,23 @@ export class ExportDetailsComponent implements OnInit {
         }
     }
 
-    goBack() {
-        this.location.back();
+    get listLink(): string {
+        return this.brokerMode ? '/exports/broker' : '/exports/db';
+    }
+
+    /** What the export reads from, as the list names it. */
+    get sourceLabel(): string {
+        switch (this.export.FilterType) {
+        case 'deviceId':
+            return 'Device';
+        case 'pipeId':
+        case 'operatorId':
+            return 'Pipeline';
+        case 'import_id':
+            return 'Import';
+        default:
+            return 'Source';
+        }
     }
 
     get brokerMode(): boolean {

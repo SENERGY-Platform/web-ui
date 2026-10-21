@@ -15,8 +15,7 @@
  */
 
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Location, NgClass, KeyValuePipe } from '@angular/common';
+import { KeyValuePipe } from '@angular/common';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
@@ -43,13 +42,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {IOModel, OperatorModel, typeBoolean, typeFloat, typeList, typeInteger, typeString, typeStructure} from '../../data/operator-repo/shared/operator.model';
 import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
 import { environment } from '../../../../environments/environment';
-import { forkJoin, Observable, of } from 'rxjs';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ImportInstancesService } from '../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../imports/import-instances/shared/import-instances.model';
 import { ImportTypeContentVariableModel, ImportTypeModel } from '../../imports/import-types/shared/import-types.model';
 import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import * as _ from 'lodash';
 import { BrokerExportService } from '../shared/broker-export.service';
@@ -58,19 +57,20 @@ import { AddTagFn } from '../../../core/model/mtx-select.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { stateMatcher } from '../../data/operator-repo/shared/operator-validation';
-import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatCard } from '@angular/material/card';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatInput } from '@angular/material/input';
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription } from '@angular/material/expansion';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../core/components/save-bar/save-bar.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { parseSvgImage, svgImageMarkup } from '../../../core/svg-image';
 
@@ -86,12 +86,14 @@ type ExportValueGroup = FormGroup<{
     templateUrl: './new-export.component.html',
     styleUrls: ['./new-export.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatIconButton, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatCard, MatRadioGroup, MatRadioButton, MatFormField, MatLabel, MtxSelect, MtxOption, MatError, MatErrorMessagesDirective, MatSlideToggle, MatInput, MatAccordion, NgClass, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatCheckbox, MatPaginator, MatButton, SpinnerComponent, MatFabButton, KeyValuePipe]
+    imports: [MatIconButton, MatTooltip, MatIcon, FormsModule, ReactiveFormsModule, MatRadioGroup, MatRadioButton, MatFormField, MatLabel, MtxSelect, MtxOption, MatError, MatErrorMessagesDirective, MatSlideToggle, MatInput, MatCheckbox, MatPaginator, MatButton, SpinnerComponent, KeyValuePipe, PageHeaderComponent, FormSectionComponent, SaveBarComponent]
 })
 export class NewExportComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
-    private location = inject(Location);
+    /** Ends the form's change handlers: when the page goes, and when Discard reloads the export. */
+    private readonly detach$ = new Subject<void>();
+    private changesTimer: ReturnType<typeof setTimeout> | undefined;
     private pipelineRegistryService = inject(PipelineRegistryService);
     private deviceInstanceService = inject(DeviceInstancesService);
     private deviceTypeService = inject(DeviceTypeService);
@@ -149,6 +151,8 @@ export class NewExportComponent implements OnInit {
     private storedOffset: string | undefined;
 
     ready = true;
+    /** The name the export was loaded with, for the page title. */
+    savedName = '';
     export = {} as ExportModel;
     deviceType = {} as DeviceTypeModel;
     operator = {} as PipelineOperatorModel;
@@ -183,6 +187,7 @@ export class NewExportComponent implements OnInit {
         }
         this.timestamp_formats = this.exportService.getTimestampFormats();
         this.exportForm.patchValue({selector: 'device'});
+        this.destroyRef.onDestroy(() => this.detach$.next());
     }
 
     ngOnInit() {
@@ -208,118 +213,134 @@ export class NewExportComponent implements OnInit {
             this.exportForm.patchValue({exportDatabaseId: environment.exportDatabaseIdInternalTimescaleDb});
             setTimeout(() => {
                 if (this.id !== null) {
-                    const obs = (
-                        this.id.startsWith(BrokerExportService.ID_PREFIX) ? this.brokerExportService : this.exportService
-                    ).getExport(this.id);
-                    obs.subscribe((exp: ExportModel | null) => {
-                        if (exp !== null) {
-                            this.exportForm.patchValue({
-                                name: exp.Name,
-                                description: exp.Description,
-                                timePath: exp.TimePath,
-                                customBrokerEnabled: exp.CustomMqttBroker !== undefined && exp.CustomMqttBroker !== null,
-                                customMqttBroker: exp.CustomMqttBroker,
-                                customMqttUser: exp.CustomMqttUser,
-                                customMqttPassword: exp.CustomMqttPassword,
-                                customMqttBaseTopic: exp.CustomMqttBaseTopic,
-                                exportDatabaseId: exp.ExportDatabaseID,
-                                timestampFormat: exp.TimestampFormat,
-                            });
-                            exp.Values.forEach(v => this.addValue(v.Name, v.Path, v.Type, v.Tag));
-                            this.storedOffset = exp.Offset;
-                            // an export created from the import dialog says earliest, the form itself writes smallest
-                            if (exp.Offset === 'smallest' || exp.Offset === 'earliest') {
-                                this.exportForm.patchValue({allMessages: true});
-                            }
-                            if (exp.FilterType === 'deviceId') {
-                                this.exportForm.patchValue({selector: 'device'});
-                                this.disableUnusedSources('device');
-                                setTimeout(() => {
-                                    this.devices.forEach((device) => {
-                                        if (device.id === exp.Filter) {
-                                            this.exportForm.patchValue({device});
-                                            this.deviceTypeService
-                                                .getDeviceType(device.device_type_id)
-                                                .subscribe((resp: DeviceTypeModel | null) => {
-                                                    if (resp !== null) {
-                                                        this.deviceType = resp;
-                                                        this.deviceType.services.forEach((service) => {
-                                                            if (service.id === exp.Topic!.replace(/_/g, ':')) {
-                                                                this.exportForm.patchValue({service});
-                                                                service.outputs.forEach((out: DeviceTypeContentModel) => {
-                                                                    const pathString = 'value';
-                                                                    this.traverseDataStructure(pathString, out.content_variable);
-                                                                });
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                        }
-                                    });
-                                });
-                            } else if (exp.FilterType === 'operatorId') {
-                                this.exportForm.patchValue({selector: 'pipe'});
-                                this.disableUnusedSources('pipe');
-                                this.pipelines.forEach((pipeline) => {
-                                    if (pipeline.id === exp.Filter.split(':')[0]) {
-                                        this.exportForm.patchValue({pipeline});
-                                        pipeline.operators.forEach((operator: PipelineOperatorModel) => {
-                                            if (operator.id === exp.Filter.split(':')[1]) {
-                                                this.operator = operator;
-                                                this.updateImage(this.operator.id);
-                                                this.operatorRepoService
-                                                    .getOperator(operator.operatorId)
-                                                    .subscribe((resp: OperatorModel | null) => {
-                                                        this.paths = this.operatorRepoService.setPaths(resp);
-                                                        this.paths.set('time', 'string');
-                                                        this.paths.set('analytics', this.typeStructure);
-                                                    });
-                                            }
-                                        });
-                                    }
-                                });
-                            } else if (exp.FilterType === 'pipeId') {
-                                this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', 'close', {
-                                    duration: 5000,
-                                    verticalPosition: 'top',
-                                    panelClass: 'snack-bar-error'
-                                });
-                                this.exportForm.patchValue({selector: 'pipe'});
-                                this.disableUnusedSources('pipe');
-                                this.pipelines.forEach((pipeline) => {
-                                    if (pipeline.id === exp.Filter) {
-                                        this.exportForm.patchValue({pipeline});
-                                        if (pipeline.operators.length === 1) {
-                                            this.operator = pipeline.operators[0];
-                                            this.operatorRepoService
-                                                .getOperator(this.operator.operatorId)
-                                                .subscribe((resp: OperatorModel | null) => {
-                                                    this.paths = this.operatorRepoService.setPaths(resp);
-                                                    this.paths.set('time', 'string');
-                                                    this.paths.set('analytics', this.typeStructure);
-                                                });
-                                        }
-                                    }
-                                });
-                            } else if (exp.FilterType === 'import_id') {
-                                this.exportForm.patchValue({selector: 'import'});
-                                this.disableUnusedSources('import');
-                                const importInstance: ImportInstancesModel =
-                                    this.imports.find((i) => i.id === exp.Filter) || ({} as ImportInstancesModel);
-                                this.exportForm.patchValue({import: importInstance});
-                                this.getImportType(exp.ServiceName).subscribe((type) => {
-                                    type.output.sub_content_variables?.forEach((output) => this.traverseDataStructure('', output));
-                                });
-                            }
-                            this.export = exp;
-                        }
-                        setTimeout(() => this.onChanges(), 100); // delay for async init
-                    });
+                    this.loadExport(this.id);
                 } else {
                     this.onChanges();
                 }
             }, 0);
             this.ready = true;
+        });
+    }
+
+    /**
+     * Loads the stored export into the form; the form's change handlers attach only afterwards, so the patches do not trigger them.
+     * A Discard ends a load still in flight through `detach$`, so its answer cannot add the values a second time, and
+     * clears the edits only once the export arrived, so a failed reload keeps them.
+     */
+    private loadExport(id: string, reload = false) {
+        const obs = (
+            id.startsWith(BrokerExportService.ID_PREFIX) ? this.brokerExportService : this.exportService
+        ).getExport(id);
+        obs.pipe(takeUntil(this.detach$)).subscribe((exp: ExportModel | null) => {
+            if (exp !== null) {
+                if (reload) {
+                    this.resetLoadedState();
+                }
+                this.exportForm.patchValue({
+                    name: exp.Name,
+                    description: exp.Description,
+                    timePath: exp.TimePath,
+                    customBrokerEnabled: exp.CustomMqttBroker !== undefined && exp.CustomMqttBroker !== null,
+                    customMqttBroker: exp.CustomMqttBroker,
+                    customMqttUser: exp.CustomMqttUser,
+                    customMqttPassword: exp.CustomMqttPassword,
+                    customMqttBaseTopic: exp.CustomMqttBaseTopic,
+                    exportDatabaseId: exp.ExportDatabaseID,
+                    timestampFormat: exp.TimestampFormat,
+                });
+                exp.Values.forEach(v => this.addValue(v.Name, v.Path, v.Type, v.Tag));
+                this.storedOffset = exp.Offset;
+                // an export created from the import dialog says earliest, the form itself writes smallest
+                if (exp.Offset === 'smallest' || exp.Offset === 'earliest') {
+                    this.exportForm.patchValue({allMessages: true});
+                }
+                if (exp.FilterType === 'deviceId') {
+                    this.exportForm.patchValue({selector: 'device'});
+                    this.disableUnusedSources('device');
+                    setTimeout(() => {
+                        this.devices.forEach((device) => {
+                            if (device.id === exp.Filter) {
+                                this.exportForm.patchValue({device});
+                                this.deviceTypeService
+                                    .getDeviceType(device.device_type_id)
+                                    .subscribe((resp: DeviceTypeModel | null) => {
+                                        if (resp !== null) {
+                                            this.deviceType = resp;
+                                            this.deviceType.services.forEach((service) => {
+                                                if (service.id === exp.Topic!.replace(/_/g, ':')) {
+                                                    this.exportForm.patchValue({service});
+                                                    service.outputs.forEach((out: DeviceTypeContentModel) => {
+                                                        const pathString = 'value';
+                                                        this.traverseDataStructure(pathString, out.content_variable);
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                            }
+                        });
+                    });
+                } else if (exp.FilterType === 'operatorId') {
+                    this.exportForm.patchValue({selector: 'pipe'});
+                    this.disableUnusedSources('pipe');
+                    this.pipelines.forEach((pipeline) => {
+                        if (pipeline.id === exp.Filter.split(':')[0]) {
+                            this.exportForm.patchValue({pipeline});
+                            pipeline.operators.forEach((operator: PipelineOperatorModel) => {
+                                if (operator.id === exp.Filter.split(':')[1]) {
+                                    this.operator = operator;
+                                    this.updateImage(this.operator.id);
+                                    this.operatorRepoService
+                                        .getOperator(operator.operatorId)
+                                        .subscribe((resp: OperatorModel | null) => {
+                                            this.paths = this.operatorRepoService.setPaths(resp);
+                                            this.paths.set('time', 'string');
+                                            this.paths.set('analytics', this.typeStructure);
+                                        });
+                                }
+                            });
+                        }
+                    });
+                } else if (exp.FilterType === 'pipeId') {
+                    if (!reload) {
+                        this.snackBar.open('Outdated export version - Please reconfigure and redeploy the export', 'close', {
+                            duration: 5000,
+                            verticalPosition: 'top',
+                            panelClass: 'snack-bar-error'
+                        });
+                    }
+                    this.exportForm.patchValue({selector: 'pipe'});
+                    this.disableUnusedSources('pipe');
+                    this.pipelines.forEach((pipeline) => {
+                        if (pipeline.id === exp.Filter) {
+                            this.exportForm.patchValue({pipeline});
+                            if (pipeline.operators.length === 1) {
+                                this.operator = pipeline.operators[0];
+                                this.operatorRepoService
+                                    .getOperator(this.operator.operatorId)
+                                    .subscribe((resp: OperatorModel | null) => {
+                                        this.paths = this.operatorRepoService.setPaths(resp);
+                                        this.paths.set('time', 'string');
+                                        this.paths.set('analytics', this.typeStructure);
+                                    });
+                            }
+                        }
+                    });
+                } else if (exp.FilterType === 'import_id') {
+                    this.exportForm.patchValue({selector: 'import'});
+                    this.disableUnusedSources('import');
+                    const importInstance: ImportInstancesModel =
+                        this.imports.find((i) => i.id === exp.Filter) || ({} as ImportInstancesModel);
+                    this.exportForm.patchValue({import: importInstance});
+                    this.getImportType(exp.ServiceName).subscribe((type) => {
+                        type.output.sub_content_variables?.forEach((output) => this.traverseDataStructure('', output));
+                    });
+                }
+                this.export = exp;
+                this.savedName = exp.Name ?? '';
+            }
+            this.ready = true;
+            this.changesTimer = setTimeout(() => this.onChanges(), 100); // delay for async init
         });
     }
 
@@ -436,7 +457,7 @@ export class NewExportComponent implements OnInit {
     onChanges(): void {
         if (this.exportForm) {
             if (this.exportForm.get('selector')) {
-                this.exportForm.get('selector')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selection) => {
+                this.exportForm.get('selector')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((selection) => {
                     this.applySelectorState(selection);
 
                     if (!this.id) {
@@ -457,7 +478,7 @@ export class NewExportComponent implements OnInit {
                     }
                 });
             }
-            this.exportForm.get('targetSelector')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((target) => {
+            this.exportForm.get('targetSelector')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((target) => {
                 if (target === this.targetDb) {
                     this.exportForm.patchValue({
                         customBrokerEnabled: false,
@@ -471,7 +492,7 @@ export class NewExportComponent implements OnInit {
                 // autofill may leave the values as they are, and only the names of a database export become columns
                 this.exportValues.updateValueAndValidity();
             });
-            this.exportForm.get('customBrokerEnabled')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((customBrokerEnabled) => {
+            this.exportForm.get('customBrokerEnabled')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((customBrokerEnabled) => {
                 if (!customBrokerEnabled) {
                     this.exportForm.patchValue({
                         customMqttBroker: undefined,
@@ -489,7 +510,7 @@ export class NewExportComponent implements OnInit {
                 }
             });
             if (this.exportForm.get('device')) {
-                this.exportForm.get('device')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((deviceValue) => {
+                this.exportForm.get('device')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((deviceValue) => {
                     const device = deviceValue as DeviceInstanceModel;
                     if (!_.isEmpty(device)) {
                         if (this.exportForm.value.device !== device) {
@@ -507,7 +528,7 @@ export class NewExportComponent implements OnInit {
                 });
             }
             if (this.exportForm.get('service')) {
-                this.exportForm.get('service')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((serviceValue) => {
+                this.exportForm.get('service')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((serviceValue) => {
                     const service = serviceValue as DeviceTypeServiceModel;
                     if (!_.isEmpty(service)) {
                         this.resetVars();
@@ -521,7 +542,7 @@ export class NewExportComponent implements OnInit {
                 });
             }
             if (this.exportForm.get('pipeline')) {
-                this.exportForm.get('pipeline')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((pipeValue) => {
+                this.exportForm.get('pipeline')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((pipeValue) => {
                     const pipe = pipeValue as PipelineModel;
                     this.exportForm.patchValue({operator: null, timePath: null});
                     this.operator = {} as PipelineOperatorModel;
@@ -546,7 +567,7 @@ export class NewExportComponent implements OnInit {
             }
 
             if (this.exportForm.get('import')) {
-                this.exportForm.get('import')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((importValue) => {
+                this.exportForm.get('import')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((importValue) => {
                     const i = importValue as ImportInstancesModel;
                     this.resetVars();
                     if (!_.isEmpty(i)) {
@@ -567,7 +588,7 @@ export class NewExportComponent implements OnInit {
             }
 
             if (this.exportForm.get('timePath')) {
-                this.exportForm.get('timePath')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((path) => {
+                this.exportForm.get('timePath')?.valueChanges.pipe(takeUntil(this.detach$)).subscribe((path) => {
                     if (path !== '' && path !== null) {
                         // ensure value not also exported
                         const i = this.exportValues.controls.findIndex((v) => v.value.Path === path);
@@ -603,7 +624,7 @@ export class NewExportComponent implements OnInit {
                 });
             }
 
-            this.formatControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((selection) => {
+            this.formatControl.valueChanges.pipe(takeUntil(this.detach$)).subscribe((selection) => {
                 this.exportForm.get('timestampFormat')?.setValue(selection);
             });
         }
@@ -873,8 +894,65 @@ export class NewExportComponent implements OnInit {
         }
     }
 
-    goBack() {
-        this.location.back();
+    /** The list the export belongs to: an existing one by its id, a new one by the target chosen so far. */
+    get listLink(): string {
+        const broker = this.id !== null
+            ? this.id.startsWith(BrokerExportService.ID_PREFIX)
+            : this.exportForm.getRawValue().targetSelector === this.targetBroker;
+        return broker ? '/exports/broker' : '/exports/db';
+    }
+
+    /** What the save bar says: what blocks saving, else whether anything changed. */
+    saveStatus(): string {
+        if (!this.exportForm.valid) {
+            return 'Fill in the required fields to ' + (this.id === null ? 'start the export' : 'save');
+        }
+        return this.exportForm.dirty ? 'Unsaved changes' : (this.id === null ? 'Ready to start' : 'Editing');
+    }
+
+    /** Loads the stored export again, which drops all edits once it arrived; a new export has no stored state, so it returns to the list. */
+    discard() {
+        if (this.id === null) {
+            this.router.navigate([this.listLink]);
+            return;
+        }
+        if (this.changesTimer !== undefined) {
+            clearTimeout(this.changesTimer);
+        }
+        this.detach$.next();
+        this.ready = false;
+        this.loadExport(this.id, true);
+    }
+
+    /** Puts the form and everything derived from the loaded export back to what the constructor left. */
+    private resetLoadedState() {
+        this.exportValues.clear();
+        this.paths.clear();
+        this.export = {} as ExportModel;
+        this.deviceType = {} as DeviceTypeModel;
+        this.operator = {} as PipelineOperatorModel;
+        this.image = '';
+        this.timeSuggest = '';
+        this.storedOffset = undefined;
+        this.lastPageEvent = undefined;
+        this.offset = 0;
+        const raw = this.exportForm.getRawValue();
+        this.exportForm.reset({
+            selector: raw.selector,
+            targetSelector: raw.targetSelector,
+            customBrokerEnabled: '',
+            name: '',
+            description: '',
+            timePath: '',
+            allMessages: false,
+            exportDatabaseId: environment.exportDatabaseIdInternalTimescaleDb,
+            timestampFormat: '',
+        }, {emitEvent: false});
+        this.formatControl.setValue('', {emitEvent: false});
+        this.exportForm.controls.device.enable({onlySelf: true, emitEvent: false});
+        for (const control of ['service', 'timePath', 'import', 'operator', 'pipeline'] as const) {
+            this.exportForm.controls[control].disable({onlySelf: true, emitEvent: false});
+        }
     }
 
     movePage($event: PageEvent) {

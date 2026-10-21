@@ -15,73 +15,42 @@
  */
 
 
-table {
-    width: 100%;
-}
-
-
-mat-grid-list {
-    margin-bottom: 100px;
-}
-
-.truncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.background {
-    background-image: url('/src/img/background_deviceTypes.png');
-    background-size: contain;
-}
-
-.device-icon {
-    top: 40px;
-    max-height: 100px;
-    max-width: 200px;
-    margin: auto;
-    display: block;
-    position: relative;
-}
-
-.main-panel {
-    height: calc(100% - 64px);
+/* A fixed height makes the container the scroll area; 64px is the toolbar. */
+.details-container {
+    height: calc(var(--app-page-height, 100vh) - 64px);
     overflow-y: auto;
 }
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
+.page {
+    padding: 0 24px 24px;
 }
 
-.radio-group {
-    display: inline-flex;
-    flex-direction: column;
+.meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: var(--mat-sys-on-surface-variant);
 }
 
-.radio-button {
-    margin: 5px;
+.facts {
+    margin: 0;
 }
 
-.full-width {
-    width: 100%;
+.fact {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 4px 16px;
+    padding: 6px 0;
 }
 
-.fill-remaining-space {
-    flex: 1 1 auto;
+.fact dt {
+    color: var(--mat-sys-on-surface-variant);
 }
 
-[mat-cell] {
-    padding: 0 8px;
-}
-
-.button-header {
-    padding-left: 8px;
-    padding-top: 7px;
-    padding-bottom: 7px;
-    overflow: hidden;
+.fact dd {
+    margin: 0;
+    overflow-wrap: anywhere;
 }
 
 .pw {
@@ -89,15 +58,20 @@ mat-grid-list {
     min-width: 145px;
 }
 
-p, h4 {
-    margin: 0;
-    color: var(--mat-sys-on-surface);
+.table-scroll {
+    overflow-x: auto;
 }
 
-h4 {
-    font-weight: 500;
+table {
+    width: 100%;
 }
 
-mat-list-item .icon {
-    color: var(--mat-sys-on-surface);
+[mat-cell] {
+    padding: 0 8px;
+}
+
+@media (max-width: 600px) {
+    .fact {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
