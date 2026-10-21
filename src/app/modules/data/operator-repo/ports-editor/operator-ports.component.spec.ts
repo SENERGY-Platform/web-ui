@@ -49,6 +49,14 @@ describe('OperatorPortsComponent', () => {
         expect(el().querySelectorAll('.port-row').length).toBe(0);
     });
 
+    it('leaves out its heading and add button in a form section, which shows them itself', () => {
+        component.ports = [{name: 'a', type: 'float'}];
+        component.section = true;
+        fixture.detectChanges();
+        expect(el().querySelector('.ports-header, .add-button')).toBeNull();
+        expect(el().querySelectorAll('.port-row').length).toBe(1);
+    });
+
     it('adds a row to a missing list and tells the owner of the list', () => {
         const emitted: unknown[] = [];
         component.portsChange.subscribe(ports => emitted.push(ports));

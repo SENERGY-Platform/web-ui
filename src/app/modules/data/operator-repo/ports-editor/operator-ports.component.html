@@ -13,16 +13,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="ports-header">
-    <h3 [class.section-title]="section">{{title}} @if (rows.length > 0) {<span class="count">({{rows.length}})</span>}</h3>
-    <span class="spacer"></span>
-    @if (!readonly) {
-        <button mat-stroked-button color="accent" type="button" class="add-button" (click)="add()"
-            [disabled]="disabled">
-            <mat-icon>add</mat-icon>Add {{noun}}
-        </button>
-    }
-</div>
+@if (!section) {
+    <div class="ports-header">
+        <h3>{{title}} @if (rows.length > 0) {<span class="count">({{rows.length}})</span>}</h3>
+        <span class="spacer"></span>
+        @if (!readonly) {
+            <button mat-stroked-button color="accent" type="button" class="add-button" (click)="add()"
+                [disabled]="disabled">
+                <mat-icon>add</mat-icon>Add {{noun}}
+            </button>
+        }
+    </div>
+}
 @if (hint) {
     <p class="hint">{{hint}}</p>
 }

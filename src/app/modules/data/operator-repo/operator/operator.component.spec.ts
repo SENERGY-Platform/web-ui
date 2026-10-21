@@ -20,9 +20,8 @@ import {FormsModule} from '@angular/forms';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {By} from '@angular/platform-browser';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, provideRouter, Router} from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -86,7 +85,8 @@ describe('OperatorComponent', () => {
     let component: OperatorComponent;
     let service: jasmine.SpyObj<OperatorRepoService>;
     let dialogs: jasmine.SpyObj<DialogsService>;
-    let router: jasmine.SpyObj<Router>;
+    let router: Router;
+    let navigate: jasmine.Spy;
     let snack: jasmine.Spy;
     let served: OperatorModel | null;
     let routeId: string | null;
@@ -113,19 +113,18 @@ describe('OperatorComponent', () => {
         service.saveOperator.and.returnValue(of({} as any));
         service.putOperatorVersion.and.returnValue(of({}));
         service.deleteOperatorVersion.and.returnValue(of({}));
-        router = jasmine.createSpyObj<Router>('Router', ['navigate']);
         dialogs = jasmine.createSpyObj<DialogsService>('DialogsService', ['openDeleteDialog']);
         dialogs.openDeleteDialog.and.returnValue({afterClosed: () => of(true)} as any);
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
-            imports: [FormsModule, MatButtonModule, MatCardModule, MatFormFieldModule, MatIconModule, MatInputModule, MatTooltipModule,
+            imports: [FormsModule, MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, MatTooltipModule,
                 MtxSelectModule, OperatorComponent, OperatorPortsComponent],
             providers: [
                 provideNoopAnimations(),
                 {provide: OperatorRepoService, useValue: service},
                 {provide: DialogsService, useValue: dialogs},
-                {provide: Router, useValue: router},
+                provideRouter([]),
                 {provide: AuthorizationService, useValue: {getUserId: () => 'test'}},
                 {provide: PermissionsService, useValue: {
                     getUserById: () => of({username: 'u'}),
@@ -134,6 +133,8 @@ describe('OperatorComponent', () => {
                 {provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => routeId}}}},
             ],
         });
+        router = TestBed.inject(Router);
+        navigate = spyOn(router, 'navigate').and.resolveTo(true);
         snack = spyOn(TestBed.inject(MatSnackBar), 'open');
     });
 
@@ -428,7 +429,7 @@ describe('OperatorComponent', () => {
             edit(op => (op.image = 'img:2'));
             component.versionLabel = 'nonsense';
             fixture.detectChanges();
-            expect((el().querySelector('.save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
+            expect((el().querySelector('senergy-save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
             component.saveOperator();
             expect(service.putOperatorVersion).not.toHaveBeenCalled();
         });
@@ -446,7 +447,7 @@ describe('OperatorComponent', () => {
             expect(component.imageProblem()).toBe(hint);
             expect(component.valid).toBeFalse();
             expect(el().querySelector('.image-problem')?.textContent).toContain(hint);
-            expect((el().querySelector('.save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
+            expect((el().querySelector('senergy-save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
             component.saveOperator();
             expect(service.putOperatorVersion).not.toHaveBeenCalled();
             expect(service.saveOperator).not.toHaveBeenCalled();
@@ -553,7 +554,7 @@ describe('OperatorComponent', () => {
             create(operatorWithVersions());
             component.operator.name = 'Renamed';
             fixture.detectChanges();
-            click('.save-bar .save');
+            click('senergy-save-bar .save');
 
             const body = service.saveOperator.calls.mostRecent().args[0] as any;
             for (const key of ['image', 'inputs', 'outputs', 'config_values']) {
@@ -567,7 +568,7 @@ describe('OperatorComponent', () => {
             create(operatorWithoutVersions());
             component.operator.name = 'Renamed';
             fixture.detectChanges();
-            click('.save-bar .save');
+            click('senergy-save-bar .save');
 
             expect(service.putOperatorVersion).not.toHaveBeenCalled();
             const body = service.saveOperator.calls.mostRecent().args[0] as any;
@@ -580,13 +581,13 @@ describe('OperatorComponent', () => {
 
         it('has no save bar until something changed and is clean again after saving', () => {
             create(operatorWithoutVersions());
-            expect(el().querySelector('.save-bar')).toBeNull();
+            expect(el().querySelector('senergy-save-bar')).toBeNull();
             component.operator.name = 'Other';
             fixture.detectChanges();
-            expect(el().querySelector('.save-bar')).not.toBeNull();
-            click('.save-bar .save');
+            expect(el().querySelector('senergy-save-bar')).not.toBeNull();
+            click('senergy-save-bar .save');
             expect(component.dirty).toBeFalse();
-            expect(el().querySelector('.save-bar')).toBeNull();
+            expect(el().querySelector('senergy-save-bar')).toBeNull();
         });
 
         it('does not call an emptied description a change', () => {
@@ -600,7 +601,7 @@ describe('OperatorComponent', () => {
             component.operator.name = '  ';
             fixture.detectChanges();
             expect(component.valid).toBeFalse();
-            expect((el().querySelector('.save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
+            expect((el().querySelector('senergy-save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
             component.saveOperator();
             expect(service.saveOperator).not.toHaveBeenCalled();
         });
@@ -625,7 +626,7 @@ describe('OperatorComponent', () => {
             component.operator.inputs!.push({name: 'a', type: 'float'});
             fixture.detectChanges();
             expect(component.valid).toBeFalse();
-            expect((el().querySelector('.save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
+            expect((el().querySelector('senergy-save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
         });
 
         it('does not let a repeated name that is stored block the save of a versioned operator', () => {
@@ -695,7 +696,7 @@ describe('OperatorComponent', () => {
             fixture.detectChanges();
             served = {...operatorWithoutVersions(), image: 'img:2', versions: [{version: 'v1.0.0', image: 'img:1'}, {version: 'v1.1.0', image: 'img:2'}]};
 
-            click('.save-bar .save');
+            click('senergy-save-bar .save');
 
             expect(order).toEqual(['put v1.0.0', 'put v1.1.0', 'get']);
             expect(putBodies()[0]).toEqual(['op2', 'v1.0.0', {
@@ -715,7 +716,7 @@ describe('OperatorComponent', () => {
             expect(snack.calls.mostRecent().args[0]).toBe('Operator saved as v1.1.0');
             expect(component.dirty).toBeFalse();
             expect(component.currentVersion).toBe('v1.1.0');
-            expect(el().querySelector('.save-bar')).toBeNull();
+            expect(el().querySelector('senergy-save-bar')).toBeNull();
         });
 
         it('skips the first version for an operator whose stored state has no image', () => {
@@ -724,7 +725,7 @@ describe('OperatorComponent', () => {
             create(operator);
             component.operator.image = 'img:2';
             fixture.detectChanges();
-            click('.save-bar .save');
+            click('senergy-save-bar .save');
             expect(putBodies().map(args => args[1])).toEqual(['v1.0.0']);
             expect((putBodies()[0][2] as any).image).toBe('img:2');
         });
@@ -735,7 +736,7 @@ describe('OperatorComponent', () => {
             component.operator.image = 'img:5';
             component.versionLabel = 'v2.0.0';
             fixture.detectChanges();
-            click('.save-bar .save');
+            click('senergy-save-bar .save');
 
             expect(order).toEqual(['put v2.0.0', 'get']);
             expect(putBodies()).toEqual([['op1', 'v2.0.0', {
@@ -749,7 +750,7 @@ describe('OperatorComponent', () => {
             component.operator.name = 'Renamed';
             component.operator.image = 'img:2';
             fixture.detectChanges();
-            click('.save-bar .save');
+            click('senergy-save-bar .save');
 
             expect(order).toEqual(['put v1.0.0', 'put v1.0.1', 'post', 'get']);
             const body = service.saveOperator.calls.mostRecent().args[0] as any;
@@ -764,7 +765,7 @@ describe('OperatorComponent', () => {
             recordOrder();
             component.operator.cost = 3;
             fixture.detectChanges();
-            click('.save-bar .save');
+            click('senergy-save-bar .save');
             expect(order).toEqual(['post', 'get']);
         });
 
@@ -782,7 +783,7 @@ describe('OperatorComponent', () => {
             expect(service.putOperatorVersion).toHaveBeenCalledTimes(1);
             fixture.detectChanges();
             await fixture.whenStable();
-            expect((el().querySelector('.save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
+            expect((el().querySelector('senergy-save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
             expect((el().querySelector('.save-label') as HTMLInputElement).disabled).toBeTrue();
             component.saveOperator();
             expect(service.putOperatorVersion).toHaveBeenCalledTimes(1);
@@ -900,7 +901,7 @@ describe('OperatorComponent', () => {
                 expect(service.getOperator).toHaveBeenCalledWith('new1');
                 expect(component.operator._id).toBe('new1');
                 expect(snack.calls.mostRecent().args[0]).toBe('Operator saved as v1.0.0');
-                expect(router.navigate).toHaveBeenCalledOnceWith(['/data/operator-repo/op', 'new1'], {replaceUrl: true});
+                expect(navigate).toHaveBeenCalledOnceWith(['/data/operator-repo/op', 'new1'], {replaceUrl: true});
                 expect(component.isSaving).toBeFalse();
             });
 
@@ -926,7 +927,7 @@ describe('OperatorComponent', () => {
                 service.putOperatorVersion.and.returnValue(throwError(() => new HttpErrorResponse({status: 400, error: 'bad image\n'})));
                 component.saveOperator();
                 expect(snack.calls.mostRecent().args[0]).toBe('Operator created, v1.0.0 not written. bad image');
-                expect(router.navigate).not.toHaveBeenCalled();
+                expect(navigate).not.toHaveBeenCalled();
                 expect(component.isSaving).toBeFalse();
             });
 
@@ -937,7 +938,7 @@ describe('OperatorComponent', () => {
                 component.saveOperator();
                 expect(service.putOperatorVersion).not.toHaveBeenCalled();
                 expect(snack.calls.mostRecent().args[0]).toBe('Operator saved');
-                expect(router.navigate).toHaveBeenCalledOnceWith(['/data/operator-repo/op', 'new1'], {replaceUrl: true});
+                expect(navigate).toHaveBeenCalledOnceWith(['/data/operator-repo/op', 'new1'], {replaceUrl: true});
             });
 
             it('keeps today\'s behaviour when the repository answers without an id and says so', () => {
@@ -949,7 +950,7 @@ describe('OperatorComponent', () => {
                 expect(service.saveOperator).toHaveBeenCalledTimes(1);
                 expect(service.putOperatorVersion).not.toHaveBeenCalled();
                 expect(service.getOperator).not.toHaveBeenCalled();
-                expect(router.navigate).not.toHaveBeenCalled();
+                expect(navigate).not.toHaveBeenCalled();
                 expect(component.operator._id).toBeUndefined();
                 expect(snack.calls.mostRecent().args[0]).toBe('Created. Open the operator again to manage versions.');
                 expect(component.dirty).toBeFalse();
@@ -960,7 +961,7 @@ describe('OperatorComponent', () => {
                 service.saveOperator.and.returnValue(of(null));
                 component.saveOperator();
                 expect(service.putOperatorVersion).not.toHaveBeenCalled();
-                expect(router.navigate).not.toHaveBeenCalled();
+                expect(navigate).not.toHaveBeenCalled();
                 expect(component.dirty).toBeTrue();
             });
         });
@@ -1004,7 +1005,7 @@ describe('OperatorComponent', () => {
             component.toggleDeprecated(component.operator.versions![0]);
             fixture.detectChanges();
 
-            expect(disabled('.save-bar .save')).toBeTrue();
+            expect(disabled('senergy-save-bar .save')).toBeTrue();
             component.saveOperator();
             expect(service.saveOperator).not.toHaveBeenCalled();
         });
@@ -1018,11 +1019,11 @@ describe('OperatorComponent', () => {
             fixture.detectChanges();
 
             expect(component.versionBusy).toBeTrue();
-            expect(disabled('.save-bar .save')).toBeTrue();
+            expect(disabled('senergy-save-bar .save')).toBeTrue();
             reload.next(operatorWithVersions());
             reload.complete();
             fixture.detectChanges();
-            expect(disabled('.save-bar .save')).toBeFalse();
+            expect(disabled('senergy-save-bar .save')).toBeFalse();
         });
 
         it('is read only while a version write and its reload are pending, so the reload overwrites no edit', async () => {
@@ -1207,6 +1208,158 @@ describe('OperatorComponent', () => {
             component.operator.image = 'img:2';
             component.operator.inputs!.push(io('a ', 'float'), io('A', 'float'));
             expect(component.valid).toBeTrue();
+        });
+    });
+
+    describe('page structure', () => {
+        const withoutWriteRight = () => {
+            (TestBed.inject(PermissionsService) as any).getComputedResourcePermissionsV2 = () => of([{write: false}]);
+        };
+
+        it('has a header with a back link to the list and the stored name as title, and no card hulls', () => {
+            create(operatorWithoutVersions());
+            component.operator.name = 'Typed but not saved';
+            fixture.detectChanges();
+
+            expect(el().querySelector('.page-title')?.textContent).toBe('Plain');
+            expect(el().querySelector('.page-back')?.getAttribute('href')).toBe('/data/operator-repo');
+            expect(el().querySelector('mat-card, .mat-mdc-card')).toBeNull();
+            expect(Array.from(el().querySelectorAll('.section-title')).map(title => title.textContent))
+                .toEqual(['General', 'Image', 'Inputs', 'Outputs', 'Configuration', 'Version history']);
+        });
+
+        it('is titled as new for a new operator, which has no version history', () => {
+            create(null);
+            expect(el().querySelector('.page-title')?.textContent).toBe('New operator');
+            expect(Array.from(el().querySelectorAll('.section-title')).map(title => title.textContent))
+                .toEqual(['General', 'Image', 'Inputs', 'Outputs', 'Configuration']);
+        });
+
+        it('adds a port to the list of the section whose add button is clicked', () => {
+            create(operatorWithoutVersions());
+            const buttons = () => Array.from(el().querySelectorAll('.add-button')) as HTMLButtonElement[];
+            const lengths = () => [component.operator.inputs!.length, component.operator.outputs!.length, component.operator.config_values!.length];
+            const before = lengths();
+
+            buttons()[0].click();
+            fixture.detectChanges();
+            expect(lengths()).toEqual([before[0] + 1, before[1], before[2]]);
+            buttons()[1].click();
+            fixture.detectChanges();
+            expect(lengths()).toEqual([before[0] + 1, before[1] + 1, before[2]]);
+            buttons()[2].click();
+            fixture.detectChanges();
+            expect(lengths()).toEqual([before[0] + 1, before[1] + 1, before[2] + 1]);
+            expect(el().querySelectorAll('.port-row').length).toBe(before[0] + before[1] + before[2] + 3);
+        });
+
+        it('puts the version label into the save bar, before the buttons', async () => {
+            create(operatorWithoutVersions());
+            component.operator.image = 'img:2';
+            fixture.detectChanges();
+            await fixture.whenStable();
+
+            const bar = el().querySelector('senergy-save-bar') as HTMLElement;
+            const order = Array.from(bar.children).map(child => ['status', 'saves-as', 'discard', 'save'].find(name => child.classList.contains(name)));
+            expect(order).toEqual(['status', 'saves-as', 'discard', 'save']);
+            expect(bar.querySelector('.saves-as .save-label')).not.toBeNull();
+        });
+
+        it('names the invalid state in the bar and disables save', () => {
+            create(operatorWithoutVersions());
+            component.operator.name = ' ';
+            fixture.detectChanges();
+
+            expect(el().querySelector('senergy-save-bar .status')?.textContent).toBe('Unsaved changes. Fix the marked fields to save.');
+            expect((el().querySelector('senergy-save-bar .save') as HTMLButtonElement).disabled).toBeTrue();
+        });
+
+        it('restores the loaded values with Discard and stays on the page', () => {
+            create(operatorWithoutVersions());
+            component.operator.name = 'Other';
+            fixture.detectChanges();
+            click('senergy-save-bar .discard');
+
+            expect(component.operator.name).toBe('Plain');
+            expect(el().querySelector('senergy-save-bar')).toBeNull();
+            expect(navigate).not.toHaveBeenCalled();
+        });
+
+        it('locks Discard and shows Saving while the operator is saved', () => {
+            create(operatorWithoutVersions());
+            component.operator.name = 'Other';
+            service.saveOperator.and.returnValue(new Subject<any>());
+            fixture.detectChanges();
+            click('senergy-save-bar .save');
+
+            expect((el().querySelector('senergy-save-bar .discard') as HTMLButtonElement).disabled).toBeTrue();
+            expect(el().querySelector('senergy-save-bar .save')?.textContent).toContain('Saving...');
+        });
+
+        it('shows the page as text without the right to write: no add, remove or version buttons and no save bar', () => {
+            withoutWriteRight();
+            create(operatorWithVersions());
+            component.operator.name = 'Edited anyway';
+            fixture.detectChanges();
+
+            expect(el().querySelector('.add-button, .remove-button, .toggle-deprecated, .delete-version, senergy-save-bar')).toBeNull();
+            expect(el().querySelectorAll('.port-row.readonly-row').length).toBeGreaterThan(0);
+            expect(el().querySelector('.versions-table.no-actions')).not.toBeNull();
+            expect(el().querySelectorAll('.version-row').length).toBe(3);
+            expect(el().querySelector('.section-hint')?.textContent).toContain('saved as a new version');
+        });
+
+        it('keeps every control with the right to write', () => {
+            create(operatorWithVersions());
+            expect(el().querySelectorAll('.add-button').length).toBe(3);
+            expect(el().querySelectorAll('.toggle-deprecated').length).toBe(3);
+            expect(el().querySelectorAll('.delete-version').length).toBe(3);
+        });
+    });
+
+    // The flow designer and the analytics pipeline read what these calls store, so the whole payload is pinned.
+    describe('the payload sent to the repository', () => {
+        it('creates a new operator with every field, then writes its image and ports as v1.0.0', () => {
+            create(null);
+            component.operator.name = 'Fresh';
+            component.operator.description = 'Does things';
+            component.operator.deploymentType = 'both';
+            component.operator.cost = 4;
+            component.operator.image = ' img:1 ';
+            component.operator.inputs = [{name: 'a', type: 'float'}];
+            component.operator.outputs = [{name: 'o', type: 'string'}];
+            component.operator.config_values = [{name: 'c', type: 'int'}];
+            service.saveOperator.and.returnValue(of({status: 201, body: {_id: 'new1'}} as any));
+            fixture.detectChanges();
+
+            component.saveOperator();
+
+            expect(service.saveOperator).toHaveBeenCalledOnceWith({
+                name: 'Fresh', description: 'Does things', deploymentType: 'both', cost: 4, image: ' img:1 ',
+                inputs: [{name: 'a', type: 'float'}], outputs: [{name: 'o', type: 'string'}], config_values: [{name: 'c', type: 'int'}],
+            } as any);
+            expect(service.putOperatorVersion.calls.allArgs()).toEqual([['new1', 'v1.0.0', {
+                image: 'img:1', inputs: [{name: 'a', type: 'float'}], outputs: [{name: 'o', type: 'string'}],
+                config_values: [{name: 'c', type: 'int'}], deprecated: false,
+            }]]);
+        });
+
+        it('writes a changed image and port as a new version and the changed name without versioned fields', () => {
+            create(operatorWithVersions());
+            component.operator.name = 'Renamed';
+            component.operator.image = 'img:5';
+            component.operator.outputs = [{name: 'o', type: text}];
+            fixture.detectChanges();
+
+            component.saveOperator();
+
+            expect(service.putOperatorVersion.calls.allArgs()).toEqual([['op1', 'v1.11.0', {
+                image: 'img:5', inputs: [{name: 'a', type: text}], outputs: [{name: 'o', type: text}], config_values: [], deprecated: false,
+            }]]);
+            expect(service.saveOperator).toHaveBeenCalledOnceWith({
+                _id: 'op1', name: 'Renamed', description: 'd', deploymentType: 'cloud', userId: 'test', version: 3,
+                versions: operatorWithVersions().versions,
+            } as any);
         });
     });
 });

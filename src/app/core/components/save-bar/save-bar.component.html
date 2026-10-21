@@ -15,5 +15,6 @@
   -->
 
 <span class="status">{{status}}</span>
-<button matButton="outlined" type="button" class="discard" (click)="discard.emit()">{{discardLabel}}</button>
+<ng-content select="[saveBarExtra]"></ng-content>
+<button matButton="outlined" type="button" class="discard" [disabled]="discardDisabled" (click)="discard.emit()">{{discardLabel}}</button>
 <button matButton="filled" type="button" class="save" [disabled]="saveDisabled" (click)="save.emit()">{{saveLabel}}</button>

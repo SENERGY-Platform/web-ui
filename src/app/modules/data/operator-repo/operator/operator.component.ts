@@ -20,7 +20,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { concat, defer, EMPTY, Observable } from 'rxjs';
 import { finalize, map, tap } from 'rxjs/operators';
 import { OperatorModel, OperatorVersionBody, OperatorVersionModel } from '../shared/operator.model';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { OperatorRepoService } from '../shared/operator-repo.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
@@ -44,12 +44,14 @@ import { OperatorPortsComponent } from '../ports-editor/operator-ports.component
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatCard } from '@angular/material/card';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
+import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
 import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
 /** The fields a change to which is saved as a new version. */
@@ -71,8 +73,9 @@ class SaveRefused extends Error {}
     templateUrl: './operator.component.html',
     styleUrls: ['./operator.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatButton, RouterLink, MatIcon, MatTooltip, MatCard, MatFormField, MatLabel, MatInput, FormsModule, MatError,
-        MatErrorMessagesDirective, MtxSelect, MtxOption, MatIconButton, OperatorPortsComponent],
+    imports: [MatButton, MatIcon, MatTooltip, MatFormField, MatLabel, MatInput, FormsModule, MatError,
+        MatErrorMessagesDirective, MtxSelect, MtxOption, MatIconButton, OperatorPortsComponent, PageHeaderComponent,
+        FormSectionComponent, SaveBarComponent],
 })
 export class OperatorComponent implements OnInit {
     private route = inject(ActivatedRoute);
@@ -99,10 +102,14 @@ export class OperatorComponent implements OnInit {
     readonly labelMatcher: ErrorStateMatcher = stateMatcher(() => this.versionLabelError() !== '');
     readonly imageMatcher: ErrorStateMatcher = stateMatcher(() => this.imageProblem() !== '');
 
+    /** Whether the route opens a new operator; an existing one is read under its id. */
+    private creating = true;
+
     ngOnInit() {
         this.userId = this.auth.getUserId();
         const id = this.route.snapshot.paramMap.get('id');
         if (id !== null) {
+            this.creating = false;
             this.permissionsPerOperator = [];
             this.operatorService.getOperator(id).subscribe((resp: OperatorModel | null) => {
                 if (resp !== null) {
@@ -122,6 +129,11 @@ export class OperatorComponent implements OnInit {
     /** The operator as loaded or last saved. */
     get saved(): OperatorModel {
         return this.baseline;
+    }
+
+    /** The page title: the stored name, so it does not change while the name is edited. */
+    get title(): string {
+        return this.creating ? 'New operator' : (this.baseline.name || 'Operator');
     }
 
     get hasVersions(): boolean {

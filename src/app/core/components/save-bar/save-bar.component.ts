@@ -18,8 +18,8 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { MatButton } from '@angular/material/button';
 
 /**
- * Sticky bar at the bottom of a page form: a status text, Discard and Save. The page decides when it is shown,
- * normally while there are unsaved changes.
+ * Sticky bar at the bottom of a page form: a status text, an optional extra control (`[saveBarExtra]`) before the
+ * buttons, Discard and Save. The page decides when it is shown, normally while there are unsaved changes.
  */
 @Component({
     selector: 'senergy-save-bar',
@@ -32,6 +32,7 @@ import { MatButton } from '@angular/material/button';
 export class SaveBarComponent {
     @Input() status = 'Unsaved changes';
     @Input() saveDisabled = false;
+    @Input() discardDisabled = false;
     @Input() saveLabel = 'Save';
     @Input() discardLabel = 'Discard';
     @Output() save = new EventEmitter<void>();

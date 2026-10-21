@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { SaveBarComponent } from './save-bar.component';
+
+@Component({
+    imports: [SaveBarComponent],
+    template: '<senergy-save-bar><input saveBarExtra class="extra"></senergy-save-bar>',
+})
+class ExtraHostComponent {}
 
 describe('SaveBarComponent', () => {
     function create(inputs: Partial<Pick<SaveBarComponent, 'status' | 'saveDisabled'>> = {}) {
@@ -45,5 +52,29 @@ describe('SaveBarComponent', () => {
 
         expect((el.querySelector('button.save') as HTMLButtonElement).disabled).toBeTrue();
         expect((el.querySelector('button.discard') as HTMLButtonElement).disabled).toBeFalse();
+    });
+
+    const order = (bar: Element) => Array.from(bar.children).map(child =>
+        ['status', 'extra', 'discard', 'save'].find(name => child.classList.contains(name)));
+
+    it('shows only the status and the two buttons without extra content', () => {
+        expect(order(create().nativeElement)).toEqual(['status', 'discard', 'save']);
+    });
+
+    it('puts the extra content between the status and the buttons', () => {
+        const fixture = TestBed.createComponent(ExtraHostComponent);
+        fixture.detectChanges();
+
+        expect(order(fixture.nativeElement.querySelector('senergy-save-bar'))).toEqual(['status', 'extra', 'discard', 'save']);
+    });
+
+    it('disables discard on request and leaves save alone', () => {
+        const fixture = create();
+        fixture.componentRef.setInput('discardDisabled', true);
+        fixture.detectChanges();
+        const el: HTMLElement = fixture.nativeElement;
+
+        expect((el.querySelector('button.discard') as HTMLButtonElement).disabled).toBeTrue();
+        expect((el.querySelector('button.save') as HTMLButtonElement).disabled).toBeFalse();
     });
 });

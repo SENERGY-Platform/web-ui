@@ -41,7 +41,7 @@ export class OperatorPortsComponent {
     @Input() noun = 'entry';
     /** Shown under the heading, e.g. why the rows cannot be edited. */
     @Input() hint = '';
-    /** Style the heading as the heading of a form section instead of a sub-block. */
+    /** Leave out the heading and the add button, because the enclosing form section shows them. */
     @Input() section = false;
     @Input() ports: IOModel[] | undefined;
     /** The list as stored: duplicates that are already in it only warn, a duplicate the edit adds is an error. */
