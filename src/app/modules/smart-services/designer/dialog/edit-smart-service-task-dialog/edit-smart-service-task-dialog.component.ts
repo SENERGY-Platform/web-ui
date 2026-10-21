@@ -111,6 +111,7 @@ import {
     WatcherWorkerInfo,
     watcherWorkerInfoToInputs,
 } from './smart-service-task-inputs';
+import { parseSvgImage, svgImageMarkup } from '../../../../../core/svg-image';
 
 @Component({
     templateUrl: './edit-smart-service-task-dialog.component.html',
@@ -713,14 +714,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
     }
 
     getAnalyticsFlowImage(svgIn: string | SafeHtml, inputId: string): SafeHtml {
-        if (!svgIn) {
+        const svg = parseSvgImage(svgIn);
+        if (svg === null) {
             return '';
         }
-        if (typeof svgIn !== 'string') {
-            return '';
-        }
-        const parser = new DOMParser();
-        const svg = parser.parseFromString(svgIn, 'image/svg+xml').getElementsByTagName('svg')[0];
 
         const elements = svg.getElementsByClassName('joint-cell') as any;
         for (const element of elements) {
@@ -732,7 +729,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                 }
             }
         }
-        return this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+        // analyticsSvgSelectOperator() reads the clicked operator, so this image has to be live DOM
+        return this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
     }
 
     analyticsSvgSelectOperatorGetEventNodeId(node: any): string {

@@ -15,7 +15,7 @@
  */
 
 import { Location } from '@angular/common';
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -37,10 +37,12 @@ import { ImportInstancesModel } from '../../imports/import-instances/shared/impo
 import { BrokerExportService } from '../shared/broker-export.service';
 import { ExportService } from '../shared/export.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { liveMarkup, withHostileMarkup } from '../../../core/svg-image.mock';
 
 // The component is built in an injection context instead of rendered: what is covered here is
 // the load and save path of an export that already exists, and the template would pull
-// in a dozen Material and mtx modules that say nothing about it.
+// in a dozen Material and mtx modules that say nothing about it. Only the specs of the
+// pipeline image render it, with the template cut down to the image.
 const PIPELINE_ID = 'pipe-1';
 const OPERATOR_ID = 'operator-a';
 const OTHER_OPERATOR_ID = 'operator-b';
@@ -131,7 +133,14 @@ interface Harness {
     failNextSave: () => void;
 }
 
-const openForEditing = (exp: ExportModel = existingExport(), id: string | null = 'export-1'): Harness => {
+// The image binding of the real template, for the specs that render the component.
+const IMAGE_TEMPLATE = '<span class="widget-image" [innerHtml]="image" (click)="selectOperator($event)"></span>';
+
+const openForEditing = (
+    exp: ExportModel = existingExport(),
+    id: string | null = 'export-1',
+    rendered?: {image: string; fixture: (fixture: ComponentFixture<NewExportComponent>) => void},
+): Harness => {
     let saved: ExportModel | undefined;
     let fail = false;
     TestBed.resetTestingModule();
@@ -139,7 +148,7 @@ const openForEditing = (exp: ExportModel = existingExport(), id: string | null =
         providers: [
             { provide: ActivatedRoute, useValue: {snapshot: {paramMap: {get: () => id}}} },
             { provide: Location, useValue: {} },
-            { provide: PipelineRegistryService, useValue: {getPipelines: () => of([pipeline])} },
+            { provide: PipelineRegistryService, useValue: {getPipelines: () => of([rendered === undefined ? pipeline : {...pipeline, image: rendered.image}])} },
             { provide: DeviceInstancesService, useValue: {getDeviceInstances: () => of({result: [], total: 0})} },
             { provide: DeviceTypeService, useValue: {} },
             {
@@ -169,7 +178,8 @@ const openForEditing = (exp: ExportModel = existingExport(), id: string | null =
                 },
             },
             { provide: Router, useValue: {navigate: () => undefined} },
-            { provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} },
+            // a rendered spec keeps the real DomSanitizer, so what reaches the page is what Angular lets through
+            ...(rendered === undefined ? [{ provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} }] : []),
             { provide: MatSnackBar, useValue: {open: () => undefined} },
             { provide: ImportInstancesService, useValue: {listImportInstances: () => of([importInstance])} },
             {
@@ -184,9 +194,17 @@ const openForEditing = (exp: ExportModel = existingExport(), id: string | null =
             { provide: PreferencesService, useValue: {pageSize: 20} },
         ],
     });
-    const component = TestBed.runInInjectionContext(() => new NewExportComponent());
-
-    component.ngOnInit();
+    let component: NewExportComponent;
+    if (rendered === undefined) {
+        component = TestBed.runInInjectionContext(() => new NewExportComponent());
+        component.ngOnInit();
+    } else {
+        TestBed.overrideTemplate(NewExportComponent, IMAGE_TEMPLATE);
+        const fixture = TestBed.createComponent(NewExportComponent);
+        component = fixture.componentInstance;
+        rendered.fixture(fixture);
+        fixture.detectChanges(); // runs ngOnInit
+    }
     tick(200); // the load defers twice: once for the form, once for onChanges
 
     return {component, saved: () => saved, failNextSave: () => (fail = true)};
@@ -311,6 +329,37 @@ describe('NewExportComponent', () => {
         expect(saved()?.EntityName).toBe(OTHER_OPERATOR_ID);
         expect(saved()?.Topic).toBe('analytics-second');
     }));
+
+    describe('pipeline image', () => {
+        let fixture: ComponentFixture<NewExportComponent>;
+        const open = () => openForEditing(existingExport(), 'export-1', {image: withHostileMarkup(PIPELINE_IMAGE), fixture: (f) => (fixture = f)});
+        const operatorRect = (id: string) => fixture.nativeElement.querySelector('.widget-image [model-id="' + id + '"] > rect') as SVGRectElement;
+
+        it('puts the image into the page without anything that runs script, with the exported operator marked', fakeAsync(() => {
+            open();
+            fixture.detectChanges();
+
+            const image = fixture.nativeElement.querySelector('.widget-image') as HTMLElement;
+            expect(image.querySelectorAll('svg').length).toBe(1);
+            expect(liveMarkup(image)).toEqual([]);
+            expect(operatorRect(OPERATOR_ID).getAttribute('stroke')).toBe('red');
+            expect(operatorRect(OTHER_OPERATOR_ID).getAttribute('stroke')).toBe('black');
+        }));
+
+        it('saves the operator that was clicked in the rendered image', fakeAsync(() => {
+            const {component, saved} = open();
+            fixture.detectChanges();
+
+            const box = operatorRect(OTHER_OPERATOR_ID).getBoundingClientRect();
+            operatorRect(OTHER_OPERATOR_ID).dispatchEvent(new MouseEvent('click', {bubbles: true, clientX: box.left + 1, clientY: box.top + 1}));
+            tick();
+            fixture.detectChanges();
+            component.onSubmit();
+
+            expect(operatorRect(OTHER_OPERATOR_ID).getAttribute('stroke')).toBe('red');
+            expect(saved()?.Filter).toBe(PIPELINE_ID + ':' + OTHER_OPERATOR_ID);
+        }));
+    });
 
     it('sets the time path and its format when an operator is chosen', fakeAsync(() => {
         const {component} = openForEditing();

@@ -38,6 +38,7 @@ import {
     V2DeploymentsPreparedFilterCriteriaModel,
     V2DeploymentsPreparedModel,
 } from '../../../../processes/deployments/shared/deployments-prepared-v2.model';
+import { HOSTILE_IMAGE, HOSTILE_OPERATOR_ID, liveMarkup } from '../../../../../core/svg-image.mock';
 
 const node = (id: string, name: string): DeviceTypeAspectNodeModel => ({
     id,
@@ -229,6 +230,39 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         it('ignores an analytics input whose text is no criteria list', () => {
             init([{ name: 'analytics.criteria.flow.port', type: 'text', value: 'not json' }], [classifiedAir, classifiedWater], 'analytics');
             expect(component.isInvalid()).toBeFalse();
+        });
+    });
+
+    describe('analytics flow image', () => {
+        const render = (currentOperator: string) => {
+            init([{ name: 'analytics.criteria.' + HOSTILE_OPERATOR_ID + '.port', type: 'text', value: '[]' }], [air, water], 'analytics', true);
+            component.flowSvg = HOSTILE_IMAGE;
+            component.currentFlowInputId = currentOperator;
+            fixture.detectChanges();
+        };
+        const image = () => fixture.nativeElement.querySelector('.image-svg-wrapper') as HTMLElement;
+        const operatorRect = () => image().querySelector('[model-id="' + HOSTILE_OPERATOR_ID + '"] > rect') as SVGRectElement;
+
+        it('puts the image into the page without anything that runs script, with the current operator marked', async () => {
+            delete (window as any).svgImageXss;
+            render(HOSTILE_OPERATOR_ID);
+            await new Promise((resolve) => setTimeout(resolve, 50));
+
+            expect(image().querySelectorAll('svg').length).toBe(1);
+            expect(liveMarkup(image())).toEqual([]);
+            expect(operatorRect().getAttribute('stroke')).toBe('red');
+            expect((window as any).svgImageXss).toBeUndefined();
+        });
+
+        it('makes the clicked operator the current one', () => {
+            render('');
+            expect(operatorRect().getAttribute('stroke')).toBe('black');
+
+            operatorRect().dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            fixture.detectChanges();
+
+            expect(component.currentFlowInputId).toBe(HOSTILE_OPERATOR_ID);
+            expect(operatorRect().getAttribute('stroke')).toBe('red');
         });
     });
 

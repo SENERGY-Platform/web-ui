@@ -22,7 +22,6 @@ import {FilterSelection, FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
 import { confirmDelete } from '../../../core/services/delete-flows';
-import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {Observable, tap} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
@@ -57,6 +56,7 @@ import { MatChipSet, MatChip, MatChipAvatar, MatChipRemove } from '@angular/mate
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { parseSvgImage, svgImageDataUrl } from '../../../core/svg-image';
 
 
 @Component({
@@ -79,7 +79,6 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
     private destroyRef = inject(DestroyRef);
     snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
-    private sanitizer = inject(DomSanitizer);
     authService = inject(AuthorizationService);
     private searchbarService = inject(SearchbarService);
     private flowEngineService = inject(FlowEngineService);
@@ -119,7 +118,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
 
     userId = {} as string | Error;
 
-    private svgCache = new Map<string, SafeUrl>();
+    private imageUrlCache = new Map<string, string | null>();
 
     routerOperator: string[] | undefined = undefined;
     routerOperatorNames: string[] | undefined = undefined;
@@ -274,18 +273,13 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
         }
     }
 
-    /**
-     * The stored flow image as an image URL, so it is only drawn and never run as markup. The designer writes
-     * `viewbox` in lower case, which an image document ignores, so the attribute name is fixed on the first
-     * `<svg` start tag; the stored document starts with an XML prolog, so it is not anchored to the text start.
-     */
-    previewUrl(id: string, svg: string | unknown): SafeUrl {
-        if (!this.svgCache.has(id)) {
-            const fixed = String(svg).replace(/<svg\b[^>]*>/i, (tag) => tag.replace(/\bviewbox=/i, 'viewBox='));
-            const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(fixed);
-            this.svgCache.set(id, this.sanitizer.bypassSecurityTrustUrl(url));
+    /** The stored flow image as a data URL for an img, so it is only drawn and never run; null shows no preview. */
+    previewUrl(id: string, image: FlowModel['image']): string | null {
+        if (!this.imageUrlCache.has(id)) {
+            const svg = parseSvgImage(image);
+            this.imageUrlCache.set(id, svg === null ? null : svgImageDataUrl(svg));
         }
-        return this.svgCache.get(id)!;
+        return this.imageUrlCache.get(id) ?? null;
     }
 
     openFilterDialog() {

@@ -104,7 +104,11 @@
       </mat-card-content>
     </mat-card>
     <mat-card appearance="outlined" style="margin-top: 10px;">
-      <div class="widget-image" [innerHtml]="pipe.image"></div>
+      <div class="widget-image">
+        @if (imageUrl) {
+          <img [src]="imageUrl" alt="Pipeline image">
+        }
+      </div>
     </mat-card>
     <section class="checkbox-section">
       <mat-checkbox class="checkbox-margin" [(ngModel)]="showAll" [ngModelOptions]="{standalone: true}">Show

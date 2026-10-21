@@ -15,8 +15,8 @@
  */
 
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA, SecurityContext } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -37,6 +37,7 @@ import { PipelineRegistryService } from '../pipeline-registry/shared/pipeline-re
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { CoreModule } from '../../../core/core.module';
+import { decodeSvgDataUrl, FLOW_IMAGE, HOSTILE_IMAGE, HOSTILE_OPERATOR_ID, liveMarkup } from '../../../core/svg-image.mock';
 
 describe('FlowRepoComponent list', () => {
     let component: FlowRepoComponent;
@@ -46,14 +47,15 @@ describe('FlowRepoComponent list', () => {
     const service: Spy<FlowRepoService> = createSpyFromClass<FlowRepoService>(FlowRepoService);
     const permissions: Spy<PermissionsService> = createSpyFromClass<PermissionsService>(PermissionsService);
     const cost: Spy<CostService> = createSpyFromClass<CostService>(CostService);
-    const flow = { _id: 'flow-1', name: 'Smoothing', description: 'Averages values', image: '<svg viewbox="0 0 10 10"></svg>', userId: 'me' } as FlowModel;
+    const flow = { _id: 'flow-1', name: 'Smoothing', description: 'Averages values', image: '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 10 10"></svg>', userId: 'me' } as FlowModel;
 
-    function init(rights = { create: true, update: true, delete: true }, perms = { read: true, write: true, execute: true, administrate: true }) {
-        service.getFlows.and.returnValue(of({ flows: [flow], total: 1 }));
+    function init(rights = { create: true, update: true, delete: true }, perms = { read: true, write: true, execute: true, administrate: true }, shown = flow) {
+        delete (window as any).svgImageXss;
+        service.getFlows.and.returnValue(of({ flows: [shown], total: 1 }));
         service.userHasCreateAuthorization.and.returnValue(rights.create);
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
         service.userHasDeleteAuthorization.and.returnValue(rights.delete);
-        permissions.getComputedResourcePermissionsV2.and.returnValue(of([{ id: flow._id, ...perms } as any]));
+        permissions.getComputedResourcePermissionsV2.and.returnValue(of([{ id: shown._id, ...perms } as any]));
         cost.userMayGetFlowCostEstimations.and.returnValue(true);
         cost.getFlowCostEstimations.and.returnValue(of([{ min: 1, max: 2, median: 1.5, mean: 1.5 } as any]));
 
@@ -154,14 +156,43 @@ describe('FlowRepoComponent list', () => {
         init();
         discardPeriodicTasks();
 
-        const stored = '<?xml version="1.0" standalone="no"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewbox="10 20 300 120"><g></g></svg>';
-        const safe = component.previewUrl('flow-prolog', stored);
-        const url = TestBed.inject(DomSanitizer).sanitize(SecurityContext.URL, safe) as string;
-        const decoded = decodeURIComponent(url.substring(url.indexOf(',') + 1));
-        expect(url).toMatch(/^data:image\/svg\+xml/);
-        expect(decoded).toContain('viewBox="10 20 300 120"');
-        expect(decoded).not.toContain('viewbox=');
-        expect(decoded.startsWith('<?xml')).toBeTrue();
+        const root = decodeSvgDataUrl(component.previewUrl('flow-prolog', FLOW_IMAGE)!).documentElement;
+        expect(FLOW_IMAGE.startsWith('<?xml')).toBeTrue();
+        expect(root.getAttribute('viewBox')).toBe('4.546875 37.20000076293945 648.90625 142.8000030517578');
+        expect(root.hasAttribute('viewbox')).toBeFalse();
+        expect(root.querySelector('[model-id="n1"] > rect')).withContext('the operator is drawn').not.toBeNull();
+    }));
+
+    it('shows a stored image only as an img with a data URL, never as markup in the page', fakeAsync(() => {
+        const shared = { _id: 'flow-2', name: 'a shared flow', description: '', image: HOSTILE_IMAGE, userId: 'someone else' } as FlowModel;
+        init(undefined, { read: true, write: false, execute: true, administrate: false }, shared);
+
+        const small = fixture.nativeElement.querySelector('td.mat-column-image img.svg-preview') as HTMLImageElement;
+        small.dispatchEvent(new Event('mouseenter'));
+        fixture.detectChanges();
+        discardPeriodicTasks();
+
+        const overlay = TestBed.inject(OverlayContainer).getContainerElement();
+        const large = overlay.querySelector('img.svg-preview-large') as HTMLImageElement;
+        expect(large).withContext('the enlarged preview').not.toBeNull();
+        expect(large.getAttribute('src')).toMatch(/^data:image\/svg\+xml;charset=utf-8,/);
+        expect(overlay.querySelectorAll('svg').length).toBe(0);
+        expect(liveMarkup(overlay)).toEqual([]);
+        expect(liveMarkup(fixture.nativeElement)).toEqual([]);
+        const drawn = decodeSvgDataUrl(large.src);
+        expect(drawn.querySelector('[model-id="' + HOSTILE_OPERATOR_ID + '"] > rect')).withContext('the operator is drawn').not.toBeNull();
+        expect(liveMarkup(drawn)).withContext('nothing live inside the image either').toEqual([]);
+        expect((window as any).svgImageXss).toBeUndefined();
+        small.dispatchEvent(new Event('mouseleave'));
+    }));
+
+    it('shows no preview for a stored image that is not an svg document', fakeAsync(() => {
+        const broken = { ...flow, _id: 'flow-3', image: '<html><body><svg xmlns="http://www.w3.org/2000/svg"></svg></body></html>' } as FlowModel;
+        init(undefined, undefined, broken);
+        discardPeriodicTasks();
+
+        expect(component.previewUrl('flow-3', broken.image)).toBeNull();
+        expect(fixture.nativeElement.querySelector('senergy-hover-preview')).toBeNull();
     }));
 
     it('shows an empty list as the empty state after the answer cleared the rows', fakeAsync(() => {

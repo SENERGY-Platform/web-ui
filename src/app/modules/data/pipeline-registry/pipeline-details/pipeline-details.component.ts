@@ -18,7 +18,6 @@ import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/cor
 import { PipelineRegistryService } from '../shared/pipeline-registry.service';
 import { OperatorInputTopic, PipelineModel } from '../shared/pipeline.model';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
@@ -29,6 +28,7 @@ import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, M
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
+import { parseSvgImage, svgImageDataUrl } from '../../../../core/svg-image';
 
 @Component({
     selector: 'senergy-pipeline-details',
@@ -40,13 +40,13 @@ import { FormsModule } from '@angular/forms';
 export class PipelineDetailsComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private pipelineRegistryService = inject(PipelineRegistryService);
-    private sanitizer = inject(DomSanitizer);
     private deviceTypeService = inject(DeviceTypeService);
     private deviceInstanceService = inject(DeviceInstancesService);
     private location = inject(Location);
 
     ready = false;
     pipe = {} as PipelineModel;
+    imageUrl: string | null = null;
     showAll = false;
     configs = new Map<string, [[string, string]]>();
 
@@ -87,12 +87,11 @@ export class PipelineDetailsComponent implements OnInit {
                             }
                         });
                     });
-                    if (typeof this.pipe.image === 'string') {
-                        const parser = new DOMParser();
-                        const svg = parser.parseFromString(this.pipe.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+                    const svg = parseSvgImage(this.pipe.image);
+                    if (svg !== null) {
                         const viewbox = svg.getAttribute('viewbox')!.split(' ');
                         svg.setAttribute('height', viewbox[3]);
-                        this.pipe.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+                        this.imageUrl = svgImageDataUrl(svg);
                     }
                 }
                 this.ready = true;

@@ -72,6 +72,7 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionP
 import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { parseSvgImage, svgImageMarkup } from '../../../core/svg-image';
 
 type ExportValueGroup = FormGroup<{
     Name: FormControl<string | null>;
@@ -531,14 +532,11 @@ export class NewExportComponent implements OnInit {
                         this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
                     }
                     this.resetVars();
-                    if (typeof pipe.image === 'string') {
-                        const parser = new DOMParser();
-                        const svg = parser
-                            .parseFromString(pipe.image, 'image/svg+xml')
-                            .getElementsByTagName('svg')[0];
+                    const svg = parseSvgImage(pipe.image);
+                    if (svg !== null) {
                         const viewbox = svg.getAttribute('viewbox')!.split(' ');
                         svg.setAttribute('height', viewbox[3]);
-                        this.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+                        this.image = this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
                         if (pipe.operators.length === 1) {
                             this.operator = pipe.operators[0];
                             this.operatorChanged(this.operator);
@@ -642,9 +640,8 @@ export class NewExportComponent implements OnInit {
 
     updateImage(id: string) {
         const pipeline: PipelineModel | null = this.exportForm.getRawValue().pipeline;
-        if (typeof pipeline?.image === 'string') {
-            const parser = new DOMParser();
-            const svg = parser.parseFromString(pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+        const svg = parseSvgImage(pipeline?.image);
+        if (svg !== null) {
             const viewbox = svg.getAttribute('viewbox')!.split(' ');
             svg.setAttribute('height', viewbox[3]);
             const elements = svg.getElementsByClassName('joint-cell') as any;
@@ -657,7 +654,8 @@ export class NewExportComponent implements OnInit {
                     }
                 }
             }
-            this.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+            // selectOperator() hit-tests the operators, so this image has to be live DOM
+            this.image = this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
         }
     }
 

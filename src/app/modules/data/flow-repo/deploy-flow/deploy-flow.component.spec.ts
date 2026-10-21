@@ -47,7 +47,8 @@ import { DeviceTypeFunctionModel } from '../../../metadata/device-types-overview
 import { PipelineModel } from '../../pipeline-registry/shared/pipeline.model';
 import { PipelineInputSelectionModel, PipelineRequestModel } from './shared/pipeline-request.model';
 import { ParseModel } from '../shared/parse.model';
-import { FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { HOSTILE_IMAGE, HOSTILE_OPERATOR_ID, liveMarkup } from '../../../../core/svg-image.mock';
 
 describe('DeployFlowComponent', () => {
     let component: DeployFlowComponent;
@@ -300,5 +301,56 @@ describe('DeployFlowComponent aspects', () => {
         input().patchValue({ selectableId: 'gone' }, { emitEvent: false });
         component.prepareSelectables(input() as any).subscribe();
         expect(input().get('selectableId')?.value).toBeNull();
+    });
+});
+
+describe('DeployFlowComponent operator image', () => {
+    let fixture: ComponentFixture<DeployFlowComponent>;
+    let pipeline: FormGroup;
+
+    beforeEach(() => {
+        delete (window as any).svgImageXss;
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [DeployFlowComponent],
+            // nothing but the image is used, so the services stay empty
+            providers: [
+                ParserService, ActivatedRoute, Router, MatSnackBar, DeviceInstancesService, DeviceTypeService, DeviceGroupsService, PathOptionsService,
+                PipelineRegistryService, ConceptsService, OperatorRepoService, ImportInstancesService, FlowEngineService, AspectClassesService,
+            ].map((token: unknown) => ({ provide: token, useValue: {} })),
+        });
+        // the binding of the real template, with the pipeline of its loop as a property
+        TestBed.overrideTemplate(
+            DeployFlowComponent,
+            '<span class="widget-image" [innerHtml]="getImage(pipeline)" (click)="selectOperator($event, pipeline)"></span>',
+        );
+        spyOn(DeployFlowComponent.prototype, 'ngOnInit');
+        fixture = TestBed.createComponent(DeployFlowComponent);
+        fixture.componentInstance.pipelines = [{ id: 'pipe-1', image: HOSTILE_IMAGE, operators: [] } as unknown as PipelineModel];
+        pipeline = new FormGroup({ pipelineId: new FormControl('pipe-1'), operatorId: new FormControl(null) });
+        (fixture.componentInstance as any).pipeline = pipeline;
+        fixture.detectChanges();
+    });
+
+    const image = () => fixture.nativeElement.querySelector('.widget-image') as HTMLElement;
+    const operatorRect = () => image().querySelector('[model-id="' + HOSTILE_OPERATOR_ID + '"] > rect') as SVGRectElement;
+
+    it('puts the image into the page without anything that runs script', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        expect(image().querySelectorAll('svg').length).toBe(1);
+        expect(liveMarkup(image())).toEqual([]);
+        expect((window as any).svgImageXss).toBeUndefined();
+    });
+
+    it('selects the operator that is clicked and marks it', () => {
+        expect(operatorRect().getAttribute('stroke')).toBe('black');
+        const box = operatorRect().getBoundingClientRect();
+
+        operatorRect().dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: box.left + box.width / 2, clientY: box.top + box.height / 2 }));
+        fixture.detectChanges();
+
+        expect(pipeline.get('operatorId')?.value).toBe(HOSTILE_OPERATOR_ID);
+        expect(operatorRect().getAttribute('stroke')).toBe('red');
     });
 });
