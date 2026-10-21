@@ -28,7 +28,6 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {FilterSelection, FlowModel} from './shared/flow.model';
 import {FlowRepoService} from './shared/flow-repo.service';
 import {DialogsService} from '../../../core/services/dialogs.service';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {merge, Subscription} from 'rxjs';
 import {SearchbarService} from '../../../core/components/searchbar/shared/searchbar.service';
 import {AuthorizationService} from '../../../core/services/authorization.service';
@@ -54,6 +53,7 @@ import {FlexibleConnectedPositionStrategy, Overlay, OverlayRef} from '@angular/c
 import {TemplatePortal} from '@angular/cdk/portal';
 import {FlowFilterDialogComponent} from './flow-filter-dialog/flow-filter-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import {parseSvgImage, svgImageDataUrl} from '../../../core/svg-image';
 
 
 @Component({
@@ -99,7 +99,7 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
 
     private overlayRef?: OverlayRef;
 
-    private svgCache = new Map<string, SafeHtml>();
+    private imageUrlCache = new Map<string, string | null>();
 
     routerOperator: string[] | undefined = undefined;
     routerOperatorNames: string[] | undefined = undefined;
@@ -108,7 +108,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         private flowRepoService: FlowRepoService,
         public snackBar: MatSnackBar,
         private dialogsService: DialogsService,
-        private sanitizer: DomSanitizer,
         public authService: AuthorizationService,
         private searchbarService: SearchbarService,
         private flowEngineService: FlowEngineService,
@@ -354,11 +353,12 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selection.clear();
     }
 
-    getSafeSvgCached(id: string, svg: string): SafeHtml {
-        if (!this.svgCache.has(id)) {
-            this.svgCache.set(id, this.sanitizer.bypassSecurityTrustHtml(svg));
+    getImageUrlCached(id: string, image: FlowModel['image']): string | null {
+        if (!this.imageUrlCache.has(id)) {
+            const svg = parseSvgImage(image);
+            this.imageUrlCache.set(id, svg === null ? null : svgImageDataUrl(svg));
         }
-        return this.svgCache.get(id)!;
+        return this.imageUrlCache.get(id) ?? null;
     }
 
     openFilterDialog() {

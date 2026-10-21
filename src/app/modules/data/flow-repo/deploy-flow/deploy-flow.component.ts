@@ -50,6 +50,7 @@ import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.se
 import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
+import { parseSvgImage, svgImageMarkup } from '../../../../core/svg-image';
 
 interface CustomSelectable {
     id: string;
@@ -1170,11 +1171,10 @@ export class DeployFlowComponent implements OnInit {
         if (pipeline === undefined) {
             return undefined;
         }
-        if (typeof pipeline.image !== 'string') {
+        const svg = parseSvgImage(pipeline.image);
+        if (svg === null) {
             return undefined;
         }
-        const parser = new DOMParser();
-        const svg = parser.parseFromString(pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
         const viewbox = svg.getAttribute('viewbox')!.split(' ');
         svg.setAttribute('height', viewbox[3]);
         const elements = svg.getElementsByClassName('joint-cell') as any;
@@ -1187,7 +1187,8 @@ export class DeployFlowComponent implements OnInit {
                 }
             }
         }
-        return this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+        // selectOperator() hit-tests the operators, so this image has to be live DOM
+        return this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
     }
 
     getOperatorPaths(pipelineId: string, operatorId: string): string[] {

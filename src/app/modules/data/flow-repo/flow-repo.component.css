@@ -47,6 +47,11 @@
     display: block;
 }
 
+/* The width the inline svg got as a replaced element without intrinsic size; the height follows its viewBox. */
+.svg-container img {
+    width: 300px;
+}
+
 .svg-wrapper {
     background: #ffffff;              /* Hintergrund */
     border: 1px solid #d0d0d0;         /* Rahmen */

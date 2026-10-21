@@ -18,12 +18,12 @@ import { Component, OnInit } from '@angular/core';
 import { PipelineRegistryService } from '../shared/pipeline-registry.service';
 import { OperatorInputTopic, PipelineModel } from '../shared/pipeline.model';
 import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {Location} from '@angular/common';
+import { parseSvgImage, svgImageDataUrl } from '../../../../core/svg-image';
 
 @Component({
     selector: 'senergy-pipeline-details',
@@ -33,13 +33,13 @@ import {Location} from '@angular/common';
 export class PipelineDetailsComponent implements OnInit {
     ready = false;
     pipe = {} as PipelineModel;
+    imageUrl: string | null = null;
     showAll = false;
     configs = new Map<string, [[string, string]]>();
 
     constructor(
         private route: ActivatedRoute,
         private pipelineRegistryService: PipelineRegistryService,
-        private sanitizer: DomSanitizer,
         private deviceTypeService: DeviceTypeService,
         private deviceInstanceService: DeviceInstancesService,
         private location: Location,
@@ -82,12 +82,11 @@ export class PipelineDetailsComponent implements OnInit {
                             }
                         });
                     });
-                    if (typeof this.pipe.image === 'string') {
-                        const parser = new DOMParser();
-                        const svg = parser.parseFromString(this.pipe.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+                    const svg = parseSvgImage(this.pipe.image);
+                    if (svg !== null) {
                         const viewbox = svg.getAttribute('viewbox')!.split(' ');
                         svg.setAttribute('height', viewbox[3]);
-                        this.pipe.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+                        this.imageUrl = svgImageDataUrl(svg);
                     }
                 }
                 this.ready = true;

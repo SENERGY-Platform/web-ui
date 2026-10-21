@@ -64,6 +64,7 @@ import { AddTagFn } from '@ng-matero/extensions/select';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { stateMatcher } from '../../data/operator-repo/shared/operator-validation';
+import { parseSvgImage, svgImageMarkup } from '../../../core/svg-image';
 
 @Component({
     selector: 'senergy-new-export',
@@ -509,14 +510,11 @@ export class NewExportComponent implements OnInit {
                         this.exportForm.controls['operator'].disable({onlySelf: true, emitEvent: false});
                     }
                     this.resetVars();
-                    if (typeof pipe.image === 'string') {
-                        const parser = new DOMParser();
-                        const svg = parser
-                            .parseFromString(pipe.image, 'image/svg+xml')
-                            .getElementsByTagName('svg')[0];
+                    const svg = parseSvgImage(pipe.image);
+                    if (svg !== null) {
                         const viewbox = svg.getAttribute('viewbox')!.split(' ');
                         svg.setAttribute('height', viewbox[3]);
-                        this.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+                        this.image = this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
                         if (pipe.operators.length === 1) {
                             this.operator = pipe.operators[0];
                             this.operatorChanged(this.operator);
@@ -619,9 +617,8 @@ export class NewExportComponent implements OnInit {
 
     updateImage(id: string) {
         const pipeline: PipelineModel | null = this.exportForm.getRawValue().pipeline;
-        if (typeof pipeline?.image === 'string') {
-            const parser = new DOMParser();
-            const svg = parser.parseFromString(pipeline.image, 'image/svg+xml').getElementsByTagName('svg')[0];
+        const svg = parseSvgImage(pipeline?.image);
+        if (svg !== null) {
             const viewbox = svg.getAttribute('viewbox')!.split(' ');
             svg.setAttribute('height', viewbox[3]);
             const elements = svg.getElementsByClassName('joint-cell') as any;
@@ -634,7 +631,8 @@ export class NewExportComponent implements OnInit {
                     }
                 }
             }
-            this.image = this.sanitizer.bypassSecurityTrustHtml(new XMLSerializer().serializeToString(svg));
+            // selectOperator() hit-tests the operators, so this image has to be live DOM
+            this.image = this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
         }
     }
 

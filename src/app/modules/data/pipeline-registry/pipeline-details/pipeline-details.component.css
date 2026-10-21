@@ -83,4 +83,10 @@ mat-grid-list {
 .widget-image {
     height: auto;
     width: 100%;
+    text-align: center;
+}
+
+/* Drawn at its viewBox size and centred, as the inline svg drew it, and scaled down to fit the card. */
+.widget-image img {
+    max-width: 100%;
 }

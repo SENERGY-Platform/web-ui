@@ -14,18 +14,33 @@
  * limitations under the License.
  */
 
-import { fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { UntypedFormBuilder } from '@angular/forms';
+import { Location } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer } from '@angular/platform-browser';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { NewExportComponent } from './new-export.component';
 import { ExportModel } from '../shared/export.model';
+import { ExportService } from '../shared/export.service';
+import { BrokerExportService } from '../shared/broker-export.service';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
+import { PipelineRegistryService } from '../../data/pipeline-registry/shared/pipeline-registry.service';
 import { OperatorModel } from '../../data/operator-repo/shared/operator.model';
+import { OperatorRepoService } from '../../data/operator-repo/shared/operator-repo.service';
+import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
+import { ImportInstancesService } from '../../imports/import-instances/shared/import-instances.service';
+import { ImportTypesService } from '../../imports/import-types/shared/import-types.service';
+import { PreferencesService } from '../../../core/services/preferences.service';
+import { liveMarkup, withHostileMarkup } from '../../../core/svg-image.mock';
 
 // The component is built by hand instead of through TestBed: what is covered here is
 // the load and save path of an export that already exists, and the template would pull
-// in a dozen Material and mtx modules that say nothing about it.
+// in a dozen Material and mtx modules that say nothing about it. Only the specs of the
+// pipeline image render it, with the template cut down to the image.
 const PIPELINE_ID = 'pipe-1';
 const OPERATOR_ID = 'operator-a';
 const OTHER_OPERATOR_ID = 'operator-b';
@@ -116,15 +131,28 @@ interface Harness {
     failNextSave: () => void;
 }
 
-const openForEditing = (exp: ExportModel = existingExport(), id: string | null = 'export-1'): Harness => {
+// The constructor's parameters in order, so the stubs below can also be handed to TestBed.
+const DEPENDENCIES = [
+    ActivatedRoute, Location, PipelineRegistryService, DeviceInstancesService, DeviceTypeService, ExportService, BrokerExportService,
+    OperatorRepoService, Router, DomSanitizer, MatSnackBar, ImportInstancesService, ImportTypesService, UntypedFormBuilder, PreferencesService,
+];
+
+// The image binding of the real template, for the specs that render the component.
+const IMAGE_TEMPLATE = '<span class="widget-image" [innerHtml]="image" (click)="selectOperator($event)"></span>';
+
+const openForEditing = (
+    exp: ExportModel = existingExport(),
+    id: string | null = 'export-1',
+    rendered?: {image: string; fixture: (fixture: ComponentFixture<NewExportComponent>) => void},
+): Harness => {
     let saved: ExportModel | undefined;
     let fail = false;
-    const component = new NewExportComponent(
-        {snapshot: {paramMap: {get: () => id}}} as any,
-        {} as any,
-        {getPipelines: () => of([pipeline])} as any,
-        {getDeviceInstances: () => of({result: [], total: 0})} as any,
-        {} as any,
+    const stubs: any[] = [
+        {snapshot: {paramMap: {get: () => id}}},
+        {},
+        {getPipelines: () => of([rendered === undefined ? pipeline : {...pipeline, image: rendered.image}])},
+        {getDeviceInstances: () => of({result: [], total: 0})},
+        {},
         {
             getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'],
             getExportDatabases: () => of([]),
@@ -139,26 +167,45 @@ const openForEditing = (exp: ExportModel = existingExport(), id: string | null =
                 saved = created;
                 return of(created);
             },
-        } as any,
-        {} as any,
+        },
+        {},
         {
             getOperator: () => of({outputs: [{name: 'value', type: 'float'}]} as OperatorModel),
             setPaths: () => new Map<string, string | undefined>([['analytics.overall_confidence', 'float']]),
-        } as any,
-        {navigate: () => undefined} as any,
-        {bypassSecurityTrustHtml: (html: string) => html} as any,
-        {open: () => undefined} as any,
-        {listImportInstances: () => of([importInstance])} as any,
+        },
+        {navigate: () => undefined},
+        {bypassSecurityTrustHtml: (html: string) => html},
+        {open: () => undefined},
+        {listImportInstances: () => of([importInstance])},
         {
             // asynchronous like the HTTP call, so the form has recomputed its value when the answer arrives
             getImportType: () => of(importType).pipe(delay(1)),
             parseImportTypeExportValues: () => [{Name: 'value', Path: 'value', Type: 'float'}],
-        } as any,
+        },
         new UntypedFormBuilder(),
-        {pageSize: 20} as any,
-    );
+        {pageSize: 20},
+    ];
+    let component: NewExportComponent;
+    let fixture: ComponentFixture<NewExportComponent> | undefined;
+    if (rendered === undefined) {
+        component = new NewExportComponent(...(stubs as ConstructorParameters<typeof NewExportComponent>));
+    } else {
+        // rendered with the real DomSanitizer, so what reaches the page is what Angular lets through
+        TestBed.configureTestingModule({
+            declarations: [NewExportComponent],
+            providers: DEPENDENCIES.map((token, i) => ({provide: token, useValue: stubs[i]})).filter((provider) => provider.provide !== DomSanitizer),
+        });
+        TestBed.overrideTemplate(NewExportComponent, IMAGE_TEMPLATE);
+        fixture = TestBed.createComponent(NewExportComponent);
+        component = fixture.componentInstance;
+        rendered.fixture(fixture);
+    }
 
-    component.ngOnInit();
+    if (fixture === undefined) {
+        component.ngOnInit();
+    } else {
+        fixture.detectChanges(); // runs ngOnInit
+    }
     tick(200); // the load defers twice: once for the form, once for onChanges
 
     return {component, saved: () => saved, failNextSave: () => (fail = true)};
@@ -216,6 +263,37 @@ describe('NewExportComponent', () => {
         expect(saved()?.EntityName).toBe(OTHER_OPERATOR_ID);
         expect(saved()?.Topic).toBe('analytics-second');
     }));
+
+    describe('pipeline image', () => {
+        let fixture: ComponentFixture<NewExportComponent>;
+        const open = () => openForEditing(existingExport(), 'export-1', {image: withHostileMarkup(PIPELINE_IMAGE), fixture: (f) => (fixture = f)});
+        const operatorRect = (id: string) => fixture.nativeElement.querySelector('.widget-image [model-id="' + id + '"] > rect') as SVGRectElement;
+
+        it('puts the image into the page without anything that runs script, with the exported operator marked', fakeAsync(() => {
+            open();
+            fixture.detectChanges();
+
+            const image = fixture.nativeElement.querySelector('.widget-image') as HTMLElement;
+            expect(image.querySelectorAll('svg').length).toBe(1);
+            expect(liveMarkup(image)).toEqual([]);
+            expect(operatorRect(OPERATOR_ID).getAttribute('stroke')).toBe('red');
+            expect(operatorRect(OTHER_OPERATOR_ID).getAttribute('stroke')).toBe('black');
+        }));
+
+        it('saves the operator that was clicked in the rendered image', fakeAsync(() => {
+            const {component, saved} = open();
+            fixture.detectChanges();
+
+            const box = operatorRect(OTHER_OPERATOR_ID).getBoundingClientRect();
+            operatorRect(OTHER_OPERATOR_ID).dispatchEvent(new MouseEvent('click', {bubbles: true, clientX: box.left + 1, clientY: box.top + 1}));
+            tick();
+            fixture.detectChanges();
+            component.onSubmit();
+
+            expect(operatorRect(OTHER_OPERATOR_ID).getAttribute('stroke')).toBe('red');
+            expect(saved()?.Filter).toBe(PIPELINE_ID + ':' + OTHER_OPERATOR_ID);
+        }));
+    });
 
     it('sets the time path and its format when an operator is chosen', fakeAsync(() => {
         const {component} = openForEditing();

@@ -128,10 +128,9 @@
 
                 <ng-template #overlayTpl let-element="element">
                     <div class="svg-wrapper">
-                        <div
-                                class="svg-container"
-                                [innerHTML]="getSafeSvgCached(element._id, element.image)"
-                        ></div>
+                        <div class="svg-container">
+                            <img *ngIf="getImageUrlCached(element._id, element.image) as url" [src]="url" alt="Flow image">
+                        </div>
                     </div>
                 </ng-template>
 
