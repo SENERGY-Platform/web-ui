@@ -20,6 +20,7 @@
       <a class="page-back" [routerLink]="backLink"><mat-icon>arrow_back</mat-icon>{{backLabel}}</a>
     }
     <h2 class="page-title">{{title}}</h2>
+    <ng-content select="[pageStatus]"></ng-content>
     @if (description) {
       <p class="page-description">{{description}}</p>
     }

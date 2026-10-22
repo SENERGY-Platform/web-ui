@@ -23,6 +23,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { SmartServiceDesignsService } from '../designs/shared/designs.service';
 import { createSmartServiceModeler } from './smart-service-modeler';
 import { exportDiagram } from '../../processes/designer/bpmn-js/bpmn-js';
+import { UnsavedChanges } from '../../processes/designer/bpmn-js/unsaved-changes';
 import { SmartServiceDesignModel } from '../designs/shared/design.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import {
@@ -43,9 +44,9 @@ import { DesignerDialogService } from '../../processes/designer/shared/designer-
 import { DesignerHelperService } from '../../processes/designer/shared/designer-helper.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { MissingMetadataOverlays } from '../../metadata/shared/missing-metadata-overlays';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 
@@ -54,7 +55,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './designer.component.html',
     styleUrls: ['./designer.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatIconButton, MatTooltip, MatIcon, SpinnerComponent]
+    imports: [MatButton, MatIcon, PageHeaderComponent, SpinnerComponent]
 })
 export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     private http = inject(HttpClient);
@@ -76,6 +77,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     ready = false;
     name = '';
     description = '';
+    readonly unsaved = new UnsavedChanges();
 
     private missingMetadataOverlays: MissingMetadataOverlays;
 
@@ -95,6 +97,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
             this.releaseId =this.route.snapshot.paramMap.get('releaseId') || '';
 
             this.modeler = createSmartServiceModeler('#js-canvas', '#js-properties-panel');
+            this.unsaved.attach(this.modeler);
 
             this.modeler.designerCallbacks = {
                 openTaskEditDialog(initInfo: SmartServiceTaskDescription, element: BpmnElement, callback: (info: SmartServiceTaskDescription) => void ) {
@@ -163,6 +166,21 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
         }, 1000);
     }
 
+    get title(): string {
+        if (this.name) {
+            return this.name;
+        }
+        return this.id === '' && this.releaseId === '' ? 'New smart service' : 'Smart service';
+    }
+
+    get backLabel(): string {
+        return this.releaseId === '' ? 'Smart service designs' : 'Smart service releases';
+    }
+
+    get backLink(): string {
+        return this.releaseId === '' ? '/smart-services/designs' : '/smart-services/releases';
+    }
+
     loadDesignDiagram(id: string) {
         this.designsService.getDesign(id).subscribe((resp: SmartServiceDesignModel | null) => {
             if (resp !== null) {
@@ -228,6 +246,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     }
 
     saveThen(then: ((design: SmartServiceDesignModel | null) => void)): void {
+        const snapshot = this.unsaved.snapshot();
         exportDiagram(this.modeler).then(
             ({ xml, svg }) => {
                 this.dialogService.openInputDialog('Design Name and Description', {name: this.name, description: this.description}, ['name'])
@@ -237,7 +256,12 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                             this.name = result.name;
                             this.description = result.description;
                             const model = { id: this.id, svg_xml: svg, bpmn_xml: xml, name: result.name, description: result.description, user_id: '' };
-                            this.designsService.saveDesign(model).subscribe(then);
+                            this.designsService.saveDesign(model).subscribe((design) => {
+                                if (design) {
+                                    this.unsaved.markSaved(snapshot);
+                                }
+                                then(design);
+                            });
                         }
                     });
             },
@@ -269,7 +293,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
         if (file) {
             const fileReader = new FileReader();
             fileReader.onload = () => {
-                this.modeler.importXML(fileReader.result).catch(this.handleError);
+                this.modeler.importXML(fileReader.result).then(() => this.unsaved.markChanged()).catch(this.handleError);
                 snackSuccess(this.snackBar, 'Import finished.');
             };
             fileReader.readAsText(file);

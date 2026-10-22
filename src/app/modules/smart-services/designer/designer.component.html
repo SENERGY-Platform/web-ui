@@ -15,23 +15,20 @@
   -->
 
 <div class="process-designer-container">
-    <div class="ly-column ly-fill">
-        <div class="button-header background-color-accent">
+    <senergy-page-header compact [title]="title" [backLabel]="backLabel" [backLink]="backLink">
+        <span pageStatus class="unsaved-status" role="status">@if (unsaved.dirty) {Unsaved changes}</span>
+        <div pageActions>
             <input hidden type="file" #uploader (change)="importBPMN($event)" [accept]="'.bpmn'"/>
-            <button mat-icon-button matTooltip="Upload BPMN" (click)="uploader.click()">
-                <mat-icon>cloud_upload</mat-icon>
+            <button matButton="outlined" type="button" (click)="uploader.click()">
+                <mat-icon>cloud_upload</mat-icon>Upload BPMN
             </button>
-            <button mat-icon-button matTooltip="Save" (click)="save()">
-                <mat-icon>save</mat-icon>
-            </button>
-            <button mat-icon-button matTooltip="Save and Release" (click)="saveAndRelease()">
-                <mat-icon>save_as</mat-icon>
-            </button>
+            <button matButton="outlined" type="button" (click)="save()">Save</button>
+            <button matButton="filled" type="button" (click)="saveAndRelease()">Save and release</button>
         </div>
-        <div class="ly-row ly-flex" [class.ly-hidden]="!(ready)">
-            <div class="canvas ly-flex" id="js-canvas"></div>
-            <div id="js-properties-panel"></div>
-        </div>
+    </senergy-page-header>
+    <div class="ly-row designer-body" [class.ly-hidden]="!(ready)">
+        <div class="canvas ly-flex" id="js-canvas"></div>
+        <div id="js-properties-panel"></div>
     </div>
     <senergy-spinner [elementCount]="0" [show]="!ready"></senergy-spinner>
 </div>

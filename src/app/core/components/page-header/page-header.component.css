@@ -67,3 +67,45 @@
     height: 18px;
     font-size: 18px;
 }
+
+:host(.compact) .page-header {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-bottom: var(--app-hairline);
+}
+
+:host(.compact) .page-heading {
+    display: flex;
+    align-items: center;
+    flex: 1 1 auto;
+    gap: 12px;
+}
+
+:host(.compact) .page-back {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+:host(.compact) .page-title {
+    overflow: hidden;
+    font-size: var(--app-text-lg);
+    line-height: 28px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+:host(.compact) .page-actions {
+    flex: none;
+}
+
+@media screen and (max-width: 599px) {
+    :host(.compact) .page-header {
+        flex-wrap: wrap;
+    }
+
+    :host(.compact) .page-actions {
+        flex-wrap: wrap;
+    }
+}

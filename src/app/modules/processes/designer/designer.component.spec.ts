@@ -94,6 +94,18 @@ describe('ProcessDesignerComponent load and save', () => {
         expect(snackBar.open).toHaveBeenCalledWith('Model saved.', undefined, { duration: 2000 });
     });
 
+    it('sends a model without an id as a new model', async () => {
+        component.id = '';
+        component.loadProcessDiagram('model-1');
+        await until(() => !!element('Task_device'));
+
+        component.save();
+        await until(() => saveProcess.calls.count() > 0);
+
+        expect(saveProcess.calls.mostRecent().args[0]).toBe('');
+        expect(saveProcess.calls.count()).toBe(1);
+    });
+
     it('reports an error and not success when the model could not be saved', async () => {
         saveProcess.and.returnValue(of(null));
         component.loadProcessDiagram('model-1');
@@ -155,6 +167,46 @@ describe('ProcessDesignerComponent IoT-Info', () => {
             expect(info.querySelectorAll('td')[1].textContent).toBe(malicious);
             await new Promise((resolve) => setTimeout(resolve, 50));
             expect((window as any).__senergyXss).toBeUndefined();
+        } finally {
+            mounted.destroy();
+        }
+    });
+});
+
+describe('ProcessDesignerComponent page state', () => {
+    it('titles a model without an id as new and one with an id as a process model', () => {
+        const component = buildDesigner({});
+
+        expect(component.title).toBe('New process model');
+        component.id = 'model-1';
+        expect(component.title).toBe('Process model');
+    });
+
+    it('is not unsaved before an edit, unsaved with one, and saved again after the save', async () => {
+        const xml = await fetchText('/bpmn-fixtures/process/senergy_all_attributes.bpmn');
+        const mounted = mountModeler(createProcessModeler);
+        try {
+            const saveProcess = jasmine.createSpy('saveProcess').and.returnValue(of({}));
+            const snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
+            const component = buildDesigner({ designerService: { checkConstraints: () => of([]) }, processRepoService: { saveProcess }, snackBar });
+            component.modeler = mounted.modeler;
+            component.unsaved.attach(mounted.modeler);
+            await importXml(mounted.modeler, xml);
+            expect(component.unsaved.dirty).toBeFalse();
+
+            mounted.modeler.get('modeling').updateProperties(mounted.modeler.get('elementRegistry').get('Task_device'), { name: 'renamed' });
+            expect(component.unsaved.dirty).toBeTrue();
+
+            saveProcess.and.returnValue(of(null));
+            component.save();
+            await until(() => snackBar.open.calls.count() > 0);
+            expect(component.unsaved.dirty).toBeTrue();
+
+            snackBar.open.calls.reset();
+            saveProcess.and.returnValue(of({}));
+            component.save();
+            await until(() => snackBar.open.calls.count() > 0);
+            expect(component.unsaved.dirty).toBeFalse();
         } finally {
             mounted.destroy();
         }

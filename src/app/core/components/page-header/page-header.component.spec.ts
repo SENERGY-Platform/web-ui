@@ -43,4 +43,17 @@ describe('PageHeaderComponent', () => {
         expect(link.textContent).toContain('All things');
         expect(link.getAttribute('href')).toBe('/things');
     });
+
+    it('is not compact by default', () => {
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.classList).not.toContain('compact');
+    });
+
+    it('marks its host as compact', () => {
+        fixture.componentRef.setInput('compact', true);
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.classList).toContain('compact');
+    });
 });

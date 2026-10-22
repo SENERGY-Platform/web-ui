@@ -14,9 +14,40 @@
  * limitations under the License.
  */
 
+/* 64px is the toolbar above the page; the header takes its own height and the canvas the rest. */
+.process-designer-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(var(--app-page-height, 100vh) - 64px);
+}
+
+.designer-body {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
 .canvas {
     position: relative;
-    height: calc(var(--app-page-height, 100vh) - 126px);
+}
+
+.unsaved-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--app-text-sm);
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.unsaved-status:empty {
+    display: none;
+}
+
+.unsaved-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--app-warning);
 }
 
 #js-properties-panel {
@@ -25,13 +56,12 @@
     border-top: 0;
     border-bottom: 0;
     width: 260px;
-    height: calc(var(--app-page-height, 100vh) - 126px);
     font-size: 12px;
     top: 0;
     bottom: 0;
     right: 0;
     z-index: 10;
-    border-left: 1px solid var(--mat-sys-outline-variant);
+    border-left: var(--app-hairline);
     overflow: auto;
 }
 
@@ -85,13 +115,6 @@
 /* the panel's script textarea stays editable; this button is just a second way in */
 #js-properties-panel ::ng-deep .senergy-script-entry .bpmn-iot-button {
     margin-top: 4px;
-}
-
-.button-header {
-    padding-left: 8px;
-    padding-top: 7px;
-    padding-bottom: 7px;
-    overflow: hidden;
 }
 
 .process-designer-container ::ng-deep .missing-metadata-overlay {

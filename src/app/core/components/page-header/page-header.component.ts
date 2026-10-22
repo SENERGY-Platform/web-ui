@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { booleanAttribute, ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 
@@ -28,6 +28,7 @@ import { MatIcon } from '@angular/material/icon';
     styleUrls: ['./page-header.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterLink, MatIcon],
+    host: { '[class.compact]': 'compact' },
 })
 export class PageHeaderComponent {
     @Input({ required: true }) title = '';
@@ -35,4 +36,6 @@ export class PageHeaderComponent {
     /** Text and router link of the back link; shown only when both are set. */
     @Input() backLabel = '';
     @Input() backLink: string | unknown[] = '';
+    /** One line for editors that give the height to a canvas: back link, title and status side by side, no description. */
+    @Input({ transform: booleanAttribute }) compact = false;
 }
