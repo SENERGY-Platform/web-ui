@@ -121,6 +121,7 @@ describe('DeployFlowComponent aspects', () => {
     function init(
         functionsByAspect: { [id: string]: DeviceTypeFunctionModel[] | Observable<DeviceTypeFunctionModel[]> },
         savedSelection?: PipelineInputSelectionModel,
+        parseModels?: ParseModel[],
     ) {
         deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspects.and.returnValue(of([{ id: air, name: 'Air', sub_aspects: [] }, { id: water, name: 'Water', sub_aspects: [] }]));
@@ -137,11 +138,11 @@ describe('DeployFlowComponent aspects', () => {
         deviceInstancesService.getDeviceSelectionsFull.and.returnValue(of([]));
         const parseModel = { id: 'op1', name: 'Operator', inPorts: ['value'], config: [] } as unknown as ParseModel;
         const parserService = createSpyFromClass(ParserService);
-        parserService.getInputs.and.returnValue(of([parseModel]));
+        parserService.getInputs.and.returnValue(of(parseModels || [parseModel]));
         const pipelineRegistryService = createSpyFromClass(PipelineRegistryService);
         pipelineRegistryService.getPipelines.and.returnValue(of([]));
-        pipelineRegistryService.getPipeline.and.returnValue(of({
-            id: 'p1', flowId: 'flow', name: 'Pipeline', description: '',
+        pipelineRegistryService.getPipeline.and.callFake((id: string) => of({
+            id, flowId: 'flow', name: 'Pipeline ' + id, description: '',
             operators: [{ id: 'op1', inputTopics: [], inputSelections: savedSelection ? [savedSelection] : [] }],
         } as unknown as PipelineModel));
         const conceptsService = createSpyFromClass(ConceptsService);
@@ -290,6 +291,16 @@ describe('DeployFlowComponent aspects', () => {
         });
         expect(input().get('aspectIds')?.value).toEqual([air, water]);
         expect(input().get('functionId')?.value).toBe(temperature.id);
+    });
+
+    const saved: PipelineInputSelectionModel = {
+        inputName: 'value', aspectId: air, functionId: temperature.id, characteristicIds: ['c1'], selectableId: 'd1',
+    };
+
+    it('opens a pipeline whose flow has no inputs for editing', () => {
+        init({ [air]: [temperature] }, saved, []);
+        expect(component.ready).toBeTrue();
+        expect(component.form.get('name')?.value).toBe('Pipeline p1');
     });
 
     it('keeps a selection the cached selectables still offer and resets one they do not', () => {

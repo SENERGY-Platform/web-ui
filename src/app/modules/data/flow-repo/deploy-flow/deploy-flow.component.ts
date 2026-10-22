@@ -206,7 +206,8 @@ export class DeployFlowComponent implements OnInit {
                                         this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics, operator?.persistData),
                                     );
                                 });
-                                return forkJoin(observables);
+                                // forkJoin over nothing completes without a value, and the page would never get ready
+                                return observables.length > 0 ? forkJoin(observables) : of([]);
                             }));
                     }));
                 }));
