@@ -26,7 +26,7 @@ import { AuthorizationService } from '../../../../core/services/authorization.se
 import { AuthorizationServiceMock } from '../../../../core/services/authorization.service.mock';
 import { DialogsService } from '../../../../core/services/dialogs.service';
 import {ActivatedRoute, provideRouter} from '@angular/router';
-import { forkJoin, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of, Subject } from 'rxjs';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -111,7 +111,10 @@ describe('DeployFlowComponent aspects', () => {
     let deviceInstancesService: Spy<DeviceInstancesService>;
     let flowEngineService: Spy<FlowEngineService>;
     let aspectClassesService: Spy<AspectClassesService>;
+    let pipelineRegistryService: Spy<PipelineRegistryService>;
     let mayReadAspectClasses: boolean;
+    let routeId: string;
+    let routeUrl: BehaviorSubject<{ path: string }[]>;
 
     beforeEach(() => {
         mayReadAspectClasses = true;
@@ -121,6 +124,7 @@ describe('DeployFlowComponent aspects', () => {
     function init(
         functionsByAspect: { [id: string]: DeviceTypeFunctionModel[] | Observable<DeviceTypeFunctionModel[]> },
         savedSelection?: PipelineInputSelectionModel,
+        parseModels?: ParseModel[],
     ) {
         deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspects.and.returnValue(of([{ id: air, name: 'Air', sub_aspects: [] }, { id: water, name: 'Water', sub_aspects: [] }]));
@@ -137,11 +141,11 @@ describe('DeployFlowComponent aspects', () => {
         deviceInstancesService.getDeviceSelectionsFull.and.returnValue(of([]));
         const parseModel = { id: 'op1', name: 'Operator', inPorts: ['value'], config: [] } as unknown as ParseModel;
         const parserService = createSpyFromClass(ParserService);
-        parserService.getInputs.and.returnValue(of([parseModel]));
-        const pipelineRegistryService = createSpyFromClass(PipelineRegistryService);
+        parserService.getInputs.and.returnValue(of(parseModels || [parseModel]));
+        pipelineRegistryService = createSpyFromClass(PipelineRegistryService);
         pipelineRegistryService.getPipelines.and.returnValue(of([]));
-        pipelineRegistryService.getPipeline.and.returnValue(of({
-            id: 'p1', flowId: 'flow', name: 'Pipeline', description: '',
+        pipelineRegistryService.getPipeline.and.callFake((id: string) => of({
+            id, flowId: 'flow', name: 'Pipeline ' + id, description: '',
             operators: [{ id: 'op1', inputTopics: [], inputSelections: savedSelection ? [savedSelection] : [] }],
         } as unknown as PipelineModel));
         const conceptsService = createSpyFromClass(ConceptsService);
@@ -155,6 +159,8 @@ describe('DeployFlowComponent aspects', () => {
         flowEngineService.startPipeline.and.returnValue(of({}));
         flowEngineService.updatePipeline.and.returnValue(of(true));
         const editing = savedSelection !== undefined;
+        routeId = editing ? 'p1' : 'flow';
+        routeUrl = new BehaviorSubject(editing ? [{ path: 'edit' }, { path: 'p1' }] : [{ path: 'deploy' }, { path: 'flow' }]);
 
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
@@ -165,9 +171,9 @@ describe('DeployFlowComponent aspects', () => {
                 {
                     provide: ActivatedRoute,
                     useValue: {
-                        url: of(editing ? [{ path: 'edit' }, { path: 'p1' }] : [{ path: 'deploy' }, { path: 'flow' }]),
+                        url: routeUrl,
                         queryParams: of({}),
-                        snapshot: { paramMap: { get: () => (editing ? 'p1' : 'flow') } },
+                        snapshot: { paramMap: { get: () => routeId } },
                     },
                 },
                 { provide: ParserService, useValue: parserService },
@@ -289,6 +295,32 @@ describe('DeployFlowComponent aspects', () => {
         });
         expect(input().get('aspectIds')?.value).toEqual([air, water]);
         expect(input().get('functionId')?.value).toBe(temperature.id);
+    });
+
+    const saved: PipelineInputSelectionModel = {
+        inputName: 'value', aspectId: air, functionId: temperature.id, characteristicIds: ['c1'], selectableId: 'd1',
+    };
+
+    it('opens a pipeline whose flow has no inputs for editing', () => {
+        init({ [air]: [temperature] }, saved, []);
+        expect(component.ready).toBeTrue();
+        expect(component.form.get('name')?.value).toBe('Pipeline p1');
+    });
+
+    it('loads the next pipeline of a ?next= chain into the reused component', () => {
+        init({ [air]: [temperature] }, saved);
+        savedSelections();
+        expect(component.ready).toBeFalse();
+
+        // the router updates the snapshot before the url emits
+        routeId = 'p2';
+        routeUrl.next([{ path: 'edit' }, { path: 'p2' }]);
+
+        expect(pipelineRegistryService.getPipeline).toHaveBeenCalledWith('p2');
+        expect(component.ready).toBeTrue();
+        expect(component.pipelineId).toBe('p2');
+        expect(component.form.get('name')?.value).toBe('Pipeline p2');
+        expect(component.getSubElementAsGroupArray(component.form, 'nodes').length).toBe(1);
     });
 
     it('keeps a selection the cached selectables still offer and resets one they do not', () => {

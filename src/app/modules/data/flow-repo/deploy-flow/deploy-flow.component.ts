@@ -35,8 +35,8 @@ import { FlowEngineService } from '../shared/flow-engine.service';
 import { PipelineInputSelectionModel } from './shared/pipeline-request.model';
 import { buildPipelineRequest, IMPORT_PREFIX, PipelineFormValue, sortedAspectIds } from './shared/pipeline-request.builder';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { concatMap, first, map, takeUntil, tap } from 'rxjs/operators';
-import { forkJoin, MonoTypeOperatorFunction, Observable, of, Subject, Subscription } from 'rxjs';
+import { concatMap, first, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import { defer, forkJoin, MonoTypeOperatorFunction, Observable, of, Subject, Subscription } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
 import { AbstractControl, FormArray, FormControl, FormGroup, FormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -214,6 +214,16 @@ export class DeployFlowComponent implements OnInit {
     }
 
     ngOnInit() {
+        // a ?next= chain navigates to the same route, which reuses this component; so every new url loads anew
+        this.route.url.pipe(switchMap(url => this.load(url)), takeUntilDestroyed(this.destroyRef)).subscribe(_ => this.ready = true);
+    }
+
+    private load(url: UrlSegment[]): Observable<unknown> {
+        this.urlSegments = url;
+        this.ready = false;
+        // the handlers of the previous pipeline's form end with it
+        this.detach$.next();
+        this.detach$ = new Subject<void>();
         const obs: Observable<unknown>[] = [];
         obs.push(this.deviceTypeService.getAspects().pipe(map(aspects => (this.aspects = aspects))));
         // loaded once here, so the aspect select of every input does not request them itself; reading them
@@ -228,12 +238,8 @@ export class DeployFlowComponent implements OnInit {
         obs.push(this.importInstancesService
             .listImportInstances('', undefined, undefined, 'name.asc')
             .pipe(map(instances => (this.importInstances = instances))));
-        obs.push(this.route.url.pipe(first(), concatMap(url => {
-            this.urlSegments = url;
-            this.ready = false;
-            return this.loadForm(url);
-        })));
-        forkJoin(obs).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(_ => this.ready = true);
+        obs.push(defer(() => this.loadForm(url)));
+        return forkJoin(obs);
     }
 
     /**
@@ -284,7 +290,9 @@ export class DeployFlowComponent implements OnInit {
                                     this.addNode(input, operator?.inputSelections || [], operator?.config, operator?.inputTopics, operator?.persistData),
                                 );
                             });
-                            return forkJoin(observables).pipe(map(() => parseModels.length > 0));
+                            // forkJoin over nothing would complete without a value and the page would never get ready;
+                            // false still lets Discard keep the edits when the flow has no operators left
+                            return observables.length > 0 ? forkJoin(observables).pipe(map(() => true)) : of(false);
                         }));
                 }));
             }));
