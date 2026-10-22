@@ -73,9 +73,11 @@ export class DeviceInstancesDialogService {
             const lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
             const serviceOutputCounts: number[] = [];
             const descriptions: string[][] = [];
+            const units: string[][] = [];
             deviceType?.services.forEach((service, serviceIndex) => {
                 serviceOutputCounts[serviceIndex] = 0;
                 const serviceDescriptions: string[] = [];
+                const serviceUnits: string[] = [];
                 service.outputs?.forEach(output => {
                     const paths = this.deviceTypeService.getValuePathsAndContentVariables(output.content_variable);
                     paths.forEach((path) => {
@@ -102,6 +104,7 @@ export class DeviceInstancesDialogService {
                             description += characteristics.find(a => a.id === path.contentVariable.characteristic_id)?.name;
                         }
                         serviceDescriptions.push(description);
+                        serviceUnits.push(characteristics.find(a => a.id === path.contentVariable.characteristic_id && !!a.id)?.display_unit ?? '');
                         if (serviceOutputCounts.length <= serviceIndex) {
                             serviceOutputCounts.push(0);
                         }
@@ -109,6 +112,7 @@ export class DeviceInstancesDialogService {
                     });
                 });
                 descriptions.push(serviceDescriptions);
+                units.push(serviceUnits);
             });
             const dialogConfig = new MatDialogConfig();
             dialogConfig.disableClose = false;
@@ -121,6 +125,7 @@ export class DeviceInstancesDialogService {
                     deviceType,
                     serviceOutputCounts,
                     descriptions,
+                    units,
                     canEdit: onEdit !== undefined,
                 };
             }

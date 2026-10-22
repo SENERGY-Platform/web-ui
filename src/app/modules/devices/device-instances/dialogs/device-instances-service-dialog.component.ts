@@ -47,6 +47,16 @@ import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker } from '@angular/material/datepicker';
 import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
+/** A last value in the value grid. */
+export interface ValueTile {
+    field: string;
+    serviceName: string;
+    showService: boolean;
+    value: TimeValuePairModel['value'];
+    unit: string;
+    time: string | null;
+}
+
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
     styleUrls: ['./device-instances-service-dialog.component.css'],
@@ -77,12 +87,19 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
     });
     device: DeviceInstanceModel;
     descriptions: string[][];
+    /** Display unit per output path, parallel to `descriptions`; empty where the characteristic gives none. */
+    units: string[][];
+    /** The last values of all services as one flat list for the value grid. */
+    tiles: ValueTile[] = [];
+    /** Names of the services that have no output, e.g. pure actuator services. */
+    servicesWithoutData: string[] = [];
     availability: { serviceId: string; from?: Date; to?: Date; groupType?: string; groupTime?: string }[] = [];
     availabilityControl = new FormControl<{
         groupType?: string;
         groupTime?: string;
     }>({});
 
+    valuesLoaded = false;
     errorOccured = false;
     errorMessage = '';
 
@@ -96,9 +113,6 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
     userIsDeveloper = false;
     canEdit = false;
 
-    /** From this many services on, each service shows its values only after a click; fewer are all open. */
-    static readonly collapseFrom = 8;
-    expanded = new Set<number>();
     /** Index of the service whose download options are open, at most one. */
     downloadIndex: number | undefined;
 
@@ -116,6 +130,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         }
     ];
 
+    /** Height of the connection history chart in pixels. */
+    readonly historyHeight = 100;
     /** Width of the connection history box; the timeline chart needs it in pixels. */
     historyWidth = 400;
     private historyBox = viewChild<ElementRef<HTMLElement>>('historyBox');
@@ -129,6 +145,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
             deviceType: DeviceTypeModel;
             serviceOutputCounts: number[];
             descriptions: string[][];
+            units?: string[][];
             canEdit?: boolean;
         }>(MAT_DIALOG_DATA);
 
@@ -138,6 +155,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         this.serviceOutputCounts = data.serviceOutputCounts;
         this.device = data.device;
         this.descriptions = data.descriptions;
+        this.units = data.units ?? [];
+        this.servicesWithoutData = this.services.filter((_, i) => (this.serviceOutputCounts[i] ?? 0) === 0).map(s => s.name);
         this.canEdit = data.canEdit === true;
         this.userCanLoadConnectionHistory = this.deviceInstancesService.userHasReadAuthorizationConnectionLog();
         this.userIsDeveloper = this.authorizationService.userIsDeveloper();
@@ -184,6 +203,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
                     this.lastValueArray.push(subArray);
                     counter += this.serviceOutputCounts[serviceIndex];
                 });
+                this.tiles = this.buildTiles();
+                this.valuesLoaded = true;
             },
             error: (_) => {
                 this.errorOccured = true;
@@ -226,30 +247,32 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         return (this.connectionHistory[0]?.[0]?.length ?? 0) > 0;
     }
 
-    /** The state shown in the header chip; an inactive device (attribute `inactive`) is neither online nor offline. */
+    /** The state shown in the header chip, with the classes of the device list: inactive is neither online nor offline. */
     get connectionState(): { label: string; cssClass: string } {
         if (this.device.attributes?.some(a => a.key === 'inactive' && a.value === 'true')) {
-            return { label: 'Inactive', cssClass: '' };
+            return { label: 'Inactive', cssClass: 'hollow muted' };
         }
         switch (this.device.connection_state) {
             case 'online': return { label: 'Online', cssClass: 'online' };
-            case 'offline': return { label: 'Offline', cssClass: '' };
-            default: return { label: 'Unknown', cssClass: '' };
+            case 'offline': return { label: 'Offline', cssClass: 'failed' };
+            default: return { label: 'Unknown', cssClass: 'muted' };
         }
     }
 
-    get collapsible(): boolean {
-        return this.services.length >= DeviceInstancesServiceDialogComponent.collapseFrom;
-    }
-
-    isOpen(i: number): boolean {
-        return !this.collapsible || this.expanded.has(i);
-    }
-
-    toggleOpen(i: number): void {
-        if (!this.expanded.delete(i)) {
-            this.expanded.add(i);
-        }
+    /** One tile per output path; the service name is shown only where another service has a field of the same name. */
+    private buildTiles(): ValueTile[] {
+        const fieldCount = new Map<string, number>();
+        this.lastValueArray.forEach(service => service.forEach(v => fieldCount.set(v.request.columnName, (fieldCount.get(v.request.columnName) ?? 0) + 1)));
+        const tiles: ValueTile[] = [];
+        this.lastValueArray.forEach((service, serviceIndex) => service.forEach((v, valueIndex) => tiles.push({
+            field: v.request.columnName,
+            serviceName: this.services[serviceIndex]?.name ?? '',
+            showService: (fieldCount.get(v.request.columnName) ?? 0) > 1,
+            value: v.response.value,
+            unit: this.units[serviceIndex]?.[valueIndex] ?? '',
+            time: v.response.time,
+        })));
+        return tiles;
     }
 
     /** Opens the download options of one service; the format starts at raw data because the formats differ per service. */

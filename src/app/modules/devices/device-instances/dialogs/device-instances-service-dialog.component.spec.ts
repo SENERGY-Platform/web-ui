@@ -56,12 +56,12 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         { time: '2026-03-01T09:00:00Z', value: 'ok' },
     ];
 
-    function create(options: { history?: boolean; canEdit?: boolean } = {}) {
+    function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues } = {}) {
         exportData = createSpyFromClass(ExportDataService);
         instances = createSpyFromClass(DeviceInstancesService);
         authorization = createSpyFromClass(AuthorizationService);
         dialogRef = createSpyFromClass(MatDialogRef<DeviceInstancesServiceDialogComponent>);
-        exportData.getLastValuesTimescale.and.returnValue(of(lastValues as never));
+        exportData.getLastValuesTimescale.and.returnValue(of((options.values ?? lastValues) as never));
         exportData.getTimescaleDataAvailability.and.returnValue(of([
             { serviceId: 'urn:service:a' }, { serviceId: 'urn:service:a', groupType: 'mean', groupTime: '1h' },
         ] as never));
@@ -83,9 +83,10 @@ describe('DeviceInstancesServiceDialogComponent', () => {
                 { provide: MatDialogRef, useValue: dialogRef },
                 {
                     provide: MAT_DIALOG_DATA, useValue: {
-                        device, services, lastValueElements, serviceOutputCounts: [2, 1], canEdit: options.canEdit ?? false,
+                        device, services, lastValueElements: options.elements ?? lastValueElements, serviceOutputCounts: options.counts ?? [2, 1], canEdit: options.canEdit ?? false,
                         deviceType: { id: 'dt1', services } as unknown as DeviceTypeModel,
                         descriptions: [['total', 'power'], ['state']],
+                        units: [['kWh', ''], ['']],
                     }
                 },
             ],
@@ -170,20 +171,81 @@ describe('DeviceInstancesServiceDialogComponent', () => {
 
     it('shows the name, the connection state, the values and the history without opening anything', () => {
         create();
-        const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+        const el = fixture.nativeElement as HTMLElement;
+        const tiles = Array.from(el.querySelectorAll('.tile')).map(t => t.textContent?.replace(/\s+/g, ' ').trim());
 
-        expect(fixture.nativeElement.querySelector('senergy-dialog-header').textContent).toContain('Meter');
-        expect(fixture.nativeElement.querySelector('.status-chip.online').textContent).toBe('Online');
-        ['Energy', 'Energy readings', 'value.total', '12.5', 'N/A', 'state', 'ok', 'Connection history'].forEach(t => expect(text).toContain(t));
-        expect(fixture.nativeElement.querySelector('timeline-chart')).not.toBeNull();
+        expect(el.querySelector('senergy-dialog-header')?.textContent).toContain('Meter');
+        expect(el.querySelector('.status-chip.online')?.textContent).toBe('Online');
+        expect(tiles.length).toBe(3);
+        expect(tiles[0]).toContain('value.total');
+        expect(tiles[0]).toContain('12.5 kWh');
+        expect(tiles[1]).toContain('N/A');
+        expect(tiles[2]).toContain('ok');
+        expect(el.querySelector('.values-block')?.textContent).toContain('Current values');
+        expect(el.querySelector('timeline-chart')).not.toBeNull();
+        expect(el.querySelector('.values-block')?.nextElementSibling?.textContent).toContain('Connection history');
     });
 
-    it('shows an inactive device as inactive', () => {
+    it('keeps the ids and the services behind two collapsed sections', () => {
         create();
+        const folds = Array.from(fixture.nativeElement.querySelectorAll('details.fold')) as HTMLDetailsElement[];
+
+        expect(folds.map(f => f.querySelector('summary')?.textContent?.replace(/\s+/g, ' ').trim())).toEqual(['expand_more Services 2', 'expand_more Details']);
+        expect(folds.every(f => !f.open)).toBeTrue();
+        expect(folds[0].textContent).toContain('Energy readings');
+        expect(folds[1].textContent).toContain('urn:device:1');
+        expect(fixture.nativeElement.querySelectorAll('details.fold button.copy').length).toBeGreaterThan(0);
+    });
+
+    it('names the service only on tiles whose field name another service also has', () => {
+        const elements = [
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'state' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'state' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'level' },
+        ];
+        create({ elements, counts: [1, 2], values: [lastValues[2], lastValues[2], lastValues[0]] });
+
+        expect(component.tiles.map(t => [t.field, t.serviceName, t.showService])).toEqual([
+            ['state', 'Energy', true], ['state', 'Status', true], ['level', 'Status', false],
+        ]);
+        expect(Array.from(fixture.nativeElement.querySelectorAll('.tile-service')).map(e => (e as HTMLElement).textContent)).toEqual(['Energy', 'Status']);
+    });
+
+    it('says in one line which services have no values, and does not list them as tiles', () => {
+        create({ elements: lastValueElements.slice(0, 2), counts: [2, 0], values: lastValues.slice(0, 2) });
+
+        expect(fixture.nativeElement.querySelector('.without-data').textContent).toContain('No values from Status');
+        expect(fixture.nativeElement.querySelectorAll('.tile').length).toBe(2);
+    });
+
+    it('shows the unit only where the characteristic gives one', () => {
+        create();
+
+        expect(component.tiles.map(t => t.unit)).toEqual(['kWh', '', '']);
+    });
+
+    it('shows one line instead of an empty grid for a device without data', () => {
+        create({ elements: [], counts: [0, 0], values: [] });
+
+        expect(fixture.nativeElement.querySelector('.tiles')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.values-block').textContent).toContain('No service of this device provides values.');
+    });
+
+    it('marks offline, inactive and unknown devices with the chip classes of the device list', () => {
+        create();
+        const chip = () => fixture.nativeElement.querySelector('senergy-dialog-header .status-chip') as HTMLElement;
+        const classes = () => ['online', 'failed', 'hollow', 'muted'].filter(c => chip().classList.contains(c));
+
+        expect(classes()).toEqual(['online']);
+        component.device.connection_state = 'offline';
+        fixture.detectChanges();
+        expect([chip().textContent, classes()]).toEqual(['Offline', ['failed']]);
+        component.device.connection_state = '';
+        fixture.detectChanges();
+        expect([chip().textContent, classes()]).toEqual(['Unknown', ['muted']]);
         component.device.attributes = [{ key: 'inactive', value: 'true', origin: 'web-ui' }];
         fixture.detectChanges();
-
-        expect(fixture.nativeElement.querySelector('.status-chip').textContent).toBe('Inactive');
+        expect([chip().textContent, classes()]).toEqual(['Inactive', ['hollow', 'muted']]);
     });
 
     it('opens the download options of one service inline without a request, and only one at a time', () => {
@@ -202,20 +264,6 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelectorAll('.download').length).toBe(0);
         expect(requests()).toBe(before);
-    });
-
-    it('collapses the values of each service from eight services on', () => {
-        create();
-        expect(component.collapsible).toBeFalse();
-        expect(fixture.nativeElement.querySelectorAll('table.values').length).toBe(2);
-
-        component.services = Array.from({ length: 8 }, (_, i) => ({ ...services[0], id: 'urn:service:' + i })) as DeviceTypeServiceModel[];
-        fixture.detectChanges();
-        expect(component.collapsible).toBeTrue();
-        expect(fixture.nativeElement.querySelectorAll('table.values').length).toBe(0);
-        component.toggleOpen(0);
-        fixture.detectChanges();
-        expect(fixture.nativeElement.querySelectorAll('table.values').length).toBe(1);
     });
 
     it('sends raw data without a group type or time when the raw format is chosen', async () => {

@@ -14,18 +14,113 @@
  * limitations under the License.
  */
 
+.block h3 {
+    margin: 12px 0 8px;
+    font-size: var(--app-text-md);
+    font-weight: 500;
+}
+
+.values-block h3 {
+    margin-top: 0;
+}
+
+.muted,
+.hint,
+.fact dt {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
+}
+
+.hint {
+    margin-left: 6px;
+    font-weight: 400;
+}
+
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+    gap: 8px;
+}
+
+.tile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding: 8px 12px;
+    border: var(--app-hairline);
+    border-radius: var(--app-radius-sm);
+    background: var(--mat-sys-surface-container-low);
+}
+
+.tile-field,
+.tile-service,
+.tile-time {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
+    overflow-wrap: anywhere;
+}
+
+.tile-value {
+    font-size: var(--app-text-lg);
+    font-weight: 500;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.tile-value.no-value {
+    color: var(--mat-sys-on-surface-variant);
+    font-weight: 400;
+}
+
+.tile-unit {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-sm);
+    font-weight: 400;
+}
+
+.without-data {
+    margin: 8px 0 0;
+}
+
+.history {
+    width: 100%;
+    min-height: 40px;
+}
+
+.fold {
+    margin-top: 12px;
+    border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.fold summary {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0;
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--app-text-md);
+    font-weight: 500;
+}
+
+.fold summary::-webkit-details-marker {
+    display: none;
+}
+
+.fold .chevron {
+    transition: transform 0.15s;
+}
+
+.fold[open] .chevron {
+    transform: rotate(180deg);
+}
+
 .facts {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: 8px 24px;
-    margin: 0 0 16px;
-}
-
-.fact dt,
-.muted,
-.hint {
-    color: var(--mat-sys-on-surface-variant);
-    font-size: var(--app-text-xs);
+    margin: 0 0 8px;
 }
 
 .fact dd {
@@ -49,25 +144,13 @@
     color: var(--app-success);
 }
 
-.block h3 {
-    margin: 16px 0 8px;
-    font-size: var(--app-text-md);
-    font-weight: 500;
-}
-
-.hint {
-    margin-left: 6px;
-    font-weight: 400;
-}
-
-.history {
-    width: 100%;
-    min-height: 60px;
-}
-
 .service {
     border-top: 1px solid var(--mat-sys-outline-variant);
     padding: 8px 0;
+}
+
+.fold > .service:first-of-type {
+    border-top: 0;
 }
 
 .service-head {
@@ -87,10 +170,6 @@
 
 .service-name {
     font-weight: 500;
-}
-
-.time {
-    white-space: nowrap;
 }
 
 .service-id {

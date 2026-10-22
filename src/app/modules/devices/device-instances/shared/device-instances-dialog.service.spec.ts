@@ -44,7 +44,7 @@ describe('DeviceInstancesDialogService data dialog', () => {
         deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getMeasuringFunctions.and.returnValue(of([{ id: 'f1', display_name: 'Get energy' }] as never));
         deviceTypeService.getAspectNodesWithMeasuringFunction.and.returnValue(of([]));
-        deviceTypeService.getLeafCharacteristics.and.returnValue(of([{ id: 'c1', name: 'kWh' }] as never));
+        deviceTypeService.getLeafCharacteristics.and.returnValue(of([{ id: 'c1', name: 'kWh', display_unit: 'kWh' }] as never));
         deviceTypeService.getDeviceType.and.returnValue(of(deviceType as never));
         deviceTypeService.getValuePathsAndContentVariables.and.returnValue([
             { path: 'value.total', contentVariable: { function_id: 'f1', characteristic_id: 'c1' } },
@@ -75,6 +75,7 @@ describe('DeviceInstancesDialogService data dialog', () => {
         ]);
         expect(config.data['serviceOutputCounts']).toEqual([2, 0]);
         expect(config.data['descriptions']).toEqual([['Get energy, kWh', 'Get energy'], []]);
+        expect(config.data['units']).toEqual([['kWh', ''], []]);
     });
 
     it('offers Edit in the dialog only with a callback, and calls it when the dialog closes with edit', () => {

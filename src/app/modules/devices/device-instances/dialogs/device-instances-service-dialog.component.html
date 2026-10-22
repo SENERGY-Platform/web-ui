@@ -15,60 +15,59 @@
   -->
 
 <senergy-dialog-header [title]="device.display_name || device.name" (closed)="close()">
-  <span class="status-chip" [class.online]="connectionState.cssClass === 'online'">{{connectionState.label}}</span>
+  <span [class]="'status-chip ' + connectionState.cssClass">{{connectionState.label}}</span>
   <button mat-icon-button type="button" color="accent" (click)="refresh()" aria-label="Refresh">
     <mat-icon>refresh</mat-icon>
   </button>
 </senergy-dialog-header>
 
 <mat-dialog-content>
-  <dl class="facts">
-    <ng-template #copyButton let-key="key" let-text="text">
-      @if (userIsDeveloper) {
-        <button mat-icon-button type="button" class="copy" [class.copied]="copiedKey === key"
-          (click)="copyToClipboard(key, text)" [matTooltip]="clipboardTooltip" aria-label="Copy to clipboard">
-          <mat-icon>{{copiedKey === key ? 'check' : 'content_copy'}}</mat-icon>
-        </button>
+  <ng-template #copyButton let-key="key" let-text="text">
+    @if (userIsDeveloper) {
+      <button mat-icon-button type="button" class="copy" [class.copied]="copiedKey === key"
+        (click)="copyToClipboard(key, text)" [matTooltip]="clipboardTooltip" aria-label="Copy to clipboard">
+        <mat-icon>{{copiedKey === key ? 'check' : 'content_copy'}}</mat-icon>
+      </button>
+    }
+  </ng-template>
+
+  <section class="block values-block">
+    <h3>Current values</h3>
+    @if (errorOccured) {
+      <p class="muted">{{errorMessage}}</p>
+    } @else if (!valuesLoaded) {
+      <p class="muted">Loading</p>
+    } @else if (tiles.length === 0) {
+      <p class="muted">No service of this device provides values.</p>
+    } @else {
+      <div class="tiles">
+        @for (tile of tiles; track $index) {
+          <div class="tile" [matTooltip]="tile.serviceName" matTooltipPosition="above">
+            <span class="tile-field">{{tile.field}}</span>
+            @if (tile.showService) {
+              <span class="tile-service">{{tile.serviceName}}</span>
+            }
+            <span class="tile-value" [class.no-value]="tile.value === null">
+              {{tile.value !== null ? tile.value : 'N/A'}}@if (tile.value !== null && tile.unit) {<span class="tile-unit"> {{tile.unit}}</span>}
+            </span>
+            @if (tile.time) {
+              <span class="tile-time">{{tile.time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+            }
+          </div>
+        }
+      </div>
+      @if (servicesWithoutData.length > 0) {
+        <p class="muted without-data">No values from {{servicesWithoutData.join(', ')}}</p>
       }
-    </ng-template>
-    <div class="fact">
-      <dt>Device type</dt>
-      <dd>{{device.device_type_name}}
-        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-name', text: device.device_type_name}"></ng-container></dd>
-    </div>
-    <div class="fact">
-      <dt>Local ID</dt>
-      <dd>{{device.local_id}}
-        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'local-id', text: device.local_id}"></ng-container></dd>
-    </div>
-    <div class="fact">
-      <dt>Device ID</dt>
-      <dd>{{device.id}}
-        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'id', text: device.id}"></ng-container></dd>
-    </div>
-    <div class="fact">
-      <dt>Short ID</dt>
-      <dd>{{getShortId(device.id)}}
-        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'short-id', text: getShortId(device.id)}"></ng-container></dd>
-    </div>
-    <div class="fact">
-      <dt>Device type ID</dt>
-      <dd>{{device.device_type_id}}
-        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-id', text: device.device_type_id}"></ng-container></dd>
-    </div>
-    <div class="fact">
-      <dt>Origin name</dt>
-      <dd>{{device.name}}
-        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'origin-name', text: device.name}"></ng-container></dd>
-    </div>
-  </dl>
+    }
+  </section>
 
   @if (userCanLoadConnectionHistory) {
     <section class="block">
       <h3>Connection history <span class="hint">last 7 days</span></h3>
       <div class="history" #historyBox>
         @if (hasConnectionHistory) {
-          <timeline-chart [data]="connectionHistory" [vAxes]="timelineAxes" [width]="historyWidth / 0.9" [height]="200"></timeline-chart>
+          <timeline-chart [data]="connectionHistory" [vAxes]="timelineAxes" [width]="historyWidth / 0.9" [height]="historyHeight"></timeline-chart>
         } @else if (connectionHistoryLoaded) {
           <p class="muted">No connection changes recorded in the last 7 days.</p>
         } @else {
@@ -78,20 +77,11 @@
     </section>
   }
 
-  <section class="block">
-    <h3>Services <span class="hint">{{services.length}}</span></h3>
-    @if (errorOccured) {
-      <p class="muted">{{errorMessage}}</p>
-    }
+  <details class="fold">
+    <summary><mat-icon class="chevron">expand_more</mat-icon> Services <span class="hint">{{services.length}}</span></summary>
     @for (service of services; track service; let i = $index) {
       <div class="service">
         <div class="service-head">
-          @if (collapsible) {
-            <button mat-icon-button type="button" class="toggle" (click)="toggleOpen(i)"
-              [attr.aria-expanded]="isOpen(i)" [attr.aria-label]="(isOpen(i) ? 'Hide values of ' : 'Show values of ') + service.name">
-              <mat-icon>{{isOpen(i) ? 'expand_less' : 'expand_more'}}</mat-icon>
-            </button>
-          }
           <div class="service-title">
             <span class="service-name">{{service.name}}</span>
             @if (service.description) {
@@ -99,42 +89,32 @@
             }
           </div>
           @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
-            <span class="muted time">{{lastValueArray[i][0].response.time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
             <button mat-icon-button type="button" (click)="toggleDownload(i)" matTooltip="Download data"
               aria-label="Download data" [attr.aria-expanded]="downloadIndex === i">
               <mat-icon>download</mat-icon>
             </button>
           }
         </div>
-        @if (isOpen(i)) {
-          @if (userIsDeveloper) {
-            <div class="service-id">
-              <span class="muted">Service ID</span> {{service.id}}
-              <ng-container *ngTemplateOutlet="copyButton; context: {key: 'service-' + i, text: service.id}"></ng-container>
-            </div>
-          }
-          @if (!errorOccured) {
-            @if (lastValueArray[i] === undefined) {
-              <p class="muted">Loading</p>
-            } @else if (lastValueArray[i].length === 0) {
-              <p class="muted">Service does not provide data</p>
-            } @else {
-              <table class="values">
-                <thead>
-                  <tr><th>Field</th><th>Value</th><th>Description</th></tr>
-                </thead>
-                <tbody>
-                  @for (element of lastValueArray[i]; track element.request.columnName) {
-                    <tr>
-                      <td>{{element.request.columnName}}</td>
-                      <td>{{element.response.value !== null ? element.response.value : 'N/A'}}</td>
-                      <td>{{element.description !== undefined ? element.description : 'N/A'}}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            }
-          }
+        @if (userIsDeveloper) {
+          <div class="service-id">
+            <span class="muted">Service ID</span> {{service.id}}
+            <ng-container *ngTemplateOutlet="copyButton; context: {key: 'service-' + i, text: service.id}"></ng-container>
+          </div>
+        }
+        @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
+          <table class="values">
+            <thead>
+              <tr><th>Field</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              @for (element of lastValueArray[i]; track element.request.columnName) {
+                <tr>
+                  <td>{{element.request.columnName}}</td>
+                  <td>{{element.description !== undefined ? element.description : 'N/A'}}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         }
         @if (downloadIndex === i) {
           <div class="download">
@@ -173,7 +153,43 @@
         }
       </div>
     }
-  </section>
+  </details>
+
+  <details class="fold">
+    <summary><mat-icon class="chevron">expand_more</mat-icon> Details</summary>
+    <dl class="facts">
+      <div class="fact">
+        <dt>Device type</dt>
+        <dd>{{device.device_type_name}}
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-name', text: device.device_type_name}"></ng-container></dd>
+      </div>
+      <div class="fact">
+        <dt>Local ID</dt>
+        <dd>{{device.local_id}}
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'local-id', text: device.local_id}"></ng-container></dd>
+      </div>
+      <div class="fact">
+        <dt>Device ID</dt>
+        <dd>{{device.id}}
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'id', text: device.id}"></ng-container></dd>
+      </div>
+      <div class="fact">
+        <dt>Short ID</dt>
+        <dd>{{getShortId(device.id)}}
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'short-id', text: getShortId(device.id)}"></ng-container></dd>
+      </div>
+      <div class="fact">
+        <dt>Device type ID</dt>
+        <dd>{{device.device_type_id}}
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-id', text: device.device_type_id}"></ng-container></dd>
+      </div>
+      <div class="fact">
+        <dt>Origin name</dt>
+        <dd>{{device.name}}
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'origin-name', text: device.name}"></ng-container></dd>
+      </div>
+    </dl>
+  </details>
 </mat-dialog-content>
 
 <mat-dialog-actions class="ly-row ly-align-end-center">
