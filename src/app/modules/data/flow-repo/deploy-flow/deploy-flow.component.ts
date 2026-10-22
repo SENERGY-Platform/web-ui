@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ParserService } from '../shared/parser.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, UrlSegment } from '@angular/router';
 import { ParseModel } from '../shared/parse.model';
 import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel, DeviceSelectablesFullModel } from '../../../devices/device-instances/shared/device-instances.model';
 import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
@@ -35,8 +35,8 @@ import { DeviceTypeService } from '../../../metadata/device-types-overview/share
 import { FlowEngineService } from '../shared/flow-engine.service';
 import { NodeConfig, NodeModel, NodeValue, PipelineInputSelectionModel, PipelineRequestModel } from './shared/pipeline-request.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { concatMap, first, map, tap } from 'rxjs/operators';
-import { forkJoin, Observable, of, Subscription } from 'rxjs';
+import { concatMap, first, map, switchMap, tap } from 'rxjs/operators';
+import { defer, forkJoin, Observable, of, Subscription } from 'rxjs';
 import { DeviceGroupsService } from '../../../devices/device-groups/shared/device-groups.service';
 import { PathOptionsService } from '../shared/path-options.service';
 import { AbstractControl, FormArray, FormGroup, UntypedFormBuilder, Validators } from '@angular/forms';
@@ -69,7 +69,7 @@ interface DeviceServicePath {
     templateUrl: './deploy-flow.component.html',
     styleUrls: ['./deploy-flow.component.css'],
 })
-export class DeployFlowComponent implements OnInit {
+export class DeployFlowComponent implements OnInit, OnDestroy {
     constructor(
         private parserService: ParserService,
         private route: ActivatedRoute,
@@ -113,6 +113,7 @@ export class DeployFlowComponent implements OnInit {
     functionCharacteristics: Map<string, DeviceTypeCharacteristicsModel[]> = new Map();
     operators: Map<string, OperatorModel> = new Map();
     importInstances: ImportInstancesModel[] = [];
+    private loadSubscription?: Subscription;
 
     form = this.fb.group({
         name: ['', Validators.required],
@@ -146,6 +147,17 @@ export class DeployFlowComponent implements OnInit {
     }
 
     ngOnInit() {
+        // a ?next= chain navigates to the same route, which reuses this component; so every new url loads anew
+        this.loadSubscription = this.route.url.pipe(switchMap(url => this.load(url))).subscribe(_ => this.ready = true);
+    }
+
+    ngOnDestroy() {
+        this.loadSubscription?.unsubscribe();
+    }
+
+    private load(url: UrlSegment[]): Observable<unknown> {
+        this.ready = false;
+        this.resetForm();
         const obs: Observable<unknown>[] = [];
         obs.push(this.deviceTypeService.getAspects().pipe(map(aspects => (this.aspects = aspects))));
         // loaded once here, so the aspect select of every input does not request them itself; reading them
@@ -160,9 +172,7 @@ export class DeployFlowComponent implements OnInit {
         obs.push(this.importInstancesService
             .listImportInstances('', undefined, undefined, 'name.asc')
             .pipe(map(instances => (this.importInstances = instances))));
-        obs.push(this.route.url.pipe(first(), concatMap(url => {
-            this.ready = false;
-            this.resetForm();
+        obs.push(defer(() => {
             let id = this.route.snapshot.paramMap.get('id');
             if (id === null) {
                 console.error('id not set!');
@@ -224,8 +234,8 @@ export class DeployFlowComponent implements OnInit {
                         }));
                 }));
             }
-        })));
-        forkJoin(obs).subscribe(_ => this.ready = true);
+        }));
+        return forkJoin(obs);
     }
 
     private resetForm() {
