@@ -19,7 +19,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import {
     ExportModel,
     ExportValueBaseModel,
@@ -49,15 +48,23 @@ import { DeviceInstanceModel, DeviceSelectablesModel } from '../../../modules/de
 import { DataTableHelperService, DeviceTypeAspectNodeModelWithRootName } from '../shared/data-table-helper.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { PipelineModel, PipelineOperatorModel } from '../../../modules/data/pipeline-registry/shared/pipeline.model';
-import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
-import { forkJoin, Observable, of } from 'rxjs';
+import { defer, forkJoin, Observable, of } from 'rxjs';
 import { DELETE_RETRY_NOTE, describeGeneratedResource, UnsavedGeneratedResources, unsavedNotice } from '../../shared/generated-resources';
 import { GeneratedResourceJanitor } from '../../shared/generated-resource-janitor';
 import { finalize, flatMap, map, mergeMap, tap } from 'rxjs/operators';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
-import { ProcessSchedulerModel } from '../../process-scheduler/shared/process-scheduler.model';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
+import { EngineSchedule } from '../../../core/model/automation-engine.model';
 import { DataTableService } from '../shared/data-table.service';
-import { buildImportExport, buildPipelineOperatorExport, GENERATED_DEPLOYMENT_SVG, generatedDeploymentXml, generatedScheduleCron, isFailedDeployment, SaveStepFailure } from './data-table-edit-dialog.save';
+import {
+    buildImportExport,
+    buildPipelineOperatorExport,
+    GENERATED_DEPLOYMENT_SVG,
+    GENERATED_TASK_ID,
+    generatedDeploymentXml,
+    generatedScheduleCron,
+    isFailedDeployment,
+    SaveStepFailure,
+} from './data-table-edit-dialog.save';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { boundaryValidator, elementDetailsValidator, exportValidator } from './data-table-edit-dialog.validators';
@@ -153,11 +160,10 @@ export class DataTableEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DataTableEditDialogComponent>>(MatDialogRef);
     dataTableHelperService = inject(DataTableHelperService);
     private dataTableService = inject(DataTableService);
-    private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
     private fb = inject(FormBuilder);
-    private processSchedulerService = inject(ProcessSchedulerService);
+    private automationEngineService = inject(AutomationEngineService);
     private cdref = inject(ChangeDetectorRef);
     private deviceGroupsService = inject(DeviceGroupsService);
     private conceptsService = inject(ConceptsService);
@@ -1263,37 +1269,18 @@ export class DataTableEditDialogComponent implements OnInit {
                 const label = this.elementLabel(element);
                 const deploymentFailure = new SaveStepFailure('process deployment', label);
                 observables.push(
-                    this.deploymentsService
-                        .v2getPreparedDeploymentsByXml(xml, svg)
+                    // called when the save step runs, not when the steps are built, as the post after the prepare call was
+                    defer(() =>
+                        this.automationEngineService.createDeployment({
+                            name: this.formGroup.get('name')?.value || 'generatedByProcessStatusWidget',
+                            xml,
+                            svg,
+                            source: 'generated',
+                            selections: { [GENERATED_TASK_ID]: { device_id: deviceId, service_id: serviceId } },
+                        }),
+                    )
                         .pipe(
-                            map((pD: V2DeploymentsPreparedModel | null) => {
-                                if (
-                                    pD !== null &&
-                                    pD.elements.length === 1 &&
-                                    pD.elements[0].task !== null &&
-                                    pD.elements[0].task.selection !== undefined
-                                ) {
-                                    const name = this.formGroup.get('name')?.value;
-                                    if (name !== undefined && name !== null) {
-                                        pD.name = name;
-                                    }
-                                    pD.elements[0].task.selection.selected_device_id = deviceId;
-                                    pD.elements[0].task.selection.selected_service_id = serviceId;
-                                    return pD;
-                                }
-                                return null;
-                            }),
-                        )
-                        .pipe(
-                            flatMap((pD) => {
-                                if (pD !== null) {
-                                    return this.deploymentsService.v2postDeployments(pD, 'generated');
-                                }
-                                return of(null);
-                            }),
-                        )
-                        .pipe(
-                            flatMap((deployment): Observable<ProcessSchedulerModel | SaveStepFailure | null> => {
+                            flatMap((deployment): Observable<EngineSchedule | SaveStepFailure | null> => {
                                 if (deployment === null || isFailedDeployment(deployment)) {
                                     return of(deploymentFailure);
                                 }
@@ -1301,11 +1288,10 @@ export class DataTableEditDialogComponent implements OnInit {
                                 element.controls.elementDetails.controls.device.patchValue({ deploymentId: deployment.id });
                                 // spread process starts
                                 const cron = generatedScheduleCron(refreshTime, elements.length, index);
-                                return this.processSchedulerService.createSchedule({
+                                return this.automationEngineService.createSchedule({
                                     created_by: this.widgetId,
-                                    process_deployment_id: deployment.id,
+                                    deployment_id: deployment.id,
                                     cron,
-                                    id: '',
                                 });
                             }),
                         )
@@ -1314,7 +1300,7 @@ export class DataTableEditDialogComponent implements OnInit {
                                 if (schedule instanceof SaveStepFailure) {
                                     return schedule;
                                 }
-                                if (schedule === null) {
+                                if (schedule === null || !schedule.id) {
                                     return new SaveStepFailure('schedule', label);
                                 }
                                 this.unsaved.record({ kind: 'schedule', id: schedule.id, label });

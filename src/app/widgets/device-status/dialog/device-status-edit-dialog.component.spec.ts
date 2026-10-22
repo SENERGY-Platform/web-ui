@@ -18,7 +18,6 @@ import { DeviceStatusEditDialogComponent } from './device-status-edit-dialog.com
 import { CoreModule } from '../../../core/core.module';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { EMPTY, of, Subject } from 'rxjs';
@@ -32,7 +31,8 @@ import {
     DeviceTypeServiceModel,
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeService } from '../../../modules/metadata/device-types-overview/shared/device-type.service';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
+import { EngineDeployment, EngineSchedule } from '../../../core/model/automation-engine.model';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
@@ -44,7 +44,6 @@ import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { environment } from '../../../../environments/environment';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import {provideRouter} from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -58,7 +57,7 @@ describe('DeviceStatusEditDialogComponent', () => {
     let fixture: ComponentFixture<DeviceStatusEditDialogComponent>;
 
     const exportServiceSpy: Spy<ExportService> = createSpyFromClass(ExportService);
-    const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
+    let engineSpy: Spy<AutomationEngineService>;
     const deviceInstanceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
     const matDialogRefSpy: Spy<MatDialogRef<DeviceStatusEditDialogComponent>> =
         createSpyFromClass<MatDialogRef<DeviceStatusEditDialogComponent>>(MatDialogRef);
@@ -92,29 +91,9 @@ describe('DeviceStatusEditDialogComponent', () => {
             };
             exportServiceSpy.addCharacteristicToDeviceTypeContentVariable.and.returnValue([exampleExportValueCharacteristicModel]);
             exportServiceSpy.getTimePath.and.returnValue({ path: 'value.struct.time' });
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: uuid() }));
-            deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(
-                of({
-                    id: '',
-                    version: 3,
-                    elements: [
-                        {
-                            task: {
-                                selection: {
-                                    selection_options: [
-                                        {
-                                            device: { id: 'device_1', name: 'device' },
-                                            services: [{ id: 'service_1', name: 'service' }],
-                                        },
-                                    ],
-                                    selected_device_id: '',
-                                    selected_service_id: '',
-                                },
-                            },
-                        },
-                    ],
-                } as V2DeploymentsPreparedModel),
-            );
+            engineSpy = createSpyFromClass<AutomationEngineService>(AutomationEngineService);
+            engineSpy.createDeployment.and.returnValue(of({ id: uuid() } as EngineDeployment));
+            engineSpy.createSchedule.and.returnValue(of({ id: uuid() } as EngineSchedule));
 
             deviceInstanceServiceSpy.getDeviceSelections.and.returnValue(
                 of([
@@ -138,7 +117,8 @@ describe('DeviceStatusEditDialogComponent', () => {
 
             // the dialog deletes unsaved resources when the fixture is destroyed after a test
             exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 200 }));
-            deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
+            engineSpy.deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
+            engineSpy.deleteScheduleIfExists.and.returnValue(of({ status: 200 }));
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
             dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'OK' }));
             dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
@@ -201,7 +181,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                     { provide: DeviceInstancesService, useValue: deviceInstanceServiceSpy },
                     { provide: DashboardService, useValue: dashboardServiceSpy },
                     { provide: DeviceTypeService, useValue: deviceTypeServiceeSpy },
-                    { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+                    { provide: AutomationEngineService, useValue: engineSpy },
                     { provide: ExportService, useValue: exportServiceSpy },
                     { provide: MatDialogRef, useValue: matDialogRefSpy },
                     { provide: MAT_DIALOG_DATA, useValue: { widgetId: 'widgetId-1', dashboardId: 'dashboardId-1' } },
@@ -234,7 +214,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.elements.length).toBe(0);
             expect(component.funcArray.length).toBe(0);
             expect(component.selectablesArray.length).toBe(0);
-            expect(component.preparedDeployment.length).toBe(0);
+            expect(component.generatedProcess.length).toBe(0);
             expect(component.serviceExportValueArray.length).toBe(0);
             expect(component.aspects.length).toBe(1);
             expect(component.aspects[0]).toEqual({ id: 'aspect_1', name: 'Air' } as DeviceTypeAspectNodeModel);
@@ -262,7 +242,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             });
             expect(component.funcArray.length).toBe(0);
             expect(component.selectablesArray.length).toBe(0);
-            expect(component.preparedDeployment.length).toBe(0);
+            expect(component.generatedProcess.length).toBe(0);
             expect(component.serviceExportValueArray.length).toBe(0);
         }),
     );
@@ -281,7 +261,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 } as DeviceTypeFunctionModel,
             ]);
             expect(component.selectablesArray.length).toBe(0);
-            expect(component.preparedDeployment.length).toBe(0);
+            expect(component.generatedProcess.length).toBe(0);
             expect(component.serviceExportValueArray.length).toBe(0);
             expect(component.elements[0]).toEqual({
                 exportValues: null,
@@ -327,7 +307,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                     services: [{ id: 'service_1', name: 'service' }],
                 },
             ] as DeviceSelectablesModel[]);
-            expect(component.preparedDeployment.length).toBe(1);
+            expect(component.generatedProcess.length).toBe(1);
             expect(component.serviceExportValueArray.length).toBe(0);
             expect(component.elements[0]).toEqual({
                 exportValues: null,
@@ -352,7 +332,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             component.elementsControl.at(0).patchValue({ function: component.funcArray[0][0] });
             component.elementsControl.at(0).patchValue({ selectable: component.selectablesArray[0][0] });
 
-            expect(component.preparedDeployment.length).toBe(1);
+            expect(component.generatedProcess.length).toBe(1);
             expect(component.serviceExportValueArray.length).toBe(1);
             expect(component.elements[0]).toEqual({
                 exportValues: null,
@@ -397,7 +377,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             component.elementsControl.at(0).patchValue({ service: component.serviceExportValueArray[0][0].service });
             component.elementsControl.at(0).patchValue({ exportValues: component.serviceExportValueArray[0][0].exportValues[0] });
 
-            expect(component.preparedDeployment.length).toBe(1);
+            expect(component.generatedProcess.length).toBe(1);
             expect(component.serviceExportValueArray.length).toBe(1);
             expect(component.elements[0]).toEqual({
                 exportValues: {
@@ -450,7 +430,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.elements.length).toBe(0);
             expect(component.funcArray.length).toBe(0);
             expect(component.selectablesArray.length).toBe(0);
-            expect(component.preparedDeployment.length).toBe(0);
+            expect(component.generatedProcess.length).toBe(0);
             expect(component.serviceExportValueArray.length).toBe(0);
             expect(component.aspects[0]).toEqual({ id: 'aspect_1', name: 'Air' } as DeviceTypeAspectNodeModel);
             expect(component.dashboardId).toBe('dashboardId-1');
@@ -472,11 +452,11 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.elements[0].deploymentId).toBeNull();
             exportServiceSpy.startPipeline.calls.reset();
             exportServiceSpy.stopPipelineByIdIfExists.calls.reset();
-            deploymentsServiceSpy.v2postDeployments.calls.reset();
+            engineSpy.createDeployment.calls.reset();
             component.save();
             expect(component.elements[0].exportId).not.toBeNull();
             expect(component.elements[0].deploymentId).not.toBeNull();
-            expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(1);
+            expect(engineSpy.createDeployment.calls.count()).toBe(1);
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
             expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
         }),
@@ -496,13 +476,45 @@ describe('DeviceStatusEditDialogComponent', () => {
             expect(component.elements[0].deploymentId).toBeNull();
             exportServiceSpy.startPipeline.calls.reset();
             exportServiceSpy.stopPipelineByIdIfExists.calls.reset();
-            deploymentsServiceSpy.v2postDeployments.calls.reset();
+            engineSpy.createDeployment.calls.reset();
             component.save();
             expect(component.elements[0].exportId).not.toBeNull();
             expect(component.elements[0].deploymentId).not.toBeNull();
-            expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+            expect(engineSpy.createDeployment.calls.count()).toBe(0);
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(1);
             expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
+        }),
+    );
+
+    it(
+        'deploys the generated process with the selected device and a schedule through the engine',
+        waitForAsync(() => {
+            component.addElement({} as DeviceStatusElementModel);
+            component.elementsControl.at(0).patchValue({ aspectId: component.aspects[0].id });
+            component.elementsControl.at(0).patchValue({ function: component.funcArray[0][0] });
+            component.elementsControl.at(0).patchValue({ selectable: component.selectablesArray[0][0] });
+            component.elementsControl.at(0).patchValue({ service: component.serviceExportValueArray[0][0].service });
+            component.elementsControl.at(0).patchValue({ exportValues: component.serviceExportValueArray[0][0].exportValues[0] });
+            component.elementsControl.at(0).patchValue({ requestDevice: true });
+            component.formGroup.get('refreshTime')?.setValue(30);
+            engineSpy.createDeployment.and.returnValue(of({ id: 'deployment_1' } as EngineDeployment));
+
+            component.save();
+
+            expect(engineSpy.createDeployment.calls.count()).toBe(1);
+            const [input, namespace] = engineSpy.createDeployment.calls.mostRecent().args;
+            expect(namespace).toBeUndefined();
+            expect(input.source).toBe('generated');
+            expect(input.xml).toContain('<bpmn:serviceTask id="Task_0os5tro"');
+            expect(input.selections).toEqual({
+                Task_0os5tro: { device_id: 'device_1', service_id: component.serviceExportValueArray[0][0].service.id },
+            });
+            expect(engineSpy.createSchedule.calls.count()).toBe(1);
+            expect(engineSpy.createSchedule.calls.mostRecent().args[0]).toEqual({
+                created_by: 'widgetId-1',
+                deployment_id: 'deployment_1',
+                cron: '0/30 * * * * *',
+            });
         }),
     );
 
@@ -521,7 +533,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             dashboardServiceSpy.updateWidgetProperty.calls.reset();
             dashboardServiceSpy.updateWidgetName.calls.reset();
             matDialogRefSpy.close.calls.reset();
-            deploymentsServiceSpy.v2postDeployments.calls.reset();
+            engineSpy.createDeployment.calls.reset();
         }
 
         function expectNoWidgetSave(): void {
@@ -535,7 +547,7 @@ describe('DeviceStatusEditDialogComponent', () => {
 
         afterEach(() => {
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+            engineSpy.createDeployment.and.returnValue(of({ id: 'deployment_id_1' } as EngineDeployment));
             dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'OK' }));
         });
 
@@ -557,7 +569,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 exportServiceSpy.startPipeline.and.returnValue(of(null));
                 component.save();
                 expectNoWidgetSave();
-                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                expect(engineSpy.createDeployment.calls.count()).toBe(0);
                 expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the export for living room');
                 expect(snackOpen.calls.mostRecent().args[2]).toEqual(jasmine.objectContaining({ panelClass: 'snack-bar-error' }));
             }),
@@ -567,7 +579,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             'does not save the widget when the process deployment cannot be created',
             waitForAsync(() => {
                 prepareElement(true);
-                deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 500, id: '' }));
+                engineSpy.createDeployment.and.returnValue(of(null));
                 component.save();
                 expectNoWidgetSave();
                 expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the process deployment for living room');
@@ -579,7 +591,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             waitForAsync(() => {
                 prepareElement(true);
                 (component.formGroup.get('refreshTime') as FormControl).setValue(5);
-                spyOn(TestBed.inject(ProcessSchedulerService), 'createSchedule').and.returnValue(of(null));
+                engineSpy.createSchedule.and.returnValue(of(null));
                 component.save();
                 expectNoWidgetSave();
                 expect(snackOpen.calls.mostRecent().args[0]).toContain('Could not create the schedule for living room');
@@ -593,7 +605,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 exportServiceSpy.startPipeline.and.returnValue(EMPTY);
                 component.save();
                 expectNoWidgetSave();
-                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                expect(engineSpy.createDeployment.calls.count()).toBe(0);
 
                 exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
                 component.save();
@@ -631,12 +643,12 @@ describe('DeviceStatusEditDialogComponent', () => {
                     order.push('delete export');
                     return of({ status: 200 });
                 });
-                deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.reset();
-                deploymentsServiceSpy.v2deleteDeploymentIfExists.and.callFake(() => {
+                engineSpy.deleteDeploymentIfExists.calls.reset();
+                engineSpy.deleteDeploymentIfExists.and.callFake(() => {
                     order.push('delete deployment');
                     return of({ status: 200 });
                 });
-                deleteSchedule = spyOn(TestBed.inject(ProcessSchedulerService), 'deleteScheduleIfExists').and.callFake(() => {
+                deleteSchedule = engineSpy.deleteScheduleIfExists.and.callFake(() => {
                     order.push('delete schedule');
                     return of({ status: 200 });
                 });
@@ -644,7 +656,7 @@ describe('DeviceStatusEditDialogComponent', () => {
 
             afterEach(() => {
                 exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 200 }));
-                deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
+                engineSpy.deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
             });
 
             const oldElement = { name: 'old element', exportId: 'old_export', deploymentId: 'old_deployment', scheduleId: 'old_schedule' };
@@ -672,7 +684,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                     storeOldElement(oldElement);
                     component.save();
                     expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
                     expect(deleteSchedule.calls.allArgs()).toEqual([['old_schedule']]);
                     expect(pending().map((e) => [e.userId, e.dashboardId, e.widgetId, e.resource.kind, e.resource.id])).toEqual([
                         ['user-1', 'dashboardId-1', 'widgetId-1', 'export', 'old_export'],
@@ -685,7 +697,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 'neither deletes nor logs a resource the saved widget still uses',
                 waitForAsync(() => {
                     prepareElement(true);
-                    deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+                    engineSpy.createDeployment.and.returnValue(of({ id: 'deployment_id_1' } as EngineDeployment));
                     storeOldElement({ ...oldElement, exportId: 'export_id_123', deploymentId: 'deployment_id_1' });
                     component.save();
                     expect(order).toEqual(['save', 'delete schedule']);
@@ -698,7 +710,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                 waitForAsync(() => {
                     storage.failWrite = true;
                     prepareElement(true);
-                    deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+                    engineSpy.createDeployment.and.returnValue(of({ id: 'deployment_id_1' } as EngineDeployment));
                     storeOldElement({ ...oldElement, deploymentId: 'deployment_id_1' });
                     component.save();
                     expect(order).toEqual(['save', 'delete export', 'delete schedule']);
@@ -745,14 +757,14 @@ describe('DeviceStatusEditDialogComponent', () => {
                     storeOldElement(oldElement);
                     let n = 0;
                     exportServiceSpy.startPipeline.and.callFake(() => of({ ID: 'export' + ++n } as ExportModel));
-                    deploymentsServiceSpy.v2postDeployments.and.returnValues(of({ status: 500, id: '' }), of({ status: 200, id: 'deployment_retry' }));
+                    engineSpy.createDeployment.and.returnValues(of(null), of({ id: 'deployment_retry' } as EngineDeployment));
 
                     component.save();
                     expect(order).toEqual([]);
                     component.save();
 
                     expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
                     expect(pendingIds()).toEqual(['export1', 'old_export']);
                 }),
             );
@@ -801,7 +813,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                     response.next({ message: 'OK' });
                     response.complete();
 
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
                     expect(pendingIds()).toEqual(['old_export']);
                 }),
             );
@@ -846,9 +858,9 @@ describe('DeviceStatusEditDialogComponent', () => {
                 let createSchedule: jasmine.Spy;
 
                 beforeEach(() => {
-                    createSchedule = spyOn(TestBed.inject(ProcessSchedulerService), 'createSchedule').and.returnValue(of(null));
+                    createSchedule = engineSpy.createSchedule.and.returnValue(of(null));
                     exportServiceSpy.startPipeline.calls.reset();
-                    deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_id_1' }));
+                    engineSpy.createDeployment.and.returnValue(of({ id: 'deployment_id_1' } as EngineDeployment));
                 });
 
                 function closeDialog(): void {
@@ -873,7 +885,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                         closeDialog();
 
                         expect(order).toEqual(['delete deployment']);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
                         expect(deleteSchedule.calls.count()).toBe(0);
                         expect(pendingIds()).toEqual(['export_id_123']);
                         expect(snackOpen.calls.count()).toBe(1);
@@ -889,18 +901,18 @@ describe('DeviceStatusEditDialogComponent', () => {
                             order.push('create export');
                             return of({ ID: 'export' + ++n } as ExportModel);
                         });
-                        deploymentsServiceSpy.v2postDeployments.and.returnValues(
-                            of({ status: 200, id: 'deployment_id_1' }),
-                            of({ status: 200, id: 'deployment_retry' }),
+                        engineSpy.createDeployment.and.returnValues(
+                            of({ id: 'deployment_id_1' } as EngineDeployment),
+                            of({ id: 'deployment_retry' } as EngineDeployment),
                         );
                         component.save();
-                        createSchedule.and.returnValue(of({ id: 'schedule_retry' }));
+                        createSchedule.and.returnValue(of({ id: 'schedule_retry' } as EngineSchedule));
 
                         component.save();
                         closeDialog();
 
                         expect(order).toEqual(['create export', 'create export', 'save', 'delete deployment', 'delete schedule', 'delete deployment']);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment_id_1']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment_id_1']]);
                         expect(deleteSchedule.calls.allArgs()).toEqual([['old_schedule']]);
                         expect(pendingIds()).toEqual(['export1', 'old_export']);
                         expect(component.elements[0]).toEqual(
@@ -919,7 +931,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                         closeDialog();
 
                         expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
                     }),
                 );
 
@@ -938,7 +950,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                         response.complete();
 
                         expect(order).toEqual(['delete deployment', 'delete schedule']);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
                         expect(pendingIds()).toEqual(['old_export']);
                     }),
                 );
@@ -948,13 +960,13 @@ describe('DeviceStatusEditDialogComponent', () => {
                     waitForAsync(() => {
                         prepareElement(true);
                         storeOldElement(oldElement);
-                        const deployment = new Subject<{ status: number; id: string }>();
-                        deploymentsServiceSpy.v2postDeployments.and.returnValue(deployment);
+                        const deployment = new Subject<EngineDeployment | null>();
+                        engineSpy.createDeployment.and.returnValue(deployment);
 
                         component.save();
                         closeDialog();
                         expect(order).toEqual([]);
-                        deployment.next({ status: 500, id: '' });
+                        deployment.next(null);
                         deployment.complete();
 
                         expect(order).toEqual([]);
@@ -987,9 +999,9 @@ describe('DeviceStatusEditDialogComponent', () => {
                         storeOldElement(oldElement);
                         let n = 0;
                         exportServiceSpy.startPipeline.and.callFake(() => of({ ID: 'export' + ++n } as ExportModel));
-                        deploymentsServiceSpy.v2postDeployments.and.returnValues(
-                            of({ status: 200, id: 'deployment_id_1' }),
-                            of({ status: 200, id: 'deployment_retry' }),
+                        engineSpy.createDeployment.and.returnValues(
+                            of({ id: 'deployment_id_1' } as EngineDeployment),
+                            of({ id: 'deployment_retry' } as EngineDeployment),
                         );
                         dashboardServiceSpy.updateWidgetProperty.and.returnValues(of({ message: 'error update' }), of({ message: 'OK' }));
 
@@ -998,7 +1010,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                         closeDialog();
 
                         expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
                         expect(deleteSchedule.calls.allArgs()).toEqual([['old_schedule']]);
                         expect(pendingIds()).toEqual(['deployment_id_1', 'export1', 'old_export']);
                         expect(snackOpen.calls.mostRecent().args[0]).toBe(KEPT_DEPLOYMENT);
@@ -1012,9 +1024,9 @@ describe('DeviceStatusEditDialogComponent', () => {
                         storeOldElement(oldElement);
                         let n = 0;
                         exportServiceSpy.startPipeline.and.callFake(() => of({ ID: 'export' + ++n } as ExportModel));
-                        deploymentsServiceSpy.v2postDeployments.and.returnValues(
-                            of({ status: 200, id: 'deployment_id_1' }),
-                            of({ status: 500, id: '' }),
+                        engineSpy.createDeployment.and.returnValues(
+                            of({ id: 'deployment_id_1' } as EngineDeployment),
+                            of(null),
                         );
                         dashboardServiceSpy.updateWidgetProperty.and.returnValue(of({ message: 'error update' }));
 
@@ -1048,11 +1060,11 @@ describe('DeviceStatusEditDialogComponent', () => {
                         exportServiceSpy.prepareDeviceServiceExport.and.callFake(() => (++prepares === 3 ? [prepared(), prepared()] : [prepared()]));
                         let n = 0;
                         exportServiceSpy.startPipeline.and.callFake(() => of({ ID: 'export' + ++n } as ExportModel));
-                        deploymentsServiceSpy.v2postDeployments.and.returnValues(
-                            of({ status: 500, id: '' }),
-                            of({ status: 200, id: 'deployment_b1' }),
-                            of({ status: 200, id: 'deployment_a2' }),
-                            of({ status: 200, id: 'deployment_b2' }),
+                        engineSpy.createDeployment.and.returnValues(
+                            of(null),
+                            of({ id: 'deployment_b1' } as EngineDeployment),
+                            of({ id: 'deployment_a2' } as EngineDeployment),
+                            of({ id: 'deployment_b2' } as EngineDeployment),
                         );
 
                         component.save();
@@ -1075,7 +1087,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                         closeDialog();
 
                         expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export_id_123']]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
                         expect(deleteSchedule.calls.count()).toBe(0);
                     }),
                 );
@@ -1106,7 +1118,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                         fixture.destroy();
 
                         expect(matDialogRefSpy.close.calls.mostRecent().args).toEqual([]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment_id_1']]);
                         expect(pendingIds()).toEqual(['export_id_123']);
                     }),
                 );
@@ -1115,7 +1127,7 @@ describe('DeviceStatusEditDialogComponent', () => {
                     'keeps a deployment logged whose delete failed when the dialog was closed and says it is retried',
                     waitForAsync(() => {
                         failAtSchedule();
-                        deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
+                        engineSpy.deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
                         component.save();
 
                         closeDialog();
@@ -1269,7 +1281,7 @@ describe('DeviceStatusEditDialogComponent', () => {
             addElementWithService(1, 'service_1');
             component.elementsControl.at(1).patchValue({ requestDevice: true });
             component.elementsControl.at(0).patchValue({ selectable: null });
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_of_b' }));
+            engineSpy.createDeployment.and.returnValue(of({ id: 'deployment_of_b' } as EngineDeployment));
 
             component.save();
 
@@ -1296,9 +1308,8 @@ describe('DeviceStatusEditDialogComponent', () => {
             component.elementsControl.at(1).patchValue({ requestDevice: true });
             component.elementsControl.at(0).patchValue({ selectable: null });
             component.formGroup.get('refreshTime')?.setValue(5);
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deployment_of_b' }));
-            const scheduler = (component as any).processSchedulerService;
-            spyOn(scheduler, 'createSchedule').and.returnValue(of({ id: 'schedule_of_b' }));
+            engineSpy.createDeployment.and.returnValue(of({ id: 'deployment_of_b' } as EngineDeployment));
+            engineSpy.createSchedule.and.returnValue(of({ id: 'schedule_of_b' } as EngineSchedule));
 
             component.save();
 

@@ -21,8 +21,7 @@ import { AuthorizationService } from '../../core/services/authorization.service'
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { ExportService } from '../../modules/exports/shared/export.service';
 import { ImportInstancesService } from '../../modules/imports/import-instances/shared/import-instances.service';
-import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
-import { ProcessSchedulerService } from '../process-scheduler/shared/process-scheduler.service';
+import { AutomationEngineService } from '../../core/services/automation-engine.service';
 import {
     deleteResources,
     describeGeneratedResource,
@@ -204,8 +203,7 @@ export class GeneratedResourceJanitor implements OnDestroy {
     private injector = inject(Injector);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
-    private deploymentsService = inject(DeploymentsService);
-    private processSchedulerService = inject(ProcessSchedulerService);
+    private automationEngineService = inject(AutomationEngineService);
     private importInstancesService = inject(ImportInstancesService);
     private ngZone = inject(NgZone);
 
@@ -224,8 +222,9 @@ export class GeneratedResourceJanitor implements OnDestroy {
 
     private readonly deleters: GeneratedResourceDeleters = {
         export: (id) => this.exportService.stopPipelineByIdIfExists(id, true),
-        deployment: (id) => this.deploymentsService.v2deleteDeploymentIfExists(id, true),
-        schedule: (id) => this.processSchedulerService.deleteScheduleIfExists(id, true),
+        // the engine serves the ids of deployments and schedules created before its switch unchanged
+        deployment: (id) => this.automationEngineService.deleteDeploymentIfExists(id, true),
+        schedule: (id) => this.automationEngineService.deleteScheduleIfExists(id, true),
         importInstance: (id) =>
             this.importInstancesService.deleteImportInstance(id).pipe(
                 map(() => ({ status: 200 })),

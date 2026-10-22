@@ -100,6 +100,7 @@ describe('smart-service writers on the smart-service designer modeler', () => {
         expect(parameters(task, 'camunda:outputParameter')).toEqual({
             answer: '42',
             Task_1_process_deployment_id: '${process_deployment_id}',
+            Task_1_done_event: '${done_event}',
             Task_1_is_fog_deployment: '${is_fog_deployment}',
             Task_1_fog_hub: '${fog_hub}',
         });
@@ -147,13 +148,63 @@ describe('smart-service writers on the smart-service designer modeler', () => {
         { topic: 'analytics', outputs: { Task_1_pipeline_id: '${pipeline_id}' } },
         { topic: 'export', outputs: { Task_1_export_id: '${export_id}' } },
         { topic: 'import', outputs: { Task_1_import_id: '${import_id}' } },
-        { topic: 'device_repository', outputs: { Task_1_device_group_id: '${device_group_id}', Task_1_device_group_selection: '${device_group_iot_option}' } },
+        {
+            topic: 'device_repository',
+            outputs: {
+                Task_1_device_group_id: '${device_group_id}',
+                Task_1_device_group_selection: '${device_group_iot_option}',
+                Task_1_done_event: '${done_event}',
+            },
+        },
         { topic: 'info', outputs: {} },
     ];
     topics.forEach(({ topic, outputs }) => {
         it(`adds the result outputs of the ${topic} topic`, async () => {
             writeTask(services, element('Task_1'), { name: topic, topic, inputs: [], outputs: [], smartServiceInputs: { inputs: [] } });
             expect(parameters(byId(await saved(), selected().id), 'camunda:outputParameter')).toEqual(outputs);
+        });
+    });
+
+    describe('done event', () => {
+        const write = (topic: string, taskInputs: { type: string; name: string; value: string }[] = []) =>
+            writeTask(services, element('Task_1'), { name: topic, topic, inputs: taskInputs, outputs: [], smartServiceInputs: { inputs: [] } });
+        const catchEvents = (doc: Document) => Array.from(doc.getElementsByTagName('bpmn:intermediateCatchEvent'));
+        const waitingFor = (doc: Document, expression: string) =>
+            catchEvents(doc).filter((e) => e.getAttribute('senergy:messageName') === expression && e.getElementsByTagName('bpmn:messageEventDefinition').length === 1);
+
+        ['process_deployment', 'device_repository'].forEach((topic) => {
+            it(`appends one message catch event waiting for the done event of a ${topic} task`, async () => {
+                write(topic);
+                const doc = await saved();
+                const [event] = waitingFor(doc, 'Task_1_done_event');
+                expect(event).toBeDefined();
+                // no bpmn:Message: the engine resolves the name from the expression
+                expect(event.getElementsByTagName('bpmn:messageEventDefinition')[0].hasAttribute('messageRef')).toBe(false);
+                const flow = Array.from(doc.getElementsByTagName('bpmn:sequenceFlow')).find((f) => f.getAttribute('targetRef') === event.getAttribute('id'));
+                expect(flow?.getAttribute('sourceRef')).toBe(selected().id);
+
+                write(topic);
+                expect(waitingFor(await saved(), 'Task_1_done_event').length).toBe(1);
+            });
+        });
+
+        it('appends none for a device_repository task that waits itself, or another topic', async () => {
+            const before = catchEvents(await saved()).length;
+            write('device_repository', [{ type: 'text', name: 'device_repository.wait', value: 'true' }]);
+            write('export');
+            expect(catchEvents(await saved()).length).toBe(before);
+        });
+
+        it('recognizes a downstream event of a Camunda design waiting by ${...} message name', async () => {
+            const definitions = modeler.getDefinitions();
+            const message = services.moddle.create('bpmn:Message', { id: 'Message_done', name: '${Task_1_done_event}' });
+            definitions.rootElements.push(message);
+            element('Event_msg').businessObject.eventDefinitions[0].messageRef = message;
+            const before = catchEvents(await saved()).length;
+
+            write('process_deployment');
+
+            expect(catchEvents(await saved()).length).toBe(before);
         });
     });
 

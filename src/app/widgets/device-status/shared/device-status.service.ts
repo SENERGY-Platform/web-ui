@@ -20,9 +20,8 @@ import { DashboardService } from '../../../modules/dashboard/shared/dashboard.se
 import { DeviceStatusElementModel } from './device-status-properties.model';
 import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { ExportService } from '../../../modules/exports/shared/export.service';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { HttpClient } from '@angular/common/http';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
 import { Observable } from 'rxjs';
 import { deleteResources, GeneratedResource, GeneratedResourceDeleters } from '../../shared/generated-resources';
 
@@ -33,10 +32,8 @@ export class DeviceStatusService {
     private dialog = inject(MatDialog);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
-    private deploymentsService = inject(DeploymentsService);
-    private processSchedulerService = inject(ProcessSchedulerService);
+    private automationEngineService = inject(AutomationEngineService);
     private http = inject(HttpClient);
-
 
     deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
         if (elements) {
@@ -45,10 +42,10 @@ export class DeviceStatusService {
                     this.exportService.stopPipeline({ ID: element.exportId } as ExportModel).subscribe();
                 }
                 if (element.deploymentId) {
-                    this.deploymentsService.v2deleteDeployment(element.deploymentId).subscribe();
+                    this.automationEngineService.deleteDeployment(element.deploymentId).subscribe();
                 }
                 if (element.scheduleId) {
-                    this.processSchedulerService.deleteSchedule(element.scheduleId).subscribe();
+                    this.automationEngineService.deleteSchedule(element.scheduleId).subscribe();
                 }
             });
         }
@@ -80,8 +77,8 @@ export class DeviceStatusService {
     private deleters(): GeneratedResourceDeleters {
         return {
             export: (id) => this.exportService.stopPipelineByIdIfExists(id),
-            deployment: (id) => this.deploymentsService.v2deleteDeploymentIfExists(id),
-            schedule: (id) => this.processSchedulerService.deleteScheduleIfExists(id),
+            deployment: (id) => this.automationEngineService.deleteDeploymentIfExists(id),
+            schedule: (id) => this.automationEngineService.deleteScheduleIfExists(id),
         };
     }
 }

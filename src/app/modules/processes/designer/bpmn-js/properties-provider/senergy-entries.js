@@ -56,7 +56,7 @@ function setAttribute(modeling, element, property, value) {
  * designers always wrote these attributes exactly as typed.
  */
 function AttributeTextEntry(props) {
-    const { element, id, label, property } = props;
+    const { element, id, label, property, description } = props;
     const modeling = useService('modeling');
     const debounceInput = useService('debounceInput');
     const value = getBusinessObject(element).get(property) || '';
@@ -103,12 +103,13 @@ function AttributeTextEntry(props) {
                     onInput,
                     onBlur: flush,
                     onKeyDown,
-                }))));
+                })),
+            description ? h('div', { class: 'bio-properties-panel-description' }, description) : null));
 }
 
-/** A text field for an attribute of the element, such as senergy:description. */
-export function attributeTextEntry(id, label, property) {
-    return { id, component: AttributeTextEntry, label, property, isEdited: isTextAreaEntryEdited };
+/** A text field for an attribute of the element, such as senergy:description, with an optional hint below it. */
+export function attributeTextEntry(id, label, property, description) {
+    return { id, component: AttributeTextEntry, label, property, description, isEdited: isTextAreaEntryEdited };
 }
 
 function AttributeSelectEntry(props) {

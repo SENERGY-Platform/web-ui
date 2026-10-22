@@ -218,7 +218,8 @@ describe('Senergy properties provider', () => {
                 ['smart-service-task-button', 'smart-service-extract-button'],
             ]);
             expect(ids(smartServiceGroups(root(), modeler))).toEqual(['description']);
-            expect(ids(smartServiceGroups(element('Event_msg'), modeler))).toEqual([]);
+            expect(ids(smartServiceGroups(element('Event_msg'), modeler))).toEqual(['message-name']);
+            expect(ids(smartServiceGroups(element('Timer_1'), modeler))).toEqual([]);
         });
 
         it('writes the smart-service description and removes it when emptied', async () => {
@@ -233,6 +234,20 @@ describe('Senergy properties provider', () => {
             field.dispatchEvent(new Event('input', { bubbles: true }));
             await new Promise((resolve) => setTimeout(resolve, 700));
             expect(await attribute('writers', 'senergy:description')).toBeUndefined();
+        });
+
+        it('writes the awaited message name of a message catch event and shows its hint', async () => {
+            modeler.get('selection').select(element('Event_msg'));
+            await panelSettled();
+            const entry = panel.querySelector('[data-entry-id="senergy-message-name"]') as HTMLElement;
+            expect(entry.querySelector('.bio-properties-panel-description')!.textContent).toContain('Task_1_done_event');
+            const field = entry.querySelector('textarea') as HTMLTextAreaElement;
+            field.value = 'Task_1_done_event';
+            field.dispatchEvent(new Event('input', { bubbles: true }));
+            // leaving the field commits at once; preact listens to focusout
+            field.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+            await panelSettled();
+            expect(await attribute('Event_msg', 'senergy:messageName')).toBe('Task_1_done_event');
         });
     });
 });

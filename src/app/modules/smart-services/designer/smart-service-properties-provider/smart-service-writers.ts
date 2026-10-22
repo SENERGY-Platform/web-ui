@@ -37,8 +37,10 @@ import {
     SmartServiceTaskDescription,
     SmartServiceTaskInputOutputDescription,
 } from '../shared/designer.model';
+import { doneEventVariable, MESSAGE_NAME_ATTRIBUTE, waitsForDoneEvent } from './done-event';
 
 type TaskServices = Pick<ModelServices, 'moddle' | 'bpmnFactory' | 'replace' | 'selection' | 'eventBus'>;
+type DoneEventServices = TaskServices & Pick<ModelServices, 'elementFactory' | 'autoPlace'>;
 
 interface TypedParameter {
     type: string;
@@ -101,6 +103,41 @@ export function findStartElement(element: any, done: any[] = []): any {
     return null;
 }
 
+// ---- done event ----
+
+/** The message catch event downstream of the element that waits for the done event of the task. */
+export function findDoneEventElement(element: any, taskId: string, done: any[] = []): any {
+    if (done.indexOf(element) !== -1) {
+        return null;
+    }
+    done.push(element);
+    for (const flow of element.outgoing || []) {
+        const target = flow.target;
+        if (waitsForDoneEvent(target.businessObject, taskId)) {
+            return target;
+        }
+        const found = findDoneEventElement(target, taskId, done);
+        if (found) {
+            return found;
+        }
+    }
+    return null;
+}
+
+/** Whether the task's topic reports its completion by done_event and nothing waits for it yet. */
+function needsDoneEvent(element: any, taskId: string, taskInfo: SmartServiceTaskDescription): boolean {
+    const waits = (taskInfo.inputs || []).some((input) => input.name === 'device_repository.wait' && input.value === 'true');
+    const reports = taskInfo.topic === 'process_deployment' || (taskInfo.topic === 'device_repository' && !waits);
+    return reports && !findDoneEventElement(element, taskId);
+}
+
+/** Appends a message catch event waiting for the message named by the JavaScript expression. */
+function appendMessageCatchEvent(services: DoneEventServices, parent: any, messageNameExpression: string): void {
+    const event = services.elementFactory.createShape({ type: 'bpmn:IntermediateCatchEvent', eventDefinitionType: 'bpmn:MessageEventDefinition' });
+    event.businessObject.set(MESSAGE_NAME_ATTRIBUTE, messageNameExpression);
+    services.autoPlace.append(parent, event);
+}
+
 // ---- task parameters ----
 
 function typedParameters(parameters: any[] | undefined): TypedParameter[] {
@@ -139,14 +176,19 @@ export function readTask(element: any): SmartServiceTaskDescription {
 
 /**
  * Makes the element an external service task for the topic and writes the dialog's inputs to the
- * start event. Result variables are named after the element id the dialog was opened for.
+ * start event. Result variables are named after the element id the dialog was opened for. A
+ * process_deployment task, and a device_repository task without wait, gets a message catch event
+ * after it that waits for its done_event, unless one is there already.
  */
-export function writeTask(services: TaskServices, element: any, taskInfo: SmartServiceTaskDescription): void {
+export function writeTask(services: DoneEventServices, element: any, taskInfo: SmartServiceTaskDescription): void {
     const moddle = services.moddle;
     const taskId = element.id;
     const startElement = findStartElement(element);
     if (startElement) {
         setExtension(moddle, startElement.businessObject, formData(moddle, taskInfo.smartServiceInputs));
+    }
+    if (needsDoneEvent(element, taskId, taskInfo)) {
+        appendMessageCatchEvent(services, element, doneEventVariable(taskId));
     }
 
     replaceTask(services, element, 'bpmn:ServiceTask', true, (task) => {
@@ -158,6 +200,7 @@ export function writeTask(services: TaskServices, element: any, taskInfo: SmartS
         switch (task.topic) {
         case 'process_deployment': {
             outputs.push(outputParameter(moddle, taskId + '_process_deployment_id', '${process_deployment_id}'));
+            outputs.push(outputParameter(moddle, doneEventVariable(taskId), '${done_event}'));
             const fogInput = inputs.find((input) => input && input.name === 'process_deployment.prefer_fog_deployment');
             if (fogInput && fogInput.value === 'true') {
                 outputs.push(outputParameter(moddle, taskId + '_is_fog_deployment', '${is_fog_deployment}'));
@@ -177,6 +220,7 @@ export function writeTask(services: TaskServices, element: any, taskInfo: SmartS
         case 'device_repository':
             outputs.push(outputParameter(moddle, taskId + '_device_group_id', '${device_group_id}'));
             outputs.push(outputParameter(moddle, taskId + '_device_group_selection', '${device_group_iot_option}'));
+            outputs.push(outputParameter(moddle, doneEventVariable(taskId), '${done_event}'));
             break;
         }
 

@@ -19,7 +19,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -42,11 +41,10 @@ import { GeneratedResourceJanitor } from '../../shared/generated-resource-janito
 import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { DeviceStatusService } from '../shared/device-status.service';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
-import { ProcessSchedulerModel } from '../../process-scheduler/shared/process-scheduler.model';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
+import { EngineSchedule } from '../../../core/model/automation-engine.model';
 import { DeviceInstancesService } from '../../../modules/devices/device-instances/shared/device-instances.service';
 import { DeviceSelectablesModel } from '../../../modules/devices/device-instances/shared/device-instances.model';
-import { V2DeploymentsPreparedModel } from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
@@ -61,6 +59,9 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from '../../../core/services/snack-bar-messages';
 
+/** the id of the service task in the generated BPMN, the key of its device selection */
+const GENERATED_TASK_ID = 'Task_0os5tro';
+
 @Component({
     templateUrl: './device-status-edit-dialog.component.html',
     styleUrls: ['./device-status-edit-dialog.component.css'],
@@ -69,13 +70,12 @@ import { snackError } from '../../../core/services/snack-bar-messages';
 })
 export class DeviceStatusEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DeviceStatusEditDialogComponent>>(MatDialogRef);
-    private deploymentsService = inject(DeploymentsService);
     private dashboardService = inject(DashboardService);
     private exportService = inject(ExportService);
     private fb = inject(FormBuilder);
     private deviceTypeService = inject(DeviceTypeService);
     private deviceStatusService = inject(DeviceStatusService);
-    private processSchedulerService = inject(ProcessSchedulerService);
+    private automationEngineService = inject(AutomationEngineService);
     private deviceInstanceService = inject(DeviceInstancesService);
     private destroyRef = inject(DestroyRef);
     private snackBar = inject(MatSnackBar);
@@ -112,7 +112,8 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     private saveInFlight = false;
     funcArray: DeviceTypeFunctionModel[][] = [];
     selectablesArray: DeviceSelectablesModel[][] = [];
-    preparedDeployment: V2DeploymentsPreparedModel[] = [];
+    /** the generated BPMN per element, deployed on save with the selected device and service */
+    generatedProcess: { xml: string; svg: string }[] = [];
     serviceExportValueArray: { service: DeviceTypeServiceModel; exportValues: ExportValueCharacteristicModel[] }[][] = [];
 
     formGroup = this.fb.group({
@@ -239,11 +240,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                 '<!-- created with bpmn-js / http://bpmn.io -->\n' +
                 '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n' +
                 '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="112" height="92" viewBox="254 74 112 92" version="1.1"><defs><marker id="sequenceflow-end-white-black-8shwih7rrgzkmm4pwfqg6rb2a" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="10" orient="auto"><path d="M 1 5 L 11 10 L 1 15 Z" style="fill: black; stroke-width: 1px; stroke-linecap: round; stroke-dasharray: 10000, 1; stroke: black;"/></marker></defs><g class="djs-group"><g class="djs-element djs-shape" data-element-id="Task_10z5wf9" style="display: block;" transform="matrix(1 0 0 1 260 80)"><g class="djs-visual"><rect x="0" y="0" width="100" height="80" rx="10" ry="10" style="stroke: black; stroke-width: 2px; fill: white; fill-opacity: 0.95;"/><text lineHeight="1.2" class="djs-label" style="font-family: Arial, sans-serif; font-size: 12px; font-weight: normal; fill: black;"><tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan></text></g><rect x="0" y="0" width="100" height="80" class="djs-hit" style="fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;"/><rect x="-6" y="-6" width="112" height="92" class="djs-outline" style="fill: none;"/></g></g></svg>';
-            this.deploymentsService.v2getPreparedDeploymentsByXml(xml, svg).subscribe((resp: V2DeploymentsPreparedModel | null) => {
-                if (resp !== null) {
-                    this.preparedDeployment[elementIndex] = resp;
-                }
-            });
+            this.generatedProcess[elementIndex] = { xml, svg };
 
             const filter = [{ function_id: this.getFunction(elementIndex).id, aspect_id: this.getAspectId(elementIndex).value }];
             this.deviceInstanceService.getDeviceSelections(filter, true).subscribe((resp: DeviceSelectablesModel[] | null) => {
@@ -259,17 +256,22 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         index: number,
         name: string | null | undefined,
     ): Observable<{ status: number; id: string }> {
-        const pD = this.preparedDeployment[index];
-        if (name) {
-            pD.name = name;
-        }
-        if (pD.elements.length === 0 || pD.elements[0].task === null) {
-            console.log('PANIC: unexpected prepared deployment value', pD);
+        const generated = this.generatedProcess[index];
+        if (generated === undefined) {
+            console.log('PANIC: no generated process for element', index);
             return of({ status: 500, id: '' });
         }
-        pD.elements[0].task.selection.selected_device_id = selectable.device.id;
-        pD.elements[0].task.selection.selected_service_id = this.getService(index).id;
-        return this.deploymentsService.v2postDeployments(pD, 'generated');
+        return this.automationEngineService
+            .createDeployment({
+                name: name || 'generatedByProcessStatusWidget',
+                xml: generated.xml,
+                svg: generated.svg,
+                source: 'generated',
+                selections: {
+                    [GENERATED_TASK_ID]: { device_id: selectable.device.id, service_id: this.getService(index).id },
+                },
+            })
+            .pipe(map((deployment) => (deployment !== null ? { status: 200, id: deployment.id } : { status: 500, id: '' })));
     }
 
     getIcon(index: number): string {
@@ -327,7 +329,7 @@ export class DeviceStatusEditDialogComponent implements OnInit {
         this.funcArray.splice(elementIndex, 1);
         this.selectablesArray.splice(elementIndex, 1);
         this.serviceExportValueArray.splice(elementIndex, 1);
-        this.preparedDeployment.splice(elementIndex, 1);
+        this.generatedProcess.splice(elementIndex, 1);
         this.elementsControl.removeAt(elementIndex);
     }
 
@@ -487,9 +489,9 @@ export class DeviceStatusEditDialogComponent implements OnInit {
     }
 
     // createSchedule answers null on failure, so a skipped schedule is told apart by failed: false.
-    private getScheduleArray(): Observable<{ schedule: ProcessSchedulerModel | null; failed: boolean }>[] {
+    private getScheduleArray(): Observable<{ schedule: EngineSchedule | null; failed: boolean }>[] {
         const skipped = { schedule: null, failed: false };
-        const scheduleArray: Observable<{ schedule: ProcessSchedulerModel | null; failed: boolean }>[] = [];
+        const scheduleArray: Observable<{ schedule: EngineSchedule | null; failed: boolean }>[] = [];
         if ((this.formGroup.get('refreshTime') as FormControl).value === 0) {
             this.elements.forEach(() => scheduleArray.push(of(skipped)));
             return scheduleArray;
@@ -509,14 +511,13 @@ export class DeviceStatusEditDialogComponent implements OnInit {
                             : (Math.round((refreshTime / this.elements.length) * index) as unknown as string) + '/' + refreshTime;
                     cron += ' * * * * *';
                     scheduleArray.push(
-                        this.processSchedulerService
+                        this.automationEngineService
                             .createSchedule({
                                 created_by: this.widgetId,
-                                process_deployment_id: element.deploymentId,
+                                deployment_id: element.deploymentId,
                                 cron,
-                                id: '',
                             })
-                            .pipe(map((schedule) => ({ schedule, failed: schedule === null }))),
+                            .pipe(map((schedule) => ({ schedule, failed: schedule === null || !schedule.id }))),
                     );
                 } else {
                     scheduleArray.push(of(skipped));

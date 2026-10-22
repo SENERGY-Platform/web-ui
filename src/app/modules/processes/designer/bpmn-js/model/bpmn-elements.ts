@@ -27,6 +27,8 @@ export interface ModelServices {
     selection: any;
     modeling: any;
     eventBus: any;
+    elementFactory: any;
+    autoPlace: any;
 }
 
 export function modelServices(modeler: any): ModelServices {
@@ -37,6 +39,8 @@ export function modelServices(modeler: any): ModelServices {
         selection: modeler.get('selection'),
         modeling: modeler.get('modeling'),
         eventBus: modeler.get('eventBus'),
+        elementFactory: modeler.get('elementFactory'),
+        autoPlace: modeler.get('autoPlace'),
     };
 }
 

@@ -43,6 +43,8 @@ export const environment = {
     processRepoUrl: 'http://localhost',
     processIncidentApiUrl: 'http://localhost',
     processSchedulerUrl: 'http://localhost',
+    /* automation-engine API (/namespaces/...); the old process routes reach it under /deprecated/... */
+    automationEngineUrl: 'http://localhost',
     operatorRepoUrl: 'http://localhost',
     exportService: 'http://localhost',
     brokerExportServiceUrl: 'http://localhost',

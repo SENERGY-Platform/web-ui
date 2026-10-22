@@ -31,8 +31,9 @@ one. A dialog therefore hands these kinds to the deferred cleanup below instead 
 and schedules belong to their widget only and are deleted at once, so an old schedule stops starting its process.
 
 All deletes use the `...IfExists` variants (`ExportService.stopPipelineByIdIfExists`,
-`DeploymentsService.v2deleteDeploymentIfExists`, `ProcessSchedulerService.deleteScheduleIfExists`): a 404 means the
-resource is already gone. Released resources are logged before any delete request. A deployment or schedule whose
+`AutomationEngineService.deleteDeploymentIfExists`, `AutomationEngineService.deleteScheduleIfExists`): a 404 means the
+resource is already gone. Deployments and schedules are created and deleted in the automation-engine namespace
+`processes`, which also serves the ids of those created before the engine replaced the old services. Released resources are logged before any delete request. A deployment or schedule whose
 delete fails stays logged and is named in the snack with "deleting is retried later". If the log cannot store them
 (no user id, storage unavailable or full), all kinds are deleted at once, checked only against the saved widget, and
 the snack carries no retry note.

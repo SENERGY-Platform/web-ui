@@ -28,7 +28,10 @@ export const GENERATED_DEPLOYMENT_SVG =
     '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n' +
     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="112" height="92" viewBox="254 74 112 92" version="1.1"><defs><marker id="sequenceflow-end-white-black-8shwih7rrgzkmm4pwfqg6rb2a" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="10" orient="auto"><path d="M 1 5 L 11 10 L 1 15 Z" style="fill: black; stroke-width: 1px; stroke-linecap: round; stroke-dasharray: 10000, 1; stroke: black;"/></marker></defs><g class="djs-group"><g class="djs-element djs-shape" data-element-id="Task_10z5wf9" style="display: block;" transform="matrix(1 0 0 1 260 80)"><g class="djs-visual"><rect x="0" y="0" width="100" height="80" rx="10" ry="10" style="stroke: black; stroke-width: 2px; fill: white; fill-opacity: 0.95;"/><text lineHeight="1.2" class="djs-label" style="font-family: Arial, sans-serif; font-size: 12px; font-weight: normal; fill: black;"><tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan></text></g><rect x="0" y="0" width="100" height="80" class="djs-hit" style="fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;"/><rect x="-6" y="-6" width="112" height="92" class="djs-outline" style="fill: none;"/></g></g></svg>';
 
-/** BPMN process with one external task that reads the function on the aspect; device and service are set on the prepared deployment. */
+/** The id of the service task in the generated BPMN, the key of its device selection. */
+export const GENERATED_TASK_ID = 'Task_0os5tro';
+
+/** BPMN process with one external task that reads the function on the aspect; device and service are its selection at deploy. */
 export function generatedDeploymentXml(
     selectedFunction: Pick<DeviceTypeFunctionModel, 'id' | 'name' | 'concept_id'>,
     aspectId: string | null | undefined,
@@ -145,7 +148,7 @@ export class SaveStepFailure {
     ) {}
 }
 
-/** v2postDeployments answers 500 with an empty id when the request failed. */
-export function isFailedDeployment(deployment: { status: number; id: string }): boolean {
-    return deployment.status >= 400 || !deployment.id;
+/** The engine's createDeployment answers null when the request failed; an answer without id is no deployment either. */
+export function isFailedDeployment(deployment: { id?: string } | null): boolean {
+    return deployment === null || !deployment.id;
 }

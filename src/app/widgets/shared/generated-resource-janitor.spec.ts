@@ -16,14 +16,14 @@
 
 import { discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import { AuthorizationService } from '../../core/services/authorization.service';
 import { DashboardService } from '../../modules/dashboard/shared/dashboard.service';
 import { ExportService } from '../../modules/exports/shared/export.service';
 import { ImportInstancesService } from '../../modules/imports/import-instances/shared/import-instances.service';
-import { DeploymentsService } from '../../modules/processes/deployments/shared/deployments.service';
-import { ProcessSchedulerService } from '../process-scheduler/shared/process-scheduler.service';
+import { AutomationEngineService } from '../../core/services/automation-engine.service';
+import { environment } from '../../../environments/environment';
 import {
     DELETE_AFTER_UNREFERENCED_MS,
     GENERATED_RESOURCE_STORAGE,
@@ -81,7 +81,15 @@ describe('GeneratedResourceJanitor', () => {
         return of({ status: s });
     };
 
-    function configure(): void {
+    /** `realEngine` keeps the AutomationEngineService itself, so its requests reach the HttpTestingController. */
+    function configure(realEngine = false): void {
+        const engine = {
+            provide: AutomationEngineService,
+            useValue: {
+                deleteDeploymentIfExists: jasmine.createSpy('deleteDeploymentIfExists').and.callFake(status),
+                deleteScheduleIfExists: jasmine.createSpy('deleteScheduleIfExists').and.callFake(status),
+            },
+        };
         TestBed.configureTestingModule({
             providers: [
                 provideHttpClient(),
@@ -106,8 +114,7 @@ describe('GeneratedResourceJanitor', () => {
                         getAllExportsQuietly: jasmine.createSpy('getAllExportsQuietly').and.callFake(() => exportList()),
                     },
                 },
-                { provide: DeploymentsService, useValue: { v2deleteDeploymentIfExists: jasmine.createSpy().and.callFake(status) } },
-                { provide: ProcessSchedulerService, useValue: { deleteScheduleIfExists: jasmine.createSpy().and.callFake(status) } },
+                ...(realEngine ? [] : [engine]),
                 {
                     provide: ImportInstancesService,
                     useValue: {
@@ -749,6 +756,54 @@ describe('GeneratedResourceJanitor', () => {
 
             expect(deleted).toEqual([]);
             expect(stored()).toEqual([]);
+        });
+
+        it('deletes a ripe deployment and schedule quietly through the automation-engine', () => {
+            seed([
+                entry({ kind: 'process deployment', id: 'dep-1', label: 'x' }, SETTLE_AFTER_MS, ripe),
+                entry({ kind: 'schedule', id: 'sched-1', label: 'x' }, SETTLE_AFTER_MS, ripe),
+            ]);
+
+            janitor.settle();
+
+            const engine = TestBed.inject(AutomationEngineService);
+            expect(engine.deleteDeploymentIfExists).toHaveBeenCalledOnceWith('dep-1', true);
+            expect(engine.deleteScheduleIfExists).toHaveBeenCalledOnceWith('sched-1', true);
+            expect(stored()).toEqual([]);
+        });
+    });
+
+    describe('with the automation-engine API', () => {
+        beforeEach(() => {
+            jasmine.clock().install();
+            jasmine.clock().mockDate(new Date(NOW));
+            configure(true);
+        });
+
+        afterEach(() => {
+            TestBed.inject(HttpTestingController).verify();
+            jasmine.clock().uninstall();
+        });
+
+        it('sends the deletes to the processes namespace, drops what is gone and keeps what failed', () => {
+            seed([
+                entry({ kind: 'process deployment', id: 'dep-1', label: 'x' }, SETTLE_AFTER_MS, ripe),
+                entry({ kind: 'schedule', id: 'sched-1', label: 'x' }, SETTLE_AFTER_MS, ripe),
+            ]);
+            spyOn(console, 'warn');
+            spyOn(console, 'error');
+
+            janitor.settle();
+
+            const http = TestBed.inject(HttpTestingController);
+            const base = environment.automationEngineUrl + '/namespaces/processes';
+            const deployment = http.expectOne(base + '/deployments/dep-1');
+            const schedule = http.expectOne(base + '/schedules/sched-1');
+            expect([deployment.request.method, schedule.request.method]).toEqual(['DELETE', 'DELETE']);
+            deployment.flush('not found', { status: 404, statusText: 'Not Found' });
+            schedule.flush('down', { status: 502, statusText: 'Bad Gateway' });
+
+            expect(storedIds()).toEqual(['sched-1']);
         });
     });
 

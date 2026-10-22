@@ -26,7 +26,8 @@ import { FormArray, ReactiveFormsModule } from '@angular/forms';
 import {
     DeviceTypeInteractionEnum
 } from '../../../modules/metadata/device-types-overview/shared/device-type.model';
-import { DeploymentsService } from '../../../modules/processes/deployments/shared/deployments.service';
+import { AutomationEngineService } from '../../../core/services/automation-engine.service';
+import { EngineDeployment, EngineSchedule } from '../../../core/model/automation-engine.model';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatInputModule } from '@angular/material/input';
@@ -35,15 +36,9 @@ import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { environment } from '../../../../environments/environment';
 import { DataTableEditDialogComponent } from './data-table-edit-dialog.component';
-import {
-    V2DeploymentsPreparedDiagramModel,
-    V2DeploymentsPreparedModel,
-} from '../../../modules/processes/deployments/shared/deployments-prepared-v2.model';
 import { DataTableHelperService } from '../shared/data-table-helper.service';
 import { WidgetModule } from '../../widget.module';
 import { DataTableAggregations, DataTableElementTypesEnum, DataTableOrderEnum, ExportValueTypes } from '../shared/data-table.model';
-import { ProcessSchedulerService } from '../../process-scheduler/shared/process-scheduler.service';
-import { ProcessSchedulerModel } from '../../process-scheduler/shared/process-scheduler.model';
 import {v4 as uuid} from 'uuid';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
@@ -62,11 +57,10 @@ describe('DataTableEditDialogComponent', () => {
 
     // By assigning the value in beforeEach, call counters get resets before each test
     let exportServiceSpy: Spy<ExportService>;
-    let deploymentsServiceSpy: Spy<DeploymentsService>;
+    let engineSpy: Spy<AutomationEngineService>;
     let matDialogRefSpy: Spy<MatDialogRef<DataTableEditDialogComponent>>;
     let dashboardServiceSpy: Spy<DashboardService>;
     let dataTableHelperServiceSpy: Spy<DataTableHelperService>;
-    let processSchedulerServiceSpy: Spy<ProcessSchedulerService>;
     let deviceGroupServiceSpy: Spy<DeviceGroupsService>;
     let conceptsServiceSpy: Spy<ConceptsService>;
     let storage: MemoryStorage;
@@ -97,19 +91,18 @@ describe('DataTableEditDialogComponent', () => {
     beforeEach(
         fakeAsync(() => {
             exportServiceSpy = createSpyFromClass(ExportService);
-            deploymentsServiceSpy = createSpyFromClass<DeploymentsService>(DeploymentsService);
+            engineSpy = createSpyFromClass<AutomationEngineService>(AutomationEngineService);
             matDialogRefSpy = createSpyFromClass<MatDialogRef<DataTableEditDialogComponent>>(MatDialogRef);
             dashboardServiceSpy = createSpyFromClass<DashboardService>(DashboardService);
             dataTableHelperServiceSpy = createSpyFromClass<DataTableHelperService>(DataTableHelperService);
-            processSchedulerServiceSpy = createSpyFromClass<ProcessSchedulerService>(ProcessSchedulerService);
             deviceGroupServiceSpy = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
             conceptsServiceSpy = createSpyFromClass<ConceptsService>(ConceptsService);
 
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'export_id_123' } as ExportModel));
             // the dialog deletes unsaved resources when the fixture is destroyed after a test
             exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 200 }));
-            deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
-            processSchedulerServiceSpy.deleteScheduleIfExists.and.returnValue(of({ status: 200 }));
+            engineSpy.deleteDeploymentIfExists.and.returnValue(of({ status: 200 }));
+            engineSpy.deleteScheduleIfExists.and.returnValue(of({ status: 200 }));
             const exampleExport: ExportModel = {
                 Name: 'device_service_1',
                 Values: [
@@ -125,18 +118,7 @@ describe('DataTableEditDialogComponent', () => {
             exportServiceSpy.prepareDeviceServiceExport.and.returnValue([exampleExport]);
             exportServiceSpy.getExportTags.and.returnValue(of({}));
 
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: uuid() }));
-            deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(
-                of({
-                    id: '0',
-                    name: 'unknown',
-                    description: '',
-                    diagram: {} as V2DeploymentsPreparedDiagramModel,
-                    elements: [],
-                    executable: true,
-                    version: 3
-                } as V2DeploymentsPreparedModel),
-            );
+            engineSpy.createDeployment.and.returnValue(of({ id: uuid() } as EngineDeployment));
 
             dashboardServiceSpy.getWidget.and.returnValue(of({ name: 'test', properties: {} } as WidgetModel));
             dashboardServiceSpy.updateWidgetName.and.returnValue(of({ message: 'OK' }));
@@ -180,7 +162,7 @@ describe('DataTableEditDialogComponent', () => {
             dataTableHelperServiceSpy.getExportTags.and.returnValue(of(new Map()));
             dataTableHelperServiceSpy.preloadFullImportType.and.returnValue(of(undefined));
 
-            processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+            engineSpy.createSchedule.and.returnValue(of(null));
 
             dataTableHelperServiceSpy.preloadMeasuringFunctionsOfAspect.and.returnValue(of([{ id: 'aspectId' }]));
             const m = new Map();
@@ -202,11 +184,8 @@ describe('DataTableEditDialogComponent', () => {
                 },
             ]);
 
-            deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(
-                of({ name: '', elements: [{ task: { selection: { selected_device_id: null, selected_service_id: null } } }] }),
-            );
-            deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 200, id: 'deploymentId' }));
-            processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'scheduleId' }));
+            engineSpy.createDeployment.and.returnValue(of({ id: 'deploymentId' } as EngineDeployment));
+            engineSpy.createSchedule.and.returnValue(of({ id: 'scheduleId' } as EngineSchedule));
             exportServiceSpy.startPipeline.and.returnValue(of({ ID: 'exportId' }));
             deviceGroupServiceSpy.getDeviceGroups.and.returnValue(of({result: []}));
             deviceGroupServiceSpy.getAspectListByIds.and.returnValue(of([]));
@@ -227,11 +206,10 @@ describe('DataTableEditDialogComponent', () => {
                 providers: [
                     provideRouter([]),
                     { provide: DashboardService, useValue: dashboardServiceSpy },
-                    { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+                    { provide: AutomationEngineService, useValue: engineSpy },
                     { provide: ExportService, useValue: exportServiceSpy },
                     { provide: MatDialogRef, useValue: matDialogRefSpy },
                     { provide: DataTableHelperService, useValue: dataTableHelperServiceSpy },
-                    { provide: ProcessSchedulerService, useValue: processSchedulerServiceSpy },
                     { provide: DeviceGroupsService, useValue: deviceGroupServiceSpy },
                     { provide: ConceptsService, useValue: conceptsServiceSpy },
                     {
@@ -352,11 +330,18 @@ describe('DataTableEditDialogComponent', () => {
             expect(component.formGroup.valid).toBe(true);
 
             component.save();
-            expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(1);
-            expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(1);
+            expect(engineSpy.createDeployment.calls.count()).toBe(1);
+            const input = engineSpy.createDeployment.calls.mostRecent().args[0];
+            expect(input.source).toBe('generated');
+            expect(input.selections).toEqual({ Task_0os5tro: { device_id: 'deviceId', service_id: 'service_1' } });
             expect(elementDetails?.get('device')?.get('requestDevice')?.value).toBe(true);
             expect(elementDetails?.get('device')?.get('deploymentId')?.value).toBe('deploymentId');
-            expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(1);
+            expect(engineSpy.createSchedule.calls.count()).toBe(1);
+            expect(engineSpy.createSchedule.calls.mostRecent().args[0]).toEqual({
+                created_by: component.widgetId,
+                deployment_id: 'deploymentId',
+                cron: '0/10 * * * * *',
+            });
             expect(elementDetails?.get('device')?.get('scheduleId')?.value).toBe('scheduleId');
             expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
             expect(element?.get('exportId')?.value).toBe(null);
@@ -480,9 +465,8 @@ describe('DataTableEditDialogComponent', () => {
 
             expect(component.getElements().at(0).get('elementDetails')?.get('device')?.get('requestDevice')?.value).toBe(false);
             component.save();
-            expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
-            expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
-            expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+            expect(engineSpy.createDeployment.calls.count()).toBe(0);
+            expect(engineSpy.createSchedule.calls.count()).toBe(0);
         }),
     );
 
@@ -631,7 +615,7 @@ describe('DataTableEditDialogComponent', () => {
                         ExportDatabaseID: environment.exportDatabaseIdInternalTimescaleDb,
                     } as ExportModel,
                 ]);
-                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
+                expect(engineSpy.createDeployment.calls.count()).toBe(0);
 
                 const saved = savedElement();
                 expect(saved.exportId).toBe('exportId');
@@ -706,8 +690,8 @@ describe('DataTableEditDialogComponent', () => {
                 component.save();
 
                 expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
-                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
-                expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+                expect(engineSpy.createDeployment.calls.count()).toBe(0);
+                expect(engineSpy.createSchedule.calls.count()).toBe(0);
                 const saved = savedElement();
                 expect(saved.name).toBe('grp');
                 expect(saved.unit).toBe('count');
@@ -755,11 +739,11 @@ describe('DataTableEditDialogComponent', () => {
 
                 component.save();
 
-                expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(3);
-                expect(processSchedulerServiceSpy.createSchedule.calls.allArgs().map((a) => a[0])).toEqual([
-                    { created_by: 'widgetId-1', process_deployment_id: 'deploymentId', cron: '0/10 * * * * *', id: '' },
-                    { created_by: 'widgetId-1', process_deployment_id: 'deploymentId', cron: '3/10 * * * * *', id: '' },
-                    { created_by: 'widgetId-1', process_deployment_id: 'deploymentId', cron: '7/10 * * * * *', id: '' },
+                expect(engineSpy.createDeployment.calls.count()).toBe(3);
+                expect(engineSpy.createSchedule.calls.allArgs().map((a) => a[0])).toEqual([
+                    { created_by: 'widgetId-1', deployment_id: 'deploymentId', cron: '0/10 * * * * *' },
+                    { created_by: 'widgetId-1', deployment_id: 'deploymentId', cron: '3/10 * * * * *' },
+                    { created_by: 'widgetId-1', deployment_id: 'deploymentId', cron: '7/10 * * * * *' },
                 ]);
             }),
         );
@@ -772,7 +756,7 @@ describe('DataTableEditDialogComponent', () => {
 
                 component.save();
 
-                expect(processSchedulerServiceSpy.createSchedule.calls.allArgs().map((a) => a[0].cron)).toEqual([
+                expect(engineSpy.createSchedule.calls.allArgs().map((a) => a[0].cron)).toEqual([
                     '* * * * * *',
                     '* * * * * *',
                 ]);
@@ -787,8 +771,8 @@ describe('DataTableEditDialogComponent', () => {
 
                 component.save();
 
-                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
-                expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+                expect(engineSpy.createDeployment.calls.count()).toBe(0);
+                expect(engineSpy.createSchedule.calls.count()).toBe(0);
             }),
         );
 
@@ -800,8 +784,10 @@ describe('DataTableEditDialogComponent', () => {
 
                 component.save();
 
-                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(1);
-                const [xml, svg] = deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.mostRecent().args as [string, string];
+                expect(engineSpy.createDeployment.calls.count()).toBe(1);
+                const [posted, namespace] = engineSpy.createDeployment.calls.mostRecent().args;
+                const xml = posted.xml as string;
+                const svg = posted.svg as string;
 
                 expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>\n<bpmn:definitions ')).toBeTrue();
                 expect(xml.endsWith('</bpmn:serviceTask></bpmn:process></bpmn:definitions>')).toBeTrue();
@@ -832,10 +818,12 @@ describe('DataTableEditDialogComponent', () => {
                 expect(svg).toContain('<tspan x="11.4375" y="43.599999999999994">GENERATED!</tspan>');
                 expect(svg.endsWith('</g></g></svg>')).toBeTrue();
 
-                const posted = deploymentsServiceSpy.v2postDeployments.calls.mostRecent().args as any[];
-                expect(posted[1]).toBe('generated');
-                expect(posted[0].name).toBe('test');
-                expect(posted[0].elements[0].task.selection).toEqual({ selected_device_id: 'deviceId', selected_service_id: 'service_1' });
+                expect(namespace).toBeUndefined();
+                expect(posted.source).toBe('generated');
+                expect(posted.name).toBe('test');
+                // keyed by the id of the service task in the generated XML
+                expect(task.getAttribute('id')).toBe('Task_0os5tro');
+                expect(posted.selections).toEqual({ Task_0os5tro: { device_id: 'deviceId', service_id: 'service_1' } });
             }),
         );
 
@@ -858,7 +846,7 @@ describe('DataTableEditDialogComponent', () => {
                 expect(dashboardServiceSpy.updateWidgetName.calls.allArgs()).toEqual([['dashboardId-1', 'widgetId-1', 'renamed']]);
                 expect(dashboardServiceSpy.updateWidgetProperty.calls.count()).toBe(0);
                 expect(exportServiceSpy.startPipeline.calls.count()).toBe(0);
-                expect(deploymentsServiceSpy.v2getPreparedDeploymentsByXml.calls.count()).toBe(0);
+                expect(engineSpy.createDeployment.calls.count()).toBe(0);
                 expect(matDialogRefSpy.close.calls.allArgs()).toEqual([[component.widget]]);
                 expect(component.widget.name).toBe('renamed');
             }),
@@ -911,25 +899,25 @@ describe('DataTableEditDialogComponent', () => {
                 fakeAsync(() => {
                     requestElements(1);
                     component.formGroup.patchValue({ refreshTime: 10 });
-                    deploymentsServiceSpy.v2postDeployments.and.returnValue(of({ status: 500, id: '' }));
+                    engineSpy.createDeployment.and.returnValue(of(null));
 
                     component.save();
 
-                    expect(processSchedulerServiceSpy.createSchedule.calls.count()).toBe(0);
+                    expect(engineSpy.createSchedule.calls.count()).toBe(0);
                     expectAborted('Could not create the process deployment for name0');
                 }),
             );
 
             it(
-                'does not store the widget when the prepared deployment cannot be loaded',
+                'does not store the widget when the engine answers a deployment without id',
                 fakeAsync(() => {
                     requestElements(1);
                     component.formGroup.patchValue({ refreshTime: 10 });
-                    deploymentsServiceSpy.v2getPreparedDeploymentsByXml.and.returnValue(of(null));
+                    engineSpy.createDeployment.and.returnValue(of({} as EngineDeployment));
 
                     component.save();
 
-                    expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                    expect(engineSpy.createSchedule.calls.count()).toBe(0);
                     expectAborted('Could not create the process deployment for name0');
                 }),
             );
@@ -939,7 +927,7 @@ describe('DataTableEditDialogComponent', () => {
                 fakeAsync(() => {
                     requestElements(1);
                     component.formGroup.patchValue({ refreshTime: 10 });
-                    processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                    engineSpy.createSchedule.and.returnValue(of(null));
 
                     component.save();
 
@@ -952,7 +940,7 @@ describe('DataTableEditDialogComponent', () => {
                 fakeAsync(() => {
                     requestElements(2);
                     component.formGroup.patchValue({ refreshTime: 10 });
-                    processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                    engineSpy.createSchedule.and.returnValue(of(null));
 
                     component.save();
 
@@ -1014,11 +1002,11 @@ describe('DataTableEditDialogComponent', () => {
                     order.push('delete export');
                     return of({ status: 200 });
                 });
-                deploymentsServiceSpy.v2deleteDeploymentIfExists.and.callFake(() => {
+                engineSpy.deleteDeploymentIfExists.and.callFake(() => {
                     order.push('delete deployment');
                     return of({ status: 200 });
                 });
-                processSchedulerServiceSpy.deleteScheduleIfExists.and.callFake(() => {
+                engineSpy.deleteScheduleIfExists.and.callFake(() => {
                     order.push('delete schedule');
                     return of({ status: 200 });
                 });
@@ -1044,7 +1032,7 @@ describe('DataTableEditDialogComponent', () => {
                     requestElements(1);
                     component.formGroup.patchValue({ refreshTime: 10 });
                     storeOldElement('old_deployment', 'old_schedule');
-                    processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                    engineSpy.createSchedule.and.returnValue(of(null));
 
                     component.save();
 
@@ -1063,8 +1051,8 @@ describe('DataTableEditDialogComponent', () => {
                     component.save();
 
                     expect(order).toEqual(['save', 'delete deployment', 'delete schedule']);
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
-                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(engineSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
                     expect(pending().map((e) => [e.userId, e.dashboardId, e.widgetId, e.resource.kind, e.resource.id])).toEqual([
                         ['user-1', 'dashboardId-1', 'widgetId-1', 'export', 'old_export'],
                     ]);
@@ -1078,7 +1066,7 @@ describe('DataTableEditDialogComponent', () => {
                     requestElements(1);
                     component.formGroup.patchValue({ refreshTime: 10 });
                     storeOldElement('old_deployment', 'old_schedule');
-                    processSchedulerServiceSpy.deleteScheduleIfExists.and.returnValue(of({ status: 500 }));
+                    engineSpy.deleteScheduleIfExists.and.returnValue(of({ status: 500 }));
 
                     component.save();
 
@@ -1185,10 +1173,10 @@ describe('DataTableEditDialogComponent', () => {
 
                     component.save();
 
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
-                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(engineSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
                     expect(pendingIds()).toEqual(['old_export_old']);
-                    expect(deploymentsServiceSpy.v2postDeployments.calls.count()).toBe(0);
+                    expect(engineSpy.createDeployment.calls.count()).toBe(0);
                 }),
             );
 
@@ -1200,9 +1188,9 @@ describe('DataTableEditDialogComponent', () => {
                     const persisted = { elements: [oldElement('old', 'old_deployment', 'old_schedule')] } as any;
                     component.widget.properties.dataTable = persisted;
                     let n = 0;
-                    deploymentsServiceSpy.v2postDeployments.and.callFake(() => of({ status: 200, id: 'deployment' + ++n }));
+                    engineSpy.createDeployment.and.callFake(() => of({ id: 'deployment' + ++n } as EngineDeployment));
                     let m = 0;
-                    processSchedulerServiceSpy.createSchedule.and.callFake(() => of({ id: 'schedule' + ++m }) as any);
+                    engineSpy.createSchedule.and.callFake(() => of({ id: 'schedule' + ++m }) as any);
                     dashboardServiceSpy.updateWidgetProperty.and.callFake(() => {
                         order.push('save');
                         return of({ message: order.filter((o) => o === 'save').length === 1 ? 'error' : 'OK' });
@@ -1215,8 +1203,8 @@ describe('DataTableEditDialogComponent', () => {
                     component.save();
 
                     // deployment1 and schedule1 went out with the property update that answered 'error' and may still be stored
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
-                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                    expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                    expect(engineSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
                     expect(pendingIds()).toEqual(['deployment1', 'old_export_old', 'schedule1']);
                     expect(component.widget.properties.dataTable).not.toBe(persisted);
                 }),
@@ -1250,8 +1238,8 @@ describe('DataTableEditDialogComponent', () => {
 
                     component.save();
 
-                    expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['shared_deployment']]);
-                    expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['shared_schedule']]);
+                    expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['shared_deployment']]);
+                    expect(engineSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['shared_schedule']]);
                 }),
             );
 
@@ -1263,7 +1251,7 @@ describe('DataTableEditDialogComponent', () => {
                     component.formGroup.patchValue({ refreshTime: 10 });
                     storeOldElement('old_deployment', 'old_schedule');
                     exportServiceSpy.stopPipelineByIdIfExists.and.returnValue(of({ status: 404 }));
-                    deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 404 }));
+                    engineSpy.deleteDeploymentIfExists.and.returnValue(of({ status: 404 }));
 
                     component.save();
 
@@ -1290,9 +1278,9 @@ describe('DataTableEditDialogComponent', () => {
                         return of({ ID: 'export' + ++e } as ExportModel);
                     });
                     let d = 0;
-                    deploymentsServiceSpy.v2postDeployments.and.callFake(() => {
+                    engineSpy.createDeployment.and.callFake(() => {
                         order.push('create deployment');
-                        return of({ status: 200, id: 'deployment' + ++d });
+                        return of({ id: 'deployment' + ++d } as EngineDeployment);
                     });
                 }
 
@@ -1300,14 +1288,14 @@ describe('DataTableEditDialogComponent', () => {
                     'deletes the deployment the failed attempt created when the dialog is closed and keeps its export logged',
                     fakeAsync(() => {
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.createSchedule.and.returnValue(of(null));
                         component.save();
                         expect(order).toEqual(['create export', 'create deployment']);
 
                         closeDialog();
 
                         expect(order).toEqual(['create export', 'create deployment', 'delete deployment']);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
                         expect(pendingIds()).toEqual(['export1']);
                         expect(snackOpen.calls.count()).toBe(1);
                     }),
@@ -1317,14 +1305,14 @@ describe('DataTableEditDialogComponent', () => {
                     'cleans up the unsaved resources when the dialog is closed from the header icon',
                     fakeAsync(() => {
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.createSchedule.and.returnValue(of(null));
                         component.save();
 
                         (fixture.nativeElement.querySelector('button[aria-label="Close"]') as HTMLButtonElement).click();
                         fixture.destroy();
 
                         expect(matDialogRefSpy.close.calls.mostRecent().args).toEqual([]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
                         expect(pendingIds()).toEqual(['export1']);
                     }),
                 );
@@ -1333,9 +1321,9 @@ describe('DataTableEditDialogComponent', () => {
                     'deletes the deployments and schedules no longer used once the retry was saved and logs the exports',
                     fakeAsync(() => {
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.createSchedule.and.returnValue(of(null));
                         component.save();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'schedule_retry' } as ProcessSchedulerModel));
+                        engineSpy.createSchedule.and.returnValue(of({ id: 'schedule_retry' } as EngineSchedule));
 
                         component.save();
                         closeDialog();
@@ -1351,8 +1339,8 @@ describe('DataTableEditDialogComponent', () => {
                             'delete schedule',
                             'delete deployment',
                         ]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment1']]);
-                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment'], ['deployment1']]);
+                        expect(engineSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
                         expect(pendingIds()).toEqual(['export1', 'old_export']);
                         const saved = savedElement();
                         expect(saved.exportId).toBe('export2');
@@ -1371,7 +1359,7 @@ describe('DataTableEditDialogComponent', () => {
                         closeDialog();
 
                         expect(order).toEqual(['create export', 'create deployment', 'save', 'delete deployment', 'delete schedule']);
-                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                        expect(engineSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
                     }),
                 );
 
@@ -1389,7 +1377,7 @@ describe('DataTableEditDialogComponent', () => {
                         response.complete();
 
                         expect(order).toEqual(['create export', 'create deployment', 'delete deployment', 'delete schedule']);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
                         expect(pendingIds()).toEqual(['old_export']);
                     }),
                 );
@@ -1398,8 +1386,8 @@ describe('DataTableEditDialogComponent', () => {
                     'deletes the deployment a running attempt created once it ended without a save and logs its export',
                     fakeAsync(() => {
                         generatingElement();
-                        const schedule = new Subject<ProcessSchedulerModel | null>();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(schedule);
+                        const schedule = new Subject<EngineSchedule | null>();
+                        engineSpy.createSchedule.and.returnValue(schedule);
 
                         component.save();
                         closeDialog();
@@ -1437,7 +1425,7 @@ describe('DataTableEditDialogComponent', () => {
                     fakeAsync(() => {
                         generatingElement();
                         let n = 0;
-                        processSchedulerServiceSpy.createSchedule.and.callFake(() => of({ id: 'schedule' + ++n } as ProcessSchedulerModel));
+                        engineSpy.createSchedule.and.callFake(() => of({ id: 'schedule' + ++n } as EngineSchedule));
                         dashboardServiceSpy.updateWidgetProperty.and.returnValues(of({ message: 'error update' }), of({ message: 'OK' }));
 
                         component.save();
@@ -1445,8 +1433,8 @@ describe('DataTableEditDialogComponent', () => {
                         closeDialog();
 
                         expect(exportServiceSpy.stopPipelineByIdIfExists.calls.count()).toBe(0);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
-                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['old_deployment']]);
+                        expect(engineSpy.deleteScheduleIfExists.calls.allArgs()).toEqual([['old_schedule']]);
                         expect(pendingIds()).toEqual(['deployment1', 'export1', 'old_export', 'schedule1']);
                         expect(snackOpen.calls.mostRecent().args[0]).toBe(
                             'Kept the process deployment of name0, schedule of name0 generated for the unsaved changes, ' +
@@ -1459,11 +1447,11 @@ describe('DataTableEditDialogComponent', () => {
                     'keeps a resource of a failed attempt that the retry saves again',
                     fakeAsync(() => {
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.createSchedule.and.returnValue(of(null));
                         component.save();
                         // the retry skips creating the export, the element keeps the id from the failed attempt
                         exportServiceSpy.prepareDeviceServiceExport.and.returnValue([]);
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of({ id: 'schedule_retry' } as ProcessSchedulerModel));
+                        engineSpy.createSchedule.and.returnValue(of({ id: 'schedule_retry' } as EngineSchedule));
 
                         component.save();
 
@@ -1477,14 +1465,14 @@ describe('DataTableEditDialogComponent', () => {
                     fakeAsync(() => {
                         storage.failWrite = true;
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.createSchedule.and.returnValue(of(null));
                         component.save();
 
                         closeDialog();
 
                         expect(exportServiceSpy.stopPipelineByIdIfExists.calls.allArgs()).toEqual([['export1']]);
-                        expect(deploymentsServiceSpy.v2deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
-                        expect(processSchedulerServiceSpy.deleteScheduleIfExists.calls.count()).toBe(0);
+                        expect(engineSpy.deleteDeploymentIfExists.calls.allArgs()).toEqual([['deployment1']]);
+                        expect(engineSpy.deleteScheduleIfExists.calls.count()).toBe(0);
                     }),
                 );
 
@@ -1493,8 +1481,8 @@ describe('DataTableEditDialogComponent', () => {
                     fakeAsync(() => {
                         storage.failRead = true;
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
-                        deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
+                        engineSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
                         component.save();
 
                         closeDialog();
@@ -1508,8 +1496,8 @@ describe('DataTableEditDialogComponent', () => {
                     'keeps a deployment logged whose delete failed when the dialog was closed and says it is retried',
                     fakeAsync(() => {
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
-                        deploymentsServiceSpy.v2deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
+                        engineSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.deleteDeploymentIfExists.and.returnValue(of({ status: 500 }));
                         component.save();
 
                         closeDialog();
@@ -1526,7 +1514,7 @@ describe('DataTableEditDialogComponent', () => {
                     'logs what a failed attempt created for this widget and keeps its export logged after the close',
                     fakeAsync(() => {
                         generatingElement();
-                        processSchedulerServiceSpy.createSchedule.and.returnValue(of(null));
+                        engineSpy.createSchedule.and.returnValue(of(null));
                         component.save();
 
                         expect(pending().map((e) => [e.userId, e.dashboardId, e.widgetId])).toEqual([

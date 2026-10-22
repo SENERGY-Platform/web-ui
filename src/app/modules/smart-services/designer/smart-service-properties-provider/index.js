@@ -26,6 +26,7 @@ import {
     writeSmartServiceInputs,
     writeTask,
 } from './smart-service-writers';
+import { MESSAGE_NAME_ATTRIBUTE } from './done-event';
 
 // after the Camunda Platform provider (500), so the script entries it adds can be augmented
 const LOW_PRIORITY = 400;
@@ -36,6 +37,11 @@ var isTask = function (element) {
 
 var isStartEvent = function (element) {
     return is(element, 'bpmn:StartEvent');
+};
+
+var isMessageCatchEvent = function (element) {
+    var definitions = element.businessObject && element.businessObject.eventDefinitions;
+    return is(element, 'bpmn:IntermediateCatchEvent') && !!definitions && !!definitions[0] && definitions[0].$type === 'bpmn:MessageEventDefinition';
 };
 
 var isCollaborationOrProcess = function (element) {
@@ -83,6 +89,15 @@ export function smartServiceGroups(element, bpmnjs) {
 
     add('description', 'Smart-Service Description', isCollaborationOrProcess(element), [
         attributeTextEntry('desc-field', 'Description', 'senergy:description'),
+    ]);
+
+    add('message-name', 'Wait for Message', isMessageCatchEvent(element), [
+        attributeTextEntry(
+            'senergy-message-name',
+            'Message Name (JavaScript)',
+            MESSAGE_NAME_ATTRIBUTE,
+            'Expression for the name of the awaited message, e.g. Task_1_done_event to wait for the completion of task Task_1. Replaces a message name like ${...}.',
+        ),
     ]);
 
     return groups;
