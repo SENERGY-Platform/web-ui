@@ -43,11 +43,20 @@ describe('AspectsComponent', () => {
     let component: AspectsComponent;
     let fixture: ComponentFixture<AspectsComponent>;
 
-    const aspectsServiceSpy: Spy<AspectsService> = createSpyFromClass<AspectsService>(AspectsService);
-    const aspectClassesServiceSpy: Spy<AspectClassesService> = createSpyFromClass<AspectClassesService>(AspectClassesService);
-    const deviceTypeServiceSpy: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
-    const authServiceSpy: Spy<AuthorizationService> = createSpyFromClass<AuthorizationService>(AuthorizationService);
-    const matDialogStub = {open: jasmine.createSpy('open')};
+    let aspectsServiceSpy: Spy<AspectsService>;
+    let aspectClassesServiceSpy: Spy<AspectClassesService>;
+    let deviceTypeServiceSpy: Spy<DeviceTypeService>;
+    let authServiceSpy: Spy<AuthorizationService>;
+    let matDialogStub: {open: jasmine.Spy};
+
+    // fresh spies per spec, so neither calls nor stubbed answers of one spec reach the next
+    beforeEach(() => {
+        aspectsServiceSpy = createSpyFromClass<AspectsService>(AspectsService);
+        aspectClassesServiceSpy = createSpyFromClass<AspectClassesService>(AspectClassesService);
+        deviceTypeServiceSpy = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
+        authServiceSpy = createSpyFromClass<AuthorizationService>(AuthorizationService);
+        matDialogStub = {open: jasmine.createSpy('open')};
+    });
 
     function dialogReturns(result: unknown) {
         matDialogStub.open.and.returnValue({afterClosed: () => of(result)});
@@ -124,13 +133,6 @@ describe('AspectsComponent', () => {
         component = fixture.componentInstance;
         fixture.detectChanges();
     }
-
-    afterEach(() => {
-        aspectsServiceSpy.updateAspects.calls.reset();
-        aspectsServiceSpy.deleteAspects.calls.reset();
-        aspectClassesServiceSpy.createAspectClass.calls.reset();
-        matDialogStub.open.calls.reset();
-    });
 
     /** air > (inside_air > morning_air, outside_air), carrying no class yet */
     function unclassifiedAir(): DeviceTypeAspectModel {
