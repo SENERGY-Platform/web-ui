@@ -15,7 +15,7 @@
  */
 
 /**
- * Tells whether a bpmn-js modeler holds edits that were not saved. A save clears only the edits made
+ * Tells whether an editor (bpmn-js modeler, flow graph) holds edits that were not saved. A save clears only the edits made
  * before it started, and an import replaces the content, so it starts clean.
  */
 export class UnsavedChanges {
@@ -28,9 +28,12 @@ export class UnsavedChanges {
 
     attach(modeler: { on: (event: string, callback: () => void) => void }): void {
         modeler.on('commandStack.changed', () => this.markChanged());
-        modeler.on('import.done', () => {
-            this.savedRevision = this.revision;
-        });
+        modeler.on('import.done', () => this.markClean());
+    }
+
+    /** The content now is what the repository holds, e.g. after a load. */
+    markClean(): void {
+        this.savedRevision = this.revision;
     }
 
     /** Content that did not come from the repository, such as an uploaded file. */

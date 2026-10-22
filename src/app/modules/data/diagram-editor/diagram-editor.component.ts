@@ -51,15 +51,32 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     /** A double click on a node or a click on its Version button. */
     @Output() nodeDoubleClick = new EventEmitter<string>();
 
+    /** Fires for every edit of the graph: nodes and links added, removed or changed. */
+    @Output() graphChange = new EventEmitter<void>();
+    private resizeObserver?: ResizeObserver;
+
     public dragStartPosition: { x: number; y: number } | null = null;
 
     ngAfterViewInit() {
         this.setPaperWidth(this.getPaperWidthFromWrap());
+        this.paperHeight = this.getPaperHeightFromWrap();
         this.reinitializePaper();
+        // The wrapper follows its host, which may be hidden or resized without a window resize.
+        const wrap = document.getElementById('paper-wrap');
+        if (wrap !== null && typeof ResizeObserver !== 'undefined') {
+            this.resizeObserver = new ResizeObserver(() => this.onResize());
+            this.resizeObserver.observe(wrap);
+        }
     }
 
     onResize() {
-        this.paperWidth = this.getPaperWidthFromWrap();
+        const width = this.getPaperWidthFromWrap();
+        const height = this.getPaperHeightFromWrap();
+        if (width === this.paperWidth && height === this.paperHeight) {
+            return;
+        }
+        this.paperWidth = width;
+        this.paperHeight = height;
         this.paperService.setDimensions(this.paperWidth, this.paperHeight);
     }
 
@@ -75,6 +92,15 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
         return this.paperWidth;
     }
 
+    /** The wrapper's own height when the host gives it one, else the last height. */
+    private getPaperHeightFromWrap() {
+        const paperWrap = document.getElementById('paper-wrap');
+        if (paperWrap !== null && paperWrap.clientHeight > 0) {
+            return paperWrap.clientHeight;
+        }
+        return this.paperHeight;
+    }
+
     reinitializePaper() {
         const {standard} = shapes;
         this.graph = new dia.Graph(
@@ -88,6 +114,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
             },
         );
         this.paperService.initialize(this.idGenerated, this.paperWidth, this.paperHeight, this.graph);
+        this.watchGraph();
 
         this.paperService.getPaper().on('blank:pointerdown', (_: any, x: number, y: number) => {
             this.dragStartPosition = {x: x * this.graphScale.sx, y: y * this.graphScale.sy};
@@ -116,6 +143,16 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
                 return;
             }
             this.nodeDoubleClick.emit(elementView.model.id);
+        });
+    }
+
+    private watchGraph() {
+        this.graph.on('add remove', () => this.graphChange.emit());
+        this.graph.on('change', (cell: dia.Cell) => {
+            // Stacking order alone is no edit.
+            if (!Object.keys(cell.changed).every(key => key === 'z')) {
+                this.graphChange.emit();
+            }
         });
     }
 
@@ -264,6 +301,7 @@ export class DiagramEditorComponent implements AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.resizeObserver?.disconnect();
         this.paperService.destroy();
     }
 

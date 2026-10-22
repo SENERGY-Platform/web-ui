@@ -13,51 +13,58 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<div class="main-panel">
+<div class="flow-designer-container">
   <senergy-spinner [show]="!ready"></senergy-spinner>
-  <div [hidden]="!ready" class="layout-margin ly-column" [class.ly-hidden]="viewInitialized && !ready">
-    @if (flow.dateCreated !== undefined) {
-      <div class="ly-row ly-align-end-center" style="margin-bottom: 10px;">
-        <mat-icon>calendar_today</mat-icon>{{flow.dateCreated| date:"medium"}}
-        <mat-icon style="margin-left: 6px;">update</mat-icon>{{flow.dateUpdated| date:"medium"}}
-      </div>
-    }
-    <mat-form-field class="ly-fill" color="accent" appearance="outline">
-      <mat-label>Name</mat-label>
-      <input matInput [(ngModel)]="flow.name">
-      <mat-error senergyError label="Name"></mat-error>
-    </mat-form-field>
-    <mat-form-field class="ly-fill" color="accent" appearance="outline">
-      <mat-label>Description</mat-label>
-      <input matInput [(ngModel)]="flow.description">
-      <mat-error senergyError label="Description"></mat-error>
-    </mat-form-field>
-    <div class="ly-row">
-      <div id="senergy-diagram-editor" style="width: 70%">
-        <senergy-diagram-editor (nodeDoubleClick)="openVersionDialog($event)"></senergy-diagram-editor>
-      </div>
-      <div id="diagram-operators" style="width: 30%" class="mat-elevation-z1" >
-        <div style="overflow: auto; height: {{listHeight}} px">
-          <mat-list>
-            @for (item of operators; track item) {
-              <mat-list-item>
-                <mat-icon matListItemIcon>insert_chart_outlined</mat-icon>
-                <h3 matListItemTitle>{{ item.name }}</h3>
-                <p [matTooltip]="item.description || 'none'" matListItemLine>{{ item.description }}</p>
-                <button matListItemMeta (click)="addNode(item)" matTooltip="Add operator" mat-button color="accent">
-                  <mat-icon color="accent">add</mat-icon>
-                </button>
-              </mat-list-item>
-            }
-          </mat-list>
-        </div>
-      </div>
+  <senergy-page-header compact [title]="title" backLabel="Flows" backLink="/data/flow-repo">
+    <span pageStatus class="unsaved-status" role="status">@if (unsaved.dirty) {Unsaved changes}</span>
+    <div pageActions>
+      <button matButton="filled" type="button" (click)="saveModel()">Save</button>
     </div>
-    <button mat-fab class="fab-fit" (click)="scaleContentToFit()" matTooltip="scalePaperToFit">
-      <mat-icon>fit_screen</mat-icon>
-    </button>
-    <button mat-fab class="fab" (click)="saveModel()" matTooltip="Save">
-      <mat-icon>save</mat-icon>
-    </button>
+  </senergy-page-header>
+  <div [hidden]="!ready" class="designer-body" [class.ly-hidden]="viewInitialized && !ready">
+    <div class="canvas">
+      <senergy-diagram-editor (nodeDoubleClick)="openVersionDialog($event)" (graphChange)="unsaved.markChanged()"></senergy-diagram-editor>
+      <button mat-icon-button type="button" class="canvas-control" (click)="scaleContentToFit()" matTooltip="Fit to screen" aria-label="Fit to screen">
+        <mat-icon>fit_screen</mat-icon>
+      </button>
+    </div>
+    <div class="side-panel">
+      <senergy-form-section title="Flow">
+        <mat-form-field class="ly-fill" color="accent" appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput [ngModel]="flow.name" (ngModelChange)="flow.name = $event; unsaved.markChanged()">
+          <mat-error senergyError label="Name"></mat-error>
+        </mat-form-field>
+        <mat-form-field class="ly-fill" color="accent" appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput [ngModel]="flow.description" (ngModelChange)="flow.description = $event; unsaved.markChanged()">
+          <mat-error senergyError label="Description"></mat-error>
+        </mat-form-field>
+        @if (flow.dateCreated !== undefined) {
+          <p class="flow-dates">
+            <span><mat-icon>calendar_today</mat-icon>{{flow.dateCreated | date:"medium"}}</span>
+            <span><mat-icon>update</mat-icon>{{flow.dateUpdated | date:"medium"}}</span>
+          </p>
+        }
+      </senergy-form-section>
+      <senergy-form-section title="Operators">
+        <ul class="operator-list">
+          @for (item of operators; track item) {
+            <li class="operator-row">
+              <mat-icon>insert_chart_outlined</mat-icon>
+              <span class="operator-text" [matTooltip]="item.description || 'none'">
+                <span class="operator-name">{{ item.name }}</span>
+                @if (item.description) {
+                  <span class="operator-description">{{ item.description }}</span>
+                }
+              </span>
+              <button mat-icon-button type="button" (click)="addNode(item)" matTooltip="Add operator" [attr.aria-label]="'Add operator ' + item.name">
+                <mat-icon>add</mat-icon>
+              </button>
+            </li>
+          }
+        </ul>
+      </senergy-form-section>
+    </div>
   </div>
 </div>

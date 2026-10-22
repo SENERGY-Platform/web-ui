@@ -14,63 +14,129 @@
  * limitations under the License.
  */
 
-.truncate {
-    white-space: nowrap;
+/* 64px is the toolbar above the page; the header takes its own height and the canvas the rest. */
+.flow-designer-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(var(--app-page-height, 100vh) - 64px);
+}
+
+.designer-body {
+    display: flex;
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+.canvas {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.canvas-control {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 1;
+    background: var(--mat-sys-surface);
+    border: var(--app-hairline);
+}
+
+.side-panel {
+    flex: 0 0 340px;
+    padding: 16px;
+    overflow: auto;
+    border-left: var(--app-hairline);
+}
+
+.unsaved-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--app-text-sm);
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.unsaved-status:empty {
+    display: none;
+}
+
+.unsaved-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--app-warning);
+}
+
+.flow-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+    font-size: var(--app-text-sm);
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.flow-dates span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.flow-dates mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+}
+
+.operator-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.operator-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: var(--app-hairline);
+}
+
+.operator-text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.operator-name,
+.operator-description {
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.background {
-    background-image: url('/src/img/background_deviceTypes.png');
-    background-size: contain;
+.operator-description {
+    font-size: var(--app-text-sm);
+    color: var(--mat-sys-on-surface-variant);
 }
 
-.device-icon {
-    top: 40px;
-    max-height: 100px;
-    max-width: 200px;
-    margin: auto;
-    display: block;
-    position: relative;
-}
+@media (max-width: 599px) {
+    .designer-body {
+        flex-direction: column;
+        overflow: auto;
+    }
 
-.main-panel {
-    height: calc(100% - 64px);
-    overflow-y: auto;
-}
+    .canvas {
+        flex: 1 0 320px;
+    }
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
-}
-
-.fab-fit {
-    position: fixed;
-    bottom: 15px;
-    right: 85px;
-    z-index: 100;
-}
-
-h1 {
-    color: #369;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 250%;
-}
-
-.checkbox-section {
-    display: flex;
-    align-content: center;
-    align-items: center;
-    height: 60px;
-}
-
-.checkbox-margin {
-    margin: 0 10px;
-}
-
-#diagram-operators {
-    max-height: 600px;
-    overflow-y: scroll;
+    .side-panel {
+        flex: 0 0 auto;
+        max-height: 50%;
+        border-left: 0;
+        border-top: var(--app-hairline);
+    }
 }

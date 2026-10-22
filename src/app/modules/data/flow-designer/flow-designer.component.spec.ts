@@ -140,6 +140,36 @@ describe('FlowDesignerComponent', () => {
         expect('operatorVersion' in cells[1]).toBeFalse();
     });
 
+    describe('the saved flow request', () => {
+        const IMAGE = '<?xml version="1.0" standalone="no"?>\r\n<svg xmlns="http://www.w3.org/2000/svg" viewbox="-10 0 20 0"><g class="joint-layers"><g class="joint-cells-layer"/></g></svg>';
+        const model = {cells: [{id: 'n1', type: 'senergy.NodeElement', name: 'op'}]};
+
+        beforeEach(() => {
+            (component.diagram as any).getGraph = () => model;
+            spyOn(router, 'navigate');
+        });
+
+        it('puts a new flow with name, description, image and model', () => {
+            component.flow = {name: 'my flow', description: 'what it does'} as FlowModel;
+
+            component.saveModel();
+            const request = http.expectOne(environment.flowRepoUrl + '/flow/').request;
+
+            expect(request.method).toBe('PUT');
+            expect(request.body).toEqual({name: 'my flow', description: 'what it does', image: IMAGE, model});
+        });
+
+        it('posts an existing flow to its id with the stored fields and without the id in the body', () => {
+            component.flow = {_id: 'flow-1', name: 'my flow', description: 'd', dateCreated: '2026-01-01', dateUpdated: '2026-01-02', userId: 'u'} as any;
+
+            component.saveModel();
+            const request = http.expectOne(environment.flowRepoUrl + '/flow/flow-1/').request;
+
+            expect(request.method).toBe('POST');
+            expect(request.body).toEqual({name: 'my flow', description: 'd', dateCreated: '2026-01-01', dateUpdated: '2026-01-02', userId: 'u', image: IMAGE, model});
+        });
+    });
+
     it('stays in create mode when the create response carries no id', () => {
         const navigate = spyOn(router, 'navigate');
 

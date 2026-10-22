@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+:host {
+  display: block;
+  height: 100%;
+}
+
+#paper-wrap {
+  height: 100%;
+  overflow: hidden;
+}
+
 .diagramsPanel {
   width:100%;
   white-space:nowrap;

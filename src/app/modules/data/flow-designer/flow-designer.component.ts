@@ -31,10 +31,12 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
-import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, MatListItemMeta } from '@angular/material/list';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { DatePipe } from '@angular/common';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { UnsavedChanges } from '../../processes/designer/bpmn-js/unsaved-changes';
 import { snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { dialogSize } from '../../../core/dialog-size';
 import {newerVersionLabel, portNames, resolveVersionData} from '../operator-repo/shared/operator-version';
@@ -47,7 +49,7 @@ type NodeSource = Pick<OperatorModel, 'image' | 'inputs' | 'outputs' | 'config_v
     templateUrl: './flow-designer.component.html',
     styleUrls: ['./flow-designer.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SpinnerComponent, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, DiagramEditorComponent, MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, MatTooltip, MatButton, MatListItemMeta, MatFabButton, DatePipe]
+    imports: [SpinnerComponent, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, DiagramEditorComponent, MatTooltip, MatButton, MatIconButton, DatePipe, PageHeaderComponent, FormSectionComponent]
 })
 export class FlowDesignerComponent implements AfterViewInit {
     private route = inject(ActivatedRoute);
@@ -66,7 +68,14 @@ export class FlowDesignerComponent implements AfterViewInit {
     // The diagram editor measures its wrapper in its own ngAfterViewInit, so the page may only be hidden after that.
     viewInitialized = false;
     flow = {} as FlowModel;
-    listHeight = 600;
+    readonly unsaved = new UnsavedChanges();
+
+    get title(): string {
+        if (this.flow._id === undefined && this.route.snapshot.paramMap.get('id') === null) {
+            return 'New flow';
+        }
+        return this.flow.name || 'Flow';
+    }
 
     ngAfterViewInit() {
         this.operatorRepoService.getAllOperators().subscribe((ops: {
@@ -146,13 +155,17 @@ export class FlowDesignerComponent implements AfterViewInit {
                         }
                         Promise.all(dialogPromises).then(() => {
                             this.diagram.addElementsToGraph(elements);
+                            this.unsaved.markClean();
+                            // Nodes refreshed from a newer operator version differ from what the repository holds.
+                            if (dialogPromises.length > 0) {
+                                this.unsaved.markChanged();
+                            }
                         });
                     }
                 });
             }
             this.ready = true;
         });
-        this.listHeight = this.diagram.paperHeight;
         this.viewInitialized = true;
         this.changeDetectorRef.detectChanges();
     }
@@ -294,10 +307,12 @@ export class FlowDesignerComponent implements AfterViewInit {
         this.flow.model = this.diagram.getGraph();
         const isNewFlow = this.flow._id === undefined;
         const flow = Object.assign({}, this.flow);
+        const snapshot = this.unsaved.snapshot();
         this.flowRepoService.saveFlow(flow).subscribe(resp => {
             if (resp == null) {
                 return;
             }
+            this.unsaved.markSaved(snapshot);
             snackSuccess(this.snackBar, 'Flow saved');
             // Only the create response carries the id of the new flow. Keeping it
             // makes every following save update that flow instead of creating another one.

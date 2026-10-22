@@ -419,4 +419,113 @@ describe('FlowDesignerComponent with the diagram editor', () => {
         mouse('mouseup', svg, { x: start.x + 40, y: start.y + 30 });
         expect(component.diagram.dragStartPosition).toBeNull();
     });
+
+    describe('the unsaved status', () => {
+        const status = () => (fixture.nativeElement.querySelector('.unsaved-status') as HTMLElement).textContent!.trim();
+        const typeInto = (label: string, text: string) => {
+            const input = Array.from(fixture.nativeElement.querySelectorAll('mat-form-field') as NodeListOf<HTMLElement>)
+                .find((field) => field.querySelector('mat-label')?.textContent === label)!.querySelector('input')!;
+            input.value = text;
+            input.dispatchEvent(new Event('input'));
+            fixture.detectChanges();
+        };
+
+        it('is empty after a flow was loaded and the title is its name', async () => {
+            await open(adderFlow);
+            fixture.detectChanges();
+
+            expect(component.unsaved.dirty).toBeFalse();
+            expect(status()).toBe('');
+            expect(fixture.nativeElement.querySelector('.page-title').textContent).toContain(adderFlow.name);
+        });
+
+        it('titles a flow without id "New flow" and starts clean', async () => {
+            await open(null);
+            fixture.detectChanges();
+
+            expect(component.unsaved.dirty).toBeFalse();
+            expect(fixture.nativeElement.querySelector('.page-title').textContent).toContain('New flow');
+        });
+
+        it('appears when the name or the description is edited', async () => {
+            await open(adderFlow);
+            typeInto('Name', 'renamed');
+            expect(status()).toBe('Unsaved changes');
+            expect(component.flow.name).toBe('renamed');
+
+            save();
+            fixture.detectChanges();
+            expect(status()).toBe('');
+            typeInto('Description', 'described');
+            expect(status()).toBe('Unsaved changes');
+        });
+
+        it('appears when a node is moved, added or removed and when a link is made', async () => {
+            await open(localFlow);
+            const graph = component.diagram['graph'];
+            const [local, timestamp] = localFlow.model.cells;
+
+            graph.getCell(local.id).translate(40, 0);
+            expect(component.unsaved.dirty).withContext('moved').toBeTrue();
+
+            save();
+            expect(component.unsaved.dirty).withContext('saved').toBeFalse();
+            drag(port(local.id, 'out-sum'), port(timestamp.id, 'in-original_input_ids'));
+            expect(component.unsaved.dirty).withContext('linked').toBeTrue();
+
+            save();
+            graph.getCell(timestamp.id).remove();
+            expect(component.unsaved.dirty).withContext('removed').toBeTrue();
+
+            save();
+            const add = fixture.nativeElement.querySelector('.operator-row button') as HTMLButtonElement;
+            add.click();
+            expect(component.unsaved.dirty).withContext('added').toBeTrue();
+        });
+
+        it('is not set by hovering or by a change of the stacking order', async () => {
+            await open(localFlow);
+            const graph = component.diagram['graph'];
+
+            graph.getCell(localFlow.model.cells[0].id).toFront();
+            component.diagram.paperService.getPaper().el.dispatchEvent(new MouseEvent('mouseover', {bubbles: true}));
+
+            expect(component.unsaved.dirty).toBeFalse();
+        });
+
+        it('stays for an edit made while the save request is in flight', async () => {
+            await open(adderFlow);
+            component.saveModel();
+            typeInto('Name', 'edited meanwhile');
+            http.expectOne(environment.flowRepoUrl + '/flow/' + adderFlow._id + '/').flush(null, { status: 200, statusText: 'OK' });
+
+            expect(component.unsaved.dirty).toBeTrue();
+        });
+
+        it('stays after a failed save', async () => {
+            await open(adderFlow);
+            typeInto('Name', 'renamed');
+            component.saveModel();
+            http.expectOne(environment.flowRepoUrl + '/flow/' + adderFlow._id + '/').flush('no', { status: 500, statusText: 'Server Error' });
+
+            expect(component.unsaved.dirty).toBeTrue();
+        });
+    });
+
+    it('fits the content from the control on the canvas', async () => {
+        await open(adderFlow);
+        const transform = spyOn(component.diagram.paperService.getPaper(), 'transformToFitContent');
+
+        (fixture.nativeElement.querySelector('.canvas-control') as HTMLButtonElement).click();
+
+        expect(transform).toHaveBeenCalledTimes(1);
+    });
+
+    it('lists the operators with an add button each', async () => {
+        await open(localFlow);
+        const rows = fixture.nativeElement.querySelectorAll('.operator-row') as NodeListOf<HTMLElement>;
+
+        expect(rows.length).toBe(operatorsOf(localFlow).length);
+        expect(rows[0].textContent).toContain(operatorsOf(localFlow)[0].name!);
+    });
 });
