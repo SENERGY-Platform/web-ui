@@ -186,6 +186,12 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     }
   }
 
+  // Material drops the top padding below a title, and the scrolling content clips the floating outline label of the
+  // first field, which sits half above the field's box. One class more than Material's rule, whose styles load later.
+  .mat-mdc-dialog-container .mat-mdc-dialog-surface .mat-mdc-dialog-title + .mat-mdc-dialog-content {
+    padding-top: 12px;
+  }
+
   .mat-mdc-select-panel,
   .mat-mdc-autocomplete-panel,
   .mat-mdc-menu-panel {
