@@ -33,7 +33,7 @@ import { DeviceInstanceModel } from '../../devices/device-instances/shared/devic
 import { DeviceGroupsService } from '../../devices/device-groups/shared/device-groups.service';
 import { DeviceGroupDisplayModel } from '../../devices/device-groups/shared/device-groups.model';
 import { HttpResponse } from '@angular/common/http';
-import { Subject, switchMap, of, takeUntil } from 'rxjs';
+import { Subject, finalize, switchMap, of, takeUntil } from 'rxjs';
 import {
     DynamicFormGroup,
     ReportValidationError,
@@ -53,13 +53,16 @@ import {
 } from '../shared/report-object-node';
 import { REPORT_SETTINGS_PATH, ReportObjectViewService } from '../shared/report-object-view.service';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
-import { MatIconButton, MatButton, MatFabButton } from '@angular/material/button';
+import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatFormField, MatLabel, MatSuffix, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { ReportTreeComponent } from './report-tree/report-tree.component';
-import { MatCard, MatCardContent } from '@angular/material/card';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../core/components/save-bar/save-bar.component';
+import { TreeDetailLayoutComponent } from '../../../core/components/tree-detail-layout/tree-detail-layout.component';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { ReportObjectComponent } from './report-object/report-object.component';
 import { MatProgressBar } from '@angular/material/progress-bar';
@@ -71,7 +74,7 @@ import { DatePipe } from '@angular/common';
     styleUrls: ['./report.component.css'],
     providers: [ReportObjectViewService],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SpinnerComponent, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatSuffix, ReportTreeComponent, MatCard, MatCardContent, MatError, MatErrorMessagesDirective, MatButton, ReportObjectComponent, MatProgressBar, RouterLink, MatFabButton, DatePipe]
+    imports: [SpinnerComponent, MatIconButton, MatTooltip, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatSuffix, ReportTreeComponent, MatError, MatErrorMessagesDirective, MatButton, ReportObjectComponent, MatProgressBar, RouterLink, DatePipe, PageHeaderComponent, FormSectionComponent, SaveBarComponent, TreeDetailLayoutComponent]
 })
 export class ReportComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
@@ -98,6 +101,10 @@ export class ReportComponent implements OnInit, OnDestroy {
     nodes: ReportObjectNode[] = [];
     selectedNode?: ReportObjectNode;
     treeFilter = new FormControl<string>('', { nonNullable: true });
+    /** True while the form differs from the loaded or last saved report. */
+    unsaved = false;
+    saving = false;
+    reloading = false;
 
     form = new FormGroup({
         name: new FormControl<string>('', { nonNullable: true, validators: Validators.required }),
@@ -110,6 +117,12 @@ export class ReportComponent implements OnInit, OnDestroy {
     });
 
     private destroy = new Subject<void>();
+    /** Ends a reload of the report: when Discard starts another one. */
+    private reload$ = new Subject<void>();
+    /** What the form held when it was loaded or last saved; null until the report is loaded. */
+    private baseline: string | null = null;
+    /** A report from a template is unsaved until its first save, even if nothing was edited. */
+    private stored = false;
 
     constructor() {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
@@ -118,6 +131,7 @@ export class ReportComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.form.statusChanges.pipe(takeUntil(this.destroy)).subscribe(() => this.updateValidation());
+        this.form.valueChanges.pipe(takeUntil(this.destroy)).subscribe(() => this.refreshUnsaved());
         this.viewService.selected$.pipe(takeUntil(this.destroy))
             .subscribe((path: string) => this.selectedNode = findNode(this.nodes, path));
         this.updateValidation();
@@ -133,11 +147,12 @@ export class ReportComponent implements OnInit, OnDestroy {
         } else if (this.templateId !== null) {
             this.loadTemplate(this.templateId);
         } else {
-            this.ready = true;
+            this.markLoaded();
         }
     }
 
     ngOnDestroy() {
+        this.reload$.next();
         this.destroy.next();
         this.destroy.complete();
     }
@@ -148,6 +163,36 @@ export class ReportComponent implements OnInit, OnDestroy {
 
     get emailReceivers(): FormArray<FormControl<string>> {
         return this.form.controls.emailReceivers;
+    }
+
+    get backLabel(): string {
+        return this.reportId === null ? 'Templates' : 'Reports';
+    }
+
+    get backLink(): string {
+        return this.reportId === null ? '/reporting/templates' : '/reporting/reports';
+    }
+
+    get pageTitle(): string {
+        if (this.reportId === null) {
+            return 'New report';
+        }
+        return this.form.controls.name.value || 'Unnamed report';
+    }
+
+    get pageDescription(): string {
+        if (!this.template.name) {
+            return '';
+        }
+        return (this.reportId === null ? 'New report from the template ' : 'Report from the template ') + this.template.name + '.';
+    }
+
+    /** The bar names what blocks saving, else that something changed. */
+    get saveStatus(): string {
+        if (this.validationErrors.length > 0) {
+            return this.validationErrors.length + ' missing input(s), see the list above the form.';
+        }
+        return 'Unsaved changes';
     }
 
     get settingsSelected(): boolean {
@@ -186,6 +231,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     copyItem(node: ReportObjectNode) {
         const path = copyReportObjectItem(node);
         this.buildNodes();
+        this.refreshUnsaved();
         if (path !== undefined) {
             this.revealObject(path);
         }
@@ -197,6 +243,7 @@ export class ReportComponent implements OnInit, OnDestroy {
         }
         const parentPath = node.parent?.path;
         this.buildNodes();
+        this.refreshUnsaved();
         this.revealObject(parentPath !== undefined ? parentPath : REPORT_SETTINGS_PATH);
     }
 
@@ -276,13 +323,55 @@ export class ReportComponent implements OnInit, OnDestroy {
      * No return value, but opens a snackbar with a success message if the report is saved successfully.
      */
     save() {
-        this.reportingService.saveReport(this.buildReport(null))
-            .subscribe(resp => this.showResult(resp, 'Report saved', 'ReportSave'));
+        const sent = this.snapshot(null);
+        this.saving = true;
+        this.reportingService.saveReport(this.buildReport(null)).pipe(finalize(() => this.saving = false))
+            .subscribe(resp => this.showResult(resp, 'Report saved', 'ReportSave', sent));
     }
 
     update() {
-        this.reportingService.updateReport(this.buildReport(this.reportId))
-            .subscribe(resp => this.showResult(resp, 'Report updated', 'ReportUpdate'));
+        const sent = this.snapshot(this.reportId);
+        this.saving = true;
+        this.reportingService.updateReport(this.buildReport(this.reportId)).pipe(finalize(() => this.saving = false))
+            .subscribe(resp => this.showResult(resp, 'Report updated', 'ReportUpdate', sent));
+    }
+
+    /** The save bar writes a new report or updates the stored one, as the header buttons did. */
+    saveChanges() {
+        if (this.saving || this.reloading || !this.isValid()) {
+            return;
+        }
+        if (this.reportId === null) {
+            this.save();
+        } else {
+            this.update();
+        }
+    }
+
+    /**
+     * A new report goes back to the template list. A stored one is loaded again: a reload still in flight is
+     * cancelled first, and the form is reset only once the report arrived, so a failed reload keeps the edits.
+     */
+    discard() {
+        if (this.saving) {
+            return;
+        }
+        if (this.reportId === null) {
+            this.router.navigateByUrl('/reporting/templates');
+            return;
+        }
+        this.reload$.next();
+        this.reloading = true;
+        this.reportingService.getReport(this.reportId).pipe(
+            takeUntil(this.reload$),
+            takeUntil(this.destroy),
+            finalize(() => this.reloading = false)
+        ).subscribe((resp: ReportResponseModel | null) => {
+            if (resp !== null) {
+                this.applyReport(resp.data);
+                this.markLoaded();
+            }
+        });
     }
 
     trackByIndex(index: number, _: any) {
@@ -303,23 +392,44 @@ export class ReportComponent implements OnInit, OnDestroy {
                 if (resp === null) {
                     return of(null);
                 }
-                this.report = resp.data;
-                this.templateId = this.report.templateId;
-                this.template.data = {
-                    dataJsonString: '',
-                    dataStructured: this.report.data,
-                    id: '',
-                    name: ''
-                };
-                this.patchForm(this.report);
-                return this.reportingService.getTemplate(this.templateId);
+                this.applyReport(resp.data);
+                return this.reportingService.getTemplate(resp.data.templateId);
             })
         ).subscribe((resp: TemplateResponseModel | null) => {
             if (resp !== null) {
                 this.template.name = resp.data.name;
             }
-            this.ready = true;
+            this.markLoaded();
         });
+    }
+
+    /** Puts a stored report into the form and the tree. */
+    private applyReport(report: ReportModel) {
+        this.report = report;
+        this.templateId = report.templateId;
+        this.template.data = {
+            dataJsonString: '',
+            dataStructured: report.data,
+            id: '',
+            name: ''
+        };
+        this.patchForm(report);
+    }
+
+    /** The form now shows the stored state, so nothing is unsaved. */
+    private markLoaded() {
+        this.ready = true;
+        this.baseline = this.snapshot(this.reportId);
+        this.refreshUnsaved();
+    }
+
+    private snapshot(id: string | null): string {
+        return JSON.stringify(this.buildReport(id));
+    }
+
+    private refreshUnsaved() {
+        this.unsaved = this.baseline !== null
+            && ((this.reportId === null && !this.stored) || this.snapshot(this.reportId) !== this.baseline);
     }
 
     private loadTemplate(templateId: string) {
@@ -328,7 +438,7 @@ export class ReportComponent implements OnInit, OnDestroy {
                 this.template = resp.data;
                 this.setDataForm();
             }
-            this.ready = true;
+            this.markLoaded();
         });
     }
 
@@ -390,8 +500,12 @@ export class ReportComponent implements OnInit, OnDestroy {
         return report;
     }
 
-    private showResult(resp: HttpResponse<string> | null, message: string, action: string) {
+    /** What was sent is now stored; edits made while the request was out stay unsaved. */
+    private showResult(resp: HttpResponse<string> | null, message: string, action: string, sent: string) {
         if (resp !== null && resp.status >= 200 && resp.status < 300) {
+            this.baseline = sent;
+            this.stored = true;
+            this.refreshUnsaved();
             this.snackBar.open(message, action, {
                 duration: 2000
             });

@@ -130,6 +130,28 @@ describe('ReportTreeComponent', () => {
         expect(removed).toEqual([item]);
     });
 
+    it('should keep the item actions in a row menu', () => {
+        const copied: ReportObjectNode[] = [];
+        const removed: ReportObjectNode[] = [];
+        component.copyItem.subscribe((node: ReportObjectNode) => copied.push(node));
+        component.removeItem.subscribe((node: ReportObjectNode) => removed.push(node));
+        viewService.expand('table');
+        fixture.detectChanges();
+        const host = fixture.nativeElement as HTMLElement;
+        const triggers = host.querySelectorAll('button[aria-label="Actions"]');
+
+        expect(triggers.length).toBe(1);
+        (triggers[0] as HTMLButtonElement).click();
+        fixture.detectChanges();
+        const items = Array.from(document.querySelectorAll('[role="menu"] button')) as HTMLButtonElement[];
+        expect(items.map((item) => item.textContent?.trim())).toEqual(['content_copy Copy item', 'delete Delete item']);
+        items[0].click();
+        fixture.detectChanges();
+
+        expect(copied).toEqual([findNode(nodes, 'table.0')!]);
+        expect(removed).toEqual([]);
+    });
+
     /**
      * The global icon stylesheet of the application makes every icon inline-block, which shifts the icons inside the
      * material icon buttons below the middle of the row unless the buttons center them themselves.

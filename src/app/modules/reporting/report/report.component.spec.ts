@@ -28,7 +28,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Observable, of } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 
 import { ReportComponent } from './report.component';
 import { ReportingService } from '../shared/reporting.service';
@@ -321,6 +321,96 @@ describe('ReportComponent', () => {
             expect(component.ready).toBe(true);
         });
 
+        it('should offer the save bar for an unedited new report, saying Save', () => {
+            fixture.detectChanges();
+            const host = fixture.nativeElement as HTMLElement;
+
+            expect(component.unsaved).toBe(true);
+            expect(host.querySelector('senergy-save-bar')?.textContent).toContain('Save');
+            expect(host.querySelector('senergy-save-bar')?.textContent).toContain('Discard');
+        });
+
+        it('should name the new report and link back to the templates', () => {
+            fixture.detectChanges();
+
+            expect(component.pageTitle).toBe('New report');
+            expect(component.pageDescription).toBe('New report from the template Template t1.');
+            expect(component.backLabel).toBe('Templates');
+            expect(component.backLink).toBe('/reporting/templates');
+        });
+
+        it('should block saving with the reason in the status while an input is missing', () => {
+            reportingService.templateObjects = incompleteObjects();
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+            fixture.detectChanges();
+
+            const bar = (fixture.nativeElement as HTMLElement).querySelector('senergy-save-bar') as HTMLElement;
+            expect(bar.textContent).toContain('3 missing input(s)');
+            expect((bar.querySelector('button.save') as HTMLButtonElement).disabled).toBe(true);
+
+            component.saveChanges();
+
+            expect(reportingService.saved.length).toBe(0);
+        });
+
+        it('should save from the bar and count the saved state as unchanged', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+
+            component.saveChanges();
+
+            expect(reportingService.saved.length).toBe(1);
+            expect(component.unsaved).toBe(false);
+        });
+
+        it('should keep the changes unsaved when saving fails', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+            spyOn(reportingService, 'saveReport').and.returnValue(of(null));
+
+            component.saveChanges();
+
+            expect(component.unsaved).toBe(true);
+            expect(component.saving).toBe(false);
+        });
+
+        it('should keep edits made while the save was out unsaved', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+            const response = new Subject<HttpResponse<string> | null>();
+            spyOn(reportingService, 'saveReport').and.returnValue(response);
+
+            component.saveChanges();
+            expect(component.saving).toBe(true);
+            component.form.controls.name.setValue('Other name');
+            response.next(new HttpResponse<string>({ status: 200 }));
+            response.complete();
+
+            expect(component.saving).toBe(false);
+            expect(component.unsaved).toBe(true);
+        });
+
+        it('should count an edit that is undone after the first save as unchanged', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+            component.saveChanges();
+
+            component.form.controls.name.setValue('Other');
+            component.form.controls.name.setValue('My Report');
+
+            expect(component.unsaved).toBe(false);
+        });
+
+        it('should return to the templates on discard', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+
+            component.discard();
+
+            expect(router.navigateByUrl).toHaveBeenCalledWith('/reporting/templates');
+        });
+
         it('should add and remove e-mail receivers', () => {
             fixture.detectChanges();
 
@@ -437,7 +527,96 @@ describe('ReportComponent', () => {
             expect(reportingService.polledJobIds).toEqual(['j1']);
         }));
 
-        it('should render the status next to the create button', fakeAsync(() => {
+        it('should say Update, name the report and link back to the reports', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            component.form.controls.name.setValue('Renamed');
+            fixture.detectChanges();
+
+            expect(component.pageTitle).toBe('Renamed');
+            expect(component.pageDescription).toBe('Report from the template Template t1.');
+            expect(component.backLink).toBe('/reporting/reports');
+            expect((fixture.nativeElement as HTMLElement).querySelector('senergy-save-bar')?.textContent).toContain('Update');
+        }));
+
+        it('should update from the bar with the report id', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            component.form.controls.name.setValue('Renamed');
+
+            component.saveChanges();
+
+            expect(reportingService.updated.length).toBe(1);
+            expect(reportingService.updated[0].id).toBe('r1');
+            expect(reportingService.saved.length).toBe(0);
+            expect(component.unsaved).toBe(false);
+        }));
+
+        it('should load the stored report again on discard and forget the edits', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            component.form.controls.name.setValue('Renamed');
+            findNode(component.nodes, 'consumption')!.form.get('query.path')?.setValue('root.other');
+            component.addEmailAddress();
+
+            component.discard();
+
+            expect(component.form.controls.name.value).toBe('Energy Report');
+            expect(component.emailReceivers.length).toBe(1);
+            expect(findNode(component.nodes, 'consumption')!.form.get('query.path')?.value).toBe('root.value');
+            expect(component.unsaved).toBe(false);
+            expect(component.reloading).toBe(false);
+        }));
+
+        it('should keep the edits when the reload fails', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            component.form.controls.name.setValue('Renamed');
+            spyOn(reportingService, 'getReport').and.returnValue(of(null));
+
+            component.discard();
+
+            expect(component.form.controls.name.value).toBe('Renamed');
+            expect(component.unsaved).toBe(true);
+            expect(component.reloading).toBe(false);
+        }));
+
+        it('should cancel a reload that is still out when Discard is used again', fakeAsync(() => {
+            fixture.detectChanges();
+            tick();
+            component.form.controls.name.setValue('Renamed');
+            const first = new Subject<ReportResponseModel | null>();
+            const second = new Subject<ReportResponseModel | null>();
+            const getReport = spyOn(reportingService, 'getReport').and.returnValues(first, second);
+            const stored = (name: string) => ({ data: { id: 'r1', name, templateId: 't1', data: completeObjects() } as ReportModel });
+
+            component.discard();
+            component.discard();
+            first.next(stored('From the first reload'));
+            expect(component.form.controls.name.value).toBe('Renamed');
+            expect(component.reloading).toBe(true);
+            second.next(stored('From the second reload'));
+            second.complete();
+
+            expect(getReport).toHaveBeenCalledTimes(2);
+            expect(component.form.controls.name.value).toBe('From the second reload');
+            expect(component.reloading).toBe(false);
+        }));
+
+        it('should disable Create report while a file is being built', fakeAsync(() => {
+            reportingService.unfinishedJob = runningJob();
+            reportingService.jobUpdates = [runningJob()];
+
+            fixture.detectChanges();
+            tick();
+            fixture.detectChanges();
+
+            const create = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button'))
+                .find((button) => button.textContent?.includes('Create report')) as HTMLButtonElement;
+            expect(create.disabled).toBe(true);
+        }));
+
+        it('should render the status below the header', fakeAsync(() => {
             reportingService.unfinishedJob = runningJob();
             reportingService.jobUpdates = [runningJob()];
 

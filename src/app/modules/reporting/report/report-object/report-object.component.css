@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-.object-header {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.object-path {
-    font-size: 1.1em;
-    font-weight: 500;
-}
-
-.object-type {
-    opacity: 0.6;
-    font-size: 12px;
+:host {
+    display: block;
 }
 
 .input-type {

@@ -19,6 +19,7 @@ import { ReportObjectNode, inputTypeOfNode, isContainer } from '../../shared/rep
 import { ReportObjectViewService } from '../../shared/report-object-view.service';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
 
 const TYPE_ICONS: { [key: string]: string } = {
@@ -32,7 +33,7 @@ const TYPE_ICONS: { [key: string]: string } = {
     templateUrl: './report-tree.component.html',
     styleUrls: ['./report-tree.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatIconButton, MatIcon, MatTooltip]
+    imports: [MatIconButton, MatIcon, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger]
 })
 export class ReportTreeComponent {
     private viewService = inject(ReportObjectViewService);

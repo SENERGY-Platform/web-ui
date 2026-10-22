@@ -18,7 +18,7 @@
     <div class="tree-row" [class.selected]="selectedPath === node.path" [style.padding-left.px]="8 + depth * 16"
       (click)="select(node)">
       @if (isContainer(node)) {
-        <button mat-icon-button class="tree-toggle" (click)="toggle(node, $event)"
+        <button mat-icon-button type="button" class="tree-toggle" (click)="toggle(node, $event)"
           [attr.aria-label]="'Toggle ' + node.key">
           <mat-icon>{{isExpanded(node) ? 'expand_more' : 'chevron_right'}}</mat-icon>
         </button>
@@ -34,16 +34,18 @@
         [matTooltip]="errors(node) + ' missing input(s)'">warning</mat-icon>
       }
       @if (node.item) {
-        <button mat-icon-button class="tree-action" matTooltip="copy Item"
-          (click)="emitCopyItem(node, $event)">
-          <mat-icon>content_copy</mat-icon>
+        <button mat-icon-button type="button" class="tree-action" [matMenuTriggerFor]="rowMenu"
+          (click)="$event.stopPropagation()" aria-label="Actions">
+          <mat-icon>more_vert</mat-icon>
         </button>
-      }
-      @if (node.item) {
-        <button mat-icon-button class="tree-action" matTooltip="delete Item"
-          (click)="emitRemoveItem(node, $event)">
-          <mat-icon>delete</mat-icon>
-        </button>
+        <mat-menu #rowMenu="matMenu" xPosition="before">
+          <button mat-menu-item type="button" (click)="emitCopyItem(node, $event)">
+            <mat-icon>content_copy</mat-icon> Copy item
+          </button>
+          <button mat-menu-item type="button" class="danger" (click)="emitRemoveItem(node, $event)">
+            <mat-icon>delete</mat-icon> Delete item
+          </button>
+        </mat-menu>
       }
     </div>
     @if (isContainer(node) && isExpanded(node)) {

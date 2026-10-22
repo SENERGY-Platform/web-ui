@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-.fab {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    z-index: 100;
+/* Same bounded page as the form pages: the layout takes the rest, each panel scrolls, the save bar sticks. */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: calc(var(--app-page-height, 100vh) - 64px);
+    overflow-y: auto;
 }
 
-/* sits next to the fab, so the status of a queued report stays visible while editing */
+/* Status of a queued report file; it stays visible while editing. */
 .job-status {
-    position: fixed;
-    bottom: 15px;
-    right: 90px;
-    z-index: 100;
     display: flex;
     align-items: center;
     gap: 12px;
+    margin: 0 24px 16px;
     padding: 8px 8px 8px 16px;
-    border-radius: 4px;
-    background: var(--mat-sys-background);
-    max-width: min(480px, calc(100vw - 120px));
+    border: var(--app-hairline);
+    border-radius: var(--app-radius-lg);
+}
+
+.job-status > mat-icon {
+    flex: none;
 }
 
 .job-status-body {
@@ -50,46 +51,11 @@
     text-overflow: ellipsis;
 }
 
-.main-panel {
-    height: calc(100% - 64px);
-    overflow: hidden;
-}
-
-.editor {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-}
-
-.editor-columns {
-    display: flex;
-    align-items: stretch;
-    gap: 16px;
-    padding: 16px;
-    min-height: 0;
-    flex: 1;
-}
-
-.tree-column {
-    width: 340px;
-    flex: none;
-    overflow-y: auto;
-    padding: 8px 4px 16px 4px;
-}
-
-.detail-column {
-    flex: 1;
-    min-width: 0;
-    overflow-y: auto;
-    padding-bottom: 72px;
-}
-
 .tree-header {
     display: flex;
     align-items: center;
     gap: 4px;
-    padding: 0 4px 8px 4px;
+    padding-bottom: 8px;
 }
 
 .tree-filter {
@@ -102,24 +68,21 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    min-height: 36px;
+    min-height: 40px;
     padding: 0 4px 0 8px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--app-radius-sm, 6px);
 }
 
 .tree-row:hover {
-    background: color-mix(in srgb, var(--mat-sys-outline) 12%, transparent);
+    background: var(--app-hover);
 }
 
 .tree-row.selected {
-    background: color-mix(in srgb, var(--mat-sys-outline) 22%, transparent);
-    font-weight: 500;
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
 }
 
 .settings-row {
-    border-bottom: 1px solid color-mix(in srgb, var(--mat-sys-outline) 25%, transparent);
-    border-radius: 0;
     margin-bottom: 4px;
 }
 
@@ -132,7 +95,7 @@
 }
 
 .tree-icon {
-    opacity: 0.7;
+    color: var(--mat-sys-on-surface-variant);
 }
 
 .tree-label {
@@ -142,21 +105,33 @@
 .tree-detail {
     flex: 1;
     min-width: 0;
-    opacity: 0.6;
-    font-size: 12px;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .template-info {
-    opacity: 0.7;
-    font-size: 12px;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
     margin-bottom: 12px;
 }
 
-.add-email {
-    align-self: flex-start;
+.fields {
+    display: flex;
+    flex-direction: column;
+    max-width: 40rem;
+}
+
+.receiver-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.receiver-delete {
+    margin-top: 4px;
 }
 
 .validation-summary {
@@ -178,9 +153,5 @@
 }
 
 .no-selection {
-    opacity: 0.7;
-}
-
-.pointer {
-    cursor: pointer;
+    color: var(--mat-sys-on-surface-variant);
 }
