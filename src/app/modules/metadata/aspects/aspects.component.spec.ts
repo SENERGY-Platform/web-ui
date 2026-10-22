@@ -29,7 +29,7 @@ import { MtxSelect, MtxSelectModule } from '@ng-matero/extensions/select';
 import { MatDialog } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { AspectsComponent } from './aspects.component';
 import { AspectsService } from './shared/aspects.service';
@@ -178,17 +178,6 @@ describe('AspectsComponent', () => {
     function groupByName(name: string): DeviceTypeAspectModel {
         return component.dataSource.data
             .find(n => component.isAspectClassGroup(n) && n.name === name) as DeviceTypeAspectModel;
-    }
-
-    /** The tags of the siblings in front of an element, which is what decides where it starts. */
-    function tagsBefore(element: HTMLElement): string[] {
-        const tags: string[] = [];
-        let sibling = element.previousElementSibling;
-        while (sibling !== null) {
-            tags.unshift(sibling.tagName);
-            sibling = sibling.previousElementSibling;
-        }
-        return tags;
     }
 
     function writtenAspects(): DeviceTypeAspectModel[] {
@@ -415,38 +404,6 @@ describe('AspectsComponent', () => {
 
             airGroup.name = 'cleaning';
             expect(component.aspectClassNameValid(airGroup)).toBeTrue();
-        }),
-    );
-
-    it(
-        'puts the same controls in front of its name field as an aspect row does',
-        fakeAsync(() => {
-            init([
-                {id: 'urn:infai:ses:aspect:a', name: 'a',
-                    aspect_class_id: 'urn:infai:ses:aspect-class:environment', sub_aspects: []},
-                {id: 'urn:infai:ses:aspect:p', name: 'p', sub_aspects: [
-                    {id: 'urn:infai:ses:aspect:c', name: 'c', sub_aspects: []}]},
-            ]);
-            flush();
-            fixture.detectChanges();
-
-            const rows = (fixture.nativeElement as HTMLElement).querySelectorAll('.mat-tree-node');
-            const groupField = rows[0].querySelector('mat-form-field') as HTMLElement;
-            // an aspect row with children, which is the shape a group row always has
-            const aspectRow = Array.from(rows).find(r => r.textContent?.includes('Toggle p')
-                || r.querySelector('[aria-label="Toggle p"]') !== null) as HTMLElement;
-            const aspectField = aspectRow?.querySelector('mat-form-field') as HTMLElement;
-            expect(groupField).not.toBeNull();
-            expect(aspectField).not.toBeNull();
-
-            // what pushed the class name out of line was a bare mat-icon and a plain span where the
-            // aspect rows carry two icon buttons and a form field. Comparing the controls in front of
-            // the field is theme-independent; measuring offsets here is not, because karma loads no
-            // material theme and an icon button then shrinks to its content.
-            expect(tagsBefore(groupField)).toEqual(tagsBefore(aspectField));
-
-            flush();
-            discardPeriodicTasks();
         }),
     );
 
@@ -730,8 +687,10 @@ describe('AspectsComponent', () => {
     it(
         'disables the class field for a user who may not change aspects',
         fakeAsync(() => {
-            // the field only exists on a hierarchy that sits at the top level, not under a class row
+            // the field is part of the form of a hierarchy that sits at the top level, not under a class row
             init([{id: 'urn:infai:ses:aspect:plain', name: 'plain', sub_aspects: []}], false, false);
+            component.select(rootByName('plain'));
+            fixture.detectChanges();
             // [disabled] reaches the field through NgModel, which disables the control a microtask
             // later — asserting straight after the first render reads the un-disabled state
             flush();
@@ -765,4 +724,658 @@ describe('AspectsComponent', () => {
             expect('aspect_class_id' in (sent.sub_aspects || [])[0]).toBeFalse();
         }),
     );
+
+    describe('request bodies', () => {
+        const environmentClassId = 'urn:infai:ses:aspect-class:environment';
+
+        function echoWrites() {
+            aspectsServiceSpy.updateAspects.and.callFake((a: DeviceTypeAspectModel) => of(a));
+            aspectsServiceSpy.createAspect.and.callFake((a: DeviceTypeAspectModel) => of({...a, id: 'urn:infai:ses:aspect:new'}));
+        }
+
+        afterEach(() => {
+            aspectsServiceSpy.createAspect.calls.reset();
+        });
+
+        it('creates a new root hierarchy with the name only', fakeAsync(() => {
+            init([]);
+            echoWrites();
+
+            component.newAspect();
+            const added = rootAspects().find(a => a.id === undefined) as DeviceTypeAspectModel;
+            added.name = 'speed';
+            component.save(added);
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects).not.toHaveBeenCalled();
+            expect(aspectsServiceSpy.createAspect.calls.count()).toBe(1);
+            expect(aspectsServiceSpy.createAspect.calls.mostRecent().args[0]).toEqual({name: 'speed'});
+        }));
+
+        it('creates a root inside a class with the class on the root', fakeAsync(() => {
+            init([], true, true, [environmentClassEntry]);
+            echoWrites();
+
+            component.addAspectToClass(groupByName('environment'));
+            const added = rootAspects().find(a => a.id === undefined) as DeviceTypeAspectModel;
+            added.name = 'wind';
+            component.save(added);
+            flush();
+
+            expect(aspectsServiceSpy.createAspect.calls.mostRecent().args[0])
+                .toEqual({name: 'wind', aspect_class_id: environmentClassId});
+        }));
+
+        it('updates a root after a sub-aspect was renamed', fakeAsync(() => {
+            init(airHierarchy());
+            echoWrites();
+
+            const root = rootByName('air');
+            (root.sub_aspects as DeviceTypeAspectModel[])[0].name = 'indoor';
+            component.save(root);
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects.calls.count()).toBe(1);
+            expect(aspectsServiceSpy.updateAspects.calls.mostRecent().args[0]).toEqual({
+                id: 'urn:infai:ses:aspect:air',
+                name: 'air',
+                aspect_class_id: environmentClassId,
+                sub_aspects: [{
+                    id: 'urn:infai:ses:aspect:inside_air',
+                    name: 'indoor',
+                    sub_aspects: [{id: 'urn:infai:ses:aspect:morning_air', name: 'morning_air', sub_aspects: []}],
+                }],
+            });
+        }));
+
+        it('updates a root after a sub-aspect was added', fakeAsync(() => {
+            init(airHierarchy());
+            echoWrites();
+
+            const root = rootByName('air');
+            component.addSubNode(root);
+            const added = (root.sub_aspects as DeviceTypeAspectModel[])[1];
+            added.name = 'dry_air';
+            component.save(root);
+            // the tree keeps a polling task of its own after a sub-aspect was added
+            discardPeriodicTasks();
+
+            expect(aspectsServiceSpy.updateAspects.calls.mostRecent().args[0]).toEqual({
+                id: 'urn:infai:ses:aspect:air',
+                name: 'air',
+                aspect_class_id: environmentClassId,
+                sub_aspects: [
+                    {
+                        id: 'urn:infai:ses:aspect:inside_air',
+                        name: 'inside_air',
+                        sub_aspects: [{id: 'urn:infai:ses:aspect:morning_air', name: 'morning_air', sub_aspects: []}],
+                    },
+                    {name: 'dry_air'},
+                ],
+            });
+        }));
+
+        it('updates a root after a sub-aspect was deleted', fakeAsync(() => {
+            init(airHierarchy());
+            echoWrites();
+
+            const root = rootByName('air');
+            component.deleteNode((root.sub_aspects as DeviceTypeAspectModel[])[0], true);
+            component.save(rootByName('air'));
+            flush();
+
+            expect(aspectsServiceSpy.deleteAspects).not.toHaveBeenCalled();
+            expect(aspectsServiceSpy.updateAspects.calls.mostRecent().args[0]).toEqual({
+                id: 'urn:infai:ses:aspect:air',
+                name: 'air',
+                aspect_class_id: environmentClassId,
+                sub_aspects: [],
+            });
+        }));
+
+        it('updates a root after its class was changed', fakeAsync(() => {
+            init([unclassifiedAir()], true, true, [environmentClassEntry]);
+            echoWrites();
+
+            const root = rootByName('air');
+            root.aspect_class_id = environmentClassId;
+            component.save(root);
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects.calls.mostRecent().args[0]).toEqual({
+                id: 'urn:infai:ses:aspect:air',
+                name: 'air',
+                aspect_class_id: environmentClassId,
+                sub_aspects: [
+                    {
+                        id: 'urn:infai:ses:aspect:inside_air',
+                        name: 'inside_air',
+                        sub_aspects: [{id: 'urn:infai:ses:aspect:morning_air', name: 'morning_air', sub_aspects: []}],
+                    },
+                    {id: 'urn:infai:ses:aspect:outside_air', name: 'outside_air', sub_aspects: []},
+                ],
+            });
+        }));
+
+        it('writes the target hierarchy with the moved aspect appended when dropped on an aspect', fakeAsync(() => {
+            init([
+                {id: 'urn:infai:ses:aspect:a', name: 'a', sub_aspects: [
+                    {id: 'urn:infai:ses:aspect:a1', name: 'a1', sub_aspects: []}]},
+                {id: 'urn:infai:ses:aspect:b', name: 'b', aspect_class_id: environmentClassId,
+                    sub_aspects: [{id: 'urn:infai:ses:aspect:b1', name: 'b1', aspect_class_id: environmentClassId,
+                        sub_aspects: []}]},
+            ]);
+            echoWrites();
+            dialogReturns(true);
+
+            component.dropped({item: {data: rootByName('b')}}, rootByName('a'));
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects.calls.count()).toBe(1);
+            expect(aspectsServiceSpy.updateAspects.calls.mostRecent().args[0]).toEqual({
+                id: 'urn:infai:ses:aspect:a',
+                name: 'a',
+                sub_aspects: [
+                    {id: 'urn:infai:ses:aspect:a1', name: 'a1', sub_aspects: []},
+                    {id: 'urn:infai:ses:aspect:b', name: 'b', sub_aspects: [
+                        {id: 'urn:infai:ses:aspect:b1', name: 'b1', sub_aspects: []}]},
+                ],
+            });
+        }));
+
+        it('writes the moved aspect with the class of the row it was dropped on', fakeAsync(() => {
+            init([
+                {id: 'urn:infai:ses:aspect:inside_air', name: 'inside_air', aspect_class_id: environmentClassId,
+                    sub_aspects: []},
+                {id: 'urn:infai:ses:aspect:device', name: 'device', sub_aspects: [
+                    {id: 'urn:infai:ses:aspect:phone', name: 'phone', sub_aspects: []}]},
+            ]);
+            echoWrites();
+            dialogReturns(true);
+
+            component.dropped({item: {data: rootByName('device')}}, groupByName('environment'));
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects.calls.mostRecent().args[0]).toEqual({
+                id: 'urn:infai:ses:aspect:device',
+                name: 'device',
+                aspect_class_id: environmentClassId,
+                sub_aspects: [{id: 'urn:infai:ses:aspect:phone', name: 'phone', sub_aspects: []}],
+            });
+        }));
+
+        it('writes the moved aspect without a class when dropped on the root zone', fakeAsync(() => {
+            init(airHierarchy());
+            echoWrites();
+            dialogReturns(true);
+
+            component.dropped({item: {data: rootByName('air')}});
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects.calls.mostRecent().args[0]).toEqual({
+                id: 'urn:infai:ses:aspect:air',
+                name: 'air',
+                sub_aspects: [{
+                    id: 'urn:infai:ses:aspect:inside_air',
+                    name: 'inside_air',
+                    sub_aspects: [{id: 'urn:infai:ses:aspect:morning_air', name: 'morning_air', sub_aspects: []}],
+                }],
+            });
+        }));
+
+        it('sends the whole body of each conversion step in order', fakeAsync(() => {
+            init([unclassifiedAir()]);
+            aspectClassesServiceSpy.createAspectClass.and.returnValue(of(newClass));
+            echoWrites();
+            aspectsServiceSpy.deleteAspects.and.returnValue(of(true));
+            dialogReturns({className: 'air', fate: 'deprecate'});
+
+            component.convertToAspectClass(rootByName('air'));
+            flush();
+
+            expect(writtenAspects()).toEqual([
+                {
+                    id: 'urn:infai:ses:aspect:inside_air',
+                    name: 'inside_air',
+                    aspect_class_id: newClass.id,
+                    sub_aspects: [{id: 'urn:infai:ses:aspect:morning_air', name: 'morning_air', sub_aspects: []}],
+                },
+                {id: 'urn:infai:ses:aspect:outside_air', name: 'outside_air', aspect_class_id: newClass.id,
+                    sub_aspects: []},
+                {id: 'urn:infai:ses:aspect:air', name: 'air (deprecated)', aspect_class_id: newClass.id,
+                    sub_aspects: []},
+            ]);
+        }));
+    });
+
+    describe('tree with detail', () => {
+        const environmentClassId = 'urn:infai:ses:aspect-class:environment';
+
+        function echoWrites() {
+            aspectsServiceSpy.updateAspects.and.callFake((a: DeviceTypeAspectModel) => of(a));
+            aspectsServiceSpy.createAspect.and.callFake((a: DeviceTypeAspectModel) => of({...a, id: 'urn:infai:ses:aspect:new'}));
+        }
+
+        function twoRoots(): DeviceTypeAspectModel[] {
+            return [
+                ...airHierarchy(),
+                {id: 'urn:infai:ses:aspect:device', name: 'device', sub_aspects: [
+                    {id: 'urn:infai:ses:aspect:phone', name: 'phone', sub_aspects: []}]},
+            ];
+        }
+
+        afterEach(() => {
+            aspectsServiceSpy.createAspect.calls.reset();
+            aspectClassesServiceSpy.updateAspectClass.calls.reset();
+            aspectsServiceSpy.updateAspects.calls.reset();
+            deviceTypeServiceSpy.getAspects.calls.reset();
+        });
+
+        it('is clean after loading and follows an edit and its undoing', fakeAsync(() => {
+            init(airHierarchy());
+            expect(component.hasUnsaved()).toBeFalse();
+
+            const inside = rootByName('air').sub_aspects?.[0] as DeviceTypeAspectModel;
+            component.renameNode(inside, 'indoor');
+            expect(component.hasUnsaved()).toBeTrue();
+            expect(component.dirtyRoots).toEqual([rootByName('air')]);
+            expect(component.saveBlocked).toBeFalse();
+
+            component.renameNode(inside, 'inside_air');
+            expect(component.hasUnsaved()).toBeFalse();
+            discardPeriodicTasks();
+        }));
+
+        it('writes every edited hierarchy and renamed class once and nothing else', fakeAsync(() => {
+            init(twoRoots(), true, true, [environmentClassEntry]);
+            echoWrites();
+            aspectClassesServiceSpy.updateAspectClass.and.callFake((c: DeviceTypeAspectClassModel) => of(c));
+
+            component.renameNode(rootByName('air'), 'atmosphere');
+            component.renameAspectClass(groupByName('environment'), '  surroundings ');
+            component.saveAll();
+            flush();
+
+            expect(writtenAspects().map(a => a.id)).toEqual(['urn:infai:ses:aspect:air']);
+            expect(writtenAspects()[0].name).toBe('atmosphere');
+            expect(aspectClassesServiceSpy.updateAspectClass.calls.count()).toBe(1);
+            expect(aspectClassesServiceSpy.updateAspectClass.calls.mostRecent().args[0])
+                .toEqual({id: environmentClassId, name: 'surroundings'});
+            expect(component.hasUnsaved()).toBeFalse();
+        }));
+
+        it('sends the same body as saving one hierarchy for each edited hierarchy', fakeAsync(() => {
+            init(twoRoots());
+            echoWrites();
+
+            component.renameNode(rootByName('device'), 'gadget');
+            component.addSubNode(rootByName('air'));
+            component.renameNode(component.selected as DeviceTypeAspectModel, 'dry_air');
+            component.saveAll();
+            discardPeriodicTasks();
+
+            expect(writtenAspects().length).toBe(2);
+            const air = writtenAspects().find(a => a.id === 'urn:infai:ses:aspect:air') as DeviceTypeAspectModel;
+            expect(air.sub_aspects?.map(a => a.name)).toEqual(['inside_air', 'dry_air']);
+            expect(air.aspect_class_id).toBe(environmentClassId);
+            const device = writtenAspects().find(a => a.id === 'urn:infai:ses:aspect:device') as DeviceTypeAspectModel;
+            expect(device).toEqual({id: 'urn:infai:ses:aspect:device', name: 'gadget',
+                sub_aspects: [{id: 'urn:infai:ses:aspect:phone', name: 'phone', sub_aspects: []}]});
+        }));
+
+        it('keeps a failed hierarchy dirty and still writes the others', fakeAsync(() => {
+            init(twoRoots());
+            aspectsServiceSpy.updateAspects.and.callFake((a: DeviceTypeAspectModel) =>
+                of(a.id === 'urn:infai:ses:aspect:air' ? null : a));
+
+            component.renameNode(rootByName('air'), 'atmosphere');
+            component.renameNode(rootByName('device'), 'gadget');
+            component.saveAll();
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects.calls.count()).toBe(2);
+            expect(component.dirtyRoots.map(r => r.name)).toEqual(['atmosphere']);
+            expect(component.saving).toBeFalse();
+        }));
+
+        it('blocks saving while a name is empty and says why', fakeAsync(() => {
+            init(airHierarchy());
+            component.renameNode(rootByName('air'), '');
+
+            expect(component.saveBlocked).toBeTrue();
+            expect(component.saveStatus).toBe('Every aspect needs a name.');
+            component.saveAll();
+            expect(aspectsServiceSpy.updateAspects).not.toHaveBeenCalled();
+        }));
+
+        it('blocks saving a class name another class holds', fakeAsync(() => {
+            init(airHierarchy(), true, true, [environmentClassEntry, {id: 'urn:infai:ses:aspect-class:b', name: 'building'}]);
+            component.renameAspectClass(groupByName('environment'), 'building');
+
+            expect(component.saveBlocked).toBeTrue();
+            component.saveAll();
+            expect(aspectClassesServiceSpy.updateAspectClass).not.toHaveBeenCalled();
+        }));
+
+        it('keeps a typed class name when the tree is rebuilt before it is saved', fakeAsync(() => {
+            init(airHierarchy(), true, true, [environmentClassEntry]);
+            component.renameAspectClass(groupByName('environment'), 'surroundings');
+
+            component.newAspect();
+            flush();
+
+            expect(groupByName('surroundings')).toBeDefined();
+            expect(component.dirtyClasses.length).toBe(1);
+        }));
+
+        it('discards by reloading and forgets class names too', fakeAsync(() => {
+            init(airHierarchy(), true, true, [environmentClassEntry]);
+            component.renameNode(rootByName('air'), 'atmosphere');
+            component.renameAspectClass(groupByName('environment'), 'surroundings');
+            component.newAspect();
+            // the repository answers with what is stored, not with the objects the form edited
+            deviceTypeServiceSpy.getAspects.and.callFake(() => of(airHierarchy()));
+            deviceTypeServiceSpy.getAspects.calls.reset();
+
+            component.discard();
+            flush();
+
+            expect(deviceTypeServiceSpy.getAspects.calls.count()).toBe(1);
+            expect(component.hasUnsaved()).toBeFalse();
+            expect(rootByName('air').name).toBe('air');
+            expect(groupByName('environment')).toBeDefined();
+            expect(component.selected).toBeUndefined();
+        }));
+
+        it('refuses to move or convert while edits are unsaved', fakeAsync(() => {
+            init(twoRoots());
+            echoWrites();
+            dialogReturns({className: 'x', fate: 'delete'});
+            component.renameNode(rootByName('device'), 'gadget');
+
+            component.dropped({item: {data: rootByName('air')}});
+            component.convertToAspectClass(rootByName('device'));
+            flush();
+
+            expect(aspectsServiceSpy.updateAspects).not.toHaveBeenCalled();
+            expect(matDialogStub.open).not.toHaveBeenCalled();
+            expect(component.dragDisabled(rootByName('air'))).toBeTrue();
+        }));
+
+        it('selects a new aspect and a new sub-aspect and counts them as unsaved', fakeAsync(() => {
+            init(airHierarchy());
+
+            component.newAspect();
+            const added = component.selected as DeviceTypeAspectModel;
+            expect(added.id).toBeUndefined();
+            expect(rootAspects()).toContain(added);
+            expect(component.saveBlocked).toBeTrue();
+
+            component.addSubNode(rootByName('air'));
+            expect(component.selected).toBe((rootByName('air').sub_aspects as DeviceTypeAspectModel[])[1]);
+            discardPeriodicTasks();
+        }));
+
+        it('moves the open form to the saved hierarchy when a new aspect gets its id', fakeAsync(() => {
+            init([]);
+            echoWrites();
+
+            component.newAspect();
+            component.renameNode(component.selected as DeviceTypeAspectModel, 'speed');
+            component.saveAll();
+            flush();
+
+            expect(component.selected?.id).toBe('urn:infai:ses:aspect:new');
+            expect(component.selected).toBe(rootByName('speed'));
+            expect(component.hasUnsaved()).toBeFalse();
+        }));
+
+        it('finds the open class form again after the tree was rebuilt', fakeAsync(() => {
+            init(airHierarchy(), true, true, [environmentClassEntry]);
+            component.select(groupByName('environment'));
+
+            component.addAspectToClass(groupByName('environment'));
+            component.select(groupByName('environment'));
+            component.newAspect();
+            flush();
+
+            expect(component.selected).toBe(rootAspects().find(a => a.id === undefined && a.aspect_class_id === undefined));
+            component.select(groupByName('environment'));
+            component.deleteNode(rootAspects().find(a => a.id === undefined && a.aspect_class_id === undefined) as DeviceTypeAspectModel, true);
+            flush();
+            expect(component.selected).toBe(groupByName('environment'));
+        }));
+
+        it('shows labels instead of fields in the tree and a row menu to an administrator', fakeAsync(() => {
+            init(airHierarchy(), true, true, [environmentClassEntry]);
+            fixture.detectChanges();
+            flush();
+            fixture.detectChanges();
+
+            const el = fixture.nativeElement as HTMLElement;
+            const tree = el.querySelector('.aspects-tree') as HTMLElement;
+            expect(tree.querySelectorAll('input, mat-form-field').length).toBe(0);
+            expect(tree.querySelector('.tree-label')?.textContent).toContain('environment');
+            expect(tree.querySelectorAll('.row-menu').length).toBeGreaterThan(0);
+            expect(tree.querySelectorAll('.drag-handle').length).toBeGreaterThan(0);
+            expect(el.querySelector('senergy-save-bar')).toBeNull();
+            discardPeriodicTasks();
+        }));
+
+        it('gives a read-only user no menu, handle, save bar or header action', fakeAsync(() => {
+            init(airHierarchy(), false, false, [environmentClassEntry]);
+            aspectClassesServiceSpy.userHasDeleteAuthorization.and.returnValue(false);
+            fixture = TestBed.createComponent(AspectsComponent);
+            fixture.detectChanges();
+            flush();
+            fixture.detectChanges();
+
+            const el = fixture.nativeElement as HTMLElement;
+            expect(el.querySelectorAll('.row-menu').length).toBe(0);
+            expect(el.querySelectorAll('.drag-handle').length).toBe(0);
+            expect(el.querySelector('senergy-save-bar')).toBeNull();
+            expect(el.querySelector('senergy-page-header button')).toBeNull();
+            discardPeriodicTasks();
+        }));
+
+        it('opens the form of the clicked row and offers the save bar once something changed', fakeAsync(() => {
+            init(airHierarchy());
+            fixture.detectChanges();
+            flush();
+            fixture.detectChanges();
+            const el = fixture.nativeElement as HTMLElement;
+            expect(el.querySelector('senergy-empty-state')).not.toBeNull();
+
+            (el.querySelector('.tree-row') as HTMLElement).click();
+            fixture.detectChanges();
+            flush();
+            fixture.detectChanges();
+            expect(component.selected).toBeDefined();
+            expect(el.querySelector('senergy-form-section input')).not.toBeNull();
+
+            component.renameAspectClass(component.selected as DeviceTypeAspectModel, 'x');
+            fixture.detectChanges();
+            expect(el.querySelector('senergy-save-bar')).not.toBeNull();
+            discardPeriodicTasks();
+        }));
+
+        describe('review findings', () => {
+            const otherClass = {id: 'urn:infai:ses:aspect-class:b', name: 'building'};
+
+            function settle() {
+                fixture.detectChanges();
+                flush();
+                fixture.detectChanges();
+            }
+
+            it('blocks saving when two classes are renamed to the same name', fakeAsync(() => {
+                init(airHierarchy(), true, true, [environmentClassEntry, otherClass]);
+                aspectClassesServiceSpy.updateAspectClass.and.callFake((c: DeviceTypeAspectClassModel) => of(c));
+
+                component.renameAspectClass(groupByName('environment'), 'same');
+                component.renameAspectClass(groupByName('building'), 'same');
+
+                expect(component.saveBlocked).toBeTrue();
+                expect(component.saveStatus).toBe('An aspect class needs a name that no other class has.');
+                component.saveAll();
+                flush();
+                expect(aspectClassesServiceSpy.updateAspectClass).not.toHaveBeenCalled();
+                discardPeriodicTasks();
+            }));
+
+            it('does not count a stored class name with blanks as renamed and trims a real rename', fakeAsync(() => {
+                init(airHierarchy(), true, true, [{id: environmentClassId, name: 'environment '}]);
+                aspectClassesServiceSpy.updateAspectClass.and.callFake((c: DeviceTypeAspectClassModel) => of(c));
+                settle();
+
+                expect(component.hasUnsaved()).toBeFalse();
+                expect((fixture.nativeElement as HTMLElement).querySelector('senergy-save-bar')).toBeNull();
+                component.saveAll();
+                expect(aspectClassesServiceSpy.updateAspectClass).not.toHaveBeenCalled();
+
+                component.renameAspectClass(groupByName('environment '), ' surroundings ');
+                component.saveAll();
+                flush();
+                expect(aspectClassesServiceSpy.updateAspectClass.calls.allArgs())
+                    .toEqual([[{id: environmentClassId, name: 'surroundings'}]]);
+                discardPeriodicTasks();
+            }));
+
+            it('does not count a class rename as unsaved without the class update right', fakeAsync(() => {
+                init(airHierarchy());
+                aspectClassesServiceSpy.userHasUpdateAuthorization.and.returnValue(false);
+                fixture = TestBed.createComponent(AspectsComponent);
+                component = fixture.componentInstance;
+                settle();
+
+                component.renameAspectClass(groupByName('environment'), 'surroundings');
+
+                expect(component.hasUnsaved()).toBeFalse();
+                aspectClassesServiceSpy.userHasUpdateAuthorization.and.returnValue(true);
+                discardPeriodicTasks();
+            }));
+
+            it('refuses a second create and keeps the root while a save is out', fakeAsync(() => {
+                init(airHierarchy());
+                const answer = new Subject<DeviceTypeAspectModel | null>();
+                aspectsServiceSpy.createAspect.and.returnValue(answer.asObservable());
+
+                component.newAspect();
+                component.renameNode(component.selected as DeviceTypeAspectModel, 'speed');
+                component.saveAll();
+                settle();
+                const el = fixture.nativeElement as HTMLElement;
+                expect((el.querySelector('senergy-page-header button') as HTMLButtonElement).disabled).toBeTrue();
+                expect((el.querySelector('senergy-form-section input') as HTMLInputElement).disabled).toBeTrue();
+                expect((el.querySelector('.row-menu') as HTMLButtonElement).disabled).toBeTrue();
+                expect(component.dragDisabled(rootByName('air'))).toBeTrue();
+
+                component.deleteNode((rootByName('air').sub_aspects as DeviceTypeAspectModel[])[0], true);
+                component.newAspect();
+                answer.next({id: 'urn:infai:ses:aspect:new', name: 'speed'});
+                answer.complete();
+                flush();
+                component.saveAll();
+                flush();
+
+                expect(rootByName('air').sub_aspects?.length).toBe(1);
+                expect(rootByName('speed').id).toBe('urn:infai:ses:aspect:new');
+                expect(aspectsServiceSpy.createAspect.calls.count()).toBe(1);
+                expect(component.hasUnsaved()).toBeFalse();
+                discardPeriodicTasks();
+            }));
+
+            it('does not take an edit of the saving hierarchy while its request is out', fakeAsync(() => {
+                init(airHierarchy());
+                const answer = new Subject<DeviceTypeAspectModel | null>();
+                aspectsServiceSpy.updateAspects.and.returnValue(answer.asObservable());
+
+                component.renameNode(rootByName('air'), 'atmosphere');
+                component.saveAll();
+                component.renameNode(rootByName('air'), 'atmosphere2');
+                answer.next({...airHierarchy()[0], name: 'atmosphere'});
+                answer.complete();
+                flush();
+
+                expect(rootByName('atmosphere')).toBeDefined();
+                expect(component.hasUnsaved()).toBeFalse();
+                discardPeriodicTasks();
+            }));
+
+            it('keeps the convert item visible but not usable while a name is empty', fakeAsync(() => {
+                init([{id: 'urn:infai:ses:aspect:p', name: 'p',
+                    sub_aspects: [{id: 'urn:infai:ses:aspect:c', name: '', sub_aspects: []}]}], true, true, []);
+                dialogReturns({className: 'x', fate: 'delete'});
+                settle();
+                const el = fixture.nativeElement as HTMLElement;
+                (el.querySelector('.row-menu') as HTMLElement).click();
+                settle();
+                const item = Array.from(document.querySelectorAll('.mat-mdc-menu-item'))
+                    .find(i => i.textContent?.includes('Convert to aspect class')) as HTMLButtonElement;
+                expect(item).toBeDefined();
+                expect(item.disabled).toBeTrue();
+                expect(document.querySelector('.menu-note')?.textContent).toContain('Name every aspect');
+
+                component.convertToAspectClass(rootByName('p'));
+                expect(matDialogStub.open).not.toHaveBeenCalled();
+                discardPeriodicTasks();
+            }));
+
+            it('is clean after adding and deleting a sub-aspect of a leaf without sub_aspects', fakeAsync(() => {
+                init([{id: 'urn:infai:ses:aspect:x', name: 'x', sub_aspects: null as unknown as undefined}]);
+
+                component.addSubNode(rootByName('x'));
+                expect(component.hasUnsaved()).toBeTrue();
+                component.deleteNode((rootByName('x').sub_aspects as DeviceTypeAspectModel[])[0], true);
+
+                expect(component.hasUnsaved()).toBeFalse();
+                discardPeriodicTasks();
+            }));
+
+            it('allows neither save nor edits while a discard reload is pending', fakeAsync(() => {
+                init(airHierarchy());
+                echoWrites();
+                component.renameNode(rootByName('air'), 'atmosphere');
+                const answer = new Subject<DeviceTypeAspectModel[]>();
+                deviceTypeServiceSpy.getAspects.and.returnValue(answer.asObservable());
+
+                component.discard();
+                settle();
+                const bar = (fixture.nativeElement as HTMLElement).querySelector('senergy-save-bar');
+                expect(bar).not.toBeNull();
+                expect(Array.from(bar?.querySelectorAll('button') || []).every(b => b.disabled)).toBeTrue();
+                component.saveAll();
+                component.renameNode(rootByName('atmosphere'), 'late');
+                expect(aspectsServiceSpy.updateAspects).not.toHaveBeenCalled();
+
+                answer.next(airHierarchy());
+                answer.complete();
+                flush();
+                expect(component.hasUnsaved()).toBeFalse();
+                expect(rootByName('air')).toBeDefined();
+                discardPeriodicTasks();
+            }));
+
+            it('selects the focused tree row with Enter and Space and marks it selected', fakeAsync(() => {
+                init(twoRoots(), true, true, [environmentClassEntry]);
+                settle();
+                const el = fixture.nativeElement as HTMLElement;
+                const rows = Array.from(el.querySelectorAll('[role="treeitem"]')) as HTMLElement[];
+                const device = rows.find(r => r.textContent?.includes('device')) as HTMLElement;
+
+                device.focus();
+                device.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+                settle();
+                expect(component.selected).toBe(rootByName('device'));
+                expect(device.getAttribute('aria-selected')).toBe('true');
+
+                const first = rows[0];
+                first.focus();
+                first.dispatchEvent(new KeyboardEvent('keydown', {key: ' ', bubbles: true}));
+                settle();
+                expect(component.selected).toBe(groupByName('environment'));
+                discardPeriodicTasks();
+            }));
+        });
+    });
 });

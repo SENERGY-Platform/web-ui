@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { afterNextRender, Component, ElementRef, Injector, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { concat, Observable, of } from 'rxjs';
-import { concatMap, map, tap, toArray } from 'rxjs/operators';
+import { concatMap, finalize, map, tap, toArray } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ResponsiveService } from '../../../core/services/responsive.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -39,7 +39,7 @@ import {
     withoutDeprecatedSuffix
 } from '../device-types-overview/shared/device-type.model';
 import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTree, MatTreeNestedDataSource, MatTreeNodeDef, MatTreeNode, MatTreeNodeToggle, MatNestedTreeNode, MatTreeNodeOutlet } from '@angular/material/tree';
+import { MatTree, MatTreeNestedDataSource, MatTreeNodeDef, MatTreeNode, MatNestedTreeNode, MatTreeNodeOutlet } from '@angular/material/tree';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { DeviceTypeService } from '../device-types-overview/shared/device-type.service';
 import {
@@ -47,17 +47,23 @@ import {
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
 import { CdkDropListGroup, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
-import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
 import { MtxSelect } from '@ng-matero/extensions/select';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { NgTemplateOutlet } from '@angular/common';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { dialogSize } from '../../../core/dialog-size';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { SaveBarComponent } from '../../../core/components/save-bar/save-bar.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
+import { TreeDetailLayoutComponent } from '../../../core/components/tree-detail-layout/tree-detail-layout.component';
 
 /**
  * A row that stands for an aspect class rather than an aspect. It is shaped like an aspect so the
@@ -73,7 +79,7 @@ export interface AspectClassGroupNode extends DeviceTypeAspectModel {
     templateUrl: './aspects.component.html',
     styleUrls: ['./aspects.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [CdkDropListGroup, MatTree, MatTreeNodeDef, MatTreeNode, CdkDropList, MatTreeNodeToggle, CdkDrag, MatIconButton, CdkDragHandle, MatIcon, MatTooltip, MatFormField, MatLabel, MtxSelect, FormsModule, NgClass, MatInput, MatError, MatErrorMessagesDirective, MatNestedTreeNode, MatHint, MatTreeNodeOutlet, MatFabButton]
+    imports: [CdkDropListGroup, MatTree, MatTreeNodeDef, MatTreeNode, CdkDropList, CdkDrag, MatButton, MatIconButton, CdkDragHandle, MatIcon, MatTooltip, MatFormField, MatLabel, MtxSelect, FormsModule, NgTemplateOutlet, MatInput, MatError, MatErrorMessagesDirective, MatNestedTreeNode, MatHint, MatTreeNodeOutlet, MatMenu, MatMenuItem, MatMenuTrigger, PageHeaderComponent, FormSectionComponent, SaveBarComponent, EmptyStateComponent, TreeDetailLayoutComponent]
 })
 export class AspectsComponent implements OnInit {
     private dialog = inject(MatDialog);
@@ -86,6 +92,7 @@ export class AspectsComponent implements OnInit {
     private authService = inject(AuthorizationService);
     private deviceTypesService = inject(DeviceTypeService);
     private aspectClassesService = inject(AspectClassesService);
+    private injector = inject(Injector);
 
     ready = false;
 
@@ -93,6 +100,7 @@ export class AspectsComponent implements OnInit {
     dataSource = new MatTreeNestedDataSource<DeviceTypeAspectModel>();
 
     @ViewChild(MatTree, {static: false}) tree!: MatTree<DeviceTypeAspectModel>;
+    @ViewChild('nameInput') nameInput?: ElementRef<HTMLInputElement>;
     hasChild = (_: number, node: DeviceTypeAspectModel) => !!node.sub_aspects && node.sub_aspects.length > 0;
     isGroupRow = (_: number, node: DeviceTypeAspectModel) => this.isAspectClassGroup(node);
     userIsAdmin = false;
@@ -113,6 +121,27 @@ export class AspectsComponent implements OnInit {
     dragging = false;
 
     usedIn: Map<string,UsedInDeviceTypeResponseElement> = new Map<string, UsedInDeviceTypeResponseElement>();
+
+    /** The node whose form is open on the right: an aspect, or the row of an aspect class. */
+    selected: DeviceTypeAspectModel | undefined;
+
+    /** Root hierarchies and classes with edits the save bar still has to write. */
+    dirtyRoots: DeviceTypeAspectModel[] = [];
+    dirtyClasses: DeviceTypeAspectModel[] = [];
+    saveStatus = '';
+    saveBlocked = false;
+    saving = false;
+    /** True while the tree is being fetched again; edits made meanwhile would be replaced by the answer. */
+    reloading = false;
+    /** Stored form of each root hierarchy as loaded or last saved, to tell edited from untouched. */
+    private baselines = new Map<string, string>();
+    /** Class names typed but not saved; a rebuilt tree labels its group rows with them again. */
+    private classRenames = new Map<string, string>();
+
+    /** Nothing may be edited or rebuilt while requests of a save or a reload are still out. */
+    get locked(): boolean {
+        return this.saving || this.reloading;
+    }
 
     ngOnInit() {
         this.checkAuthorization();
@@ -153,14 +182,173 @@ export class AspectsComponent implements OnInit {
     }
 
     newAspect(): void {
-        this.setTree([...this.rootAspects(), {name: ''} as DeviceTypeAspectModel]);
+        if (this.locked) {
+            return;
+        }
+        const added = {name: ''} as DeviceTypeAspectModel;
+        this.setTree([...this.rootAspects(), added]);
+        this.select(added, true);
     }
 
     addSubNode(node: DeviceTypeAspectModel) {
+        if (this.locked) {
+            return;
+        }
+        const added = {name: ''} as DeviceTypeAspectModel;
         node.sub_aspects = node.sub_aspects || [];
-        node.sub_aspects.push({name: ''} as DeviceTypeAspectModel);
+        node.sub_aspects.push(added);
         this.treeControl.expand(node);
         this.redraw();
+        this.refreshDirty();
+        this.select(added, true);
+    }
+
+    select(node: DeviceTypeAspectModel, focusName = false) {
+        this.selected = node;
+        if (focusName) {
+            afterNextRender(() => this.nameInput?.nativeElement.focus(), {injector: this.injector});
+        }
+    }
+
+    toggle(node: DeviceTypeAspectModel, event: Event) {
+        event.stopPropagation();
+        this.treeControl.toggle(node);
+    }
+
+    /** Called for every edit the form makes, so the save bar follows what was typed. */
+    renameNode(node: DeviceTypeAspectModel, name: string) {
+        if (this.locked) {
+            return;
+        }
+        node.name = name;
+        this.refreshDirty();
+    }
+
+    setAspectClass(node: DeviceTypeAspectModel, classId: string | null) {
+        if (this.locked) {
+            return;
+        }
+        node.aspect_class_id = classId;
+        this.refreshDirty();
+    }
+
+    renameAspectClass(group: DeviceTypeAspectModel, name: string) {
+        if (this.locked) {
+            return;
+        }
+        group.name = name;
+        this.classRenames.set(group.id, name);
+        this.refreshDirty();
+    }
+
+    hasUnsaved(): boolean {
+        return this.dirtyRoots.length > 0 || this.dirtyClasses.length > 0;
+    }
+
+    isDirty(node: DeviceTypeAspectModel): boolean {
+        return this.isAspectClassGroup(node) ? this.dirtyClasses.some(g => g.id === node.id) : this.dirtyRoots.includes(node);
+    }
+
+    /** A move or a conversion reloads the tree, which would drop the edits the bar still holds. */
+    dragDisabled(node: DeviceTypeAspectModel): boolean {
+        return !this.userIsAdmin || !this.nodeValid(node) || this.hasUnsaved() || this.locked;
+    }
+
+    dragHint(node: DeviceTypeAspectModel): string {
+        if (this.hasUnsaved()) {
+            return 'Save or discard your changes before moving an aspect';
+        }
+        return this.nodeValid(node) ? 'Drag to move' : 'Name every aspect before moving it';
+    }
+
+    rowHasMenu(node: DeviceTypeAspectModel): boolean {
+        return this.isAspectClassGroup(node) ? (this.userIsAdmin || this.userHasAspectClassDeleteAuthorization) : this.userIsAdmin;
+    }
+
+    /** Which root hierarchies and classes differ from what is stored, and what may block saving them. */
+    private refreshDirty() {
+        this.dirtyRoots = this.rootAspects().filter(root => root.id === undefined
+            || this.baselines.get(root.id) !== this.dirtyKey(root));
+        this.dirtyClasses = this.dataSource.data.filter(node => this.isAspectClassGroup(node) && this.aspectClassRenamed(node));
+        if (this.dirtyRoots.some(root => !this.nodeValid(root))) {
+            this.saveStatus = 'Every aspect needs a name.';
+            this.saveBlocked = true;
+        } else if (this.dirtyClasses.some(group => !this.aspectClassNameValid(group))) {
+            this.saveStatus = 'An aspect class needs a name that no other class has.';
+            this.saveBlocked = true;
+        } else {
+            const parts: string[] = [];
+            if (this.dirtyRoots.length > 0) {
+                parts.push(this.dirtyRoots.length + (this.dirtyRoots.length === 1 ? ' aspect hierarchy' : ' aspect hierarchies'));
+            }
+            if (this.dirtyClasses.length > 0) {
+                parts.push(this.dirtyClasses.length + (this.dirtyClasses.length === 1 ? ' aspect class' : ' aspect classes'));
+            }
+            this.saveStatus = 'Unsaved changes in ' + parts.join(' and ');
+            this.saveBlocked = false;
+        }
+    }
+
+    /** Only a name the user typed counts, so a stored name with stray blanks is not dirty after loading. */
+    private aspectClassRenamed(group: DeviceTypeAspectModel): boolean {
+        const typed = this.classRenames.get(group.id);
+        const stored = this.aspectClasses.find(c => c.id === group.id);
+        return this.userHasAspectClassUpdateAuthorization && typed !== undefined && stored !== undefined
+            && typed !== stored.name && typed.trim() !== stored.name;
+    }
+
+    /** What Save would send, with a missing or null `sub_aspects` read as empty so add-then-delete is clean. */
+    private dirtyKey(root: DeviceTypeAspectModel): string {
+        const normalised = (node: DeviceTypeAspectModel): DeviceTypeAspectModel => {
+            const copy = {...node};
+            delete copy.sub_aspects;
+            return {...copy, sub_aspects: (node.sub_aspects || []).map(normalised)};
+        };
+        return JSON.stringify(normalised(this.aspectWriteRequest(root)));
+    }
+
+    private nodeInTree(nodes: DeviceTypeAspectModel[], wanted: DeviceTypeAspectModel): boolean {
+        return nodes.some(node => node === wanted || this.nodeInTree(node.sub_aspects || [], wanted));
+    }
+
+    private findById(nodes: DeviceTypeAspectModel[], id: string): DeviceTypeAspectModel | undefined {
+        for (const node of nodes) {
+            const found = node.id === id ? node : this.findById(node.sub_aspects || [], id);
+            if (found !== undefined) {
+                return found;
+            }
+        }
+        return undefined;
+    }
+
+    /** The rebuilt tree holds new group objects, so the open form is found again by id. */
+    private reselect() {
+        const wanted = this.selected;
+        if (wanted === undefined || this.nodeInTree(this.dataSource.data, wanted)) {
+            return;
+        }
+        this.selected = wanted.id === undefined ? undefined : this.findById(this.dataSource.data, wanted.id);
+    }
+
+    /** Writes every edited root hierarchy and renamed class, one request each; a failed one stays dirty. */
+    saveAll() {
+        if (this.locked || this.saveBlocked || !this.hasUnsaved()) {
+            return;
+        }
+        this.saving = true;
+        concat(
+            ...this.dirtyRoots.map(root => this.saveRoot(root)),
+            ...this.dirtyClasses.map(group => this.saveClass(group)),
+        ).pipe(toArray(), finalize(() => this.saving = false)).subscribe();
+    }
+
+    /** Reloads from the repository and forgets every edit. */
+    discard() {
+        if (this.locked) {
+            return;
+        }
+        this.classRenames.clear();
+        this.getAspects();
     }
 
     /**
@@ -169,6 +357,9 @@ export class AspectsComponent implements OnInit {
      * top level of the displayed tree — a classified hierarchy sits under its group row.
      */
     deleteNode(node: DeviceTypeAspectModel, skipDialog = false) {
+        if (this.locked) {
+            return;
+        }
         const del = (confirmed: boolean | undefined) => {
             if (!confirmed) {
                 return;
@@ -228,28 +419,43 @@ export class AspectsComponent implements OnInit {
     }
 
     save(node: DeviceTypeAspectModel) {
-        const request = this.aspectWriteRequest(node);
-        let obs: Observable<DeviceTypeAspectModel | null> | undefined;
-        if (node.id === undefined) {
-            obs = this.aspectsService.createAspect(request);
-        } else {
-            obs = this.aspectsService.updateAspects(request);
-        }
+        this.saveRoot(node).subscribe();
+    }
 
-        obs.subscribe((resp: DeviceTypeAspectModel | null) => {
+    private saveRoot(node: DeviceTypeAspectModel): Observable<boolean> {
+        const request = this.aspectWriteRequest(node);
+        const obs = node.id === undefined
+            ? this.aspectsService.createAspect(request)
+            : this.aspectsService.updateAspects(request);
+
+        return obs.pipe(map((resp: DeviceTypeAspectModel | null) => {
             if (resp === null) {
                 snackError(this.snackBar, 'Error while saving the aspect!');
-            } else {
-                // regrouping rather than replacing in place: a class the user just changed puts the
-                // hierarchy under a different group row
-                this.setTree(this.rootAspects().map(root => root === node ? resp : root));
-                snackSuccess(this.snackBar, 'Aspect saved successfully.');
+                return false;
             }
-        });
+            // an unsaved node has no id to be found by, so the form moves to the root it was saved with
+            if (this.selected !== undefined && this.selected.id === undefined
+                && (this.selected === node || this.hasDescendant(node, this.selected))) {
+                this.selected = resp;
+            }
+            this.baselines.set(resp.id, this.dirtyKey(resp));
+            // regrouping rather than replacing in place: a class the user just changed puts the
+            // hierarchy under a different group row
+            this.setTree(this.rootAspects().map(root => root === node ? resp : root));
+            snackSuccess(this.snackBar, 'Aspect saved successfully.');
+            return true;
+        }));
     }
 
     dropped($event: any, target?: DeviceTypeAspectModel) {
         const node = $event.item.data as DeviceTypeAspectModel;
+        if (this.locked) {
+            return;
+        }
+        if (this.hasUnsaved()) {
+            snackError(this.snackBar, 'Save or discard your changes before moving an aspect.');
+            return;
+        }
         if (node === target) {
             snackError(this.snackBar, 'Can\'t move aspect into itself');
             return;
@@ -378,6 +584,17 @@ export class AspectsComponent implements OnInit {
      * removal stop being reported as deleting sub-aspects that are still in use.
      */
     convertToAspectClass(node: DeviceTypeAspectModel) {
+        if (this.locked) {
+            return;
+        }
+        if (this.hasUnsaved()) {
+            snackError(this.snackBar, 'Save or discard your changes before converting an aspect.');
+            return;
+        }
+        if (!this.nodeValid(node)) {
+            snackError(this.snackBar, 'Name every aspect before converting it.');
+            return;
+        }
         const dialogConfig = new MatDialogConfig();
         Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
@@ -536,9 +753,12 @@ export class AspectsComponent implements OnInit {
     }
 
     private getAspects() {
+        this.reloading = true;
         this.deviceTypesService
             .getAspects()
+            .pipe(finalize(() => this.reloading = false))
             .subscribe((aspects: DeviceTypeAspectModel[]) => {
+                this.baselines = new Map(aspects.map(root => [root.id, this.dirtyKey(root)]));
                 this.setTree(aspects);
                 this.updateAspectsUsedInDeviceTypes(aspects);
                 this.ready = true;
@@ -546,29 +766,37 @@ export class AspectsComponent implements OnInit {
     }
 
     /**
-     * A class may not take a name another one already has: the conversion helper resolves a class by
+     * A class may not take a name another one holds, stored or typed and not yet saved: the conversion helper resolves a class by
      * name, and two of the same name make that pick arbitrary.
      */
     aspectClassNameTaken(group: DeviceTypeAspectModel): boolean {
         const name = (group.name || '').trim();
-        return this.aspectClasses.some(c => c.id !== group.id && c.name === name);
+        return this.aspectClasses.some(c => c.id !== group.id
+            && (this.classRenames.get(c.id) ?? c.name).trim() === name);
     }
 
     aspectClassNameValid(group: DeviceTypeAspectModel): boolean {
         return (group.name || '').trim().length > 0 && !this.aspectClassNameTaken(group);
     }
 
-    /** Starts a new root hierarchy inside the class; it is written when the user saves the row. */
+    /** Starts a new root hierarchy inside the class; it is written when the user saves. */
     addAspectToClass(group: DeviceTypeAspectModel) {
+        if (this.locked) {
+            return;
+        }
         const added = {name: '', aspect_class_id: group.id} as DeviceTypeAspectModel;
         this.setTree([...this.rootAspects(), added]);
         const regrouped = this.dataSource.data.find(node => node.id === group.id);
         if (regrouped !== undefined) {
             this.treeControl.expand(regrouped);
         }
+        this.select(added, true);
     }
 
     deleteAspectClass(group: DeviceTypeAspectModel) {
+        if (this.locked) {
+            return;
+        }
         this.dialogsService
             .openDeleteDialog('aspect class ' + group.name)
             .afterClosed()
@@ -584,6 +812,7 @@ export class AspectsComponent implements OnInit {
                         return;
                     }
                     this.aspectClasses = this.aspectClasses.filter(c => c.id !== group.id);
+                    this.classRenames.delete(group.id);
                     this.setTree(this.rootAspects());
                     snackSuccess(this.snackBar, 'Aspect class deleted successfully.');
                 });
@@ -596,19 +825,25 @@ export class AspectsComponent implements OnInit {
     }
 
     saveAspectClass(group: DeviceTypeAspectModel) {
+        this.saveClass(group).subscribe();
+    }
+
+    private saveClass(group: DeviceTypeAspectModel): Observable<boolean> {
         const name = (group.name || '').trim();
-        this.aspectClassesService.updateAspectClass({id: group.id, name}).subscribe((saved) => {
+        return this.aspectClassesService.updateAspectClass({id: group.id, name}).pipe(map((saved) => {
             if (saved === null) {
                 snackError(this.snackBar, 'Error while saving the aspect class!');
-                return;
+                return false;
             }
             this.aspectClasses = this.aspectClasses
                 .map(c => c.id === saved.id ? saved : c)
                 .sort((a, b) => a.name.localeCompare(b.name));
+            this.classRenames.delete(saved.id);
             // the group rows are labelled from that list and sorted by name, so both follow the rename
             this.setTree(this.rootAspects());
             snackSuccess(this.snackBar, 'Aspect class saved successfully.');
-        });
+            return true;
+        }));
     }
 
     isAspectClassGroup(node: DeviceTypeAspectModel): boolean {
@@ -640,6 +875,8 @@ export class AspectsComponent implements OnInit {
         const newGroups = grouped.filter(node => this.isAspectClassGroup(node) && !knownIds.includes(node.id));
         this.redraw();
         newGroups.forEach(group => this.treeControl.expand(group));
+        this.reselect();
+        this.refreshDirty();
     }
 
     /**
@@ -665,7 +902,7 @@ export class AspectsComponent implements OnInit {
         classIds.forEach((classId) => {
             groups.push({
                 id: classId,
-                name: this.aspectClassName(classId),
+                name: this.classRenames.get(classId) ?? this.aspectClassName(classId),
                 sub_aspects: byClass.get(classId) || [],
                 is_aspect_class_group: true,
             } as AspectClassGroupNode);
