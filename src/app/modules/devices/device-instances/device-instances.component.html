@@ -233,7 +233,7 @@
               } @else {
                 <button mat-menu-item (click)="editDevice(device, true)"><mat-icon>info</mat-icon> Details</button>
               }
-              <button mat-menu-item (click)="showInfoOfDevice(device)"><mat-icon>account_tree</mat-icon> Services</button>
+              <button mat-menu-item (click)="showInfoOfDevice(device)"><mat-icon>monitoring</mat-icon> Data</button>
               @if (userHasCreateAuthoriation && device.permissions?.write) {
                 <button mat-menu-item (click)="replaceDevice(device)"><mat-icon>build_circle</mat-icon> Replace</button>
                 <button mat-menu-item (click)="duplicateDevice(device)"><mat-icon>content_copy</mat-icon> Duplicate</button>

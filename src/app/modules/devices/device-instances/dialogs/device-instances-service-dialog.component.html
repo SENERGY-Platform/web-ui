@@ -14,216 +14,171 @@
   ~ limitations under the License.
   -->
 
-<senergy-dialog-header title="Data" (closed)="close()">
-  <button mat-icon-button color="accent" (click)="refresh()" aria-label="Refresh">
+<senergy-dialog-header [title]="device.display_name || device.name" (closed)="close()">
+  <span class="status-chip" [class.online]="connectionState.cssClass === 'online'">{{connectionState.label}}</span>
+  <button mat-icon-button type="button" color="accent" (click)="refresh()" aria-label="Refresh">
     <mat-icon>refresh</mat-icon>
   </button>
 </senergy-dialog-header>
 
 <mat-dialog-content>
-  <div id="id-container">
-    <mat-form-field appearance="outline" class="full-width" color="accent">
-      <mat-label>ID</mat-label>
-      <input matInput disabled value="{{device.id}}">
+  <dl class="facts">
+    <ng-template #copyButton let-key="key" let-text="text">
       @if (userIsDeveloper) {
-        <button mat-icon-button matPrefix (click)="copyToClipboard(0, device.id)"
-          [matTooltip]="clipboardTooltip"
-          [ngClass]="clipboardTooltipTimeout[0] !== undefined ? 'clipboard-success': 'clipboard'">
-          <mat-icon>{{clipboardTooltipTimeout[0] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
+        <button mat-icon-button type="button" class="copy" [class.copied]="copiedKey === key"
+          (click)="copyToClipboard(key, text)" [matTooltip]="clipboardTooltip" aria-label="Copy to clipboard">
+          <mat-icon>{{copiedKey === key ? 'check' : 'content_copy'}}</mat-icon>
         </button>
       }
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="full-width" color="accent">
-      <mat-label>Short ID</mat-label>
-      <input matInput placeholder="ShortID" disabled value="{{getShortId(device.id)}}">
-      @if (userIsDeveloper) {
-        <button mat-icon-button matPrefix
-          (click)="copyToClipboard(1, getShortId(device.id))" [matTooltip]="clipboardTooltip"
-          [ngClass]="clipboardTooltipTimeout[1] !== undefined ? 'clipboard-success': 'clipboard'">
-          <mat-icon>{{clipboardTooltipTimeout[1] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
-        </button>
-      }
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="full-width" color="accent">
-      <mat-label>Device Type ID</mat-label>
-      <input matInput disabled value="{{device.device_type_id}}">
-      @if (userIsDeveloper) {
-        <button mat-icon-button matPrefix
-          (click)="copyToClipboard(2, device.device_type_id)" [matTooltip]="clipboardTooltip"
-          [ngClass]="clipboardTooltipTimeout[2] !== undefined ? 'clipboard-success': 'clipboard'">
-          <mat-icon>{{clipboardTooltipTimeout[2] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
-        </button>
-      }
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="full-width" color="accent">
-      <mat-label>Device Type Name</mat-label>
-      <input matInput disabled value="{{device.device_type_name}}">
-      @if (userIsDeveloper) {
-        <button mat-icon-button matPrefix
-          (click)="copyToClipboard(3, device.device_type_name)" [matTooltip]="clipboardTooltip"
-          [ngClass]="clipboardTooltipTimeout[3] !== undefined ? 'clipboard-success': 'clipboard'">
-          <mat-icon>{{clipboardTooltipTimeout[3] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
-        </button>
-      }
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="full-width" color="accent">
-      <mat-label>Origin Name</mat-label>
-      <input matInput [(ngModel)]="device.name" disabled [ngModelOptions]="{standalone: true}">
-      <mat-error senergyError label="Origin Name"></mat-error>
-      @if (userIsDeveloper) {
-        <button mat-icon-button matPrefix (click)="copyToClipboard(4, device.name)"
-          [matTooltip]="clipboardTooltip"
-          [ngClass]="clipboardTooltipTimeout[4] !== undefined ? 'clipboard-success': 'clipboard'">
-          <mat-icon>{{clipboardTooltipTimeout[4] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
-        </button>
-      }
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="full-width" color="accent">
-      <mat-label>Local ID</mat-label>
-      <input matInput [(ngModel)]="device.local_id" disabled>
-      <mat-error senergyError label="Local ID"></mat-error>
-      @if (userIsDeveloper) {
-        <button mat-icon-button matPrefix (click)="copyToClipboard(5, device.local_id)"
-          [matTooltip]="clipboardTooltip"
-          [ngClass]="clipboardTooltipTimeout[5] !== undefined ? 'clipboard-success': 'clipboard'">
-          <mat-icon>{{clipboardTooltipTimeout[5] !== undefined ? 'check' : 'content_copy'}}</mat-icon>
-        </button>
-      }
-    </mat-form-field>
-  </div>
+    </ng-template>
+    <div class="fact">
+      <dt>Device type</dt>
+      <dd>{{device.device_type_name}}
+        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-name', text: device.device_type_name}"></ng-container></dd>
+    </div>
+    <div class="fact">
+      <dt>Local ID</dt>
+      <dd>{{device.local_id}}
+        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'local-id', text: device.local_id}"></ng-container></dd>
+    </div>
+    <div class="fact">
+      <dt>Device ID</dt>
+      <dd>{{device.id}}
+        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'id', text: device.id}"></ng-container></dd>
+    </div>
+    <div class="fact">
+      <dt>Short ID</dt>
+      <dd>{{getShortId(device.id)}}
+        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'short-id', text: getShortId(device.id)}"></ng-container></dd>
+    </div>
+    <div class="fact">
+      <dt>Device type ID</dt>
+      <dd>{{device.device_type_id}}
+        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-id', text: device.device_type_id}"></ng-container></dd>
+    </div>
+    <div class="fact">
+      <dt>Origin name</dt>
+      <dd>{{device.name}}
+        <ng-container *ngTemplateOutlet="copyButton; context: {key: 'origin-name', text: device.name}"></ng-container></dd>
+    </div>
+  </dl>
 
-  <mat-accordion>
-    @if (userCanLoadConnectionHistory) {
-      <mat-expansion-panel id="connectionHistoryPanel" #connectionHistoryPanel>
-        <mat-expansion-panel-header>
-          <mat-panel-title class="ly-flex">Connection History</mat-panel-title>
-        </mat-expansion-panel-header>
-        <ng-template matExpansionPanelContent>
-          @if (connectionHistory !== null) {
-            <timeline-chart class="timeline"
-              [data]="connectionHistory" [vAxes]="timelineAxes"
-            [width]="connectionHistoryPanelWidth" [height]="200"></timeline-chart>
-          }
-        </ng-template>
-      </mat-expansion-panel>
+  @if (userCanLoadConnectionHistory) {
+    <section class="block">
+      <h3>Connection history <span class="hint">last 7 days</span></h3>
+      <div class="history" #historyBox>
+        @if (hasConnectionHistory) {
+          <timeline-chart [data]="connectionHistory" [vAxes]="timelineAxes" [width]="historyWidth / 0.9" [height]="200"></timeline-chart>
+        } @else if (connectionHistoryLoaded) {
+          <p class="muted">No connection changes recorded in the last 7 days.</p>
+        } @else {
+          <p class="muted">Loading</p>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="block">
+    <h3>Services <span class="hint">{{services.length}}</span></h3>
+    @if (errorOccured) {
+      <p class="muted">{{errorMessage}}</p>
     }
-
     @for (service of services; track service; let i = $index) {
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title class="ly-flex">{{service.name}}</mat-panel-title>
-          <mat-panel-description>
-            {{service.description}}
-            @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
-              <span
-                >{{lastValueArray[i][0].response.time
-              | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
-            }
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <ng-template matExpansionPanelContent>
-          @if (userIsDeveloper) {
-            <mat-form-field appearance="outline" style="display: flex;" color="accent">
-              <mat-label>Service ID</mat-label>
-              <input matInput [(ngModel)]="service.id" disabled>
-              <mat-error senergyError label="Local ID"></mat-error>
-              <button mat-icon-button matPrefix (click)="copyToClipboard(6+i, service.id)"
-                [matTooltip]="clipboardTooltip"
-                [ngClass]="clipboardTooltipTimeout[6+i] !== undefined ? 'clipboard-success': 'clipboard'">
-                <mat-icon>{{clipboardTooltipTimeout[6+i] !== undefined ? 'check' :
-                'content_copy'}}</mat-icon>
-              </button>
-            </mat-form-field>
+      <div class="service">
+        <div class="service-head">
+          @if (collapsible) {
+            <button mat-icon-button type="button" class="toggle" (click)="toggleOpen(i)"
+              [attr.aria-expanded]="isOpen(i)" [attr.aria-label]="(isOpen(i) ? 'Hide values of ' : 'Show values of ') + service.name">
+              <mat-icon>{{isOpen(i) ? 'expand_less' : 'expand_more'}}</mat-icon>
+            </button>
           }
-          @if (errorOccured === false && lastValueArray[i] !== undefined) {
-            <div>
-              @if (lastValueArray[i].length > 0) {
-                <table mat-table [dataSource]="lastValueArray[i]">
-                  <ng-container matColumnDef="field">
-                    <th mat-header-cell *matHeaderCellDef>Field</th>
-                    <td mat-cell *matCellDef="let element"> {{element.request.columnName}} </td>
-                  </ng-container>
-                  <ng-container matColumnDef="value">
-                    <th mat-header-cell *matHeaderCellDef>Value</th>
-                    <td mat-cell *matCellDef="let element">
-                    {{element.response.value !== null ? element.response.value : 'N/A'}} </td>
-                  </ng-container>
-                  <ng-container matColumnDef="description">
-                    <th mat-header-cell *matHeaderCellDef>Description</th>
-                    <td mat-cell *matCellDef="let element">
-                    {{element.description !== undefined ? (element.description) : 'N/A'}} </td>
-                  </ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['field', 'value', 'description']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['field', 'value', 'description'];"></tr>
-                </table>
-              }
-              @if (lastValueArray[i].length === 0) {
-                <span>Service does not provide data</span>
-              }
-              @if (lastValueArray[i].length > 0) {
-                <div>
-                  <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                      <mat-panel-title class="ly-flex">Download Data</mat-panel-title>
-                    </mat-expansion-panel-header>
-                    <ng-template matExpansionPanelContent>
-                      <div class="ly-column">
-                        <mat-form-field class="ly-flex" color="accent" appearance="outline">
-                          <mat-label>Data Format</mat-label>
-                          <mtx-select appendTo=".ng-select-anchor" [formControl]="availabilityControl"
-                            [compareWith]="compareAvailabilityValue" placeholder="Device">
-                            @for (option of filterAvailability(i); track option) {
-                              <mtx-option
-                              [value]="valueAvailability(option)">{{formatAvailability(option)}}</mtx-option>
-                            }
-                          </mtx-select>
-                          <mat-error senergyError label="Data Format"></mat-error>
-                        </mat-form-field>
-                        <mat-form-field appearance="outline" class="ly-flex" color="accent" (click)="picker.open()">
-                          <mat-label>Enter a Date Range</mat-label>
-                          <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker"
-                            [min]="getMin(i)" [max]="getMax(i)">
-                            <input matStartDate formControlName="from" placeholder="Start date">
-                            <input matEndDate formControlName="to" placeholder="End date">
-                          </mat-date-range-input>
-                          <mat-datepicker-toggle matPrefix [for]="picker" disabled="false">
-                          </mat-datepicker-toggle>
-                          <mat-date-range-picker #picker disabled="false"></mat-date-range-picker>
-                          <button matSuffix mat-icon-button (click)="download($event, i)">
-                            <mat-icon>download</mat-icon>
-                          </button>
-                          @if (timeControl.controls.from.hasError('matStartDateInvalid')) {
-                            <mat-error>
-                              Invalid
-                              start
-                              date
-                            </mat-error>
-                          }
-                          @if (timeControl.controls.to.hasError('matEndDateInvalid')) {
-                            <mat-error>Invalid
-                              end
-                              date
-                            </mat-error>
-                          }
-                        </mat-form-field>
-                      </div>
-                    </ng-template>
-                  </mat-expansion-panel>
-                </div>
-              }
+          <div class="service-title">
+            <span class="service-name">{{service.name}}</span>
+            @if (service.description) {
+              <span class="muted">{{service.description}}</span>
+            }
+          </div>
+          @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
+            <span class="muted time">{{lastValueArray[i][0].response.time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+            <button mat-icon-button type="button" (click)="toggleDownload(i)" matTooltip="Download data"
+              aria-label="Download data" [attr.aria-expanded]="downloadIndex === i">
+              <mat-icon>download</mat-icon>
+            </button>
+          }
+        </div>
+        @if (isOpen(i)) {
+          @if (userIsDeveloper) {
+            <div class="service-id">
+              <span class="muted">Service ID</span> {{service.id}}
+              <ng-container *ngTemplateOutlet="copyButton; context: {key: 'service-' + i, text: service.id}"></ng-container>
             </div>
           }
-        </ng-template>
-        @if (errorOccured === true) {
-          <div>
-            {{errorMessage}}
+          @if (!errorOccured) {
+            @if (lastValueArray[i] === undefined) {
+              <p class="muted">Loading</p>
+            } @else if (lastValueArray[i].length === 0) {
+              <p class="muted">Service does not provide data</p>
+            } @else {
+              <table class="values">
+                <thead>
+                  <tr><th>Field</th><th>Value</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  @for (element of lastValueArray[i]; track element.request.columnName) {
+                    <tr>
+                      <td>{{element.request.columnName}}</td>
+                      <td>{{element.response.value !== null ? element.response.value : 'N/A'}}</td>
+                      <td>{{element.description !== undefined ? element.description : 'N/A'}}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          }
+        }
+        @if (downloadIndex === i) {
+          <div class="download">
+            <mat-form-field class="ly-flex" color="accent" appearance="outline">
+              <mat-label>Data Format</mat-label>
+              <mtx-select appendTo=".ng-select-anchor" [formControl]="availabilityControl"
+                [compareWith]="compareAvailabilityValue" placeholder="Device">
+                @for (option of filterAvailability(i); track option) {
+                  <mtx-option [value]="valueAvailability(option)">{{formatAvailability(option)}}</mtx-option>
+                }
+              </mtx-select>
+              <mat-error senergyError label="Data Format"></mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="ly-flex" color="accent" (click)="picker.open()">
+              <mat-label>Enter a Date Range</mat-label>
+              <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker" [min]="getMin(i)" [max]="getMax(i)">
+                <input matStartDate formControlName="from" placeholder="Start date">
+                <input matEndDate formControlName="to" placeholder="End date">
+              </mat-date-range-input>
+              <mat-datepicker-toggle matPrefix [for]="picker" disabled="false"></mat-datepicker-toggle>
+              <mat-date-range-picker #picker disabled="false"></mat-date-range-picker>
+              @if (timeControl.controls.from.hasError('matStartDateInvalid')) {
+                <mat-error>Invalid start date</mat-error>
+              }
+              @if (timeControl.controls.to.hasError('matEndDateInvalid')) {
+                <mat-error>Invalid end date</mat-error>
+              }
+            </mat-form-field>
+            <div class="download-actions">
+              <button matButton="outlined" type="button" (click)="toggleDownload(i)">Cancel</button>
+              <button matButton="filled" type="button" (click)="download($event, i)">
+                <mat-icon>download</mat-icon> Download
+              </button>
+            </div>
           </div>
         }
-      </mat-expansion-panel>
+      </div>
     }
-  </mat-accordion>
+  </section>
 </mat-dialog-content>
 
-<mat-dialog-actions>
-  <button matButton="outlined" (click)="close()">Close</button>
+<mat-dialog-actions class="ly-row ly-align-end-center">
+  <button matButton="outlined" type="button" (click)="close()">Close</button>
+  @if (canEdit) {
+    <button matButton="filled" type="button" (click)="edit()"><mat-icon>edit</mat-icon> Edit</button>
+  }
 </mat-dialog-actions>
