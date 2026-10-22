@@ -54,7 +54,8 @@ export class DeviceInstancesDialogService {
         return editDialogRef.afterClosed();
     }
 
-    openDeviceServiceDialog(device: DeviceInstanceModel): void {
+    /** `onEdit` runs when the user chooses Edit in the dialog; the Edit action exists only when it is given. */
+    openDeviceServiceDialog(device: DeviceInstanceModel, onEdit?: () => void): void {
         const obs: Observable<any>[] = [];
         const deviceTypeId = device.device_type_id;
         const deviceId = device.id;
@@ -120,9 +121,14 @@ export class DeviceInstancesDialogService {
                     deviceType,
                     serviceOutputCounts,
                     descriptions,
+                    canEdit: onEdit !== undefined,
                 };
             }
-            this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig);
+            this.dialog.open(DeviceInstancesServiceDialogComponent, dialogConfig).afterClosed().subscribe(result => {
+                if (result === 'edit') {
+                    onEdit?.();
+                }
+            });
         });
     }
 

@@ -354,13 +354,14 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /** The data dialog; its Edit action opens the edit dialog and exists only where the row menu offers Edit. */
     showInfoOfDevice(device: DeviceInstanceModel): void {
-        this.deviceInstancesDialogService.openDeviceServiceDialog(device);
+        this.deviceInstancesDialogService.openDeviceServiceDialog(device, this.canEdit(device) ? () => this.editDevice(device) : undefined);
     }
 
-    /** Row click: the edit dialog, read-only without the right to change this device. */
+    /** Row click: the data dialog with the current values and the connection history. */
     openDevice(device: DeviceInstanceModel): void {
-        this.editDevice(device, !this.canEdit(device));
+        this.showInfoOfDevice(device);
     }
 
     editDevice(device: DeviceInstanceModel, readOnly = false): void {

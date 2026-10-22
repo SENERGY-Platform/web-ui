@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, afterNextRender, inject, viewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import {
     DeviceTypeModel,
@@ -26,26 +26,23 @@ import {
     TimeValuePairModel
 } from '../../../../widgets/shared/export-data.model';
 import { ExportDataService } from '../../../../widgets/shared/export-data.service';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { environment } from '../../../../../environments/environment';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
-import { MatExpansionPanel, MatAccordion, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent, MatExpansionPanelDescription } from '@angular/material/expansion';
 import { detectAndMergeFlapping } from '../shared/flapping.function';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
-import { MatFormField, MatLabel, MatPrefix, MatError, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { MatFormField, MatLabel, MatPrefix, MatError } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
-import { NgClass, DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { TimelineComponent } from '../../../../widgets/charts/shared/chart-types/timeline/timeline.component';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker } from '@angular/material/datepicker';
 import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
@@ -54,15 +51,16 @@ import { DialogHeaderComponent } from '../../../../core/components/dialog-header
     templateUrl: './device-instances-service-dialog.component.html',
     styleUrls: ['./device-instances-service-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DialogHeaderComponent, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, MatPrefix, MatTooltip, NgClass, FormsModule, MatError, MatErrorMessagesDirective, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelContent, TimelineComponent, MatExpansionPanelDescription, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatSuffix, MatDialogActions, MatButton, DatePipe]
+    imports: [DialogHeaderComponent, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatTooltip, MatError, MatErrorMessagesDirective, TimelineComponent, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatPrefix, MatDialogActions, MatButton, DatePipe, NgTemplateOutlet]
 })
-export class DeviceInstancesServiceDialogComponent implements OnInit {
+export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy {
     private dialogRef = inject<MatDialogRef<DeviceInstancesServiceDialogComponent>>(MatDialogRef);
     private exportDataService = inject(ExportDataService);
     private fb = inject(FormBuilder);
     private errorHandlerService = inject(ErrorHandlerService);
     private authorizationService = inject(AuthorizationService);
     private deviceInstancesService = inject(DeviceInstancesService);
+    private zone = inject(NgZone);
 
     services: DeviceTypeServiceModel[] = [];
     lastValueElements: LastValuesRequestElementTimescaleModel[] = [];
@@ -90,9 +88,19 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     connectionHistory: any[][][] = [];
     userCanLoadConnectionHistory = false;
+    connectionHistoryLoaded = false;
     clipboardTooltip = 'Copy to Clipboard';
-    clipboardTooltipTimeout: unknown[] = [];
+    /** Key of the value whose copy button shows the check mark for two seconds. */
+    copiedKey: string | undefined;
+    private copiedTimeout: number | undefined;
     userIsDeveloper = false;
+    canEdit = false;
+
+    /** From this many services on, each service shows its values only after a click; fewer are all open. */
+    static readonly collapseFrom = 8;
+    expanded = new Set<number>();
+    /** Index of the service whose download options are open, at most one. */
+    downloadIndex: number | undefined;
 
     timelineAxes: ChartsExportVAxesModel[] = [
         // @ts-expect-error other values are not required
@@ -108,7 +116,10 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         }
     ];
 
-    @ViewChild('connectionHistoryPanel') connectionHistoryPanel: MatExpansionPanel | undefined;
+    /** Width of the connection history box; the timeline chart needs it in pixels. */
+    historyWidth = 400;
+    private historyBox = viewChild<ElementRef<HTMLElement>>('historyBox');
+    private resizeObserver: ResizeObserver | undefined;
 
     constructor() {
         const data = inject<{
@@ -118,6 +129,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
             deviceType: DeviceTypeModel;
             serviceOutputCounts: number[];
             descriptions: string[][];
+            canEdit?: boolean;
         }>(MAT_DIALOG_DATA);
 
         this.services = data.services;
@@ -126,12 +138,29 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         this.serviceOutputCounts = data.serviceOutputCounts;
         this.device = data.device;
         this.descriptions = data.descriptions;
+        this.canEdit = data.canEdit === true;
         this.userCanLoadConnectionHistory = this.deviceInstancesService.userHasReadAuthorizationConnectionLog();
         this.userIsDeveloper = this.authorizationService.userIsDeveloper();
+        afterNextRender(() => this.observeHistoryBox());
     }
 
     ngOnInit() {
         this.refresh();
+    }
+
+    ngOnDestroy() {
+        this.resizeObserver?.disconnect();
+        window.clearTimeout(this.copiedTimeout);
+    }
+
+    /** The timeline chart takes its width in pixels, so the box that holds it is observed. */
+    private observeHistoryBox(): void {
+        const box = this.historyBox()?.nativeElement;
+        if (box === undefined) {
+            return;
+        }
+        this.resizeObserver = new ResizeObserver(() => this.zone.run(() => this.historyWidth = Math.max(box.clientWidth, 1)));
+        this.resizeObserver.observe(box);
     }
 
     refresh() {
@@ -166,6 +195,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         });
         if (this.userCanLoadConnectionHistory) {
             this.deviceInstancesService.getDeviceHistoryV2({ id: this.device.id, range: '168h' }).subscribe(history => {
+                this.connectionHistoryLoaded = true;
                 this.connectionHistory = [[[]]];
                 if (history?.prev_state) {
                     this.connectionHistory[0][0].push([history.prev_state.time, history.prev_state.connected]);
@@ -185,6 +215,51 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     close(): void {
         this.dialogRef.close();
+    }
+
+    /** Closes with 'edit'; whoever opened the dialog opens the edit dialog. */
+    edit(): void {
+        this.dialogRef.close('edit');
+    }
+
+    get hasConnectionHistory(): boolean {
+        return (this.connectionHistory[0]?.[0]?.length ?? 0) > 0;
+    }
+
+    /** The state shown in the header chip; an inactive device (attribute `inactive`) is neither online nor offline. */
+    get connectionState(): { label: string; cssClass: string } {
+        if (this.device.attributes?.some(a => a.key === 'inactive' && a.value === 'true')) {
+            return { label: 'Inactive', cssClass: '' };
+        }
+        switch (this.device.connection_state) {
+            case 'online': return { label: 'Online', cssClass: 'online' };
+            case 'offline': return { label: 'Offline', cssClass: '' };
+            default: return { label: 'Unknown', cssClass: '' };
+        }
+    }
+
+    get collapsible(): boolean {
+        return this.services.length >= DeviceInstancesServiceDialogComponent.collapseFrom;
+    }
+
+    isOpen(i: number): boolean {
+        return !this.collapsible || this.expanded.has(i);
+    }
+
+    toggleOpen(i: number): void {
+        if (!this.expanded.delete(i)) {
+            this.expanded.add(i);
+        }
+    }
+
+    /** Opens the download options of one service; the format starts at raw data because the formats differ per service. */
+    toggleDownload(i: number): void {
+        if (this.downloadIndex === i) {
+            this.downloadIndex = undefined;
+            return;
+        }
+        this.downloadIndex = i;
+        this.availabilityControl.setValue({});
     }
 
     async getDownloadUrl(i: number): Promise<string> {
@@ -289,15 +364,10 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
         return this.deviceInstancesService.convertToShortId(id);
     }
 
-    get connectionHistoryPanelWidth(): number {
-        if (this.connectionHistoryPanel === undefined) {
-            return 400;
-        }
-        return this.connectionHistoryPanel._body.nativeElement.offsetWidth;
-    }
-
-    copyToClipboard(id: number, text: string) {
+    copyToClipboard(key: string, text: string) {
         navigator.clipboard.writeText(text);
-        this.clipboardTooltipTimeout[id] = setTimeout(() => this.clipboardTooltipTimeout[id] = undefined, 2000);
+        this.copiedKey = key;
+        window.clearTimeout(this.copiedTimeout);
+        this.copiedTimeout = window.setTimeout(() => this.copiedKey = undefined, 2000);
     }
 }

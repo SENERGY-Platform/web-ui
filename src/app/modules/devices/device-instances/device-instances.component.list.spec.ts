@@ -44,7 +44,7 @@ describe('DeviceInstancesComponent list', () => {
     const service: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
     const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
     const exportDataService: Spy<ExportDataService> = createSpyFromClass<ExportDataService>(ExportDataService);
-    const dialogService: Spy<DeviceInstancesDialogService> = createSpyFromClass<DeviceInstancesDialogService>(DeviceInstancesDialogService);
+    let dialogService: Spy<DeviceInstancesDialogService>;
     const device = (write: boolean): DeviceInstanceModel => ({
         id: 'urn:device:1', name: 'meter', display_name: 'Meter', device_type_id: 'dt', device_type_name: 'Smart meter',
         connection_state: 'online', shared: false, attributes: [{ key: 'inactive', value: 'true', origin: 'web-ui' }],
@@ -86,9 +86,12 @@ describe('DeviceInstancesComponent list', () => {
         fixture.detectChanges();
     }
 
+    beforeEach(() => {
+        dialogService = createSpyFromClass<DeviceInstancesDialogService>(DeviceInstancesDialogService);
+    });
+
     afterEach(() => {
         service.getDeviceInstances.calls.reset();
-        dialogService.openDeviceEditDialog.calls.reset();
     });
 
     it('reloads exactly once when the refresh button is clicked', fakeAsync(() => {
@@ -125,13 +128,24 @@ describe('DeviceInstancesComponent list', () => {
         expect(component.filtered).toBeTrue();
     }));
 
-    it('opens the edit dialog on a row click, read-only without the right to change this device', fakeAsync(() => {
+    it('opens the data dialog on a row click and offers Edit in it only with the right to change this device', fakeAsync(() => {
         init();
         component.openDevice(device(true));
-        expect(dialogService.openDeviceEditDialog.calls.mostRecent().args[2]).toBeTrue();
+        expect(dialogService.openDeviceServiceDialog.calls.mostRecent().args[0]).toEqual(device(true));
+        expect(dialogService.openDeviceServiceDialog.calls.mostRecent().args[1]).toEqual(jasmine.any(Function));
 
         component.openDevice(device(false));
-        expect(dialogService.openDeviceEditDialog.calls.mostRecent().args.slice(1, 4)).toEqual([false, false, false]);
+        expect(dialogService.openDeviceServiceDialog.calls.mostRecent().args[1]).toBeUndefined();
+        expect(dialogService.openDeviceEditDialog).not.toHaveBeenCalled();
+        discardPeriodicTasks();
+    }));
+
+    it('opens the editable edit dialog when Edit is chosen in the data dialog', fakeAsync(() => {
+        init();
+        component.openDevice(device(true));
+        (dialogService.openDeviceServiceDialog.calls.mostRecent().args[1] as () => void)();
+
+        expect(dialogService.openDeviceEditDialog.calls.mostRecent().args.slice(1, 4)).toEqual([true, true, false]);
         discardPeriodicTasks();
     }));
 

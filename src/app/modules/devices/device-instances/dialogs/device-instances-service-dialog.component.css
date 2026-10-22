@@ -14,28 +14,123 @@
  * limitations under the License.
  */
 
-:host mat-dialog-content {
-    padding-bottom: 2em;
+.facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 8px 24px;
+    margin: 0 0 16px;
 }
 
-#id-container {
+.fact dt,
+.muted,
+.hint {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
+}
+
+.fact dd {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: var(--app-text-sm);
 }
 
-#id-container mat-form-field {
-    width: 16%;
+.copy {
+    --mat-icon-button-state-layer-size: 28px;
+    --mat-icon-button-icon-size: 16px;
+    width: 28px;
+    height: 28px;
+    padding: 6px;
+    color: var(--mat-sys-on-surface-variant);
 }
 
-#connectionHistoryPanel {
-    margin-bottom: 1rem;
+.copy.copied {
+    color: var(--app-success);
 }
 
-.clipboard-success {
-    color: #28a745;
+.block h3 {
+    margin: 16px 0 8px;
+    font-size: var(--app-text-md);
+    font-weight: 500;
 }
 
-.clipboard {
-    color: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent)
+.hint {
+    margin-left: 6px;
+    font-weight: 400;
 }
 
+.history {
+    width: 100%;
+    min-height: 60px;
+}
+
+.service {
+    border-top: 1px solid var(--mat-sys-outline-variant);
+    padding: 8px 0;
+}
+
+.service-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.service-title {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    min-width: 0;
+}
+
+.service-name {
+    font-weight: 500;
+}
+
+.time {
+    white-space: nowrap;
+}
+
+.service-id {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--app-text-xs);
+    overflow-wrap: anywhere;
+}
+
+.values {
+    width: 100%;
+    margin-top: 4px;
+    border-collapse: collapse;
+    font-size: var(--app-text-sm);
+}
+
+.values th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.values th,
+.values td {
+    padding: 4px 8px 4px 0;
+    overflow-wrap: anywhere;
+}
+
+.download {
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: var(--app-radius-sm);
+    background: var(--mat-sys-surface-container);
+}
+
+.download-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
