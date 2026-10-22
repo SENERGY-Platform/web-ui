@@ -162,11 +162,11 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>Connection</th>
           <td mat-cell *matCellDef="let device">
             @if (!isActive(device)) {
-              <span class="status-chip muted">Inactive</span>
+              <span class="status-chip hollow muted">Inactive</span>
             } @else {
               @switch (device.connection_state) {
                 @case ('online') { <span class="status-chip online">Online</span> }
-                @case ('offline') { <span class="status-chip">Offline</span> }
+                @case ('offline') { <span class="status-chip failed">Offline</span> }
                 @default { <span class="status-chip muted">Unknown</span> }
               }
             }

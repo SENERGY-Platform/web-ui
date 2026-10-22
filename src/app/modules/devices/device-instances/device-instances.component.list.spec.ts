@@ -158,4 +158,21 @@ describe('DeviceInstancesComponent list', () => {
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelector('tr.clickable-row .status-chip.online').textContent).toBe('Online');
     }));
+
+    it('marks offline, inactive and unknown devices apart', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+        const chip = () => fixture.nativeElement.querySelector('tr.clickable-row .status-chip') as HTMLElement;
+
+        expect(chip().classList).toContain('hollow');
+        component.dataSource.data = [{ ...device(true), connection_state: 'offline', attributes: [] } as DeviceInstanceModel];
+        fixture.detectChanges();
+        expect(chip().textContent).toBe('Offline');
+        expect(chip().classList).toContain('failed');
+        component.dataSource.data = [{ ...device(true), connection_state: '', attributes: [] } as DeviceInstanceModel];
+        fixture.detectChanges();
+        expect(chip().textContent).toBe('Unknown');
+        expect(chip().classList).not.toContain('failed');
+        expect(chip().classList).not.toContain('hollow');
+    }));
 });

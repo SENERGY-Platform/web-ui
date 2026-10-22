@@ -397,6 +397,12 @@ $heading-font: (Figtree, Inter, system-ui, Arial, sans-serif);
     background: var(--app-danger);
   }
 
+  // A state that is switched off rather than failing: a ring instead of a dot.
+  .status-chip.hollow::before {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px var(--mat-sys-outline);
+  }
+
   // Small image of a flow or process in a table cell, an <img> that scales its SVG into the box.
   .svg-preview {
     object-fit: contain;
