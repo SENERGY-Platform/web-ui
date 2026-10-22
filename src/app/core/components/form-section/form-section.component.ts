@@ -22,6 +22,8 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
     templateUrl: './form-section.component.html',
     styleUrls: ['./form-section.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
+    // A static title="..." on the tag would otherwise stay on the host and show a browser tooltip over the whole section.
+    host: { '[attr.title]': 'null' },
 })
 export class FormSectionComponent {
     @Input({ required: true }) title = '';

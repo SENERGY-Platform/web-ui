@@ -42,13 +42,13 @@
           <input matInput [value]="row.value" disabled matTooltip="Not editable here: not a number or text value.">
         }
       </mat-form-field>
-      <button mat-icon-button color="warn" matTooltip="Remove entry" (click)="removeRow(i)">
+      <button mat-icon-button type="button" color="warn" matTooltip="Remove entry" (click)="removeRow(i)">
         <mat-icon>delete</mat-icon>
       </button>
     </div>
   }
 
-  <button mat-stroked-button color="accent" (click)="addRow()">
+  <button mat-stroked-button type="button" color="accent" (click)="addRow()">
     <mat-icon>add</mat-icon> Add entry
   </button>
 </div>

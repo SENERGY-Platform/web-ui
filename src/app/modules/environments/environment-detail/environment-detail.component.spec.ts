@@ -65,6 +65,7 @@ import { PermissionsUserModel } from '../../permissions/shared/permissions-user.
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../environments/environment';
+import { EnvTreeNode } from '../shared/environments-tree';
 import { CatalogDeviceType, DatedChange, EffectsGraph, EffectsNode, Environment } from '../shared/environments.model';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
 import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
@@ -450,8 +451,8 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(permissionsService.calls).toEqual(['user-1']);
             expect(component.ownerName('user-1')).toBe('Name of user-1');
-            const ownerLine = fixture.nativeElement.querySelector('.owner-line') as HTMLElement | null;
-            expect(ownerLine?.textContent).toContain('Name of user-1');
+            const ownerLine = fixture.nativeElement.querySelector('.page-description') as HTMLElement | null;
+            expect(ownerLine?.textContent).toContain('Owner: Name of user-1');
         });
 
         it('shows nothing and does not fail loading when the environment has no owner', () => {
@@ -459,7 +460,7 @@ describe('EnvironmentDetailComponent', () => {
 
             expect(permissionsService.calls).toEqual([]);
             expect(component.dataReady).toBe(true);
-            expect(fixture.nativeElement.querySelector('.owner-line')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.page-description')).toBeNull();
         });
 
         it('looks up the owner id only once even after a second load of the same environment', () => {
@@ -1191,6 +1192,112 @@ describe('EnvironmentDetailComponent', () => {
             httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(nestedEnvironment)));
 
             expect(component.isDirty).toBe(false);
+        });
+    });
+
+    describe('page header, sections and save bar', () => {
+        const saveBar = (): HTMLElement | null => fixture.nativeElement.querySelector('senergy-save-bar');
+        const barButton = (cls: string): HTMLButtonElement => saveBar()!.querySelector('button.' + cls) as HTMLButtonElement;
+        const sectionTitles = (): string[] =>
+            Array.from(fixture.nativeElement.querySelectorAll('senergy-form-section .section-title')).map((e) => (e as HTMLElement).textContent!.trim());
+
+        it('titles the page with the environment name and links back to the list', () => {
+            loadWith(nestedEnvironment);
+
+            expect(fixture.nativeElement.querySelector('.page-title').textContent).toBe('Plant A');
+            const back = fixture.nativeElement.querySelector('.page-back') as HTMLElement;
+            expect(back.textContent).toContain('Environments');
+            expect(back.getAttribute('href')).toBe('/environments');
+        });
+
+        it('groups the selected node\'s form in sections', () => {
+            loadWith(nestedEnvironment);
+            expect(sectionTitles()).toEqual(['Environment', 'Context', 'Timeline', 'Meter groups']);
+
+            component.select(component.root!.children[0]);
+            fixture.detectChanges();
+            expect(sectionTitles()).toEqual(['Zone', 'Initial States', 'Time Constants (seconds)']);
+        });
+
+        it('has no button without type="button" in the node form, so Enter in a field cannot click a remove or add control', () => {
+            loadWith({
+                ...nestedEnvironment,
+                context: { irradiation: 100 },
+                context_sources: { outdoor_temperature: { kind: 'profile', interval_seconds: 300, profile: {} } },
+            });
+            const nodes: EnvTreeNode[] = [];
+            const walk = (n: EnvTreeNode): void => {
+                nodes.push(n);
+                n.children.forEach(walk);
+            };
+            walk(component.root!);
+
+            nodes.forEach((node) => {
+                component.select(node);
+                fixture.detectChanges();
+                const form = fixture.nativeElement.querySelector('form.node-form') as HTMLElement;
+                expect(form).withContext(node.kind).not.toBeNull();
+                expect(form.querySelectorAll('button:not([type="button"])').length).withContext(node.kind + ' form').toBe(0);
+            });
+            component.select(component.root!);
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelectorAll('form.node-form button').length).toBeGreaterThan(0);
+        });
+
+        it('shows the save bar only while there are unsaved changes, outside the tab group', () => {
+            loadWith(nestedEnvironment);
+            expect(saveBar()).toBeNull();
+
+            component.markDirty();
+            fixture.detectChanges();
+
+            expect(saveBar()).not.toBeNull();
+            expect(saveBar()!.closest('mat-tab-group')).toBeNull();
+        });
+
+        it('saves with the bar\'s Save and keeps it from sending twice while the request is out', () => {
+            loadWith(nestedEnvironment);
+            component.markDirty();
+            fixture.detectChanges();
+
+            barButton('save').click();
+            fixture.detectChanges();
+
+            expect(barButton('save').disabled).toBe(true);
+            expect(barButton('discard').disabled).toBe(true);
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+            httpMock.expectOne(environmentsUrl + '/e1').flush(JSON.parse(JSON.stringify(nestedEnvironment))); // the reload
+            fixture.detectChanges();
+            expect(saveBar()).toBeNull();
+        });
+
+        it('reloads the stored document with the bar\'s Discard and hides the bar', () => {
+            loadWith(nestedEnvironment);
+            component.setEnvironmentContext(component.selectedEnvironment!, { outdoor_temp: 5 });
+            fixture.detectChanges();
+
+            barButton('discard').click();
+            const reload = httpMock.expectOne(environmentsUrl + '/e1');
+            expect(reload.request.method).toBe('GET');
+            reload.flush(JSON.parse(JSON.stringify(nestedEnvironment)));
+            fixture.detectChanges();
+
+            expect(component.environment?.context).toBeUndefined();
+            expect(saveBar()).toBeNull();
+        });
+
+        it('keeps the edits and the save bar when the reload of a Discard fails', () => {
+            loadWith(nestedEnvironment);
+            component.setEnvironmentContext(component.selectedEnvironment!, { outdoor_temp: 5 });
+            fixture.detectChanges();
+
+            barButton('discard').click();
+            httpMock.expectOne(environmentsUrl + '/e1').flush('boom', { status: 500, statusText: 'Internal Server Error' });
+            fixture.detectChanges();
+
+            expect(component.environment?.context).toEqual({ outdoor_temp: 5 });
+            expect(component.isDirty).toBe(true);
+            expect(saveBar()).not.toBeNull();
         });
     });
 

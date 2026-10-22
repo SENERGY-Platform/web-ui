@@ -14,44 +14,62 @@
  * limitations under the License.
  */
 
-.title-bar {
-    margin-bottom: 8px;
-}
-
-.owner-line {
-    font-size: 12px;
-    opacity: 0.6;
+/* Same bounded page as the form pages: the header and tabs on top, the editor takes a fixed share, the save bar sticks. */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: calc(var(--app-page-height, 100vh) - 64px);
+    overflow-y: auto;
 }
 
 .problems-list {
+    max-height: 112px;
+    overflow-y: auto;
     background: color-mix(in srgb, var(--app-status-error) 8%, transparent);
-    border-radius: 4px;
+    border-radius: var(--app-radius-sm, 6px);
     padding: 8px 12px;
-    margin-bottom: 12px;
+    margin: 0 24px 16px;
+}
+
+.page-tabs {
+    flex: none;
+    padding: 0 24px;
+}
+
+/* The page's own padding sits on the tab group; the editor frame gives up its side padding and takes the screen height. */
+.editor-layout {
+    padding: 16px 0 24px;
+}
+
+/* The tab group hides the flex chain, so the frame subtracts what sits around it: the save bar and the capped problems list. */
+@media screen and (min-width: 600px) {
+    .container {
+        --editor-chrome: 190px;
+    }
+
+    .container.has-save-bar {
+        --editor-chrome: 256px;
+    }
+
+    .container.has-problems {
+        --editor-chrome: 318px;
+    }
+
+    .container.has-save-bar.has-problems {
+        --editor-chrome: 384px;
+    }
+
+    .editor-layout {
+        height: calc(var(--app-page-height, 100vh) - 64px - var(--editor-chrome));
+        min-height: 360px;
+        flex: none;
+    }
 }
 
 .problems-list-item {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.editor-body {
-    gap: 16px;
-}
-
-.tree-panel {
-    overflow: auto;
-    border-right: 1px solid var(--mat-sys-outline-variant);
-    padding-right: 8px;
-}
-
-@media screen and (min-width: 600px) {
-    .tree-panel {
-        width: 340px;
-        min-width: 340px;
-        height: calc(var(--app-page-height, 100vh) - 260px);
-    }
 }
 
 .tree-invisible {
@@ -69,16 +87,16 @@
     display: flex;
     align-items: center;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--app-radius-sm, 6px);
     padding: 2px 4px;
 }
 
 .tree-node:hover {
-    background: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
+    background: var(--app-hover);
 }
 
 .tree-node.selected {
-    background: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
 }
 
 .tree-node-toggle-spacer {
@@ -97,25 +115,9 @@
     flex: 1 1 auto;
 }
 
-.node-editor-panel {
-    overflow: auto;
-    padding-left: 8px;
-    /* room below the last field's hint, so the scroll end does not look cut off */
-    padding-bottom: 24px;
-}
-
-/* Side-by-side layout only: without a bound, overflow:auto never scrolls -- the
-   panel grows past the app shell and the shell cuts the bottom off instead.
-   Same bound as the tree panel, so both columns end on one line. */
-@media screen and (min-width: 600px) {
-    .node-editor-panel {
-        max-height: calc(var(--app-page-height, 100vh) - 260px);
-    }
-}
-
 .node-problems {
     background: color-mix(in srgb, var(--app-status-error) 8%, transparent);
-    border-radius: 4px;
+    border-radius: var(--app-radius-sm, 6px);
     padding: 8px 12px;
     margin-bottom: 12px;
 }
@@ -207,14 +209,6 @@
 
 .context-subsection:last-child {
     margin-bottom: 16px;
-}
-
-.node-form h3 {
-    margin: 24px 0 4px;
-}
-
-.node-form h3:first-of-type {
-    margin-top: 0;
 }
 
 .node-form h4 {

@@ -17,23 +17,9 @@
 <senergy-spinner [show]="!dataReady"></senergy-spinner>
 
 @if (dataReady && environment) {
-  <div class="environment-detail-container layout-margin ly-column">
-    <div class="title-bar ly-row ly-align-between-center">
-      <div class="ly-column">
-        <h2>{{environment.name || 'Environment'}}</h2>
-        @if (environment.owner) {
-          <span class="owner-line">Owner: {{ownerName(environment.owner)}}</span>
-        }
-      </div>
-      <div class="ly-row ly-gap-8">
-        <button mat-stroked-button [disabled]="isSaving" (click)="discard()">
-          <mat-icon>undo</mat-icon> Discard
-        </button>
-        <button mat-raised-button color="accent" [disabled]="!isDirty || isSaving" (click)="save()">
-          <mat-icon>save</mat-icon> Save
-        </button>
-      </div>
-    </div>
+  <div class="container" [class.has-save-bar]="isDirty" [class.has-problems]="problems.length > 0">
+    <senergy-page-header [title]="environment.name || 'Environment'" [description]="ownerLine" backLabel="Environments"
+      backLink="/environments"></senergy-page-header>
     @if (problems.length > 0) {
       <div class="problems-list">
         @for (p of problems; track p) {
@@ -44,10 +30,10 @@
         }
       </div>
     }
-    <mat-tab-group backgroundColor="accent" color="primary" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
+    <mat-tab-group class="page-tabs" backgroundColor="accent" color="primary" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
       <mat-tab label="Editor">
-        <div class="editor-body ly-column ly-row-gt-xs">
-          <div class="tree-panel">
+        <senergy-tree-detail-layout class="editor-layout">
+          <div treePanel>
             <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="env-tree">
               <mat-nested-tree-node *matTreeNodeDef="let node">
                 <li>
@@ -108,8 +94,9 @@
               </mat-nested-tree-node>
             </mat-tree>
           </div>
+          <div detailPanel>
           @if (selectedNode) {
-            <div class="node-editor-panel ly-flex">
+            <div class="node-editor-panel">
               @if (selectedNodeProblems.length > 0) {
                 <div class="node-problems">
                   @for (p of selectedNodeProblems; track p) {
@@ -123,6 +110,7 @@
               <form class="node-form">
                 @switch (selectedNode.kind) {
                   @case ('environment') {
+                    <senergy-form-section title="Environment">
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                       <mat-label>Name</mat-label>
                       <input matInput [(ngModel)]="selectedEnvironment!.name" (ngModelChange)="markDirty()" name="env-name">
@@ -137,20 +125,16 @@
                       </mtx-select>
                       <mat-hint>Descriptive only -- picks the starter zone type for a new environment, has no other effect.</mat-hint>
                     </mat-form-field>
-                    <mat-form-field appearance="outline" color="accent" class="third-width">
+                    <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                       <mat-label>Seed</mat-label>
                       <input matInput type="number" step="1" [(ngModel)]="selectedEnvironment!.seed" (ngModelChange)="markDirty()"
                         name="env-seed">
                       <mat-icon matSuffix class="inline-help-icon"
                       matTooltip="The starting point for every random value in this environment (noise, cumulative meters, ...). Same seed and same clock always reproduce the same values. Only change it if you want a different roll of the dice.">help_outline</mat-icon>
                     </mat-form-field>
-                    <h3>Context</h3>
-                    <p class="section-hint">
-                      The context is the shared environment of the whole site: values like outdoor temperature or working
-                      hours that every zone and every formula can read (as context.&lt;key&gt;). Static entries keep their
-                      value until changed on the Live state tab; driven entries follow a day cycle or replay a recorded
-                      series on their own.
-                    </p>
+                    </senergy-form-section>
+                    <senergy-form-section title="Context"
+                      hint="The context is the shared environment of the whole site: values like outdoor temperature or working hours that every zone and every formula can read (as context.&lt;key&gt;). Static entries keep their value until changed on the Live state tab; driven entries follow a day cycle or replay a recorded series on their own.">
                     <div class="context-subsection">
                       <h4>Static values</h4>
                       <p class="section-hint">
@@ -188,7 +172,7 @@
                                 <mat-panel-title class="context-source-title">{{entry.key}}</mat-panel-title>
                                 <mat-panel-description class="context-source-description">
                                   <span class="context-source-meta">{{sourceKindLabel(entry.source.kind)}} &middot; every {{entry.source.interval_seconds || 0}}s</span>
-                                  <button mat-icon-button color="warn" matTooltip="Remove" class="context-source-remove"
+                                  <button mat-icon-button type="button" color="warn" matTooltip="Remove" class="context-source-remove"
                                     (click)="removeContextSource(selectedEnvironment!, entry.key); $event.stopPropagation()">
                                     <mat-icon>delete</mat-icon>
                                   </button>
@@ -198,7 +182,7 @@
                               panel's profile/dataset editor (charts included) eagerly for the ones still
                               collapsed was most of the environment root's render cost (SNRGY-4739). -->
                               <ng-template matExpansionPanelContent>
-                                <mat-form-field appearance="outline" color="accent" class="third-width">
+                                <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                                   <mat-label>Interval (seconds)</mat-label>
                                   <input matInput type="number" step="1" [(ngModel)]="entry.source.interval_seconds"
                                     (ngModelChange)="markDirty()" [ngModelOptions]="{standalone: true}" name="context-source-interval">
@@ -229,24 +213,18 @@
                         <mat-icon>add</mat-icon> Add driven value
                       </button>
                     </div>
-                    <h3>Timeline</h3>
-                    <p class="section-hint">
-                      Scheduled one-off jumps: at a given time, a channel or context field switches straight to a new
-                      value, no interpolation. A context key targeted here becomes read-only on the Live state tab.
-                    </p>
+                    </senergy-form-section>
+                    <senergy-form-section title="Timeline"
+                      hint="Scheduled one-off jumps: at a given time, a channel or context field switches straight to a new value, no interpolation. A context key targeted here becomes read-only on the Live state tab.">
                     <senergy-environments-timeline-editor [timeline]="timelineOf(selectedEnvironment!)"
                       [targetOptions]="timelineTargetOptions" [problems]="selectedNodeProblems"
                       [(pageIndex)]="timelinePageIndex" [(pageSize)]="timelinePageSize" (timelineChange)="onTimelineChange()"
                       (timelineRestructured)="onTimelineRestructured()">
                     </senergy-environments-timeline-editor>
+                    </senergy-form-section>
 
-                    <h3>Meter groups</h3>
-                    <p class="section-hint">
-                        A meter group stands for a quantity that is only known as the sum of its members, e.g. all outgoing
-                        feeders supplied jointly by grid, PV, battery and CHP. An asset becomes a member by naming the group
-                        under its Meter parents; the group's own parents are what supplies that sum, and they and the members
-                        must lie in one top-level zone.
-                    </p>
+                    <senergy-form-section title="Meter groups"
+                      hint="A meter group stands for a quantity that is only known as the sum of its members, e.g. all outgoing feeders supplied jointly by grid, PV, battery and CHP. An asset becomes a member by naming the group under its Meter parents; the group's own parents are what supplies that sum, and they and the members must lie in one top-level zone.">
                     @if (!selectedEnvironment!.meter_groups?.length) {
                       <p class="empty-hint">No meter groups yet.</p>
                     }
@@ -277,8 +255,10 @@
                         (click)="addMeterGroup(selectedEnvironment!)">
                         <mat-icon>add</mat-icon> Add meter group
                     </button>
+                    </senergy-form-section>
                   }
                   @case ('zone') {
+                    <senergy-form-section title="Zone">
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                       <mat-label>Name</mat-label>
                       <input matInput [(ngModel)]="selectedZone!.name" (ngModelChange)="onZoneNameChange()" name="zone-name">
@@ -293,26 +273,22 @@
                       </mtx-select>
                       <mat-hint>Descriptive only, e.g. for the tree icon -- has no effect on the simulation.</mat-hint>
                     </mat-form-field>
-                    <h3>Initial States</h3>
-                    <p class="section-hint">
-                      What this zone starts with when the simulation boots, e.g. temperature = 20. Sensors and
-                      formulas in this zone read these values; scripts can change them while the simulation runs.
-                      This is not the current live value -- see the Live state tab for that.
-                    </p>
+                    </senergy-form-section>
+                    <senergy-form-section title="Initial States"
+                      hint="What this zone starts with when the simulation boots, e.g. temperature = 20. Sensors and formulas in this zone read these values; scripts can change them while the simulation runs. This is not the current live value -- see the Live state tab for that.">
                     <senergy-environments-key-value-editor [record]="selectedZone!.initial_states" mode="mixed"
                       (recordChange)="setZoneInitialStates(selectedZone!, $event)">
                     </senergy-environments-key-value-editor>
-                    <h3>Time Constants (seconds)</h3>
-                    <p class="section-hint">
-                      How sluggishly this zone follows a change, in seconds per value. Example: a time constant of
-                      1800 for temperature means a heating step needs about 30 minutes until two thirds of it show
-                      in the value. Leave a key out for one that should jump instantly instead.
-                    </p>
+                    </senergy-form-section>
+                    <senergy-form-section title="Time Constants (seconds)"
+                      hint="How sluggishly this zone follows a change, in seconds per value. Example: a time constant of 1800 for temperature means a heating step needs about 30 minutes until two thirds of it show in the value. Leave a key out for one that should jump instantly instead.">
                     <senergy-environments-key-value-editor [record]="selectedZone!.time_constants" mode="number"
                       (recordChange)="setTimeConstants(selectedZone!, $event)">
                     </senergy-environments-key-value-editor>
+                    </senergy-form-section>
                   }
                   @case ('asset') {
+                    <senergy-form-section title="Asset">
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                       <mat-label>Name</mat-label>
                       <input matInput [(ngModel)]="selectedAsset!.name" (ngModelChange)="onAssetNameChange()" name="asset-name">
@@ -338,19 +314,17 @@
                       </mtx-select>
                       <mat-hint>Which meter's reading already includes this asset. Only assets in the same top-level zone can be picked.</mat-hint>
                     </mat-form-field>
+                    </senergy-form-section>
 
-                    <h3>Meter parents</h3>
-                    <p class="section-hint">
-                        The meters that supply this asset in the meter graph, each with an optional weight and a flag for a
-                        medium change (gas to heat, for example). Pick another asset in the same top-level zone, or a meter
-                        group. Leave the list empty and the meter graph follows "Sub-metered by" above.
-                    </p>
+                    <senergy-form-section title="Meter parents"
+                      hint="The meters that supply this asset in the meter graph, each with an optional weight and a flag for a medium change (gas to heat, for example). Pick another asset in the same top-level zone, or a meter group. Leave the list empty and the meter graph follows &quot;Sub-metered by&quot; above.">
                     <senergy-environments-meter-parents-editor [parents]="selectedAsset!.meter_parents" [options]="meterParentOptions"
                         [problems]="selectedNodeProblems" problemPrefix="meter_parents"
                         (parentsChange)="setMeterParents(selectedAsset!, $event)" (parentsRestructured)="onMeterParentsRestructured()">
                     </senergy-environments-meter-parents-editor>
+                    </senergy-form-section>
 
-                    <h3>Platform device</h3>
+                    <senergy-form-section title="Platform device">
                     @if (selectedAsset!.external_ref) {
                       <mat-form-field appearance="outline" color="accent" class="full-width">
                         <mat-label>Device</mat-label>
@@ -389,17 +363,16 @@
                         </p>
                       }
                     }
-                    <h3>Initial States</h3>
-                    <p class="section-hint">
-                      What this asset starts with when the simulation boots, e.g. temperature = 20. Sensors and
-                      formulas on this asset read these values; scripts can change them while the simulation runs.
-                      This is not the current live value -- see the Live state tab for that.
-                    </p>
+                    </senergy-form-section>
+                    <senergy-form-section title="Initial States"
+                      hint="What this asset starts with when the simulation boots, e.g. temperature = 20. Sensors and formulas on this asset read these values; scripts can change them while the simulation runs. This is not the current live value -- see the Live state tab for that.">
                     <senergy-environments-key-value-editor [record]="selectedAsset!.initial_states" mode="mixed"
                       (recordChange)="setAssetInitialStates(selectedAsset!, $event)">
                     </senergy-environments-key-value-editor>
+                    </senergy-form-section>
                   }
                   @case ('channel') {
+                    <senergy-form-section title="Channel">
                     <mat-form-field appearance="outline" color="accent" class="full-width">
                       <mat-label>Name</mat-label>
                       <input matInput [(ngModel)]="selectedChannel!.name" (ngModelChange)="markDirty()" name="channel-name">
@@ -419,18 +392,18 @@
                       </mat-form-field>
                     }
                     <div class="field-row">
-                      <mat-form-field appearance="outline" color="accent" class="third-width">
+                      <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                         <mat-label>Interval (seconds)</mat-label>
                         <input matInput type="number" step="1" [(ngModel)]="selectedChannel!.interval_seconds" (ngModelChange)="markDirty()"
                           name="channel-interval">
                         <mat-hint>Sends to the platform every N seconds. 0 = on command only.</mat-hint>
                       </mat-form-field>
-                      <mat-form-field appearance="outline" color="accent" class="third-width">
+                      <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                         <mat-label>Unit</mat-label>
                         <input matInput [(ngModel)]="selectedChannel!.unit" (ngModelChange)="markDirty()" name="channel-unit">
                         <mat-hint>Shown alongside the value; purely descriptive.</mat-hint>
                       </mat-form-field>
-                      <mat-form-field appearance="outline" color="accent" class="third-width">
+                      <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                         <mat-label>Characteristic Id</mat-label>
                         <input matInput [(ngModel)]="selectedChannel!.characteristic_id" (ngModelChange)="markDirty()"
                           name="channel-characteristic-id">
@@ -438,8 +411,8 @@
                         matTooltip="What kind of quantity this is, e.g. temperature in °C -- lets the platform display and convert the value correctly.">help_outline</mat-icon>
                       </mat-form-field>
                     </div>
-                    <mat-divider></mat-divider>
-                    <h3>Source</h3>
+                    </senergy-form-section>
+                    <senergy-form-section title="Source">
                     <mat-button-toggle-group [value]="selectedChannel!.source?.kind"
                       (change)="onSourceKindChange(selectedChannel!, $event.value)" name="source-kind">
                       @for (k of SOURCE_KINDS; track k) {
@@ -453,7 +426,7 @@
                     }
                     @switch (selectedChannel!.source?.kind) {
                       @case ('script') {
-                        <mat-form-field appearance="outline" color="accent" class="third-width">
+                        <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                           <mat-label>Own compute interval (seconds)</mat-label>
                           <input matInput type="number" step="1" [(ngModel)]="selectedChannel!.source!.interval_seconds"
                             (ngModelChange)="markDirty()" name="script-interval">
@@ -490,13 +463,13 @@
                         <div class="formula-inputs">
                           @for (entry of formulaEntries; track trackByFormulaName($index, entry)) {
                             <div class="formula-input-row">
-                              <mat-form-field appearance="outline" color="accent" class="third-width">
+                              <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                                 <mat-label>Name</mat-label>
                                 <input matInput #formulaNameField [value]="entry.name"
                                   (blur)="renameFormulaInput(entry.name, formulaNameField.value)">
                                 <mat-hint>The name used for this input inside the expression.</mat-hint>
                               </mat-form-field>
-                              <mat-form-field appearance="outline" color="accent" class="third-width">
+                              <mat-form-field appearance="outline" color="accent" class="third-width" subscriptSizing="dynamic">
                                 <mat-label>Reference</mat-label>
                                 <mtx-select [ngModel]="entry.ref" [ngModelOptions]="{standalone: true}"
                                   (ngModelChange)="setFormulaInput(entry.name, $event)" appendTo=".ng-select-anchor">
@@ -543,8 +516,8 @@
                       </senergy-environments-schedule-editor>
                     }
                   }
-                  <mat-divider></mat-divider>
-                  <h3>Injected faults</h3>
+                  </senergy-form-section>
+                  <senergy-form-section title="Injected faults">
                   @if (selectedChannel!.direction === 'sensor' && (selectedChannel!.interval_seconds || 0) > 0) {
                     <senergy-environments-faults-editor [faults]="faultsOf(selectedChannel!)" [cumulative]="selectedChannelSourceCumulative"
                       [problems]="selectedNodeProblems" [stepSeconds]="selectedChannel!.interval_seconds" (faultsChange)="markDirty()"
@@ -553,12 +526,14 @@
                   } @else {
                     <p class="section-hint">Only available on a sensor channel with an interval -- there are no readings to disturb otherwise.</p>
                   }
+                  </senergy-form-section>
                 }
               }
             </form>
           </div>
         }
-      </div>
+          </div>
+        </senergy-tree-detail-layout>
     </mat-tab>
     <mat-tab label="Effects">
       <ng-template matTabContent>
@@ -585,5 +560,10 @@
       </mat-tab>
     }
   </mat-tab-group>
-</div>
+
+    @if (isDirty) {
+      <senergy-save-bar [saveDisabled]="isSaving" [discardDisabled]="isSaving" (save)="save()" (discard)="discard()">
+      </senergy-save-bar>
+    }
+  </div>
 }

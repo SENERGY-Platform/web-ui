@@ -103,7 +103,10 @@ import { EnvironmentsProfileEditorComponent } from './profile-editor/environment
 import { EnvironmentsDatasetEditorComponent } from './dataset-editor/environments-dataset-editor.component';
 import { EnvironmentsMeterParentsEditorComponent } from './meter-parents-editor/environments-meter-parents-editor.component';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { MatDivider } from '@angular/material/divider';
+import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
+import { TreeDetailLayoutComponent } from '../../../core/components/tree-detail-layout/tree-detail-layout.component';
+import { SaveBarComponent } from '../../../core/components/save-bar/save-bar.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
 import { EnvironmentsScheduleEditorComponent } from './schedule-editor/environments-schedule-editor.component';
 import { EnvironmentsFaultsEditorComponent } from './faults-editor/environments-faults-editor.component';
 import { EnvironmentsEffectsComponent } from './effects/environments-effects.component';
@@ -123,7 +126,7 @@ import { dialogSize } from '../../../core/dialog-size';
     styleUrls: ['./environment-detail.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
     providers: [PlatformDeviceLookup, EnvironmentsLiveState],
-    imports: [SpinnerComponent, MatButton, MatIcon, MatTabGroup, MatTab, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatIconButton, MatTreeNodeToggle, MatBadge, MatTooltip, MatTreeNodeOutlet, FormsModule, MatFormField, MatLabel, MatInput, MtxSelect, MtxOption, MatHint, MatSuffix, EnvironmentsKeyValueEditorComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, EnvironmentsProfileEditorComponent, EnvironmentsDatasetEditorComponent, EnvironmentsTimelineEditorComponent, EnvironmentsMeterParentsEditorComponent, RouterLink, MatButtonToggleGroup, MatButtonToggle, MatDivider, EnvironmentsScheduleEditorComponent, EnvironmentsFaultsEditorComponent, MatTabContent, EnvironmentsEffectsComponent, EnvironmentsLiveStateTabComponent, EnvironmentsHistoryComponent]
+    imports: [SpinnerComponent, MatButton, MatIcon, MatTabGroup, MatTab, MatTree, MatTreeNodeDef, MatNestedTreeNode, MatIconButton, MatTreeNodeToggle, MatBadge, MatTooltip, MatTreeNodeOutlet, FormsModule, MatFormField, MatLabel, MatInput, MtxSelect, MtxOption, MatHint, MatSuffix, EnvironmentsKeyValueEditorComponent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, EnvironmentsProfileEditorComponent, EnvironmentsDatasetEditorComponent, EnvironmentsTimelineEditorComponent, EnvironmentsMeterParentsEditorComponent, RouterLink, MatButtonToggleGroup, MatButtonToggle, PageHeaderComponent, TreeDetailLayoutComponent, SaveBarComponent, FormSectionComponent, EnvironmentsScheduleEditorComponent, EnvironmentsFaultsEditorComponent, MatTabContent, EnvironmentsEffectsComponent, EnvironmentsLiveStateTabComponent, EnvironmentsHistoryComponent]
 })
 export class EnvironmentDetailComponent implements OnInit, OnDestroy {
     private route = inject(ActivatedRoute);
@@ -430,6 +433,11 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         const length = this.environment?.timeline?.length || 0;
         const totalPages = Math.max(1, Math.ceil(length / this.timelinePageSize));
         this.timelinePageIndex = Math.min(this.timelinePageIndex, totalPages - 1);
+    }
+
+    /** The page header's description: who owns the environment, empty when the document has no owner. */
+    get ownerLine(): string {
+        return this.environment?.owner ? 'Owner: ' + this.ownerName(this.environment.owner) : '';
     }
 
     /** Owner cell text for the template, see ownerDisplay. */
