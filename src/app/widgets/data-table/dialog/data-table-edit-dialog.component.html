@@ -16,25 +16,359 @@
 
 <senergy-dialog-header title="Edit Data Table" (closed)="close()"></senergy-dialog-header>
 
-<mat-dialog-content>
+<mat-dialog-content class="dialog-body">
   <senergy-widget-spinner [show]="!ready || saving"></senergy-widget-spinner>
 
   @if (ready && !saving) {
-    <form [formGroup]="formGroup">
-      <table>
-        <tr>
-          @if (userHasUpdateNameAuthorization) {
-            <td>
+    <form [formGroup]="formGroup" class="dialog-form">
+      @if (userHasUpdatePropertiesAuthorization) {
+        <senergy-tree-detail-layout class="in-dialog">
+          <div treePanel>
+            <div role="listbox" aria-label="Table settings">
+              <div class="entry-row" role="option" tabindex="0" [class.selected]="step === -1"
+                [attr.aria-selected]="step === -1" (click)="select(-1)" (keydown.enter)="selectByKey($event, -1)"
+                (keydown.space)="selectByKey($event, -1)">
+                <span class="entry-text">
+                  <span class="entry-label">Table</span>
+                  <span class="entry-sub">{{formGroup.controls.name.value || 'no name'}}</span>
+                </span>
+                @if (tableInvalid()) {
+                  <mat-icon class="entry-warning" matTooltip="The table settings are incomplete">warning</mat-icon>
+                }
+              </div>
+            </div>
+            <div class="entry-heading">
+              <span>Elements</span>
+              <button mat-icon-button type="button" class="entry-add" matTooltip="Add element" aria-label="Add element"
+                (click)="addNewMeasurement(true)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            <div role="listbox" aria-label="Elements">
+              @for (tab of getElements().controls; track tab; let index = $index) {
+                <div class="entry-row" role="option" tabindex="0" [class.selected]="step === index"
+                  [attr.aria-selected]="step === index" (click)="select(index)"
+                  (keydown.enter)="selectByKey($event, index)" (keydown.space)="selectByKey($event, index)">
+                  <span class="entry-text">
+                    <span class="entry-label" [class.unnamed]="!tab.get('name')?.value">{{rowLabel(index)}}</span>
+                    <span class="entry-sub">{{elementTypeLabel(tab)}}</span>
+                  </span>
+                  @if (tab.invalid) {
+                    <mat-icon class="entry-warning" matTooltip="This element is incomplete">warning</mat-icon>
+                  }
+                  <button mat-icon-button type="button" class="entry-menu" [matMenuTriggerFor]="rowMenu"
+                    [attr.aria-label]="'Actions for ' + rowLabel(index)" (click)="$event.stopPropagation()">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #rowMenu="matMenu" xPosition="before">
+                    @if (index > 0) {
+                      <button mat-menu-item type="button" (click)="moveUp(index)">
+                        <mat-icon>arrow_upward</mat-icon> Move up
+                      </button>
+                    }
+                    @if (index < getElements().length - 1) {
+                      <button mat-menu-item type="button" (click)="moveDown(index)">
+                        <mat-icon>arrow_downward</mat-icon> Move down
+                      </button>
+                    }
+                    <button mat-menu-item type="button" (click)="copyTab(index)">
+                      <mat-icon>content_copy</mat-icon> Duplicate
+                    </button>
+                    @if (getElements().length > 1) {
+                      <button mat-menu-item type="button" class="danger" (click)="removeTab(index)">
+                        <mat-icon>delete</mat-icon> Delete
+                      </button>
+                    }
+                  </mat-menu>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div detailPanel>
+            <div [class.ly-hidden]="step >= 0">
+              <ng-container *ngTemplateOutlet="tableSettings"></ng-container>
+            </div>
+            @for (tab of getElements().controls; track tab; let index = $index) {
+              @if (opened.has(tab)) {
+                <div [class.ly-hidden]="step !== index" [formGroup]="tab">
+                  <senergy-form-section title="Element">
+                    <mat-form-field class="full-width">
+                      <mat-label>Alias</mat-label>
+                      <input #aliasInput type="text" matInput required formControlName="name">
+                      <mat-error senergyError label="Alias"></mat-error>
+                    </mat-form-field>
+                  </senergy-form-section>
+
+                  <senergy-form-section title="Source">
+                    <div formGroupName="elementDetails">
+                      <mat-radio-group formControlName="elementType" class="ly-row type-group" aria-label="Element type">
+                        <mat-radio-button [value]="elementTypes.DEVICE">Device</mat-radio-button>
+                        <mat-radio-button [value]="elementTypes.PIPELINE">Pipeline</mat-radio-button>
+                        <mat-radio-button [value]="elementTypes.IMPORT">Import</mat-radio-button>
+                        <mat-radio-button [value]="elementTypes.DEVICE_GROUP">Device Group</mat-radio-button>
+                      </mat-radio-group>
+                    </div>
+                    @if (isDevice(tab)) {
+                      <div class="field-grid" formGroupName="elementDetails">
+                        <ng-container formGroupName="device">
+                          <mat-form-field>
+                            <mat-label>Aspect</mat-label>
+                            <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
+                              [items]="aspects" bindLabel="name" bindValue="id"
+                              appendTo=".ng-select-anchor" groupBy="root_name" selectableGroup
+                              [groupValue]="getRootAspect()"
+                            [compareWith]="compareAspectsWith"></mtx-select>
+                            <mat-error senergyError label="Aspect"></mat-error>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Function</mat-label>
+                            <mtx-select formControlName="functionId" required placeholder="Choose Function"
+                              [items]="getFunctions(tab)" bindValue="id"
+                              bindLabel="name" appendTo=".ng-select-anchor" [compareWith]="compareIds">
+                            </mtx-select>
+                            <mat-error senergyError label="Function"></mat-error>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Device</mat-label>
+                            <mtx-select [compareWith]="compareSelectableDevices" formControlName="deviceId"
+                              placeholder="Choose Device" required [items]="getSelectables(tab)"
+                              bindLabel="device.display_name" bindValue="device.id"
+                              appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Device"></mat-error>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Service</mat-label>
+                            <mtx-select formControlName="serviceId" required placeholder="Choose Service"
+                              [compareWith]="compareIds" [items]="getServices(tab)" bindValue="id"
+                              bindLabel="name" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Service"></mat-error>
+                          </mat-form-field>
+                        </ng-container>
+                      </div>
+                      <div class="field-grid">
+                        <mat-form-field class="wide">
+                          <mat-label>Value</mat-label>
+                          <mtx-select formControlName="exportValuePath" required
+                            placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
+                            [items]="getServiceValues(tab)" bindLabel="Name" bindValue="Path"
+                            appendTo=".ng-select-anchor">
+                          </mtx-select>
+                          <mat-error senergyError label="Value"></mat-error>
+                        </mat-form-field>
+                      </div>
+                    }
+                    @if (isPipeline(tab)) {
+                      <div class="field-grid" formGroupName="elementDetails">
+                        <ng-container formGroupName="pipeline">
+                          <mat-form-field>
+                            <mat-label>Pipeline</mat-label>
+                            <mtx-select formControlName="pipelineId" required placeholder="Choose Pipeline"
+                              [compareWith]="compareIds"
+                              [items]="dataTableHelperService.getPipelines()" bindValue="id"
+                              bindLabel="name" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Pipeline"></mat-error>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Operator</mat-label>
+                            <mtx-select formControlName="operatorId" required placeholder="Choose Operator"
+                              [compareWith]="compareIds" appendTo=".ng-select-anchor">
+                              @for (option of getOperators(tab); track option) {
+                                <mtx-option
+                                [value]="option.id">{{getOperatorViewValue(option)}}</mtx-option>
+                              }
+                            </mtx-select>
+                            <mat-error senergyError label="Operator"></mat-error>
+                          </mat-form-field>
+                        </ng-container>
+                      </div>
+                      <div class="field-grid">
+                        <mat-form-field class="wide">
+                          <mat-label>Value</mat-label>
+                          <mtx-select formControlName="exportValuePath" required
+                            placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
+                            [items]="getOperatorValues(tab)" bindValue="Path" bindLabel="Name"
+                            appendTo=".ng-select-anchor">
+                          </mtx-select>
+                          <mat-error senergyError label="Value"></mat-error>
+                        </mat-form-field>
+                      </div>
+                    }
+                    @if (isImport(tab)) {
+                      <div class="field-grid" formGroupName="elementDetails">
+                        <ng-container formGroupName="import">
+                          <mat-form-field>
+                            <mat-label>Type</mat-label>
+                            <mtx-select formControlName="typeId" required placeholder="Choose Type"
+                              [items]="dataTableHelperService.getImportTypes()" bindValue="id"
+                              bindLabel="name" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Type"></mat-error>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Instance</mat-label>
+                            <mtx-select formControlName="instanceId" required placeholder="Choose Instance"
+                              [items]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
+                              bindValue="id" bindLabel="name" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Instance"></mat-error>
+                          </mat-form-field>
+                        </ng-container>
+                      </div>
+                      <div class="field-grid">
+                        <mat-form-field class="wide">
+                          <mat-label>Value</mat-label>
+                          <mtx-select formControlName="exportValuePath" required
+                            placeholder="Choose Value"
+                            [items]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
+                            bindValue="Path" bindLabel="Name" appendTo=".ng-select-anchor">
+                          </mtx-select>
+                          <mat-error senergyError label="Value"></mat-error>
+                        </mat-form-field>
+                      </div>
+                    }
+                    @if (isDeviceGroup(tab)) {
+                      <div class="field-grid" formGroupName="elementDetails">
+                        <ng-container formGroupName="deviceGroup">
+                          <mat-form-field>
+                            <mat-label>Device Group</mat-label>
+                            <mtx-select placeholder="Choose Device Group" [items]="deviceGroups"
+                              formControlName="deviceGroupId" bindLabel="name" bindValue="id"
+                              appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Device Group"></mat-error>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Criteria</mat-label>
+                            <mtx-select placeholder="Choose Criteria" formControlName="deviceGroupCriteria"
+                              [compareWith]="compareCriteria" appendTo=".ng-select-anchor">
+                              @for (option of getCriteria(tab); track option) {
+                                <mtx-option
+                                [value]="option">{{describeCriteria()(option)}}</mtx-option>
+                              }
+                            </mtx-select>
+                            <mat-error senergyError label="Criteria"></mat-error>
+                          </mat-form-field>
+                          <mat-form-field>
+                            <mat-label>Aggregation</mat-label>
+                            <mtx-select [items]="aggregations" formControlName="deviceGroupAggregation"
+                              appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Aggregation"></mat-error>
+                          </mat-form-field>
+                        </ng-container>
+                      </div>
+                    }
+                    <div class="field-grid">
+                      @if (!isDevice(tab) && !isDeviceGroup(tab)) {
+                        <mat-form-field>
+                          <mat-label>Export</mat-label>
+                          <mtx-select formControlName="exportId" required placeholder="Choose Export"
+                            [items]="getExports(tab)" bindLabel="Name" bindValue="ID"
+                            appendTo=".ng-select-anchor">
+                          </mtx-select>
+                          <mat-error senergyError label="Export"></mat-error>
+                        </mat-form-field>
+                      }
+                      @if (!isDevice(tab) && (tab.get('exportId') === null || tab.get('exportId')?.value !== undefined) && getTags(tab).length > 0) {
+                        <mat-form-field>
+                          <mat-label>Tags</mat-label>
+                          <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
+                            formControlName="exportTagSelection" groupBy="group"
+                            appendTo=".ng-select-anchor">
+                            @for (option of getTags(tab); track option) {
+                              <mtx-option
+                                [value]="getTagValue(option)"
+                              [disabled]="getTagOptionDisabledFunction(tab)(option)">{{option.value}}</mtx-option>
+                            }
+                          </mtx-select>
+                          <mat-error senergyError label="Tags"></mat-error>
+                        </mat-form-field>
+                      }
+                    </div>
+                  </senergy-form-section>
+
+                  <senergy-form-section title="Display and grouping">
+                    <div class="field-grid">
+                      @if (isDeviceGroup(tab)) {
+                        <mat-form-field>
+                          <mat-label>Unit</mat-label>
+                          <mtx-select formControlName="unit" appendTo=".ng-select-anchor">
+                            @for (option of getConcept(tab)?.characteristics || []; track option) {
+                              <mtx-option
+                              [value]="getDisplayUnit(option)">{{getDisplayUnit(option)}}</mtx-option>
+                            }
+                          </mtx-select>
+                          <mat-error senergyError label="Unit"></mat-error>
+                        </mat-form-field>
+                      } @else {
+                        <mat-form-field>
+                          <mat-label>Unit</mat-label>
+                          <input type="text" matInput formControlName="unit">
+                          <mat-error senergyError label="Unit"></mat-error>
+                        </mat-form-field>
+                      }
+                      <mat-form-field hintLabel="For use in Angular pipes">
+                        <mat-label>Format</mat-label>
+                        <input type="text" matInput formControlName="format">
+                        <mat-error senergyError label="Format"></mat-error>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Group Type</mat-label>
+                        <mtx-select [items]="groupTypes" formControlName="groupType"
+                          appendTo=".ng-select-anchor">
+                        </mtx-select>
+                        <mat-error senergyError label="Group Type"></mat-error>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Group Time</mat-label>
+                        <input type="text" matInput formControlName="groupTime">
+                        <mat-error senergyError label="Group Time"></mat-error>
+                      </mat-form-field>
+                    </div>
+                  </senergy-form-section>
+
+                  <senergy-form-section title="Warnings">
+                    <div formGroupName="warning" [matTooltip]="getBoundaryWarningTooltip(tab)">
+                      <mat-slide-toggle formControlName="enabled">Enable warnings</mat-slide-toggle>
+                      <div class="field-grid warning-fields">
+                        <mat-form-field>
+                          <mat-label>Lower Boundary</mat-label>
+                          <input matInput type="number" formControlName="lowerBoundary">
+                          <mat-error senergyError label="Lower Boundary"></mat-error>
+                        </mat-form-field>
+                        <mat-form-field>
+                          <mat-label>Upper Boundary</mat-label>
+                          <input matInput type="number" formControlName="upperBoundary">
+                          <mat-error senergyError label="Upper Boundary"></mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+                  </senergy-form-section>
+                </div>
+              }
+            }
+          </div>
+        </senergy-tree-detail-layout>
+      } @else {
+        <ng-container *ngTemplateOutlet="tableSettings"></ng-container>
+      }
+
+      <ng-template #tableSettings>
+        <senergy-form-section title="Table">
+          <div class="field-grid">
+            @if (userHasUpdateNameAuthorization) {
               <mat-form-field>
                 <mat-label>Widget Name</mat-label>
-                <input type="text" matInput formControlName="name" required>
+                <input type="text" matInput formControlName="name" required cdkFocusInitial #nameInput>
                 <mat-error senergyError label="Widget Name"></mat-error>
               </mat-form-field>
-            </td>
-          }
-          @if (userHasUpdatePropertiesAuthorization) {
-            <td>
-              <mat-form-field class="order-select">
+            }
+            @if (userHasUpdatePropertiesAuthorization) {
+              <mat-form-field>
                 <mat-label>Default Order</mat-label>
                 <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareIds"
                   required appendTo=".ng-select-anchor">
@@ -48,431 +382,72 @@
                 </mtx-select>
                 <mat-error senergyError label="Default Order"></mat-error>
               </mat-form-field>
-            </td>
-          }
-          @if (userHasUpdatePropertiesAuthorization) {
-            <td>
               <mat-form-field>
                 <mat-label>Value Alias</mat-label>
                 <input type="text" matInput placeholder="Value" formControlName="valueAlias">
                 <mat-error senergyError label="Value Alias"></mat-error>
               </mat-form-field>
-            </td>
-          }
-          @if (userHasUpdatePropertiesAuthorization) {
-            <td>
               <mat-form-field>
                 <mat-label>Refresh Time</mat-label>
                 <input type="number" matInput formControlName="refreshTime">
                 <mat-error senergyError label="Refresh Time"></mat-error>
               </mat-form-field>
-            </td>
-          }
-          @if (userHasUpdatePropertiesAuthorization) {
-            <td>
               <mat-form-field>
                 <mat-label>Values per Element</mat-label>
                 <input type="number" matInput formControlName="valuesPerElement">
                 <mat-error senergyError label="Values per Element"></mat-error>
               </mat-form-field>
-            </td>
-          }
-        </tr>
-      </table>
-      @if (userHasUpdatePropertiesAuthorization) {
-        <span>
-          <table formArrayName="convertRules">
-            @for (convertRule of convertRulesControl.controls; track convertRule; let convertRuleIndex = $index) {
-              <tr [formGroupName]="convertRuleIndex"
-                >
-                <td>
-                  <mat-form-field>
-                    <mat-label>Status</mat-label>
-                    <input class="convert-input" type="text" matInput formControlName="status">
-                    <mat-error senergyError label="Status"></mat-error>
-                  </mat-form-field>
-                </td>
-                <td>
-                  <mat-form-field>
-                    <mat-label>Icon</mat-label>
-                    <mtx-select formControlName="icon" placeholder="Choose Icon" class="convert-input"
-                      appendTo=".ng-select-anchor">
-                      <ng-template ngSelectLabel>
-                        <mat-icon
-                        [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
-                      </ng-template>
-                      <mtx-option>-- None --</mtx-option>
-                      @for (icon of icons; track icon) {
-                        <mtx-option [value]="icon">
-                          <mat-icon>{{icon}}</mat-icon>
-                          {{icon}}
-                        </mtx-option>
-                      }
-                    </mtx-select>
-                    <mat-error senergyError label="Icon"></mat-error>
-                  </mat-form-field>
-                </td>
-                <td>
-                  <mat-form-field>
-                    <mat-label>Color</mat-label>
-                    <input class="convert-input" type="text" matInput formControlName="color">
-                    <mat-error senergyError label="Color"></mat-error>
-                  </mat-form-field>
-                </td>
-                <td>
-                  <button mat-icon-button style="float: right" (click)="deleteConvertRule(convertRuleIndex)">
+            }
+          </div>
+        </senergy-form-section>
+
+        @if (userHasUpdatePropertiesAuthorization) {
+          <senergy-form-section title="Status display" hint="Shows an icon in a colour for a value with this status.">
+            <button sectionActions type="button" matButton matTooltip="Add icon conversion rule" (click)="addConvertRule()">
+              <mat-icon>add</mat-icon> Add rule
+            </button>
+            <div formArrayName="convertRules">
+              @for (convertRule of convertRulesControl.controls; track convertRule; let convertRuleIndex = $index) {
+                <div class="rule-row" [formGroupName]="convertRuleIndex">
+                  <div class="rule-fields">
+                    <mat-form-field>
+                      <mat-label>Status</mat-label>
+                      <input type="text" matInput formControlName="status">
+                      <mat-error senergyError label="Status"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Icon</mat-label>
+                      <mtx-select formControlName="icon" placeholder="Choose Icon" appendTo=".ng-select-anchor">
+                        <ng-template ngSelectLabel>
+                          <mat-icon
+                          [ngStyle]="{'color': getColor(convertRuleIndex)}">{{getIcon(convertRuleIndex)}}</mat-icon>
+                        </ng-template>
+                        <mtx-option>-- None --</mtx-option>
+                        @for (icon of icons; track icon) {
+                          <mtx-option [value]="icon">
+                            <mat-icon>{{icon}}</mat-icon>
+                            {{icon}}
+                          </mtx-option>
+                        }
+                      </mtx-select>
+                      <mat-error senergyError label="Icon"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Color</mat-label>
+                      <input type="text" matInput formControlName="color">
+                      <mat-error senergyError label="Color"></mat-error>
+                    </mat-form-field>
+                  </div>
+                  <button mat-icon-button type="button" color="warn" class="rule-delete" matTooltip="Delete rule"
+                    aria-label="Delete rule" (click)="deleteConvertRule(convertRuleIndex)">
                     <mat-icon>delete</mat-icon>
                   </button>
-                </td>
-              </tr>
-            }
-            <tr>
-              <td colspan="4">
-                <button style="float: right" mat-icon-button (click)="addConvertRule()"
-                  matTooltip="Add icon conversion rule">
-                  <mat-icon>add</mat-icon>
-                </button>
-              </td>
-            </tr>
-          </table>
-          <mat-accordion>
-            @for (tab of getElements().controls; track tab; let index = $index) {
-              <mat-expansion-panel
-                [expanded]="step === index">
-                <mat-expansion-panel-header class="right-aligned-header">
-                  <mat-panel-title>
-                    <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.get('name')?.value}} </span>
-                  </mat-panel-title>
-                  <mat-panel-description>
-                    <span [ngClass]="{'color-warn': tab.invalid}"> {{index}} </span>
-                  </mat-panel-description>
-                </mat-expansion-panel-header>
-                <ng-template matExpansionPanelContent>
-                  <table [formGroup]="getElement(index)">
-                    <tr>
-                      <td colspan="1">
-                        <mat-form-field>
-                          <mat-label>Alias</mat-label>
-                          <input type="text" matInput required formControlName="name">
-                          <mat-error senergyError label="Alias"></mat-error>
-                        </mat-form-field>
-                      </td>
-                      <td colspan="2" formGroupName="elementDetails">
-                        <mat-radio-group formControlName="elementType" class="ly-row">
-                          <mat-radio-button [value]="elementTypes.DEVICE" class="ly-flex">Device</mat-radio-button>
-                          <mat-radio-button [value]="elementTypes.PIPELINE" class="ly-flex">Pipeline</mat-radio-button>
-                          <mat-radio-button [value]="elementTypes.IMPORT" class="ly-flex">Import</mat-radio-button>
-                          <mat-radio-button [value]="elementTypes.DEVICE_GROUP" class="ly-flex">Device
-                          Group</mat-radio-button>
-                        </mat-radio-group>
-                      </td>
-                    </tr>
-                    @if (isDevice(tab)) {
-                      <tr formGroupName="elementDetails">
-                        <td formGroupName="device">
-                          <mat-form-field>
-                            <mat-label>Aspect</mat-label>
-                            <mtx-select formControlName="aspectId" required placeholder="Choose Aspect"
-                              [items]="aspects" bindLabel="name" bindValue="id"
-                              appendTo=".ng-select-anchor" groupBy="root_name" selectableGroup
-                              [groupValue]="getRootAspect()"
-                            [compareWith]="compareAspectsWith"></mtx-select>
-                            <mat-error senergyError label="Aspect"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td formGroupName="device">
-                          <mat-form-field>
-                            <mat-label>Function</mat-label>
-                            <mtx-select formControlName="functionId" required placeholder="Choose Function"
-                              [items]="getFunctions(tab)" bindValue="id"
-                              bindLabel="name" appendTo=".ng-select-anchor" [compareWith]="compareIds">
-                            </mtx-select>
-                            <mat-error senergyError label="Function"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td formGroupName="device">
-                          <mat-form-field>
-                            <mat-label>Device</mat-label>
-                            <mtx-select [compareWith]="compareSelectableDevices" formControlName="deviceId"
-                              placeholder="Choose Device" required [items]="getSelectables(tab)"
-                              bindLabel="device.display_name" bindValue="device.id"
-                              appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Device"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      </tr>
-                    }
-                    @if (isDevice(tab)) {
-                      <tr>
-                        <td formGroupName="elementDetails">
-                          <mat-form-field formGroupName="device">
-                            <mat-label>Service</mat-label>
-                            <mtx-select formControlName="serviceId" required placeholder="Choose Service"
-                              [compareWith]="compareIds" [items]="getServices(tab)" bindValue="id"
-                              bindLabel="name" appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Service"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td>
-                          <mat-form-field>
-                            <mat-label>Value</mat-label>
-                            <mtx-select formControlName="exportValuePath" required
-                              placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
-                              [items]="getServiceValues(tab)" bindLabel="Name" bindValue="Path"
-                              appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Value"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      </tr>
-                    }
-                    @if (isPipeline(tab)) {
-                      <tr>
-                        <td formGroupName="elementDetails">
-                          <mat-form-field formGroupName="pipeline">
-                            <mat-label>Pipeline</mat-label>
-                            <mtx-select formControlName="pipelineId" required placeholder="Choose Pipeline"
-                              [compareWith]="compareIds"
-                              [items]="dataTableHelperService.getPipelines()" bindValue="id"
-                              bindLabel="name" appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Pipeline"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td formGroupName="elementDetails">
-                          <mat-form-field formGroupName="pipeline">
-                            <mat-label>Operator</mat-label>
-                            <mtx-select formControlName="operatorId" required placeholder="Choose Operator"
-                              [compareWith]="compareIds" appendTo=".ng-select-anchor">
-                              @for (option of getOperators(tab); track option) {
-                                <mtx-option
-                                [value]="option.id">{{getOperatorViewValue(option)}}</mtx-option>
-                              }
-                            </mtx-select>
-                            <mat-error senergyError label="Operator"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td>
-                          <mat-form-field>
-                            <mat-label>Value</mat-label>
-                            <mtx-select formControlName="exportValuePath" required
-                              placeholder="Choose Value" [compareWith]="compareExportValueCharacteristicModel"
-                              [items]="getOperatorValues(tab)" bindValue="Path" bindLabel="Name"
-                              appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Value"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      </tr>
-                    }
-                    @if (isImport(tab)) {
-                      <tr>
-                        <td formGroupName="elementDetails">
-                          <mat-form-field formGroupName="import">
-                            <mat-label>Type</mat-label>
-                            <mtx-select formControlName="typeId" required placeholder="Choose Type"
-                              [items]="dataTableHelperService.getImportTypes()" bindValue="id"
-                              bindLabel="name" appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Type"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td formGroupName="elementDetails">
-                          <mat-form-field formGroupName="import">
-                            <mat-label>Instance</mat-label>
-                            <mtx-select formControlName="instanceId" required placeholder="Choose Instance"
-                              [items]="dataTableHelperService.getImportInstancesOfType(tab.get('elementDetails.import.typeId')?.value)"
-                              bindValue="id" bindLabel="name" appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Instance"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td>
-                          <mat-form-field>
-                            <mat-label>Value</mat-label>
-                            <mtx-select formControlName="exportValuePath" required
-                              placeholder="Choose Value"
-                              [items]="dataTableHelperService.getImportTypeValues(tab.get('elementDetails.import.typeId')?.value)"
-                              bindValue="Path" bindLabel="Name" appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Value"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      </tr>
-                    }
-                    @if (isDeviceGroup(tab)) {
-                      <tr formGroupName="elementDetails">
-                        <td formGroupName="deviceGroup">
-                          <mat-form-field>
-                            <mat-label>Device Group</mat-label>
-                            <mtx-select placeholder="Choose Device Group" [items]="deviceGroups"
-                              formControlName="deviceGroupId" bindLabel="name" bindValue="id"
-                              appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Device Group"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td formGroupName="deviceGroup">
-                          <mat-form-field>
-                            <mat-label>Criteria</mat-label>
-                            <mtx-select placeholder="Choose Criteria" formControlName="deviceGroupCriteria"
-                              [compareWith]="compareCriteria" appendTo=".ng-select-anchor">
-                              @for (option of getCriteria(tab); track option) {
-                                <mtx-option
-                                [value]="option">{{describeCriteria()(option)}}</mtx-option>
-                              }
-                            </mtx-select>
-                            <mat-error senergyError label="Criteria"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      </tr>
-                    }
-                    @if (isDeviceGroup(tab)) {
-                      <tr>
-                        <td>
-                          <mat-form-field>
-                            <mat-label>Unit</mat-label>
-                            <mtx-select formControlName="unit" appendTo=".ng-select-anchor">
-                              @for (option of getConcept(tab)?.characteristics || []; track option) {
-                                <mtx-option
-                                [value]="getDisplayUnit(option)">{{getDisplayUnit(option)}}</mtx-option>
-                              }
-                            </mtx-select>
-                            <mat-error senergyError label="Unit"></mat-error>
-                          </mat-form-field>
-                        </td>
-                        <td formGroupName="elementDetails">
-                          <mat-form-field formGroupName="deviceGroup">
-                            <mat-label>Aggregation</mat-label>
-                            <mtx-select [items]="aggregations" formControlName="deviceGroupAggregation"
-                              appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Aggregation"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      </tr>
-                    }
-                    <tr>
-                      @if (!isDevice(tab) && !isDeviceGroup(tab)) {
-                        <td>
-                          <mat-form-field>
-                            <mat-label>Export</mat-label>
-                            <mtx-select formControlName="exportId" required placeholder="Choose Export"
-                              [items]="getExports(tab)" bindLabel="Name" bindValue="ID"
-                              appendTo=".ng-select-anchor">
-                            </mtx-select>
-                            <mat-error senergyError label="Export"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      }
-                      @if (!isDevice(tab) && (tab.get('exportId') === null || tab.get('exportId')?.value !== undefined) && getTags(tab).length > 0) {
-                        <td
-                          >
-                          <mat-form-field>
-                            <mat-label>Tags</mat-label>
-                            <mtx-select placeholder="Choose Tags" multiple closeOnSelect="false"
-                              formControlName="exportTagSelection" groupBy="group"
-                              appendTo=".ng-select-anchor">
-                              @for (option of getTags(tab); track option) {
-                                <mtx-option
-                                  [value]="getTagValue(option)"
-                                [disabled]="getTagOptionDisabledFunction(tab)(option)">{{option.value}}</mtx-option>
-                              }
-                            </mtx-select>
-                            <mat-error senergyError label="Tags"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      }
-                      @if (!isDeviceGroup(tab)) {
-                        <td>
-                          <mat-form-field>
-                            <mat-label>Unit</mat-label>
-                            <input type="text" matInput formControlName="unit">
-                            <mat-error senergyError label="Unit"></mat-error>
-                          </mat-form-field>
-                        </td>
-                      }
-                    </tr>
-                    <tr>
-                      <td>
-                        <mat-form-field
-                          hintLabel="For use in Angular pipes">
-                          <mat-label>Format</mat-label>
-                          <input type="text" matInput formControlName="format">
-                          <mat-error senergyError label="Format"></mat-error>
-                        </mat-form-field>
-                      </td>
-                      <td>
-                        <mat-form-field>
-                          <mat-label>Group Type</mat-label>
-                          <mtx-select [items]="groupTypes" formControlName="groupType"
-                            appendTo=".ng-select-anchor">
-                          </mtx-select>
-                          <mat-error senergyError label="Group Type"></mat-error>
-                        </mat-form-field>
-                      </td>
-                      <td>
-                        <mat-form-field>
-                          <mat-label>Group Time</mat-label>
-                          <input type="text" matInput formControlName="groupTime">
-                          <mat-error senergyError label="Group Time"></mat-error>
-                        </mat-form-field>
-                      </td>
-                    </tr>
-                    <tr formGroupName="warning" matTooltip="{{getBoundaryWarningTooltip(tab)}}">
-                      <td>
-                        <mat-slide-toggle formControlName="enabled">Enable warnings</mat-slide-toggle>
-                      </td>
-                      <td>
-                        <mat-form-field>
-                          <mat-label>Lower Boundary</mat-label>
-                          <input matInput type="number" formControlName="lowerBoundary">
-                          <mat-error senergyError label="Lower Boundary"></mat-error>
-                        </mat-form-field>
-                      </td>
-                      <td>
-                        <mat-form-field>
-                          <mat-label>Upper Boundary</mat-label>
-                          <input matInput type="number" formControlName="upperBoundary">
-                          <mat-error senergyError label="Upper Boundary"></mat-error>
-                        </mat-form-field>
-                      </td>
-                    </tr>
-                  </table>
-                  <div>
-                    <span matTooltip="Move this measurement up or down">
-                      <button mat-icon-button
-                        [disabled]="this.getElements().controls.length === 1 || index === 0"
-                        (click)="moveUp(index)">
-                        <mat-icon>arrow_upward</mat-icon>
-                      </button>
-                      <button mat-icon-button
-                        [disabled]="this.getElements().controls.length === 1 || index === this.getElements().controls.length - 1"
-                        (click)="moveDown(index)">
-                        <mat-icon>arrow_downward</mat-icon>
-                      </button>
-                    </span>
-                    <span style="float: right">
-                      <button mat-icon-button (click)="copyTab(index)">
-                        <mat-icon>content_copy</mat-icon>
-                      </button>
-                      <button mat-icon-button [disabled]="this.getElements().controls.length === 1"
-                        (click)="removeTab(index)">
-                        <mat-icon>delete</mat-icon>
-                      </button>
-                    </span>
-                  </div>
-                </ng-template>
-              </mat-expansion-panel>
-            }
-          </mat-accordion>
-          <button (click)="addNewMeasurement()" mat-icon-button matTooltip="Add element">
-            <mat-icon>add</mat-icon>
-          </button>
-        </span>
-      }
+                </div>
+              }
+            </div>
+          </senergy-form-section>
+        }
+      </ng-template>
     </form>
   }
 </mat-dialog-content>
@@ -480,7 +455,7 @@
 @if (ready && !saving) {
   <mat-dialog-actions>
     @if (!formGroup.valid) {
-      <span class="color-warn actions-warn">Widget not configured correctly</span>
+      <span class="color-warn actions-warn">{{configurationProblem()}}</span>
     }
     <button matButton="outlined" (click)="close()">Cancel</button>
     <button matButton="filled" (click)="save()" [disabled]="!formGroup.valid">Save</button>

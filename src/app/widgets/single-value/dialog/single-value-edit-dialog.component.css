@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+/* Two columns in reading order: general and data source, then display and timestamp; one column on narrow screens. */
+.columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+    align-items: start;
+    /* room for the checkbox touch targets, which reach past the last row */
+    padding-bottom: 8px;
+}
+
+.columns.single-column {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.column {
+    min-width: 0;
+}
+
 mat-radio-group mat-radio-button:not(:first-child) {
     padding-left: 8px;
 }
@@ -34,12 +52,29 @@ mat-form-field {
     gap: 12px;
 }
 
+/* Format gets more room so its hint stays on one line, and the row keeps a gap below the hint. */
+.type-format {
+    margin-bottom: 8px;
+}
+
+.type-format > div:first-child {
+    flex: 4;
+}
+
+.type-format > div:last-child {
+    flex: 5;
+}
+
 .one-line-form-container > div {
     flex: 1;
     min-width: 0;
 }
 
 @media screen and (max-width: 599px) {
+    .columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .one-line-form-container {
         flex-direction: column;
         gap: 0;

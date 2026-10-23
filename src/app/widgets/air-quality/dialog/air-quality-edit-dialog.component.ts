@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, NgZone, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { Component, ElementRef, Injector, NgZone, afterNextRender, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
@@ -49,6 +49,7 @@ import { DeviceTypeService } from '../../../modules/metadata/device-types-overvi
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../core/directives/close-mtx-select-on-scroll.directive';
 import { WidgetSpinnerComponent } from '../../components/widget-spinner/widget-spinner.component';
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { MatStepper, MatStep, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
 import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -59,21 +60,22 @@ import { MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autoc
 import { MatOption } from '@angular/material/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
-import { MatDivider } from '@angular/material/divider';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatList, MatListItem } from '@angular/material/list';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
+import { TreeDetailLayoutComponent } from '../../../core/components/tree-detail-layout/tree-detail-layout.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from '../../../core/services/snack-bar-messages';
 import { GeneratedResourceJanitor } from '../../shared/generated-resource-janitor';
 
 @Component({
     templateUrl: './air-quality-edit-dialog.component.html',
-    styleUrls: ['./air-quality-edit-dialog.component.css'],
+    styleUrls: ['../../shared/dialog-list-detail.css', './air-quality-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
     providers: [AirQualityProvisioningService],
-    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatStepper, MatStep, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MatButton, MatStepperNext, MatIconButton, MatIcon, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatHint, MatTooltip, MatStepperPrevious, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatDivider, MatSlideToggle, MatSuffix, MatList, MatListItem, MatDialogActions, AsyncPipe, DecimalPipe]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatStepper, MatStep, MatFormField, MatLabel, MatInput, FormsModule, MatError, MatErrorMessagesDirective, MatButton, MatStepperNext, MatIconButton, MatIcon, MatAutocompleteTrigger, ReactiveFormsModule, MatAutocomplete, MatOption, MatHint, MatTooltip, MatStepperPrevious, MtxSelect, MtxOption, MatSlideToggle, MatSuffix, MatList, MatListItem, MatDialogActions, AsyncPipe, DecimalPipe, NgTemplateOutlet, TreeDetailLayoutComponent, FormSectionComponent, EmptyStateComponent]
 })
 export class AirQualityEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<AirQualityEditDialogComponent>>(MatDialogRef);
@@ -91,6 +93,8 @@ export class AirQualityEditDialogComponent implements OnInit {
     private snackBar = inject(MatSnackBar);
     private provisioning = inject(AirQualityProvisioningService);
     private janitor = inject(GeneratedResourceJanitor);
+    private host = inject<ElementRef<HTMLElement>>(ElementRef);
+    private injector = inject(Injector);
 
     constructor() {
         const dwdPollenService = this.dwdPollenService;
@@ -149,6 +153,10 @@ export class AirQualityEditDialogComponent implements OnInit {
     ready = false;
     devices: DeviceInstanceModel[] = [];
     deviceTypes: Map<string, DeviceTypeModel> = new Map();
+    private scrollStepIndex?: number;
+    private selectedEntry?: MeasurementModel;
+    /** Entries whose form was shown once. It stays in the DOM, hidden, like the content of a collapsed expansion panel. */
+    private readonly opened = new WeakSet<MeasurementModel>();
 
     private static latLongDistance(latA: number, longA: number, latB: number, longB: number): number {
         const er = 6366.707;
@@ -250,6 +258,71 @@ export class AirQualityEditDialogComponent implements OnInit {
 
     close(): void {
         this.dialogRef.close();
+    }
+
+    stepChanged(event: StepperSelectionEvent): void {
+        this.scrollStepIndex = event.selectedStep.label === 'Configure measurements' ? event.selectedIndex : undefined;
+    }
+
+    /** Once the steps have moved, step 4 is scrolled to the top of the content so its list and detail fit the view. */
+    stepAnimated(): void {
+        const index = this.scrollStepIndex;
+        this.scrollStepIndex = undefined;
+        if (index === undefined) {
+            return;
+        }
+        afterNextRender(() => {
+            const header = this.host.nativeElement.querySelectorAll('mat-step-header')[index];
+            const content = this.host.nativeElement.querySelector('mat-dialog-content');
+            if (header && content) {
+                content.scrollTop += header.getBoundingClientRect().top - content.getBoundingClientRect().top;
+            }
+        }, { injector: this.injector });
+    }
+
+    /** The measurements step 4 lists: enabled ones, and those with online data, which the toggle can still enable. */
+    listedMeasurements(): MeasurementModel[] {
+        return this.measurements.filter((m) => m.is_enabled || m.can_web);
+    }
+
+    listedPollen(): MeasurementModel[] {
+        return this.pollen.filter((p) => p.is_enabled);
+    }
+
+    /** The selected entry, or the first one while none is selected or the selected one is no longer listed. */
+    currentEntry(): MeasurementModel | undefined {
+        const listed = [...this.listedMeasurements(), ...this.listedPollen()];
+        return listed.find((entry) => entry === this.selectedEntry) ?? listed[0];
+    }
+
+    isOpened(entry: MeasurementModel, current: MeasurementModel | undefined): boolean {
+        return entry === current || this.opened.has(entry);
+    }
+
+    selectEntry(entry: MeasurementModel): void {
+        const current = this.currentEntry();
+        if (current !== undefined) {
+            this.opened.add(current);
+        }
+        this.opened.add(entry);
+        this.selectedEntry = entry;
+    }
+
+    /** Selection from the keyboard; keys pressed inside the row stay with their element. */
+    selectByKey(event: Event, entry: MeasurementModel): void {
+        if (event.target === event.currentTarget) {
+            event.preventDefault();
+            this.selectEntry(entry);
+        }
+    }
+
+    /** Mirrors the required thresholds of the form: an empty number input holds null. */
+    entryInvalid(entry: MeasurementModel): boolean {
+        const blank = (value: unknown) => value === null || value === undefined || value === '';
+        const { warn, critical } = entry.boundaries;
+        const isPollen = this.pollen.includes(entry);
+        const required = isPollen ? [warn.upper, critical.upper] : [warn.lower, warn.upper, critical.lower, critical.upper];
+        return required.some(blank);
     }
 
     updateName(): Observable<DashboardResponseMessageModel> {

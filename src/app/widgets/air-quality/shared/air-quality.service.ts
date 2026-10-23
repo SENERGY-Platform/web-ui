@@ -57,7 +57,11 @@ export class AirQualityService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, dialogSize('l'));
+        }, {
+            ...dialogSize('xl'),
+            // the dialog fills this height; step 4 shows a list and detail inside it
+            ...(userHasUpdatePropertiesAuthorization ? { height: '90vh' } : {}),
+        });
     }
 
     readAllData(widget: WidgetModel): Observable<WidgetModel> {

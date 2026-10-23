@@ -72,7 +72,7 @@ export class SingleValueService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, dialogSize('m'));
+        }, dialogSize(userHasUpdatePropertiesAuthorization ? 'l' : 'm'));
     }
 
     getValues(widget: WidgetModel, date?: Date): Observable<SingleValueModel[]> {

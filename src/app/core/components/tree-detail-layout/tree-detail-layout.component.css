@@ -24,6 +24,16 @@
     min-height: 0;
 }
 
+/* In a dialog the content has its own padding, and the scrolling detail keeps a gap between fields and scrollbar. */
+:host(.in-dialog) {
+    padding: 0;
+}
+
+:host(.in-dialog) .detail-panel {
+    padding-right: 12px;
+    scrollbar-gutter: stable;
+}
+
 .tree-panel,
 .detail-panel {
     min-width: 0;
@@ -47,5 +57,10 @@
 
     .tree-panel {
         max-height: 45vh;
+    }
+
+    :host(.in-dialog) .detail-panel {
+        padding-right: 0;
+        scrollbar-gutter: auto;
     }
 }

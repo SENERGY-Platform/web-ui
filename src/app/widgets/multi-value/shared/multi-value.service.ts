@@ -43,7 +43,11 @@ export class MultiValueService {
             dashboardId,
             userHasUpdateNameAuthorization,
             userHasUpdatePropertiesAuthorization
-        }, dialogSize('l'));
+        }, {
+            ...dialogSize('xl'),
+            // the dialog fills this height, only its list and detail panels scroll
+            ...(userHasUpdatePropertiesAuthorization ? { height: '90vh' } : {}),
+        });
     }
 
     getValues(widget: WidgetModel): Observable<WidgetModel> {

@@ -74,6 +74,15 @@ describe('openWidgetEditDialog', () => {
         expect(openedConfig().minHeight).toBe('10px');
     });
 
+    it('sets the height only when given', () => {
+        openWidgetEditDialog(dialog, dashboardService, TestEditComponent, data);
+        expect(openedConfig().height).toBe(new MatDialogConfig().height);
+
+        openWidgetEditDialog(dialog, dashboardService, TestEditComponent, data, { width: '1100px', height: '90vh' });
+        expect(openedConfig().height).toBe('90vh');
+        expect(openedConfig().width).toBe('1100px');
+    });
+
     it('updates the widget the dialog closes with', () => {
         openWidgetEditDialog(dialog, dashboardService, TestEditComponent, data);
         const widget = { id: 'w1', name: 'edited' } as WidgetModel;

@@ -14,19 +14,27 @@
  * limitations under the License.
  */
 
-table {
-    width: 100%;
+.type-group {
+    flex-wrap: wrap;
+    gap: 0 16px;
+    margin-bottom: 8px;
 }
 
-.actions-warn {
-    margin-right: 8px;
+.rule-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
 }
 
-.convert-input {
-    height: 32px
+.rule-fields {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    column-gap: 12px;
+    min-width: 0;
 }
 
-.order-select {
-    min-height: 65px;
+.rule-delete {
+    flex: 0 0 auto;
+    margin-top: 4px;
 }
-
