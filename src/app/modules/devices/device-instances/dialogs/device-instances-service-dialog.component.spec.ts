@@ -59,7 +59,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
     const meta = (hasAspect: boolean, aspectName = '', characteristicName = ''): ValueMeta => ({ hasAspect, aspectName, characteristicName });
     const defaultMeta = [[meta(true, 'Energy', 'kWh'), meta(false)], [meta(false)]];
 
-    function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues; meta?: ValueMeta[][]; descriptions?: string[][] } = {}) {
+    function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues; meta?: ValueMeta[][]; descriptions?: string[][]; developer?: boolean } = {}) {
         exportData = createSpyFromClass(ExportDataService);
         instances = createSpyFromClass(DeviceInstancesService);
         authorization = createSpyFromClass(AuthorizationService);
@@ -71,7 +71,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         instances.userHasReadAuthorizationConnectionLog.and.returnValue(options.history ?? true);
         instances.getDeviceHistoryV2.and.returnValue(of({ states: [{ time: '2026-03-01T08:00:00Z', connected: true }] } as never));
         instances.convertToShortId.and.returnValue('short');
-        authorization.userIsDeveloper.and.returnValue(true);
+        authorization.userIsDeveloper.and.returnValue(options.developer ?? true);
         authorization.getToken.and.resolveTo('Bearer tok');
 
         TestBed.configureTestingModule({
@@ -199,16 +199,16 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         expect(fixture.nativeElement.querySelectorAll('details.fold button.copy').length).toBeGreaterThan(0);
     });
 
-    it('puts only values with an aspect on the tiles, and keeps every value in the services table', () => {
+    const rowTexts = () => Array.from(fixture.nativeElement.querySelectorAll('.services-fold tbody tr'))
+        .map(r => Array.from((r as HTMLElement).querySelectorAll('td')).map(td => td.textContent?.trim()).join(' '));
+
+    it('puts only values with an aspect on the tiles, and keeps every value with data in the services table', () => {
         create();
-        const rows = Array.from(fixture.nativeElement.querySelectorAll('.services-fold tbody tr')).map(r => (r as HTMLElement).textContent?.replace(/\s+/g, ' ').trim());
+        const rows = rowTexts();
 
         expect(component.tiles.map(t => t.path)).toEqual(['value.total']);
         expect(fixture.nativeElement.querySelectorAll('.tile').length).toBe(1);
-        expect(rows.length).toBe(3);
-        expect(rows[1]).toContain('power');
-        expect(rows[1]).toContain('N/A');
-        expect(rows[2]).toContain('ok');
+        expect(rows).toEqual(['Energy 12.5 kWh', 'state ok']);
     });
 
     it('labels a tile with the aspect name, else the characteristic name, else the last path segment', () => {
@@ -254,7 +254,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         expect(fixture.nativeElement.querySelector('.tiles')).toBeNull();
         expect(first.classList.contains('services-fold')).toBeTrue();
         expect(first.open).toBeTrue();
-        expect(first.querySelectorAll('tbody tr').length).toBe(3);
+        expect(first.querySelectorAll('tbody tr').length).toBe(2);
     });
 
     it('keeps the services section collapsed below the tiles when there are aspect values', () => {
@@ -265,49 +265,80 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         expect(fixture.nativeElement.querySelector('mat-dialog-content').firstElementChild.classList.contains('values-block')).toBeTrue();
     });
 
-    it('drops the path prefix all fields of a service share, and keeps the full path as the tooltip source', () => {
-        const elements = [
-            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'measurements.temp' },
-            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'measurements.x.hum' },
-            { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'only.one' },
-        ];
-        create({ elements, counts: [2, 1], values: lastValues });
+    const airElements = [
+        { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.temp_err' },
+        { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.temperature' },
+        { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.uptime' },
+        { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.co2' },
+        { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.dead' },
+        { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.dead_aspect' },
+    ];
+    const airValues = [lastValues[0], lastValues[0], lastValues[0], lastValues[0], { time: null, value: null }, { time: null, value: null }];
+    const airMeta = [[meta(false), meta(true, 'Temperature'), meta(false), meta(true, '', 'CO2'), meta(false), meta(true, 'Dust')]];
+    const createAir = () => create({ elements: airElements, counts: [6, 0], values: airValues as never, meta: airMeta });
 
-        expect(component.serviceTables[0].rows.map(r => [r.field, r.path])).toEqual([
-            ['temp', 'measurements.temp'], ['x.hum', 'measurements.x.hum'],
-        ]);
-        expect(component.serviceTables[1].rows[0].field).toBe('one');
+    it('lists fields with an aspect first, labelled like the tiles, then the others by path without the shared prefix, in path order', () => {
+        createAir();
+
+        expect(rowTexts()).toEqual(['Temperature 12.5', 'CO2 12.5', 'temp_err 12.5 kWh', 'uptime 12.5']);
+        expect(component.serviceTables[0].aspectRows.map(r => r.path)).toEqual(['m.temperature', 'm.co2']);
     });
 
-    it('has a description column only when a field of the service has a description', () => {
-        create({ descriptions: [['', 'Power'], ['']] });
-        const headers = () => Array.from(fixture.nativeElement.querySelectorAll('.services-fold table')).map(t => Array.from((t as HTMLElement).querySelectorAll('th')).map(h => h.textContent));
+    it('puts a divider between the aspect group and the rest only when both have rows', () => {
+        createAir();
+        const dividers = () => fixture.nativeElement.querySelectorAll('.services-fold tr.group-start').length;
 
-        expect(headers()[0]).toContain('Description');
-        expect(headers()[1]).not.toContain('Description');
-    });
-
-    it('shows one time per service when all values share it, otherwise a time per row', () => {
-        create();
-        const tables = Array.from(fixture.nativeElement.querySelectorAll('.services-fold table')) as HTMLElement[];
-
-        expect(component.serviceTables[0].time).toBe('2026-03-01T10:00:00Z');
-        expect(tables[0].querySelectorAll('th').length).toBe(3);
-        expect(fixture.nativeElement.querySelector('.service-time').textContent).toContain('01.03.2026');
+        expect(dividers()).toBe(1);
+        expect((fixture.nativeElement.querySelector('.services-fold tr.group-start td') as HTMLElement).textContent).toContain('temp_err');
 
         TestBed.resetTestingModule();
-        const elements = lastValueElements.slice(0, 2);
-        create({ elements, counts: [2, 0], values: [lastValues[0], lastValues[2]] });
-        expect(component.serviceTables[0].time).toBeNull();
-        expect(Array.from(fixture.nativeElement.querySelectorAll('.services-fold th')).map(h => (h as HTMLElement).textContent)).toContain('Time');
+        create({ meta: [[meta(true, 'Energy'), meta(false)], [meta(false)]], elements: lastValueElements.slice(0, 1), counts: [1, 0], values: lastValues.slice(0, 1) });
+        expect(dividers()).toBe(0);
     });
 
-    it('mutes N/A in the services table and shows the unit after a value', () => {
-        create();
-        const cells = Array.from(fixture.nativeElement.querySelectorAll('.services-fold tbody td.no-value')) as HTMLElement[];
+    it('hides fields without a value by default, says how many, and shows them muted at the bottom when switched off', () => {
+        createAir();
+        const toggle = fixture.nativeElement.querySelector('.hide-empty') as HTMLElement;
 
-        expect(cells.map(c => c.textContent)).toEqual(['N/A']);
-        expect(fixture.nativeElement.querySelector('.services-fold tbody tr').textContent).toContain('12.5 kWh');
+        expect(toggle.textContent).toContain('Hide empty fields (2)');
+        expect(component.hideEmpty).toBeTrue();
+        expect(rowTexts().length).toBe(4);
+
+        component.hideEmpty = false;
+        fixture.detectChanges();
+        expect(rowTexts().slice(4)).toEqual(['Dust N/A', 'dead N/A']);
+        expect(fixture.nativeElement.querySelectorAll('.services-fold tr.empty').length).toBe(2);
+    });
+
+    it('shows one No values line instead of an empty table for a service with only empty fields', () => {
+        create({ elements: lastValueElements, counts: [2, 1], values: [lastValues[1], lastValues[1], lastValues[0]], meta: defaultMeta });
+        const serviceEls = fixture.nativeElement.querySelectorAll('.services-fold .service') as NodeListOf<HTMLElement>;
+
+        expect(serviceEls[0].querySelector('table')).toBeNull();
+        expect(serviceEls[0].textContent).toContain('No values');
+        expect(serviceEls[1].querySelector('table')).not.toBeNull();
+    });
+
+    it('has only a field and a value column and no description', () => {
+        create();
+
+        expect(fixture.nativeElement.querySelector('.services-fold th')).toBeNull();
+        expect(fixture.nativeElement.querySelectorAll('.services-fold tbody tr')[0].querySelectorAll('td').length).toBe(2);
+        expect(fixture.nativeElement.querySelector('.services-fold').textContent).not.toContain('Description');
+    });
+
+    it('shows the newest time of a service once in its header', () => {
+        create();
+
+        expect(component.serviceTables[0].time).toBe('2026-03-01T10:00:00Z');
+        expect(component.serviceTables[1].time).toBe('2026-03-01T09:00:00Z');
+        expect(fixture.nativeElement.querySelector('.service-time').textContent).toContain('01.03.2026');
+    });
+
+    it('keeps the full path as the tooltip source of a row', () => {
+        createAir();
+
+        expect(component.serviceTables[0].otherRows[0].path).toBe('m.temp_err');
     });
 
     it('says in the service that it has no values, without a table', () => {
@@ -316,6 +347,40 @@ describe('DeviceInstancesServiceDialogComponent', () => {
 
         expect(serviceEls[1].textContent).toContain('No values');
         expect(serviceEls[1].querySelector('table')).toBeNull();
+    });
+
+    const detailsFacts = () => Array.from(fixture.nativeElement.querySelectorAll('details.fold')[1].querySelectorAll('.fact')) as HTMLElement[];
+
+    it('copies the value of each Details row for a developer, and the rows are the same six', async () => {
+        const write = jasmine.createSpy('writeText').and.resolveTo();
+        spyOnProperty(navigator, 'clipboard', 'get').and.returnValue({ writeText: write } as unknown as Clipboard);
+        create();
+        const copied: Record<string, string> = {};
+        for (const fact of detailsFacts()) {
+            (fact.querySelector('button.copy') as HTMLButtonElement).click();
+            copied[fact.querySelector('dt')?.textContent?.trim() ?? ''] = write.calls.mostRecent().args[0];
+        }
+
+        expect(copied).toEqual({
+            'Device type': 'Smart meter', 'Local ID': 'local-1', 'Device ID': 'urn:device:1',
+            'Short ID': 'short', 'Device type ID': 'dt1', 'Origin name': 'meter',
+        });
+    });
+
+    it('lists the Details rows in a fixed order, ids on one line with the value as tooltip source', () => {
+        create();
+        const facts = detailsFacts();
+
+        expect(facts.map(f => f.querySelector('dt')?.textContent?.trim())).toEqual(['Origin name', 'Device type', 'Local ID', 'Short ID', 'Device ID', 'Device type ID']);
+        expect(facts.map(f => f.querySelector('.fact-value')?.classList.contains('mono'))).toEqual([false, false, true, true, true, true]);
+        expect(facts[4].querySelector('.fact-value')?.textContent).toBe('urn:device:1');
+    });
+
+    it('lists the Details rows for everyone but offers the copy buttons only to a developer', () => {
+        create({ developer: false });
+
+        expect(detailsFacts().length).toBe(6);
+        expect(fixture.nativeElement.querySelectorAll('details.fold button.copy').length).toBe(0);
     });
 
     it('shows the unit only where the characteristic gives one', () => {

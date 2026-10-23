@@ -41,6 +41,7 @@ import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/clo
 import { MatFormField, MatLabel, MatPrefix, MatError } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { TimelineComponent } from '../../../../widgets/charts/shared/chart-types/timeline/timeline.component';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
@@ -56,6 +57,7 @@ export interface ValueMeta {
 
 /** A last value in the value grid; only values with an aspect get one. */
 export interface ValueTile {
+    serviceIndex: number;
     label: string;
     path: string;
     serviceName: string;
@@ -65,20 +67,23 @@ export interface ValueTile {
     time: string | null;
 }
 
-/** One row of a service's value table. */
+/** One row of a service's value table; aspect rows carry the label of their tile. */
 export interface ServiceRow {
-    field: string;
+    label: string;
     path: string;
     value: TimeValuePairModel['value'];
     unit: string;
-    description: string;
-    time: string | null;
 }
 
-/** The value table of one service; `time` is set when all values that have one share it. */
+/**
+ * The value table of one service: rows with a value (aspect group, then the rest in path order) and the
+ * rows without one, which the dialog shows only when it does not hide empty fields.
+ */
 export interface ServiceTable {
-    rows: ServiceRow[];
-    showDescription: boolean;
+    aspectRows: ServiceRow[];
+    otherRows: ServiceRow[];
+    emptyRows: ServiceRow[];
+    /** The newest time among the service's values. */
     time: string | null;
 }
 
@@ -86,7 +91,7 @@ export interface ServiceTable {
     templateUrl: './device-instances-service-dialog.component.html',
     styleUrls: ['./device-instances-service-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DialogHeaderComponent, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatTooltip, MatError, MatErrorMessagesDirective, TimelineComponent, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatPrefix, MatDialogActions, MatButton, DatePipe, NgTemplateOutlet]
+    imports: [DialogHeaderComponent, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatTooltip, MatError, MatErrorMessagesDirective, TimelineComponent, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatPrefix, MatDialogActions, MatButton, DatePipe, NgTemplateOutlet, MatSlideToggle]
 })
 export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy {
     private dialogRef = inject<MatDialogRef<DeviceInstancesServiceDialogComponent>>(MatDialogRef);
@@ -139,6 +144,9 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
     private copiedTimeout: number | undefined;
     userIsDeveloper = false;
     canEdit = false;
+
+    /** Hides the fields without a value in every service's table. */
+    hideEmpty = true;
 
     /** Index of the service whose download options are open, at most one. */
     downloadIndex: number | undefined;
@@ -303,6 +311,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
             }
             const path = v.request.columnName;
             tiles.push({
+                serviceIndex,
                 label: meta.aspectName || meta.characteristicName || lastSegment(path),
                 path,
                 serviceName: this.services[serviceIndex]?.name ?? '',
@@ -325,25 +334,44 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         return tiles;
     }
 
-    /** All fields of a service, with the path segments they all share left out of the field name. */
+    /** Per service: fields with an aspect first, labelled like the tiles, then the others by their path without the shared prefix. */
     private buildServiceTables(): ServiceTable[] {
         return this.lastValueArray.map((service, serviceIndex) => {
             const prefix = commonPrefixLength(service.map(v => v.request.columnName.split('.')));
-            const rows = service.map((v, valueIndex): ServiceRow => ({
-                field: v.request.columnName.split('.').slice(prefix).join('.'),
-                path: v.request.columnName,
-                value: v.response.value,
-                unit: this.units[serviceIndex]?.[valueIndex] ?? '',
-                description: v.description ?? '',
-                time: v.response.time,
-            }));
-            const times = new Set(rows.map(r => r.time).filter((t): t is string => !!t));
+            const aspectRows: ServiceRow[] = [];
+            const otherRows: ServiceRow[] = [];
+            const emptyAspect: ServiceRow[] = [];
+            const emptyOther: ServiceRow[] = [];
+            service.forEach((v, valueIndex) => {
+                const path = v.request.columnName;
+                const tile = this.tiles.find(t => t.serviceIndex === serviceIndex && t.path === path);
+                const row: ServiceRow = {
+                    label: tile?.label ?? path.split('.').slice(prefix).join('.'),
+                    path,
+                    value: v.response.value,
+                    unit: this.units[serviceIndex]?.[valueIndex] ?? '',
+                };
+                const empty = row.value === null;
+                (tile ? (empty ? emptyAspect : aspectRows) : (empty ? emptyOther : otherRows)).push(row);
+            });
+            const times = service.map(v => v.response.time).filter((t): t is string => !!t);
             return {
-                rows,
-                showDescription: rows.some(r => r.description !== ''),
-                time: times.size === 1 ? [...times][0] : null,
+                aspectRows,
+                otherRows,
+                emptyRows: [...emptyAspect, ...emptyOther],
+                time: times.length > 0 ? times.reduce((a, b) => new Date(a) >= new Date(b) ? a : b) : null,
             };
         });
+    }
+
+    /** Number of fields without a value, over all services. */
+    get emptyCount(): number {
+        return this.serviceTables.reduce((n, t) => n + t.emptyRows.length, 0);
+    }
+
+    /** Whether a service has anything to list under the current setting of the toggle. */
+    tableHasRows(table: ServiceTable): boolean {
+        return table.aspectRows.length + table.otherRows.length > 0 || (!this.hideEmpty && table.emptyRows.length > 0);
     }
 
     /** Opens the download options of one service; the format starts at raw data because the formats differ per service. */

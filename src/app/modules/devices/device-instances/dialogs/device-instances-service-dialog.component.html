@@ -31,9 +31,19 @@
     }
   </ng-template>
 
+  <ng-template #valueRow let-row="row" let-cls="cls">
+    <tr [class]="cls">
+      <td class="field" [matTooltip]="row.path">{{row.label}}</td>
+      <td class="value">{{row.value !== null ? row.value : 'N/A'}}@if (row.value !== null && row.unit) {<span class="unit"> {{row.unit}}</span>}</td>
+    </tr>
+  </ng-template>
+
   <ng-template #servicesFold>
     <details class="fold services-fold" [open]="!showValues">
       <summary><mat-icon class="chevron">expand_more</mat-icon> Services <span class="hint">{{services.length}}</span></summary>
+      @if (emptyCount > 0) {
+        <mat-slide-toggle class="hide-empty" [checked]="hideEmpty" (change)="hideEmpty = $event.checked">Hide empty fields ({{emptyCount}})</mat-slide-toggle>
+      }
       @for (service of services; track service; let i = $index) {
         <div class="service">
           <div class="service-head">
@@ -57,26 +67,22 @@
             </div>
           }
           @if (serviceTables[i]; as table) {
-            @if (table.rows.length > 0) {
-              @if (table.time) {
-                <div class="muted service-time">Last value {{table.time | date:'dd.MM.yyyy - HH:mm:ss'}}</div>
-              }
+            @if (table.time) {
+              <div class="muted service-time">Last value {{table.time | date:'dd.MM.yyyy - HH:mm:ss'}}</div>
+            }
+            @if (tableHasRows(table)) {
               <table class="values">
-                <thead>
-                  <tr>
-                    <th>Field</th><th>Value</th>
-                    @if (table.showDescription) { <th>Description</th> }
-                    @if (!table.time) { <th>Time</th> }
-                  </tr>
-                </thead>
                 <tbody>
-                  @for (row of table.rows; track row.path) {
-                    <tr>
-                      <td [matTooltip]="row.path">{{row.field}}</td>
-                      <td [class.no-value]="row.value === null">{{row.value !== null ? row.value : 'N/A'}}@if (row.value !== null && row.unit) {<span class="muted"> {{row.unit}}</span>}</td>
-                      @if (table.showDescription) { <td>{{row.description}}</td> }
-                      @if (!table.time) { <td class="muted">{{row.time ? (row.time | date:'dd.MM.yyyy - HH:mm:ss') : ''}}</td> }
-                    </tr>
+                  @for (row of table.aspectRows; track row.path) {
+                    <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: 'aspect'}"></ng-container>
+                  }
+                  @for (row of table.otherRows; track row.path; let first = $first) {
+                    <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: first && table.aspectRows.length > 0 ? 'group-start' : ''}"></ng-container>
+                  }
+                  @if (!hideEmpty) {
+                    @for (row of table.emptyRows; track row.path) {
+                      <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: 'empty'}"></ng-container>
+                    }
                   }
                 </tbody>
               </table>
@@ -180,34 +186,46 @@
     <summary><mat-icon class="chevron">expand_more</mat-icon> Details</summary>
     <dl class="facts">
       <div class="fact">
+        <dt>Origin name</dt>
+        <dd>
+          <span class="fact-value" [matTooltip]="device.name">{{device.name}}</span>
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'origin-name', text: device.name}"></ng-container>
+        </dd>
+      </div>
+      <div class="fact">
         <dt>Device type</dt>
-        <dd>{{device.device_type_name}}
-          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-name', text: device.device_type_name}"></ng-container></dd>
+        <dd>
+          <span class="fact-value" [matTooltip]="device.device_type_name">{{device.device_type_name}}</span>
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-name', text: device.device_type_name}"></ng-container>
+        </dd>
       </div>
       <div class="fact">
         <dt>Local ID</dt>
-        <dd>{{device.local_id}}
-          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'local-id', text: device.local_id}"></ng-container></dd>
-      </div>
-      <div class="fact">
-        <dt>Device ID</dt>
-        <dd>{{device.id}}
-          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'id', text: device.id}"></ng-container></dd>
+        <dd>
+          <span class="fact-value mono" [matTooltip]="device.local_id">{{device.local_id}}</span>
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'local-id', text: device.local_id}"></ng-container>
+        </dd>
       </div>
       <div class="fact">
         <dt>Short ID</dt>
-        <dd>{{getShortId(device.id)}}
-          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'short-id', text: getShortId(device.id)}"></ng-container></dd>
+        <dd>
+          <span class="fact-value mono" [matTooltip]="getShortId(device.id)">{{getShortId(device.id)}}</span>
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'short-id', text: getShortId(device.id)}"></ng-container>
+        </dd>
+      </div>
+      <div class="fact">
+        <dt>Device ID</dt>
+        <dd>
+          <span class="fact-value mono" [matTooltip]="device.id">{{device.id}}</span>
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'id', text: device.id}"></ng-container>
+        </dd>
       </div>
       <div class="fact">
         <dt>Device type ID</dt>
-        <dd>{{device.device_type_id}}
-          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-id', text: device.device_type_id}"></ng-container></dd>
-      </div>
-      <div class="fact">
-        <dt>Origin name</dt>
-        <dd>{{device.name}}
-          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'origin-name', text: device.name}"></ng-container></dd>
+        <dd>
+          <span class="fact-value mono" [matTooltip]="device.device_type_id">{{device.device_type_id}}</span>
+          <ng-container *ngTemplateOutlet="copyButton; context: {key: 'type-id', text: device.device_type_id}"></ng-container>
+        </dd>
       </div>
     </dl>
   </details>
