@@ -72,12 +72,17 @@ export class AuthorizationService implements HttpInterceptor {
     }
 
     getUserId(): string | Error {
-        const sub = localStorage.getItem('sub');
-        if (sub !== null) {
-            return sub;
-        } else {
-            return this.keycloakService.getKeycloakInstance().subject || Error('Could not load sub');
+        // the user of the current token first: localStorage keeps the sub of an earlier login in
+        // this browser, e.g. of another account, and every start wrote it back unchanged
+        const subject = this.keycloakService.getKeycloakInstance()?.subject;
+        if (subject) {
+            return subject;
         }
+        const sub = localStorage.getItem('sub');
+        if (sub) {
+            return sub;
+        }
+        return Error('Could not load sub');
     }
 
     getUserName(): string {

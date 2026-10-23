@@ -35,4 +35,31 @@ describe('AuthorizationService', () => {
 
         expect(logins).toEqual([{ action: 'UPDATE_PASSWORD', redirectUri: 'https://ui.example.org/settings' }]);
     });
+
+    // localStorage keeps the sub of an earlier login in this browser; the Own tab of the process
+    // repository then asked for the models of that other account.
+    describe('getUserId', () => {
+        const serviceWithSubject = (subject: string | undefined) => {
+            const keycloakService = Object.create(KeycloakService.prototype) as KeycloakService;
+            keycloakService.getKeycloakInstance = () => ({ subject }) as ReturnType<KeycloakService['getKeycloakInstance']>;
+            return new AuthorizationService([keycloakService], {} as ErrorHandlerService, {} as HttpClient);
+        };
+
+        afterEach(() => localStorage.removeItem('sub'));
+
+        it('should name the user of the current token, not an earlier one', () => {
+            localStorage.setItem('sub', 'earlier-user');
+            expect(serviceWithSubject('current-user').getUserId()).toBe('current-user');
+        });
+
+        it('should fall back to the stored sub without a token', () => {
+            localStorage.setItem('sub', 'stored-user');
+            expect(serviceWithSubject(undefined).getUserId()).toBe('stored-user');
+        });
+
+        it('should report an error without either', () => {
+            localStorage.setItem('sub', '');
+            expect(serviceWithSubject(undefined).getUserId()).toEqual(jasmine.any(Error));
+        });
+    });
 });
