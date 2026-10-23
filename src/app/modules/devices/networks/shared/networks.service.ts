@@ -131,7 +131,7 @@ export class NetworksService {
         const dialogConfig = new MatDialogConfig();
         dialogConfig.autoFocus = true;
         dialogConfig.data = { network, readOnly };
-        dialogConfig.width = '80vw';
+        Object.assign(dialogConfig, dialogSize('xl'));
         const editDialogRef = this.dialog.open(NetworksEditDialogComponent, dialogConfig);
 
         editDialogRef.afterClosed().subscribe((newNetwork: HubModel) => {

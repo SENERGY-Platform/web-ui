@@ -134,6 +134,10 @@ export class DataTableComponent implements OnInit {
         const config: MatDialogConfig = {};
         config.data = { dashboardId: this.dashboardId, widgetId: this.widget.id, userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization, userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization };
         Object.assign(config, dialogSize('xl'));
+        if (this.userHasUpdatePropertiesAuthorization) {
+            // the dialog fills this height, only its list and detail panels scroll
+            config.height = '90vh';
+        }
         this.dialog
             .open(DataTableEditDialogComponent, config)
             .afterClosed()

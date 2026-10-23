@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { AfterViewInit, ChangeDetectorRef, Component, DestroyRef, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { HubModel } from '../shared/networks.model';
 import { Attribute } from '../../device-instances/shared/device-instances.model';
 import { AddTagFn } from '../../../../core/model/mtx-select.model';
@@ -38,13 +38,14 @@ import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/clo
 import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { MatDivider } from '@angular/material/divider';
 import { MtxSelect } from '@ng-matero/extensions/select';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MapComponent } from '../../map/map.component';
+import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
+import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
 import { DatePipe } from '@angular/common';
 
 export interface NetworksEditDialogData {
@@ -56,18 +57,19 @@ export interface NetworksEditDialogData {
     templateUrl: './networks-edit-dialog.component.html',
     styleUrls: ['./networks-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MatDivider, MtxSelect, MatError, MatErrorMessagesDirective, MatTooltip, MatIconButton, MatIcon, MatButton, MapComponent, MatDialogActions, DatePipe]
+    imports: [DialogHeaderComponent, FormSectionComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MatError, MatErrorMessagesDirective, MatTooltip, MatIconButton, MatIcon, MatButton, MapComponent, MatDialogActions, DatePipe]
 })
-export class NetworksEditDialogComponent implements OnInit {
+export class NetworksEditDialogComponent implements OnInit, AfterViewInit {
     private cd = inject(ChangeDetectorRef);
+    private destroyRef = inject(DestroyRef);
     private dialogRef = inject<MatDialogRef<NetworksEditDialogComponent>>(MatDialogRef);
 
     network: HubModel;
     /** Without the right to update the dialog only shows the network. */
     readOnly = false;
+    title: string;
     knownAttributes = ['last_message_max_age', 'senergy/lora/eui'];
     hiddenAttributes = ['location-lat', 'location-lon'];
-    @ViewChild('content') content: ElementRef | undefined;
     @ViewChild('mapBody') mapBody: ElementRef | undefined;
     mapView = new View({
         center: [0, 0],
@@ -93,6 +95,7 @@ export class NetworksEditDialogComponent implements OnInit {
         const data = inject<NetworksEditDialogData | undefined>(MAT_DIALOG_DATA);
         const network = data?.network;
         this.readOnly = !!data?.readOnly;
+        this.title = this.readOnly ? 'Network' : network === undefined ? 'New network' : 'Edit network';
 
         this.network = network || {
             id: '',
@@ -114,12 +117,17 @@ export class NetworksEditDialogComponent implements OnInit {
         this.buildMap();
     }
 
-    buildMap() {
-        if (this.mapCalcHeight() === undefined) {
-            setTimeout(() => this.buildMap(), 100);
-            this.cd.markForCheck();
-            return;
+    ngAfterViewInit() {
+        // The column layout sizes the map, so it follows its container instead of a computed height.
+        const container = this.mapBody?.nativeElement;
+        if (container !== undefined && typeof ResizeObserver !== 'undefined') {
+            const observer = new ResizeObserver(() => this.map.updateSize());
+            observer.observe(container);
+            this.destroyRef.onDestroy(() => observer.disconnect());
         }
+    }
+
+    buildMap() {
         const features: Feature[] = [];
         let place: number[] = [12.380809087977605, 51.3386072545588];
         let zoom = 5;
@@ -332,16 +340,5 @@ export class NetworksEditDialogComponent implements OnInit {
 
         this.zoomControl = new Control({ element: container });
         this.map.addControl(this.zoomControl);
-    }
-
-    mapCalcHeight(): number | undefined {
-        if (this.mapBody === undefined) {
-            return undefined;
-        }
-        const res = [this.mapBody.nativeElement.offsetWidth * .5];
-        if (this.content !== undefined) {
-            res.push(this.content?.nativeElement.offsetHeight - 75);
-        }
-        return Math.min(...res);
     }
 }

@@ -16,10 +16,10 @@
 
 <senergy-dialog-header title="Edit Air Quality Recommendation" (closed)="close()"></senergy-dialog-header>
 
-<mat-dialog-content>
+<mat-dialog-content class="dialog-body">
   <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
   @if (ready) {
-    <mat-vertical-stepper #stepper>
+    <mat-vertical-stepper #stepper (selectionChange)="stepChanged($event)" (animationDone)="stepAnimated()">
       @if (userHasUpdateNameAuthorization) {
         <mat-step label="Give the widget a name">
           <div class="step-content">
@@ -138,314 +138,271 @@
             </div>
           </mat-step>
           <mat-step label="Configure measurements">
-            <mat-accordion>
-              @for (option of measurements; track option) {
-                <div>
-                  @if (option.is_enabled || option.can_web) {
-                    <mat-expansion-panel>
-                      <mat-expansion-panel-header class="right-aligned-header">
-                        <mat-panel-title>
-                          <div class="panel-title" [innerHTML]="option.name_html"></div>
-                        </mat-panel-title>
-                        @if (option.description_html !== undefined) {
-                          <mat-panel-description>
-                            <span [innerHTML]="option.description_html"></span>
-                            @if (option.can_web) {
-                              <span>&nbsp;
-                                <mat-icon color="accent"
-                                matTooltip="Outside data available online">cloud</mat-icon>
-                              </span>
-                            }
-                          </mat-panel-description>
-                        }
-                      </mat-expansion-panel-header>
-                      <ng-template matExpansionPanelContent>
-                        <h4 class="headline">Choose the measurement area and it's data connector</h4>
-                        <mat-divider></mat-divider>
-                        <div>
-                          <mat-slide-toggle class="toggle" [(ngModel)]="option.is_enabled">Enable inside
-                            measurement
-                          </mat-slide-toggle>
-                        </div>
-                        @if (option.is_enabled) {
-                          <table>
-                            <tr>
-                              <td>
-                                <mat-form-field class="ly-fill">
-                                  <mat-label>Export</mat-label>
-                                  <mtx-select [(ngModel)]="option.export"
-                                    (ngModelChange)="insideExportChanged(option)"
-                                    [compareWith]="compareExports" [items]="exports" bindLabel="Name"
-                                    [disabled]="option.insideDeviceId != null"
-                                    appendTo=".ng-select-anchor">
-                                  </mtx-select>
-                                  <mat-error senergyError label="Export"></mat-error>
-                                </mat-form-field>
-                              </td>
-                              <td>
-                                <mat-form-field class="ly-fill">
-                                  <mat-label>Value</mat-label>
-                                  <mtx-select [(ngModel)]="option.data.column"
-                                    [compareWith]="compareExportValueModels"
-                                    [items]="option.export?.Values || []" bindLabel="Name"
-                                    [disabled]="option.insideDeviceId != null"
-                                    appendTo=".ng-select-anchor">
-                                  </mtx-select>
-                                  <mat-error senergyError label="Value"></mat-error>
-                                </mat-form-field>
-                              </td>
-                              <td>
-                                <mat-form-field class="ly-fill">
-                                  <mat-label>Math</mat-label>
-                                  <input matInput [(ngModel)]="option.math">
-                                  <mat-error senergyError label="Math"></mat-error>
-                                </mat-form-field>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <mat-form-field class="ly-fill">
-                                  <mat-label>Device</mat-label>
-                                  <mtx-select [(ngModel)]="option.insideDeviceId"
-                                    (ngModelChange)="insideDeviceChanged(option)" [items]="devices"
-                                    bindLabel="name" bindValue="id" [disabled]="option.export != null"
-                                    appendTo=".ng-select-anchor">
-                                  </mtx-select>
-                                  <mat-error senergyError label="Device"></mat-error>
-                                </mat-form-field>
-                              </td>
-                              <td>
-                                <mat-form-field class="ly-fill">
-                                  <mat-label>Service</mat-label>
-                                  <mtx-select [(ngModel)]="option.insideServiceId"
-                                    [items]="(getServices(option.insideDeviceId) | async) || []"
-                                    bindValue="id" [disabled]="option.export != null" bindLabel="name"
-                                    appendTo=".ng-select-anchor">
-                                  </mtx-select>
-                                  <mat-error senergyError label="Service"></mat-error>
-                                </mat-form-field>
-                              </td>
-                              <td>
-                                <mat-form-field class="ly-fill">
-                                  <mat-label>Value</mat-label>
-                                  <mtx-select [(ngModel)]="option.insideDeviceValuePath"
-                                    [items]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
-                                    [disabled]="option.export != null" appendTo=".ng-select-anchor">
-                                  </mtx-select>
-                                  <mat-error senergyError label="Value"></mat-error>
-                                </mat-form-field>
-                              </td>
-                            </tr>
-                          </table>
-                        }
-                        <div>
-                        </div>
-                        <div>
-                          <mat-slide-toggle class="toggle" [(ngModel)]="option.has_outside">Enable outside
-                            measurement
-                          </mat-slide-toggle>
-                        </div>
-                        @if (option.has_outside) {
-                          <div>
+            @let current = currentEntry();
+            <div class="entry-frame">
+              <senergy-tree-detail-layout class="in-dialog">
+                <div treePanel>
+                  @if (listedMeasurements().length > 0) {
+                    <div class="entry-heading">
+                      <span>Measurements</span>
+                    </div>
+                    <div role="listbox" aria-label="Measurements">
+                      @for (option of listedMeasurements(); track option) {
+                        <ng-container *ngTemplateOutlet="entryRow; context: { $implicit: option, kind: 'Measurement', current: current }"></ng-container>
+                      }
+                    </div>
+                  }
+                  @if (listedPollen().length > 0) {
+                    <div class="entry-heading">
+                      <span>Pollen</span>
+                    </div>
+                    <div role="listbox" aria-label="Pollen">
+                      @for (option of listedPollen(); track option) {
+                        <ng-container *ngTemplateOutlet="entryRow; context: { $implicit: option, kind: 'Pollen warning', current: current }"></ng-container>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div detailPanel>
+                  @if (current === undefined) {
+                    <senergy-empty-state icon="air" title="Nothing to configure"
+                      text="Enable measurements or pollen warnings in the previous step."></senergy-empty-state>
+                  }
+                  @for (option of listedMeasurements(); track option) {
+                    @if (isOpened(option, current)) {
+                      <div [class.ly-hidden]="current !== option">
+                        <senergy-form-section title="Inside measurement">
+                          <mat-slide-toggle [(ngModel)]="option.is_enabled">Enable inside measurement</mat-slide-toggle>
+                          @if (option.is_enabled) {
+                            <div class="field-grid warning-fields">
+                              <mat-form-field>
+                                <mat-label>Export</mat-label>
+                                <mtx-select [(ngModel)]="option.export"
+                                  (ngModelChange)="insideExportChanged(option)"
+                                  [compareWith]="compareExports" [items]="exports" bindLabel="Name"
+                                  [disabled]="option.insideDeviceId != null"
+                                  appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Export"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Value</mat-label>
+                                <mtx-select [(ngModel)]="option.data.column"
+                                  [compareWith]="compareExportValueModels"
+                                  [items]="option.export?.Values || []" bindLabel="Name"
+                                  [disabled]="option.insideDeviceId != null"
+                                  appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Value"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Device</mat-label>
+                                <mtx-select [(ngModel)]="option.insideDeviceId"
+                                  (ngModelChange)="insideDeviceChanged(option)" [items]="devices"
+                                  bindLabel="name" bindValue="id" [disabled]="option.export != null"
+                                  appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Device"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Service</mat-label>
+                                <mtx-select [(ngModel)]="option.insideServiceId"
+                                  [items]="(getServices(option.insideDeviceId) | async) || []"
+                                  bindValue="id" [disabled]="option.export != null" bindLabel="name"
+                                  appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Service"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Value</mat-label>
+                                <mtx-select [(ngModel)]="option.insideDeviceValuePath"
+                                  [items]="getServiceValues(option.insideDeviceId, option.insideServiceId)"
+                                  [disabled]="option.export != null" appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Value"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Math</mat-label>
+                                <input matInput [(ngModel)]="option.math">
+                                <mat-error senergyError label="Math"></mat-error>
+                              </mat-form-field>
+                            </div>
+                          }
+                        </senergy-form-section>
+
+                        <senergy-form-section title="Outside measurement">
+                          <mat-slide-toggle [(ngModel)]="option.has_outside">Enable outside measurement</mat-slide-toggle>
+                          @if (option.has_outside) {
                             @if (option.can_web) {
                               <div class="small-text outside-warning color-warn">
                                 ! Enabling outside measurement will override web data
                               </div>
                             }
-                            <table>
-                              <tr>
-                                <td>
-                                  <mat-form-field>
-                                    <mat-label>Export</mat-label>
-                                    <mtx-select [(ngModel)]="option.outsideExport"
-                                      [compareWith]="compareExports" [items]="exports"
-                                      useOptionViewProperty="Name"
-                                      (ngModelChange)="outsideExportChanged(option)"
-                                      [disabled]="option.outsideDeviceId != null"
-                                      appendTo=".ng-select-anchor">
-                                    </mtx-select>
-                                    <mat-error senergyError label="Export"></mat-error>
-                                  </mat-form-field>
-                                </td>
-                                <td>
-                                  <mat-form-field>
-                                    <mat-label>Value</mat-label>
-                                    <mtx-select [(ngModel)]="option.outsideData.column"
-                                      [compareWith]="compareExportValueModels"
-                                      [items]="option.outsideExport?.Values || []"
-                                      [disabled]="option.outsideDeviceId != null" bindLabel="Name"
-                                    appendTo=".ng-select-anchor"> </mtx-select>
-                                    <mat-error senergyError label="Value"></mat-error>
-                                  </mat-form-field>
-                                </td>
-                                <td>
-                                  <mat-form-field>
-                                    <mat-label>Math</mat-label>
-                                    <input matInput [(ngModel)]="option.outsideMath">
-                                    <mat-error senergyError label="Math"></mat-error>
-                                  </mat-form-field>
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>
-                                  <mat-form-field>
-                                    <mat-label>Device</mat-label>
-                                    <mtx-select [(ngModel)]="option.outsideDeviceId"
-                                      (ngModelChange)="outsideDeviceChanged(option)" [items]="devices"
-                                      bindLabel="name" bindValue="id"
-                                      [disabled]="option.outsideExport !== null"
-                                      appendTo=".ng-select-anchor">
-                                    </mtx-select>
-                                    <mat-error senergyError label="Device"></mat-error>
-                                  </mat-form-field>
-                                </td>
-                                <td>
-                                  <mat-form-field>
-                                    <mat-label>Service</mat-label>
-                                    <mtx-select [(ngModel)]="option.outsideServiceId"
-                                      [items]="(getServices(option.outsideDeviceId) | async) || []"
-                                      bindValue="id" [disabled]="option.outsideExport != null"
-                                      bindLabel="name" appendTo=".ng-select-anchor">
-                                    </mtx-select>
-                                    <mat-error senergyError label="Service"></mat-error>
-                                  </mat-form-field>
-                                </td>
-                                <td>
-                                  <mat-form-field>
-                                    <mat-label>Value</mat-label>
-                                    <mtx-select [(ngModel)]="option.outsideDeviceValuePath"
-                                      [disabled]="option.outsideExport != null"
-                                      [items]="getServiceValues(option.outsideDeviceId, option.outsideServiceId)"
-                                      appendTo=".ng-select-anchor">
-                                    </mtx-select>
-                                    <mat-error senergyError label="Value"></mat-error>
-                                  </mat-form-field>
-                                </td>
-                              </tr>
-                            </table>
+                            <div class="field-grid warning-fields">
+                              <mat-form-field>
+                                <mat-label>Export</mat-label>
+                                <mtx-select [(ngModel)]="option.outsideExport"
+                                  [compareWith]="compareExports" [items]="exports"
+                                  useOptionViewProperty="Name"
+                                  (ngModelChange)="outsideExportChanged(option)"
+                                  [disabled]="option.outsideDeviceId != null"
+                                  appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Export"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Value</mat-label>
+                                <mtx-select [(ngModel)]="option.outsideData.column"
+                                  [compareWith]="compareExportValueModels"
+                                  [items]="option.outsideExport?.Values || []"
+                                  [disabled]="option.outsideDeviceId != null" bindLabel="Name"
+                                  appendTo=".ng-select-anchor"> </mtx-select>
+                                <mat-error senergyError label="Value"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Device</mat-label>
+                                <mtx-select [(ngModel)]="option.outsideDeviceId"
+                                  (ngModelChange)="outsideDeviceChanged(option)" [items]="devices"
+                                  bindLabel="name" bindValue="id"
+                                  [disabled]="option.outsideExport !== null"
+                                  appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Device"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Service</mat-label>
+                                <mtx-select [(ngModel)]="option.outsideServiceId"
+                                  [items]="(getServices(option.outsideDeviceId) | async) || []"
+                                  bindValue="id" [disabled]="option.outsideExport != null"
+                                  bindLabel="name" appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Service"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Value</mat-label>
+                                <mtx-select [(ngModel)]="option.outsideDeviceValuePath"
+                                  [disabled]="option.outsideExport != null"
+                                  [items]="getServiceValues(option.outsideDeviceId, option.outsideServiceId)"
+                                  appendTo=".ng-select-anchor">
+                                </mtx-select>
+                                <mat-error senergyError label="Value"></mat-error>
+                              </mat-form-field>
+                              <mat-form-field>
+                                <mat-label>Math</mat-label>
+                                <input matInput [(ngModel)]="option.outsideMath">
+                                <mat-error senergyError label="Math"></mat-error>
+                              </mat-form-field>
+                            </div>
+                          }
+                        </senergy-form-section>
+
+                        <senergy-form-section title="Warning thresholds">
+                          <div class="field-grid">
+                            <mat-form-field>
+                              <mat-label>Min. Warning</mat-label>
+                              <input class="right-aligned" type="number" matInput
+                                [(ngModel)]="option.boundaries.warn.lower" required>
+                              <mat-error senergyError label="Min. Warning"></mat-error>
+                              <div matSuffix>
+                                <span [innerHTML]="option.unit_html" class="unit"></span>
+                              </div>
+                            </mat-form-field>
+                            <mat-form-field>
+                              <mat-label>Max. Warning</mat-label>
+                              <input class="right-aligned" type="number" matInput
+                                [(ngModel)]="option.boundaries.warn.upper" required>
+                              <div matSuffix>
+                                <span [innerHTML]="option.unit_html" class="unit"></span>
+                              </div>
+                              <mat-error senergyError label="Max. Warning"></mat-error>
+                            </mat-form-field>
+                            <mat-form-field>
+                              <mat-label>Min. Critical Warning</mat-label>
+                              <input class="right-aligned" type="number" matInput
+                                [(ngModel)]="option.boundaries.critical.lower" required>
+                              <mat-error senergyError label="Min. Crit. Warning"></mat-error>
+                              <div matSuffix>
+                                <span [innerHTML]="option.unit_html" class="unit"></span>
+                              </div>
+                            </mat-form-field>
+                            <mat-form-field>
+                              <mat-label>Max. Critical Warning</mat-label>
+                              <input class="right-aligned" type="number" matInput
+                                [(ngModel)]="option.boundaries.critical.upper" required>
+                              <mat-error senergyError label="Max. Crit. Warning"></mat-error>
+                              <div matSuffix>
+                                <span [innerHTML]="option.unit_html" class="unit"></span>
+                              </div>
+                            </mat-form-field>
                           </div>
-                        }
-                        <h4 class="headline">Choose thresholds for warnings</h4>
-                        <mat-divider></mat-divider>
-                        <table>
-                          <tr>
-                            <td>
-                              <p class="scale-heading">Warning Thresholds:</p>
-                            </td>
-                            <td>
-                              <mat-form-field class="threshold-field">
-                                <mat-label>Min. Warning</mat-label>
-                                <input class="right-aligned" type="number" matInput
-                                  [(ngModel)]="option.boundaries.warn.lower" required>
-                                <mat-error senergyError label="Min. Warning"></mat-error>
-                                <div matSuffix>
-                                  <span [innerHTML]="option.unit_html" class="unit"></span>
-                                </div>
-                              </mat-form-field>
-                            </td>
-                            <td>
-                              <mat-form-field class="threshold-field">
-                                <mat-label>Max. Warning</mat-label>
-                                <input class="right-aligned" type="number" matInput
-                                  [(ngModel)]="option.boundaries.warn.upper" required>
-                                <div matSuffix>
-                                  <span [innerHTML]="option.unit_html" class="unit"></span>
-                                </div>
-                                <mat-error senergyError label="Max. Warning"></mat-error>
-                              </mat-form-field>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td>
-                              <p class="scale-heading"> Critical Warning Thresholds: </p>
-                            </td>
-                            <td>
-                              <mat-form-field class="threshold-field">
-                                <mat-label>Min. Critical Warning</mat-label>
-                                <input class="right-aligned" type="number" matInput
-                                  [(ngModel)]="option.boundaries.critical.lower" required>
-                                <mat-error senergyError label="Min. Crit. Warning"></mat-error>
-                                <div matSuffix>
-                                  <span [innerHTML]="option.unit_html" class="unit"></span>
-                                </div>
-                              </mat-form-field>
-                            </td>
-                            <td>
-                              <mat-form-field class="threshold-field">
-                                <mat-label>Max. Critical Warning</mat-label>
-                                <input class="right-aligned" type="number" matInput
-                                  [(ngModel)]="option.boundaries.critical.upper" required>
-                                <mat-error senergyError label="Max. Crit. Warning"></mat-error>
-                                <div matSuffix>
-                                  <span [innerHTML]="option.unit_html" class="unit"></span>
-                                </div>
-                              </mat-form-field>
-                            </td>
-                          </tr>
-                        </table>
-                        <div class="small-text color-accent"
-                          matTooltip="Values below or above these thresholds will result in warnings or critical warnings">
-                          What do those numbers mean?
-                        </div>
-                      </ng-template>
-                    </mat-expansion-panel>
+                          <div class="small-text color-accent"
+                            matTooltip="Values below or above these thresholds will result in warnings or critical warnings">
+                            What do those numbers mean?
+                          </div>
+                        </senergy-form-section>
+                      </div>
+                    }
+                  }
+                  @for (option of listedPollen(); track option) {
+                    @if (isOpened(option, current)) {
+                      <div [class.ly-hidden]="current !== option">
+                        <senergy-form-section title="Warning levels">
+                          <div class="field-grid">
+                            <mat-form-field>
+                              <mat-label>Warning Level</mat-label>
+                              <mtx-select required placeholder="Select warning level"
+                                [(ngModel)]="option.boundaries.warn.upper" appendTo=".ng-select-anchor">
+                                @for (level of pollenLevel; track level) {
+                                  <mtx-option [value]="level.value">
+                                    {{level.name}}
+                                  </mtx-option>
+                                }
+                              </mtx-select>
+                              <mat-error senergyError label="Warning Level"></mat-error>
+                            </mat-form-field>
+                            <mat-form-field>
+                              <mat-label>Critical Level</mat-label>
+                              <mtx-select required placeholder="Select critical level"
+                                [(ngModel)]="option.boundaries.critical.upper" appendTo=".ng-select-anchor">
+                                @for (level of pollenLevel; track level) {
+                                  <mtx-option [value]="level.value">
+                                    {{level.name}}
+                                  </mtx-option>
+                                }
+                              </mtx-select>
+                              <mat-error senergyError label="Critical Level"></mat-error>
+                            </mat-form-field>
+                          </div>
+                          <div class="small-text color-accent">
+                            Pollen levels from DWD. Find out more
+                            <a target="_blank" rel="noopener noreferrer"
+                            href="https://www.dwd.de/DE/leistungen/gefahrenindizespollen/erklaerungen.html;">here.</a>
+                          </div>
+                        </senergy-form-section>
+                      </div>
+                    }
                   }
                 </div>
-              }
-              @for (option of pollen; track option) {
-                <div>
-                  @if (option.is_enabled || false) {
-                    <mat-expansion-panel>
-                      <mat-expansion-panel-header class="right-aligned-header">
-                        <mat-panel-title class="panel-title">
-                          <div [innerHTML]="option.name_html"></div>
-                        </mat-panel-title>
-                        @if (option.description_html !== undefined) {
-                          <mat-panel-description>
-                            <div [innerHTML]="option.description_html"></div>
-                          </mat-panel-description>
-                        }
-                      </mat-expansion-panel-header>
-                      <ng-template matExpansionPanelContent>
-                        <div>
-                          <mat-form-field class="input-field">
-                            <mat-label>Warning Level</mat-label>
-                            <mtx-select required placeholder="Select warning level"
-                              [(ngModel)]="option.boundaries.warn.upper" appendTo=".ng-select-anchor">
-                              @for (level of pollenLevel; track level) {
-                                <mtx-option [value]="level.value">
-                                  {{level.name}}
-                                </mtx-option>
-                              }
-                            </mtx-select>
-                            <mat-error senergyError label="Warning Level"></mat-error>
-                          </mat-form-field>
-                        </div>
-                        <div>
-                          <mat-form-field class="input-field">
-                            <mat-label>Critical Level</mat-label>
-                            <mtx-select required placeholder="Select critical level"
-                              [(ngModel)]="option.boundaries.critical.upper" appendTo=".ng-select-anchor">
-                              @for (level of pollenLevel; track level) {
-                                <mtx-option [value]="level.value">
-                                  {{level.name}}
-                                </mtx-option>
-                              }
-                            </mtx-select>
-                            <mat-error senergyError label="Critical Level"></mat-error>
-                          </mat-form-field>
-                        </div>
-                        <div class="small-text color-accent">
-                          Pollen levels from DWD. Find out more
-                          <a target="_blank" rel="noopener noreferrer"
-                          href="https://www.dwd.de/DE/leistungen/gefahrenindizespollen/erklaerungen.html;">here.</a>
-                        </div>
-                      </ng-template>
-                    </mat-expansion-panel>
-                  }
-                </div>
-              }
-            </mat-accordion>
+              </senergy-tree-detail-layout>
+            </div>
+
+            <ng-template #entryRow let-option let-kind="kind" let-current="current">
+              <div class="entry-row" role="option" tabindex="0" [class.selected]="current === option"
+                [attr.aria-selected]="current === option" (click)="selectEntry(option)"
+                (keydown.enter)="selectByKey($event, option)" (keydown.space)="selectByKey($event, option)">
+                <span class="entry-text">
+                  <span class="entry-label" [innerHTML]="option.name_html"></span>
+                  <span class="entry-sub">{{kind}}</span>
+                </span>
+                @if (option.can_web) {
+                  <mat-icon class="entry-online" matTooltip="Outside data available online">cloud</mat-icon>
+                }
+                @if (entryInvalid(option)) {
+                  <mat-icon class="entry-warning" matTooltip="The thresholds are incomplete">warning</mat-icon>
+                }
+              </div>
+            </ng-template>
             <div>
               <button class="nav-button" matButton matStepperPrevious>Back</button>
               <button class="nav-button" matButton="outlined" matStepperNext>Next</button>

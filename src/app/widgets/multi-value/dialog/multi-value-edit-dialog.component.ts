@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { afterNextRender, Component, ElementRef, Injector, OnInit, ChangeDetectionStrategy, inject, DestroyRef, QueryList, ViewChildren } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { TreeDetailLayoutComponent } from '../../../core/components/tree-detail-layout/tree-detail-layout.component';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ChartsExportMeasurementModel } from '../../charts/export/shared/charts-export-properties.model';
@@ -36,8 +38,8 @@ import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
-import { NgClass } from '@angular/common';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { NgTemplateOutlet } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatIconButton, MatButton } from '@angular/material/button';
@@ -45,9 +47,9 @@ import { MatIcon } from '@angular/material/icon';
 
 @Component({
     templateUrl: './multi-value-edit-dialog.component.html',
-    styleUrls: ['./multi-value-edit-dialog.component.css'],
+    styleUrls: ['../../shared/dialog-list-detail.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MatSlideToggle, MatIconButton, MatIcon, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, FormSectionComponent, TreeDetailLayoutComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, NgTemplateOutlet, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatSlideToggle, MatIconButton, MatIcon, MatDialogActions, MatButton]
 })
 export class MultiValueEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<MultiValueEditDialogComponent>>(MatDialogRef);
@@ -56,13 +58,17 @@ export class MultiValueEditDialogComponent implements OnInit {
     private exportService = inject(ExportService);
     private fb = inject(FormBuilder);
     private destroyRef = inject(DestroyRef);
+    private injector = inject(Injector);
 
     exports: ChartsExportMeasurementModel[] = [];
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
     orderValues = MultiValueOrderEnum;
-    step = -1;
+    private selection = -1;
+    /** Measurements whose form was shown once. It stays in the DOM, hidden, like the content of a collapsed expansion panel. */
+    readonly opened = new WeakSet<AbstractControl>();
+    @ViewChildren('aliasInput') aliasInputs?: QueryList<ElementRef<HTMLInputElement>>;
 
     formGroup = this.fb.group({
         name: ['', Validators.required],
@@ -105,6 +111,7 @@ export class MultiValueEditDialogComponent implements OnInit {
 
             if (measurements.length === 0) {
                 this.addNewMeasurement();
+                this.step = -1; // the settings stay selected
             }
         });
     }
@@ -328,7 +335,7 @@ export class MultiValueEditDialogComponent implements OnInit {
         });
     }
 
-    addNewMeasurement() {
+    addNewMeasurement(focusAlias = false) {
         const m: MultiValueMeasurement = {
             name: '',
             column: {} as ExportValueModel,
@@ -340,7 +347,67 @@ export class MultiValueEditDialogComponent implements OnInit {
             warning_enabled: false,
         };
         this.addMeasurement(m);
-        this.step = this.getMeasurements().controls.length - 1;
+        this.select(this.getMeasurements().controls.length - 1, focusAlias);
+    }
+
+    /** The entry selected in the list: -1 is the widget settings, otherwise the index of a measurement. */
+    get step(): number {
+        return this.selection;
+    }
+
+    set step(index: number) {
+        this.selection = index;
+        const measurement = this.getMeasurements().controls[index];
+        if (measurement !== undefined) {
+            this.opened.add(measurement);
+        }
+    }
+
+    select(index: number, focusAlias = false) {
+        this.step = index;
+        if (focusAlias) {
+            afterNextRender(() => this.focusAlias(), { injector: this.injector });
+        }
+    }
+
+    private focusAlias() {
+        const controls = this.getMeasurements().controls;
+        const shown = controls.filter((measurement) => this.opened.has(measurement));
+        this.aliasInputs?.get(shown.indexOf(controls[this.step]))?.nativeElement.focus();
+    }
+
+    /** Selection from the keyboard; keys pressed on the row menu button stay with the button. */
+    selectByKey(event: Event, index: number) {
+        if (event.target === event.currentTarget) {
+            event.preventDefault();
+            this.select(index);
+        }
+    }
+
+    rowLabel(index: number): string {
+        return this.getMeasurement(index).get('name')?.value || 'Measurement ' + (index + 1);
+    }
+
+    exportName(measurement: AbstractControl): string {
+        return measurement.get('export')?.value?.name ?? '';
+    }
+
+    settingsInvalid(): boolean {
+        const { name, order, valueAlias } = this.formGroup.controls;
+        return [name, order, valueAlias].some((control) => control.invalid);
+    }
+
+    incompleteMeasurements(): number {
+        return this.getMeasurements().controls.filter((measurement) => measurement.invalid).length;
+    }
+
+    /** The reason the widget cannot be saved, naming the incomplete measurements when they are the cause. */
+    configurationProblem(): string {
+        const incomplete = this.incompleteMeasurements();
+        if (incomplete === 0) {
+            return 'Widget not configured correctly';
+        }
+        return 'Widget not configured correctly: ' + incomplete + (incomplete === 1 ? ' measurement' : ' measurements') + ' incomplete';
     }
 
     getMathWarningTooltip(index: number): string {
@@ -383,7 +450,11 @@ export class MultiValueEditDialogComponent implements OnInit {
 
     removeTab(index: number) {
         this.getMeasurements().controls.splice(index, 1);
-        this.step = index - 1;
+        if (this.step === index) {
+            this.step = index - 1;
+        } else if (this.step > index) {
+            this.step--;
+        }
     }
 
     compareExports(a: any, b: any): boolean {
@@ -404,10 +475,15 @@ export class MultiValueEditDialogComponent implements OnInit {
     changePosition(index: number, isUp: boolean) {
         const removed = this.getMeasurement(index);
         this.getMeasurements().controls.splice(index, 1);
-        if (isUp) {
-            this.getMeasurements().controls.splice(index - 1, 0, removed);
-        } else {
-            this.getMeasurements().controls.splice(index + 1, 0, removed);
+        const target = isUp ? index - 1 : index + 1;
+        this.getMeasurements().controls.splice(target, 0, removed);
+        // the selection stays with its measurement
+        if (target >= 0 && target < this.getMeasurements().length) {
+            if (this.step === index) {
+                this.step = target;
+            } else if (this.step === target) {
+                this.step = index;
+            }
         }
     }
 }

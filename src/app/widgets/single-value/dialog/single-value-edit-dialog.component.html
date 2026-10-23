@@ -18,324 +18,332 @@
 
 <mat-dialog-content>
   @if (formIsReady) {
-    <div [formGroup]="form">
-      @if (userHasUpdateNameAuthorization) {
-        <senergy-form-section title="General">
-          <mat-form-field>
-            <mat-label>Widget Name</mat-label>
-            <input type="text" matInput formControlName="name">
-            <mat-error senergyError label="Widget Name"></mat-error>
-          </mat-form-field>
-        </senergy-form-section>
-      }
-      @if (userHasUpdatePropertiesAuthorization) {
-        <senergy-form-section title="Data source">
-          <mat-radio-group formControlName="sourceType" class="source-type">
-            <mat-radio-button value="export">Export</mat-radio-button>
-            <mat-radio-button value="device">Device</mat-radio-button>
-            <mat-radio-button value="deviceGroup">Device Group</mat-radio-button>
-          </mat-radio-group>
-          @if (!dataSourceSelectionReady) {
-            <mat-spinner [diameter]="50" [strokeWidth]="5" color="accent">
-            </mat-spinner>
-          }
-          @if (dataSourceSelectionReady) {
-            @if (form.get('sourceType')?.value === 'device') {
-              <div>
-                @if (devices.length > 0) {
-                  <span>
-                    <div>
-                      <mat-form-field>
-                        <mat-label>Device</mat-label>
-                        <mtx-select placeholder="Choose Device" [items]="devices" formControlName="device"
-                          bindLabel="display_name" [compareWith]="compareIds" appendTo=".ng-select-anchor">
-                        </mtx-select>
-                        <mat-error senergyError label="Device"></mat-error>
-                      </mat-form-field>
-                    </div>
-                    @if (dataSourceFieldsReady) {
-                      <div>
-                        <mat-form-field>
-                          <mat-label>Service</mat-label>
-                          <mtx-select placeholder="Choose Service" [items]="services" formControlName="service"
-                            bindLabel="name" [compareWith]="compareIds" appendTo=".ng-select-anchor">
-                          </mtx-select>
-                          <mat-error senergyError label="Service"></mat-error>
-                        </mat-form-field>
-                      </div>
-                    }
-                  </span>
-                }
-                @if (devices.length === 0) {
-                  <span>
-                    No devices found.
-                  </span>
-                }
-              </div>
-            }
-            @if (form.get('sourceType')?.value === 'export') {
-              <div>
-                @if (exports.length > 0) {
-                  <span>
-                    <div>
-                      <mat-form-field>
-                        <mat-label>Export</mat-label>
-                        <mtx-select placeholder="Choose Export" [items]="exports" formControlName="measurement"
-                          bindLabel="name" [compareWith]="compareIds" appendTo=".ng-select-anchor">
-                        </mtx-select>
-                        <mat-error senergyError label="Export"></mat-error>
-                      </mat-form-field>
-                    </div>
-                  </span>
-                }
-                @if (exports.length === 0) {
-                  <span>
-                    No exports found.
-                  </span>
-                }
-              </div>
-            }
-            @if (form.get('sourceType')?.value === 'deviceGroup') {
-              <div>
-                @if (deviceGroups.length > 0) {
-                  <span>
-                    <div>
-                      <mat-form-field>
-                        <mat-label>Device Group</mat-label>
-                        <mtx-select placeholder="Choose Device Group" [items]="deviceGroups"
-                          formControlName="deviceGroupId" bindLabel="name" bindValue="id"
-                          appendTo=".ng-select-anchor">
-                        </mtx-select>
-                        <mat-error senergyError label="Device Group"></mat-error>
-                      </mat-form-field>
-                    </div>
-                    @if (dataSourceFieldsReady) {
-                      <div>
-                        <mat-form-field>
-                          <mat-label>Criteria</mat-label>
-                          <mtx-select placeholder="Choose Criteria" formControlName="deviceGroupCriteria"
-                            [compareWith]="compareCriteria" appendTo=".ng-select-anchor">
-                            @for (option of getCriteria(); track option) {
-                              <mtx-option
-                                [value]="option">{{describeCriteria()(option)}}</mtx-option>
-                            }
-                          </mtx-select>
-                          <mat-error senergyError label="Criteria"></mat-error>
-                        </mat-form-field>
-                      </div>
-                    }
-                  </span>
-                }
-                @if (deviceGroups.length === 0) {
-                  <span>
-                    No device groups found.
-                  </span>
-                }
-              </div>
-            }
-            @if (!dataSourceFieldsReady) {
+    <div [formGroup]="form" class="columns" [class.single-column]="!userHasUpdatePropertiesAuthorization">
+      <div class="column">
+        @if (userHasUpdateNameAuthorization) {
+          <senergy-form-section title="General">
+            <mat-form-field>
+              <mat-label>Widget Name</mat-label>
+              <input type="text" matInput formControlName="name">
+              <mat-error senergyError label="Widget Name"></mat-error>
+            </mat-form-field>
+          </senergy-form-section>
+        }
+        @if (userHasUpdatePropertiesAuthorization) {
+          <senergy-form-section title="Data source">
+            <mat-radio-group formControlName="sourceType" class="source-type">
+              <mat-radio-button value="export">Export</mat-radio-button>
+              <mat-radio-button value="device">Device</mat-radio-button>
+              <mat-radio-button value="deviceGroup">Device Group</mat-radio-button>
+            </mat-radio-group>
+            @if (!dataSourceSelectionReady) {
               <mat-spinner [diameter]="50" [strokeWidth]="5" color="accent">
               </mat-spinner>
             }
-            @if (dataSourceFieldsReady) {
-              @if (form.get('sourceType')?.value === 'export' && exports.length > 0) {
+            @if (dataSourceSelectionReady) {
+              @if (form.get('sourceType')?.value === 'device') {
                 <div>
-                  <mat-form-field>
-                    <mat-label>Value</mat-label>
-                    <mtx-select placeholder="Choose Value" [items]="vAxisValues" [compareWith]="compareValues"
-                      bindLabel="Name" formControlName="vAxis" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                    <mat-error senergyError label="Value"></mat-error>
-                  </mat-form-field>
-                </div>
-              }
-              @if (form.get('sourceType')?.value === 'device'  && devices.length > 0) {
-                <div>
-                  <mat-form-field>
-                    <mat-label>Value</mat-label>
-                    <mtx-select placeholder="Choose Value" bindLabel="Name" [items]="paths"
-                      formControlName="vAxis" [compareWith]="compareNames" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                    <mat-error senergyError label="Value"></mat-error>
-                  </mat-form-field>
-                </div>
-              }
-              <div>
-                @if (form.get('sourceType')?.value !== 'deviceGroup') {
-                  <mat-form-field>
-                    <mat-label>Unit</mat-label>
-                    <input type="text" matInput formControlName="vAxisLabel">
-                    <mat-error senergyError label="Unit"></mat-error>
-                  </mat-form-field>
-                }
-                @if (form.get('sourceType')?.value === 'deviceGroup' && deviceGroups.length > 0) {
-                  <mat-form-field>
-                    <mat-label>Unit</mat-label>
-                    <mtx-select placeholder="Choose Unit" formControlName="vAxisLabel"
-                      appendTo=".ng-select-anchor">
-                      @for (option of concept?.characteristics || []; track option) {
-                        <mtx-option
-                          [value]="getDisplay(option)">{{getDisplay(option)}}</mtx-option>
+                  @if (devices.length > 0) {
+                    <span>
+                      <div>
+                        <mat-form-field>
+                          <mat-label>Device</mat-label>
+                          <mtx-select placeholder="Choose Device" [items]="devices" formControlName="device"
+                            bindLabel="display_name" [compareWith]="compareIds" appendTo=".ng-select-anchor">
+                          </mtx-select>
+                          <mat-error senergyError label="Device"></mat-error>
+                        </mat-form-field>
+                      </div>
+                      @if (dataSourceFieldsReady) {
+                        <div>
+                          <mat-form-field>
+                            <mat-label>Service</mat-label>
+                            <mtx-select placeholder="Choose Service" [items]="services" formControlName="service"
+                              bindLabel="name" [compareWith]="compareIds" appendTo=".ng-select-anchor">
+                            </mtx-select>
+                            <mat-error senergyError label="Service"></mat-error>
+                          </mat-form-field>
+                        </div>
                       }
-                    </mtx-select>
-                    <mat-error senergyError label="Unit"></mat-error>
-                  </mat-form-field>
+                    </span>
+                  }
+                  @if (devices.length === 0) {
+                    <span>
+                      No devices found.
+                    </span>
+                  }
+                </div>
+              }
+              @if (form.get('sourceType')?.value === 'export') {
+                <div>
+                  @if (exports.length > 0) {
+                    <span>
+                      <div>
+                        <mat-form-field>
+                          <mat-label>Export</mat-label>
+                          <mtx-select placeholder="Choose Export" [items]="exports" formControlName="measurement"
+                            bindLabel="name" [compareWith]="compareIds" appendTo=".ng-select-anchor">
+                          </mtx-select>
+                          <mat-error senergyError label="Export"></mat-error>
+                        </mat-form-field>
+                      </div>
+                    </span>
+                  }
+                  @if (exports.length === 0) {
+                    <span>
+                      No exports found.
+                    </span>
+                  }
+                </div>
+              }
+              @if (form.get('sourceType')?.value === 'deviceGroup') {
+                <div>
+                  @if (deviceGroups.length > 0) {
+                    <span>
+                      <div>
+                        <mat-form-field>
+                          <mat-label>Device Group</mat-label>
+                          <mtx-select placeholder="Choose Device Group" [items]="deviceGroups"
+                            formControlName="deviceGroupId" bindLabel="name" bindValue="id"
+                            appendTo=".ng-select-anchor">
+                          </mtx-select>
+                          <mat-error senergyError label="Device Group"></mat-error>
+                        </mat-form-field>
+                      </div>
+                      @if (dataSourceFieldsReady) {
+                        <div>
+                          <mat-form-field>
+                            <mat-label>Criteria</mat-label>
+                            <mtx-select placeholder="Choose Criteria" formControlName="deviceGroupCriteria"
+                              [compareWith]="compareCriteria" appendTo=".ng-select-anchor">
+                              @for (option of getCriteria(); track option) {
+                                <mtx-option
+                                  [value]="option">{{describeCriteria()(option)}}</mtx-option>
+                              }
+                            </mtx-select>
+                            <mat-error senergyError label="Criteria"></mat-error>
+                          </mat-form-field>
+                        </div>
+                      }
+                    </span>
+                  }
+                  @if (deviceGroups.length === 0) {
+                    <span>
+                      No device groups found.
+                    </span>
+                  }
+                </div>
+              }
+              @if (!dataSourceFieldsReady) {
+                <mat-spinner [diameter]="50" [strokeWidth]="5" color="accent">
+                </mat-spinner>
+              }
+              @if (dataSourceFieldsReady) {
+                @if (form.get('sourceType')?.value === 'export' && exports.length > 0) {
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Value</mat-label>
+                      <mtx-select placeholder="Choose Value" [items]="vAxisValues" [compareWith]="compareValues"
+                        bindLabel="Name" formControlName="vAxis" appendTo=".ng-select-anchor">
+                      </mtx-select>
+                      <mat-error senergyError label="Value"></mat-error>
+                    </mat-form-field>
+                  </div>
                 }
-              </div>
-              <div>
-                @if (form.get('sourceType')?.value === 'deviceGroup') {
-                  <mat-form-field>
-                    <mat-label>Aggregation</mat-label>
-                    <mtx-select placeholder="Choose Aggregation" [items]="aggregations"
-                      formControlName="deviceGroupAggregation" appendTo=".ng-select-anchor">
-                    </mtx-select>
-                    <mat-error senergyError label="Aggregation"></mat-error>
-                  </mat-form-field>
+                @if (form.get('sourceType')?.value === 'device'  && devices.length > 0) {
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Value</mat-label>
+                      <mtx-select placeholder="Choose Value" bindLabel="Name" [items]="paths"
+                        formControlName="vAxis" [compareWith]="compareNames" appendTo=".ng-select-anchor">
+                      </mtx-select>
+                      <mat-error senergyError label="Value"></mat-error>
+                    </mat-form-field>
+                  </div>
                 }
-              </div>
-            }
-          }
-        </senergy-form-section>
-        @if (dataSourceSelectionReady && dataSourceFieldsReady) {
-          <senergy-form-section title="Display">
-            <div class="one-line-form-container">
-              <div>
-                <mat-form-field>
-                  <mat-label>Type</mat-label>
-                  <mtx-select placeholder="Choose Type" formControlName="type"
-                    [compareWith]="compareStrings" appendTo=".ng-select-anchor">
-                    <mtx-option [value]="'String'">String</mtx-option>
-                    <mtx-option [value]="'Number'">Number</mtx-option>
-                    <mtx-option [value]="'Date'">Date</mtx-option>
-                    <mtx-option [value]="'Currency'">Currency</mtx-option>
-                    <mtx-option [value]="'Percent'">Percent</mtx-option>
-                  </mtx-select>
-                  <mat-error senergyError label="Type"></mat-error>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field hintLabel="For use in Angular pipes">
-                  <mat-label>Format</mat-label>
-                  <input type="text" matInput formControlName="format">
-                  <mat-error senergyError label="Format"></mat-error>
-                </mat-form-field>
-              </div>
-            </div>
-            <div formGroupName="group" class="one-line-form-container">
-              <div>
-                <mat-form-field>
-                  <mat-label>Group Type</mat-label>
-                  <mtx-select placeholder="Choose Group Type" formControlName="type"
-                    appendTo=".ng-select-anchor">
-                    <mtx-option [value]="">none</mtx-option>
-                    @for (t of groupTypes; track t) {
-                      <mtx-option [value]="t">
-                        {{t}}
-                      </mtx-option>
-                    }
-                  </mtx-select>
-                  <mat-error senergyError label="Group Type"></mat-error>
-                </mat-form-field>
-              </div>
-              <div>
-                <mat-form-field>
-                  <mat-label>Group Time</mat-label>
-                  <input type="string" matInput formControlName="time">
-                  <mat-error senergyError label="Group Time"></mat-error>
-                </mat-form-field>
-              </div>
-            </div>
-            <div>
-              <mat-form-field>
-                <mat-label>Math</mat-label>
-                <input type="text" matInput formControlName="math">
-                <mat-error senergyError label="Math"></mat-error>
-              </mat-form-field>
-            </div>
-            <div>
-              <mat-form-field>
-                <mat-label>Max. Font Size (px)</mat-label>
-                <input type="number" matInput formControlName="threshold">
-                <mat-error senergyError label="Max. Font Size (px)"></mat-error>
-              </mat-form-field>
-            </div>
-          </senergy-form-section>
-          <senergy-form-section title="Timestamp and highlighting">
-            <div formGroupName="timestampConfig">
-              <div>
-                <mat-checkbox formControlName="showTimestamp">Show timestamp?</mat-checkbox>
-              </div>
-            </div>
-            @if (form.get('timestampConfig')?.get('showTimestamp')?.value == true) {
-              <div formGroupName="timestampConfig">
                 <div>
-                  <mat-checkbox formControlName="highlightTimestamp">Highlight timestamp by age?
-                  </mat-checkbox>
-                </div>
-              </div>
-            }
-            @if (form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true) {
-              <div formGroupName="timestampConfig">
-                <div>
-                  <mat-form-field>
-                    <mat-label>Maximum Age for Warning</mat-label>
-                    <input type="number" matInput formControlName="warningAge">
-                    <mat-error senergyError label="Maximum Age"></mat-error>
-                  </mat-form-field>
+                  @if (form.get('sourceType')?.value !== 'deviceGroup') {
+                    <mat-form-field>
+                      <mat-label>Unit</mat-label>
+                      <input type="text" matInput formControlName="vAxisLabel">
+                      <mat-error senergyError label="Unit"></mat-error>
+                    </mat-form-field>
+                  }
+                  @if (form.get('sourceType')?.value === 'deviceGroup' && deviceGroups.length > 0) {
+                    <mat-form-field>
+                      <mat-label>Unit</mat-label>
+                      <mtx-select placeholder="Choose Unit" formControlName="vAxisLabel"
+                        appendTo=".ng-select-anchor">
+                        @for (option of concept?.characteristics || []; track option) {
+                          <mtx-option
+                            [value]="getDisplay(option)">{{getDisplay(option)}}</mtx-option>
+                        }
+                      </mtx-select>
+                      <mat-error senergyError label="Unit"></mat-error>
+                    </mat-form-field>
+                  }
                 </div>
                 <div>
-                  <mat-form-field>
-                    <mat-label>Warning Time Level</mat-label>
-                    <mtx-select placeholder="Choose Warning Time Level" formControlName="warningTimeLevel"
-                      appendTo=".ng-select-anchor">
-                      <mtx-option value="s">Seconds</mtx-option>
-                      <mtx-option value="min">Minutes</mtx-option>
-                      <mtx-option value="h">Hours</mtx-option>
-                      <mtx-option value="d">Days</mtx-option>
-                      <mtx-option value="m">Months</mtx-option>
-                    </mtx-select>
-                    <mat-error senergyError label="Time Warning Level"></mat-error>
-                  </mat-form-field>
+                  @if (form.get('sourceType')?.value === 'deviceGroup') {
+                    <mat-form-field>
+                      <mat-label>Aggregation</mat-label>
+                      <mtx-select placeholder="Choose Aggregation" [items]="aggregations"
+                        formControlName="deviceGroupAggregation" appendTo=".ng-select-anchor">
+                      </mtx-select>
+                      <mat-error senergyError label="Aggregation"></mat-error>
+                    </mat-form-field>
+                  }
                 </div>
-              </div>
-            }
-            @if (form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true) {
-              <div formGroupName="timestampConfig">
-                <div>
-                  <mat-form-field>
-                    <mat-label>Maximum Age for Problem</mat-label>
-                    <input type="number" matInput formControlName="problemAge">
-                    <mat-error senergyError label="Maximum Age"></mat-error>
-                  </mat-form-field>
-                </div>
-                <div>
-                  <mat-form-field>
-                    <mat-label>Problem Time Level</mat-label>
-                    <mtx-select placeholder="Choose Problem Time Level" formControlName="problemTimeLevel"
-                      appendTo=".ng-select-anchor">
-                      <mtx-option value="s">Seconds</mtx-option>
-                      <mtx-option value="min">Minutes</mtx-option>
-                      <mtx-option value="h">Hours</mtx-option>
-                      <mtx-option value="d">Days</mtx-option>
-                      <mtx-option value="m">Months</mtx-option>
-                    </mtx-select>
-                    <mat-error senergyError label="Problem Time Level"></mat-error>
-                  </mat-form-field>
-                </div>
-              </div>
-            }
-            <div formGroupName="valueHighlightConfig">
-              <div>
-                <mat-checkbox formControlName="highlight">Highlight value by threshold?</mat-checkbox>
-              </div>
-            </div>
-            @if (form.get('valueHighlightConfig')?.get('highlight')?.value === true) {
-              <single-value-threshold
-                [oldConfigs]="widget.properties?.valueHighlightConfig?.thresholds || []"
-                (threshholdConfigUpdated)="valueHighlightConfigUpdated($event)"></single-value-threshold>
+              }
             }
           </senergy-form-section>
         }
+      </div>
+      @if (userHasUpdatePropertiesAuthorization) {
+        <div class="column">
+          @if (dataSourceSelectionReady && dataSourceFieldsReady) {
+            <senergy-form-section title="Display">
+              <div class="one-line-form-container type-format">
+                <div>
+                  <mat-form-field>
+                    <mat-label>Type</mat-label>
+                    <mtx-select placeholder="Choose Type" formControlName="type"
+                      [compareWith]="compareStrings" appendTo=".ng-select-anchor">
+                      <mtx-option [value]="'String'">String</mtx-option>
+                      <mtx-option [value]="'Number'">Number</mtx-option>
+                      <mtx-option [value]="'Date'">Date</mtx-option>
+                      <mtx-option [value]="'Currency'">Currency</mtx-option>
+                      <mtx-option [value]="'Percent'">Percent</mtx-option>
+                    </mtx-select>
+                    <mat-error senergyError label="Type"></mat-error>
+                  </mat-form-field>
+                </div>
+                <div>
+                  <mat-form-field hintLabel="For use in Angular pipes" subscriptSizing="dynamic">
+                    <mat-label>Format</mat-label>
+                    <input type="text" matInput formControlName="format">
+                    <mat-error senergyError label="Format"></mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div formGroupName="group" class="one-line-form-container">
+                <div>
+                  <mat-form-field>
+                    <mat-label>Group Type</mat-label>
+                    <mtx-select placeholder="Choose Group Type" formControlName="type"
+                      appendTo=".ng-select-anchor">
+                      <mtx-option [value]="">none</mtx-option>
+                      @for (t of groupTypes; track t) {
+                        <mtx-option [value]="t">
+                          {{t}}
+                        </mtx-option>
+                      }
+                    </mtx-select>
+                    <mat-error senergyError label="Group Type"></mat-error>
+                  </mat-form-field>
+                </div>
+                <div>
+                  <mat-form-field>
+                    <mat-label>Group Time</mat-label>
+                    <input type="string" matInput formControlName="time">
+                    <mat-error senergyError label="Group Time"></mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="one-line-form-container">
+                <div>
+                  <mat-form-field>
+                    <mat-label>Math</mat-label>
+                    <input type="text" matInput formControlName="math">
+                    <mat-error senergyError label="Math"></mat-error>
+                  </mat-form-field>
+                </div>
+                <div>
+                  <mat-form-field>
+                    <mat-label>Max. Font Size (px)</mat-label>
+                    <input type="number" matInput formControlName="threshold">
+                    <mat-error senergyError label="Max. Font Size (px)"></mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </senergy-form-section>
+            <senergy-form-section title="Timestamp and highlighting">
+              <div formGroupName="timestampConfig">
+                <div>
+                  <mat-checkbox formControlName="showTimestamp">Show timestamp?</mat-checkbox>
+                </div>
+              </div>
+              @if (form.get('timestampConfig')?.get('showTimestamp')?.value == true) {
+                <div formGroupName="timestampConfig">
+                  <div>
+                    <mat-checkbox formControlName="highlightTimestamp">Highlight timestamp by age?
+                    </mat-checkbox>
+                  </div>
+                </div>
+              }
+              @if (form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true) {
+                <div formGroupName="timestampConfig" class="one-line-form-container">
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Maximum Age for Warning</mat-label>
+                      <input type="number" matInput formControlName="warningAge">
+                      <mat-error senergyError label="Maximum Age"></mat-error>
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Warning Time Level</mat-label>
+                      <mtx-select placeholder="Choose Warning Time Level" formControlName="warningTimeLevel"
+                        appendTo=".ng-select-anchor">
+                        <mtx-option value="s">Seconds</mtx-option>
+                        <mtx-option value="min">Minutes</mtx-option>
+                        <mtx-option value="h">Hours</mtx-option>
+                        <mtx-option value="d">Days</mtx-option>
+                        <mtx-option value="m">Months</mtx-option>
+                      </mtx-select>
+                      <mat-error senergyError label="Time Warning Level"></mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+              }
+              @if (form.get('timestampConfig')?.get('highlightTimestamp')?.value == true && form.get('timestampConfig')?.get('showTimestamp')?.value == true) {
+                <div formGroupName="timestampConfig" class="one-line-form-container">
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Maximum Age for Problem</mat-label>
+                      <input type="number" matInput formControlName="problemAge">
+                      <mat-error senergyError label="Maximum Age"></mat-error>
+                    </mat-form-field>
+                  </div>
+                  <div>
+                    <mat-form-field>
+                      <mat-label>Problem Time Level</mat-label>
+                      <mtx-select placeholder="Choose Problem Time Level" formControlName="problemTimeLevel"
+                        appendTo=".ng-select-anchor">
+                        <mtx-option value="s">Seconds</mtx-option>
+                        <mtx-option value="min">Minutes</mtx-option>
+                        <mtx-option value="h">Hours</mtx-option>
+                        <mtx-option value="d">Days</mtx-option>
+                        <mtx-option value="m">Months</mtx-option>
+                      </mtx-select>
+                      <mat-error senergyError label="Problem Time Level"></mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+              }
+              <div formGroupName="valueHighlightConfig">
+                <div>
+                  <mat-checkbox formControlName="highlight">Highlight value by threshold?</mat-checkbox>
+                </div>
+              </div>
+              @if (form.get('valueHighlightConfig')?.get('highlight')?.value === true) {
+                <single-value-threshold
+                  [oldConfigs]="widget.properties?.valueHighlightConfig?.thresholds || []"
+                  (threshholdConfigUpdated)="valueHighlightConfigUpdated($event)"></single-value-threshold>
+              }
+            </senergy-form-section>
+          }
+        </div>
       }
     </div>
   }

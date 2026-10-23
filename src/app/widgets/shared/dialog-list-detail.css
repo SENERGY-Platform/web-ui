@@ -1,0 +1,157 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* The dialog has the height the opener gave it: header and actions keep theirs, the content takes the rest. */
+:host {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+mat-dialog-content.dialog-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    max-height: none;
+    overflow: hidden;
+}
+
+.dialog-form {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.actions-warn {
+    margin-right: 8px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* The content scrolls as a whole only where the panels stack. */
+@media (max-width: 599px) {
+    mat-dialog-content.dialog-body {
+        overflow: auto;
+    }
+}
+
+.entry-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 4px 4px 12px;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.entry-add,
+.entry-menu {
+    --mat-icon-button-state-layer-size: 36px;
+    --mat-icon-button-icon-size: 20px;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+}
+
+.entry-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 48px;
+    padding: 4px 4px 4px 12px;
+    border-radius: var(--app-radius-sm, 6px);
+    cursor: pointer;
+}
+
+.entry-row:hover {
+    background: var(--app-hover);
+}
+
+.entry-row.selected {
+    background: color-mix(in srgb, var(--mat-sys-primary) 14%, transparent);
+}
+
+.entry-row:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: -2px;
+}
+
+.entry-text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.entry-label,
+.entry-sub {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.entry-sub {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
+    line-height: 16px;
+}
+
+.unnamed {
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+}
+
+.entry-warning {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: var(--app-danger);
+}
+
+/* Two fields per row; a field with .wide takes the whole row. Single column on narrow screens. */
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+}
+
+.field-grid > mat-form-field {
+    width: 100%;
+}
+
+.field-grid > .wide {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 599px) {
+    .field-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.warning-fields {
+    margin-top: 8px;
+}

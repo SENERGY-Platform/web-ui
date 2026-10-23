@@ -14,85 +14,85 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>Edit</h2>
+<senergy-dialog-header [title]="title" (closed)="close()"></senergy-dialog-header>
 
-<mat-dialog-content #content>
-  <mat-form-field appearance="outline" class="full-width" color="accent">
-    <mat-label>ID</mat-label>
-    <input matInput disabled value="{{network.id}}">
-  </mat-form-field>
-  <mat-form-field appearance="outline" class="full-width" color="accent">
-    <mat-label>Name</mat-label>
-    <input matInput [(ngModel)]="network.name" [disabled]="readOnly">
-  </mat-form-field>
+<mat-dialog-content class="dialog-body">
+  <div class="columns">
+    <div class="column">
+      <senergy-form-section title="Network">
+        <mat-form-field class="full-width">
+          <mat-label>ID</mat-label>
+          <input matInput disabled value="{{network.id}}">
+        </mat-form-field>
+        <mat-form-field class="full-width">
+          <mat-label>Name</mat-label>
+          <input matInput [(ngModel)]="network.name" [disabled]="readOnly">
+        </mat-form-field>
+      </senergy-form-section>
 
-  <div class="attributes">
-    <div class="divider">
-      Attributes
-      <mat-divider></mat-divider>
-    </div>
-    @for (attr of network.attributes; track attr; let i = $index) {
-      <div class="attribute">
-        @if(!hiddenAttributes.includes(attr.key)) {
-          <mat-form-field appearance="outline" class="third-width" color="accent">
-            <mat-label>Key</mat-label>
-            <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-              [disabled]="readOnly || !editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
-            [addTag]="addAttribute()"></mtx-select>
-            <mat-error senergyError label="Key"></mat-error>
-          </mat-form-field>
-          =
-          <mat-form-field appearance="outline" class="third-width" color="accent">
-            <mat-label>Value</mat-label>
-            @switch(attr.key) {
-              @case('senergy/lora/certs-expiration') {
-                <input matInput disabled value="{{attr.value | date: 'medium'}}">
-              }
-              @default {
-                <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
-                  [disabled]="readOnly || !editableAttribute(attr)">
-              }
-            }
-            <mat-error senergyError label="Value"></mat-error>
-          </mat-form-field>
-          <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">
-            <button mat-icon-button color="warn" (click)="removeAttr(i)" [disabled]="readOnly || !editableAttribute(attr)">
-              @if (!editableAttribute(attr)) {
-                <mat-icon>conversion_path</mat-icon>
-              }
-              @if (editableAttribute(attr)) {
-                <mat-icon>delete</mat-icon>
-              }
-            </button>
-          </div>
+      <senergy-form-section title="Attributes">
+        @if (!readOnly) {
+          <button sectionActions type="button" matButton (click)="addAttr()">
+            <mat-icon>add</mat-icon> Add attribute
+          </button>
         }
-      </div>
-    }
-    @if (!readOnly) {
-      <button mat-stroked-button color="accent" (click)="addAttr()">Add Attribute</button>
-    }
-  </div>
-  <div class="divider">
-    <div style="display: flex; justify-content: space-between;">
-      <div>Geo Location</div>
-      <div>© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</div>
+        @for (attr of network.attributes; track attr; let i = $index) {
+          @if (!hiddenAttributes.includes(attr.key)) {
+            <div class="attribute">
+              <mat-form-field class="attribute-field">
+                <mat-label>Key</mat-label>
+                <mtx-select [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
+                  [disabled]="readOnly || !editableAttribute(attr)" [items]="knownAttributes" appendTo=".ng-select-anchor"
+                  [addTag]="addAttribute()"></mtx-select>
+                <mat-error senergyError label="Key"></mat-error>
+              </mat-form-field>
+              <span class="attribute-equals">=</span>
+              @if (attr.key === 'senergy/lora/certs-expiration') {
+                <mat-form-field class="attribute-field">
+                  <mat-label>Value</mat-label>
+                  <input matInput disabled value="{{attr.value | date: 'medium'}}">
+                </mat-form-field>
+              } @else {
+                <mat-form-field class="attribute-field">
+                  <mat-label>Value</mat-label>
+                  <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
+                    [disabled]="readOnly || !editableAttribute(attr)">
+                  <mat-error senergyError label="Value"></mat-error>
+                </mat-form-field>
+              }
+              <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">
+                <button mat-icon-button type="button" color="warn" (click)="removeAttr(i)"
+                  [disabled]="readOnly || !editableAttribute(attr)">
+                  @if (!editableAttribute(attr)) {
+                    <mat-icon>conversion_path</mat-icon>
+                  }
+                  @if (editableAttribute(attr)) {
+                    <mat-icon>delete</mat-icon>
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </senergy-form-section>
     </div>
-    <mat-divider></mat-divider>
-  </div>
-  <div #mapBody>
-    @if (mapCalcHeight() !== undefined) {
-      <div [style]="'height: ' + mapCalcHeight()+'px'">
-        <div id="ol-map" class="full-width full-height">
-          <app-map [map]="map"></app-map>
+
+    <div class="column">
+      <senergy-form-section title="Geo location" class="map-section">
+        <div #mapBody class="map-body">
+          <div id="ol-map" class="map-canvas">
+            <app-map [map]="map"></app-map>
+          </div>
         </div>
-      </div>
-    }
+        <p class="map-credit">© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors.</p>
+      </senergy-form-section>
+    </div>
   </div>
 </mat-dialog-content>
 
-<mat-dialog-actions class="ly-row ly-align-end-center">
-  <button mat-raised-button color="primary" (click)="close()">{{readOnly ? 'Close' : 'Cancel'}}</button>
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" (click)="close()">{{readOnly ? 'Close' : 'Cancel'}}</button>
   @if (!readOnly) {
-    <button mat-raised-button color="accent" (click)="save()">Save</button>
+    <button matButton="filled" type="button" (click)="save()">Save</button>
   }
 </mat-dialog-actions>

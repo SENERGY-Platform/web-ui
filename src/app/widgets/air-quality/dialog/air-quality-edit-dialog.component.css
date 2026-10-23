@@ -49,7 +49,7 @@
 }
 
 .outside-warning {
-    padding: 0 1.55rem 0.7rem;
+    padding-top: 8px;
 }
 
 mat-form-field {
@@ -77,44 +77,36 @@ mat-form-field {
     margin-left: 0.4rem;
 }
 
-.panel-title {
-    font-size: 16px;
-}
-
-.toggle {
-    padding-top: 0.25rem;
-    padding-bottom: 1.5rem;
-    margin-top: 1%;
-}
-
-.headline {
-    padding-top: 1.2rem;
-    font-weight: 400;
-    letter-spacing: 0.03rem;
-}
-
-mat-divider {
-    padding-bottom: 0.7rem;
-}
-
 .right-aligned {
     text-align: right;
 }
 
-.scale-heading {
-    padding-bottom: 0.1rem;
+/* The dialog has the height the opener gave it; the stepper scrolls inside. */
+mat-dialog-content.dialog-body {
+    display: block;
+    overflow: auto;
 }
 
-table {
-    align-items: center;
-    justify-content: space-between;
-    table-layout: fixed;
-    width: 100%;
+.entry-frame {
+    /* Leaves room for the dialog chrome, the step header and the Back/Next row of a 90vh dialog. */
+    display: flex;
+    flex-direction: column;
+    height: calc(90vh - 18.5rem);
+    min-height: 20rem;
 }
 
-td {
-    width: 33%;
-    padding: 0.2rem 1.3rem 0.2rem;
+@media (max-width: 599px) {
+    .entry-frame {
+        height: auto;
+    }
+}
+
+.entry-online {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: var(--mat-sys-primary);
 }
 
 senergy-widget-spinner {
@@ -123,11 +115,6 @@ senergy-widget-spinner {
 
 .unit {
     padding-right: 0.5em;
-}
-
-.threshold-field {
-    /*width: 80%;*/
-    width: calc(100% - 0.5em);
 }
 
 /* Hide arrows in number inputs */
@@ -141,5 +128,4 @@ input[matinput]::-webkit-inner-spin-button {
 input[matinput][type=number] {
     -moz-appearance: textfield;
 }
-
 

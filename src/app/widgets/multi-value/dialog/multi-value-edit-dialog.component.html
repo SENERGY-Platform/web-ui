@@ -16,21 +16,184 @@
 
 <senergy-dialog-header title="Edit Multi Value" (closed)="close()"></senergy-dialog-header>
 
-<mat-dialog-content>
-  <form [formGroup]="formGroup">
-    <table>
-      <tr>
-        @if (userHasUpdateNameAuthorization) {
-          <td>
+<mat-dialog-content class="dialog-body">
+  <form [formGroup]="formGroup" class="dialog-form">
+    @if (userHasUpdatePropertiesAuthorization) {
+      <senergy-tree-detail-layout class="in-dialog">
+        <div treePanel>
+          <div role="listbox" aria-label="Widget settings">
+            <div class="entry-row" role="option" tabindex="0" [class.selected]="step === -1"
+              [attr.aria-selected]="step === -1" (click)="select(-1)" (keydown.enter)="selectByKey($event, -1)"
+              (keydown.space)="selectByKey($event, -1)">
+              <span class="entry-text">
+                <span class="entry-label">Settings</span>
+                <span class="entry-sub">{{formGroup.controls.name.value || 'no name'}}</span>
+              </span>
+              @if (settingsInvalid()) {
+                <mat-icon class="entry-warning" matTooltip="The settings are incomplete">warning</mat-icon>
+              }
+            </div>
+          </div>
+          <div class="entry-heading">
+            <span>Measurements</span>
+            <button mat-icon-button type="button" class="entry-add" matTooltip="Add measurement"
+              aria-label="Add measurement" (click)="addNewMeasurement(true)">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <div role="listbox" aria-label="Measurements">
+            @for (tab of getMeasurements().controls; track tab; let index = $index) {
+              <div class="entry-row" role="option" tabindex="0" [class.selected]="step === index"
+                [attr.aria-selected]="step === index" (click)="select(index)"
+                (keydown.enter)="selectByKey($event, index)" (keydown.space)="selectByKey($event, index)">
+                <span class="entry-text">
+                  <span class="entry-label" [class.unnamed]="!tab.get('name')?.value">{{rowLabel(index)}}</span>
+                  <span class="entry-sub">{{exportName(tab)}}</span>
+                </span>
+                @if (tab.invalid) {
+                  <mat-icon class="entry-warning" matTooltip="This measurement is incomplete">warning</mat-icon>
+                }
+                @if (getMeasurements().length > 1) {
+                  <button mat-icon-button type="button" class="entry-menu" [matMenuTriggerFor]="rowMenu"
+                    [attr.aria-label]="'Actions for ' + rowLabel(index)" (click)="$event.stopPropagation()">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #rowMenu="matMenu" xPosition="before">
+                    @if (index > 0) {
+                      <button mat-menu-item type="button" (click)="moveUp(index)">
+                        <mat-icon>arrow_upward</mat-icon> Move up
+                      </button>
+                    }
+                    @if (index < getMeasurements().length - 1) {
+                      <button mat-menu-item type="button" (click)="moveDown(index)">
+                        <mat-icon>arrow_downward</mat-icon> Move down
+                      </button>
+                    }
+                    <button mat-menu-item type="button" class="danger" (click)="removeTab(index)">
+                      <mat-icon>delete</mat-icon> Delete
+                    </button>
+                  </mat-menu>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div detailPanel>
+          <div [class.ly-hidden]="step >= 0">
+            <ng-container *ngTemplateOutlet="settings"></ng-container>
+          </div>
+          @for (tab of getMeasurements().controls; track tab; let index = $index) {
+            @if (opened.has(tab)) {
+              <div [class.ly-hidden]="step !== index" [formGroup]="getMeasurement(index)">
+                <senergy-form-section title="Measurement">
+                  <mat-form-field class="full-width">
+                    <mat-label>Alias</mat-label>
+                    <input #aliasInput type="text" matInput required formControlName="name">
+                    <mat-error senergyError label="Alias"></mat-error>
+                  </mat-form-field>
+                </senergy-form-section>
+
+                <senergy-form-section title="Source">
+                  <div class="field-grid">
+                    <mat-form-field>
+                      <mat-label>Export</mat-label>
+                      <mtx-select formControlName="export" required [compareWith]="compareExports"
+                        placeholder="Choose Export" appendTo=".ng-select-anchor">
+                        @for (option of exports; track option) {
+                          <mtx-option [value]="option">
+                            {{option.name}}
+                          </mtx-option>
+                        }
+                      </mtx-select>
+                      <mat-error senergyError label="Export"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Value</mat-label>
+                      <mtx-select [compareWith]="compare" formControlName="column" required
+                        appendTo=".ng-select-anchor">
+                        @for (column of (tab.get('export')?.value.values); track column) {
+                          <mtx-option
+                            [value]="column">
+                            {{column.Name}}
+                          </mtx-option>
+                        }
+                      </mtx-select>
+                      <mat-error senergyError label="Value"></mat-error>
+                    </mat-form-field>
+                  </div>
+                </senergy-form-section>
+
+                <senergy-form-section title="Display">
+                  <div class="field-grid">
+                    <mat-form-field>
+                      <mat-label>Unit</mat-label>
+                      <input type="text" matInput formControlName="unit">
+                      <mat-error senergyError label="Unit"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Type</mat-label>
+                      <mtx-select formControlName="type" [compareWith]="compareStrings" required
+                        appendTo=".ng-select-anchor">
+                        <mtx-option [value]="'String'">String</mtx-option>
+                        <mtx-option [value]="'Number'">Number</mtx-option>
+                        <mtx-option [value]="'Date'">Date</mtx-option>
+                        <mtx-option [value]="'Currency'">Currency</mtx-option>
+                        <mtx-option [value]="'Percent'">Percent</mtx-option>
+                        <mtx-option [value]="'Boolean'">Boolean</mtx-option>
+                      </mtx-select>
+                      <mat-error senergyError label="Type"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field hintLabel="For use in Angular pipes">
+                      <mat-label>Format</mat-label>
+                      <input type="text" matInput formControlName="format">
+                      <mat-error senergyError label="Format"></mat-error>
+                    </mat-form-field>
+                    <mat-form-field matTooltip="{{getMathWarningTooltip(index)}}">
+                      <mat-label>Math</mat-label>
+                      <input type="text" matInput formControlName="math">
+                      <mat-error senergyError label="Math"></mat-error>
+                    </mat-form-field>
+                  </div>
+                </senergy-form-section>
+
+                <senergy-form-section title="Warnings">
+                  <div formGroupName="warnings" [matTooltip]="getBoundaryWarningTooltip(index)">
+                    <mat-slide-toggle formControlName="warning_enabled">Enable warnings</mat-slide-toggle>
+                    <div class="field-grid warning-fields">
+                      <mat-form-field>
+                        <mat-label>Lower Boundary</mat-label>
+                        <input matInput type="number" formControlName="lowerBoundary">
+                        <mat-error senergyError label="Lower Boundary"></mat-error>
+                      </mat-form-field>
+                      <mat-form-field>
+                        <mat-label>Upper Boundary</mat-label>
+                        <input matInput type="number" formControlName="upperBoundary">
+                        <mat-error senergyError label="Upper Boundary"></mat-error>
+                      </mat-form-field>
+                    </div>
+                  </div>
+                </senergy-form-section>
+              </div>
+            }
+          }
+        </div>
+      </senergy-tree-detail-layout>
+    } @else {
+      <ng-container *ngTemplateOutlet="settings"></ng-container>
+    }
+
+    <ng-template #settings>
+      <senergy-form-section title="Settings">
+        <div class="field-grid">
+          @if (userHasUpdateNameAuthorization) {
             <mat-form-field>
               <mat-label>Widget Name</mat-label>
-              <input type="text" matInput formControlName="name">
+              <input type="text" matInput formControlName="name" cdkFocusInitial>
               <mat-error senergyError label="Widget Name"></mat-error>
             </mat-form-field>
-          </td>
-        }
-        @if (userHasUpdatePropertiesAuthorization) {
-          <td>
+          }
+          @if (userHasUpdatePropertiesAuthorization) {
             <mat-form-field>
               <mat-label>Default Order</mat-label>
               <mtx-select formControlName="order" placeholder="Order by" [compareWith]="compareStrings"
@@ -45,169 +208,21 @@
               </mtx-select>
               <mat-error senergyError label="Default Order"></mat-error>
             </mat-form-field>
-          </td>
-        }
-        @if (userHasUpdatePropertiesAuthorization) {
-          <td>
             <mat-form-field>
               <mat-label>Value Alias</mat-label>
               <input type="text" matInput placeholder="Value" formControlName="valueAlias">
               <mat-error senergyError label="Value Alias"></mat-error>
             </mat-form-field>
-          </td>
-        }
-      </tr>
-    </table>
-    @if (userHasUpdatePropertiesAuthorization) {
-      <span>
-        <mat-accordion>
-          @for (tab of getMeasurements().controls; track tab; let index = $index) {
-            <mat-expansion-panel
-              [expanded]="step === index">
-              <mat-expansion-panel-header class="right-aligned-header">
-                <mat-panel-title>
-                  <span [ngClass]="{'color-warn': tab.invalid}"> {{tab.get('name')?.value}} </span>
-                </mat-panel-title>
-                <mat-panel-description>
-                  <span [ngClass]="{'color-warn': tab.invalid}"> {{index}} </span>
-                </mat-panel-description>
-              </mat-expansion-panel-header>
-              <ng-template matExpansionPanelContent>
-                <table [formGroup]="getMeasurement(index)">
-                  <tr>
-                    <td>
-                      <mat-form-field>
-                        <mat-label>Alias</mat-label>
-                        <input type="text" matInput required formControlName="name">
-                        <mat-error senergyError label="Alias"></mat-error>
-                      </mat-form-field>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <mat-form-field>
-                        <mat-label>Export</mat-label>
-                        <mtx-select formControlName="export" required [compareWith]="compareExports"
-                          placeholder="Choose Export" appendTo=".ng-select-anchor">
-                          @for (option of exports; track option) {
-                            <mtx-option [value]="option">
-                              {{option.name}}
-                            </mtx-option>
-                          }
-                        </mtx-select>
-                        <mat-error senergyError label="Export"></mat-error>
-                      </mat-form-field>
-                    </td>
-                    <td>
-                      <mat-form-field>
-                        <mat-label>Value</mat-label>
-                        <mtx-select [compareWith]="compare" formControlName="column" required
-                          appendTo=".ng-select-anchor">
-                          @for (column of (tab.get('export')?.value.values); track column) {
-                            <mtx-option
-                              [value]="column">
-                              {{column.Name}}
-                            </mtx-option>
-                          }
-                        </mtx-select>
-                        <mat-error senergyError label="Value"></mat-error>
-                      </mat-form-field>
-                    </td>
-                    <td>
-                      <mat-form-field>
-                        <mat-label>Unit</mat-label>
-                        <input type="text" matInput formControlName="unit">
-                        <mat-error senergyError label="Unit"></mat-error>
-                      </mat-form-field>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <mat-form-field>
-                        <mat-label>Type</mat-label>
-                        <mtx-select formControlName="type" [compareWith]="compareStrings" required
-                          appendTo=".ng-select-anchor">
-                          <mtx-option [value]="'String'">String</mtx-option>
-                          <mtx-option [value]="'Number'">Number</mtx-option>
-                          <mtx-option [value]="'Date'">Date</mtx-option>
-                          <mtx-option [value]="'Currency'">Currency</mtx-option>
-                          <mtx-option [value]="'Percent'">Percent</mtx-option>
-                          <mtx-option [value]="'Boolean'">Boolean</mtx-option>
-                        </mtx-select>
-                        <mat-error senergyError label="Type"></mat-error>
-                      </mat-form-field>
-                    </td>
-                    <td>
-                      <mat-form-field
-                        hintLabel="For use in Angular pipes">
-                        <mat-label>Format</mat-label>
-                        <input type="text" matInput formControlName="format">
-                        <mat-error senergyError label="Format"></mat-error>
-                      </mat-form-field>
-                    </td>
-                    <td>
-                      <mat-form-field
-                        matTooltip="{{getMathWarningTooltip(index)}}">
-                        <mat-label>Math</mat-label>
-                        <input type="text" matInput formControlName="math">
-                        <mat-error senergyError label="Math"></mat-error>
-                      </mat-form-field>
-                    </td>
-                  </tr>
-                  <tr [formGroup]="getWarningGroup(index)" matTooltip="{{getBoundaryWarningTooltip(index)}}">
-                    <td>
-                      <mat-slide-toggle formControlName="warning_enabled">Enable warnings
-                      </mat-slide-toggle>
-                    </td>
-                    <td>
-                      <mat-form-field>
-                        <mat-label>Lower Boundary</mat-label>
-                        <input matInput type="number" formControlName="lowerBoundary">
-                        <mat-error senergyError label="Lower Boundary"></mat-error>
-                      </mat-form-field>
-                    </td>
-                    <td>
-                      <mat-form-field>
-                        <mat-label>Upper Boundary</mat-label>
-                        <input matInput type="number" formControlName="upperBoundary">
-                        <mat-error senergyError label="Upper Boundary"></mat-error>
-                      </mat-form-field>
-                    </td>
-                  </tr>
-                </table>
-                <div>
-                  <span matTooltip="Move this measurement up or down">
-                    <button mat-icon-button
-                      [disabled]="this.getMeasurements().controls.length === 1 || index === 0"
-                      (click)="moveUp(index)">
-                      <mat-icon>arrow_upward</mat-icon>
-                    </button>
-                    <button mat-icon-button
-                      [disabled]="this.getMeasurements().controls.length === 1 || index === this.getMeasurements().controls.length - 1"
-                      (click)="moveDown(index)">
-                      <mat-icon>arrow_downward</mat-icon>
-                    </button>
-                  </span>
-                  <button mat-icon-button style="float: right"
-                    [disabled]="this.getMeasurements().controls.length === 1" (click)="removeTab(index)">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              </ng-template>
-            </mat-expansion-panel>
           }
-        </mat-accordion>
-        <button (click)="addNewMeasurement()" mat-icon-button>
-          <mat-icon>add</mat-icon>
-        </button>
-      </span>
-    }
+        </div>
+      </senergy-form-section>
+    </ng-template>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions>
   @if (!formGroup.valid) {
-    <span class="color-warn actions-warn">Widget not configured correctly</span>
+    <span class="color-warn actions-warn">{{configurationProblem()}}</span>
   }
   <button matButton="outlined" (click)="close()">Cancel</button>
   <button matButton="filled" (click)="save()" [disabled]="!formGroup.valid">Save</button>

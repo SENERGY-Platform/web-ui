@@ -18,7 +18,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /**
  * Two columns for a tree and the form of its selected node: content marked `[treePanel]` goes left,
- * `[detailPanel]` right. Below 600px the tree stacks above the detail; each panel scrolls on its own.
+ * `[detailPanel]` right. Below 600px the tree stacks above the detail; each panel scrolls on its own. The class
+ * `in-dialog` on the host drops the page padding for use inside `mat-dialog-content`.
  */
 @Component({
     selector: 'senergy-tree-detail-layout',

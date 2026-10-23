@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { afterNextRender, ChangeDetectorRef, Component, ElementRef, Injector, OnInit, ChangeDetectionStrategy, inject, DestroyRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
+import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
+import { TreeDetailLayoutComponent } from '../../../core/components/tree-detail-layout/tree-detail-layout.component';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import {
@@ -85,10 +87,10 @@ import { MatInput } from '@angular/material/input';
 import { MatErrorMessagesDirective } from '../../../core/directives/matError.directive';
 import { MtxSelect, MtxOption, MtxSelectLabelTemplate } from '@ng-matero/extensions/select';
 import { MatIcon } from '@angular/material/icon';
-import { NgStyle, NgClass } from '@angular/common';
+import { NgStyle, NgTemplateOutlet } from '@angular/common';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent } from '@angular/material/expansion';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 
@@ -152,9 +154,9 @@ type ElementGroup = FormGroup<{
 
 @Component({
     templateUrl: './data-table-edit-dialog.component.html',
-    styleUrls: ['./data-table-edit-dialog.component.css'],
+    styleUrls: ['../../shared/dialog-list-detail.css', './data-table-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MtxSelectLabelTemplate, MatIcon, NgStyle, MatIconButton, MatTooltip, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, NgClass, MatExpansionPanelDescription, MatExpansionPanelContent, MatRadioGroup, MatRadioButton, MatSlideToggle, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, FormSectionComponent, TreeDetailLayoutComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatErrorMessagesDirective, MtxSelect, MtxOption, MtxSelectLabelTemplate, MatIcon, NgStyle, NgTemplateOutlet, MatIconButton, MatTooltip, MatMenu, MatMenuItem, MatMenuTrigger, MatRadioGroup, MatRadioButton, MatSlideToggle, MatDialogActions, MatButton]
 })
 export class DataTableEditDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<DataTableEditDialogComponent>>(MatDialogRef);
@@ -170,11 +172,16 @@ export class DataTableEditDialogComponent implements OnInit {
     private destroyRef = inject(DestroyRef);
     private snackBar = inject(MatSnackBar);
     private janitor = inject(GeneratedResourceJanitor);
+    private injector = inject(Injector);
 
     dashboardId: string;
     widgetId: string;
     widget: WidgetModel = {} as WidgetModel;
-    step = -1;
+    private selection = -1;
+    /** Elements whose form was shown once. It stays in the DOM, hidden, like the content of a collapsed expansion panel. */
+    readonly opened = new WeakSet<AbstractControl>();
+    private nameFocused = false;
+    @ViewChildren('aliasInput') aliasInputs?: QueryList<ElementRef<HTMLInputElement>>;
     elementTypes = DataTableElementTypesEnum;
     exportTypes = ExportValueTypes;
     orderValues = DataTableOrderEnum;
@@ -345,6 +352,7 @@ export class DataTableEditDialogComponent implements OnInit {
 
             if (measurements.length === 0) {
                 this.addNewMeasurement();
+                this.step = -1; // the table settings stay selected
             }
             this.numReady++;
             this.setReady();
@@ -651,9 +659,88 @@ export class DataTableEditDialogComponent implements OnInit {
         });
     }
 
-    addNewMeasurement() {
+    addNewMeasurement(focusAlias = false) {
         this.addMeasurement(undefined);
-        this.step = this.getElements().controls.length - 1;
+        this.select(this.getElements().controls.length - 1, focusAlias);
+    }
+
+    /** The entry selected in the list: -1 is the table settings, otherwise the index of an element. */
+    get step(): number {
+        return this.selection;
+    }
+
+    set step(index: number) {
+        this.selection = index;
+        const element = this.getElements().controls[index];
+        if (element !== undefined) {
+            this.opened.add(element);
+        }
+    }
+
+    select(index: number, focusAlias = false) {
+        this.step = index;
+        if (focusAlias) {
+            afterNextRender(() => this.focusAlias(), { injector: this.injector });
+        }
+    }
+
+    /** The form renders after the dialog's own initial focus ran, so the name field is focused once when it appears. */
+    @ViewChild('nameInput') set nameInput(input: ElementRef<HTMLInputElement> | undefined) {
+        if (input !== undefined && !this.nameFocused) {
+            this.nameFocused = true;
+            afterNextRender(() => input.nativeElement.focus(), { injector: this.injector });
+        }
+    }
+
+    private focusAlias() {
+        const controls = this.getElements().controls;
+        const shown = controls.filter((element) => this.opened.has(element));
+        this.aliasInputs?.get(shown.indexOf(controls[this.step]))?.nativeElement.focus();
+    }
+
+    /** Selection from the keyboard; keys pressed on the row menu button stay with the button. */
+    selectByKey(event: Event, index: number) {
+        if (event.target === event.currentTarget) {
+            event.preventDefault();
+            this.select(index);
+        }
+    }
+
+    rowLabel(index: number): string {
+        return this.getElement(index).get('name')?.value || 'Element ' + (index + 1);
+    }
+
+    elementTypeLabel(element: AbstractControl): string {
+        switch (element.get('elementDetails')?.get('elementType')?.value) {
+            case this.elementTypes.DEVICE:
+                return 'Device';
+            case this.elementTypes.PIPELINE:
+                return 'Pipeline';
+            case this.elementTypes.IMPORT:
+                return 'Import';
+            case this.elementTypes.DEVICE_GROUP:
+                return 'Device group';
+            default:
+                return '';
+        }
+    }
+
+    tableInvalid(): boolean {
+        const { name, order, valueAlias, refreshTime, valuesPerElement } = this.formGroup.controls;
+        return [name, order, valueAlias, refreshTime, valuesPerElement].some((control) => control.invalid);
+    }
+
+    incompleteElements(): number {
+        return this.getElements().controls.filter((element) => element.invalid).length;
+    }
+
+    /** The reason the widget cannot be saved, naming the incomplete elements when they are the cause. */
+    configurationProblem(): string {
+        const incomplete = this.incompleteElements();
+        if (incomplete === 0) {
+            return 'Widget not configured correctly';
+        }
+        return 'Widget not configured correctly: ' + incomplete + (incomplete === 1 ? ' element' : ' elements') + ' incomplete';
     }
 
     getBoundaryWarningTooltip(element: AbstractControl): string {
@@ -688,7 +775,11 @@ export class DataTableEditDialogComponent implements OnInit {
 
     removeTab(index: number) {
         this.getElements().controls.splice(index, 1);
-        this.step = index - 1;
+        if (this.step === index) {
+            this.step = index - 1;
+        } else if (this.step > index) {
+            this.step--;
+        }
     }
 
     moveUp(index: number) {
@@ -702,10 +793,15 @@ export class DataTableEditDialogComponent implements OnInit {
     changePosition(index: number, isUp: boolean) {
         const removed = this.getElement(index);
         this.getElements().controls.splice(index, 1);
-        if (isUp) {
-            this.getElements().controls.splice(index - 1, 0, removed);
-        } else {
-            this.getElements().controls.splice(index + 1, 0, removed);
+        const target = isUp ? index - 1 : index + 1;
+        this.getElements().controls.splice(target, 0, removed);
+        // the selection stays with its element
+        if (target >= 0 && target < this.getElements().length) {
+            if (this.step === index) {
+                this.step = target;
+            } else if (this.step === target) {
+                this.step = index;
+            }
         }
     }
 

@@ -25,6 +25,7 @@ export interface WidgetEditDialogSize {
     minHeight?: string;
     width?: string;
     maxWidth?: string;
+    height?: string;
 }
 
 /** Opens a widget edit dialog and applies the widget it closes with; size fields are only set when given. */
@@ -49,6 +50,9 @@ export function openWidgetEditDialog(
     }
     if (size?.maxWidth !== undefined) {
         dialogConfig.maxWidth = size.maxWidth;
+    }
+    if (size?.height !== undefined) {
+        dialogConfig.height = size.height;
     }
     const editDialogRef = dialog.open(component, dialogConfig);
 

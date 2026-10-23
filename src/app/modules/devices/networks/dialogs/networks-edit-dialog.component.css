@@ -14,34 +14,71 @@
  * limitations under the License.
  */
 
-.form {
-    width: 100%;
+/* Id, name and attributes on the left, the map filling the height of the right column; stacked on narrow screens. */
+.columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 32px;
+    align-items: stretch;
+}
+
+.column {
+    min-width: 0;
 }
 
 .full-width {
     width: 100%;
 }
 
-.full-height {
+.attribute {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.attribute-field {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.attribute-equals {
+    flex: 0 0 auto;
+}
+
+.map-section {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     height: 100%;
 }
 
-
-.third-width {
-    width: 33%;
+.map-body {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 320px;
 }
 
-.attributes {
-    margin-bottom: 5px;
+.map-canvas {
+    position: absolute;
+    inset: 0;
 }
 
-.attribute {
-    justify-content: space-between;
-    display: flex;
-    align-items: baseline;
+.map-credit {
+    margin: 8px 0 0;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: var(--app-text-xs);
 }
 
-.divider {
-    margin-top: 20px;
-    margin-bottom: 20px;
+@media (max-width: 599px) {
+    .columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .map-section {
+        height: auto;
+    }
+
+    .map-body {
+        flex: 0 0 320px;
+    }
 }
