@@ -38,7 +38,7 @@
 
 .tiles {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
     gap: 8px;
 }
 
@@ -177,10 +177,12 @@
     border-top: 0;
 }
 
+/* same cap as the value table, so the service actions sit at the end of its rows */
 .service-head {
     display: flex;
     align-items: center;
     gap: 8px;
+    max-width: 480px;
 }
 
 .service-title {
@@ -194,14 +196,6 @@
 
 .service-name {
     font-weight: 500;
-}
-
-.service-id {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: var(--app-text-xs);
-    overflow-wrap: anywhere;
 }
 
 /* capped so the eye does not cross the whole dialog from a field to its value */
@@ -254,9 +248,6 @@
     margin-top: 4px;
 }
 
-.service-time {
-    margin-top: 4px;
-}
 
 .download {
     display: flex;

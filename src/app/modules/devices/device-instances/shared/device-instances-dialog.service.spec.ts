@@ -83,9 +83,24 @@ describe('DeviceInstancesDialogService data dialog', () => {
 
         const config = dialog.open.calls.mostRecent().args[1] as { data: Record<string, unknown> };
         expect(config.data['valueMeta']).toEqual([[
-            { hasAspect: true, aspectName: 'Air', characteristicName: 'kWh' },
-            { hasAspect: false, aspectName: '', characteristicName: '' },
+            { hasAspect: true, aspectName: 'Air', characteristicName: 'kWh', functionName: 'Get energy', isTimestamp: false },
+            { hasAspect: false, aspectName: '', characteristicName: '', functionName: 'Get energy', isTimestamp: false },
         ], []]);
+    });
+
+    it('names a value by its function without the Get- prefix, and marks timestamp characteristics', () => {
+        deviceTypeService.getMeasuringFunctions.and.returnValue(of([
+            { id: 'f1', name: 'Get-Temperature', display_name: 'Get-Temperature' }, { id: 'f2', name: 'Get-Datetime', display_name: 'Timestamp' },
+        ] as never));
+        deviceTypeService.getLeafCharacteristics.and.returnValue(of([{ id: 'c1', name: 'Timestamp (Unix Milliseconds)', display_unit: '' }] as never));
+        deviceTypeService.getValuePathsAndContentVariables.and.returnValue([
+            { path: 'm.temperature', contentVariable: { function_id: 'f1', aspect_ids: ['a1'] } },
+            { path: 'm.timestamp', contentVariable: { function_id: 'f2', characteristic_id: 'c1', aspect_ids: ['a1'] } },
+        ] as never);
+        service.openDeviceServiceDialog(device);
+
+        const meta = (dialog.open.calls.mostRecent().args[1] as { data: Record<string, unknown> }).data['valueMeta'] as { functionName: string; isTimestamp: boolean }[][];
+        expect(meta[0].map(m => [m.functionName, m.isTimestamp])).toEqual([['Temperature', false], ['Timestamp', true]]);
     });
 
     it('treats the deprecated aspect_id alone as an aspect', () => {

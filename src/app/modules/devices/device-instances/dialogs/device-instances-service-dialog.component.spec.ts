@@ -28,7 +28,7 @@ import { ExportDataService } from '../../../../widgets/shared/export-data.servic
 import { DeviceTypeModel, DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
-import { DeviceInstancesServiceDialogComponent, ValueMeta } from './device-instances-service-dialog.component';
+import { DeviceInstancesServiceDialogComponent, formatValue, ValueMeta } from './device-instances-service-dialog.component';
 
 describe('DeviceInstancesServiceDialogComponent', () => {
     let fixture: ComponentFixture<DeviceInstancesServiceDialogComponent>;
@@ -56,7 +56,8 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         { time: '2026-03-01T09:00:00Z', value: 'ok' },
     ];
 
-    const meta = (hasAspect: boolean, aspectName = '', characteristicName = ''): ValueMeta => ({ hasAspect, aspectName, characteristicName });
+    const meta = (hasAspect: boolean, aspectName = '', characteristicName = '', functionName = '', isTimestamp = false): ValueMeta =>
+        ({ hasAspect, aspectName, characteristicName, functionName, isTimestamp });
     const defaultMeta = [[meta(true, 'Energy', 'kWh'), meta(false)], [meta(false)]];
 
     function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues; meta?: ValueMeta[][]; descriptions?: string[][]; developer?: boolean } = {}) {
@@ -238,6 +239,74 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         expect(Array.from(fixture.nativeElement.querySelectorAll('.tile-service')).map(e => (e as HTMLElement).textContent)).toEqual(['Energy', 'Status']);
     });
 
+    const airLike = () => create({
+        elements: [
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.temperature' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.pm10' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.pm1' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.timestamp' },
+        ],
+        counts: [4, 0],
+        values: [
+            { time: '2026-03-01T10:00:00Z', value: 21.108 }, { time: '2026-03-01T10:00:00Z', value: 0.160637 },
+            { time: '2026-03-01T10:00:00Z', value: 1179 }, { time: '2026-03-01T10:00:00Z', value: 1772359200000 },
+        ] as never,
+        meta: [[
+            meta(true, 'Air', 'Degree Celsius', 'Temperature'), meta(true, 'Air', 'ug/m3', 'Particle Concentration'),
+            meta(true, 'Air', 'ug/m3', 'Particle Concentration'), meta(true, 'Air', 'Timestamp (Unix Milliseconds)', 'Timestamp', true),
+        ], []],
+    });
+
+    it('labels a tile with its function before the aspect, so one shared aspect does not name every tile', () => {
+        airLike();
+
+        expect(component.tiles.map(t => t.label)).toEqual(['Temperature', 'Particle Concentration (pm10)', 'Particle Concentration (pm1)']);
+    });
+
+    it('tells equal function labels apart by their aspect when the aspects differ', () => {
+        const elements = [
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'in.t' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'out.t' },
+        ];
+        create({ elements, counts: [2, 0], values: lastValues.slice(0, 2), meta: [[meta(true, 'Inside', '', 'Temperature'), meta(true, 'Outside', '', 'Temperature')], []] });
+
+        expect(component.tiles.map(t => t.label)).toEqual(['Temperature (Inside)', 'Temperature (Outside)']);
+    });
+
+    it('leaves timestamps off the tiles but lists them in the services table', () => {
+        airLike();
+
+        expect(component.tiles.map(t => t.path)).not.toContain('m.timestamp');
+        expect(component.serviceTables[0].otherRows.map(r => r.path)).toEqual(['m.timestamp']);
+    });
+
+    it('shows a time all tiles share once above the grid instead of on every tile', () => {
+        airLike();
+        const el = fixture.nativeElement as HTMLElement;
+
+        expect(el.querySelector('.values-block h3')?.textContent).toContain('01.03.2026');
+        expect(el.querySelectorAll('.tile-time').length).toBe(0);
+    });
+
+    it('keeps the time on each tile when the tiles do not share one', () => {
+        create({ meta: [[meta(true, 'Energy'), meta(true, 'Power')], [meta(true, 'State')]] });
+
+        expect(component.tilesTime).toBeNull();
+        expect(fixture.nativeElement.querySelectorAll('.tile-time').length).toBe(3);
+    });
+
+    it('rounds values on the tiles and keeps the raw value in the services table', () => {
+        airLike();
+        const tileValues = Array.from(fixture.nativeElement.querySelectorAll('.tile-value')).map(e => (e as HTMLElement).textContent?.replace(/\s+/g, ' ').trim());
+
+        expect(tileValues.map(v => v?.split(' ')[0])).toEqual(['21.11', '0.161', '1179']);
+        expect(rowTexts()[0]).toContain('21.108');
+    });
+
+    it('formats numbers with a fraction and leaves everything else as it is', () => {
+        expect([21.108, 0.160637, 1179, -3.14159, 'ok', true].map(v => formatValue(v as never))).toEqual(['21.11', '0.161', '1179', '-3.14', 'ok', 'true']);
+    });
+
     it('keeps the path and the service name on a tile for its tooltip', () => {
         create();
 
@@ -332,7 +401,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
 
         expect(component.serviceTables[0].time).toBe('2026-03-01T10:00:00Z');
         expect(component.serviceTables[1].time).toBe('2026-03-01T09:00:00Z');
-        expect(fixture.nativeElement.querySelector('.service-time').textContent).toContain('01.03.2026');
+        expect(fixture.nativeElement.querySelector('.service-title').textContent).toContain('01.03.2026');
     });
 
     it('keeps the full path as the tooltip source of a row', () => {

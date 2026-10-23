@@ -106,10 +106,14 @@ export class DeviceInstancesDialogService {
                             description += characteristics.find(a => a.id === path.contentVariable.characteristic_id)?.name;
                         }
                         serviceDescriptions.push(description);
+                        const fn = functions.find(f => f.id === path.contentVariable.function_id && !!f.id);
+                        const characteristicName = characteristics.find(a => a.id === path.contentVariable.characteristic_id && !!a.id)?.name ?? '';
                         serviceMeta.push({
                             hasAspect: aspectIds.length > 0,
                             aspectName: aspectIds.map(id => aspects.find(a => a.id === id)?.name).filter(n => !!n).join(', '),
-                            characteristicName: characteristics.find(a => a.id === path.contentVariable.characteristic_id && !!a.id)?.name ?? '',
+                            characteristicName,
+                            functionName: (fn?.display_name || fn?.name || '').replace(/^Get-/, ''),
+                            isTimestamp: characteristicName.startsWith('Timestamp'),
                         });
                         serviceUnits.push(characteristics.find(a => a.id === path.contentVariable.characteristic_id && !!a.id)?.display_unit ?? '');
                         if (serviceOutputCounts.length <= serviceIndex) {

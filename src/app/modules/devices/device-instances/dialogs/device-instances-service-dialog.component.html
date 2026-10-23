@@ -52,7 +52,16 @@
               @if (service.description) {
                 <span class="muted">{{service.description}}</span>
               }
+              @if (serviceTables[i]?.time; as time) {
+                <span class="muted">{{time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+              }
             </div>
+            @if (userIsDeveloper) {
+              <button mat-icon-button type="button" class="copy" [class.copied]="copiedKey === 'service-' + i"
+                (click)="copyToClipboard('service-' + i, service.id)" [matTooltip]="'Copy service ID ' + service.id" aria-label="Copy service ID">
+                <mat-icon>{{copiedKey === 'service-' + i ? 'check' : 'content_copy'}}</mat-icon>
+              </button>
+            }
             @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
               <button mat-icon-button type="button" (click)="toggleDownload(i)" matTooltip="Download data"
                 aria-label="Download data" [attr.aria-expanded]="downloadIndex === i">
@@ -60,16 +69,7 @@
               </button>
             }
           </div>
-          @if (userIsDeveloper) {
-            <div class="service-id">
-              <span class="muted">Service ID</span> {{service.id}}
-              <ng-container *ngTemplateOutlet="copyButton; context: {key: 'service-' + i, text: service.id}"></ng-container>
-            </div>
-          }
           @if (serviceTables[i]; as table) {
-            @if (table.time) {
-              <div class="muted service-time">Last value {{table.time | date:'dd.MM.yyyy - HH:mm:ss'}}</div>
-            }
             @if (tableHasRows(table)) {
               <table class="values">
                 <tbody>
@@ -137,7 +137,7 @@
 
   @if (showValues) {
     <section class="block values-block">
-      <h3>Current values</h3>
+      <h3>Current values @if (tilesTime) {<span class="hint">{{tilesTime | date:'dd.MM.yyyy - HH:mm:ss'}}</span>}</h3>
       @if (errorOccured) {
         <p class="muted">{{errorMessage}}</p>
       } @else if (!valuesLoaded) {
@@ -145,15 +145,15 @@
       } @else {
         <div class="tiles">
           @for (tile of tiles; track $index) {
-            <div class="tile" [matTooltip]="tile.path + ' (' + tile.serviceName + ')'" matTooltipPosition="above">
+            <div class="tile" [matTooltip]="tile.path + ': ' + tile.value + ' (' + tile.serviceName + ')'" matTooltipPosition="above">
               <span class="tile-field">{{tile.label}}</span>
               @if (tile.showService) {
                 <span class="tile-service">{{tile.serviceName}}</span>
               }
               <span class="tile-value" [class.no-value]="tile.value === null">
-                {{tile.value !== null ? tile.value : 'N/A'}}@if (tile.value !== null && tile.unit) {<span class="tile-unit"> {{tile.unit}}</span>}
+                {{tile.value !== null ? formatValue(tile.value) : 'N/A'}}@if (tile.value !== null && tile.unit) {<span class="tile-unit"> {{tile.unit}}</span>}
               </span>
-              @if (tile.time) {
+              @if (tile.time && !tilesTime) {
                 <span class="tile-time">{{tile.time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
               }
             </div>

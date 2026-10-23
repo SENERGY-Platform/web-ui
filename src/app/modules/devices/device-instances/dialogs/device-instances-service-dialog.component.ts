@@ -53,9 +53,13 @@ export interface ValueMeta {
     hasAspect: boolean;
     aspectName: string;
     characteristicName: string;
+    /** Display name of the measuring function without the "Get-" prefix; empty without a function. */
+    functionName?: string;
+    /** The value is a point in time (a "Timestamp ..." characteristic), which the tile grid leaves out. */
+    isTimestamp?: boolean;
 }
 
-/** A last value in the value grid; only values with an aspect get one. */
+/** A last value in the value grid; only values with an aspect that are not timestamps get one. */
 export interface ValueTile {
     serviceIndex: number;
     label: string;
@@ -147,6 +151,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
 
     /** Hides the fields without a value in every service's table. */
     hideEmpty = true;
+    readonly formatValue = formatValue;
 
     /** Index of the service whose download options are open, at most one. */
     downloadIndex: number | undefined;
@@ -301,18 +306,30 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         return !this.valuesLoaded || this.errorOccured || this.tiles.length > 0;
     }
 
-    /** Aspect name, else characteristic name, else the last path segment; equal labels get the last segment added. */
+    /** The time all tiles share, shown once above the grid; null when they differ, then each tile shows its own. */
+    get tilesTime(): string | null {
+        const times = new Set(this.tiles.map(t => t.time));
+        return times.size === 1 ? [...times][0] : null;
+    }
+
+    /**
+     * Function name, else aspect name, else characteristic name, else the last path segment. A device type often puts
+     * every value under one aspect (e.g. "Air"), so the function says what is measured. Equal labels get the aspect
+     * added when that tells them apart, else the last path segment.
+     */
     private buildTiles(): ValueTile[] {
         const tiles: ValueTile[] = [];
+        const aspectOf = new Map<ValueTile, string>();
         this.lastValueArray.forEach((service, serviceIndex) => service.forEach((v, valueIndex) => {
             const meta = this.valueMeta[serviceIndex]?.[valueIndex];
-            if (meta?.hasAspect !== true) {
+            if (meta?.hasAspect !== true || meta.isTimestamp === true) {
                 return;
             }
             const path = v.request.columnName;
+            const label = meta.functionName || meta.aspectName || meta.characteristicName || lastSegment(path);
             tiles.push({
                 serviceIndex,
-                label: meta.aspectName || meta.characteristicName || lastSegment(path),
+                label,
                 path,
                 serviceName: this.services[serviceIndex]?.name ?? '',
                 showService: false,
@@ -320,13 +337,19 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
                 unit: this.units[serviceIndex]?.[valueIndex] ?? '',
                 time: v.response.time,
             });
-        }));
-        const labelCount = new Map<string, number>();
-        tiles.forEach(t => labelCount.set(t.label, (labelCount.get(t.label) ?? 0) + 1));
-        tiles.forEach(t => {
-            if ((labelCount.get(t.label) ?? 0) > 1) {
-                t.label += ' (' + lastSegment(t.path) + ')';
+            if (meta.functionName && meta.aspectName) {
+                aspectOf.set(tiles[tiles.length - 1], meta.aspectName);
             }
+        }));
+        const byLabel = new Map<string, ValueTile[]>();
+        tiles.forEach(t => byLabel.set(t.label, [...(byLabel.get(t.label) ?? []), t]));
+        byLabel.forEach(group => {
+            if (group.length < 2) {
+                return;
+            }
+            const aspects = group.map(t => aspectOf.get(t));
+            const aspectsDiffer = aspects.every(a => !!a) && new Set(aspects).size === group.length;
+            group.forEach(t => t.label += ' (' + (aspectsDiffer ? aspectOf.get(t) : lastSegment(t.path)) + ')');
         });
         const fullLabelCount = new Map<string, number>();
         tiles.forEach(t => fullLabelCount.set(t.label, (fullLabelCount.get(t.label) ?? 0) + 1));
@@ -492,6 +515,15 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         window.clearTimeout(this.copiedTimeout);
         this.copiedTimeout = window.setTimeout(() => this.copiedKey = undefined, 2000);
     }
+}
+
+/** Numbers with a fraction to two decimals, below 1 to three significant digits; everything else unchanged. */
+export function formatValue(value: TimeValuePairModel['value']): string {
+    if (typeof value !== 'number' || Number.isInteger(value)) {
+        return String(value);
+    }
+    const rounded = Math.abs(value) >= 1 ? Math.round(value * 100) / 100 : Number(value.toPrecision(3));
+    return String(rounded);
 }
 
 function lastSegment(path: string): string {
