@@ -1,0 +1,220 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="details-container">
+  <senergy-spinner [elementCount]="request ? 1 : 0" [show]="!ready"></senergy-spinner>
+  @if (ready && request === null) {
+    <senergy-page-header title="Request" backLabel="Requests" backLink="/smart-services/requests"></senergy-page-header>
+    <senergy-empty-state icon="fact_check" title="Request not found"
+      text="The request does not exist, or you may not read it."></senergy-empty-state>
+  }
+  @if (request) {
+    <senergy-page-header [title]="request.name" description="Proposal of this smart service for publication."
+      backLabel="Requests" backLink="/smart-services/requests">
+      <ng-container pageActions>
+        @if (canWithdraw) {
+          <button matButton="filled" type="button" (click)="withdraw()">
+            <mat-icon>undo</mat-icon> Withdraw
+          </button>
+        }
+      </ng-container>
+    </senergy-page-header>
+    <div class="page">
+      <senergy-form-section title="Summary">
+        <dl class="facts">
+          <div class="fact">
+            <dt>Smart service</dt>
+            <dd>{{request.name}}</dd>
+          </div>
+          <div class="fact">
+            <dt>State</dt>
+            <dd><span [class]="'status-chip ' + stateClass(request.state)">{{stateLabel(request.state)}}</span></dd>
+          </div>
+          <div class="fact">
+            <dt>Author</dt>
+            <dd>{{request.author_name}}</dd>
+          </div>
+          <div class="fact">
+            <dt>Created</dt>
+            <dd>{{request.created_at | date:dateFormat}}</dd>
+          </div>
+          <div class="fact">
+            <dt>Release</dt>
+            <dd class="mono">{{request.release_id}}</dd>
+          </div>
+          <div class="fact">
+            <dt>Test description</dt>
+            <dd class="text">{{request.test_description}}</dd>
+          </div>
+          <div class="fact">
+            <dt>Test parameters</dt>
+            <dd>
+              @if (testParameters !== '') {
+                <senergy-code-editor class="json" [value]="testParameters" language="json" [readOnly]="true" height="10rem"></senergy-code-editor>
+              } @else {
+                <span class="muted">None</span>
+              }
+            </dd>
+          </div>
+          @if (request.error) {
+            <div class="fact">
+              <dt>Error</dt>
+              <dd class="text error">{{request.error}}</dd>
+            </div>
+          }
+        </dl>
+      </senergy-form-section>
+
+      <senergy-form-section title="Review status">
+        <dl class="facts">
+          <div class="fact">
+            <dt>Test</dt>
+            <dd>
+              <span [class]="'status-chip ' + statusClass(request.test.status)">{{statusLabel(request.test.status)}}</span>
+              @if (request.test.at) {
+                <span class="muted"> {{request.test.at | date:dateFormat}}</span>
+              }
+              @if (request.test.detail) {
+                <div class="text">{{request.test.detail}}</div>
+              }
+            </dd>
+          </div>
+          <div class="fact">
+            <dt>Take-over</dt>
+            <dd>
+              <span [class]="'status-chip ' + statusClass(request.sync.status)">{{statusLabel(request.sync.status)}}</span>
+              @if (request.sync.at) {
+                <span class="muted"> {{request.sync.at | date:dateFormat}}</span>
+              }
+              @if (request.sync.commit) {
+                <div class="mono">{{request.sync.commit}}</div>
+              }
+              @if (request.sync.detail) {
+                <div class="text">{{request.sync.detail}}</div>
+              }
+            </dd>
+          </div>
+          <div class="fact">
+            <dt>Operations</dt>
+            <dd>
+              @for (operation of request.operations ?? []; track operation.id) {
+                <div class="operation">
+                  {{operation.kind}}
+                  <span [class]="'status-chip ' + statusClass(operation.status)">{{statusLabel(operation.status)}}</span>
+                  <span class="muted">{{operation.started_at | date:dateFormat}}</span>
+                </div>
+              } @empty {
+                <span class="muted">None</span>
+              }
+            </dd>
+          </div>
+        </dl>
+      </senergy-form-section>
+
+      <senergy-form-section title="Files" hint="What the proposal writes into platform-content, as the files job read it.">
+        @switch (request.files.status) {
+          @case ('none') {
+            <p class="muted">The files have not been made yet.</p>
+          }
+          @case ('running') {
+            <p class="muted">The files are being made. This page refreshes by itself.</p>
+          }
+          @case ('failed') {
+            <p class="error">Making the files failed.</p>
+            @if (request.files.detail) {
+              <p class="text">{{request.files.detail}}</p>
+            }
+          }
+          @case ('ready') {
+            @if (proposal) {
+              @if (proposal.truncated) {
+                <p class="notice">Some contents were left out to keep the upload within its size limit.</p>
+              }
+              @if ((proposal.files ?? []).length === 0) {
+                <p class="muted">The proposal writes no files.</p>
+              } @else {
+                <div class="files">
+                  <ul class="file-list" aria-label="Files of the proposal">
+                    @for (file of proposal.files ?? []; track file.path) {
+                      <li>
+                        <button type="button" class="file-row" [class.selected]="file === selectedFile"
+                          [attr.aria-current]="file === selectedFile ? 'true' : null" (click)="select(file)">
+                          <span class="file-path">{{file.path}}</span>
+                          <span [class]="'status-chip ' + changeClass(file.change)">{{file.change}}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                  <div class="file-content">
+                    @if (selectedFile; as file) {
+                      @if (!hasContent(file)) {
+                        <p class="muted">
+                          @if (file.change === 'deleted') {
+                            The proposal deletes this file.
+                          } @else {
+                            No text to show: the file is not text, or its content was left out to keep the upload small.
+                          }
+                        </p>
+                      } @else {
+                        @if (selectedSvgUrl; as url) {
+                          <img class="svg-image" [src]="url" alt="Rendered image of {{file.path}}">
+                        }
+                        @if (fileLanguage(file) === 'json') {
+                          <senergy-code-editor [value]="file.content ?? ''" language="json" [readOnly]="true" height="24rem"></senergy-code-editor>
+                        } @else {
+                          <senergy-code-editor [value]="file.content ?? ''" language="plaintext" [readOnly]="true" height="24rem"></senergy-code-editor>
+                        }
+                      }
+                    }
+                  </div>
+                </div>
+              }
+            } @else if (filesLoading) {
+              <p class="muted">Loading the files.</p>
+            } @else {
+              <p class="muted">The files could not be read.</p>
+            }
+          }
+        }
+      </senergy-form-section>
+
+      <senergy-form-section title="History">
+        <div class="table-scroll">
+          <table mat-table [dataSource]="history">
+            <ng-container matColumnDef="at">
+              <th mat-header-cell *matHeaderCellDef>Time</th>
+              <td mat-cell *matCellDef="let entry" class="muted nowrap">{{entry.at | date:'dd.MM.yyyy HH:mm:ss'}}</td>
+            </ng-container>
+            <ng-container matColumnDef="by">
+              <th mat-header-cell *matHeaderCellDef>By</th>
+              <td mat-cell *matCellDef="let entry">{{historyBy(entry)}}</td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef>Action</th>
+              <td mat-cell *matCellDef="let entry">{{entry.action}}</td>
+            </ng-container>
+            <ng-container matColumnDef="detail">
+              <th mat-header-cell *matHeaderCellDef>Detail</th>
+              <td mat-cell *matCellDef="let entry" class="text">{{entry.detail}}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="historyColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: historyColumns;"></tr>
+          </table>
+        </div>
+      </senergy-form-section>
+    </div>
+  }
+</div>

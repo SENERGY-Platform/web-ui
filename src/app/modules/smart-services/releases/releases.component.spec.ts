@@ -33,6 +33,7 @@ import { PreferencesService } from '../../../core/services/preferences.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { SmartServiceInstanceDialogService } from '../instances/shared/instance-dialog.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { ContentReviewService } from '../requests/shared/content-review.service';
 
 describe('SmartServiceReleasesComponent', () => {
     let fixture: ComponentFixture<SmartServiceReleasesComponent>;
@@ -62,6 +63,7 @@ describe('SmartServiceReleasesComponent', () => {
                 { provide: DialogsService, useValue: {} },
                 { provide: Router, useValue: {} },
                 { provide: SmartServiceInstanceDialogService, useValue: {} },
+                { provide: ContentReviewService, useValue: { canProposeRelease: () => false } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
             ],
         }).compileComponents();

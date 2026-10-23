@@ -1,0 +1,45 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<senergy-dialog-header title="Propose for publication" (closed)="cancel()"></senergy-dialog-header>
+
+<mat-dialog-content>
+  <p class="intro">
+    {{data.name}} moves to the staging account, where the reviewers read it and test it with your test case.
+  </p>
+
+  <mat-form-field appearance="outline" color="accent" class="full-width">
+    <mat-label>Test description</mat-label>
+    <textarea matInput rows="5" [(ngModel)]="description" name="description" required></textarea>
+    <mat-hint>What the reviewers should check and how.</mat-hint>
+    <mat-hint align="end">{{descriptionLength}} / {{maxLength}}</mat-hint>
+  </mat-form-field>
+
+  <div class="parameters">
+    <div class="parameters-label">Test parameters (optional)</div>
+    <senergy-code-editor [(value)]="testParameters" language="json" height="10rem"></senergy-code-editor>
+    @if (parametersError; as error) {
+      <div class="parameters-error" role="alert">{{error}}</div>
+    } @else {
+      <div class="parameters-hint">A JSON object with parameters for the test.</div>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" (click)="cancel()">Cancel</button>
+  <button matButton="filled" type="button" [disabled]="!canPropose()" (click)="propose()">Propose</button>
+</mat-dialog-actions>

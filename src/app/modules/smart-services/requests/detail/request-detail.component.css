@@ -1,0 +1,163 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/* A fixed height makes the container the scroll area; 64px is the toolbar. */
+.details-container {
+    height: calc(var(--app-page-height, 100vh) - 64px);
+    overflow-y: auto;
+}
+
+.page {
+    padding: 0 24px 24px;
+}
+
+.facts {
+    margin: 0;
+}
+
+.fact {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: 4px 16px;
+    padding: 6px 0;
+}
+
+.fact dt {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.fact dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.mono {
+    font-family: monospace;
+}
+
+.text {
+    white-space: pre-wrap;
+}
+
+.error {
+    color: var(--app-danger);
+}
+
+.notice {
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0 0 12px;
+}
+
+.operation {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+
+.files {
+    display: grid;
+    grid-template-columns: minmax(14rem, 22rem) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.file-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 28rem;
+    overflow-y: auto;
+    border: var(--app-hairline);
+    border-radius: 8px;
+}
+
+.file-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.file-row:hover {
+    background: var(--app-hover);
+}
+
+.file-row.selected {
+    background: var(--app-muted-surface);
+    box-shadow: inset 3px 0 0 var(--mat-sys-primary);
+    font-weight: 600;
+}
+
+.file-path {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.svg-image {
+    display: block;
+    height: 10rem;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    margin-bottom: 12px;
+    padding: 8px;
+    box-sizing: border-box;
+    border: var(--app-hairline);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.json {
+    display: block;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+[mat-cell] {
+    padding: 0 8px;
+}
+
+@media (max-width: 900px) {
+    .files {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .fact {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

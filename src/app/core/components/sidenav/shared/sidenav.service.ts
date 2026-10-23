@@ -51,6 +51,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { CostService } from 'src/app/modules/cost/shared/cost.service';
 import { LadonService } from '../../../../modules/admin/permissions/shared/services/ladom.service';
 import { CertificatesService } from 'src/app/modules/credentials/certificates/shared/certificates.service';
+import { ContentReviewService } from 'src/app/modules/smart-services/requests/shared/content-review.service';
 import { EnvironmentsService } from 'src/app/modules/environments/shared/environments.service';
 
 @Injectable({
@@ -87,6 +88,7 @@ export class SidenavService implements OnDestroy {
     private ladonService = inject(LadonService);
     private certificatesService = inject(CertificatesService);
     private environmentsService = inject(EnvironmentsService);
+    private contentReviewService = inject(ContentReviewService);
 
     @Output() toggleChanged: EventEmitter<boolean> = new EventEmitter();
     @Output() sectionChanged: EventEmitter<string> = new EventEmitter();
@@ -184,6 +186,7 @@ export class SidenavService implements OnDestroy {
             [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Designs', 'link', 'create', '/smart-services/designs'), this.smartServiceDesignService],
             [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Releases', 'link', 'storage', '/smart-services/releases'), this.smartServiceDesignService],
             [this.smartServiceDesignService.userHasReadAuthorization, new SidenavPageModel('Instances', 'link', 'table', '/smart-services/instances'), this.smartServiceDesignService],
+            [this.contentReviewService.userHasReadAuthorization, new SidenavPageModel('Requests', 'link', 'fact_check', '/smart-services/requests'), this.contentReviewService],
         ]);
 
         return new SidenavSectionModel('Smart Services', 'toggle', 'design_services', '/smart-services', sections);

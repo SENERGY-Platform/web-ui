@@ -1,0 +1,93 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<senergy-page-header title="Requests" description="Smart services proposed for publication, and where each stands in the review."></senergy-page-header>
+
+<senergy-list-toolbar [showSearch]="false" (refresh)="reload()">
+  <ng-container toolbarFilters>
+    @if (isReviewer) {
+      <mat-chip-listbox aria-label="Filter">
+        <mat-chip-option [selected]="showAll" (selectionChange)="toggleAll($event.selected)">
+          All requests
+        </mat-chip-option>
+      </mat-chip-listbox>
+    }
+  </ng-container>
+</senergy-list-toolbar>
+
+<div class="page-body">
+  <senergy-spinner [show]="!ready"></senergy-spinner>
+
+  @if (ready && dataSource.data.length === 0) {
+    <senergy-empty-state icon="fact_check"
+      [title]="!userHasReadAuthorization ? 'No access to requests' : (showAll ? 'No requests yet' : 'No requests of yours yet')"
+      [text]="!userHasReadAuthorization ? 'You do not have permission to view requests.' : (showAll ? 'No smart service was proposed for publication yet.' : 'Propose a release for publication from the smart service releases.')">
+    </senergy-empty-state>
+  }
+
+  <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Smart service</th>
+          <td mat-cell *matCellDef="let row" class="name-cell">{{row.name}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="author">
+          <th mat-header-cell *matHeaderCellDef>Author</th>
+          <td mat-cell *matCellDef="let row">{{row.author_name}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="state">
+          <th mat-header-cell *matHeaderCellDef>State</th>
+          <td mat-cell *matCellDef="let row">
+            <span [class]="'status-chip ' + stateClass(row.state)">{{stateLabel(row.state)}}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="created">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let row" class="muted">{{row.created_at | date:dateFormat}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="updated">
+          <th mat-header-cell *matHeaderCellDef>Updated</th>
+          <td mat-cell *matCellDef="let row" class="muted">{{row.updated_at | date:dateFormat}}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column"><span class="cdk-visually-hidden">Actions</span></th>
+          <td mat-cell *matCellDef="let row" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="rowMenu" (click)="$event.stopPropagation()" aria-label="Actions">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #rowMenu="matMenu" xPosition="before">
+              <button mat-menu-item (click)="open(row)"><mat-icon>open_in_new</mat-icon> Open</button>
+              @if (canWithdraw(row)) {
+                <button mat-menu-item (click)="withdraw(row)"><mat-icon>undo</mat-icon> Withdraw</button>
+              }
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="clickable-row" (click)="open(row)"></tr>
+      </table>
+    </div>
+    <mat-paginator #paginator [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+      (page)="preferencesService.pageSize = $event.pageSize" showFirstLastButtons></mat-paginator>
+  </div>
+</div>

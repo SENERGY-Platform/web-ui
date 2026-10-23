@@ -113,6 +113,9 @@
               <button mat-menu-item (click)="exportToDesigner(row)"><mat-icon>edit</mat-icon> Export to designer</button>
               <button mat-menu-item (click)="downloadDiagram(row)"><mat-icon>cloud_download</mat-icon> Download BPMN</button>
               <button mat-menu-item (click)="downloadSvg(row)"><mat-icon>insert_photo</mat-icon> Download SVG</button>
+              @if (canPropose(row)) {
+                <button mat-menu-item (click)="proposeForPublication(row)"><mat-icon>publish</mat-icon> Propose for publication</button>
+              }
               @if (canAdministrate(row)) {
                 <button mat-menu-item (click)="permission(row)"><mat-icon>share</mat-icon> Share</button>
               }

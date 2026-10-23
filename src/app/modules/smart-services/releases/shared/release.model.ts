@@ -28,6 +28,8 @@ export interface SmartServiceReleaseModel extends SmartServiceReleaseCreateModel
     error?: string;
     /** set once a newer release of the same design exists */
     new_release_id?: string;
+    /** keycloak user id of whoever created the release */
+    creator?: string;
     /** hint from the repository: resources used by the release changed or disappeared after its creation */
     changed_resources?: SmartServiceChangedResource[];
 }

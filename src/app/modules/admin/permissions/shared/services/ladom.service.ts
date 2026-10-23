@@ -111,6 +111,7 @@ export class LadonService {
             environment.iotRepoUrl,
             environment.operatorRepoUrl,
             environment.smartServiceRepoUrl,
+            environment.contentReviewUrl,
             environment.processDeploymentUrl,
             environment.processServiceUrl,
             environment.processRepoUrl,

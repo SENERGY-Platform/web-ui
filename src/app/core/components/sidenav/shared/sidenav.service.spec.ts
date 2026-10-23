@@ -55,3 +55,33 @@ describe('SidenavService.titleFor', () => {
         expect(service.titleFor('/dashboard')).toEqual(['Dashboard']);
     });
 });
+
+describe('SidenavService.setupSmartServiceSection', () => {
+    function serviceWith(designsRead: boolean, requestsRead: boolean): SidenavService {
+        const service = Object.create(SidenavService.prototype) as SidenavService;
+        Object.assign(service, {
+            smartServiceDesignService: { userHasReadAuthorization: () => designsRead },
+            contentReviewService: { userHasReadAuthorization: () => requestsRead },
+        });
+        return service;
+    }
+
+    it('adds Requests as the fourth entry with the read right on the content review service', () => {
+        const pages = serviceWith(true, true).setupSmartServiceSection().pages;
+
+        expect(pages.map((page) => page.name)).toEqual(['Designs', 'Releases', 'Instances', 'Requests']);
+        expect(pages[3].state).toBe('/smart-services/requests');
+    });
+
+    it('leaves Requests out without that right, whatever the right on the smart service repository is', () => {
+        const pages = serviceWith(true, false).setupSmartServiceSection().pages;
+
+        expect(pages.map((page) => page.name)).toEqual(['Designs', 'Releases', 'Instances']);
+    });
+
+    it('shows Requests to a user who may not read the repository', () => {
+        const pages = serviceWith(false, true).setupSmartServiceSection().pages;
+
+        expect(pages.map((page) => page.name)).toEqual(['Requests']);
+    });
+});

@@ -70,6 +70,8 @@ import {
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WidgetModule } from 'src/app/widgets/widget.module';
+import { RequestsComponent } from './requests/requests.component';
+import { RequestDetailComponent } from './requests/detail/request-detail.component';
 import {
     SmartServiceParameterDialogComponent
 } from './instances/dialog/smart-service-parameter-dialog/smart-service-parameter-dialog.component';
@@ -93,6 +95,20 @@ const instances: Route = {
     pathMatch: 'full',
     component: SmartServiceInstancesComponent,
     data: { header: 'Instances' },
+};
+
+const requests: Route = {
+    path: 'smart-services/requests',
+    pathMatch: 'full',
+    component: RequestsComponent,
+    data: { header: 'Requests' },
+};
+
+const requestDetail: Route = {
+    path: 'smart-services/requests/:id',
+    pathMatch: 'full',
+    component: RequestDetailComponent,
+    data: { header: 'Requests' },
 };
 
 const designerReleaseExport: Route = {
@@ -120,6 +136,8 @@ const designer: Route = {
             designs,
             releases,
             instances,
+            requests,
+            requestDetail,
             designer,
             designerEdit,
             designerReleaseExport
@@ -168,6 +186,8 @@ const designer: Route = {
         EditSmartServiceInputDialogComponent,
         EditSmartServiceJsonExtractionDialogComponent,
         SmartServiceInstancesComponent,
+        RequestsComponent,
+        RequestDetailComponent,
         SmartServiceParameterDialogComponent,
         CheckboxValueDirective,
         CriteriaListComponent,

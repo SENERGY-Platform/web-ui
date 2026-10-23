@@ -47,7 +47,12 @@ import { DatePipe } from '@angular/common';
 import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
 import { PagedListState } from '../../../core/classes/paged-list-state';
 import { PreferencesService } from '../../../core/services/preferences.service';
-import { snackError } from 'src/app/core/services/snack-bar-messages';
+import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { MatDialog } from '@angular/material/dialog';
+import { dialogSize } from '../../../core/dialog-size';
+import { ContentReviewService } from '../requests/shared/content-review.service';
+import { ReviewRequestModel } from '../requests/shared/content-review.model';
+import { ProposeDialogComponent, ProposeDialogData } from '../requests/propose-dialog/propose-dialog.component';
 import { ChangedResourcesHintComponent } from '../changed-resources/changed-resources-hint.component';
 
 @Component({
@@ -71,6 +76,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
     private instanceDialogService = inject(SmartServiceInstanceDialogService);
     private metadataExistenceService = inject(MetadataExistenceService);
     private preferencesService = inject(PreferencesService);
+    private contentReviewService = inject(ContentReviewService);
+    private dialog = inject(MatDialog);
 
     readonly dateFormat = LIST_DATE_FORMAT;
     displayedColumns = ['image', 'name', 'status', 'created_at', 'actions'];
@@ -151,6 +158,26 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
 
     canAdministrate(release: SmartServiceExtendedReleaseModel): boolean {
         return release.permissions_info.permissions.a !== false;
+    }
+
+    /** Only the user's own latest release can be proposed, and only with the right to create requests. */
+    canPropose(release: SmartServiceExtendedReleaseModel): boolean {
+        return this.contentReviewService.canProposeRelease(release);
+    }
+
+    proposeForPublication(release: SmartServiceExtendedReleaseModel): void {
+        this.dialog
+            .open<ProposeDialogComponent, ProposeDialogData, ReviewRequestModel>(ProposeDialogComponent, {
+                ...dialogSize('m'),
+                data: { releaseId: release.id, name: release.name },
+            })
+            .afterClosed()
+            .subscribe((request) => {
+                if (request) {
+                    snackSuccess(this.snackBar, 'Release proposed for publication.');
+                    this.router.navigate(['/smart-services/requests', request.id]);
+                }
+            });
     }
 
     downloadDiagram(release: SmartServiceExtendedReleaseModel): void {
