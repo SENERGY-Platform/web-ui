@@ -53,6 +53,10 @@
     white-space: pre-wrap;
 }
 
+.muted {
+    color: var(--mat-sys-on-surface-variant);
+}
+
 .error {
     color: var(--app-danger);
 }
@@ -132,6 +136,12 @@
 
 .json {
     display: block;
+}
+
+.section-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .table-scroll {

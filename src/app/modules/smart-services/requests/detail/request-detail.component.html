@@ -25,7 +25,21 @@
     <senergy-page-header [title]="request.name" description="Proposal of this smart service for publication."
       backLabel="Requests" backLink="/smart-services/requests">
       <ng-container pageActions>
-        @if (canWithdraw) {
+        @if (canPublish) {
+          <button matButton="filled" type="button" (click)="publish()">
+            <mat-icon>publish</mat-icon> Publish
+          </button>
+        }
+        @if (canReject) {
+          <button matButton="outlined" type="button" (click)="reject()">
+            <mat-icon>block</mat-icon> Reject
+          </button>
+        }
+        @if (canWithdraw && canReject) {
+          <button matButton="outlined" type="button" (click)="withdraw()">
+            <mat-icon>undo</mat-icon> Withdraw
+          </button>
+        } @else if (canWithdraw) {
           <button matButton="filled" type="button" (click)="withdraw()">
             <mat-icon>undo</mat-icon> Withdraw
           </button>
@@ -78,7 +92,32 @@
         </dl>
       </senergy-form-section>
 
+      <senergy-form-section title="Test case"
+        hint="A JSON object with the keys parameters (the values of the form fields), export_within_minutes, standing, standing_export_hours and training, or cases for several named cases.">
+        @if (canEditTestCase && hasTestCase) {
+          <div sectionActions class="section-actions">
+            <button matButton="outlined" type="button" (click)="removeTestCase()">Remove test case</button>
+          </div>
+        }
+        @if (canEditTestCase) {
+          <p class="muted">A changed test case resets the test.</p>
+        }
+        @if (canEditTestCase || hasTestCase) {
+          <senergy-code-editor class="json" [value]="testCaseText" (valueChange)="onTestCaseText($event)" language="json"
+            [readOnly]="!canEditTestCase" height="16rem"></senergy-code-editor>
+        } @else {
+          <p class="muted">No test case has been written yet.</p>
+        }
+      </senergy-form-section>
+
       <senergy-form-section title="Review status">
+        @if (canStartTest) {
+          <div sectionActions class="section-actions">
+            <button matButton="outlined" type="button" [disabled]="testCaseDirty" (click)="startTest()">
+              <mat-icon>play_arrow</mat-icon> Start test
+            </button>
+          </div>
+        }
         <dl class="facts">
           <div class="fact">
             <dt>Test</dt>
@@ -125,6 +164,13 @@
       </senergy-form-section>
 
       <senergy-form-section title="Files" hint="What the proposal writes into platform-content, as the files job read it.">
+        @if (canEditTestCase) {
+          <div sectionActions class="section-actions">
+            <button matButton="outlined" type="button" (click)="makeFilesAgain()">
+              <mat-icon>refresh</mat-icon> Make files again
+            </button>
+          </div>
+        }
         @switch (request.files.status) {
           @case ('none') {
             <p class="muted">The files have not been made yet.</p>
@@ -216,5 +262,10 @@
         </div>
       </senergy-form-section>
     </div>
+    @if (canEditTestCase && testCaseDirty) {
+      <senergy-save-bar saveLabel="Save test case" [status]="testCaseProblem ?? 'Unsaved changes to the test case'"
+        [saveDisabled]="testCaseProblem !== null || saving" [discardDisabled]="saving" (save)="saveTestCase()"
+        (discard)="discardTestCase()"></senergy-save-bar>
+    }
   }
 </div>

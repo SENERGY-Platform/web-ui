@@ -169,6 +169,99 @@ describe('ContentReviewService', () => {
         expect(open.calls.mostRecent().args[0]).toContain('not in review');
     });
 
+    it('sets the test case as typed, so numbers keep their spelling', () => {
+        const service = setup();
+        let answer: ReviewRequestModel | null | undefined;
+        service.setTestCase('r1', '{ "parameters": {"big": 12345678901234567890}, "x": 1.0 }').subscribe((request) => (answer = request));
+
+        const req = httpMock.expectOne(url + '/requests/r1/test-case');
+        expect(req.request.method).toBe('PUT');
+        expect(req.request.headers.get('Content-Type')).toBe('application/json');
+        expect(req.request.body).toBe('{"test_case":{ "parameters": {"big": 12345678901234567890}, "x": 1.0 }}');
+        req.flush({ id: 'r1' });
+
+        expect(answer?.id).toBe('r1');
+    });
+
+    it('removes the test case by sending null', () => {
+        const service = setup();
+        service.setTestCase('r1', null).subscribe();
+
+        const req = httpMock.expectOne(url + '/requests/r1/test-case');
+        expect(req.request.method).toBe('PUT');
+        expect(req.request.body).toBe('{"test_case":null}');
+        req.flush({ id: 'r1' });
+    });
+
+    it('answers null and shows the backend message when the test case is refused', () => {
+        const service = setup();
+        const open = spyOn(TestBed.inject(MatSnackBar), 'open').and.callThrough();
+        let answer: ReviewRequestModel | null | undefined;
+        service.setTestCase('r1', '{}').subscribe((request) => (answer = request));
+
+        httpMock.expectOne(url + '/requests/r1/test-case').flush({ error: 'an operation runs' }, { status: 409, statusText: 'Conflict' });
+
+        expect(answer).toBeNull();
+        expect(open.calls.mostRecent().args[0]).toContain('content-review: request failed (409): an operation runs');
+    });
+
+    it('posts the review actions with an empty object as body', () => {
+        const service = setup();
+        const calls: [string, (id: string) => ReturnType<ContentReviewService['startTest']>][] = [
+            ['test', (id) => service.startTest(id)],
+            ['files', (id) => service.startFiles(id)],
+            ['publish', (id) => service.publish(id)],
+        ];
+        for (const [action, call] of calls) {
+            let answer: ReviewRequestModel | null | undefined;
+            call('r1').subscribe((request) => (answer = request));
+
+            const req = httpMock.expectOne(url + '/requests/r1/' + action);
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({});
+            req.flush({ id: 'r1' });
+
+            expect(answer?.id).toBe('r1');
+        }
+    });
+
+    it('rejects with the reason as body', () => {
+        const service = setup();
+        service.reject('r1', 'Name the exports').subscribe();
+
+        const req = httpMock.expectOne(url + '/requests/r1/reject');
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual({ reason: 'Name the exports' });
+        req.flush({ id: 'r1', state: 'rejecting' });
+    });
+
+    it('shows the backend message when another request is being tested and answers null', () => {
+        const service = setup();
+        const open = spyOn(TestBed.inject(MatSnackBar), 'open').and.callThrough();
+        let answer: ReviewRequestModel | null | undefined;
+        service.startTest('r1').subscribe((request) => (answer = request));
+
+        httpMock.expectOne(url + '/requests/r1/test').flush({ error: 'another request is being tested' }, { status: 409, statusText: 'Conflict' });
+
+        expect(answer).toBeNull();
+        expect(open.calls.mostRecent().args[0]).toContain('another request is being tested');
+    });
+
+    it('answers null after a refused publish, files or reject call', () => {
+        const service = setup();
+        spyOn(TestBed.inject(MatSnackBar), 'open').and.callThrough();
+        const answers: (ReviewRequestModel | null | undefined)[] = [undefined, undefined, undefined];
+        service.publish('r1').subscribe((request) => (answers[0] = request));
+        service.startFiles('r1').subscribe((request) => (answers[1] = request));
+        service.reject('r1', 'x').subscribe((request) => (answers[2] = request));
+
+        for (const action of ['publish', 'files', 'reject']) {
+            httpMock.expectOne(url + '/requests/r1/' + action).flush({ error: 'not in review' }, { status: 409, statusText: 'Conflict' });
+        }
+
+        expect(answers).toEqual([null, null, null]);
+    });
+
     it('reads the files of a request', () => {
         const service = setup();
         let answer: ReviewProposalFilesModel | null | undefined;

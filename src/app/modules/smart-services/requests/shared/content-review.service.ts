@@ -84,11 +84,47 @@ export class ContentReviewService {
             .pipe(catchError(this.errorHandlerService.handleError(ContentReviewService.name, 'withdraw()', null)));
     }
 
+    /**
+     * `testCaseJson` is the text of a JSON object, sent as typed like the test parameters; null removes the test
+     * case. A changed test case resets the test. Answers null after reporting a failure.
+     */
+    setTestCase(id: string, testCaseJson: string | null): Observable<ReviewRequestModel | null> {
+        return this.http
+            .put<ReviewRequestModel>(environment.contentReviewUrl + '/requests/' + id + '/test-case', '{"test_case":' + (testCaseJson ?? 'null') + '}', {
+                headers: { 'Content-Type': 'application/json' },
+            })
+            .pipe(catchError(this.errorHandlerService.handleError(ContentReviewService.name, 'setTestCase()', null)));
+    }
+
+    /** Starts the review test; the service answers 409 while another request is being tested. */
+    startTest(id: string): Observable<ReviewRequestModel | null> {
+        return this.post(id, 'test', 'startTest()');
+    }
+
+    /** Makes the files of the proposal again from what staging holds now. */
+    startFiles(id: string): Observable<ReviewRequestModel | null> {
+        return this.post(id, 'files', 'startFiles()');
+    }
+
+    publish(id: string): Observable<ReviewRequestModel | null> {
+        return this.post(id, 'publish', 'publish()');
+    }
+
+    reject(id: string, reason: string): Observable<ReviewRequestModel | null> {
+        return this.post(id, 'reject', 'reject()', { reason });
+    }
+
     /** The service answers 404 unless `files.status` is `ready`; call it only then. */
     getFiles(id: string): Observable<ReviewProposalFilesModel | null> {
         return this.http
             .get<ReviewProposalFilesModel>(environment.contentReviewUrl + '/requests/' + id + '/files')
             .pipe(catchError(this.errorHandlerService.handleError(ContentReviewService.name, 'getFiles()', null)));
+    }
+
+    private post(id: string, action: string, name: string, body: object = {}): Observable<ReviewRequestModel | null> {
+        return this.http
+            .post<ReviewRequestModel>(environment.contentReviewUrl + '/requests/' + id + '/' + action, body)
+            .pipe(catchError(this.errorHandlerService.handleError(ContentReviewService.name, name, null)));
     }
 
     userHasReadAuthorization(): boolean {

@@ -3,11 +3,12 @@
 ## Applies when
 
 Changing the Requests pages under `smart-services/requests`, the "Propose for publication" action of the smart
-service releases, or the calls to the content-review service (state of the upgrade branch, 2026-10). What the
-states and routes of the service mean is in `docs/requests.md` of the content-review repository.
+service releases, the review actions on the detail page, or the calls to the content-review service (state of the
+upgrade branch, 2026-10). What the states and routes of the service mean is in `docs/requests.md` of the
+content-review repository.
 
-**Not this if**: the change is about the review actions (test case, test, reject, publish) or the take-over into
-platform-content. The pages show their status as plain fields only; the actions are not built here yet.
+**Not this if**: the change is about the take-over into platform-content. The detail page shows its status as
+plain fields only; the actions are not built here yet.
 
 ## Where it comes from
 
@@ -24,14 +25,36 @@ platform-content. The pages show their status as plain fields only; the actions 
   adds the author column and loads every request (`all=true`). The service answers no total, so the list reads
   all pages with `loadAllPages` and pages on the client. Row click opens the detail; the row menu offers Open and,
   for the author of a request in `in_review`, Withdraw.
-- **Detail** (`smart-services/requests/:id`): read-only form page with Summary, Review status, Files and History
-  (newest first). Withdraw is the header action for the author in `in_review`.
+- **Detail** (`smart-services/requests/:id`): form page with Summary, Test case, Review status, Files and History
+  (newest first). Header actions in this order: Publish (filled), Reject, then Withdraw (author, `in_review`).
 - **Reload**: while the state is transitional (`checking`, `moving`, `rejecting`, `withdrawing`, `publishing`), or the files job, the test or the take-over runs, the detail reloads
   every 5 seconds and stops once nothing runs or the page is left.
 - **Files**: read only when `files.status` is `ready`, because the service answers 404 otherwise, and again only
   when `files.operation_id` changed. `.json` shows in the code editor as JSON, other text as plaintext, `.svg`
   additionally as an image through `core/svg-image.ts`. A deleted file and one without content show a short text.
   The service sends no old version, so there is no diff.
+
+## Review actions
+
+Shown only to reviewers, only in `in_review` and only while nothing runs (files job, test, transfer, any running
+operation); otherwise hidden. The service enforces the same and answers 409 while something runs. Every write
+reads the request again, also after a refusal, whose message the central handler shows; nothing is retried, and the
+reload restarts the polling until nothing runs.
+
+- **Test case**: the stored `test_case` in the JSON editor, editable for reviewers, read-only for everyone else.
+  Changes are saved through the save bar (`PUT /requests/{id}/test-case`). The text is sent as typed, after the page
+  checked that it is a JSON object of at most 65536 bytes without whitespace between tokens
+  (`shared/test-case.ts`); text equal to the stored one does not enable Save. Unsaved edits survive the polling
+  reload and are dropped when the reviewer may not edit any more. "Remove test case" sends `null` after a
+  confirmation. A changed test case resets the test, which the page says. The key names in the hint are those of
+  the test case format in `docs/tests.md` of platform-content.
+- **Start test** (`POST .../test`), in Review status, once a test case is stored and the editor has no unsaved
+  changes. 409 means another request is being tested, because all requests share one review test account.
+- **Make files again** (`POST .../files`), in Files: reads staging again after the author changed something.
+- **Reject** (`POST .../reject`): dialog with the required reason, at most 10000 characters (counted as characters).
+  The state goes to `rejecting` and the polling follows it to `rejected`.
+- **Publish** (`POST .../publish`): only with a stored test case and `test.status` `passed`; the confirmation
+  names the smart service and says it moves to shared-resources-prod for all users.
 
 ## Reviewer rule
 

@@ -19,25 +19,30 @@ import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { Subscription, timer } from 'rxjs';
+import { Observable, Subscription, timer } from 'rxjs';
 import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
 import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
 import { EmptyStateComponent } from '../../../../core/components/empty-state/empty-state.component';
 import { CodeEditorComponent } from '../../../../core/components/code-editor/code-editor.component';
+import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
 import { DialogsService } from '../../../../core/services/dialogs.service';
 import { snackSuccess } from '../../../../core/services/snack-bar-messages';
+import { dialogSize } from '../../../../core/dialog-size';
 import { LIST_DATE_FORMAT } from '../../../../core/classes/list-date-format';
 import { parseSvgImage, svgImageDataUrl } from '../../../../core/svg-image';
 import { ContentReviewService } from '../shared/content-review.service';
+import { RejectDialogComponent, RejectDialogData } from '../reject-dialog/reject-dialog.component';
 import { ReviewHistoryEntryModel, ReviewProposalFileModel, ReviewProposalFilesModel, ReviewRequestModel } from '../shared/content-review.model';
 import {
-    reviewFileChangeClass, reviewRequestRunning, reviewRequestWithdrawable, reviewStateClass, reviewStateLabel, reviewStatusClass,
-    reviewStatusLabel,
+    reviewFileChangeClass, reviewRequestActionable, reviewRequestHasTestCase, reviewRequestPublishable, reviewRequestRunning,
+    reviewRequestWithdrawable, reviewStateClass, reviewStateLabel, reviewStatusClass, reviewStatusLabel,
 } from '../shared/request-view';
+import { testCaseError } from '../shared/test-case';
 
 /** Interval of the reload while the request, its files job, test or take-over runs. */
 export const REQUEST_POLL_MS = 5000;
@@ -47,13 +52,14 @@ export const REQUEST_POLL_MS = 5000;
     templateUrl: './request-detail.component.html',
     styleUrls: ['./request-detail.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, FormSectionComponent, SpinnerComponent, EmptyStateComponent, CodeEditorComponent, MatButton, MatIcon, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
+    imports: [PageHeaderComponent, FormSectionComponent, SpinnerComponent, EmptyStateComponent, CodeEditorComponent, SaveBarComponent, MatButton, MatIcon, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, DatePipe]
 })
 export class RequestDetailComponent implements OnInit {
     private route = inject(ActivatedRoute);
     private contentReviewService = inject(ContentReviewService);
     private dialogsService = inject(DialogsService);
     private snackBar = inject(MatSnackBar);
+    private dialog = inject(MatDialog);
     private destroyRef = inject(DestroyRef);
 
     readonly dateFormat = LIST_DATE_FORMAT;
@@ -76,7 +82,20 @@ export class RequestDetailComponent implements OnInit {
     /** Data URL of the selected file when it is an SVG, else null. */
     selectedSvgUrl: string | null = null;
     canWithdraw = false;
+    /** The reviewer actions, each already narrowed by state and by what runs. */
+    canPublish = false;
+    canReject = false;
+    canEditTestCase = false;
+    canStartTest = false;
+    hasTestCase = false;
+    /** The test case as the editor shows it; kept while the user edits, so a reload does not overwrite it. */
+    testCaseText = '';
+    testCaseDirty = false;
+    testCaseProblem: string | null = null;
+    saving = false;
+    private storedTestCase = '';
     private userId = this.contentReviewService.userId();
+    private reviewer = this.contentReviewService.userIsReviewer();
     /** The files job whose upload is in `proposal`, so a reload does not read the same files again. */
     private proposalOperation = '';
     private pollSub?: Subscription;
@@ -93,8 +112,11 @@ export class RequestDetailComponent implements OnInit {
         this.load();
     }
 
-    /** Reads the request; while anything of it runs it reads again after `REQUEST_POLL_MS`. */
-    load(): void {
+    /**
+     * Reads the request; while anything of it runs it reads again after `REQUEST_POLL_MS`. `resetTestCase` also
+     * replaces the editor's text by the stored test case once the request arrived; a failed read keeps the edits.
+     */
+    load(resetTestCase = false): void {
         this.pollSub?.unsubscribe();
         this.loadSub?.unsubscribe();
         this.loadSub = this.contentReviewService.get(this.id).subscribe((request) => {
@@ -102,7 +124,7 @@ export class RequestDetailComponent implements OnInit {
             if (request === null) {
                 return;
             }
-            this.apply(request);
+            this.apply(request, resetTestCase);
             if (reviewRequestRunning(request)) {
                 this.pollSub = timer(REQUEST_POLL_MS).subscribe(() => this.load());
             }
@@ -130,6 +152,88 @@ export class RequestDetailComponent implements OnInit {
             });
     }
 
+    /** Runs a write and reads the request afterwards, also after a refusal, whose message the service call shows. */
+    private act(call: Observable<ReviewRequestModel | null>, success: string, resetTestCase = false): void {
+        call.subscribe((result) => {
+            if (result) {
+                snackSuccess(this.snackBar, success);
+            }
+            this.load(resetTestCase && result !== null);
+        });
+    }
+
+    onTestCaseText(text: string): void {
+        this.testCaseText = text;
+        this.checkTestCase();
+    }
+
+    discardTestCase(): void {
+        this.load(true);
+    }
+
+    saveTestCase(): void {
+        if (!this.canEditTestCase || !this.testCaseDirty || this.testCaseProblem !== null || this.saving) {
+            return;
+        }
+        this.saving = true;
+        this.contentReviewService.setTestCase(this.id, this.testCaseText).subscribe((result) => {
+            this.saving = false;
+            if (result) {
+                snackSuccess(this.snackBar, 'Test case saved.');
+            }
+            this.load(result !== null);
+        });
+    }
+
+    removeTestCase(): void {
+        this.dialogsService
+            .openConfirmDialog('Remove test case', 'Remove the test case? The test result is reset, and the request cannot be published without a test case.')
+            .afterClosed()
+            .subscribe((confirmed) => {
+                if (confirmed === true) {
+                    this.act(this.contentReviewService.setTestCase(this.id, null), 'Test case removed.', true);
+                }
+            });
+    }
+
+    startTest(): void {
+        this.act(this.contentReviewService.startTest(this.id), 'Test started.');
+    }
+
+    makeFilesAgain(): void {
+        this.act(this.contentReviewService.startFiles(this.id), 'Making the files again.');
+    }
+
+    publish(): void {
+        const request = this.request;
+        if (request === null) {
+            return;
+        }
+        this.dialogsService
+            .openConfirmDialog('Publish smart service', 'Publish ' + request.name + '? It moves to shared-resources-prod and becomes available to all users.')
+            .afterClosed()
+            .subscribe((confirmed) => {
+                if (confirmed === true) {
+                    this.act(this.contentReviewService.publish(request.id), 'Publishing the smart service.');
+                }
+            });
+    }
+
+    reject(): void {
+        const request = this.request;
+        if (request === null) {
+            return;
+        }
+        this.dialog
+            .open<RejectDialogComponent, RejectDialogData, string>(RejectDialogComponent, { ...dialogSize('m'), data: { name: request.name } })
+            .afterClosed()
+            .subscribe((reason) => {
+                if (reason) {
+                    this.act(this.contentReviewService.reject(request.id, reason), 'Request rejected.');
+                }
+            });
+    }
+
     select(file: ReviewProposalFileModel): void {
         this.selectedFile = file;
         this.selectedSvgUrl = null;
@@ -153,12 +257,33 @@ export class RequestDetailComponent implements OnInit {
         return this.request !== null && entry.by === this.request.author_id ? this.request.author_name : entry.by;
     }
 
-    private apply(request: ReviewRequestModel): void {
+    private apply(request: ReviewRequestModel, resetTestCase: boolean): void {
         this.request = request;
         this.testParameters = request.test_parameters === null ? '' : JSON.stringify(request.test_parameters, null, 2);
         this.history = [...(request.history ?? [])].reverse();
         this.canWithdraw = reviewRequestWithdrawable(request, this.userId);
+        this.hasTestCase = reviewRequestHasTestCase(request);
+        const actionable = this.reviewer && reviewRequestActionable(request);
+        this.canReject = actionable;
+        this.canEditTestCase = actionable;
+        this.canStartTest = actionable && this.hasTestCase;
+        this.canPublish = this.reviewer && reviewRequestPublishable(request);
+        this.applyTestCase(request, resetTestCase || !actionable);
         this.updateFiles(request);
+    }
+
+    /** Takes over the stored test case; unsaved edits survive a reload unless the reviewer cannot edit any more. */
+    private applyTestCase(request: ReviewRequestModel, reset: boolean): void {
+        this.storedTestCase = this.hasTestCase ? JSON.stringify(request.test_case, null, 2) : '';
+        if (reset || !this.testCaseDirty) {
+            this.testCaseText = this.storedTestCase;
+        }
+        this.checkTestCase();
+    }
+
+    private checkTestCase(): void {
+        this.testCaseDirty = this.testCaseText !== this.storedTestCase;
+        this.testCaseProblem = this.testCaseDirty ? testCaseError(this.testCaseText) : null;
     }
 
     private updateFiles(request: ReviewRequestModel): void {

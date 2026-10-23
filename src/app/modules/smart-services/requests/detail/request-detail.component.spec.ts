@@ -63,7 +63,7 @@ describe('RequestDetailComponent', () => {
             schemas: [NO_ERRORS_SCHEMA],
             imports: [NoopAnimationsModule, RequestDetailComponent],
             providers: [
-                { provide: ContentReviewService, useValue: { userId: () => userId, get, getFiles, withdraw } },
+                { provide: ContentReviewService, useValue: { userId: () => userId, userIsReviewer: () => false, get, getFiles, withdraw } },
                 { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'r1' } } } },
                 { provide: DialogsService, useValue: { openConfirmDialog: confirm } },
                 { provide: MatSnackBar, useValue: { open: () => undefined } },

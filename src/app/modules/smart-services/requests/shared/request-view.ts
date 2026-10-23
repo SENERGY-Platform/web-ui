@@ -69,15 +69,30 @@ export function reviewFileChangeClass(change: ReviewFileChange): string {
     }
 }
 
-/** Something is still going on: a transitional state, or a files job, test or take-over that runs. */
+/** Something is still going on: a transitional state, or a files job, test, take-over or other operation that runs. */
 export function reviewRequestRunning(request: ReviewRequestModel): boolean {
     return (
         TRANSITIONAL_STATES.includes(request.state) ||
         request.files?.status === 'running' ||
         request.test?.status === 'running' ||
         request.sync?.status === 'previewing' ||
-        request.sync?.status === 'syncing'
+        request.sync?.status === 'syncing' ||
+        (request.operations ?? []).some((operation) => operation.status === 'running')
     );
+}
+
+/** What the reviewers may act on: in review, with no files job, test, transfer or other operation running. */
+export function reviewRequestActionable(request: ReviewRequestModel): boolean {
+    return request.state === 'in_review' && !reviewRequestRunning(request);
+}
+
+export function reviewRequestHasTestCase(request: ReviewRequestModel): boolean {
+    return request.test_case !== null && request.test_case !== undefined;
+}
+
+/** A stored test case and a test that passed with it, which is what publishing needs. */
+export function reviewRequestPublishable(request: ReviewRequestModel): boolean {
+    return reviewRequestActionable(request) && reviewRequestHasTestCase(request) && request.test.status === 'passed';
 }
 
 /** The author takes a request back while it is in review. */
