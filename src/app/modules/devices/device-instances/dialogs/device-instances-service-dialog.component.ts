@@ -47,13 +47,38 @@ import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
 import { MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker } from '@angular/material/datepicker';
 import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 
-/** A last value in the value grid. */
+/** What the opener knows about one output path: whether its content variable has an aspect, and the names to label it with. */
+export interface ValueMeta {
+    hasAspect: boolean;
+    aspectName: string;
+    characteristicName: string;
+}
+
+/** A last value in the value grid; only values with an aspect get one. */
 export interface ValueTile {
-    field: string;
+    label: string;
+    path: string;
     serviceName: string;
     showService: boolean;
     value: TimeValuePairModel['value'];
     unit: string;
+    time: string | null;
+}
+
+/** One row of a service's value table. */
+export interface ServiceRow {
+    field: string;
+    path: string;
+    value: TimeValuePairModel['value'];
+    unit: string;
+    description: string;
+    time: string | null;
+}
+
+/** The value table of one service; `time` is set when all values that have one share it. */
+export interface ServiceTable {
+    rows: ServiceRow[];
+    showDescription: boolean;
     time: string | null;
 }
 
@@ -89,10 +114,12 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
     descriptions: string[][];
     /** Display unit per output path, parallel to `descriptions`; empty where the characteristic gives none. */
     units: string[][];
-    /** The last values of all services as one flat list for the value grid. */
+    /** Aspect and characteristic info per output path, parallel to `descriptions`. */
+    valueMeta: ValueMeta[][];
+    /** The last values that have an aspect, as one flat list for the value grid. */
     tiles: ValueTile[] = [];
-    /** Names of the services that have no output, e.g. pure actuator services. */
-    servicesWithoutData: string[] = [];
+    /** One table per service, parallel to `services`. */
+    serviceTables: ServiceTable[] = [];
     availability: { serviceId: string; from?: Date; to?: Date; groupType?: string; groupTime?: string }[] = [];
     availabilityControl = new FormControl<{
         groupType?: string;
@@ -146,6 +173,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
             serviceOutputCounts: number[];
             descriptions: string[][];
             units?: string[][];
+            valueMeta?: ValueMeta[][];
             canEdit?: boolean;
         }>(MAT_DIALOG_DATA);
 
@@ -156,7 +184,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         this.device = data.device;
         this.descriptions = data.descriptions;
         this.units = data.units ?? [];
-        this.servicesWithoutData = this.services.filter((_, i) => (this.serviceOutputCounts[i] ?? 0) === 0).map(s => s.name);
+        this.valueMeta = data.valueMeta ?? [];
         this.canEdit = data.canEdit === true;
         this.userCanLoadConnectionHistory = this.deviceInstancesService.userHasReadAuthorizationConnectionLog();
         this.userIsDeveloper = this.authorizationService.userIsDeveloper();
@@ -204,6 +232,7 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
                     counter += this.serviceOutputCounts[serviceIndex];
                 });
                 this.tiles = this.buildTiles();
+                this.serviceTables = this.buildServiceTables();
                 this.valuesLoaded = true;
             },
             error: (_) => {
@@ -259,20 +288,62 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         }
     }
 
-    /** One tile per output path; the service name is shown only where another service has a field of the same name. */
+    /** The grid shows values whose content variable has an aspect; without any, the area is left out. */
+    get showValues(): boolean {
+        return !this.valuesLoaded || this.errorOccured || this.tiles.length > 0;
+    }
+
+    /** Aspect name, else characteristic name, else the last path segment; equal labels get the last segment added. */
     private buildTiles(): ValueTile[] {
-        const fieldCount = new Map<string, number>();
-        this.lastValueArray.forEach(service => service.forEach(v => fieldCount.set(v.request.columnName, (fieldCount.get(v.request.columnName) ?? 0) + 1)));
         const tiles: ValueTile[] = [];
-        this.lastValueArray.forEach((service, serviceIndex) => service.forEach((v, valueIndex) => tiles.push({
-            field: v.request.columnName,
-            serviceName: this.services[serviceIndex]?.name ?? '',
-            showService: (fieldCount.get(v.request.columnName) ?? 0) > 1,
-            value: v.response.value,
-            unit: this.units[serviceIndex]?.[valueIndex] ?? '',
-            time: v.response.time,
-        })));
+        this.lastValueArray.forEach((service, serviceIndex) => service.forEach((v, valueIndex) => {
+            const meta = this.valueMeta[serviceIndex]?.[valueIndex];
+            if (meta?.hasAspect !== true) {
+                return;
+            }
+            const path = v.request.columnName;
+            tiles.push({
+                label: meta.aspectName || meta.characteristicName || lastSegment(path),
+                path,
+                serviceName: this.services[serviceIndex]?.name ?? '',
+                showService: false,
+                value: v.response.value,
+                unit: this.units[serviceIndex]?.[valueIndex] ?? '',
+                time: v.response.time,
+            });
+        }));
+        const labelCount = new Map<string, number>();
+        tiles.forEach(t => labelCount.set(t.label, (labelCount.get(t.label) ?? 0) + 1));
+        tiles.forEach(t => {
+            if ((labelCount.get(t.label) ?? 0) > 1) {
+                t.label += ' (' + lastSegment(t.path) + ')';
+            }
+        });
+        const fullLabelCount = new Map<string, number>();
+        tiles.forEach(t => fullLabelCount.set(t.label, (fullLabelCount.get(t.label) ?? 0) + 1));
+        tiles.forEach(t => t.showService = (fullLabelCount.get(t.label) ?? 0) > 1);
         return tiles;
+    }
+
+    /** All fields of a service, with the path segments they all share left out of the field name. */
+    private buildServiceTables(): ServiceTable[] {
+        return this.lastValueArray.map((service, serviceIndex) => {
+            const prefix = commonPrefixLength(service.map(v => v.request.columnName.split('.')));
+            const rows = service.map((v, valueIndex): ServiceRow => ({
+                field: v.request.columnName.split('.').slice(prefix).join('.'),
+                path: v.request.columnName,
+                value: v.response.value,
+                unit: this.units[serviceIndex]?.[valueIndex] ?? '',
+                description: v.description ?? '',
+                time: v.response.time,
+            }));
+            const times = new Set(rows.map(r => r.time).filter((t): t is string => !!t));
+            return {
+                rows,
+                showDescription: rows.some(r => r.description !== ''),
+                time: times.size === 1 ? [...times][0] : null,
+            };
+        });
     }
 
     /** Opens the download options of one service; the format starts at raw data because the formats differ per service. */
@@ -393,4 +464,22 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         window.clearTimeout(this.copiedTimeout);
         this.copiedTimeout = window.setTimeout(() => this.copiedKey = undefined, 2000);
     }
+}
+
+function lastSegment(path: string): string {
+    const segments = path.split('.');
+    return segments[segments.length - 1];
+}
+
+/** Number of leading segments all paths share, keeping at least the last segment of each. */
+function commonPrefixLength(paths: string[][]): number {
+    if (paths.length === 0) {
+        return 0;
+    }
+    const maxLength = Math.min(...paths.map(p => p.length - 1));
+    let n = 0;
+    while (n < maxLength && paths.every(p => p[n] === paths[0][n])) {
+        n++;
+    }
+    return n;
 }

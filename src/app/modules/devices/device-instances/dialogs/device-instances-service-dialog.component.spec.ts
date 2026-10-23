@@ -28,7 +28,7 @@ import { ExportDataService } from '../../../../widgets/shared/export-data.servic
 import { DeviceTypeModel, DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
-import { DeviceInstancesServiceDialogComponent } from './device-instances-service-dialog.component';
+import { DeviceInstancesServiceDialogComponent, ValueMeta } from './device-instances-service-dialog.component';
 
 describe('DeviceInstancesServiceDialogComponent', () => {
     let fixture: ComponentFixture<DeviceInstancesServiceDialogComponent>;
@@ -56,7 +56,10 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         { time: '2026-03-01T09:00:00Z', value: 'ok' },
     ];
 
-    function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues } = {}) {
+    const meta = (hasAspect: boolean, aspectName = '', characteristicName = ''): ValueMeta => ({ hasAspect, aspectName, characteristicName });
+    const defaultMeta = [[meta(true, 'Energy', 'kWh'), meta(false)], [meta(false)]];
+
+    function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues; meta?: ValueMeta[][]; descriptions?: string[][] } = {}) {
         exportData = createSpyFromClass(ExportDataService);
         instances = createSpyFromClass(DeviceInstancesService);
         authorization = createSpyFromClass(AuthorizationService);
@@ -85,8 +88,9 @@ describe('DeviceInstancesServiceDialogComponent', () => {
                     provide: MAT_DIALOG_DATA, useValue: {
                         device, services, lastValueElements: options.elements ?? lastValueElements, serviceOutputCounts: options.counts ?? [2, 1], canEdit: options.canEdit ?? false,
                         deviceType: { id: 'dt1', services } as unknown as DeviceTypeModel,
-                        descriptions: [['total', 'power'], ['state']],
+                        descriptions: options.descriptions ?? [['total', 'power'], ['state']],
                         units: [['kWh', ''], ['']],
+                        valueMeta: options.meta ?? defaultMeta,
                     }
                 },
             ],
@@ -176,11 +180,9 @@ describe('DeviceInstancesServiceDialogComponent', () => {
 
         expect(el.querySelector('senergy-dialog-header')?.textContent).toContain('Meter');
         expect(el.querySelector('.status-chip.online')?.textContent).toBe('Online');
-        expect(tiles.length).toBe(3);
-        expect(tiles[0]).toContain('value.total');
+        expect(tiles.length).toBe(1);
+        expect(tiles[0]).toContain('Energy');
         expect(tiles[0]).toContain('12.5 kWh');
-        expect(tiles[1]).toContain('N/A');
-        expect(tiles[2]).toContain('ok');
         expect(el.querySelector('.values-block')?.textContent).toContain('Current values');
         expect(el.querySelector('timeline-chart')).not.toBeNull();
         expect(el.querySelector('.values-block')?.nextElementSibling?.textContent).toContain('Connection history');
@@ -197,38 +199,138 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         expect(fixture.nativeElement.querySelectorAll('details.fold button.copy').length).toBeGreaterThan(0);
     });
 
-    it('names the service only on tiles whose field name another service also has', () => {
+    it('puts only values with an aspect on the tiles, and keeps every value in the services table', () => {
+        create();
+        const rows = Array.from(fixture.nativeElement.querySelectorAll('.services-fold tbody tr')).map(r => (r as HTMLElement).textContent?.replace(/\s+/g, ' ').trim());
+
+        expect(component.tiles.map(t => t.path)).toEqual(['value.total']);
+        expect(fixture.nativeElement.querySelectorAll('.tile').length).toBe(1);
+        expect(rows.length).toBe(3);
+        expect(rows[1]).toContain('power');
+        expect(rows[1]).toContain('N/A');
+        expect(rows[2]).toContain('ok');
+    });
+
+    it('labels a tile with the aspect name, else the characteristic name, else the last path segment', () => {
         const elements = [
-            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'state' },
-            { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'state' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.temp' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'm.hum' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'm.co2' },
+        ];
+        create({ elements, counts: [2, 1], values: lastValues, meta: [[meta(true, 'Temperature', 'degC'), meta(true, '', 'Humidity')], [meta(true)]] });
+
+        expect(component.tiles.map(t => t.label)).toEqual(['Temperature', 'Humidity', 'co2']);
+    });
+
+    it('adds the last path segment to equal labels, and the service where they still match', () => {
+        const elements = [
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'x.in' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'x.out' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'y.out' },
             { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'level' },
         ];
-        create({ elements, counts: [1, 2], values: [lastValues[2], lastValues[2], lastValues[0]] });
+        create({ elements, counts: [2, 2], values: [lastValues[0], lastValues[0], lastValues[0], lastValues[0]],
+            meta: [[meta(true, 'Power'), meta(true, 'Power')], [meta(true, 'Power'), meta(true, 'Level')]] });
 
-        expect(component.tiles.map(t => [t.field, t.serviceName, t.showService])).toEqual([
-            ['state', 'Energy', true], ['state', 'Status', true], ['level', 'Status', false],
+        expect(component.tiles.map(t => [t.label, t.showService])).toEqual([
+            ['Power (in)', false], ['Power (out)', true], ['Power (out)', true], ['Level', false],
         ]);
         expect(Array.from(fixture.nativeElement.querySelectorAll('.tile-service')).map(e => (e as HTMLElement).textContent)).toEqual(['Energy', 'Status']);
     });
 
-    it('says in one line which services have no values, and does not list them as tiles', () => {
-        create({ elements: lastValueElements.slice(0, 2), counts: [2, 0], values: lastValues.slice(0, 2) });
+    it('keeps the path and the service name on a tile for its tooltip', () => {
+        create();
 
-        expect(fixture.nativeElement.querySelector('.without-data').textContent).toContain('No values from Status');
-        expect(fixture.nativeElement.querySelectorAll('.tile').length).toBe(2);
+        expect(component.tiles[0].path).toBe('value.total');
+        expect(component.tiles[0].serviceName).toBe('Energy');
+    });
+
+    it('shows no value area and opens the services first for a device without any aspect value', () => {
+        create({ meta: [[meta(false), meta(false)], [meta(false)]] });
+        const content = fixture.nativeElement.querySelector('mat-dialog-content') as HTMLElement;
+        const first = content.firstElementChild as HTMLDetailsElement;
+
+        expect(fixture.nativeElement.querySelector('.values-block')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.tiles')).toBeNull();
+        expect(first.classList.contains('services-fold')).toBeTrue();
+        expect(first.open).toBeTrue();
+        expect(first.querySelectorAll('tbody tr').length).toBe(3);
+    });
+
+    it('keeps the services section collapsed below the tiles when there are aspect values', () => {
+        create();
+        const fold = fixture.nativeElement.querySelector('.services-fold') as HTMLDetailsElement;
+
+        expect(fold.open).toBeFalse();
+        expect(fixture.nativeElement.querySelector('mat-dialog-content').firstElementChild.classList.contains('values-block')).toBeTrue();
+    });
+
+    it('drops the path prefix all fields of a service share, and keeps the full path as the tooltip source', () => {
+        const elements = [
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'measurements.temp' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'measurements.x.hum' },
+            { deviceId: 'urn:device:1', serviceId: 'urn:service:b', columnName: 'only.one' },
+        ];
+        create({ elements, counts: [2, 1], values: lastValues });
+
+        expect(component.serviceTables[0].rows.map(r => [r.field, r.path])).toEqual([
+            ['temp', 'measurements.temp'], ['x.hum', 'measurements.x.hum'],
+        ]);
+        expect(component.serviceTables[1].rows[0].field).toBe('one');
+    });
+
+    it('has a description column only when a field of the service has a description', () => {
+        create({ descriptions: [['', 'Power'], ['']] });
+        const headers = () => Array.from(fixture.nativeElement.querySelectorAll('.services-fold table')).map(t => Array.from((t as HTMLElement).querySelectorAll('th')).map(h => h.textContent));
+
+        expect(headers()[0]).toContain('Description');
+        expect(headers()[1]).not.toContain('Description');
+    });
+
+    it('shows one time per service when all values share it, otherwise a time per row', () => {
+        create();
+        const tables = Array.from(fixture.nativeElement.querySelectorAll('.services-fold table')) as HTMLElement[];
+
+        expect(component.serviceTables[0].time).toBe('2026-03-01T10:00:00Z');
+        expect(tables[0].querySelectorAll('th').length).toBe(3);
+        expect(fixture.nativeElement.querySelector('.service-time').textContent).toContain('01.03.2026');
+
+        TestBed.resetTestingModule();
+        const elements = lastValueElements.slice(0, 2);
+        create({ elements, counts: [2, 0], values: [lastValues[0], lastValues[2]] });
+        expect(component.serviceTables[0].time).toBeNull();
+        expect(Array.from(fixture.nativeElement.querySelectorAll('.services-fold th')).map(h => (h as HTMLElement).textContent)).toContain('Time');
+    });
+
+    it('mutes N/A in the services table and shows the unit after a value', () => {
+        create();
+        const cells = Array.from(fixture.nativeElement.querySelectorAll('.services-fold tbody td.no-value')) as HTMLElement[];
+
+        expect(cells.map(c => c.textContent)).toEqual(['N/A']);
+        expect(fixture.nativeElement.querySelector('.services-fold tbody tr').textContent).toContain('12.5 kWh');
+    });
+
+    it('says in the service that it has no values, without a table', () => {
+        create({ elements: lastValueElements.slice(0, 2), counts: [2, 0], values: lastValues.slice(0, 2) });
+        const serviceEls = fixture.nativeElement.querySelectorAll('.services-fold .service') as NodeListOf<HTMLElement>;
+
+        expect(serviceEls[1].textContent).toContain('No values');
+        expect(serviceEls[1].querySelector('table')).toBeNull();
     });
 
     it('shows the unit only where the characteristic gives one', () => {
-        create();
+        create({ meta: [[meta(true), meta(true)], [meta(true)]] });
 
         expect(component.tiles.map(t => t.unit)).toEqual(['kWh', '', '']);
     });
 
-    it('shows one line instead of an empty grid for a device without data', () => {
-        create({ elements: [], counts: [0, 0], values: [] });
+    it('shows no value area and no table for a device without data, with the services listed first', () => {
+        create({ elements: [], counts: [0, 0], values: [], meta: [[], []] });
 
         expect(fixture.nativeElement.querySelector('.tiles')).toBeNull();
-        expect(fixture.nativeElement.querySelector('.values-block').textContent).toContain('No service of this device provides values.');
+        expect(fixture.nativeElement.querySelector('.values-block')).toBeNull();
+        expect(fixture.nativeElement.querySelector('mat-dialog-content').firstElementChild.classList.contains('services-fold')).toBeTrue();
+        expect(fixture.nativeElement.querySelector('.services-fold table')).toBeNull();
     });
 
     it('marks offline, inactive and unknown devices with the chip classes of the device list', () => {

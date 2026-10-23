@@ -31,36 +31,131 @@
     }
   </ng-template>
 
-  <section class="block values-block">
-    <h3>Current values</h3>
-    @if (errorOccured) {
-      <p class="muted">{{errorMessage}}</p>
-    } @else if (!valuesLoaded) {
-      <p class="muted">Loading</p>
-    } @else if (tiles.length === 0) {
-      <p class="muted">No service of this device provides values.</p>
-    } @else {
-      <div class="tiles">
-        @for (tile of tiles; track $index) {
-          <div class="tile" [matTooltip]="tile.serviceName" matTooltipPosition="above">
-            <span class="tile-field">{{tile.field}}</span>
-            @if (tile.showService) {
-              <span class="tile-service">{{tile.serviceName}}</span>
-            }
-            <span class="tile-value" [class.no-value]="tile.value === null">
-              {{tile.value !== null ? tile.value : 'N/A'}}@if (tile.value !== null && tile.unit) {<span class="tile-unit"> {{tile.unit}}</span>}
-            </span>
-            @if (tile.time) {
-              <span class="tile-time">{{tile.time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+  <ng-template #servicesFold>
+    <details class="fold services-fold" [open]="!showValues">
+      <summary><mat-icon class="chevron">expand_more</mat-icon> Services <span class="hint">{{services.length}}</span></summary>
+      @for (service of services; track service; let i = $index) {
+        <div class="service">
+          <div class="service-head">
+            <div class="service-title">
+              <span class="service-name">{{service.name}}</span>
+              @if (service.description) {
+                <span class="muted">{{service.description}}</span>
+              }
+            </div>
+            @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
+              <button mat-icon-button type="button" (click)="toggleDownload(i)" matTooltip="Download data"
+                aria-label="Download data" [attr.aria-expanded]="downloadIndex === i">
+                <mat-icon>download</mat-icon>
+              </button>
             }
           </div>
-        }
-      </div>
-      @if (servicesWithoutData.length > 0) {
-        <p class="muted without-data">No values from {{servicesWithoutData.join(', ')}}</p>
+          @if (userIsDeveloper) {
+            <div class="service-id">
+              <span class="muted">Service ID</span> {{service.id}}
+              <ng-container *ngTemplateOutlet="copyButton; context: {key: 'service-' + i, text: service.id}"></ng-container>
+            </div>
+          }
+          @if (serviceTables[i]; as table) {
+            @if (table.rows.length > 0) {
+              @if (table.time) {
+                <div class="muted service-time">Last value {{table.time | date:'dd.MM.yyyy - HH:mm:ss'}}</div>
+              }
+              <table class="values">
+                <thead>
+                  <tr>
+                    <th>Field</th><th>Value</th>
+                    @if (table.showDescription) { <th>Description</th> }
+                    @if (!table.time) { <th>Time</th> }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of table.rows; track row.path) {
+                    <tr>
+                      <td [matTooltip]="row.path">{{row.field}}</td>
+                      <td [class.no-value]="row.value === null">{{row.value !== null ? row.value : 'N/A'}}@if (row.value !== null && row.unit) {<span class="muted"> {{row.unit}}</span>}</td>
+                      @if (table.showDescription) { <td>{{row.description}}</td> }
+                      @if (!table.time) { <td class="muted">{{row.time ? (row.time | date:'dd.MM.yyyy - HH:mm:ss') : ''}}</td> }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else if (valuesLoaded) {
+              <p class="muted">No values</p>
+            }
+          }
+          @if (downloadIndex === i) {
+            <div class="download">
+              <mat-form-field class="ly-flex" color="accent" appearance="outline">
+                <mat-label>Data Format</mat-label>
+                <mtx-select appendTo=".ng-select-anchor" [formControl]="availabilityControl"
+                  [compareWith]="compareAvailabilityValue" placeholder="Device">
+                  @for (option of filterAvailability(i); track option) {
+                    <mtx-option [value]="valueAvailability(option)">{{formatAvailability(option)}}</mtx-option>
+                  }
+                </mtx-select>
+                <mat-error senergyError label="Data Format"></mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="ly-flex" color="accent" (click)="picker.open()">
+                <mat-label>Enter a Date Range</mat-label>
+                <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker" [min]="getMin(i)" [max]="getMax(i)">
+                  <input matStartDate formControlName="from" placeholder="Start date">
+                  <input matEndDate formControlName="to" placeholder="End date">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matPrefix [for]="picker" disabled="false"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker disabled="false"></mat-date-range-picker>
+                @if (timeControl.controls.from.hasError('matStartDateInvalid')) {
+                  <mat-error>Invalid start date</mat-error>
+                }
+                @if (timeControl.controls.to.hasError('matEndDateInvalid')) {
+                  <mat-error>Invalid end date</mat-error>
+                }
+              </mat-form-field>
+              <div class="download-actions">
+                <button matButton="outlined" type="button" (click)="toggleDownload(i)">Cancel</button>
+                <button matButton="filled" type="button" (click)="download($event, i)">
+                  <mat-icon>download</mat-icon> Download
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       }
-    }
-  </section>
+    </details>
+
+  </ng-template>
+
+  @if (!showValues) {
+    <ng-container *ngTemplateOutlet="servicesFold"></ng-container>
+  }
+
+  @if (showValues) {
+    <section class="block values-block">
+      <h3>Current values</h3>
+      @if (errorOccured) {
+        <p class="muted">{{errorMessage}}</p>
+      } @else if (!valuesLoaded) {
+        <p class="muted">Loading</p>
+      } @else {
+        <div class="tiles">
+          @for (tile of tiles; track $index) {
+            <div class="tile" [matTooltip]="tile.path + ' (' + tile.serviceName + ')'" matTooltipPosition="above">
+              <span class="tile-field">{{tile.label}}</span>
+              @if (tile.showService) {
+                <span class="tile-service">{{tile.serviceName}}</span>
+              }
+              <span class="tile-value" [class.no-value]="tile.value === null">
+                {{tile.value !== null ? tile.value : 'N/A'}}@if (tile.value !== null && tile.unit) {<span class="tile-unit"> {{tile.unit}}</span>}
+              </span>
+              @if (tile.time) {
+                <span class="tile-time">{{tile.time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
 
   @if (userCanLoadConnectionHistory) {
     <section class="block">
@@ -77,83 +172,9 @@
     </section>
   }
 
-  <details class="fold">
-    <summary><mat-icon class="chevron">expand_more</mat-icon> Services <span class="hint">{{services.length}}</span></summary>
-    @for (service of services; track service; let i = $index) {
-      <div class="service">
-        <div class="service-head">
-          <div class="service-title">
-            <span class="service-name">{{service.name}}</span>
-            @if (service.description) {
-              <span class="muted">{{service.description}}</span>
-            }
-          </div>
-          @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
-            <button mat-icon-button type="button" (click)="toggleDownload(i)" matTooltip="Download data"
-              aria-label="Download data" [attr.aria-expanded]="downloadIndex === i">
-              <mat-icon>download</mat-icon>
-            </button>
-          }
-        </div>
-        @if (userIsDeveloper) {
-          <div class="service-id">
-            <span class="muted">Service ID</span> {{service.id}}
-            <ng-container *ngTemplateOutlet="copyButton; context: {key: 'service-' + i, text: service.id}"></ng-container>
-          </div>
-        }
-        @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
-          <table class="values">
-            <thead>
-              <tr><th>Field</th><th>Description</th></tr>
-            </thead>
-            <tbody>
-              @for (element of lastValueArray[i]; track element.request.columnName) {
-                <tr>
-                  <td>{{element.request.columnName}}</td>
-                  <td>{{element.description !== undefined ? element.description : 'N/A'}}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        }
-        @if (downloadIndex === i) {
-          <div class="download">
-            <mat-form-field class="ly-flex" color="accent" appearance="outline">
-              <mat-label>Data Format</mat-label>
-              <mtx-select appendTo=".ng-select-anchor" [formControl]="availabilityControl"
-                [compareWith]="compareAvailabilityValue" placeholder="Device">
-                @for (option of filterAvailability(i); track option) {
-                  <mtx-option [value]="valueAvailability(option)">{{formatAvailability(option)}}</mtx-option>
-                }
-              </mtx-select>
-              <mat-error senergyError label="Data Format"></mat-error>
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="ly-flex" color="accent" (click)="picker.open()">
-              <mat-label>Enter a Date Range</mat-label>
-              <mat-date-range-input [formGroup]="timeControl" [rangePicker]="picker" [min]="getMin(i)" [max]="getMax(i)">
-                <input matStartDate formControlName="from" placeholder="Start date">
-                <input matEndDate formControlName="to" placeholder="End date">
-              </mat-date-range-input>
-              <mat-datepicker-toggle matPrefix [for]="picker" disabled="false"></mat-datepicker-toggle>
-              <mat-date-range-picker #picker disabled="false"></mat-date-range-picker>
-              @if (timeControl.controls.from.hasError('matStartDateInvalid')) {
-                <mat-error>Invalid start date</mat-error>
-              }
-              @if (timeControl.controls.to.hasError('matEndDateInvalid')) {
-                <mat-error>Invalid end date</mat-error>
-              }
-            </mat-form-field>
-            <div class="download-actions">
-              <button matButton="outlined" type="button" (click)="toggleDownload(i)">Cancel</button>
-              <button matButton="filled" type="button" (click)="download($event, i)">
-                <mat-icon>download</mat-icon> Download
-              </button>
-            </div>
-          </div>
-        }
-      </div>
-    }
-  </details>
+  @if (showValues) {
+    <ng-container *ngTemplateOutlet="servicesFold"></ng-container>
+  }
 
   <details class="fold">
     <summary><mat-icon class="chevron">expand_more</mat-icon> Details</summary>

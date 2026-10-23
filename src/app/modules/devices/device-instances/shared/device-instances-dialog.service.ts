@@ -17,7 +17,7 @@
 import { Injectable, inject } from '@angular/core';
 import { DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from './device-instances.model';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-import { DeviceInstancesServiceDialogComponent } from '../dialogs/device-instances-service-dialog.component';
+import { DeviceInstancesServiceDialogComponent, ValueMeta } from '../dialogs/device-instances-service-dialog.component';
 import {
     contentVariableAspectIds,
     DeviceTypeAspectNodeModel, DeviceTypeCharacteristicsModel,
@@ -74,10 +74,12 @@ export class DeviceInstancesDialogService {
             const serviceOutputCounts: number[] = [];
             const descriptions: string[][] = [];
             const units: string[][] = [];
+            const valueMeta: ValueMeta[][] = [];
             deviceType?.services.forEach((service, serviceIndex) => {
                 serviceOutputCounts[serviceIndex] = 0;
                 const serviceDescriptions: string[] = [];
                 const serviceUnits: string[] = [];
+                const serviceMeta: ValueMeta[] = [];
                 service.outputs?.forEach(output => {
                     const paths = this.deviceTypeService.getValuePathsAndContentVariables(output.content_variable);
                     paths.forEach((path) => {
@@ -104,6 +106,11 @@ export class DeviceInstancesDialogService {
                             description += characteristics.find(a => a.id === path.contentVariable.characteristic_id)?.name;
                         }
                         serviceDescriptions.push(description);
+                        serviceMeta.push({
+                            hasAspect: aspectIds.length > 0,
+                            aspectName: aspectIds.map(id => aspects.find(a => a.id === id)?.name).filter(n => !!n).join(', '),
+                            characteristicName: characteristics.find(a => a.id === path.contentVariable.characteristic_id && !!a.id)?.name ?? '',
+                        });
                         serviceUnits.push(characteristics.find(a => a.id === path.contentVariable.characteristic_id && !!a.id)?.display_unit ?? '');
                         if (serviceOutputCounts.length <= serviceIndex) {
                             serviceOutputCounts.push(0);
@@ -113,6 +120,7 @@ export class DeviceInstancesDialogService {
                 });
                 descriptions.push(serviceDescriptions);
                 units.push(serviceUnits);
+                valueMeta.push(serviceMeta);
             });
             const dialogConfig = new MatDialogConfig();
             dialogConfig.disableClose = false;
@@ -126,6 +134,7 @@ export class DeviceInstancesDialogService {
                     serviceOutputCounts,
                     descriptions,
                     units,
+                    valueMeta,
                     canEdit: onEdit !== undefined,
                 };
             }

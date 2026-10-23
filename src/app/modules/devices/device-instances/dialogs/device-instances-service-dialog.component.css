@@ -79,10 +79,6 @@
     font-weight: 400;
 }
 
-.without-data {
-    margin: 8px 0 0;
-}
-
 .history {
     width: 100%;
     min-height: 40px;
@@ -91,6 +87,11 @@
 .fold {
     margin-top: 12px;
     border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.fold:first-child {
+    margin-top: 0;
+    border-top: 0;
 }
 
 .fold summary {
@@ -197,6 +198,14 @@
 .values td {
     padding: 4px 8px 4px 0;
     overflow-wrap: anywhere;
+}
+
+.values .no-value {
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.service-time {
+    margin-top: 4px;
 }
 
 .download {

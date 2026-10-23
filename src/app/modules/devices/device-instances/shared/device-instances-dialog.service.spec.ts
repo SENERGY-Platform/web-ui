@@ -43,11 +43,11 @@ describe('DeviceInstancesDialogService data dialog', () => {
     beforeEach(() => {
         deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getMeasuringFunctions.and.returnValue(of([{ id: 'f1', display_name: 'Get energy' }] as never));
-        deviceTypeService.getAspectNodesWithMeasuringFunction.and.returnValue(of([]));
+        deviceTypeService.getAspectNodesWithMeasuringFunction.and.returnValue(of([{ id: 'a1', name: 'Air' }] as never));
         deviceTypeService.getLeafCharacteristics.and.returnValue(of([{ id: 'c1', name: 'kWh', display_unit: 'kWh' }] as never));
         deviceTypeService.getDeviceType.and.returnValue(of(deviceType as never));
         deviceTypeService.getValuePathsAndContentVariables.and.returnValue([
-            { path: 'value.total', contentVariable: { function_id: 'f1', characteristic_id: 'c1' } },
+            { path: 'value.total', contentVariable: { function_id: 'f1', characteristic_id: 'c1', aspect_ids: ['a1'] } },
             { path: 'value.power', contentVariable: { function_id: 'f1' } },
         ] as never);
         afterClosed = new Subject();
@@ -74,8 +74,37 @@ describe('DeviceInstancesDialogService data dialog', () => {
             { deviceId: 'urn:device:1', serviceId: 'urn:service:a', columnName: 'value.power' },
         ]);
         expect(config.data['serviceOutputCounts']).toEqual([2, 0]);
-        expect(config.data['descriptions']).toEqual([['Get energy, kWh', 'Get energy'], []]);
+        expect(config.data['descriptions']).toEqual([['Air, Get energy, kWh', 'Get energy'], []]);
         expect(config.data['units']).toEqual([['kWh', ''], []]);
+    });
+
+    it('marks the paths whose content variable has an aspect, from the data it loads anyway', () => {
+        service.openDeviceServiceDialog(device);
+
+        const config = dialog.open.calls.mostRecent().args[1] as { data: Record<string, unknown> };
+        expect(config.data['valueMeta']).toEqual([[
+            { hasAspect: true, aspectName: 'Air', characteristicName: 'kWh' },
+            { hasAspect: false, aspectName: '', characteristicName: '' },
+        ], []]);
+    });
+
+    it('treats the deprecated aspect_id alone as an aspect', () => {
+        deviceTypeService.getValuePathsAndContentVariables.and.returnValue([
+            { path: 'v', contentVariable: { aspect_id: 'a1' } },
+        ] as never);
+        service.openDeviceServiceDialog(device);
+
+        const config = dialog.open.calls.mostRecent().args[1] as { data: Record<string, unknown> };
+        expect((config.data['valueMeta'] as { hasAspect: boolean }[][])[0][0].hasAspect).toBeTrue();
+    });
+
+    it('loads the functions, aspects, characteristics and the device type once each, and nothing else', () => {
+        service.openDeviceServiceDialog(device);
+
+        expect(deviceTypeService.getMeasuringFunctions).toHaveBeenCalledTimes(1);
+        expect(deviceTypeService.getAspectNodesWithMeasuringFunction).toHaveBeenCalledTimes(1);
+        expect(deviceTypeService.getLeafCharacteristics).toHaveBeenCalledTimes(1);
+        expect(deviceTypeService.getDeviceType).toHaveBeenCalledOnceWith('dt1');
     });
 
     it('offers Edit in the dialog only with a callback, and calls it when the dialog closes with edit', () => {
