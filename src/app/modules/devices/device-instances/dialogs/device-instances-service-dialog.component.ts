@@ -41,7 +41,6 @@ import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/clo
 import { MatFormField, MatLabel, MatPrefix, MatError } from '@angular/material/form-field';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatErrorMessagesDirective } from '../../../../core/directives/matError.directive';
 import { TimelineComponent } from '../../../../widgets/charts/shared/chart-types/timeline/timeline.component';
 import { MtxSelect, MtxOption } from '@ng-matero/extensions/select';
@@ -95,7 +94,7 @@ export interface ServiceTable {
     templateUrl: './device-instances-service-dialog.component.html',
     styleUrls: ['./device-instances-service-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DialogHeaderComponent, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatTooltip, MatError, MatErrorMessagesDirective, TimelineComponent, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatPrefix, MatDialogActions, MatButton, DatePipe, NgTemplateOutlet, MatSlideToggle]
+    imports: [DialogHeaderComponent, MatIconButton, MatIcon, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatTooltip, MatError, MatErrorMessagesDirective, TimelineComponent, MtxSelect, ReactiveFormsModule, MtxOption, MatDateRangeInput, MatStartDate, MatEndDate, MatDatepickerToggle, MatDateRangePicker, MatPrefix, MatDialogActions, MatButton, DatePipe, NgTemplateOutlet]
 })
 export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy {
     private dialogRef = inject<MatDialogRef<DeviceInstancesServiceDialogComponent>>(MatDialogRef);
@@ -151,6 +150,8 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
 
     /** Hides the fields without a value in every service's table. */
     hideEmpty = true;
+    /** Fields without an aspect stay folded under the aspect rows until asked for; a service without aspect rows shows them directly. */
+    showOthers = false;
     readonly formatValue = formatValue;
 
     /** Index of the service whose download options are open, at most one. */
@@ -387,10 +388,6 @@ export class DeviceInstancesServiceDialogComponent implements OnInit, OnDestroy 
         });
     }
 
-    /** Number of fields without a value, over all services. */
-    get emptyCount(): number {
-        return this.serviceTables.reduce((n, t) => n + t.emptyRows.length, 0);
-    }
 
     /** Whether a service has anything to list under the current setting of the toggle. */
     tableHasRows(table: ServiceTable): boolean {

@@ -200,7 +200,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         expect(fixture.nativeElement.querySelectorAll('details.fold button.copy').length).toBeGreaterThan(0);
     });
 
-    const rowTexts = () => Array.from(fixture.nativeElement.querySelectorAll('.services-fold tbody tr'))
+    const rowTexts = () => Array.from(fixture.nativeElement.querySelectorAll('.services-fold tbody tr:not(.group-label)'))
         .map(r => Array.from((r as HTMLElement).querySelectorAll('td')).map(td => td.textContent?.trim()).join(' '));
 
     it('puts only values with an aspect on the tiles, and keeps every value with data in the services table', () => {
@@ -345,38 +345,71 @@ describe('DeviceInstancesServiceDialogComponent', () => {
     const airValues = [lastValues[0], lastValues[0], lastValues[0], lastValues[0], { time: null, value: null }, { time: null, value: null }];
     const airMeta = [[meta(false), meta(true, 'Temperature'), meta(false), meta(true, '', 'CO2'), meta(false), meta(true, 'Dust')]];
     const createAir = () => create({ elements: airElements, counts: [6, 0], values: airValues as never, meta: airMeta });
+    const expandOthers = () => {
+        (fixture.nativeElement.querySelector('.group-toggle') as HTMLButtonElement).click();
+        fixture.detectChanges();
+    };
+
+    it('folds the other fields under the aspect rows until asked for', () => {
+        createAir();
+
+        expect(rowTexts()).toEqual(['Temperature 12.5', 'CO2 12.5']);
+        expect((fixture.nativeElement.querySelector('.group-toggle') as HTMLElement).textContent?.replace(/\s+/g, ' ').trim()).toBe('expand_more Other fields 2');
+        expect(fixture.nativeElement.querySelector('.show-empty')).toBeNull();
+
+        expandOthers();
+        expect(rowTexts()).toEqual(['Temperature 12.5', 'CO2 12.5', 'temp_err 12.5 kWh', 'uptime 12.5']);
+    });
+
+    it('shows the fields of a service without aspect rows directly', () => {
+        create({ meta: [[meta(false), meta(false)], [meta(false)]] });
+
+        expect(fixture.nativeElement.querySelector('.group-toggle')).toBeNull();
+        expect(rowTexts()).toEqual(['total 12.5 kWh', 'state ok']);
+    });
 
     it('lists fields with an aspect first, labelled like the tiles, then the others by path without the shared prefix, in path order', () => {
         createAir();
+        expandOthers();
 
         expect(rowTexts()).toEqual(['Temperature 12.5', 'CO2 12.5', 'temp_err 12.5 kWh', 'uptime 12.5']);
         expect(component.serviceTables[0].aspectRows.map(r => r.path)).toEqual(['m.temperature', 'm.co2']);
     });
 
-    it('puts a divider between the aspect group and the rest only when both have rows', () => {
+    it('heads the rest with Other fields only when there are aspect rows above it', () => {
         createAir();
-        const dividers = () => fixture.nativeElement.querySelectorAll('.services-fold tr.group-start').length;
+        const dividers = () => fixture.nativeElement.querySelectorAll('.services-fold tr.group-label').length;
 
         expect(dividers()).toBe(1);
-        expect((fixture.nativeElement.querySelector('.services-fold tr.group-start td') as HTMLElement).textContent).toContain('temp_err');
+        expect((fixture.nativeElement.querySelector('.services-fold tbody.others tr.group-label') as HTMLElement).textContent).toContain('Other fields');
 
         TestBed.resetTestingModule();
         create({ meta: [[meta(true, 'Energy'), meta(false)], [meta(false)]], elements: lastValueElements.slice(0, 1), counts: [1, 0], values: lastValues.slice(0, 1) });
         expect(dividers()).toBe(0);
     });
 
-    it('hides fields without a value by default, says how many, and shows them muted at the bottom when switched off', () => {
+    it('hides fields without a value by default, offers how many, and shows them muted at the bottom on request', () => {
         createAir();
-        const toggle = fixture.nativeElement.querySelector('.hide-empty') as HTMLElement;
+        expandOthers();
+        const button = () => fixture.nativeElement.querySelector('.show-empty') as HTMLButtonElement;
 
-        expect(toggle.textContent).toContain('Hide empty fields (2)');
+        expect(button().textContent?.trim()).toBe('Show 2 empty fields');
         expect(component.hideEmpty).toBeTrue();
         expect(rowTexts().length).toBe(4);
 
-        component.hideEmpty = false;
+        button().click();
         fixture.detectChanges();
         expect(rowTexts().slice(4)).toEqual(['Dust N/A', 'dead N/A']);
         expect(fixture.nativeElement.querySelectorAll('.services-fold tr.empty').length).toBe(2);
+        expect(button().textContent?.trim()).toBe('Hide empty fields');
+    });
+
+    it('offers the service ID and the download as labelled buttons in the service header', () => {
+        create();
+        const actions = Array.from(fixture.nativeElement.querySelectorAll('.services-fold .service')[0].querySelectorAll('.service-actions button'))
+            .map(b => (b as HTMLElement).textContent?.replace(/\s+/g, ' ').trim());
+
+        expect(actions).toEqual(['content_copy Copy ID', 'download Download']);
     });
 
     it('shows one No values line instead of an empty table for a service with only empty fields', () => {

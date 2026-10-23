@@ -41,9 +41,6 @@
   <ng-template #servicesFold>
     <details class="fold services-fold" [open]="!showValues">
       <summary><mat-icon class="chevron">expand_more</mat-icon> Services <span class="hint">{{services.length}}</span></summary>
-      @if (emptyCount > 0) {
-        <mat-slide-toggle class="hide-empty" [checked]="hideEmpty" (change)="hideEmpty = $event.checked">Hide empty fields ({{emptyCount}})</mat-slide-toggle>
-      }
       @for (service of services; track service; let i = $index) {
         <div class="service">
           <div class="service-head">
@@ -53,41 +50,64 @@
                 <span class="muted">{{service.description}}</span>
               }
               @if (serviceTables[i]?.time; as time) {
-                <span class="muted">{{time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+                <span class="muted">Updated {{time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
               }
             </div>
-            @if (userIsDeveloper) {
-              <button mat-icon-button type="button" class="copy" [class.copied]="copiedKey === 'service-' + i"
-                (click)="copyToClipboard('service-' + i, service.id)" [matTooltip]="'Copy service ID ' + service.id" aria-label="Copy service ID">
-                <mat-icon>{{copiedKey === 'service-' + i ? 'check' : 'content_copy'}}</mat-icon>
-              </button>
-            }
-            @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
-              <button mat-icon-button type="button" (click)="toggleDownload(i)" matTooltip="Download data"
-                aria-label="Download data" [attr.aria-expanded]="downloadIndex === i">
-                <mat-icon>download</mat-icon>
-              </button>
-            }
+            <div class="service-actions">
+              @if (userIsDeveloper) {
+                <button matButton type="button" class="copy-id" [class.copied]="copiedKey === 'service-' + i"
+                  (click)="copyToClipboard('service-' + i, service.id)" [matTooltip]="service.id">
+                  <mat-icon>{{copiedKey === 'service-' + i ? 'check' : 'content_copy'}}</mat-icon> Copy ID
+                </button>
+              }
+              @if (lastValueArray[i] !== undefined && lastValueArray[i].length > 0) {
+                <button matButton type="button" (click)="toggleDownload(i)" [attr.aria-expanded]="downloadIndex === i">
+                  <mat-icon>download</mat-icon> Download
+                </button>
+              }
+            </div>
           </div>
           @if (serviceTables[i]; as table) {
             @if (tableHasRows(table)) {
               <table class="values">
-                <tbody>
-                  @for (row of table.aspectRows; track row.path) {
-                    <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: 'aspect'}"></ng-container>
-                  }
-                  @for (row of table.otherRows; track row.path; let first = $first) {
-                    <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: first && table.aspectRows.length > 0 ? 'group-start' : ''}"></ng-container>
-                  }
-                  @if (!hideEmpty) {
-                    @for (row of table.emptyRows; track row.path) {
-                      <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: 'empty'}"></ng-container>
+                @if (table.aspectRows.length > 0) {
+                  <tbody class="readings">
+                    @for (row of table.aspectRows; track row.path) {
+                      <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: 'aspect'}"></ng-container>
                     }
-                  }
-                </tbody>
+                  </tbody>
+                }
+                @if (table.otherRows.length > 0 || (!hideEmpty && table.emptyRows.length > 0)) {
+                  <tbody class="others">
+                    @if (table.aspectRows.length > 0) {
+                      <tr class="group-label">
+                        <th colspan="2">
+                          <button type="button" class="group-toggle" (click)="showOthers = !showOthers" [attr.aria-expanded]="showOthers">
+                            <mat-icon>{{showOthers ? 'expand_less' : 'expand_more'}}</mat-icon> Other fields <span class="hint">{{table.otherRows.length}}</span>
+                          </button>
+                        </th>
+                      </tr>
+                    }
+                    @if (showOthers || table.aspectRows.length === 0) {
+                      @for (row of table.otherRows; track row.path) {
+                        <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: ''}"></ng-container>
+                      }
+                      @if (!hideEmpty) {
+                        @for (row of table.emptyRows; track row.path) {
+                          <ng-container *ngTemplateOutlet="valueRow; context: {row: row, cls: 'empty'}"></ng-container>
+                        }
+                      }
+                    }
+                  </tbody>
+                }
               </table>
             } @else if (valuesLoaded) {
-              <p class="muted">No values</p>
+              <p class="muted no-values">No values</p>
+            }
+            @if (table.emptyRows.length > 0 && (showOthers || table.aspectRows.length === 0)) {
+              <button matButton type="button" class="show-empty" (click)="hideEmpty = !hideEmpty">
+                {{hideEmpty ? 'Show ' + table.emptyRows.length + ' empty ' + (table.emptyRows.length === 1 ? 'field' : 'fields') : 'Hide empty fields'}}
+              </button>
             }
           }
           @if (downloadIndex === i) {
