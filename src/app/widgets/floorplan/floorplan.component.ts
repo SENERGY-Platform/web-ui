@@ -332,9 +332,9 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     dialogConfig.disableClose = false;
     dialogConfig.data = {
       widgetId: this.widget().id,
-      dashboardId: this.dashboardId,
-      userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization,
-      userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization,
+      dashboardId: this.dashboardId(),
+      userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization(),
+      userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization(),
       aspectRatio: this.imageWrapper.nativeElement.offsetWidth / this.imageWrapper.nativeElement.offsetHeight,
     };
     const editDialogRef = this.dialog.open(FloorplanEditDialogComponent, dialogConfig);

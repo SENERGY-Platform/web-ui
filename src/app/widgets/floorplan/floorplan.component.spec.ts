@@ -723,4 +723,23 @@ describe('FloorplanComponent', () => {
             }));
         });
     });
+
+    describe('edit', () => {
+        it('hands the dialog the input values, not the signals', () => {
+            // a signal stringified into the URL made the dashboard service reject the dashboard id
+            dialogSpy.open.calls.reset();
+            dialogSpy.open.and.returnValue({ afterClosed: () => of(undefined) } as any);
+            fixture.componentRef.setInput('dashboardId', '0123456789abcdef01234567');
+            fixture.componentRef.setInput('userHasUpdateNameAuthorization', true);
+            fixture.componentRef.setInput('widget', { id: 'widgetId', name: 'widget', type: 'floorplan', properties: {} } as WidgetModel);
+
+            component.edit();
+
+            const data = dialogSpy.open.calls.mostRecent().args[1]?.data;
+            expect(data.dashboardId).toBe('0123456789abcdef01234567');
+            expect(data.widgetId).toBe('widgetId');
+            expect(data.userHasUpdateNameAuthorization).toBeTrue();
+            expect(data.userHasUpdatePropertiesAuthorization).toBeFalse();
+        });
+    });
 });
