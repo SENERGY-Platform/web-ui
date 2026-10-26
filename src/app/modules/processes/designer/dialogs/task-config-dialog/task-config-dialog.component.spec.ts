@@ -32,7 +32,13 @@ import { CoreModule } from '../../../../../core/core.module';
 import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
 import { DeviceTypeService } from '../../../../metadata/device-types-overview/shared/device-type.service';
 import { ConceptsService } from '../../../../metadata/concepts/shared/concepts.service';
-import { DeviceTypeAspectNodeModel, DeviceTypeDeviceClassModel, DeviceTypeFunctionModel } from '../../../../metadata/device-types-overview/shared/device-type.model';
+import { ConceptsCharacteristicsModel } from '../../../../metadata/concepts/shared/concepts-characteristics.model';
+import {
+    DeviceTypeAspectNodeModel,
+    DeviceTypeCharacteristicsModel,
+    DeviceTypeDeviceClassModel,
+    DeviceTypeFunctionModel,
+} from '../../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceTypeSelectionRefModel } from '../../../../metadata/device-types-overview/shared/device-type-selection.model';
 
 const MEASURING = 'https://senergy.infai.org/ontology/MeasuringFunction';
@@ -63,6 +69,7 @@ describe('TaskConfigDialogComponent', () => {
     let component: TaskConfigDialogComponent;
     let dialogRef: Spy<MatDialogRef<TaskConfigDialogComponent>>;
     let deviceTypeService: Spy<DeviceTypeService>;
+    let conceptsService: Spy<ConceptsService>;
 
     function init(
         selection: DeviceTypeSelectionRefModel | null,
@@ -84,7 +91,7 @@ describe('TaskConfigDialogComponent', () => {
         });
         deviceTypeService.getAspectNodesWithControllingFunction.and.returnValue(of(controllingListing));
         deviceTypeService.getAspectsControllingFunctions.and.callFake((id: string) => of(controllingFunctionsByAspect[id] || []));
-        const conceptsService = createSpyFromClass(ConceptsService);
+        conceptsService = createSpyFromClass(ConceptsService);
         conceptsService.getConceptWithCharacteristics.and.returnValue(of(null));
 
         TestBed.configureTestingModule({
@@ -166,6 +173,69 @@ describe('TaskConfigDialogComponent', () => {
         slowAir.next([temperature]);
         slowAir.complete();
         expect(functionIds()).toEqual([pressure.id]);
+    });
+
+    it('keeps the selected function when the new aspect selection offers it too', () => {
+        init(null, { [air.id]: [temperature, humidity], [water.id]: [temperature] });
+        selectMeasuring([air.id]);
+        component.functionFormControl.setValue(temperature);
+        component.aspectFormControl.setValue([air.id, water.id]);
+        expect(functionIds()).toEqual([temperature.id]);
+        expect(component.functionFormControl.value).toBe(temperature);
+        expect(savedResult().function).toBe(temperature);
+    });
+
+    it('clears the selected function when the new aspect selection does not offer it', () => {
+        init(null, { [air.id]: [temperature, humidity], [water.id]: [temperature] });
+        selectMeasuring([air.id]);
+        component.functionFormControl.setValue(humidity);
+        component.aspectFormControl.setValue([air.id, water.id]);
+        expect(component.functionFormControl.value).toBe('');
+    });
+
+    it('holds no function while the functions of the new aspect selection load', () => {
+        const slowWater = new Subject<DeviceTypeFunctionModel[]>();
+        init(null, { [air.id]: [temperature], [water.id]: slowWater });
+        selectMeasuring([air.id]);
+        component.functionFormControl.setValue(temperature);
+        component.aspectFormControl.setValue([water.id]);
+        expect(component.functionFormControl.value).toBe('');
+        slowWater.next([temperature]);
+        slowWater.complete();
+        expect(component.functionFormControl.value).toBe(temperature);
+    });
+
+    it('keeps the function through a second change while the first listing still loads', () => {
+        const slowWater = new Subject<DeviceTypeFunctionModel[]>();
+        init(null, { [air.id]: [temperature], [water.id]: slowWater });
+        selectMeasuring([air.id]);
+        component.functionFormControl.setValue(temperature);
+        component.aspectFormControl.setValue([water.id]);
+        component.aspectFormControl.setValue([air.id, water.id]);
+        slowWater.next([temperature]);
+        slowWater.complete();
+        expect(component.functionFormControl.value).toBe(temperature);
+    });
+
+    it('keeps the loaded characteristic of the kept function, so Save never writes an empty one', () => {
+        const celsius = { id: 'urn:infai:ses:characteristic:celsius', name: 'Celsius' } as DeviceTypeCharacteristicsModel;
+        const measured = { ...temperature, concept_id: 'urn:infai:ses:concept:temperature' };
+        init(null, { [air.id]: [measured], [water.id]: [measured] });
+        conceptsService.getConceptWithCharacteristics.and.returnValue(
+            of({ base_characteristic_id: celsius.id, characteristics: [celsius] } as ConceptsCharacteristicsModel),
+        );
+        selectMeasuring([air.id]);
+        component.functionFormControl.setValue(measured);
+        conceptsService.getConceptWithCharacteristics.and.returnValue(new Subject<ConceptsCharacteristicsModel | null>());
+        component.aspectFormControl.setValue([air.id, water.id]);
+        expect(savedResult().characteristic).toBe(celsius);
+    });
+
+    it('keeps the stored function of an opened task when its new aspects still offer it', () => {
+        init(measuringSelection({ aspect: air }), { [air.id]: [temperature, humidity], [water.id]: [temperature] });
+        component.aspectFormControl.setValue([water.id]);
+        expect(component.functionFormControl.value.id).toBe(temperature.id);
+        expect(component.unlistedFunction).toBeNull();
     });
 
     it('returns the selected aspect nodes sorted by id and the first of them as the deprecated aspect', () => {
@@ -283,6 +353,17 @@ describe('TaskConfigDialogComponent', () => {
             const result = savedResult();
             expect(result.device_class).toBe(heater);
             expect(result.aspects).toEqual([air]);
+        });
+
+        it('keeps the selected function when the device class or the aspects change and still offer it', () => {
+            initControlling();
+            component.aspectFormControl.setValue([insideAir.id]);
+            component.functionFormControl.setValue(setTemperature);
+            component.deviceClassFormControl.setValue(heater);
+            expect(component.functionFormControl.value).toBe(setTemperature);
+            component.aspectFormControl.setValue([air.id]);
+            expect(functionIds()).toEqual([setTemperature.id]);
+            expect(component.functionFormControl.value).toBe(setTemperature);
         });
 
         it('offers no function without device class and aspect', () => {

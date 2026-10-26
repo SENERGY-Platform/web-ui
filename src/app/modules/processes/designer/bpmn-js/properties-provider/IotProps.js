@@ -259,6 +259,34 @@ export function getTaskName(connectorInfo, currentName) {
     return name + " " + connectorInfo.function.name;
 }
 
+// input values and output variable names are expressed in the characteristic, so a task configured anew with the
+// same characteristic, as after a changed aspect, keeps what the user edited; the payload is always written anew
+function keepParameterEdits(element, characteristicId, inputs, outputs) {
+    var extentionElements = getBusinessObject(element).extensionElements;
+    var previous = extentionElements && extentionElements.values && extentionElements.values[0];
+    if (!characteristicId || !previous || !previous.inputParameters) {
+        return;
+    }
+    var previousInputs = previous.inputParameters;
+    var payload = previousInputs.find(function (input) { return input.name === "payload"; });
+    if (!payload || JSON.parse(payload.value).characteristic_id !== characteristicId) {
+        return;
+    }
+    (inputs || []).forEach(function (input) {
+        var kept = previousInputs.find(function (old) { return old.name === input.name; });
+        if (kept && input.name !== "payload") {
+            input.value = kept.value;
+        }
+    });
+    var previousOutputs = previous.outputParameters || [];
+    (outputs || []).forEach(function (output) {
+        var kept = previousOutputs.find(function (old) { return old.value === output.value; });
+        if (kept) {
+            output.name = kept.name;
+        }
+    });
+}
+
 export function getDeviceTypeServiceFromServiceElement(element) {
     var bo = getBusinessObject(element);
     var extentionElements = bo.extensionElements;
@@ -562,6 +590,7 @@ export function external(group, element, bpmnjs, eventBus, bpmnFactory, replace,
         html: "<button class='bpmn-iot-button' data-action='selectIotDeviceTypeForExtern'>Select Function</button>",
         selectIotDeviceTypeForExtern: function (element, node) {
             bpmnjs.designerCallbacks.findIotDeviceType(getDeviceTypeServiceFromServiceElement(element), function (connectorInfo) {
+                var previousElement = element;
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
                     serviceTask.topic = connectorInfo.completionStrategy;
                     serviceTask.name = getTaskName(connectorInfo, serviceTask.name);
@@ -580,6 +609,7 @@ export function external(group, element, bpmnjs, eventBus, bpmnFactory, replace,
                         inputs = [script];
                         outputs = createTaskParameter(bpmnjs, generateStructure(connectorInfo.characteristic, false, ''), 'outputs', 'output');
                     }
+                    keepParameterEdits(previousElement, connectorInfo.characteristic.id, inputs, outputs);
 
                     var inputOutput = createInputOutput(bpmnjs, inputs, outputs);
                     setExtentionsElement(bpmnjs, serviceTask, inputOutput);

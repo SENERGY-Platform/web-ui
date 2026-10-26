@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { getDeviceTypeServiceFromServiceElement, getPayload, getTaskName, msgevent } from './IotProps';
+import { external, getDeviceTypeServiceFromServiceElement, getPayload, getTaskName, msgevent } from './IotProps';
 
 const air = { id: 'urn:infai:ses:aspect:air', name: 'Air', root_id: 'urn:infai:ses:aspect:air', parent_id: '', child_ids: [], ancestor_ids: [], descendent_ids: [] };
 const water = { id: 'urn:infai:ses:aspect:water', name: 'Water', root_id: 'urn:infai:ses:aspect:water', parent_id: '', child_ids: [], ancestor_ids: [], descendent_ids: [] };
@@ -95,6 +95,65 @@ describe('IotProps task payload', () => {
             serviceElement({ function: controlling, device_class: deviceClass, aspect: null }, 'optimistic'),
         );
         expect(selection.aspects).toEqual([]);
+    });
+});
+
+describe('IotProps task configured anew', () => {
+    const celsius = { id: 'urn:infai:ses:characteristic:celsius', type: 'https://schema.org/Float' };
+    const fahrenheit = { id: 'urn:infai:ses:characteristic:fahrenheit', type: 'https://schema.org/Float' };
+    const setTemperature = { id: 'urn:infai:ses:controlling-function:set-temperature', name: 'Set Temperature', rdf_type: controlling.rdf_type };
+    const controllingInfo = (aspects: any[], characteristic = celsius) =>
+        connectorInfo({ function: setTemperature, aspect: aspects[0], aspects, characteristic, completionStrategy: 'optimistic' });
+    const measuringInfo = (aspects: any[]) => connectorInfo({ aspect: aspects[0], aspects, characteristic: celsius });
+
+    /** Runs the Select Function entry with `info` as the dialog result and returns the element that replaces `element`. */
+    const configure = (element: any, info: any) => {
+        const group = { entries: [] as any[] };
+        let replaced: any;
+        const bpmnjs = {
+            get: () => ({ create: (type: string, attributes: any) => ({ $type: type, ...attributes }) }),
+            designerCallbacks: { findIotDeviceType: (_: any, callback: (result: any) => void) => callback(info) },
+        };
+        const bpmnFactory = {
+            create: () => {
+                const businessObject: any = {};
+                businessObject.get = (name: string) => (name === 'camunda:topic' ? businessObject.topic : undefined);
+                return businessObject;
+            },
+        };
+        const replace = { replaceElement: (_: any, newElement: any) => (replaced = newElement) };
+        external(group, element, bpmnjs, { fire: () => {} }, bpmnFactory, replace, { select: () => {} });
+        group.entries.find((entry) => entry.id === 'iot-extern-device-type-select-button').selectIotDeviceTypeForExtern(element, null);
+        return replaced;
+    };
+    const io = (element: any) => element.businessObject.extensionElements.values[0];
+    const task = { businessObject: { name: 'Task', get: () => undefined } };
+
+    it('keeps the edited input values when the aspects change and the characteristic stays', () => {
+        const before = configure(task, controllingInfo([air]));
+        expect(io(before).inputParameters[1].value).toBe('0');
+        io(before).inputParameters[1].value = '${target}';
+        const after = configure(before, controllingInfo([air, water]));
+        expect(io(after).inputParameters.map((p: any) => p.name)).toEqual(['payload', 'inputs']);
+        expect(io(after).inputParameters[1].value).toBe('${target}');
+        expect(JSON.parse(io(after).inputParameters[0].value).aspects).toEqual([air, water]);
+    });
+
+    it('writes the default input values for another characteristic', () => {
+        const before = configure(task, controllingInfo([air]));
+        io(before).inputParameters[1].value = '21';
+        const after = configure(before, controllingInfo([air], fahrenheit));
+        expect(io(after).inputParameters[1].value).toBe('0');
+        expect(JSON.parse(io(after).inputParameters[0].value).characteristic_id).toBe(fahrenheit.id);
+    });
+
+    it('keeps the renamed output variables when the aspects change and the characteristic stays', () => {
+        const before = configure(task, measuringInfo([air]));
+        expect(io(before).outputParameters.map((p: any) => [p.name, p.value])).toEqual([['outputs', '${result}']]);
+        io(before).outputParameters[0].name = 'temperature';
+        const after = configure(before, measuringInfo([water]));
+        expect(io(after).outputParameters.map((p: any) => [p.name, p.value])).toEqual([['temperature', '${result}']]);
+        expect(JSON.parse(io(after).inputParameters[0].value).aspects).toEqual([water]);
     });
 });
 
