@@ -16,7 +16,12 @@ on:
   workflow_dispatch:
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+  # tagging is the release, so red tests leave no tag and no image behind
   multi:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
