@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+/* out of the flow, so the title keeps Material's layout; centered on the title text */
+.foreign-attributes-lock {
+    position: absolute;
+    top: 9px;
+    right: 12px;
+}
+
 .form {
     min-width: 150px;
     width: 100%;

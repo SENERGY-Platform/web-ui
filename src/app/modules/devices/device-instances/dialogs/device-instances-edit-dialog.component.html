@@ -14,7 +14,14 @@
   ~ limitations under the License.
   -->
 
-<h2 mat-dialog-title>{{action}} Device</h2>
+<h2 mat-dialog-title>
+    {{action}} Device
+    <button mat-icon-button color="accent" class="foreign-attributes-lock" *ngIf="userHasUpdateAttributesAuthorization && hasForeignAttributes()"
+        (click)="foreignAttributesUnlocked = !foreignAttributesUnlocked"
+        [matTooltip]="foreignAttributesLockLabel()" [attr.aria-label]="foreignAttributesLockLabel()">
+        <mat-icon>{{foreignAttributesUnlocked ? 'lock_open' : 'lock'}}</mat-icon>
+    </button>
+</h2>
 
 <mat-dialog-content>
     <form class="form">
@@ -69,7 +76,7 @@
                             [disabled]="!editableAttribute(attr)">
                         <mat-error senergyError label="Value"></mat-error>
                     </mat-form-field>
-                    <div [matTooltip]="editableAttribute(attr) ? '' : attr.origin">
+                    <div [matTooltip]="ownAttribute(attr) ? '' : attr.origin">
                         <button mat-icon-button color="warn" (click)="removeAttr(i)"
                             [disabled]="!editableAttribute(attr)">
                             <mat-icon *ngIf="!editableAttribute(attr)">conversion_path</mat-icon>

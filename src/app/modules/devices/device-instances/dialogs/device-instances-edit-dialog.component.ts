@@ -16,7 +16,7 @@
 
 import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, ViewChild } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Attribute, DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from '../shared/device-instances.model';
+import { Attribute, defaultAttributeOrigin, DeviceInstanceModel, DeviceInstanceWithDeviceTypeModel } from '../shared/device-instances.model';
 import { AbstractControl, ValidationErrors } from '@angular/forms';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
 import { senergyConnectorLocalIdConstraint } from '../../../metadata/device-types-overview/shared/device-type.model';
@@ -44,6 +44,7 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
     deviceTypeSupportsQR = false;
     qrScanSupported = false;
     qrScanInProgress = false;
+    foreignAttributesUnlocked = false;
 
     private qrScannerId: number | undefined;
     private qrMediaStream: MediaStream | undefined;
@@ -145,8 +146,24 @@ export class DeviceInstancesEditDialogComponent implements OnDestroy {
         this.device.attributes.push({ key: '', value: '', origin: 'web-ui' });
     }
 
-    editableAttribute(attr: Attribute) {
+    ownAttribute(attr: Attribute) {
         return !attr.origin || attr.origin === '' || attr.origin === 'web-ui';
+    }
+
+    /**
+     * Attributes of other origins are managed elsewhere and only editable once unlocked. Account defaults never are:
+     * they are not saved with the device.
+     */
+    editableAttribute(attr: Attribute) {
+        return this.ownAttribute(attr) || (this.foreignAttributesUnlocked && attr.origin !== defaultAttributeOrigin);
+    }
+
+    foreignAttributesLockLabel(): string {
+        return (this.foreignAttributesUnlocked ? 'Lock' : 'Unlock') + ' attributes of other origins';
+    }
+
+    hasForeignAttributes(): boolean {
+        return this.device.attributes?.some(attr => attr.key !== this.nicknameAttributeKey && !this.ownAttribute(attr) && attr.origin !== defaultAttributeOrigin) ?? false;
     }
 
     private setDisplayNameAttribute() {

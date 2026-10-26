@@ -74,4 +74,27 @@ describe('DeviceInstancesEditDialogComponent', () => {
         expect(closedWith.attributes?.find((attr) => attr.key === 'shared/nickname')?.value).toBe('new-nickname');
         expect(closedWith.display_name).toBe('new-nickname');
     });
+
+    describe('attributes of other origins', () => {
+        const connectorAttr = { key: 'senergy/lora/dev-addr', value: 'abc', origin: 'lorawan-platform-connector' };
+        const defaultAttr = { key: 'last_message_max_age', value: '1h', origin: 'default' };
+        const ownAttr = { key: 'timezone', value: 'Europe/Berlin', origin: 'web-ui' };
+
+        it('are locked until unlocked, account defaults stay locked', () => {
+            const component = newComponent({ ...deviceWithNickname(), attributes: [connectorAttr, defaultAttr, ownAttr] });
+            expect(component.hasForeignAttributes()).toBeTrue();
+            expect(component.editableAttribute(ownAttr)).toBeTrue();
+            expect(component.editableAttribute(connectorAttr)).toBeFalse();
+            expect(component.editableAttribute(defaultAttr)).toBeFalse();
+
+            component.foreignAttributesUnlocked = true;
+            expect(component.editableAttribute(connectorAttr)).toBeTrue();
+            expect(component.editableAttribute(defaultAttr)).toBeFalse();
+        });
+
+        it('do not include account defaults or the nickname', () => {
+            const component = newComponent({ ...deviceWithNickname(), attributes: [...deviceWithNickname().attributes!, defaultAttr] });
+            expect(component.hasForeignAttributes()).toBeFalse();
+        });
+    });
 });
