@@ -21,6 +21,7 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, map, concatMap } from 'rxjs/operators';
 import {
     Attribute,
+    defaultAttributeOrigin,
     DeviceFilterCriteriaModel,
     DeviceInstanceModel,
     DeviceInstancesBaseModel,
@@ -51,7 +52,7 @@ export class DeviceInstancesService {
     authorizationsAttributes: PermissionTestResponse;
     authorizationsConnectionLog: PermissionTestResponse;
     authorizationsShare: PermissionTestResponse;
-    defaultOrigin = 'default';
+    defaultOrigin = defaultAttributeOrigin;
 
     constructor(
         private http: HttpClient,
@@ -113,7 +114,7 @@ export class DeviceInstancesService {
 
     updateDeviceInstance(device: DeviceInstanceModel, updateOnlySameOriginAttributes = false): Observable<DeviceInstanceModel | null> {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(device.id) + this.sameOriginAttributesQuery(updateOnlySameOriginAttributes), device)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(device.id) + this.sameOriginAttributesQuery(updateOnlySameOriginAttributes), {...device, attributes: this.withoutDefaultAttributes(device.attributes)})
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstance', null)));
     }
 
@@ -125,7 +126,7 @@ export class DeviceInstancesService {
 
     updateDeviceInstanceAttributes(deviceId: string, attributes: Attribute[], updateOnlySameOriginAttributes = false) {
         return this.http
-            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes' + this.sameOriginAttributesQuery(updateOnlySameOriginAttributes), attributes)
+            .put<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(deviceId) + '/attributes' + this.sameOriginAttributesQuery(updateOnlySameOriginAttributes), this.withoutDefaultAttributes(attributes))
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'updateDeviceInstanceDisplayName', null)));
     }
 
@@ -133,9 +134,17 @@ export class DeviceInstancesService {
         return updateOnlySameOriginAttributes ? '?update-only-same-origin-attributes=shared,web-ui' : '';
     }
 
+    /**
+     * The device repository merges the account's default attributes into every device it returns, marked with
+     * origin 'default'. Sent back, they would be stored on the device and pin the default of that moment.
+     */
+    private withoutDefaultAttributes(attributes: Attribute[] | undefined): Attribute[] | undefined {
+        return attributes?.filter(attr => attr.origin !== this.defaultOrigin);
+    }
+
     saveDeviceInstance(device: DeviceInstanceModel): Observable<DeviceInstanceModel | null> {
         return this.http
-            .post<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices', device)
+            .post<DeviceInstanceModel>(environment.deviceRepoUrl + '/devices', {...device, attributes: this.withoutDefaultAttributes(device.attributes)})
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'saveDeviceInstance', null)));
     }
 
