@@ -22,11 +22,14 @@ import { AuthorizationService } from '../../services/authorization.service';
 import { AutomationEngineService, engineErrorMessage } from '../../services/automation-engine.service';
 import { applyDebugMessage, instanceIsRunning, liveUrl } from './debug-state';
 
-/** opens a WebSocket; replaced in specs */
-export const DEBUG_WEBSOCKET_FACTORY = new InjectionToken<(url: string) => WebSocket>('DEBUG_WEBSOCKET_FACTORY', {
+/** opens a WebSocket with subprotocols; replaced in specs */
+export const DEBUG_WEBSOCKET_FACTORY = new InjectionToken<(url: string, protocols: string[]) => WebSocket>('DEBUG_WEBSOCKET_FACTORY', {
     providedIn: 'root',
-    factory: () => (url: string) => new WebSocket(url),
+    factory: () => (url: string, protocols: string[]) => new WebSocket(url, protocols),
 });
+
+/** the subprotocol the token is offered next to; the engine answers with it alone */
+export const BEARER_PROTOCOL = 'bearer';
 
 /**
  * connecting: no state yet; live: the WebSocket sends; reconnecting: the connection broke and is resumed;
@@ -50,13 +53,15 @@ const MAX_RETRY_MS = 30000;
 
 /**
  * Follows an instance through the live stream of the automation-engine (GET .../live): a snapshot, then
- * deltas merged with applyDebugMessage, then the end state. The token goes as first message. An
- * interrupted stream resumes after the last sequence; close code 4401 after the first message means the
- * token expired and reconnects at once with a new one.
+ * deltas merged with applyDebugMessage, then the end state. A browser cannot set the Authorization
+ * header on a WebSocket, so the token goes as subprotocol next to "bearer"; Kong copies it into the
+ * header for Ladon, and the engine verifies it against Keycloak. An interrupted stream resumes after the
+ * last sequence; close code 4401 after the first message means the token expired and reconnects at once
+ * with a new one.
  *
- * If the first connection does not bring a single message, the WebSocket is not usable here: Kong did
- * not pass the upgrade, or the engine runs without KEYCLOAK_CERT_URL and answers the first-message token
- * with 4401. The stream then reads GET .../debug every POLL_INTERVAL_MS instead.
+ * If the first connection does not bring a single message, the WebSocket is not usable here: Kong
+ * refused the upgrade, or the engine runs without KEYCLOAK_CERT_URL and closes with 4401. The stream
+ * then reads GET .../debug every POLL_INTERVAL_MS instead.
  */
 @Injectable({
     providedIn: 'root',
@@ -65,7 +70,7 @@ export class InstanceDebugStreamService {
     constructor(
         private automationEngineService: AutomationEngineService,
         private authorizationService: AuthorizationService,
-        @Inject(DEBUG_WEBSOCKET_FACTORY) private openSocket: (url: string) => WebSocket,
+        @Inject(DEBUG_WEBSOCKET_FACTORY) private openSocket: (url: string, protocols: string[]) => WebSocket,
     ) {}
 
     watch(namespace: string, id: string, evaluateEvents: boolean): Observable<DebugStreamUpdate> {
@@ -181,14 +186,13 @@ export class InstanceDebugStreamService {
                         const url = liveUrl(environment.automationEngineUrl, namespace, id, state?.seq || 0, evaluateEvents, window.location.href);
                         let ws: WebSocket;
                         try {
-                            ws = this.openSocket(url);
+                            ws = this.openSocket(url, [BEARER_PROTOCOL, token.replace(/^bearer\s+/i, '')]);
                         } catch (e) {
                             onClose(0, String(e), false);
                             return;
                         }
                         socket = ws;
                         let received = false;
-                        ws.onopen = () => ws.send(JSON.stringify({ type: 'auth', token }));
                         ws.onmessage = (event: MessageEvent) => {
                             if (socket !== ws || stopped) {
                                 return;

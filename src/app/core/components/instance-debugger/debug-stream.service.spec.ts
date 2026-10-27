@@ -21,7 +21,7 @@ import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AuthorizationService } from '../../services/authorization.service';
 import { AuthorizationServiceMock } from '../../services/authorization.service.mock';
-import { DEBUG_WEBSOCKET_FACTORY, DebugStreamUpdate, InstanceDebugStreamService, POLL_INTERVAL_MS } from './debug-stream.service';
+import { BEARER_PROTOCOL, DEBUG_WEBSOCKET_FACTORY, DebugStreamUpdate, InstanceDebugStreamService, POLL_INTERVAL_MS } from './debug-stream.service';
 import { debugState } from './debug-state.mock';
 
 /** stands in for a browser WebSocket; the spec drives its events */
@@ -32,7 +32,10 @@ class FakeSocket {
     onmessage: ((event: { data: string }) => void) | null = null;
     onclose: ((event: { code: number; reason: string }) => void) | null = null;
 
-    constructor(public url: string) {}
+    constructor(
+        public url: string,
+        public protocols: string[],
+    ) {}
 
     send(data: string): void {
         this.sent.push(data);
@@ -81,8 +84,8 @@ describe('InstanceDebugStreamService', () => {
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 {
                     provide: DEBUG_WEBSOCKET_FACTORY,
-                    useValue: (url: string) => {
-                        const socket = new FakeSocket(url);
+                    useValue: (url: string, protocols: string[]) => {
+                        const socket = new FakeSocket(url, protocols);
                         sockets.push(socket);
                         return socket as unknown as WebSocket;
                     },
@@ -98,14 +101,18 @@ describe('InstanceDebugStreamService', () => {
         http.verify();
     });
 
-    it('sends the token as first message and merges snapshot and deltas', fakeAsync(() => {
+    it('offers the token as subprotocol next to bearer and merges snapshot and deltas', fakeAsync(() => {
         watch(true);
         expect(sockets.length).toBe(1);
         expect(sockets[0].url).toContain('/namespaces/processes/instances/i-1/live?evaluate_events=true');
         expect(sockets[0].url).not.toContain('token');
+        expect(sockets[0].protocols.length).toBe(2);
+        expect(sockets[0].protocols[0]).toBe(BEARER_PROTOCOL);
+        // the bare token: a subprotocol cannot contain the space of "Bearer <token>"
+        expect(sockets[0].protocols[1]).toMatch(/^eyJ[\w.-]+$/);
         sockets[0].open();
-        expect(JSON.parse(sockets[0].sent[0]).type).toBe('auth');
-        expect(JSON.parse(sockets[0].sent[0]).token).toMatch(/^Bearer /);
+        // a message after a header token would make the engine close the stream
+        expect(sockets[0].sent).toEqual([]);
 
         sockets[0].receive({ type: 'snapshot', seq: 4, state: debugState() });
         expect(last().status).toBe('live');
@@ -158,7 +165,7 @@ describe('InstanceDebugStreamService', () => {
 
     it('reads the state periodically when the first connection brings no message', fakeAsync(() => {
         watch();
-        // the engine without KEYCLOAK_CERT_URL does not take the token as first message
+        // the engine without KEYCLOAK_CERT_URL does not take the token from the subprotocol
         sockets[0].serverClose(4401, 'send the token in the Authorization header');
         const url = environment.automationEngineUrl + '/namespaces/processes/instances/i-1/debug';
         http.expectOne(url).flush(debugState());
