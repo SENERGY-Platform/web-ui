@@ -40,7 +40,7 @@ import { RejectDialogComponent, RejectDialogData } from '../reject-dialog/reject
 import { ReviewHistoryEntryModel, ReviewProposalFileModel, ReviewProposalFilesModel, ReviewRequestModel } from '../shared/content-review.model';
 import {
     reviewFileChangeClass, reviewRequestActionable, reviewRequestHasTestCase, reviewRequestPublishable, reviewRequestRunning,
-    reviewRequestWithdrawable, reviewStateClass, reviewStateLabel, reviewStatusClass, reviewStatusLabel,
+    reviewRequestSyncable, reviewRequestTakeoverReady, reviewRequestWithdrawable, reviewStateClass, reviewStateLabel, reviewStatusClass, reviewStatusLabel,
 } from '../shared/request-view';
 import { testCaseError } from '../shared/test-case';
 
@@ -87,6 +87,8 @@ export class RequestDetailComponent implements OnInit {
     canReject = false;
     canEditTestCase = false;
     canStartTest = false;
+    canPreviewSync = false;
+    canTakeOver = false;
     hasTestCase = false;
     /** The test case as the editor shows it; kept while the user edits, so a reload does not overwrite it. */
     testCaseText = '';
@@ -219,6 +221,35 @@ export class RequestDetailComponent implements OnInit {
             });
     }
 
+    previewTakeover(): void {
+        this.act(this.contentReviewService.previewSync(this.id), 'Previewing the take-over.');
+    }
+
+    takeOver(): void {
+        const request = this.request;
+        if (request === null) {
+            return;
+        }
+        const count = request.sync.files?.length ?? 0;
+        const what = count === 0
+            ? ' The preview found no changes, so nothing is committed unless platform-content changed since.'
+            : ' The ' + count + (count === 1 ? ' file' : ' files') +
+              ' of the preview are committed to main of platform-content, from where the content jobs take them up.';
+        this.dialogsService
+            .openConfirmDialog('Take over smart service', 'Take over ' + request.name + '?' + what)
+            .afterClosed()
+            .subscribe((confirmed) => {
+                if (confirmed === true) {
+                    this.act(this.contentReviewService.executeSync(request.id), 'Taking over the smart service.');
+                }
+            });
+    }
+
+    /** The take-over section shows once the request is published, and stays for a take-over that has run. */
+    showTakeover(request: ReviewRequestModel): boolean {
+        return request.state === 'published' || request.sync.status !== 'none';
+    }
+
     reject(): void {
         const request = this.request;
         if (request === null) {
@@ -268,6 +299,8 @@ export class RequestDetailComponent implements OnInit {
         this.canEditTestCase = actionable;
         this.canStartTest = actionable && this.hasTestCase;
         this.canPublish = this.reviewer && reviewRequestPublishable(request);
+        this.canPreviewSync = this.reviewer && reviewRequestSyncable(request);
+        this.canTakeOver = this.reviewer && reviewRequestTakeoverReady(request);
         this.applyTestCase(request, resetTestCase || !actionable);
         this.updateFiles(request);
     }

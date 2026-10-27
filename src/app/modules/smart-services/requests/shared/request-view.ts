@@ -95,6 +95,16 @@ export function reviewRequestPublishable(request: ReviewRequestModel): boolean {
     return reviewRequestActionable(request) && reviewRequestHasTestCase(request) && request.test.status === 'passed';
 }
 
+/** Published, with a test case and nothing running: the take-over may be previewed. */
+export function reviewRequestSyncable(request: ReviewRequestModel): boolean {
+    return request.state === 'published' && reviewRequestHasTestCase(request) && !reviewRequestRunning(request);
+}
+
+/** Syncable and previewed, which is what the take-over itself needs. */
+export function reviewRequestTakeoverReady(request: ReviewRequestModel): boolean {
+    return reviewRequestSyncable(request) && request.sync?.status === 'previewed';
+}
+
 /** The author takes a request back while it is in review. */
 export function reviewRequestWithdrawable(request: ReviewRequestModel, userId: string): boolean {
     return request.state === 'in_review' && userId !== '' && request.author_id === userId;

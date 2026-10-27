@@ -225,6 +225,40 @@ describe('ContentReviewService', () => {
         }
     });
 
+    it('previews and executes the take-over with an empty object as body', () => {
+        const service = setup();
+        const calls: [string, (id: string) => ReturnType<ContentReviewService['previewSync']>][] = [
+            ['sync', (id) => service.previewSync(id)],
+            ['sync/execute', (id) => service.executeSync(id)],
+        ];
+        for (const [action, call] of calls) {
+            let answer: ReviewRequestModel | null | undefined;
+            call('r1').subscribe((request) => (answer = request));
+
+            const req = httpMock.expectOne(url + '/requests/r1/' + action);
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({});
+            req.flush({ id: 'r1' });
+
+            expect(answer?.id).toBe('r1');
+        }
+    });
+
+    it('answers null and shows the backend message after a refused take-over call', () => {
+        const service = setup();
+        const open = spyOn(TestBed.inject(MatSnackBar), 'open').and.callThrough();
+        const answers: (ReviewRequestModel | null | undefined)[] = [undefined, undefined];
+        service.previewSync('r1').subscribe((request) => (answers[0] = request));
+        service.executeSync('r1').subscribe((request) => (answers[1] = request));
+
+        for (const action of ['sync', 'sync/execute']) {
+            httpMock.expectOne(url + '/requests/r1/' + action).flush({ error: 'an operation runs' }, { status: 409, statusText: 'Conflict' });
+        }
+
+        expect(answers).toEqual([null, null]);
+        expect(open.calls.mostRecent().args[0]).toContain('content-review: request failed (409): an operation runs');
+    });
+
     it('rejects with the reason as body', () => {
         const service = setup();
         service.reject('r1', 'Name the exports').subscribe();

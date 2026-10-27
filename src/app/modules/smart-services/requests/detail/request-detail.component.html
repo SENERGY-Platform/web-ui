@@ -132,21 +132,6 @@
             </dd>
           </div>
           <div class="fact">
-            <dt>Take-over</dt>
-            <dd>
-              <span [class]="'status-chip ' + statusClass(request.sync.status)">{{statusLabel(request.sync.status)}}</span>
-              @if (request.sync.at) {
-                <span class="muted"> {{request.sync.at | date:dateFormat}}</span>
-              }
-              @if (request.sync.commit) {
-                <div class="mono">{{request.sync.commit}}</div>
-              }
-              @if (request.sync.detail) {
-                <div class="text">{{request.sync.detail}}</div>
-              }
-            </dd>
-          </div>
-          <div class="fact">
             <dt>Operations</dt>
             <dd>
               @for (operation of request.operations ?? []; track operation.id) {
@@ -162,6 +147,78 @@
           </div>
         </dl>
       </senergy-form-section>
+
+      @if (showTakeover(request)) {
+        <senergy-form-section title="Take-over" hint="Writes the published smart service into platform-content.">
+          @if (canPreviewSync || canTakeOver) {
+            <div sectionActions class="section-actions">
+              @if (canPreviewSync) {
+                <button matButton="outlined" type="button" (click)="previewTakeover()">
+                  <mat-icon>visibility</mat-icon> Preview take-over
+                </button>
+              }
+              @if (canTakeOver) {
+                <button matButton="filled" type="button" (click)="takeOver()">
+                  <mat-icon>merge</mat-icon> Take over
+                </button>
+              }
+            </div>
+          }
+          <dl class="facts">
+            <div class="fact">
+              <dt>Status</dt>
+              <dd>
+                <span [class]="'status-chip ' + statusClass(request.sync.status)">{{statusLabel(request.sync.status)}}</span>
+                @if (request.sync.at) {
+                  <span class="muted"> {{request.sync.at | date:dateFormat}}</span>
+                }
+                @if (request.sync.commit) {
+                  <div class="mono">{{request.sync.commit}}</div>
+                } @else if (request.sync.status === 'synced') {
+                  <div class="muted">Nothing changed.</div>
+                }
+                @if (request.sync.detail) {
+                  <div class="text">{{request.sync.detail}}</div>
+                }
+              </dd>
+            </div>
+          </dl>
+          <!-- a failed run keeps the files and commit it got, so a push that happened still shows -->
+          @if (request.sync.status === 'previewed' || request.sync.status === 'synced' ||
+            (request.sync.status === 'failed' && (request.sync.files ?? []).length > 0)) {
+            <p class="muted">
+              @switch (request.sync.status) {
+                @case ('previewed') {
+                  Files the preview found. Nothing is written until the take-over.
+                }
+                @case ('synced') {
+                  Files written by the take-over.
+                }
+                @default {
+                  Files of the failed run; the detail above says what went wrong.
+                }
+              }
+            </p>
+            @if (request.sync.truncated) {
+              <p class="notice">The list is cut off; more files are affected than shown.</p>
+            }
+            @if ((request.sync.files ?? []).length === 0) {
+              @if (request.sync.status === 'previewed') {
+                <p class="muted">No files would change.</p>
+              }
+            } @else {
+              <ul class="file-list" aria-label="Files of the take-over">
+                @for (file of request.sync.files ?? []; track file.path) {
+                  <li class="sync-file">
+                    <span class="file-path">{{file.path}}</span>
+                    <span [class]="'status-chip ' + changeClass(file.change)">{{file.change}}</span>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </senergy-form-section>
+      }
 
       <senergy-form-section title="Files" hint="What the proposal writes into platform-content, as the files job read it.">
         @if (canEditTestCase) {

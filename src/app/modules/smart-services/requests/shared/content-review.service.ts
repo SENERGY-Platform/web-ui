@@ -110,6 +110,16 @@ export class ContentReviewService {
         return this.post(id, 'publish', 'publish()');
     }
 
+    /** Previews the take-over into platform-content; writes nothing. */
+    previewSync(id: string): Observable<ReviewRequestModel | null> {
+        return this.post(id, 'sync', 'previewSync()');
+    }
+
+    /** Commits the files to platform-content; the service pulls again, so they can differ from the preview's. */
+    executeSync(id: string): Observable<ReviewRequestModel | null> {
+        return this.post(id, 'sync/execute', 'executeSync()');
+    }
+
     reject(id: string, reason: string): Observable<ReviewRequestModel | null> {
         return this.post(id, 'reject', 'reject()', { reason });
     }

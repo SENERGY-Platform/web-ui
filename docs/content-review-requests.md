@@ -7,9 +7,6 @@ service releases, the review actions on the detail page, or the calls to the con
 upgrade branch, 2026-10). What the states and routes of the service mean is in `docs/requests.md` of the
 content-review repository.
 
-**Not this if**: the change is about the take-over into platform-content. The detail page shows its status as
-plain fields only; the actions are not built here yet.
-
 ## Where it comes from
 
 - The service URL is `environment.contentReviewUrl` (`CONTENT_REVIEW_URL`), kept in the three tracked files of
@@ -25,7 +22,7 @@ plain fields only; the actions are not built here yet.
   adds the author column and loads every request (`all=true`). The service answers no total, so the list reads
   all pages with `loadAllPages` and pages on the client. Row click opens the detail; the row menu offers Open and,
   for the author of a request in `in_review`, Withdraw.
-- **Detail** (`smart-services/requests/:id`): form page with Summary, Test case, Review status, Files and History
+- **Detail** (`smart-services/requests/:id`): form page with Summary, Test case, Review status, Take-over, Files and History
   (newest first). Header actions in this order: Publish (filled), Reject, then Withdraw (author, `in_review`).
 - **Reload**: while the state is transitional (`checking`, `moving`, `rejecting`, `withdrawing`, `publishing`), or the files job, the test or the take-over runs, the detail reloads
   every 5 seconds and stops once nothing runs or the page is left.
@@ -55,6 +52,25 @@ reload restarts the polling until nothing runs.
   The state goes to `rejecting` and the polling follows it to `rejected`.
 - **Publish** (`POST .../publish`): only with a stored test case and `test.status` `passed`; the confirmation
   names the smart service and says it moves to shared-resources-prod for all users.
+
+## Take-over
+
+The section "Take-over" of the detail page shows when the state is `published` or `sync.status` is not `none`. It
+holds the status with time and detail, the commit whenever there is one (or "Nothing changed." for `synced` without
+one) and the list of `sync.files` with a change chip each. A line above the list says whether it is the files the
+preview found (`previewed`), the files written (`synced`) or those of a failed run, which the service keeps so that a
+push that happened still shows; the execute pulls again, so preview and take-over can differ. An empty preview says
+"No files would change.", and `truncated` adds a notice that more files are affected than shown.
+
+Two actions, shown only to reviewers, hidden otherwise, and only while nothing runs (`reviewRequestSyncable`: `published`, a
+stored test case, no running job, test, take-over or operation):
+
+- **Preview take-over** (`POST .../sync`): no confirmation, it writes nothing.
+- **Take over** (`POST .../sync/execute`): only after a preview (`sync.status` `previewed`). The confirmation names the
+  smart service and the number of files of the preview and says they are committed to `main` of platform-content,
+  from where the content jobs take them up; after a preview without changes it says that nothing is committed.
+
+Both read the request again, also after a refusal; the polling follows `previewing` and `syncing`.
 
 ## Reviewer rule
 

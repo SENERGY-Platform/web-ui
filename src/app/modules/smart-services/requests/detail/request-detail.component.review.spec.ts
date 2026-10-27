@@ -37,6 +37,8 @@ describe('RequestDetailComponent review actions', () => {
     let startTest: jasmine.Spy;
     let startFiles: jasmine.Spy;
     let publish: jasmine.Spy;
+    let previewSync: jasmine.Spy;
+    let executeSync: jasmine.Spy;
     let reject: jasmine.Spy;
     let withdraw: jasmine.Spy;
     let confirm: jasmine.Spy;
@@ -74,6 +76,8 @@ describe('RequestDetailComponent review actions', () => {
         startTest = jasmine.createSpy('startTest').and.returnValue(write);
         startFiles = jasmine.createSpy('startFiles').and.returnValue(write);
         publish = jasmine.createSpy('publish').and.returnValue(write);
+        previewSync = jasmine.createSpy('previewSync').and.returnValue(write);
+        executeSync = jasmine.createSpy('executeSync').and.returnValue(write);
         reject = jasmine.createSpy('reject').and.returnValue(write);
         withdraw = jasmine.createSpy('withdraw').and.returnValue(write);
         confirm = jasmine.createSpy('openConfirmDialog').and.callFake(() => ({ afterClosed: () => of(confirmed) }));
@@ -86,7 +90,7 @@ describe('RequestDetailComponent review actions', () => {
                     provide: ContentReviewService,
                     useValue: {
                         userId: () => options.userId ?? 'reviewer', userIsReviewer: () => options.reviewer !== false,
-                        get, getFiles: () => of(null), withdraw, setTestCase, startTest, startFiles, publish, reject,
+                        get, getFiles: () => of(null), withdraw, setTestCase, startTest, startFiles, publish, previewSync, executeSync, reject,
                     },
                 },
                 { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'r1' } } } },
@@ -107,6 +111,14 @@ describe('RequestDetailComponent review actions', () => {
         Array.from(root().querySelectorAll('senergy-page-header button')).map((b) => (b.textContent || '').replace(/\s+/g, ' ').trim());
     const button = (label: string): HTMLButtonElement | undefined =>
         (Array.from(root().querySelectorAll('button')) as HTMLButtonElement[]).find((b) => (b.textContent || '').includes(label));
+    // the section keeps its title only as the text of its heading
+    const sectionTitle = (e: Element): string => (e.querySelector('.section-title')?.textContent || '').trim();
+    const sectionTitles = (): string[] => Array.from(root().querySelectorAll('senergy-form-section')).map(sectionTitle);
+    const section = (title: string): HTMLElement | undefined =>
+        (Array.from(root().querySelectorAll('senergy-form-section')) as HTMLElement[]).find((e) => sectionTitle(e) === title);
+    const syncOf = (status: ReviewRequestModel['sync']['status'], overrides: Partial<ReviewRequestModel['sync']> = {}): ReviewRequestModel['sync'] =>
+        ({ status, files: null, truncated: false, commit: '', at: null, detail: '', ...overrides });
+    const published = (sync: ReviewRequestModel['sync'] = syncOf('none')) => withCase({ state: 'published', test: passed, sync });
     const saveBar = (): HTMLElement | null => root().querySelector('senergy-save-bar');
     const saveButton = (): HTMLButtonElement => root().querySelector('senergy-save-bar button.save') as HTMLButtonElement;
     const discardButton = (): HTMLButtonElement => root().querySelector('senergy-save-bar button.discard') as HTMLButtonElement;
@@ -496,6 +508,247 @@ describe('RequestDetailComponent review actions', () => {
             expect(publish).toHaveBeenCalledTimes(1);
             expect(get).toHaveBeenCalledTimes(2);
             expect(headerButtons()).toEqual(['block Reject']);
+        });
+    });
+
+    describe('take-over', () => {
+        const previewed = syncOf('previewed', {
+            files: [{ path: 'a.json', change: 'added' }, { path: 'b.json', change: 'modified' }, { path: 'c.json', change: 'deleted' }],
+        });
+
+        it('shows the section after Review status, and not for a request in review without a take-over', () => {
+            init([published()]);
+            const titles = sectionTitles();
+            expect(titles.indexOf('Take-over')).toBe(titles.indexOf('Review status') + 1);
+            expect(section('Take-over')?.querySelector('.section-hint')?.textContent).toContain('platform-content');
+
+            fixture.destroy();
+            TestBed.resetTestingModule();
+            init([withCase()]);
+            expect(sectionTitles()).not.toContain('Take-over');
+        });
+
+        it('keeps the section for a take-over that ran, whatever the state', () => {
+            init([withCase({ sync: syncOf('failed', { detail: 'push refused' }) })]);
+
+            expect(sectionTitles()).toContain('Take-over');
+            expect(section('Take-over')?.textContent).toContain('push refused');
+        });
+
+        it('no longer shows the take-over fact in Review status', () => {
+            init([published(syncOf('synced', { commit: 'abc123' }))]);
+
+            expect(section('Review status')?.textContent).not.toContain('Take-over');
+            expect(section('Review status')?.textContent).not.toContain('Synced');
+            expect(section('Review status')?.textContent).not.toContain('abc123');
+            expect(section('Take-over')?.textContent).toContain('Synced');
+            expect(text().match(/Synced/g)?.length).toBe(1);
+        });
+
+        it('offers a reviewer only the preview before one ran, outlined', () => {
+            init([published()]);
+
+            expect(button('Preview take-over')).toBeDefined();
+            expect(button('Preview take-over')?.getAttribute('matButton')).toBe('outlined');
+            expect(button('Take over')).toBeUndefined();
+        });
+
+        it('offers the take-over, filled, besides the preview once previewed', () => {
+            init([published(previewed)]);
+
+            expect(button('Preview take-over')).toBeDefined();
+            expect(button('Take over')?.getAttribute('matButton')).toBe('filled');
+        });
+
+        it('hides both buttons from a user who is not a reviewer', () => {
+            init([published(previewed)], { reviewer: false });
+
+            expect(sectionTitles()).toContain('Take-over');
+            expect(button('Preview take-over')).toBeUndefined();
+            expect(button('Take over')).toBeUndefined();
+        });
+
+        it('hides both buttons outside of published and without a test case', () => {
+            for (const other of [withCase({ state: 'in_review', sync: previewed }), request({ state: 'published', sync: previewed })]) {
+                init([other]);
+
+                expect(button('Preview take-over')).toBeUndefined();
+                expect(button('Take over')).toBeUndefined();
+                fixture.destroy();
+                TestBed.resetTestingModule();
+            }
+        });
+
+        it('hides both buttons while the preview or the take-over runs, and follows it', fakeAsync(() => {
+            for (const status of ['previewing', 'syncing'] as const) {
+                init([published(syncOf(status)), published(previewed)]);
+
+                expect(button('Preview take-over')).toBeUndefined();
+                expect(button('Take over')).toBeUndefined();
+                tick(REQUEST_POLL_MS);
+                fixture.detectChanges();
+                expect(get).toHaveBeenCalledTimes(2);
+                expect(button('Take over')).toBeDefined();
+                fixture.destroy();
+                TestBed.resetTestingModule();
+            }
+        }));
+
+        it('hides Take over after a take-over was done and after a failure, keeping the preview', () => {
+            for (const sync of [syncOf('synced', { commit: 'abc123' }), syncOf('failed', { detail: 'push refused' })]) {
+                init([published(sync)]);
+
+                expect(button('Preview take-over')).toBeDefined();
+                expect(button('Take over')).toBeUndefined();
+                fixture.destroy();
+                TestBed.resetTestingModule();
+            }
+        });
+
+        it('previews without a confirmation and reads the request again', () => {
+            init([published(), published(syncOf('previewing'))]);
+
+            button('Preview take-over')?.click();
+            fixture.detectChanges();
+
+            expect(confirm).not.toHaveBeenCalled();
+            expect(previewSync).toHaveBeenCalledOnceWith('r1');
+            expect(executeSync).not.toHaveBeenCalled();
+            expect(get).toHaveBeenCalledTimes(2);
+            expect(button('Preview take-over')).toBeUndefined();
+        });
+
+        it('asks first, naming the smart service, the number of files and the target', () => {
+            init([published(previewed), published(syncOf('syncing'))]);
+
+            button('Take over')?.click();
+
+            expect(confirm).toHaveBeenCalledTimes(1);
+            const [title, message] = confirm.calls.mostRecent().args;
+            expect(title).toBe('Take over smart service');
+            expect(message).toContain('Heating');
+            expect(message).toContain('3 files');
+            expect(message).toContain('main of platform-content');
+            expect(message).toContain('content jobs');
+            expect(executeSync).toHaveBeenCalledOnceWith('r1');
+            expect(get).toHaveBeenCalledTimes(2);
+        });
+
+        it('says "1 file" for a single file', () => {
+            init([published(syncOf('previewed', { files: [{ path: 'a.json', change: 'added' }] }))]);
+
+            button('Take over')?.click();
+
+            expect(confirm.calls.mostRecent().args[1]).toContain('1 file ');
+        });
+
+        it('says that nothing is committed when the preview found no changes', () => {
+            init([published(syncOf('previewed', { files: [] }))]);
+
+            button('Take over')?.click();
+
+            const message = confirm.calls.mostRecent().args[1];
+            expect(message).toContain('found no changes');
+            expect(message).not.toContain('0 files');
+        });
+
+        it('sends nothing when the confirmation is declined', () => {
+            init([published(previewed)]);
+            confirmed = false;
+
+            button('Take over')?.click();
+
+            expect(confirm).toHaveBeenCalledTimes(1);
+            expect(executeSync).not.toHaveBeenCalled();
+            expect(get).toHaveBeenCalledTimes(1);
+        });
+
+        it('reads the request again after a refusal and keeps the page usable', () => {
+            init([published(previewed), published(previewed)], { write: of(null) });
+
+            button('Take over')?.click();
+            fixture.detectChanges();
+            button('Preview take-over')?.click();
+            fixture.detectChanges();
+
+            expect(executeSync).toHaveBeenCalledTimes(1);
+            expect(previewSync).toHaveBeenCalledTimes(1);
+            expect(get).toHaveBeenCalledTimes(3);
+            expect(button('Take over')).toBeDefined();
+            expect(button('Preview take-over')).toBeDefined();
+        });
+
+        it('lists the files of a preview with a change chip each and says it is the preview', () => {
+            init([published(previewed)]);
+
+            const rows = Array.from(section('Take-over')?.querySelectorAll('li') ?? []);
+            expect(rows.map((row) => (row.querySelector('.file-path')?.textContent || '').trim())).toEqual(['a.json', 'b.json', 'c.json']);
+            expect(rows.map((row) => ['online', 'warning', 'failed'].filter((c) => row.querySelector('.status-chip')?.classList.contains(c))))
+                .toEqual([['online'], ['warning'], ['failed']]);
+            expect(rows.map((row) => (row.querySelector('.status-chip')?.textContent || '').trim())).toEqual(['added', 'modified', 'deleted']);
+            expect(section('Take-over')?.textContent).toContain('Files the preview found.');
+            expect(section('Take-over')?.textContent).not.toContain('Files written');
+        });
+
+        it('says the list of a done take-over is what was written, with the commit', () => {
+            init([published(syncOf('synced', { commit: 'abc123', files: [{ path: 'a.json', change: 'added' }] }))]);
+
+            expect(section('Take-over')?.textContent).toContain('Files written by the take-over.');
+            expect(section('Take-over')?.textContent).not.toContain('the preview found');
+            expect(section('Take-over')?.querySelector('.mono')?.textContent).toBe('abc123');
+            expect(section('Take-over')?.textContent).not.toContain('Nothing changed.');
+        });
+
+        it('says nothing changed for a take-over without a commit', () => {
+            init([published(syncOf('synced', { files: [] }))]);
+
+            expect(section('Take-over')?.textContent).toContain('Nothing changed.');
+            expect(section('Take-over')?.textContent).not.toContain('No files would change.');
+        });
+
+        it('says no files would change for an empty preview', () => {
+            init([published(syncOf('previewed', { files: [] }))]);
+
+            expect(section('Take-over')?.textContent).toContain('No files would change.');
+            expect(section('Take-over')?.querySelectorAll('li').length).toBe(0);
+        });
+
+        it('shows a notice when the list is truncated, and none otherwise', () => {
+            init([published(syncOf('previewed', { truncated: true, files: [{ path: 'a.json', change: 'added' }] }))]);
+            expect(section('Take-over')?.querySelector('.notice')?.textContent).toContain('cut off');
+
+            fixture.destroy();
+            TestBed.resetTestingModule();
+            init([published(previewed)]);
+            expect(section('Take-over')?.querySelector('.notice')).toBeNull();
+        });
+
+        it('shows no file list while no preview has ended', () => {
+            for (const status of ['none', 'previewing'] as const) {
+                init([published(syncOf(status))]);
+
+                expect(section('Take-over')?.querySelector('.file-list')).toBeNull();
+                expect(section('Take-over')?.textContent).not.toContain('Files ');
+                fixture.destroy();
+                TestBed.resetTestingModule();
+            }
+        });
+
+        it('keeps the files and the commit of a failed run, and says the run failed', () => {
+            init([published(syncOf('failed', { commit: 'abc123', detail: 'push lost its answer', files: [{ path: 'a.json', change: 'added' }] }))]);
+
+            const shown = section('Take-over')?.textContent ?? '';
+            expect(shown).toContain('abc123');
+            expect(shown).toContain('Files of the failed run');
+            expect(shown).toContain('a.json');
+            expect(shown).not.toContain('Nothing changed.');
+        });
+
+        it('shows no file list for a failed run without files', () => {
+            init([published(syncOf('failed', { detail: 'clone failed' }))]);
+
+            expect(section('Take-over')?.querySelector('.file-list')).toBeNull();
+            expect(section('Take-over')?.textContent).not.toContain('Files of the failed run');
         });
     });
 });
