@@ -33,6 +33,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-networks',
@@ -44,10 +45,13 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<HubModel>();
     sortBy = 'name';
+    /** The column header the sort shows on; sortBy is the backend field it maps to. */
+    sortColumn = 'name';
     sortDirection: SortDirection = 'asc';
     selection = new SelectionModel<HubModel>(true, []);
     searchText = '';
     totalCount = 200;
+    pageIndex = 0;
     offset = 0;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
@@ -71,9 +75,22 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
         private preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) { }
 
     ngOnInit() {
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortColumn = sort.active;
+        this.sortDirection = sort.direction;
+        // same column mapping as matSortChange
+        if (this.sortBy === 'connection') {
+            this.sortBy = 'annotations.connected';
+        } else if (this.sortBy === 'number_devices') {
+            this.sortBy = 'device_local_ids';
+        }
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
         this.checkAuthorization();
     }
@@ -106,14 +123,18 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
+        this.sortColumn = $event.active;
 
         // TODO Ingo suche connection
         if (this.sortBy === 'connection') {
@@ -122,6 +143,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
             this.sortBy = 'device_local_ids';
         }
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
         this.reload();
     }
 
@@ -129,7 +151,9 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         this.paginator.page.subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.getNetworks().subscribe({
                 next: (_) => {
                     this.ready = true;
@@ -209,8 +233,12 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
         });
     }
 
-    reload() {
-        this.offset = 0;
+    reload(keepPage = false) {
+        if (!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+        }
         this.ready = false;
         this.selectionClear();
 

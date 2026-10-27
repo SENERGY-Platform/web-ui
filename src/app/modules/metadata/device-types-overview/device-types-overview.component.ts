@@ -29,6 +29,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { UntypedFormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-device-types',
@@ -38,6 +39,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'copy', 'new', 'show'];
     pageSize = this.preferencesSerivce.pageSize;
+    pageIndex = 0;
     deviceTypes: DeviceTypeModel[] = [];
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     dataSource = new MatTableDataSource<DeviceTypeModel>();
@@ -63,9 +65,15 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
         private router: Router,
         private deviceInstancesDialogService: DeviceInstancesDialogService,
         private preferencesSerivce: PreferencesService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit() {
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
         this.loadDeviceClasses();
         this.checkAuthorization();
@@ -78,6 +86,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
         this.reload();
     }
 
@@ -97,7 +106,9 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
         this.paginator.page.subscribe((e)=>{
             this.preferencesSerivce.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.getDeviceTypes().subscribe();
         });
     }
@@ -171,9 +182,12 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
@@ -190,8 +204,12 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     }
 
 
-    private reload() {
-        this.offset = 0;
+    private reload(keepPage = false) {
+        if (!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+        }
         this.ready = false;
         this.selectionClear();
 

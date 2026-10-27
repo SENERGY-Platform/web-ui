@@ -39,8 +39,8 @@
 
     <div [hidden]="!ready || (exports.length === 0 && ready)" class="mat-elevation-z1">
         <div class="table-container" [ngClass]="{'table-container-with-button': userHasCreateAuthorization}">
-            <table #sort="matSort" mat-table [dataSource]="exportsDataSource" matSort matSortActive="created_at"
-                matSortDirection="desc" matSortDisableClear>
+            <table #sort="matSort" mat-table [dataSource]="exportsDataSource" matSort [matSortActive]="initialSort.active"
+                [matSortDirection]="initialSort.direction" matSortDisableClear>
 
                 <ng-container matColumnDef="select">
                     <th mat-header-cell *matHeaderCellDef>
@@ -191,7 +191,7 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
         </div>
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
+        <mat-paginator #paginator senergyKeepPageInRange [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex"
             [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
     </div>
     <div *ngIf="exports.length === 0 && ready">No export instances found.</div>

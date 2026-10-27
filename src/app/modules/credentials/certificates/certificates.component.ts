@@ -22,9 +22,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { CertificatesService } from './shared/certificates.service';
 import { concatMap, map, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { CertificateRevokeDialogComponent } from './certificate-revoke-dialog/certificate-revoke-dialog.component';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
   selector: 'app-certificates',
@@ -42,6 +43,8 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
   userHasRevokeAuthorization = this.certificatesService.userHasRevokeAuthorization();
   certs: CertificateInfo[] = [];
   searchSub?: Subscription;
+  sortBy = 'issued_at';
+  sortDirection: SortDirection = 'desc';
 
   @ViewChild(MatSort) sort?: MatSort;
 
@@ -51,9 +54,13 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
     private certificatesService: CertificatesService,
     private searchbarService: SearchbarService,
     private dialog: MatDialog,
+    private urlState: UrlStateService,
   ) { }
 
   ngOnInit() {
+    const sort = this.urlState.getSort('issued_at', 'desc');
+    this.sortBy = sort.active;
+    this.sortDirection = sort.direction;
     this.initSearch();
     if (this.userHasRevokeAuthorization) {
       this.displayedColumns.push('revoke');
@@ -72,6 +79,12 @@ export class CertificatesComponent implements OnInit, OnDestroy, AfterViewInit {
       this.preferencesService.pageSize = e.pageSize;
       this.pageSize = this.paginator.pageSize;
     });
+  }
+
+  matSortChange($event: Sort) {
+    this.sortBy = $event.active;
+    this.sortDirection = $event.direction;
+    this.urlState.setSort($event, 'issued_at', 'desc');
   }
 
   revoke(cert: CertificateInfo) {

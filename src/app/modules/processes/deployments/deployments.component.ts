@@ -16,6 +16,7 @@
 
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { SortDirection } from '@angular/material/sort';
 import { concatMap, forkJoin, from, map, mergeMap, Observable, Subscription, toArray } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
@@ -38,6 +39,7 @@ import { DeploymentsFogFactory } from './shared/deployments-fog.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -66,7 +68,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private offset = 0;
     // Engine rows consumed so far; differs from repoItems.length because the wrapper drops deployments without a virtual id.
     private serverOffset = 0;
-    private sortAttribute = this.sortAttributes[0];
+    sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     private getAllSub = new Subscription();
     private routeSub: Subscription = new Subscription();
@@ -124,12 +126,16 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         private _formBuilder: FormBuilder,
         private hubsService: NetworksService,
         private metadataExistenceService: MetadataExistenceService,
+        private urlState: UrlStateService,
     ) {
         this.deploymentsService = platformDeploymentsService;
     }
 
     ngOnInit() {
         this.userHasDeleteAuthorization = this.platformDeploymentsService.userHasDeleteAuthorization();
+        this.showGenerated = this.urlState.getShown('generated', false);
+        this.sortAttribute = this.restoreSortAttribute();
+        this.source = this.showGenerated ? '' : 'sepl';
 
         this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
         this.deploymentIdFilter = this.route.snapshot.queryParamMap.get('deploymentId');
@@ -192,7 +198,19 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     receiveSortingAttribute(sortAttribute: SortModel) {
         this.sortAttribute = sortAttribute;
+        this.urlState.setSort({ active: sortAttribute.value, direction: sortAttribute.order as SortDirection }, 'deploymentTime', 'desc');
         this.getRepoItems(true);
+    }
+
+    /** The sort attribute the URL names, with the order it names; the first attribute otherwise. */
+    private restoreSortAttribute(): SortModel {
+        const sort = this.urlState.getSort('deploymentTime', 'desc');
+        const attribute = this.sortAttributes.find((a) => a.value === sort.active);
+        if (attribute === undefined || sort.direction === '') {
+            return this.sortAttributes[0];
+        }
+        attribute.order = sort.direction;
+        return attribute;
     }
 
     selectHub(hub: HubModel | null, updateQueryParam = true) {
@@ -411,6 +429,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     filterItems(show: boolean): void {
         this.showGenerated = show;
+        this.urlState.set({ generated: show ? 'show' : null });
 
         if (this.showGenerated) {
             this.source = '';

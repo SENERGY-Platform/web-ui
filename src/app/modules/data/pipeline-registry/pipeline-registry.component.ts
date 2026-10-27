@@ -37,6 +37,7 @@ import {PipelineFilterDialogComponent} from './pipeline-filter-dialog/pipeline-f
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {SmartServiceModuleService} from '../../smart-services/instances/shared/modules.service';
 import {switchMap} from 'rxjs/operators';
+import {UrlStateService} from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-pipeline-registry',
@@ -51,6 +52,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     displayedColumns: string[] = ['select', 'status','access', 'id', 'name','smartServiceInstanceId', 'createdat', 'updatedat', 'info'];
     selection = new SelectionModel<PipelineModel>(true, []);
     totalCount = 0;
+    pageIndex = 0;
     searchSub: Subscription = new Subscription();
     sortBy = 'createdat';
     sortDirection: SortDirection = 'desc';
@@ -88,10 +90,16 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
         private cd: ChangeDetectorRef,
         private activatedRoute: ActivatedRoute,
         private router: Router,
-        private smartServiceModuleService: SmartServiceModuleService
+        private smartServiceModuleService: SmartServiceModuleService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit() {
+        const sort = this.urlState.getSort('createdat', 'desc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.userId = this.auth.getUserId();
         this.userHasUpdateAuthorization = this.flowEngineService.userHasUpdateAuthorization();
         if(this.userHasUpdateAuthorization) {
@@ -126,12 +134,19 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     }
 
     initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if (searchText != ''){
                 this.search = searchText;
             } else {
                 this.search = undefined;
             }
+            if (!opening) {
+                this.resetToFirstPage();
+                this.urlState.setPage(0);
+            }
+            opening = false;
             this.loadPipelines().subscribe({
                 next: (pipelines) => {
                     this.setPipelines(pipelines);
@@ -143,14 +158,24 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'createdat', 'desc');
+        this.resetToFirstPage();
         this.reload();
+    }
+
+    private resetToFirstPage() {
+        this.offset = 0;
+        this.pageIndex = 0;
+        this.paginator.pageIndex = 0;
     }
 
     ngAfterViewInit() {
         this.paginator.page.subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageIndex*this.paginator.pageSize;
+            this.urlState.setPage(this.pageIndex);
 
             this.loadPipelines().subscribe({
                 next: (pipelines) => {
@@ -334,14 +359,16 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
                     this.routerFlow = filterSelectionInner.flows;
                     this.routerFlowNames = filterSelectionInner.flowNames;
                     const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames,
-                        flow: this.routerFlow, flowName: this.routerFlowNames};
+                        flow: this.routerFlow, flowName: this.routerFlowNames, page: null};
                     this.router.navigate(
                         [],
                         {
                             relativeTo: this.activatedRoute,
-                            queryParams
+                            queryParams,
+                            queryParamsHandling: 'merge',
                         },
                     );
+                    this.resetToFirstPage();
                     this.cd.detectChanges();
 
                 }
@@ -360,14 +387,16 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit, OnDestr
             this.routerFlowNames!.splice(i, 1);
         }
         const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames,
-            flow: this.routerFlow, flowName: this.routerFlowNames};
+            flow: this.routerFlow, flowName: this.routerFlowNames, page: null};
         this.router.navigate(
             [],
             {
                 relativeTo: this.activatedRoute,
-                queryParams
+                queryParams,
+                queryParamsHandling: 'merge',
             },
         );
+        this.resetToFirstPage();
         this.reload();
     }
 

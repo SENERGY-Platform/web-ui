@@ -28,6 +28,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 
 @Component({
@@ -41,6 +42,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     ready = false;
     instances = [];
     totalCount = 200;
+    pageIndex = 0;
     offset = 0;
     dataSource = new MatTableDataSource<ExtendedLocationModel>();
     selection = new SelectionModel<ExtendedLocationModel>(true, []);
@@ -62,9 +64,15 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         private dialogsService: DialogsService,
         public preferencesService: PreferencesService,
         private permissionsDialogService: PermissionsDialogService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit() {
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
         this.checkAuthorization();
     }
@@ -77,7 +85,9 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.paginator.page.subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.getLocations().subscribe();
         });
     }
@@ -104,6 +114,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
         this.reload();
     }
 
@@ -118,9 +129,12 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
@@ -172,8 +186,12 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
         }, 2500);
     }
 
-    reload() {
-        this.offset = 0;
+    reload(keepPage = false) {
+        if (!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+        }
         this.ready = false;
         this.selectionClear();
 

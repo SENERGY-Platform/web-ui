@@ -16,7 +16,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ImportTypeModel, ImportTypeModelWithCostEstimation } from './shared/import-types.model';
 import { ImportTypesService } from './shared/import-types.service';
-import { Sort } from '@angular/material/sort';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
@@ -33,6 +33,7 @@ import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-import-types',
@@ -51,6 +52,8 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     searchSub: Subscription = new Subscription();
     totalCount = 200;
     offset = 0;
+    pageIndex = 0;
+    initialSort!: { active: string; direction: SortDirection };
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -67,9 +70,14 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
         private costService: CostService,
         private permissionsService: PermissionsService,
         private prefeencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) { }
 
     ngOnInit(): void {
+        this.initialSort = this.urlState.getSort('name', 'asc');
+        this.sort = this.initialSort.active + '.' + this.initialSort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
         this.checkAuthorization();
     }
@@ -83,6 +91,8 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
             this.prefeencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.pageIndex = this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.load().subscribe();
         });
     }
@@ -106,9 +116,12 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
@@ -166,6 +179,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     matSortChange($event: Sort) {
         this.sort = $event.active + '.' + $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
         this.reload();
     }
 
@@ -194,8 +208,12 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
         );
     }
 
-    reload() {
-        this.offset = 0;
+    reload(keepPage = false) {
+        if (!keepPage) {
+            this.offset = 0;
+            this.pageIndex = 0;
+            this.urlState.setPage(0);
+        }
         this.dataReady = false;
         this.selectionClear();
 

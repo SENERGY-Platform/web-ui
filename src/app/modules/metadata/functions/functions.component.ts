@@ -38,6 +38,7 @@ import {
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-functions',
@@ -47,6 +48,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name'];
     pageSize = this.preferencesService.pageSize;
+    pageIndex = 0;
     dataSource = new MatTableDataSource<DeviceTypeFunctionModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<DeviceTypeFunctionModel>(true, []);
@@ -81,11 +83,17 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
         private route: ActivatedRoute,
         private router: Router,
         private conceptsService: ConceptsService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit() {
         this.userIsAdmin = this.authService.userIsAdmin();
         this.readConceptFilter(this.route.snapshot.queryParamMap);
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
         this.routeSub = this.route.queryParamMap.pipe(skip(1)).subscribe((params) => {
             if (this.readConceptFilter(params)) {
@@ -99,7 +107,9 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.paginator.page.subscribe((e)=> {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.load();
         });
     }
@@ -132,7 +142,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     clearConceptFilter(): void {
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: {concept_ids: null},
+            queryParams: {concept_ids: null, page: null},
             queryParamsHandling: 'merge',
         });
     }
@@ -157,9 +167,12 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
@@ -248,12 +261,16 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
             );
     }
 
-    reload() {
+    reload(keepPage = false) {
         this.ready = false;
-        this.offset = 0;
-        // reload starts at the first page, so the paginator has to say so too
-        if (this.paginator) {
-            this.paginator.pageIndex = 0;
+        if (!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+            // reload starts at the first page, so the paginator has to say so too
+            if (this.paginator) {
+                this.paginator.pageIndex = 0;
+            }
         }
         this.selectionClear();
         this.load(() => {
@@ -269,6 +286,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
         this.reload();
     }
 

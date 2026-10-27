@@ -17,6 +17,7 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { SortModel } from '../../../core/components/sort/shared/sort.model';
+import { SortDirection } from '@angular/material/sort';
 import { concatMap, forkJoin, map, Observable, Subscription } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
@@ -34,6 +35,7 @@ import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 const grids = new Map([
     ['xs', 1],
@@ -71,7 +73,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     private limitInit = 54;
     private limit = this.limitInit;
     private offset = 0;
-    private sortAttribute = this.sortAttributes[0];
+    sortAttribute = this.sortAttributes[0];
     private searchSub: Subscription = new Subscription();
     // one listing in flight at a time: an answer for a previous tab or search must not be appended
     private loadSub: Subscription = new Subscription();
@@ -98,6 +100,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         private _formBuilder: FormBuilder,
         private permissionsService: PermissionsService,
         private metadataExistenceService: MetadataExistenceService,
+        private urlState: UrlStateService,
     ) {
         const sub = this.authorizationService.getUserId();
         if (typeof sub === 'string') {
@@ -108,6 +111,9 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit() {
+        // the owner filter of the tab is needed by the first load, so the tab is restored before it
+        this.activeIndex = this.urlState.getInt('tab', 0);
+        this.sortAttribute = this.restoreSortAttribute();
         this.userHasCreateAuthorization = this.processRepoService.userHasCreateAuthorization();
         this.userHasUpdateAuthorization = this.processRepoService.userHasUpdateAuthorization();
         this.userHasDeleteAuthorization = this.processRepoService.userHasDeleteAuthorization();
@@ -136,7 +142,19 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     receiveSortingAttribute(sortAttribute: SortModel) {
         this.sortAttribute = sortAttribute;
+        this.urlState.setSort({ active: sortAttribute.value, direction: sortAttribute.order as SortDirection }, sortingAttributes[0].value, sortingAttributes[0].order as SortDirection);
         this.getRepoItems(true);
+    }
+
+    /** The sort attribute the URL names, with the order it names; the first attribute otherwise. */
+    private restoreSortAttribute(): SortModel {
+        const sort = this.urlState.getSort(sortingAttributes[0].value, sortingAttributes[0].order as SortDirection);
+        const attribute = this.sortAttributes.find((a: SortModel) => a.value === sort.active);
+        if (attribute === undefined || sort.direction === '') {
+            return this.sortAttributes[0];
+        }
+        attribute.order = sort.direction;
+        return attribute;
     }
 
     permission(process: ProcessModel): void {
@@ -204,6 +222,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     setIndex(event: number) {
         this.activeIndex = event;
+        // the tab starts from the default sort below, so the URL drops the previous one
+        this.urlState.set({ tab: event > 0 ? event : null, sort: null, dir: null });
         this.animationDone = false;
         this.searchText = '';
         this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;

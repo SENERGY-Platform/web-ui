@@ -22,8 +22,8 @@
     <senergy-spinner [show]="!ready || downloading"></senergy-spinner>
     <div class="mat-elevation-z1" [hidden]="!ready || templatesDataSource.data.length === 0">
         <div class="table-container">
-            <table mat-table [dataSource]="templatesDataSource" matSort matSortActive="name"
-                   matSortDirection="asc" matSortDisableClear>
+            <table mat-table [dataSource]="templatesDataSource" matSort (matSortChange)="matSortChange($event)"
+                   [matSortActive]="sortBy" [matSortDirection]="sortDirection" matSortDisableClear>
 
                 <ng-container matColumnDef="id">
                     <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>

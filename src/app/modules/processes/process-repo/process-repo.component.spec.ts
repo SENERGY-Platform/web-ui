@@ -31,6 +31,7 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsMockService } from '../../permissions/shared/permissions.service.mock';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 interface ListResponse {
     result: ProcessModel[];
@@ -75,6 +76,7 @@ describe('ProcessRepoComponent', () => {
                 { provide: DialogsService, useValue: {} },
                 { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useValue: { getInt: () => 0, getSort: (active: string, direction: string) => ({ active, direction }), set: () => undefined, setSort: () => undefined } },
             ],
         });
         component = TestBed.createComponent(ProcessRepoComponent).componentInstance;

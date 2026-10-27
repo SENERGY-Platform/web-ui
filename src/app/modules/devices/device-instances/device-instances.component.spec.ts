@@ -26,7 +26,7 @@ import { CoreModule } from '../../../core/core.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { DevicesModule } from '../devices.module';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { DeviceInstancesService } from './shared/device-instances.service';
 import { of } from 'rxjs';
@@ -135,6 +135,10 @@ describe('DeviceInstancesComponent', () => {
 });
 
 class RouterStub {
+    url = '/devices/deviceinstances';
+    parseUrl() {
+        return { queryParamMap: convertToParamMap({}) };
+    }
     getCurrentNavigation() {
         return {
             extras: {

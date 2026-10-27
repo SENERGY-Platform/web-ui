@@ -29,6 +29,7 @@ import {forkJoin, Observable, Subscription} from 'rxjs';
 import { SelectionModel } from '@angular/cdk/collections';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import {UrlStateService} from '../../../../core/services/url-state.service';
 
 
 
@@ -43,6 +44,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     keyRegex = '';
     ready = false;
     offset = 0;
+    pageIndex = 0;
     totalCount = 0;
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -66,6 +68,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
         private searchbarService: SearchbarService,
         public utilsService: UtilService,
         private preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) {
         this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization();
 
@@ -87,6 +90,12 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     }
 
     ngOnInit() {
+        // sort and page are restored before the first load, which the search subscription starts
+        const sort = this.urlState.getSort('unix_timestamp_in_s', 'desc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
     }
 
@@ -94,7 +103,9 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
         this.paginator.page.subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.loadVariables();
         });
     }
@@ -102,22 +113,32 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'unix_timestamp_in_s', 'desc');
         this.reload();
     }
 
     initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if(this.keyRegex !== searchText) {
                 this.keyRegex = searchText;
-                this.offset = 0;
+                if(!opening) {
+                    this.offset = 0;
+                }
             }
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
-    reload(){
+    reload(keepPage = false){
         this.selectionClear();
-        this.offset = 0;
+        if(!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+        }
         this.updateTotal();
         this.loadVariables();
     }

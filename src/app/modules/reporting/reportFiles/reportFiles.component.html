@@ -29,8 +29,8 @@
     </div>
     <div class="mat-elevation-z1" [hidden]="!ready || reportsDataSource.data.length === 0">
         <div class="table-container">
-            <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="createdAt"
-                   matSortDirection="desc" matSortDisableClear>
+            <table mat-table [dataSource]="reportsDataSource" matSort (matSortChange)="matSortChange($event)"
+                   [matSortActive]="sortBy" [matSortDirection]="sortDirection" matSortDisableClear>
 
                 <ng-container matColumnDef="id">
                     <th mat-header-cell mat-sort-header *matHeaderCellDef>Id</th>

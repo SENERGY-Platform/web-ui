@@ -51,7 +51,7 @@
                         [hidden]="animation || isLoadingResultsRunning || totalCountRunning === 0">
                         <div class="table-container">
                             <table #sortRunning="matSort" mat-table [dataSource]="dataSourceRunning" matSort
-                                matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
+                                [matSortActive]="sortActive" [matSortDirection]="sortDirection" matSortDisableClear>
                                 <ng-container matColumnDef="select">
                                     <th mat-header-cell *matHeaderCellDef>
                                         <mat-checkbox (change)="$event ? masterToggleRunning() : null"
@@ -115,8 +115,8 @@
                                 <tr mat-row *matRowDef="let row; columns: displayedColumnsRunning;"></tr>
                             </table>
                         </div>
-                        <mat-paginator #paginatorRunning [length]="totalCountRunning" [pageSize]="preferencesService.pageSize"
-                            [pageSizeOptions]="[20, 50, 75, 100]" (page)="paginatorRunningPage($event)" showFirstLastButtons></mat-paginator>
+                        <mat-paginator #paginatorRunning senergyKeepPageInRange [length]="totalCountRunning" [pageSize]="preferencesService.pageSize"
+                            [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="paginatorRunningPage($event)" showFirstLastButtons></mat-paginator>
                     </div>
                     <div *ngIf="!animation && !isLoadingResultsRunning && totalCountRunning === 0">No entries found.
                     </div>
@@ -157,7 +157,7 @@
                         [hidden]="animation || isLoadingResultsFinished || totalCountFinished === 0">
                         <div class="table-container">
                             <table #sortFinished="matSort" mat-table [dataSource]="dataSourceFinished" matSort
-                                matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
+                                [matSortActive]="sortActive" [matSortDirection]="sortDirection" matSortDisableClear>
 
                                 <ng-container matColumnDef="select">
                                     <th mat-header-cell *matHeaderCellDef>
@@ -252,8 +252,8 @@
                                 <tr mat-row *matRowDef="let row; columns: displayedColumnsFinished;"></tr>
                             </table>
                         </div>
-                        <mat-paginator #paginatorFinished [length]="totalCountFinished" [pageSize]="preferencesService.pageSize"
-                            [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons>
+                        <mat-paginator #paginatorFinished senergyKeepPageInRange [length]="totalCountFinished" [pageSize]="preferencesService.pageSize"
+                            [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons>
                         </mat-paginator>
                     </div>
                     <div *ngIf="!animation && !isLoadingResultsFinished && totalCountFinished === 0">No entries found.

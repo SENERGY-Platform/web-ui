@@ -28,12 +28,13 @@ import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { DeploymentsModel } from '../deployments/shared/deployments.model';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { UtilService } from 'src/app/core/services/util.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
 
 @Component({
     selector: 'senergy-process-monitor',
@@ -48,6 +49,11 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     selectionRunning = new SelectionModel<MonitorProcessModel>(true, []);
     activeIndex = 0;
+    // sort and page of the table on the active tab
+    sortActive = 'startTime';
+    sortDirection: SortDirection = 'desc';
+    pageIndex = 0;
+    private navigationTab: number | null = null;
     totalCountFinished = 0;
     totalCountRunning = 0;
     searchText = '';
@@ -104,12 +110,24 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         private fogMonitorFactory: MonitorFogFactory,
         public utilsService: UtilService,
         public preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) {
         this.monitorService = plattformMonitorService;
         this.getRouterParams();
     }
 
     ngOnInit() {
+        if (this.navigationTab !== null) {
+            // a tab from navigation state wins over the URL and is written there
+            this.urlState.set({ tab: this.activeIndex > 0 ? this.activeIndex : null });
+        } else {
+            this.activeIndex = this.urlState.getInt('tab', 0);
+        }
+        const sort = this.urlState.getSort('startTime', 'desc');
+        this.sortActive = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+
         this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
         this.businessKeyFilter = this.route.snapshot.queryParamMap.get('businessKey') || this.route.snapshot.queryParamMap.get('businesskey');
         this.routeSub = this.route.queryParamMap.subscribe((params) => {
@@ -130,6 +148,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             }
 
             if (this.tablesInitialized) {
+                // a changed filter starts again on the first page
+                this.resetPage();
                 this.reload();
             }
         });
@@ -168,7 +188,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             this.businessKeyFilter = null;
             this.router.navigate([], {
                 relativeTo: this.route,
-                queryParams: { hubId: this.requestedHubId, businessKey: null, businesskey: null },
+                queryParams: { hubId: this.requestedHubId, businessKey: null, businesskey: null, page: null },
                 queryParamsHandling: 'merge',
                 replaceUrl: true,
             });
@@ -177,6 +197,8 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     selectHubWithReload(hub: HubModel | null) {
         this.selectHub(hub, true);
+        // the URL page is dropped by the navigation in selectHub
+        this.resetPaginator();
         this.reload();
     }
 
@@ -216,6 +238,11 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
         this.animation = true;
         this.activeIndex = index;
         this.searchText = '';
+        // sort and page belong to the table of one tab, the other tab starts from its defaults
+        this.sortActive = 'startTime';
+        this.sortDirection = 'desc';
+        this.pageIndex = 0;
+        this.urlState.set({ tab: index > 0 ? index : null, sort: null, dir: null, page: null });
         if (this.activeIndex === 0) {
             this.isLoadingResultsRunning = true;
         } else {
@@ -238,6 +265,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                     this.monitorService.deleteInstances(element.id).subscribe((resp: string) => {
                         if (resp === 'ok') {
                             this.paginatorFinished.pageIndex = 0;
+                            this.urlState.setPage(0);
                             this.reload();
                         }
                     });
@@ -254,6 +282,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                     this.isLoadingResultsFinished = true;
                     this.monitorService.deleteMultipleInstances(this.selection.selected).subscribe(() => {
                         this.paginatorFinished.pageIndex = 0;
+                        this.urlState.setPage(0);
                         this.reload();
                         this.selectionClear();
                     });
@@ -270,6 +299,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                     this.isLoadingResultsRunning = true;
                     this.monitorService.stopMultipleInstances(this.selectionRunning.selected).subscribe(() => {
                         this.paginatorRunning.pageIndex = 0;
+                        this.urlState.setPage(0);
                         this.reload();
                         this.selectionClearRunning();
                     });
@@ -282,6 +312,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
             if (resp === 'ok') {
                 this.isLoadingResultsRunning = true;
                 this.paginatorRunning.pageIndex = 0;
+                this.urlState.setPage(0);
                 this.reload();
             }
         });
@@ -306,7 +337,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     removeBusinessKeyChip(): void {
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { businessKey: null, businesskey: null },
+            queryParams: { businessKey: null, businesskey: null, page: null },
             queryParamsHandling: 'merge',
             replaceUrl: true,
         });
@@ -318,8 +349,13 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     private initRunning() {
         this.dataSourceRunning.sort = this.sortRunning;
-        this.dataSourceRunning.sort.sortChange.subscribe(() => {
+        this.dataSourceRunning.sort.sortChange.subscribe((sort: Sort) => {
             this.paginatorRunning.pageIndex = 0;
+            this.urlState.setSort(sort, 'startTime', 'desc');
+        });
+        this.paginatorRunning.page.subscribe((e: PageEvent) => {
+            this.pageIndex = e.pageIndex;
+            this.urlState.setPage(e.pageIndex);
         });
         this.runningSub = merge(this.dataSourceRunning.sort.sortChange, this.paginatorRunning.page, this.reloadRunningSub)
             .pipe(
@@ -351,9 +387,14 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
 
     private initFinished() {
         this.dataSourceFinished.sort = this.sortFinished;
-        this.dataSourceFinished.sort.sortChange.subscribe(() => {
+        this.dataSourceFinished.sort.sortChange.subscribe((sort: Sort) => {
             this.paginatorFinished.pageIndex = 0;
             this.selectionClear();
+            this.urlState.setSort(sort, 'startTime', 'desc');
+        });
+        this.paginatorFinished.page.subscribe((e: PageEvent) => {
+            this.pageIndex = e.pageIndex;
+            this.urlState.setPage(e.pageIndex);
         });
 
         this.finishedSub = merge(this.dataSourceFinished.sort.sortChange, this.paginatorFinished.page, this.reloadFinishedSub)
@@ -399,16 +440,40 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             if (searchText !== '') {
                 this.searchInitialized = true;
             }
             this.searchText = searchText;
             if (this.searchInitialized) {
+                if (!opening) {
+                    this.resetPage();
+                }
                 this.reload();
             }
+            opening = false;
         });
     }
+
+    private resetPage(): void {
+        this.resetPaginator();
+        this.urlState.setPage(0);
+    }
+
+    private resetPaginator(): void {
+        this.pageIndex = 0;
+        // only the active tab's table exists, and not before its first render
+        if (this.activeIndex === 0) {
+            if (this.paginatorRunning) {
+                this.paginatorRunning.pageIndex = 0;
+            }
+        } else if (this.paginatorFinished) {
+            this.paginatorFinished.pageIndex = 0;
+        }
+    }
+
     private getRouterParams(): void {
         const navigation: Navigation | null = this.router.getCurrentNavigation();
         if (navigation !== null) {
@@ -421,6 +486,7 @@ export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit
                 };
                 this.selectedDeployment = params.deployment;
                 this.activeIndex = params.activeTab;
+                this.navigationTab = params.activeTab;
                 if (params.hub) {
                     this.selectHub(params.hub, true);
                 }

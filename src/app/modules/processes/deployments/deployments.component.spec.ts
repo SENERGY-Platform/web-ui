@@ -42,6 +42,7 @@ import { UtilService } from '../../../core/services/util.service';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 const deployment = (id: string, disabled?: boolean): DeploymentsModel =>
     ({ id, name: 'name-' + id, definition_id: 'def-' + id, diagram: '<svg></svg>', online: true, disabled }) as DeploymentsModel;
@@ -102,6 +103,7 @@ describe('ProcessDeploymentsComponent', () => {
                 { provide: DeploymentsFogFactory, useValue: { withHubId: () => new MockDeploymentsService() } },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([hub]) } },
                 { provide: MetadataExistenceService, useValue: {} },
+                { provide: UrlStateService, useValue: { getShown: () => false, getSort: (active: string, direction: string) => ({ active, direction }), set: () => undefined, setSort: () => undefined } },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(ProcessDeploymentsComponent);

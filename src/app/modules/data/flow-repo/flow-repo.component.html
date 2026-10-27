@@ -38,7 +38,7 @@
         <div class="table-container" [ngClass]="{'table-container-with-button': userHasWritePermission}">
             <table #sort="matSort" mat-table [dataSource]="flowsDataSource" matSort
                    matSortActive="name"
-                   matSortDirection="asc" matSortDisableClear>
+                   matSortDirection="asc" matSortDisableClear (matSortChange)="sortChanged($event)">
 
                 <ng-container matColumnDef="select">
                     <th mat-header-cell *matHeaderCellDef class="button-column">
@@ -199,8 +199,8 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             </table>
         </div>
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
-                       [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)"
+        <mat-paginator #paginator senergyKeepPageInRange [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex"
+                       [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event); pageChanged($event)"
                        showFirstLastButtons></mat-paginator>
     </div>
     <div *ngIf="flows.length === 0 && ready">No flow instances found.</div>

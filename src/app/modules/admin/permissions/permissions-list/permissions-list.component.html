@@ -136,8 +136,8 @@
     <mat-card appearance="outlined" [fxHide]="!ready" class="table-card">
         <mat-card-content>
             <div>
-                <mat-table #table (matSortChange)="sortData($event)" [dataSource]="sortedData" [hidden]="!ready"
-                    matSort>
+                <mat-table #table (matSortChange)="sortChanged($event)" [dataSource]="sortedData" [hidden]="!ready"
+                    matSort [matSortActive]="sort.active" [matSortDirection]="sort.direction">
                     <ng-container matColumnDef="select">
                         <th mat-header-cell *matHeaderCellDef>
                             <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -253,7 +253,7 @@
                     <mat-row *matRowDef="let row; columns: displayedColumns;" mat-row></mat-row>
 
                 </mat-table>
-                <mat-paginator #paginator [length]="total" [pageSize]="preferencesService.pageSize"
+                <mat-paginator #paginator senergyKeepPageInRange [length]="total" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex"
                     [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
             </div>
         </mat-card-content>

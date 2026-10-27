@@ -16,7 +16,7 @@
 
 <div class="process-repo-container">
 
-    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight (selectedIndexChange)="setIndex($event)"
+    <mat-tab-group backgroundColor="accent" color="primary" dynamicHeight [selectedIndex]="activeIndex" (selectedIndexChange)="setIndex($event)"
         (animationDone)="animation()">
         <!-- <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Marketplace', 'Shared']"> -->
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Shared']">
@@ -27,7 +27,7 @@
                         (click)="deleteMultipleItems()" *ngIf="selectedItems.length > 0 && ready">
                         <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn" aria-hidden="false">delete</mat-icon>
                     </button>
-                    <senergy-sort class="suffix" [sortAttributes]="sortAttributes"
+                    <senergy-sort class="suffix" [sortAttributes]="sortAttributes" [selectedValue]="sortAttribute.value"
                         (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
                 </div>
                 <div class="main-panel" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"

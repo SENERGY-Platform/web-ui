@@ -30,6 +30,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 
 @Component({
@@ -46,6 +47,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     dataSource = new MatTableDataSource<DeviceGroupModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
+    pageIndex = 0;
     offset = 0;
     searchText = '';
     sortBy = 'name';
@@ -69,9 +71,16 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         private permissionsDialogService: PermissionsDialogService,
         private permissionsService: PermissionsService,
         private preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit() {
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.hideGenerated = !this.urlState.getShown('generated', false);
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
         this.checkAuthorization();
     }
@@ -80,7 +89,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.paginator.page.subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.getDeviceGroups().subscribe();
         });
     }
@@ -102,6 +113,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
         this.reload();
     }
 
@@ -110,9 +122,12 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
@@ -165,6 +180,9 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
 
     setHideGenerated(hide: boolean){
         this.hideGenerated = hide;
+        this.pageIndex = 0;
+        this.offset = 0;
+        this.urlState.set({ generated: hide ? null : 'show', page: null });
         this.getDeviceGroups().subscribe();
     }
 
@@ -187,8 +205,12 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
         );
     }
 
-    public reload() {
-        this.offset = 0;
+    public reload(keepPage = false) {
+        if (!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+        }
         this.ready = false;
         this.selectionClear();
 

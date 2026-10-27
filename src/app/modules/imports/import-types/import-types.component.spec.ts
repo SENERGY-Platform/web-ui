@@ -20,6 +20,7 @@ import {CoreModule} from '../../../core/core.module';
 import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {FlexModule} from '@ngbracket/ngx-layout';
@@ -116,6 +117,7 @@ describe('ImportTypesComponent', () => {
         { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
         { provide: SearchbarService, useValue: searchbarSpy },
         { provide: Router, useValue: routerSpy },
+        { provide: UrlStateService, useValue: { get: () => null, getShown: (_: string, fallback: boolean) => fallback, getPage: () => 0, getSort: (active: string, direction: string) => ({ active, direction }), set: () => {}, setPage: () => {}, setSort: () => {} } },
         { provide: MatDialog, useValue: dialogSpy },
         { provide: CostService, useValue: costServiceSpy },
         { provide: PermissionsService, useValue: permissionsServiceSpy },

@@ -33,8 +33,9 @@ import {PermissionsDialogImportComponent} from '../permissions-dialog-import/per
 import {PermissionImportModel} from '../permissions-dialog-import/permissions-dialog-import.model';
 import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.component';
 import {DialogsService} from '../../../../core/services/dialogs.service';
-import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {MatPaginator} from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
 
 @Component({
     selector: 'senergy-permissions-list',
@@ -85,6 +86,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     private subscriptions: Subscription[] = [];
     total = 0;
+    pageIndex = 0;
     selectedUser = '';
     selectedRole = '';
     selectedClientID = '';
@@ -97,6 +99,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
                 private kongService: KongService,
                 private dialogsService: DialogsService,
                 public preferencesService: PreferencesService,
+                private urlState: UrlStateService,
     ) {
         this.authService.loadAllRoles().subscribe((roles: any | { error: string }) => {
             if (roles != null) {
@@ -128,6 +131,13 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     public ngOnInit() {
+        this.query = this.urlState.get('search') || '';
+        this.selectedUser = this.urlState.get('user') || '';
+        this.selectedRole = this.urlState.get('role') || '';
+        this.selectedClientID = this.urlState.get('client') || '';
+        this.selectedEndpoint = this.urlState.get('endpoint') || '';
+        this.sort = this.urlState.getSort('', '');
+        this.pageIndex = this.urlState.getPage();
         this.loadPolicies();
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initAutoComplete();
@@ -136,7 +146,9 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     ngAfterViewInit() {
         this.subscriptions.push(this.paginator.page.subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
-            this.sortData(this.sort, this.policies, e);
+            this.pageIndex = e.pageIndex;
+            this.urlState.setPage(this.pageIndex);
+            this.sortData(this.sort);
         }));
     }
 
@@ -236,16 +248,19 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
         });
     }
 
-    public sortData(sort: Sort, policies: PermissionModel[] | undefined = undefined, pageEvent: PageEvent | undefined = undefined) {
+    /** Bound to the table's matSortChange: another order puts other rows on every page, so the list returns to the first one. */
+    public sortChanged(sort: Sort) {
+        this.pageIndex = 0;
+        this.urlState.setSort(sort, '', '');
+        this.sortData(sort);
+    }
+
+    /** Shows the current page of the filtered policies in the given order. */
+    public sortData(sort: Sort) {
         this.sort = sort;
-        policies = policies || this.policies;
-        const pageSize = pageEvent?.pageSize || 20;
-        const pageIndex = pageEvent?.pageIndex || 0;
-        if (sort == null) {
-            this.total = policies.length;
-            this.sortedData = policies.slice(pageSize * pageIndex, pageSize * (pageIndex + 1));
-        }
-        const data = policies.slice();
+        const data = this.filteredPolicies();
+        const pageSize = this.preferencesService.pageSize;
+        const pageIndex = this.pageIndex;
 
         if (!sort.active || sort.direction === '') {
             this.total = data.length;
@@ -324,8 +339,27 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     filter(_: any) {
+        this.pageIndex = 0;
+        this.urlState.set({
+            search: this.query,
+            user: this.selectedUser,
+            role: this.selectedRole,
+            client: this.selectedClientID,
+            endpoint: this.selectedEndpoint,
+            page: null,
+        });
+        this.sortData(this.sort);
+    }
+
+    private filteredPolicies(): PermissionModel[] {
         const filtered: PermissionModel[] = [];
-        const query = new RegExp(this.query, 'i');
+        let query: RegExp;
+        try {
+            query = new RegExp(this.query, 'i');
+        } catch {
+            // an incomplete pattern, typed or from the URL, is searched for literally
+            query = new RegExp(this.query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+        }
         this.policies.forEach((policy) => {
             try {
                 if(
@@ -351,13 +385,12 @@ export class PermissionsListComponent implements OnInit, AfterViewInit, OnDestro
 
         });
 
-        this.sortData(this.sort, filtered);
+        return filtered;
     }
 
     public clearSearch() {
         this.query = '';
-        this.sortedData = this.policies;
-        this.sortData(this.sort);
+        this.filter(null);
     }
 
     isAllSelected() {

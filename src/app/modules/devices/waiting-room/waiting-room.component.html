@@ -32,8 +32,8 @@
 
     <div class="mat-elevation-z1" [hidden]="!ready || (devicesDataSource.data.length === 0 && ready)">
         <div class="table-container">
-            <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort matSortActive="created_at"
-                matSortDirection="desc" matSortDisableClear [trackBy]="trackDevice">
+            <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort [matSortActive]="sortBy"
+                [matSortDirection]="sortDirection" matSortDisableClear [trackBy]="trackDevice">
 
                 <ng-container matColumnDef="select">
                     <th mat-header-cell *matHeaderCellDef class="button-column">
@@ -145,7 +145,7 @@
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;" [@rowAnimation]="{value: animate, params: animationParams }"></tr>
             </table>
         </div>
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+        <mat-paginator #paginator senergyKeepPageInRange [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]"
             (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
         <div *ngIf="devicesDataSource.data.length === 0 && ready">No devices found.</div>
     </div>

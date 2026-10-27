@@ -26,7 +26,7 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
@@ -39,6 +39,7 @@ import {FlowOperatorUsage} from '../flow-repo/shared/flow.model';
 import {deleteErrorMessage} from './shared/operator-delete-error';
 import {newestVersionLabel} from './shared/operator-version';
 import {HttpErrorResponse} from '@angular/common/http';
+import {UrlStateService} from '../../../core/services/url-state.service';
 @Component({
     selector: 'senergy-operator-repo',
     templateUrl: './operator-repo.component.html',
@@ -51,6 +52,8 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     selection = new SelectionModel<OperatorModel>(true, []);
     displayedColumns: string[] = ['select', 'pub', 'name', 'version', 'image'];
     totalCount = 0;
+    pageIndex = 0;
+    initialSort!: { active: string; direction: SortDirection };
 
     operators = [] as OperatorModel[];
     operatorsDataSource = new MatTableDataSource<OperatorModel>();
@@ -84,9 +87,12 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit, OnDestroy {
         private pipeService: PipelineRegistryService,
         private flowService: FlowRepoService,
         private router: Router,
+        private urlState: UrlStateService,
     ) { }
 
     ngOnInit() {
+        this.initialSort = this.urlState.getSort('name', 'asc');
+        this.pageIndex = this.urlState.getPage();
         this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization();
 
         this.userId = this.auth.getUserId();
@@ -112,9 +118,15 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngAfterViewInit() {
         this.operatorsDataSource.sort = this.sort;
-        this.sort.sortChange.subscribe(() => {
+        this.sort.sortChange.subscribe((sort: Sort) => {
             this.paginator.pageIndex = 0;
+            this.pageIndex = 0;
             this.selectionClear();
+            this.urlState.setSort(sort, 'name', 'asc');
+        });
+        this.paginator.page.subscribe((e: PageEvent) => {
+            this.pageIndex = e.pageIndex;
+            this.urlState.setPage(e.pageIndex);
         });
 
         // set up once: a search or reload only triggers this pipeline, a new one per call would multiply the requests
@@ -202,8 +214,16 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initSearchAndGetOperators() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
+            if (!opening) {
+                this.paginator.pageIndex = 0;
+                this.pageIndex = 0;
+                this.urlState.setPage(0);
+            }
+            opening = false;
             this.getOperators(true);
         });
     }

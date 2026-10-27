@@ -42,7 +42,7 @@
             (click)="checkMissingMetadata()" [disabled]="!ready || metadataCheckRunning" class="suffix">
             <mat-icon>rule</mat-icon>
         </button>
-        <senergy-sort [sortAttributes]="sortAttributes" class="suffix-sort"
+        <senergy-sort [sortAttributes]="sortAttributes" [selectedValue]="sortAttribute.value" class="suffix-sort"
             (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
         <button matTooltip="refresh fog deployment sync" mat-icon-button color="accent" (click)="refreshSync()"
                 *ngIf="this.refreshSyncF" class="suffix">

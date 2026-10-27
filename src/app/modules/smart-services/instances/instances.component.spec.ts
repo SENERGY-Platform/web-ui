@@ -28,7 +28,7 @@ describe('SmartServiceInstancesComponent', () => {
 
     const answer = (name: string) => ({ instances: [{ id: name, name } as any], total: 100 });
 
-    const create = (params: { [key: string]: string }) => {
+    const create = (params: { [key: string]: string }, urlSort = { active: 'name', direction: 'asc' }) => {
         navigate = jasmine.createSpy('navigate');
         component = new SmartServiceInstancesComponent(
             { userHasDeleteAuthorization: () => false, getInstances } as any,
@@ -42,6 +42,7 @@ describe('SmartServiceInstancesComponent', () => {
             {} as any,
             { userIsDeveloper: () => false } as any,
             { getExtendedReleaseList } as any,
+            { getSort: () => urlSort } as any,
         );
         component.paginator = { pageIndex: Number(params['page'] || 0) } as MatPaginator;
     };
@@ -56,6 +57,13 @@ describe('SmartServiceInstancesComponent', () => {
         component.ngOnInit();
 
         expect(getInstances.calls.mostRecent().args[0].offset).toBe(40);
+    });
+
+    it('restores the sort of the URL on the first load', () => {
+        create({}, { active: 'created_at', direction: 'desc' });
+        component.ngOnInit();
+
+        expect(getInstances.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({ sort: 'created_at.desc' }));
     });
 
     it('goes back to the first page when the sorting changes', () => {

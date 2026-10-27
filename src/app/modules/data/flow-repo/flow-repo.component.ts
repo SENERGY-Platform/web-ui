@@ -47,13 +47,14 @@ import {MatTableDataSource} from '@angular/material/table';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {PreferencesService} from '../../../core/services/preferences.service';
 import {SelectionModel} from '@angular/cdk/collections';
-import {MatSort} from '@angular/material/sort';
+import {MatSort, Sort, SortDirection} from '@angular/material/sort';
 import {startWith, switchMap} from 'rxjs/operators';
 import {FlexibleConnectedPositionStrategy, Overlay, OverlayRef} from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
 import {FlowFilterDialogComponent} from './flow-filter-dialog/flow-filter-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {parseSvgImage, svgImageDataUrl} from '../../../core/svg-image';
+import {UrlStateService} from '../../../core/services/url-state.service';
 
 
 @Component({
@@ -84,6 +85,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
 
     displayedColumns: string[] = ['select', 'pub', 'name', 'description','cost', 'dateUpdated'];
     totalCount = 0;
+    pageIndex = 0;
+    private initialSort!: { active: string; direction: SortDirection };
 
     shareUser = '';
 
@@ -122,10 +125,13 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         private dialog: MatDialog,
         private activatedRoute: ActivatedRoute,
         private cd: ChangeDetectorRef,
+        private urlState: UrlStateService,
     ) {
     }
 
     ngOnInit() {
+        this.initialSort = this.urlState.getSort('dateUpdated', 'desc');
+        this.pageIndex = this.urlState.getPage();
         this.userId = this.authService.getUserId();
         if (this.authService.userIsAdmin()) {
             this.loadFlowUsage();
@@ -158,8 +164,8 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
     ngAfterViewInit() {
         this.flowsDataSource.sort = this.sort;
         setTimeout(() => {
-            this.sort.active = 'dateUpdated';
-            this.sort.direction = 'desc';
+            this.sort.active = this.initialSort.active;
+            this.sort.direction = this.initialSort.direction;
             this.sort.sortChange.emit();
         });
         this.initSearchAndGetFlows();
@@ -203,11 +209,6 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         if (reset) {
             this.reset();
         }
-        this.sort.sortChange.subscribe(() => {
-            this.paginator.pageIndex = 0;
-            this.selectionClear();
-        });
-
         let filter = undefined;
         if (this.routerOperator != null && this.routerOperator.length > 0){
             filter = 'operator:'+this.routerOperator!.toString();
@@ -226,9 +227,10 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
                 }),
             )
             .subscribe((resp: { flows: FlowModel[], total: number }) => {
+                // also for an empty page, so a page beyond the end is noticed (KeepPageInRangeDirective)
+                this.totalCount = resp.total;
                 if (resp.flows !== null && resp.flows.length > 0) {
                     this.flows= resp.flows;
-                    this.totalCount = resp.total;
                     this.flowsDataSource.data = this.flows;
                     this.loadFlowsPermissions();
                     this.ready = true;
@@ -261,9 +263,36 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
         this.permissionsDialogService.openPermissionV2Dialog('analytics-flows', flow._id, flow.name || '');
     }
 
+    sortChanged($event: Sort | undefined) {
+        // the start sort in ngAfterViewInit emits without an event and keeps the restored page
+        if ($event === undefined) {
+            return;
+        }
+        this.resetToFirstPage();
+        this.selectionClear();
+        this.urlState.setSort($event, 'dateUpdated', 'desc');
+    }
+
+    pageChanged($event: PageEvent) {
+        this.pageIndex = $event.pageIndex;
+        this.urlState.setPage($event.pageIndex);
+    }
+
+    private resetToFirstPage() {
+        this.pageIndex = 0;
+        this.paginator.pageIndex = 0;
+    }
+
     private initSearchAndGetFlows(): void {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
+            if (!opening) {
+                this.resetToFirstPage();
+                this.urlState.setPage(0);
+            }
+            opening = false;
             this.getFlows(true);
         });
     }
@@ -376,14 +405,16 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
                 if (filterSelectionInner != null) {
                     this.routerOperator = filterSelectionInner.operators;
                     this.routerOperatorNames = filterSelectionInner.operatorNames;
-                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames, page: null};
                     this.router.navigate(
                         [],
                         {
                             relativeTo: this.activatedRoute,
-                            queryParams
+                            queryParams,
+                            queryParamsHandling: 'merge',
                         },
                     );
+                    this.resetToFirstPage();
                     this.cd.detectChanges();
 
                 }
@@ -397,14 +428,16 @@ export class FlowRepoComponent implements OnInit, OnDestroy, AfterViewInit {
             this.routerOperator!.splice(i, 1);
             this.routerOperatorNames!.splice(i, 1);
         }
-        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames, page: null};
         this.router.navigate(
             [],
             {
                 relativeTo: this.activatedRoute,
-                queryParams
+                queryParams,
+                queryParamsHandling: 'merge',
             },
         );
+        this.resetToFirstPage();
         this.getFlows(true);
     }
 

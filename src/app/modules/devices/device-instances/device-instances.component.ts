@@ -43,6 +43,7 @@ import { concatMap } from 'rxjs/operators';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { DeviceInstancesDefaultAttributesDialogComponent } from './dialogs/device-instances-default-attributes-dialog.component';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 export interface DeviceInstancesRouterState {
     type: DeviceInstancesRouterStateTypesEnum | undefined | null;
@@ -79,6 +80,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         public preferencesService: PreferencesService,
         private cd: ChangeDetectorRef,
         private activatedRoute: ActivatedRoute,
+        private urlState: UrlStateService,
     ) {
     }
     displayedColumns = ['select', 'log_state', 'shared', 'display_name', 'attributes', 'info'];
@@ -87,6 +89,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     selection = new SelectionModel<DeviceInstanceModel>(true, []);
     totalCount = 200;
+    pageIndex = 0;
     offset = 0;
     ready = false;
     init = false;
@@ -115,6 +118,8 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
 
     private searchSub: Subscription = new Subscription();
     sortBy = 'display_name';
+    /** The column header the sort shows on; sortBy is the backend field it maps to. */
+    sortColumn = 'display_name';
     sortDirection: SortDirection = 'asc';
 
     userHasDeleteAuthorization = false;
@@ -129,6 +134,16 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     userIdToName: { [key: string]: string } = {};
 
     ngOnInit(): void {
+        const sort = this.urlState.getSort('display_name', 'asc');
+        this.sortBy = sort.active;
+        this.sortColumn = sort.active;
+        // same column mapping as matSortChange
+        if (this.sortBy === 'log_state') {
+            this.sortBy = 'annotations.connected';
+        }
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.checkAuthorization();
     }
 
@@ -138,7 +153,9 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         this.paginator.page.subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.load().subscribe();
         });
     }
@@ -183,19 +200,24 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
+        this.sortColumn = $event.active;
 
         if (this.sortBy === 'log_state') {
             this.sortBy = 'annotations.connected';
         }
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'display_name', 'asc');
         this.reload();
     }
 
@@ -339,13 +361,17 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
         this.totalCount = result.total;
     }
 
-    reload() {
+    reload(keepPage = false) {
         if (this.init && !this.ready) {
             return;
         }
         this.init = true;
         
-        this.offset = 0;
+        if (!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+        }
         this.ready = false;
         this.selectionClear();
         this.usage = [];
@@ -456,8 +482,18 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             });
     }
 
+    // the filter values the page holds; search, sort and page writes leave them unchanged
+    private filterState(): string {
+        return JSON.stringify([
+            this.routerConnectionState, this.routerDeviceType, this.routerDeviceTypeNames, this.routerNetwork,
+            this.routerNetworkName, this.routerLocation, this.routerLocationName, this.routerDeviceIds,
+            this.routerAttributeKeys, this.routerAttributeValues, this.routerDeviceAttributeBlacklist,
+        ]);
+    }
+
     private getRouterParams(): void {
         this.activatedRoute.queryParamMap.subscribe(params => {
+            const before = this.filterState();
             if (params !== undefined && params !== null) {
                 if (params.has('device-type-id')) {
                     this.routerDeviceType = params.getAll('device-type-id');
@@ -496,7 +532,11 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
                 }
             }
             this.cd.detectChanges();
-            this.reload();
+            // The first emission only reads the filters: the search subscription makes the first load (see
+            // ngAfterViewInit). A filter set from this page is already in the fields and loads from its own call.
+            if (this.init && this.filterState() !== before) {
+                this.reload();
+            }
         });
     }
 
@@ -633,7 +673,21 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     updateQueryParams() {
-        const queryParams: any = {};
+        // every key of this page is set, so absent filters are removed; merge keeps search, sort and dir
+        const queryParams: any = {
+            'connection-state': null,
+            'device-type-id': null,
+            'device-type-name': null,
+            'network-id': null,
+            'network-name': null,
+            'location-id': null,
+            'location-name': null,
+            'device-id': null,
+            'attribute-key': null,
+            'attribute-value': null,
+            'device-attribute-blacklist': null,
+            page: null,
+        };
         if (this.routerConnectionState) {
             queryParams['connection-state'] = this.routerConnectionState;
         }
@@ -669,6 +723,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
             {
                 relativeTo: this.activatedRoute,
                 queryParams,
+                queryParamsHandling: 'merge',
             },
         );
     }

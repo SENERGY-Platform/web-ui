@@ -107,7 +107,7 @@
             </table>
         </div>
 
-        <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
+        <mat-paginator #paginator senergyKeepPageInRange [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]"
             showFirstLastButtons></mat-paginator>
     </div>
 

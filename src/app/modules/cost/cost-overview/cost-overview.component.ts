@@ -36,6 +36,7 @@ import { ExportModel } from '../../exports/shared/export.model';
 import { BrokerExportService } from '../../exports/shared/broker-export.service';
 import { ReportModel } from '../../reporting/shared/reporting.model';
 import { ReportingService } from '../../reporting/shared/reporting.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-cost-overview',
@@ -72,18 +73,28 @@ export class CostOverviewComponent implements OnInit {
         private exportService: ExportService,
         private brokerExportService: BrokerExportService,
         private reportingService: ReportingService,
+        private urlState: UrlStateService,
     ) {
         this.isAdmin = this.authorizationService.userIsAdmin();
         if (this.isAdmin) {
-            this.selectedUser.setValue(this.authorizationService.getUserId());
+            this.selectedUser.setValue(this.urlState.get('user') || this.authorizationService.getUserId());
         }
     }
     ngOnInit(): void {
         const obs: Observable<any>[] = [];
-        this.selectedBill.valueChanges.subscribe(tree => this.tree = tree);
+        this.selectedBill.valueChanges.subscribe(tree => {
+            this.tree = tree;
+            // the newest bill of a month is the default, the URL only names an older one
+            const index = this.options.findIndex(o => o.tree === tree);
+            this.urlState.set({ bill: index >= 0 && index < this.options.length - 1 ? index : null });
+        });
         if (this.isAdmin) {
             this.selectedUser.valueChanges.pipe(mergeMap(userid => {
                 this.dataReady = false;
+                // loadForUser shows the current month, so the month and bill picked for the previous user go
+                this.date.setValue(new Date());
+                this.options = [];
+                this.urlState.set({ user: userid === this.authorizationService.getUserId() ? null : userid, month: null, bill: null });
                 return this.loadForUser(userid);
             })).subscribe(() => this.dataReady = true);
             obs.push(this.authorizationService.loadAllUsers().pipe(map((users: any | { error: string }) => {
@@ -94,8 +105,20 @@ export class CostOverviewComponent implements OnInit {
                 }
             })));
         }
-        obs.push(this.loadForUser());
-        forkJoin(obs).subscribe(_ => this.dataReady = true);
+        obs.push(this.loadForUser(this.getUserid()));
+        forkJoin(obs).subscribe(_ => {
+            this.dataReady = true;
+            this.restoreMonth();
+        });
+    }
+
+    /** Opens the month and bill the URL names; the current month needs nothing, loadForUser has shown it. */
+    private restoreMonth(): void {
+        const match = (this.urlState.get('month') || '').match(/^(\d{4})-(\d{2})$/);
+        if (match === null) {
+            return;
+        }
+        this.showMonth(new Date(parseInt(match[1], 10), parseInt(match[2], 10) - 1, 1), this.urlState.getInt('bill', -1));
     }
 
     loadForUser(userId: string | undefined = undefined): Observable<any> {
@@ -179,13 +202,18 @@ export class CostOverviewComponent implements OnInit {
     }
 
     setMonthAndYear($event: Date, datepicker: MatDatepicker<any>) {
-        let userid = this.selectedUser.value;
-        if (userid === this.authorizationService.getUserId()) {
-            userid = undefined;
-        }
         datepicker.close();
+        this.urlState.set({ bill: null });
+        this.showMonth($event);
+    }
+
+    /** @param billIndex The bill of the month to show, the newest one when it names none. */
+    private showMonth($event: Date, billIndex = -1) {
+        const userid = this.getUserid();
         const now = new Date();
-        if (now.getFullYear() === $event.getFullYear() && now.getMonth() === $event.getMonth()) {
+        const isCurrentMonth = now.getFullYear() === $event.getFullYear() && now.getMonth() === $event.getMonth();
+        this.urlState.set({ month: isCurrentMonth ? null : $event.getFullYear() + '-' + String($event.getMonth() + 1).padStart(2, '0') });
+        if (isCurrentMonth) {
             this.costService.getTree(userid).subscribe((res: Map<string, CostModel>) => {
                 this.date.setValue(now);
                 this.options = [];
@@ -198,7 +226,8 @@ export class CostOverviewComponent implements OnInit {
                 if (this.options.length === 0) {
                     this.tree = undefined;
                 } else {
-                    this.selectedBill.setValue(this.options[this.options.length - 1].tree);
+                    const index = billIndex >= 0 && billIndex < this.options.length ? billIndex : this.options.length - 1;
+                    this.selectedBill.setValue(this.options[index].tree);
                 }
             }));
         }

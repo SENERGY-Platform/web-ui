@@ -38,6 +38,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PipelineRegistryService } from '../pipeline-registry/shared/pipeline-registry.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import { decodeSvgDataUrl, HOSTILE_IMAGE, liveMarkup } from '../../../core/svg-image.mock';
 
 describe('FlowRepoComponent image preview', () => {
@@ -75,6 +76,7 @@ describe('FlowRepoComponent image preview', () => {
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: MatDialog, useValue: {} },
                 { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
+                { provide: UrlStateService, useValue: { getSort: () => ({ active: 'dateUpdated', direction: 'desc' }), getPage: () => 0, setPage: () => {}, setSort: () => {} } },
             ],
         });
         TestBed.overrideComponent(FlowRepoComponent, {

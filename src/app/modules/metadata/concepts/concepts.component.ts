@@ -31,6 +31,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-concepts',
@@ -40,6 +41,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'info', 'characteristic'];
     pageSize = this.preferencesService.pageSize;
+    pageIndex = 0;
     concepts: DeviceTypeConceptModel[] = [];
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
@@ -64,9 +66,15 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
         private snackBar: MatSnackBar,
         private dialogsService: DialogsService,
         private preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit() {
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
         this.initSearch();
         this.checkAuthorization();
     }
@@ -92,15 +100,20 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
         this.paginator.page.subscribe((e)=>{
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
+            this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.getConcepts().subscribe();
         });
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
     }
 
@@ -239,7 +252,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     showCharacteristics(concept: DeviceTypeConceptModel) {
-        this.router.navigateByUrl('/metadata/characteristics', { state: concept });
+        this.router.navigate(['/metadata/characteristics'], { queryParams: { concept_id: concept.id }, state: concept });
     }
 
     private getConcepts(): Observable<DeviceTypeConceptModel[]> {
@@ -254,9 +267,13 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
             );
     }
 
-    reload() {
+    reload(keepPage = false) {
         this.ready = false;
-        this.offset = 0;
+        if (!keepPage) {
+            this.pageIndex = 0;
+            this.offset = 0;
+            this.urlState.setPage(0);
+        }
         this.selectionClear();
 
         this.getConcepts().subscribe(_ => {
@@ -267,6 +284,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     matSortChange($event: Sort) {
         this.sortBy = $event.active;
         this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
         this.reload();
     }
 

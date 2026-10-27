@@ -23,7 +23,7 @@ import { Subscription, map, Observable } from 'rxjs';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { of } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
@@ -38,6 +38,7 @@ import { AuthorizationService } from 'src/app/core/services/authorization.servic
 import { PermissionsRightsModel } from '../permissions/shared/permissions-rights.model';
 import { PermissionsV2RightsAndIdModel } from '../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../core/services/url-state.service';
 
 /** The bulk DELETE deletes one export after the other and keeps going after a gateway timeout. */
 export function bulkDeleteOutcome(status: number, count: number): { message: string; failed: boolean; pending: boolean } {
@@ -75,6 +76,8 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         'description'
     ];
     totalCount = 0;
+    pageIndex = 0;
+    initialSort!: { active: string; direction: SortDirection };
     userHasCreateAuthorization = false;
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
@@ -124,18 +127,28 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         private permissionsService: PermissionsService,
         private userService: AuthorizationService,
         public preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) { }
 
     ngAfterViewInit(): void {
-        this.paginator.page.subscribe(() => {
+        this.paginator.page.subscribe((e: PageEvent) => {
+            this.pageIndex = e.pageIndex;
+            this.urlState.setPage(e.pageIndex);
             this.reload();
         });
 
-        this.sort.sortChange.subscribe(() => {
-            this.paginator.pageIndex = 0;
+        this.sort.sortChange.subscribe((sort: Sort) => {
+            this.resetToFirstPage();
             this.selectionClear();
+            this.urlState.setSort(sort, 'created_at', 'desc');
             this.reload();
         });
+    }
+
+    private resetToFirstPage() {
+        this.pageIndex = 0;
+        this.paginator.pageIndex = 0;
+        this.urlState.setPage(0);
     }
 
     reload() {
@@ -146,6 +159,10 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     ngOnInit() {
+        const sort = this.urlState.getSort('created_at', 'desc');
+        this.initialSort = sort;
+        this.pageIndex = this.urlState.getPage();
+        this.showGenerated = this.urlState.getShown('generated', this.showGenerated);
         this.initSearchAndGetExports();
         this.getUserData();
         this.checkAuthorization();
@@ -174,11 +191,17 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                     this.displayedColumns.push('delete');
                 }
                 this.displayedColumns.push('share');
-                if (localStorage.getItem('data.exports.search') !== null) {
+                // the searchbar takes a search from the URL itself, so the stored one only applies without it
+                if (localStorage.getItem('data.exports.search') !== null && this.urlState.get('search') === null) {
                     this.initSearchText = localStorage.getItem('data.exports.search') as string;
                 }
                 if (localStorage.getItem('data.exports.searchField') !== null) {
                     this.searchField = localStorage.getItem('data.exports.searchField') as string;
+                }
+                // the field ends up in the request's query string, so only one of the offered fields is taken
+                const urlSearchField = this.urlState.get('search-field');
+                if (urlSearchField !== null && this.searchFields.some((field) => field[1] === urlSearchField)) {
+                    this.searchField = urlSearchField;
                 }
                 return null;
             }),
@@ -235,6 +258,9 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     searchFieldChanged() {
         this.ready = false;
         localStorage.setItem('data.exports.searchField', String(this.searchField));
+        // written explicitly: the default is the stored value, which a removed parameter would not restore
+        this.urlState.set({ 'search-field': String(this.searchField) });
+        this.resetToFirstPage();
         this.getExports().subscribe(_ => this.ready = true);
     }
 
@@ -242,6 +268,9 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
         this.ready = false;
         this.showGenerated = !this.showGenerated;
         localStorage.setItem('data.exports.showGenerated', String(this.showGenerated));
+        // written explicitly for the same reason as the search field
+        this.urlState.set({ generated: this.showGenerated ? 'show' : 'hide' });
+        this.resetToFirstPage();
         this.getExports().subscribe(_ => this.ready = true);
     }
 
@@ -307,9 +336,15 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearchAndGetExports() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
             localStorage.setItem('data.exports.search', this.searchText);
+            if (!opening) {
+                this.resetToFirstPage();
+            }
+            opening = false;
             this.reload();
         });
     }
@@ -369,7 +404,7 @@ export class ExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         } else {
                             this.snackBar.open(outcome.message, 'close', { duration: outcome.pending ? undefined : 2000 });
                         }
-                        this.paginator.pageIndex = 0;
+                        this.resetToFirstPage();
                         this.selectionClear();
                         this.getExports().subscribe(_ => this.ready = true);
                     });

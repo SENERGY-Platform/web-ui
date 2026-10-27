@@ -35,6 +35,7 @@ import { DeviceTypeService as PlatformDeviceTypeService } from '../../metadata/d
 import { DeviceTypeModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import { ExportService } from '../../exports/shared/export.service';
 import { ExportModel } from '../../exports/shared/export.model';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import {
     Asset,
     ASSET_KINDS,
@@ -271,6 +272,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
      * code (onEffectsOpenInEditor) to jump back to the Editor tab.
      */
     selectedTabIndex = 0;
+    /** The tab from the URL, switched to once the first load has rendered the tab group -- see load(). */
+    private tabToRestore = 0;
     /** The Effects tab's last GET .../effects answer; undefined until loadEffects's request comes back. */
     effectsResult: EffectsResult | undefined;
     /** Set once loadEffects has been called, so onTabChange only fires it on the tab's first opening. Cleared by every load() (fresh, discard, save's reload, 409's reload): the document may have changed, so the graph is stale until refetched -- see load(). */
@@ -303,10 +306,12 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
         private platformDeviceTypeService: PlatformDeviceTypeService,
         private exportService: ExportService,
         private changeDetectorRef: ChangeDetectorRef,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit(): void {
         this.id = this.route.snapshot.paramMap.get('id') || '';
+        this.tabToRestore = this.urlState.getInt('tab', 0);
         this.environmentsService.listDatasets().subscribe((datasets) => (this.datasets = datasets));
         this.exportService.getAvailableExports().subscribe((exports) => (this.exports = exports));
         this.environmentsService.listDeviceTypes().subscribe((types) => {
@@ -323,6 +328,7 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
 
     /** Bound to the tab group's (selectedTabChange): polling only ever runs while its tab is actually visible. selectedTabIndex itself is kept in step by [(selectedIndex)] in the template, not written here -- see that field's comment. */
     onTabChange(event: MatTabChangeEvent): void {
+        this.urlState.set({ tab: event.index > 0 ? event.index : null });
         this.effectsTabActive = event.tab.textLabel === 'Effects';
         if (event.tab.textLabel === 'Live state') {
             this.startLiveStatePolling();
@@ -438,6 +444,8 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             if (!env) {
                 this.snackBar.open('Error while loading the environment!', 'close', { panelClass: 'snack-bar-error' });
                 this.dataReady = true;
+                // the tab belongs to the opening, a later reload must not jump to it
+                this.tabToRestore = 0;
                 return;
             }
             this.normalizeEnvironment(env);
@@ -452,6 +460,14 @@ export class EnvironmentDetailComponent implements OnInit, OnDestroy {
             this.dataReady = true;
             if (this.effectsTabActive) {
                 this.loadEffects();
+            }
+            if (this.tabToRestore > 0) {
+                const tab = this.tabToRestore;
+                this.tabToRestore = 0;
+                // The tab group is created on the first tab and emits no selectedTabChange for its initial
+                // index; switching once it has rendered does, and that starts what the tab needs (polling,
+                // history, effect graph) in onTabChange.
+                setTimeout(() => (this.selectedTabIndex = tab));
             }
         });
     }

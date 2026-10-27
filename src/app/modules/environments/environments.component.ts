@@ -30,6 +30,7 @@ import { EnvironmentsCreateDialogComponent } from './dialogs/environments-create
 import { EnvironmentsShareDialogComponent } from './dialogs/environments-share-dialog.component';
 import { PermissionsService } from '../permissions/shared/permissions.service';
 import { AuthorizationService } from '../../core/services/authorization.service';
+import { UrlStateService } from '../../core/services/url-state.service';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
 export interface EnvironmentRow {
@@ -70,6 +71,7 @@ export class EnvironmentsComponent implements OnInit {
         private router: Router,
         private permissionsService: PermissionsService,
         private authorizationService: AuthorizationService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit(): void {
@@ -79,6 +81,7 @@ export class EnvironmentsComponent implements OnInit {
             this.displayedColumns.push('share');
             this.displayedColumns.push('delete');
         }
+        this.showAllEnvironments = this.userIsAdmin && this.urlState.getBoolean('all', false);
         this.reload();
     }
 
@@ -97,6 +100,7 @@ export class EnvironmentsComponent implements OnInit {
     /** Admin-only toggle (see the header's mat-slide-toggle): reloads with or without other users' environments. */
     toggleAllEnvironments(showAll: boolean): void {
         this.showAllEnvironments = showAll;
+        this.urlState.set({ all: showAll });
         this.reload();
     }
 

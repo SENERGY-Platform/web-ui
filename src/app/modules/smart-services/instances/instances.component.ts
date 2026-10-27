@@ -38,6 +38,7 @@ import { environment } from 'src/environments/environment';
 import { smartServiceLogsUrl } from './shared/opensearch';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { SmartServiceChangedResource } from '../releases/shared/release.model';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
 
 
 @Component({
@@ -94,9 +95,13 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         private instanceDialogService: SmartServiceInstanceDialogService,
         private authorizationService: AuthorizationService,
         private releasesService: SmartServiceReleasesService,
+        private urlState: UrlStateService,
     ) { }
     ngOnInit(): void {
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
         // the log lines are only of use to someone who reads them, and the column is dead weight for
         // everyone else - it also stays hidden while the deployment has not said where OpenSearch is
         if (this.authorizationService.userIsDeveloper() && environment.openSearchDashboardsUrl && environment.openSearchSmartServiceIndexId) {
@@ -362,6 +367,11 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         }
         if (this.pageIndex > 0) {
             queryParams['page'] = this.pageIndex;
+        }
+        // this writes every parameter, so the sort is written along with them
+        if (this.sortBy !== 'name' || this.sortDirection !== 'asc') {
+            queryParams['sort'] = this.sortBy;
+            queryParams['dir'] = this.sortDirection || 'none';
         }
         if (this.tableScrollTop > 0) {
             queryParams['scroll_top'] = this.tableScrollTop;

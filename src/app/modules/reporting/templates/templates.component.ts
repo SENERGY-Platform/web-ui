@@ -16,7 +16,7 @@
 
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
 import { TemplateListResponseModel, TemplateModel } from '../shared/reporting.model';
@@ -26,6 +26,7 @@ import { saveAs } from 'file-saver';
 import { Observable, Subscription, concatMap, map } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import { reportFileName } from '../shared/report-file-name';
 
 @Component({
@@ -41,6 +42,9 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
     templatesDataSource = new MatTableDataSource<TemplateModel>();
     displayedColumns: string[] = ['id', 'name', 'type'];
     pageSize = this.preferencesService.pageSize;
+    pageIndex = 0;
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
     ready = false;
     downloading = false;
 
@@ -52,9 +56,14 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
         private reportingService: ReportingService,
         private searchbarService: SearchbarService,
         private preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) {}
 
     ngOnInit() {
+        const sort = this.urlState.getSort('name', 'asc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
         if (this.reportingService.userHasCreateReportAuthorization()) {
             this.displayedColumns.push('preview');
             this.displayedColumns.push('create');
@@ -69,15 +78,25 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.paginator === undefined) {
             return;
         }
+        this.paginator.pageIndex = this.pageIndex;
         this.templatesDataSource.paginator = this.paginator;
         this.paginator.page.subscribe((event) => {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
+            this.pageIndex = event.pageIndex;
+            this.urlState.setPage(event.pageIndex);
         });
     }
 
     ngOnDestroy() {
         this.searchSub?.unsubscribe();
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active;
+        this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'name', 'asc');
+        this.paginator.firstPage();
     }
 
     downloadPreview($event: Event, template: TemplateModel) {
@@ -92,9 +111,18 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.pipe(
             concatMap((searchText: string) => this.reload().pipe(map(() => searchText))),
-        ).subscribe((searchText: string) => this.filter(searchText));
+        ).subscribe((searchText: string) => {
+            if (!opening) {
+                this.pageIndex = 0;
+                this.urlState.setPage(0);
+            }
+            opening = false;
+            this.filter(searchText);
+        });
     }
 
     private reload(): Observable<unknown> {
@@ -107,6 +135,10 @@ export class TemplatesComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private filter(searchText: string) {
         const search = searchText.toLowerCase();
+        if (this.paginator !== undefined) {
+            // set before the data, the data source pages from the index it has when the data arrives
+            this.paginator.pageIndex = this.pageIndex;
+        }
         this.templatesDataSource.data = this.templates.filter((template: TemplateModel) =>
             search === ''
             || (template.name || '').toLowerCase().indexOf(search) !== -1

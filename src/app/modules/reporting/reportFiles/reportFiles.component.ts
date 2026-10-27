@@ -16,7 +16,7 @@
 
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, Sort, SortDirection } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { Subject, takeUntil } from 'rxjs';
 import { UtilService } from 'src/app/core/services/util.service';
@@ -32,6 +32,7 @@ import { ActivatedRoute } from '@angular/router';
 import { saveAs } from 'file-saver';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import { reportFileName } from '../shared/report-file-name';
 
 @Component({
@@ -49,6 +50,9 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     reportsDataSource = new MatTableDataSource<ReportFileModel>();
     displayedColumns: string[] = ['id', 'type', 'createdAt', 'download'];
     pageSize = this.preferencesService.pageSize;
+    pageIndex = 0;
+    sortBy = 'createdAt';
+    sortDirection: SortDirection = 'desc';
     ready = false;
     downloading = false;
     reportJob: ReportJobModel | null = null;
@@ -62,11 +66,16 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
         private reportingService: ReportingService,
         private dialogsService: DialogsService,
         private preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) {
         this.reportId = this.route.snapshot.paramMap.get('reportId');
     }
 
     ngOnInit() {
+        const sort = this.urlState.getSort('createdAt', 'desc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
         if (this.reportingService.userHasDeleteReportFileAuthorization()) {
             this.displayedColumns.push('delete');
         }
@@ -102,11 +111,21 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.paginator === undefined) {
             return;
         }
+        this.paginator.pageIndex = this.pageIndex;
         this.reportsDataSource.paginator = this.paginator;
         this.paginator.page.subscribe((event) => {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
+            this.pageIndex = event.pageIndex;
+            this.urlState.setPage(event.pageIndex);
         });
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active;
+        this.sortDirection = $event.direction;
+        this.urlState.setSort($event, 'createdAt', 'desc');
+        this.paginator.firstPage();
     }
 
     download($event: Event, reportFile: ReportFileModel) {
@@ -153,6 +172,10 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reportingService.getReport(reportId).subscribe((resp: ReportResponseModel | null) => {
             if (resp !== null) {
                 this.report = resp.data;
+                if (this.paginator !== undefined) {
+                    // set before the data, the data source pages from the index it has when the data arrives
+                    this.paginator.pageIndex = this.pageIndex;
+                }
                 this.reportsDataSource.data = this.report.reportFiles || [];
             }
             this.ready = true;

@@ -15,7 +15,7 @@
  */
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, } from '@angular/core';
 import { ImportInstancesModel } from './shared/import-instances.model';
-import { Sort } from '@angular/material/sort';
+import { Sort, SortDirection } from '@angular/material/sort';
 import { ImportInstancesService } from './shared/import-instances.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
@@ -35,6 +35,7 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'senergy-import-instances',
@@ -59,6 +60,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
         private permissionsService: PermissionsService,
         private userService: AuthorizationService,
         private preferencesService: PreferencesService,
+        private urlState: UrlStateService,
     ) {}
 
     searchText = '';
@@ -68,7 +70,9 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     searchSub: Subscription = new Subscription();
     dataReady = false;
     sort = 'updated_at.desc';
+    initialSort!: { active: string; direction: SortDirection };
     offset = 0;
+    pageIndex = 0;
     excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
@@ -77,10 +81,26 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     userID = '';
     userRoles: string[] = [];
     instanceId: string | null = null;
+    private searchStarted = false;
 
     ngOnInit(): void {
+        this.initialSort = this.urlState.getSort('updated_at', 'desc');
+        this.sort = this.initialSort.active + '.' + this.initialSort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.offset = this.pageSize * this.pageIndex;
+        this.excludeGenerated = !this.urlState.getShown('generated', !this.excludeGenerated);
+        // the search subscription is set up once; a change of the instance id only reloads
         this.route.queryParamMap.subscribe(params => {
-            this.instanceId = params.get('id');
+            const instanceId = params.get('id');
+            if (this.searchStarted && instanceId === this.instanceId) {
+                return;
+            }
+            this.instanceId = instanceId;
+            if (this.searchStarted) {
+                this.reload();
+                return;
+            }
+            this.searchStarted = true;
             this.initSearch();
             this.getTotalNumberOfTypes();
         });
@@ -112,9 +132,12 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchSub = this.searchbarService.currentSearchText.subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.reload();
+            this.reload(opening);
+            opening = false;
         });
         this.checkAuthorization();
     }
@@ -124,6 +147,8 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
             this.preferencesService.pageSize = e.pageSize;
             this.pageSize = this.paginator.pageSize;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
+            this.pageIndex = this.paginator.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.selectionClear();
             this.load().subscribe({
                 next: () => {
@@ -187,6 +212,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
 
     matSortChange($event: Sort) {
         this.sort = $event.active + '.' + $event.direction;
+        this.urlState.setSort($event, 'updated_at', 'desc');
         this.reload();
     }
 
@@ -207,8 +233,12 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
             );
     }
 
-    reload() {
-        this.offset = 0;
+    reload(keepPage = false) {
+        if (!keepPage) {
+            this.offset = 0;
+            this.pageIndex = 0;
+            this.urlState.setPage(0);
+        }
         this.selectionClear();
         this.dataReady = false;
 
@@ -246,6 +276,8 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
     toggleExcludeGenerated() {
         this.excludeGenerated = !this.excludeGenerated;
         localStorage.setItem('import.instances.excludeGenerated', '' + this.excludeGenerated);
+        // written explicitly: the default is the stored value, which a removed parameter would not restore
+        this.urlState.set({ generated: this.excludeGenerated ? 'hide' : 'show' });
         this.reload();
     }
 
