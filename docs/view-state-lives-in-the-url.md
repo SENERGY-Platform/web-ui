@@ -50,8 +50,16 @@ key named after what they filter (`user`, `role`, `month`, `concept_id`).
   through `UrlStateService.set`. Replacing all parameters drops `search`, `sort` and `page`.
 - A server-paged paginator carries `senergyKeepPageInRange` (`core/directives/keep-page-in-range.directive.ts`): a
   page from the URL beyond the end of a list that has become shorter moves to the last page through a page event, so
-  the page's own handler loads it and writes `page`. It needs the list's total in `[length]` also for an empty page.
+  the page's own handler loads it and writes `page`. It needs the list's total in `[length]` also for an empty page,
+  and the total starts at 0: a placeholder length would move the page of the URL before the first answer. The list
+  stays hidden until it is loaded.
 - Client-side tables (`MatTableDataSource` with `.paginator`/`.sort`) restore the paginator's `pageIndex` once the
-  data is in, since the data source moves a paginator beyond the last page back to the last page.
+  data is in, since the data source moves a paginator beyond the last page back to the last page. That move emits no
+  page event, so the page clamps the index to the last page itself and writes it.
+- Tabs of one page that each carry a table (process monitor) keep their own sort and page. Tab content exists from the
+  start, so a shared binding would let a hidden table's keep-page-in-range reset the page of the visible one. Only the
+  selected tab reads and writes `sort`, `dir` and `page`, and its load reads the tab's own fields, since a table takes
+  new bindings only at the next change detection. A tab switch clears `search` in the URL and in the searchbar
+  (`[searchTextIn]`) together with the other keys.
 - Infinite-scroll lists have no page parameter. Their `senergy-sort` dropdown keeps `sort`/`dir` too: the page
   restores its sort attribute (value and order) and passes it as `[selectedValue]`.

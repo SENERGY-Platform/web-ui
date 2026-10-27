@@ -65,7 +65,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit, OnDestro
 
     searchText = '';
     pageSize = this.preferencesService.pageSize;
-    totalCount = 200;
+    totalCount = 0;
     selection = new SelectionModel<ImportInstancesModel>(true, []);
     searchSub: Subscription = new Subscription();
     dataReady = false;

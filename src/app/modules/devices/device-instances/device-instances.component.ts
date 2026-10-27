@@ -88,7 +88,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit, OnDestro
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     selection = new SelectionModel<DeviceInstanceModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     pageIndex = 0;
     offset = 0;
     ready = false;

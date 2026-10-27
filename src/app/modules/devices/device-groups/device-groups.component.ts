@@ -42,7 +42,7 @@ export class DeviceGroupsComponent implements OnInit, OnDestroy, AfterViewInit {
     displayedColumns = ['select', 'name', 'show'];
     pageSize = this.preferencesService.pageSize;
     selection = new SelectionModel<DeviceGroupModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     instances = [];
     dataSource = new MatTableDataSource<DeviceGroupModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

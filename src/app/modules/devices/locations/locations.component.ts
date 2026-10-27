@@ -41,7 +41,7 @@ export class LocationsComponent implements OnInit, OnDestroy, AfterViewInit {
     pageSize = this.preferencesService.pageSize;
     ready = false;
     instances = [];
-    totalCount = 200;
+    totalCount = 0;
     pageIndex = 0;
     offset = 0;
     dataSource = new MatTableDataSource<ExtendedLocationModel>();

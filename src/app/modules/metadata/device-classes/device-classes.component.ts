@@ -48,7 +48,7 @@ export class DeviceClassesComponent implements OnInit, OnDestroy, AfterViewInit 
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeDeviceClassModel>();
     selection = new SelectionModel<DeviceTypeDeviceClassModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userIsAdmin = false;
     searchText = '';

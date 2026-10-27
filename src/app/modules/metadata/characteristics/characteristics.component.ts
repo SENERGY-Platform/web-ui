@@ -48,7 +48,7 @@ export class CharacteristicsComponent implements OnInit, OnDestroy, AfterViewIni
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeCharacteristicsModel>();
     selection = new SelectionModel<DeviceTypeCharacteristicsModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     routerConcept: Pick<ConceptsPermSearchModel, 'name' | 'characteristic_ids'> | null = null;

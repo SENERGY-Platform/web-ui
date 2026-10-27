@@ -19,7 +19,7 @@
         <mat-tab label="Running">
             <div class="layout-margin">
                 <div fxLayout="row" class="search-button-container">
-                    <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
+                    <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
                     <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment"
                         matTooltip="Deployment Environment" color="accent">
                         <mat-icon>device_hub</mat-icon>
@@ -51,7 +51,7 @@
                         [hidden]="animation || isLoadingResultsRunning || totalCountRunning === 0">
                         <div class="table-container">
                             <table #sortRunning="matSort" mat-table [dataSource]="dataSourceRunning" matSort
-                                [matSortActive]="sortActive" [matSortDirection]="sortDirection" matSortDisableClear>
+                                [matSortActive]="runningView.sortActive" [matSortDirection]="runningView.sortDirection" matSortDisableClear>
                                 <ng-container matColumnDef="select">
                                     <th mat-header-cell *matHeaderCellDef>
                                         <mat-checkbox (change)="$event ? masterToggleRunning() : null"
@@ -126,7 +126,7 @@
                             </table>
                         </div>
                         <mat-paginator #paginatorRunning senergyKeepPageInRange [length]="totalCountRunning" [pageSize]="preferencesService.pageSize"
-                            [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="paginatorRunningPage($event)" showFirstLastButtons></mat-paginator>
+                            [pageIndex]="runningView.pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="paginatorRunningPage($event)" showFirstLastButtons></mat-paginator>
                     </div>
                     <div *ngIf="!animation && !isLoadingResultsRunning && totalCountRunning === 0">No entries found.
                     </div>
@@ -136,7 +136,7 @@
         <mat-tab label="Finished">
             <div class="layout-margin">
                 <div fxLayout="row" class="search-button-container">
-                    <senergy-searchbar fxFlex [disable]="selectedDeployment !== null"></senergy-searchbar>
+                    <senergy-searchbar fxFlex [searchTextIn]="searchText" [disable]="selectedDeployment !== null"></senergy-searchbar>
                     <button mat-icon-button [matMenuTriggerFor]="deploymentEnvironment"
                         matTooltip="Deployment Environment" color="accent">
                         <mat-icon>device_hub</mat-icon>
@@ -167,7 +167,7 @@
                         [hidden]="animation || isLoadingResultsFinished || totalCountFinished === 0">
                         <div class="table-container">
                             <table #sortFinished="matSort" mat-table [dataSource]="dataSourceFinished" matSort
-                                [matSortActive]="sortActive" [matSortDirection]="sortDirection" matSortDisableClear>
+                                [matSortActive]="finishedView.sortActive" [matSortDirection]="finishedView.sortDirection" matSortDisableClear>
 
                                 <ng-container matColumnDef="select">
                                     <th mat-header-cell *matHeaderCellDef>
@@ -273,7 +273,7 @@
                             </table>
                         </div>
                         <mat-paginator #paginatorFinished senergyKeepPageInRange [length]="totalCountFinished" [pageSize]="preferencesService.pageSize"
-                            [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons>
+                            [pageIndex]="finishedView.pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons>
                         </mat-paginator>
                     </div>
                     <div *ngIf="!animation && !isLoadingResultsFinished && totalCountFinished === 0">No entries found.

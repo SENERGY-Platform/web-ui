@@ -63,7 +63,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     pageSize = this.preferencesService.pageSize;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     offset = 0;
     pageIndex = 0;
     sortBy = 'name';
@@ -137,7 +137,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
             this.pageSize = this.paginator.pageSize;
             this.pageIndex = this.paginator.pageIndex;
             this.offset = this.paginator.pageSize * this.paginator.pageIndex;
-            this.updateQueryParams();
+            // replaced, so a page keepPageInRange moved into range leaves no entry that Back would return to
+            this.updateQueryParams(true);
             this.loadInstances();
         });
 
@@ -399,18 +400,14 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     clearQueryParams(): void {
-        this.router.navigate([], {
-            relativeTo: this.activatedRoute,
-            queryParams: {},
-            queryParamsHandling: ''
-        });
         this.instanceId = undefined;
         this.expandedInstance = undefined;
         this.expandedInstanceId = undefined;
         this.tableScrollTop = 0;
-        // the navigation resets the page only after this load has started
         this.pageIndex = 0;
         this.offset = 0;
+        // writes the release and the sort the list keeps, so the URL matches what the load below shows
+        this.updateQueryParams();
         if (this.tableContainer?.nativeElement) {
             this.tableContainer.nativeElement.scrollTop = 0;
         }

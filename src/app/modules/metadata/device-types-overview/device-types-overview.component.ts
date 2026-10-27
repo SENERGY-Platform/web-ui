@@ -44,7 +44,7 @@ export class DeviceTypesOverviewComponent implements OnInit, OnDestroy, AfterVie
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     dataSource = new MatTableDataSource<DeviceTypeModel>();
     selection = new SelectionModel<DeviceTypeModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     offset = 0;
     searchControl = new UntypedFormControl('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;

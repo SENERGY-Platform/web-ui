@@ -46,7 +46,7 @@ export class ConceptsComponent implements OnInit, OnDestroy, AfterViewInit {
     ready = false;
     dataSource = new MatTableDataSource(this.concepts);
     selection = new SelectionModel<DeviceTypeConceptModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     offset = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     private searchSub: Subscription = new Subscription();

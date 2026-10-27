@@ -59,6 +59,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     sortDirection: SortDirection = 'desc';
 
     private searchSub: Subscription = new Subscription();
+    private totalSub: Subscription = new Subscription();
 
     constructor(
         private processIoService: ProcessIoService,
@@ -87,6 +88,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
 
     ngOnDestroy() {
         this.searchSub.unsubscribe();
+        this.totalSub.unsubscribe();
     }
 
     ngOnInit() {
@@ -144,7 +146,9 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnDestroy, On
     }
 
     updateTotal(){
-        this.processIoService.countVariables(this.keyRegex).subscribe(value => {
+        // only the count of the latest search counts, however late an earlier one answers
+        this.totalSub.unsubscribe();
+        this.totalSub = this.processIoService.countVariables(this.keyRegex).subscribe(value => {
             if (value) {
                 this.totalCount = value.count;
             }

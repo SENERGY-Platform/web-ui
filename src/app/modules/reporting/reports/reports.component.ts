@@ -156,15 +156,22 @@ export class ReportsComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private filter(searchText: string) {
         const search = searchText.toLowerCase();
-        if (this.paginator !== undefined) {
-            // set before the data, the data source pages from the index it has when the data arrives
-            this.paginator.pageIndex = this.pageIndex;
-        }
-        this.reportsDataSource.data = this.reports.filter((report: ReportModel) =>
+        const rows = this.reports.filter((report: ReportModel) =>
             search === ''
             || (report.name || '').toLowerCase().indexOf(search) !== -1
             || (report.id || '').toLowerCase().indexOf(search) !== -1
             || (report.templateName || '').toLowerCase().indexOf(search) !== -1
         );
+        // the data source moves a page beyond the end back without a page event, so the page and the URL follow here
+        const lastPage = Math.max(0, Math.ceil(rows.length / this.pageSize) - 1);
+        if (this.pageIndex > lastPage) {
+            this.pageIndex = lastPage;
+            this.urlState.setPage(lastPage);
+        }
+        if (this.paginator !== undefined) {
+            // set before the data, the data source pages from the index it has when the data arrives
+            this.paginator.pageIndex = this.pageIndex;
+        }
+        this.reportsDataSource.data = rows;
     }
 }

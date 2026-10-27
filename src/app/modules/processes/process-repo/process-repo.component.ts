@@ -222,8 +222,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
 
     setIndex(event: number) {
         this.activeIndex = event;
-        // the tab starts from the default sort below, so the URL drops the previous one
-        this.urlState.set({ tab: event > 0 ? event : null, sort: null, dir: null });
+        // the tab starts without a search and on the default sort below, so the URL drops the previous ones
+        this.urlState.set({ tab: event > 0 ? event : null, search: null, sort: null, dir: null });
         this.animationDone = false;
         this.searchText = '';
         this.sortAttributes = JSON.parse(JSON.stringify(sortingAttributes)); // create copy of object;

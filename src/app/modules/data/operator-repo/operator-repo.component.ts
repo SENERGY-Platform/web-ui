@@ -144,12 +144,10 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                 }),
             )
             .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
-                if (resp.operators.length > 0) {
-                    this.operators = resp.operators;
-                    this.operatorsDataSource.data = this.operators;
-
-                    this.totalCount = resp.totalCount;
-                }
+                // also for an empty page, so a page beyond the end is noticed (KeepPageInRangeDirective)
+                this.operators = resp.operators;
+                this.operatorsDataSource.data = this.operators;
+                this.totalCount = resp.totalCount;
                 this.loadOperatorPermissions();
                 this.ready = true;
             });

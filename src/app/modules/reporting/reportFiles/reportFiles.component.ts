@@ -172,11 +172,18 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reportingService.getReport(reportId).subscribe((resp: ReportResponseModel | null) => {
             if (resp !== null) {
                 this.report = resp.data;
+                const rows = this.report.reportFiles || [];
+                // the data source moves a page beyond the end back without a page event, so the page and the URL follow here
+                const lastPage = Math.max(0, Math.ceil(rows.length / this.pageSize) - 1);
+                if (this.pageIndex > lastPage) {
+                    this.pageIndex = lastPage;
+                    this.urlState.setPage(lastPage);
+                }
                 if (this.paginator !== undefined) {
                     // set before the data, the data source pages from the index it has when the data arrives
                     this.paginator.pageIndex = this.pageIndex;
                 }
-                this.reportsDataSource.data = this.report.reportFiles || [];
+                this.reportsDataSource.data = rows;
             }
             this.ready = true;
         });

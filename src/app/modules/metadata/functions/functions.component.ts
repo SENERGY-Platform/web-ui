@@ -52,7 +52,7 @@ export class FunctionsComponent implements OnInit, OnDestroy, AfterViewInit {
     dataSource = new MatTableDataSource<DeviceTypeFunctionModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     selection = new SelectionModel<DeviceTypeFunctionModel>(true, []);
-    totalCount = 200;
+    totalCount = 0;
     offset = 0;
     ready = false;
     userIsAdmin = false;

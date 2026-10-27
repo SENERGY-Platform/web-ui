@@ -50,7 +50,7 @@ export class NetworksComponent implements OnInit, OnDestroy, AfterViewInit {
     sortDirection: SortDirection = 'asc';
     selection = new SelectionModel<HubModel>(true, []);
     searchText = '';
-    totalCount = 200;
+    totalCount = 0;
     pageIndex = 0;
     offset = 0;
     ready = false;

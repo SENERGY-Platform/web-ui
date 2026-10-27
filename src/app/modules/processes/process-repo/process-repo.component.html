@@ -22,7 +22,7 @@
         <mat-tab label="{{tab}}" *ngFor="let tab of ['All', 'Own', 'Shared']">
             <div class="layout-margin">
                 <div class="search-button-container">
-                    <senergy-searchbar fxFlex></senergy-searchbar>
+                    <senergy-searchbar fxFlex [searchTextIn]="searchText"></senergy-searchbar>
                     <button matTooltip="Delete" mat-icon-button color="accent" class="suffix-del"
                         (click)="deleteMultipleItems()" *ngIf="selectedItems.length > 0 && ready">
                         <mat-icon matBadge="{{selectedItems.length}}" matBadgeColor="warn" aria-hidden="false">delete</mat-icon>

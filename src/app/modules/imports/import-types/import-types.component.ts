@@ -50,7 +50,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit, OnDestroy {
     sort = 'name.asc';
     searchText = '';
     searchSub: Subscription = new Subscription();
-    totalCount = 200;
+    totalCount = 0;
     offset = 0;
     pageIndex = 0;
     initialSort!: { active: string; direction: SortDirection };
