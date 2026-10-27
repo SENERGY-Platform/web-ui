@@ -20,6 +20,8 @@ import {CoreModule} from '../../../core/core.module';
 import {Router, RouterModule} from '@angular/router';
 import {ReactiveFormsModule} from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -114,6 +116,7 @@ describe('ImportTypesComponent', () => {
                 { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
                 { provide: SearchbarService, useValue: searchbarSpy },
                 { provide: Router, useValue: routerSpy },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
                 { provide: MatDialog, useValue: dialogSpy },
                 { provide: CostService, useValue: costServiceSpy },
                 { provide: PermissionsService, useValue: permissionsServiceSpy },

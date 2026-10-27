@@ -28,6 +28,8 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { MatPaginator } from '@angular/material/paginator';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -51,7 +53,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './networks.component.html',
     styleUrls: ['./networks.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIcon, MatTooltip, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIcon, MatTooltip, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class NetworksComponent implements OnInit, AfterViewInit {
     private networksService = inject(NetworksService);
@@ -65,14 +67,21 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     private permissionsDialogService = inject(PermissionsDialogService);
     private permissionsService = inject(PermissionsService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = [];
     dataSource = new MatTableDataSource<ExtendedHubModel>();
-    list = new PagedListState(this.preferencesService, () => this.getNetworks(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.getNetworks(), {
+        sortBy: 'name',
+        sortDirection: 'asc',
+        remap: { connection: 'annotations.connected', number_devices: 'device_local_ids' },
+        urlState: this.urlState,
+    });
     listSelection = new ListSelection<ExtendedHubModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     searchText = '';
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     ready = false;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     userHasUpdateAuthorization = false;
@@ -130,7 +139,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
 
     matSortChange($event: Sort) {
         // TODO Ingo suche connection
-        this.list.sortChanged($event, { connection: 'annotations.connected', number_devices: 'device_local_ids' });
+        this.list.sortChanged($event);
         this.reload();
     }
 

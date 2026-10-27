@@ -72,7 +72,7 @@
 
   <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
     <div class="table-container">
-      <table mat-table [dataSource]="dataSource" matSort matSortActive="deploymentTime" matSortDirection="desc" matSortDisableClear
+      <table mat-table [dataSource]="dataSource" matSort [matSortActive]="sortBy" [matSortDirection]="sortOrder" matSortDisableClear
         (matSortChange)="matSortChange($event)">
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef class="select-column">

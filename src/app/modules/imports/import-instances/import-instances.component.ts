@@ -50,13 +50,15 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 
 @Component({
     selector: 'senergy-import-instances',
     templateUrl: './import-instances.component.html',
     styleUrls: ['./import-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, MatChipListbox, MatChipOption, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, MatChipListbox, MatChipOption, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, DatePipe]
 })
 export class ImportInstancesComponent implements OnInit, AfterViewInit {
     private importInstancesService = inject(ImportInstancesService);
@@ -72,20 +74,22 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     private permissionsService = inject(PermissionsService);
     private userService = inject(AuthorizationService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = [];
     dataSource = new MatTableDataSource<ImportInstancesModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
 
     searchText = '';
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     listSelection = new ListSelection<ImportInstancesModel>(
         () => this.dataSource.connect().value,
         { selectable: (row) => this.userHasAdministratePermission(row.id || '') },
     );
     selection = this.listSelection.model;
     dataReady = false;
-    list = new PagedListState(this.preferencesService, () => this.loadList(), { sortBy: 'updated_at', sortDirection: 'desc' });
+    list = new PagedListState(this.preferencesService, () => this.loadList(), { sortBy: 'updated_at', sortDirection: 'desc', urlState: this.urlState });
     excludeGenerated = localStorage.getItem('import.instances.excludeGenerated') === 'true';
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
@@ -98,6 +102,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     private paramsSeen = false;
 
     ngOnInit(): void {
+        this.excludeGenerated = !this.urlState.getShown('generated', !this.excludeGenerated);
         this.checkAuthorization();
         this.initSearch();
         // The first emission only reads the filter; the search starts the first load.
@@ -277,6 +282,8 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
         }
         this.excludeGenerated = exclude;
         localStorage.setItem('import.instances.excludeGenerated', '' + this.excludeGenerated);
+        // written explicitly: the default is the stored value, which a removed parameter would not restore
+        this.urlState.set({ generated: exclude ? 'hide' : 'show', page: null });
         this.reload();
     }
 

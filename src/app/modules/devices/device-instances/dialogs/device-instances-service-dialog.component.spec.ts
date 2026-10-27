@@ -26,7 +26,9 @@ import { AuthorizationService } from '../../../../core/services/authorization.se
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { ExportDataService } from '../../../../widgets/shared/export-data.service';
 import { DeviceTypeModel, DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { DeviceInstanceModel } from '../shared/device-instances.model';
+import { By } from '@angular/platform-browser';
+import { MatTooltip } from '@angular/material/tooltip';
+import { Attribute, DeviceInstanceModel } from '../shared/device-instances.model';
 import { DeviceInstancesService } from '../shared/device-instances.service';
 import { DeviceInstancesServiceDialogComponent, formatValue, ValueMeta } from './device-instances-service-dialog.component';
 
@@ -60,7 +62,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         ({ hasAspect, aspectName, characteristicName, functionName, isTimestamp });
     const defaultMeta = [[meta(true, 'Energy', 'kWh'), meta(false)], [meta(false)]];
 
-    function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues; meta?: ValueMeta[][]; descriptions?: string[][]; developer?: boolean } = {}) {
+    function create(options: { history?: boolean; canEdit?: boolean; elements?: typeof lastValueElements; counts?: number[]; values?: typeof lastValues; meta?: ValueMeta[][]; descriptions?: string[][]; developer?: boolean; attributes?: Attribute[]; nimbuses?: DeviceInstanceModel[] } = {}) {
         exportData = createSpyFromClass(ExportDataService);
         instances = createSpyFromClass(DeviceInstancesService);
         authorization = createSpyFromClass(AuthorizationService);
@@ -72,6 +74,8 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         instances.userHasReadAuthorizationConnectionLog.and.returnValue(options.history ?? true);
         instances.getDeviceHistoryV2.and.returnValue(of({ states: [{ time: '2026-03-01T08:00:00Z', connected: true }] } as never));
         instances.convertToShortId.and.returnValue('short');
+        instances.getDeviceInstance.and.returnValue(of({ ...device, attributes: options.attributes ?? [] }));
+        instances.getDeviceListByIds.and.returnValue(of(options.nimbuses ?? []));
         authorization.userIsDeveloper.and.returnValue(options.developer ?? true);
         authorization.getToken.and.resolveTo('Bearer tok');
 
@@ -113,12 +117,14 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         });
     });
 
-    it('makes exactly the three requests of the dialog when it opens, and no download request', () => {
+    it('makes exactly the four requests of the dialog when it opens, and no download request', () => {
         create();
 
         expect(exportData.getLastValuesTimescale).toHaveBeenCalledOnceWith(lastValueElements);
         expect(exportData.getTimescaleDataAvailability).toHaveBeenCalledOnceWith(device.id);
         expect(instances.getDeviceHistoryV2).toHaveBeenCalledOnceWith({ id: device.id, range: '168h' });
+        // the receivers of a wM-Bus meter come from the attributes, read anew since every telegram changes them
+        expect(instances.getDeviceInstance).toHaveBeenCalledOnceWith(device.id);
         expect(fetchSpy).not.toHaveBeenCalled();
     });
 
@@ -284,7 +290,9 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         airLike();
         const el = fixture.nativeElement as HTMLElement;
 
-        expect(el.querySelector('.values-block h3')?.textContent).toContain('01.03.2026');
+        const hint = fixture.debugElement.query(By.css('.values-block h3 .hint'));
+        expect(hint.nativeElement.textContent).toContain(' ago');
+        expect(hint.injector.get(MatTooltip).message).toContain('01.03.2026');
         expect(el.querySelectorAll('.tile-time').length).toBe(0);
     });
 
@@ -434,7 +442,10 @@ describe('DeviceInstancesServiceDialogComponent', () => {
 
         expect(component.serviceTables[0].time).toBe('2026-03-01T10:00:00Z');
         expect(component.serviceTables[1].time).toBe('2026-03-01T09:00:00Z');
-        expect(fixture.nativeElement.querySelector('.service-title').textContent).toContain('01.03.2026');
+        const updated = fixture.debugElement.query(By.css('.service-title .muted:last-child'));
+        expect(updated.nativeElement.textContent).toContain('Updated ');
+        expect(updated.nativeElement.textContent).toContain(' ago');
+        expect(updated.injector.get(MatTooltip).message).toContain('01.03.2026');
     });
 
     it('keeps the full path as the tooltip source of a row', () => {
@@ -546,5 +557,72 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         expect(body.serviceId).toBe('urn:service:b');
         expect(body.columns).toEqual([{ name: 'state' }]);
         expect(body.groupTime).toBeUndefined();
+    });
+
+    describe('receivers of a wM-Bus meter', () => {
+        const nimbusA = 'urn:infai:ses:device:nimbus-a';
+        const nimbusB = 'urn:infai:ses:device:nimbus-b';
+        const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
+        const receiverAttributes = () => [
+            { key: 'wmbus/last_seen/' + nimbusB, value: ago(3 * 24 * 3600 * 1000), origin: nimbusB },
+            { key: 'wmbus/last_seen/' + nimbusA, value: ago(12 * 60 * 1000), origin: nimbusA },
+        ];
+        const receiverRows = (): string[] => Array.from(fixture.nativeElement.querySelectorAll('table.receivers tr'))
+            .map((tr) => Array.from((tr as HTMLTableRowElement).cells).map((td) => td.textContent!.trim()).join(' '));
+
+        it('lists each receiving nimbus by name, most recent first, and an unreadable one by its id', () => {
+            create({ attributes: receiverAttributes(), nimbuses: [{ id: nimbusA, name: 'nimbus-a', display_name: 'Nimbus A' } as DeviceInstanceModel] });
+            fixture.detectChanges();
+
+            expect(instances.getDeviceListByIds).toHaveBeenCalledOnceWith([nimbusA, nimbusB]);
+            expect(receiverRows()).toEqual(['Nimbus A 12 minutes ago', nimbusB + ' 3 days ago']);
+        });
+
+        it('counts the seconds of a message that just came in', () => {
+            create();
+
+            expect(component.timeAgo(new Date(Date.now() - 3000))).toBe('3 seconds ago');
+            expect(component.timeAgo(new Date(Date.now() + 5000))).toBe('a few seconds ago');
+        });
+
+        it('keeps the relative times until the next refresh', () => {
+            jasmine.clock().install();
+            try {
+                const time = new Date('2026-10-27T10:00:00Z');
+                jasmine.clock().mockDate(new Date(time.valueOf() + 12 * 60 * 1000));
+                create();
+
+                jasmine.clock().mockDate(new Date(time.valueOf() + 17 * 60 * 1000));
+                expect(component.timeAgo(time)).toBe('12 minutes ago');
+
+                component.refresh();
+                expect(component.timeAgo(time)).toBe('17 minutes ago');
+            } finally {
+                jasmine.clock().uninstall();
+            }
+        });
+
+        it('marks the nimbuses that received the last message within the tolerance', () => {
+            create({ attributes: receiverAttributes(), values: [{ time: ago(12 * 60 * 1000 - 110 * 1000), value: 1 }, { time: null as never, value: null }, { time: null as never, value: null }] });
+            fixture.detectChanges();
+
+            expect(component.receivers.map((r) => component.receivedLastMessage(r))).toEqual([true, false]);
+            const dots = Array.from(fixture.nativeElement.querySelectorAll('table.receivers .status-chip')) as HTMLElement[];
+            expect(dots.map((d) => d.classList.contains('online') ? 'online' : d.classList.contains('failed') ? 'failed' : 'open')).toEqual(['online', 'failed']);
+        });
+
+        it('leaves the state open while the last message is unknown', () => {
+            create({ attributes: receiverAttributes(), values: [{ time: null as never, value: null }, { time: null as never, value: null }, { time: null as never, value: null }] });
+
+            expect(component.receivers.map((r) => component.receivedLastMessage(r))).toEqual([undefined, undefined]);
+        });
+
+        it('looks up no nimbus and shows no receivers for a device that no nimbus has received', () => {
+            create({ attributes: [{ key: 'wmbus/key', value: '0102', origin: '' }] });
+
+            // an empty id list would list every device of the user
+            expect(instances.getDeviceListByIds).not.toHaveBeenCalled();
+            expect(fixture.nativeElement.querySelector('table.receivers')).toBeNull();
+        });
     });
 });

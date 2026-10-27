@@ -17,7 +17,7 @@
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { UtilService } from 'src/app/core/services/util.service';
 import { TemplateListResponseModel, TemplateModel } from '../shared/reporting.model';
@@ -28,6 +28,7 @@ import { Observable, concatMap, map, tap } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { reportFileName } from '../shared/report-file-name';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
 import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
@@ -52,6 +53,7 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
     private preferencesService = inject(PreferencesService);
     private router = inject(Router);
+    private urlState = inject(UrlStateService);
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild(MatSort, { static: false }) sort?: MatSort;
@@ -62,10 +64,20 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
     userMayCreate = false;
     searchText = '';
     pageSize = this.preferencesService.pageSize;
+    pageIndex = 0;
+    sortBy = 'name';
+    sortDirection: SortDirection = 'asc';
     ready = false;
     downloading = false;
 
     ngOnInit() {
+        const sort = this.urlState.getSort('name', 'asc');
+        // the header cannot be cleared, so a sort without a direction is the default sort
+        if (sort.direction !== '') {
+            this.sortBy = sort.active;
+            this.sortDirection = sort.direction;
+        }
+        this.pageIndex = this.urlState.getPage();
         // Preview and creating a report are both behind the create right, so the menu only exists with it.
         this.userMayCreate = this.reportingService.userHasCreateReportAuthorization();
         if (this.userMayCreate) {
@@ -81,11 +93,21 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
         if (this.paginator === undefined) {
             return;
         }
+        this.paginator.pageIndex = this.pageIndex;
         this.templatesDataSource.paginator = this.paginator;
         this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
+            this.pageIndex = event.pageIndex;
+            this.urlState.setPage(event.pageIndex);
         });
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active;
+        this.sortDirection = $event.direction || 'asc';
+        this.urlState.setSort($event, 'name', 'asc');
+        this.paginator.firstPage();
     }
 
     create(template: TemplateModel) {
@@ -109,11 +131,20 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
     }
 
     private initSearch() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchbarService.currentSearchText.pipe(
             tap((searchText: string) => this.searchText = searchText),
             concatMap((searchText: string) => this.reload().pipe(map(() => searchText))),
             takeUntilDestroyed(this.destroyRef),
-        ).subscribe((searchText: string) => this.filter(searchText));
+        ).subscribe((searchText: string) => {
+            if (!opening) {
+                this.pageIndex = 0;
+                this.urlState.setPage(0);
+            }
+            opening = false;
+            this.filter(searchText);
+        });
     }
 
     private reload(): Observable<unknown> {
@@ -126,11 +157,28 @@ export class TemplatesComponent implements OnInit, AfterViewInit {
 
     private filter(searchText: string) {
         const search = searchText.toLowerCase();
-        this.templatesDataSource.data = this.templates.filter((template: TemplateModel) =>
+        this.showRows(this.templates.filter((template: TemplateModel) =>
             search === ''
             || (template.name || '').toLowerCase().indexOf(search) !== -1
             || (template.id || '').toLowerCase().indexOf(search) !== -1
             || (template.type || '').toLowerCase().indexOf(search) !== -1
-        );
+        ));
     }
+
+    /**
+     * Shows the rows on the page the paginator is on. The data source moves a page beyond the end back without a page
+     * event, so it is corrected here, with the URL.
+     */
+    private showRows(rows: TemplateModel[]) {
+        if (this.paginator !== undefined) {
+            const lastPage = Math.max(0, Math.ceil(rows.length / this.paginator.pageSize) - 1);
+            this.paginator.pageIndex = Math.min(this.pageIndex, lastPage);
+            if (this.paginator.pageIndex !== this.pageIndex) {
+                this.pageIndex = this.paginator.pageIndex;
+                this.urlState.setPage(this.pageIndex);
+            }
+        }
+        this.templatesDataSource.data = rows;
+    }
+
 }

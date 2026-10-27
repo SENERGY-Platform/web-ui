@@ -32,6 +32,7 @@ import { ConceptsService } from '../concepts/shared/concepts.service';
 import { DeviceTypeService } from '../device-types-overview/shared/device-type.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
 import { CoreModule } from '../../../core/core.module';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { DeviceTypeConceptModel, DeviceTypeFunctionModel } from '../device-types-overview/shared/device-type.model';
 
 describe('FunctionsComponent concept filter', () => {
@@ -48,8 +49,8 @@ describe('FunctionsComponent concept filter', () => {
     let harness: RouterTestingHarness;
     let component: FunctionsComponent;
 
-    async function open(url: string): Promise<FunctionsComponent> {
-        functionsServiceSpy.getFunctions.and.returnValue(of({result: [getTemperature], total: 1}));
+    async function open(url: string, total = 1): Promise<FunctionsComponent> {
+        functionsServiceSpy.getFunctions.and.returnValue(of({result: [getTemperature], total}));
         conceptsServiceSpy.getConceptWithoutCharacteristics.and.callFake((id: string) =>
             of([temperature, pressure].find((c) => c.id === id) || null),
         );
@@ -173,4 +174,92 @@ describe('FunctionsComponent concept filter', () => {
         expect(component.dataSource.data).toEqual([getPressure]);
         expect(component.totalCount).toBe(7);
     }));
+
+    describe('view state in the URL', () => {
+        const pageSize = 20;
+        const lastCall = () => functionsServiceSpy.getFunctions.calls.mostRecent().args;
+
+        let storedPageSize: string | null;
+
+        beforeEach(() => {
+            storedPageSize = localStorage.getItem('PreferencesService/pageSize');
+            localStorage.setItem('PreferencesService/pageSize', '' + pageSize);
+        });
+
+        afterEach(() => {
+            if (storedPageSize === null) {
+                localStorage.removeItem('PreferencesService/pageSize');
+            } else {
+                localStorage.setItem('PreferencesService/pageSize', storedPageSize);
+            }
+        });
+
+        it('restores page and sort before the first load', fakeAsync(() => {
+            open('/metadata/functions?page=2&sort=name&dir=desc', 100);
+            tick(400);
+            flush();
+            harness.detectChanges();
+            discardPeriodicTasks();
+
+            expect(functionsServiceSpy.getFunctions).toHaveBeenCalledTimes(1);
+            expect(lastCall().slice(1, 5)).toEqual([pageSize, 2 * pageSize, 'name', 'desc']);
+            expect(component.paginator.pageIndex).toBe(2);
+            expect(TestBed.inject(Router).url).toBe('/metadata/functions?page=2&sort=name&dir=desc');
+        }));
+
+        it('a new search returns to the first page and drops it from the URL', fakeAsync(() => {
+            open('/metadata/functions?page=2', 100);
+            tick(400);
+            flush();
+            harness.detectChanges();
+
+            TestBed.inject(SearchbarService).changeMessage('get');
+            tick(400);
+            flush();
+            harness.detectChanges();
+            discardPeriodicTasks();
+
+            expect(lastCall()[0]).toBe('get');
+            expect(lastCall()[2]).toBe(0);
+            expect(component.paginator.pageIndex).toBe(0);
+            expect(TestBed.inject(Router).url).toBe('/metadata/functions');
+        }));
+
+        it('moves a page beyond the end of a shorter list to the last page', fakeAsync(() => {
+            open('/metadata/functions?page=5', pageSize + 10);
+            tick(400);
+            flush();
+            harness.detectChanges();
+            tick(10);
+            flush();
+            harness.detectChanges();
+            discardPeriodicTasks();
+
+            expect(lastCall()[2]).toBe(pageSize);
+            expect(component.paginator.pageIndex).toBe(1);
+            expect(TestBed.inject(Router).url).toBe('/metadata/functions?page=1');
+        }));
+
+        it('writes a page change and a sort change, the sort dropping the page', fakeAsync(() => {
+            open('/metadata/functions', 100);
+            tick(400);
+            flush();
+            harness.detectChanges();
+
+            component.paginator.nextPage();
+            tick(10);
+            flush();
+            expect(lastCall()[2]).toBe(pageSize);
+            expect(TestBed.inject(Router).url).toBe('/metadata/functions?page=1');
+
+            component.matSortChange({ active: 'name', direction: 'desc' });
+            tick(10);
+            flush();
+            harness.detectChanges();
+            discardPeriodicTasks();
+
+            expect(lastCall().slice(2, 5)).toEqual([0, 'name', 'desc']);
+            expect(TestBed.inject(Router).url).toBe('/metadata/functions?sort=name&dir=desc');
+        }));
+    });
 });

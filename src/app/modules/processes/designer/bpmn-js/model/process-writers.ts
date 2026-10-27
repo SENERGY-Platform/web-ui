@@ -287,8 +287,49 @@ export function readDeviceTask(element: any): any {
     };
 }
 
+/** A camunda input or output parameter with a text value. */
+interface TaskParameter {
+    name: string;
+    value?: string;
+}
+
+/**
+ * Input values and output variable names are expressed in the characteristic, so a task configured anew with the same
+ * characteristic, as after a changed aspect, keeps what the user edited; the payload is always written anew.
+ */
+function keepParameterEdits(
+    previous: { inputParameters?: TaskParameter[]; outputParameters?: TaskParameter[] } | undefined,
+    characteristicId: string | undefined,
+    inputs: (TaskParameter | undefined)[] | undefined,
+    outputs: (TaskParameter | undefined)[] | undefined,
+): void {
+    const previousInputs = previous?.inputParameters;
+    if (!characteristicId || !previousInputs) {
+        return;
+    }
+    const payload = previousInputs.find((input) => input.name === 'payload');
+    if (!payload || JSON.parse(payload.value ?? '{}').characteristic_id !== characteristicId) {
+        return;
+    }
+    (inputs || []).forEach((input) => {
+        const kept = input && input.name !== 'payload' ? previousInputs.find((old) => old.name === input.name) : undefined;
+        if (input && kept && kept.value !== undefined) {
+            input.value = kept.value;
+        }
+    });
+    const previousOutputs = previous?.outputParameters || [];
+    (outputs || []).forEach((output) => {
+        const kept = output ? previousOutputs.find((old) => old.value === output.value) : undefined;
+        if (output && kept) {
+            output.name = kept.name;
+        }
+    });
+}
+
 export function writeDeviceTask(services: TaskServices, element: any, connectorInfo: any): void {
     const moddle = services.moddle;
+    // read before the replacement, which gives the task a new business object
+    const previous = firstExtension(element);
     replaceTask(services, element, 'bpmn:ServiceTask', true, (task) => {
         task.topic = connectorInfo.completionStrategy;
         task.name = getTaskName(connectorInfo, task.name);
@@ -303,6 +344,7 @@ export function writeDeviceTask(services: TaskServices, element: any, connectorI
             inputs = [inputParameter(moddle, 'payload', getPayload(connectorInfo, false))];
             outputs = taskParameters(moddle, generateStructure(connectorInfo.characteristic, false, ''), 'outputs', false);
         }
+        keepParameterEdits(previous, connectorInfo.characteristic?.id, inputs, outputs);
         setExtension(moddle, task, inputOutput(moddle, inputs, outputs));
         refresh(services, element);
     });

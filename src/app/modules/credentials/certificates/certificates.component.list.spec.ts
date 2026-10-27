@@ -20,26 +20,31 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BehaviorSubject, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { CertificatesComponent } from './certificates.component';
 import { CertificatesService } from './shared/certificates.service';
 import { CertificateInfo } from './shared/certificates.model';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('CertificatesComponent list', () => {
     let fixture: ComponentFixture<CertificatesComponent>;
     let component: CertificatesComponent;
     let service: jasmine.SpyObj<CertificatesService>;
     let search: BehaviorSubject<string>;
+    let urlState: UrlStateServiceMock;
 
     const valid = { serial_number: 'aa', metadata: { device: 'd1' }, issued_at: '2026-01-02T10:00:00Z', not_before: '2026-01-02T10:00:00Z', expiry: '2027-01-02T10:00:00Z', expired: false, revoked: false } as CertificateInfo;
     const revoked = { ...valid, serial_number: 'bb', issued_at: '2026-01-01T10:00:00Z', revoked: true, revoked_at: '2026-02-01T10:00:00Z', reason: 1 } as CertificateInfo;
     const expired = { ...valid, serial_number: 'cc', issued_at: '2025-01-01T10:00:00Z', expired: true } as CertificateInfo;
 
-    function init(mayRevoke = true) {
+    function init(mayRevoke = true, urlParams: Record<string, string> = {}, pageSize = 20) {
         search = new BehaviorSubject('');
         service = jasmine.createSpyObj<CertificatesService>('CertificatesService', ['list', 'revoke', 'userHasRevokeAuthorization']);
-        service.list.and.callFake(() => of([valid, revoked, expired]));
+        // answered after the view exists, as a request is
+        service.list.and.callFake(() => of([valid, revoked, expired]).pipe(delay(1)));
         service.userHasRevokeAuthorization.and.returnValue(mayRevoke);
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
@@ -47,7 +52,15 @@ describe('CertificatesComponent list', () => {
             providers: [
                 { provide: CertificatesService, useValue: service },
                 { provide: SearchbarService, useValue: { currentSearchText: search, changeMessage: () => undefined } },
-                { provide: PreferencesService, useValue: { pageSize: 20 } },
+                { provide: PreferencesService, useValue: { pageSize } },
+                {
+                    provide: UrlStateService,
+                    useFactory: () => {
+                        urlState = new UrlStateServiceMock();
+                        urlState.params = urlParams;
+                        return urlState;
+                    },
+                },
                 { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(undefined) }) } },
             ],
         }).compileComponents();
@@ -102,4 +115,36 @@ describe('CertificatesComponent list', () => {
 
         expect(component.paginator.length).toBe(1);
     }));
+    describe('view state in the URL', () => {
+        const firstRowText = () => (fixture.nativeElement.querySelector('tr[mat-row]') as HTMLElement).textContent;
+
+        it('opens on the page and the sort of the URL without writing them back', fakeAsync(() => {
+            init(true, { page: '1', sort: 'serial_number', dir: 'asc' }, 1);
+
+            expect(component.paginator.pageIndex).toBe(1);
+            expect(firstRowText()).toContain('bb');
+            expect(urlState.writes).toEqual([]);
+        }));
+
+        it('moves a page beyond the end to the last page and writes it', fakeAsync(() => {
+            init(true, { page: '9', sort: 'serial_number', dir: 'asc' }, 1);
+
+            expect(component.paginator.pageIndex).toBe(2);
+            expect(firstRowText()).toContain('cc');
+            expect(urlState.writes).toEqual([{ page: 2 }]);
+        }));
+
+        it('goes back to the first page for a new search and writes the page and the sort', fakeAsync(() => {
+            init(true, { page: '1' }, 1);
+
+            search.next('b');
+            tick(400);
+            fixture.detectChanges();
+            expect(component.paginator.pageIndex).toBe(0);
+            expect(urlState.writes).toContain({ page: null });
+
+            component.matSortChange({ active: 'serial_number', direction: 'asc' });
+            expect(urlState.writes[urlState.writes.length - 1]).toEqual({ sort: 'serial_number', dir: 'asc', page: null });
+        }));
+    });
 });

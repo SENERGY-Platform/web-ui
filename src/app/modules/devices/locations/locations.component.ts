@@ -27,6 +27,8 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -47,7 +49,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './locations.component.html',
     styleUrls: ['./locations.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class LocationsComponent implements OnInit, AfterViewInit {
     private locationsService = inject(LocationsService);
@@ -58,17 +60,19 @@ export class LocationsComponent implements OnInit, AfterViewInit {
     private dialogsService = inject(DialogsService);
     preferencesService = inject(PreferencesService);
     private permissionsDialogService = inject(PermissionsDialogService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = [];
     ready = false;
     instances = [];
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     dataSource = new MatTableDataSource<ExtendedLocationModel>();
     listSelection = new ListSelection<ExtendedLocationModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     searchText = '';
-    list = new PagedListState(this.preferencesService, () => this.getLocations(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.getLocations(), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;

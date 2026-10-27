@@ -25,7 +25,7 @@ import { concatMap, map, Observable, of, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { CertificateRevokeDialogComponent } from './certificate-revoke-dialog/certificate-revoke-dialog.component';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
@@ -37,6 +37,7 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
 import { DatePipe, KeyValuePipe } from '@angular/common';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 @Component({
     selector: 'app-certificates',
@@ -52,6 +53,7 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
   private searchbarService = inject(SearchbarService);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private urlState = inject(UrlStateService);
 
 
   dataReady = false;
@@ -64,10 +66,21 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
   rfc5280ReasonString = rfc5280ReasonString;
   userHasRevokeAuthorization = this.certificatesService.userHasRevokeAuthorization();
   certs: CertificateInfo[] = [];
+  sortBy = 'issued_at';
+  sortDirection: SortDirection = 'desc';
+  // the page from the URL, taken by the opening search once the rows are in; null afterwards
+  private openingPage: number | null = null;
 
   @ViewChild(MatSort) sort?: MatSort;
 
   ngOnInit() {
+    const sort = this.urlState.getSort('issued_at', 'desc');
+    // the header cannot be cleared, so a sort without a direction is the default sort
+    if (sort.direction !== '') {
+      this.sortBy = sort.active;
+      this.sortDirection = sort.direction;
+    }
+    this.openingPage = this.urlState.getPage();
     this.initSearch();
     if (this.userHasRevokeAuthorization) {
       this.displayedColumns.push('actions');
@@ -82,7 +95,14 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
     this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
       this.preferencesService.pageSize = e.pageSize;
       this.pageSize = this.paginator.pageSize;
+      this.urlState.setPage(e.pageIndex);
     });
+  }
+
+  matSortChange($event: Sort) {
+    this.sortBy = $event.active;
+    this.sortDirection = $event.direction || 'desc';
+    this.urlState.setSort($event, 'issued_at', 'desc');
   }
 
   revoke(cert: CertificateInfo) {
@@ -115,8 +135,7 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
   }
 
   private applySearch(searchText: string) {
-    this.paginator?.firstPage();
-    this.dataSource.data = this.certs.filter(c => {
+    const rows = this.certs.filter(c => {
       if (c.serial_number.indexOf(searchText) !== -1) {
         return true;
       }
@@ -125,6 +144,21 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
       }
       return false;
     });
+    // the first search is the one the page was opened with and keeps the page from the URL
+    const openingPage = this.openingPage;
+    this.openingPage = null;
+    if (openingPage !== null && this.paginator) {
+      // set before the data, which the data source renders at the paginator's page; a page beyond the end would be
+      // moved back by the data source without a page event, so it is corrected here with the URL
+      const lastPage = Math.max(0, Math.ceil(rows.length / this.paginator.pageSize) - 1);
+      this.paginator.pageIndex = Math.min(openingPage, lastPage);
+      if (this.paginator.pageIndex !== openingPage) {
+        this.urlState.setPage(this.paginator.pageIndex);
+      }
+    } else {
+      this.paginator?.firstPage();
+    }
+    this.dataSource.data = rows;
   }
 
   private initSearch() {

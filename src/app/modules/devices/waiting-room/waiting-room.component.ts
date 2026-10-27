@@ -25,7 +25,7 @@ import {
 } from '@angular/material/snack-bar';
 import {merge, Subscription} from 'rxjs';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {WaitingDeviceListModel, WaitingDeviceModel, WaitingRoomEventTypeDelete, WaitingRoomEventTypeSet, WaitingRoomEventTypeUse} from './shared/waiting-room.model';
@@ -52,6 +52,8 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
 import { DatePipe } from '@angular/common';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { dialogSize } from '../../../core/dialog-size';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 
 @Component({
     selector: 'senergy-waiting-room',
@@ -59,7 +61,7 @@ import { dialogSize } from '../../../core/dialog-size';
     styleUrls: ['./waiting-room.component.css'],
     animations: [TableRowAnimations.getRowAnimation()],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatChipListbox, MatChipOption, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatChipListbox, MatChipOption, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, SpinnerComponent, DatePipe]
 })
 export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -70,6 +72,7 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     preferencesService = inject(PreferencesService);
     private cd = inject(ChangeDetectorRef);
     private destroyRef = inject(DestroyRef);
+    private urlState = inject(UrlStateService);
 
     static wmbusKeyAttributeKey = 'wmbus/key';
     public wmbusKeyAttributeKey = WaitingRoomComponent.wmbusKeyAttributeKey;
@@ -83,6 +86,9 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly dateFormat = LIST_DATE_FORMAT;
     displayedColumns: string[] = ['select', 'name', 'status', 'created_at', 'updated_at', 'actions'];
     totalCount = 0;
+    sortBy = 'created_at';
+    sortDirection: SortDirection = 'desc';
+    pageIndex = 0;
 
     // devices: WaitingDeviceModel[] = [] as WaitingDeviceModel[];
     devicesDataSource = new MatTableDataSource<WaitingDeviceModel>();
@@ -96,6 +102,11 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     private sortAndPageSubscription?: Subscription;
 
     ngOnInit() {
+        const sort = this.urlState.getSort('created_at', 'desc');
+        this.sortBy = sort.active;
+        this.sortDirection = sort.direction;
+        this.pageIndex = this.urlState.getPage();
+        this.showHidden = this.urlState.getShown('hidden', this.showHidden);
         this.initSearchAndGetDevices();
         this.initEventNotification();
     }
@@ -126,6 +137,8 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         }
         this.showHidden = show;
         localStorage.setItem('devices.waiting-room.showHidden', String(this.showHidden));
+        // written explicitly, not as null: a shared link has to show this view on any browser
+        this.urlState.set({ hidden: this.showHidden ? 'show' : 'hide', page: null });
         this.getDevices(true);
     }
 
@@ -151,8 +164,11 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.sortAndPageSubscription?.unsubscribe();
         const subscription = new Subscription();
         this.sortAndPageSubscription = subscription;
-        subscription.add(this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        subscription.add(this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((sort: Sort) => {
             this.paginator.pageIndex = 0;
+            this.sortBy = sort.active;
+            this.sortDirection = sort.direction;
+            this.urlState.setSort(sort, 'created_at', 'desc');
             this.selectionClear();
         }));
         subscription.add(merge(this.sort.sortChange, this.paginator.page)
@@ -161,6 +177,11 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
                 switchMap(() => {
                     this.ready = false;
                     this.animate = false;
+                    // the opening load has the page the URL names, so it writes nothing
+                    if (this.pageIndex !== this.paginator.pageIndex) {
+                        this.pageIndex = this.paginator.pageIndex;
+                        this.urlState.setPage(this.pageIndex);
+                    }
                     return this.waitingRoomService.searchDevices(
                         this.searchText,
                         this.paginator.pageSize,
@@ -187,9 +208,12 @@ export class WaitingRoomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     private initSearchAndGetDevices() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
-            this.getDevices(true);
+            this.getDevices(!opening);
+            opening = false;
         });
     }
 

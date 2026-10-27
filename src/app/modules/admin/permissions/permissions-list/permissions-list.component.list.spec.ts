@@ -28,6 +28,8 @@ import { KongService } from '../shared/services/kong.service';
 import { LadonService } from '../shared/services/ladom.service';
 import { PermissionModel } from '../shared/permission.model';
 import { PermissionsListComponent } from './permissions-list.component';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('PermissionsListComponent list', () => {
     let fixture: ComponentFixture<PermissionsListComponent>;
@@ -35,6 +37,7 @@ describe('PermissionsListComponent list', () => {
     let ladon: jasmine.SpyObj<LadonService>;
     let dialog: jasmine.SpyObj<MatDialog>;
     let search: BehaviorSubject<string>;
+    let urlState: UrlStateServiceMock;
 
     const policies = [
         { id: 'p1', subject: 'alice', resource: '/devices', actions: ['GET', 'POST'] },
@@ -42,10 +45,10 @@ describe('PermissionsListComponent list', () => {
         { id: 'admin-all', subject: 'admin', resource: '/', actions: ['GET'] },
     ] as PermissionModel[];
 
-    function init() {
+    function init(urlParams: Record<string, string> = {}, data: PermissionModel[] = policies) {
         search = new BehaviorSubject('');
         ladon = jasmine.createSpyObj<LadonService>('LadonService', ['getAllPolicies', 'deletePolicies', 'test']);
-        ladon.getAllPolicies.and.callFake(() => of(policies.map((p) => ({ ...p }))));
+        ladon.getAllPolicies.and.callFake(() => of(data.map((p) => ({ ...p }))));
         ladon.test.and.returnValue(of({ GET: true, POST: false, PUT: false, PATCH: false, DELETE: false, HEAD: false }));
         const auth = jasmine.createSpyObj<AuthorizationService>('AuthorizationService', ['loadAllRoles', 'loadAllUsers', 'loadAllClients', 'userIsAdmin']);
         auth.loadAllRoles.and.returnValue(of([{ name: 'ops' }]));
@@ -65,6 +68,14 @@ describe('PermissionsListComponent list', () => {
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: MatDialog, useValue: dialog },
                 { provide: SearchbarService, useValue: { currentSearchText: search, changeMessage: (t: string) => search.next(t) } },
+                {
+                    provide: UrlStateService,
+                    useFactory: () => {
+                        urlState = new UrlStateServiceMock();
+                        urlState.params = urlParams;
+                        return urlState;
+                    },
+                },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(PermissionsListComponent);
@@ -167,4 +178,69 @@ describe('PermissionsListComponent list', () => {
 
         expect(names()).toEqual(['admin']);
     }));
+    describe('view state in the URL', () => {
+        const many = Array.from({ length: 45 }, (_, i) => ({ id: 'p' + i, subject: 'u' + String(i).padStart(2, '0'), resource: '/r', actions: ['GET'] }) as PermissionModel);
+
+        it('applies a filter from the URL before the first list and clamps the page to it', fakeAsync(() => {
+            init({ page: '1', role: 'u30' }, many);
+            discardPeriodicTasks();
+
+            expect(names()).toEqual(['u30']);
+            expect(component.selectedRole).toBe('u30');
+            expect(component.pageIndex).toBe(0);
+            expect(urlState.writes).toEqual([{ page: null }]);
+        }));
+
+        it('restores the page and the sort', fakeAsync(() => {
+            init({ page: '1', sort: 'subject', dir: 'desc' }, many);
+            discardPeriodicTasks();
+
+            expect(names()[0]).toBe('u24');
+            expect(component.pageIndex).toBe(1);
+            expect(urlState.writes).toEqual([]);
+        }));
+
+        it('moves a page beyond the end to the last page and writes it', fakeAsync(() => {
+            init({ page: '9' }, many);
+            discardPeriodicTasks();
+
+            expect(component.pageIndex).toBe(2);
+            expect(urlState.writes).toContain({ page: 2 });
+            expect(names().length).toBe(5);
+        }));
+
+        it('keeps the page for the first search and leaves it for a new one', fakeAsync(() => {
+            init({ page: '1' }, many);
+            discardPeriodicTasks();
+            expect(component.pageIndex).toBe(1);
+            expect(urlState.writes).toEqual([]);
+
+            search.next('u1');
+
+            expect(component.pageIndex).toBe(0);
+            expect(urlState.writes).toContain(jasmine.objectContaining({ page: null }));
+        }));
+
+        it('writes a filter change with the page dropped, and a sort change likewise', fakeAsync(() => {
+            init({ page: '1' }, many);
+            discardPeriodicTasks();
+
+            component.removeFilter('user');
+            expect(component.pageIndex).toBe(0);
+            expect(urlState.writes[urlState.writes.length - 1]).toEqual({ user: '', role: '', client: '', endpoint: '', page: null });
+
+            component.sortChanged({ active: 'subject', direction: 'desc' });
+            expect(urlState.writes[urlState.writes.length - 1]).toEqual({ sort: 'subject', dir: 'desc', page: null });
+        }));
+
+        it('writes a page event', fakeAsync(() => {
+            init({}, many);
+            discardPeriodicTasks();
+
+            component.paginator.page.emit({ pageIndex: 2, pageSize: 20, length: 45 });
+
+            expect(component.pageIndex).toBe(2);
+            expect(urlState.writes).toContain({ page: 2 });
+        }));
+    });
 });

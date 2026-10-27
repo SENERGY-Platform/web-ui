@@ -52,6 +52,8 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { JsonPipe, DatePipe } from '@angular/common';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { SmartServiceChangedResource } from '../releases/shared/release.model';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { ChangedResourcesHintComponent } from '../changed-resources/changed-resources-hint.component';
 
 
@@ -67,7 +69,7 @@ import { ChangedResourcesHintComponent } from '../changed-resources/changed-reso
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatMenu, MatMenuItem, MatMenuTrigger, SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, JsonPipe, DatePipe, ChangedResourcesHintComponent]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatMenu, MatMenuItem, MatMenuTrigger, SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, JsonPipe, DatePipe, ChangedResourcesHintComponent]
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     private instancesService = inject(SmartServiceInstanceService);
@@ -82,6 +84,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     private instanceDialogService = inject(SmartServiceInstanceDialogService);
     private authorizationService = inject(AuthorizationService);
     private releasesService = inject(SmartServiceReleasesService);
+    private urlState = inject(UrlStateService);
 
     formGroup: FormGroup = new FormGroup({ repoItems: new FormArray([]) });
 
@@ -94,7 +97,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     showLogs = false;
     dataSource = new MatTableDataSource<SmartServiceInstanceModel>();
     selection = new SelectionModel<SmartServiceInstanceModel>(true, []);
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     pageIndex = 0;
     list = new PagedListState(this.preferencesService, () => this.fetchInstances(), { sortBy: 'name', sortDirection: 'asc' });
     releaseId?: string;
@@ -113,6 +117,10 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     @ViewChild('tableContainer', { static: false }) tableContainer?: ElementRef<HTMLDivElement>;
     ngOnInit(): void {
         this.userHasDeleteAuthorization = this.instancesService.userHasDeleteAuthorization();
+        const sort = this.urlState.getSort('name', 'asc');
+        this.list.sortBy = sort.active;
+        this.list.sortColumn = sort.active;
+        this.list.sortDirection = sort.direction;
         this.showLogs = this.authorizationService.userIsDeveloper() && !!environment.openSearchDashboardsUrl && !!environment.openSearchSmartServiceIndexId;
         this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
             this.releaseId = params.get('release_id') || undefined;
@@ -380,6 +388,11 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         }
         if (this.pageIndex > 0) {
             queryParams['page'] = this.pageIndex;
+        }
+        // this writes every parameter, so the sort is written along with them
+        if (this.list.sortBy !== 'name' || this.list.sortDirection !== 'asc') {
+            queryParams['sort'] = this.list.sortBy;
+            queryParams['dir'] = this.list.sortDirection || 'none';
         }
         if (this.tableScrollTop > 0) {
             queryParams['scroll_top'] = this.tableScrollTop;

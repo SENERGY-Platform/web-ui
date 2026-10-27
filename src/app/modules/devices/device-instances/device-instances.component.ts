@@ -36,6 +36,8 @@ import { DeviceTypeService } from '../../metadata/device-types-overview/shared/d
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { MatPaginator } from '@angular/material/paginator';
 import { Observable, map, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
@@ -77,7 +79,7 @@ export enum DeviceInstancesRouterStateTypesEnum {
     templateUrl: './device-instances.component.html',
     styleUrls: ['./device-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatMenu, MatMenuContent, MatMenuItem, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, RouterLink, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatMenu, MatMenuContent, MatMenuItem, MatPaginator, KeepPageInRangeDirective]
 })
 export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     private deviceInstancesService = inject(DeviceInstancesService);
@@ -95,13 +97,15 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     preferencesService = inject(PreferencesService);
     private cd = inject(ChangeDetectorRef);
     private activatedRoute = inject(ActivatedRoute);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = [];
     maxShownAttributes = 3;
     dataSource = new MatTableDataSource<DeviceInstanceModel>();
     listSelection = new ListSelection<DeviceInstanceModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     ready = false;
     searchText = '';
     usage: {
@@ -126,7 +130,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     routerAttributeValues: string[] = [];
     DeviceInstancesRouterStateTabEnum = DeviceInstancesRouterStateTabEnum;
 
-    list = new PagedListState(this.preferencesService, () => this.load(), { sortBy: 'display_name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.load(), {
+        sortBy: 'display_name',
+        sortDirection: 'asc',
+        remap: { log_state: 'annotations.connected' },
+        urlState: this.urlState,
+    });
 
     userHasDeleteAuthorization = false;
     userHasUpdateAuthorization = false;
@@ -194,7 +203,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     matSortChange($event: Sort) {
-        this.list.sortChanged($event, { log_state: 'annotations.connected' });
+        this.list.sortChanged($event);
         this.reload();
     }
 
@@ -455,8 +464,19 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             });
     }
 
+    // the filter values the page holds; search, sort and page writes leave them unchanged
+    private filterState(): string {
+        return JSON.stringify([
+            this.routerConnectionState, this.routerDeviceType, this.routerDeviceTypeNames, this.routerNetwork,
+            this.routerNetworkName, this.routerLocation, this.routerLocationName, this.routerDeviceIds,
+            this.routerAttributeKeys, this.routerAttributeValues, this.routerDeviceAttributeBlacklist,
+        ]);
+    }
+
     private getRouterParams(): void {
+        let opening = true;
         this.activatedRoute.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+            const before = this.filterState();
             if (params !== undefined && params !== null) {
                 if (params.has('device-type-id')) {
                     this.routerDeviceType = params.getAll('device-type-id');
@@ -495,7 +515,12 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
                 }
             }
             this.cd.detectChanges();
-            this.reload();
+            // The first emission only reads the filters: the search subscription makes the opening load. A filter set
+            // from this page is already in the fields and loads from its own call.
+            if (!opening && this.filterState() !== before) {
+                this.reload();
+            }
+            opening = false;
         });
     }
 
@@ -601,7 +626,21 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     updateQueryParams() {
-        const queryParams: any = {};
+        // every key of this page is set, so absent filters are removed; merge keeps search, sort and dir
+        const queryParams: any = {
+            'connection-state': null,
+            'device-type-id': null,
+            'device-type-name': null,
+            'network-id': null,
+            'network-name': null,
+            'location-id': null,
+            'location-name': null,
+            'device-id': null,
+            'attribute-key': null,
+            'attribute-value': null,
+            'device-attribute-blacklist': null,
+            page: null,
+        };
         if (this.routerConnectionState) {
             queryParams['connection-state'] = this.routerConnectionState;
         }
@@ -637,6 +676,7 @@ export class DeviceInstancesComponent implements OnInit, AfterViewInit {
             {
                 relativeTo: this.activatedRoute,
                 queryParams,
+                queryParamsHandling: 'merge',
             },
         );
     }

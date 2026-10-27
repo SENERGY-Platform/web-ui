@@ -47,6 +47,7 @@ import { MatIcon } from '@angular/material/icon';
 import { SpinnerComponent } from '../spinner/spinner.component';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
+import { UrlStateService } from '../../services/url-state.service';
 
 interface NotificationDisplayModel extends NotificationModel {
   action?: () => void;
@@ -64,6 +65,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   set paginator(value: MatPaginator | undefined) {
     this._paginator = value;
     if (value) {
+      value.pageIndex = this.pageIndex;
       this.dataSource.paginator = value;
     }
   }
@@ -79,11 +81,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   dialog = inject(MatDialog);
   router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private urlState = inject(UrlStateService);
 
   private readonly destroy$ = new Subject<void>();
   private _paginator?: MatPaginator;
 
   ready = false;
+  pageIndex = 0;
 
   notifications: NotificationDisplayModel[] = [];
   dataSource = new MatTableDataSource<NotificationDisplayModel>();
@@ -94,6 +98,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   private readonly deviceReferencePattern = /device (.+?)\s*\((urn:infai:ses:device:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\)/;
 
   ngOnInit() {
+    this.pageIndex = this.urlState.getPage();
     this.dataSource.filterPredicate = (notification: NotificationModel, filter: string): boolean => {
       const needle = filter.trim().toLowerCase();
       if (!needle) {
@@ -144,9 +149,16 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       this.reconcileSelection();
     });
 
+    // the first search is the one the page was opened with, so it keeps the page from the URL
+    let opening = true;
     this.searchbarService.currentSearchText.pipe(takeUntil(this.destroy$), debounceTime(300)).subscribe((searchText: string) => {
       this.dataSource.filter = searchText;
-      this.paginator?.firstPage();
+      if (!opening) {
+        this.pageIndex = 0;
+        this.urlState.setPage(0);
+        this.paginator?.firstPage();
+      }
+      opening = false;
       this.reconcileSelection();
     });
   }
@@ -240,6 +252,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   selectionClear($event: PageEvent | undefined = undefined): void {
     if ($event !== undefined) {
       this.preferencesService.pageSize = $event.pageSize;
+      this.pageIndex = $event.pageIndex;
+      this.urlState.setPage($event.pageIndex);
     }
     this.selection.clear();
   }

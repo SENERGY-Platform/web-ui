@@ -39,6 +39,7 @@ import { PermissionsService } from '../permissions/shared/permissions.service';
 import { PermissionsUserModel } from '../permissions/shared/permissions-user.model';
 import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 import { AuthorizationService } from '../../core/services/authorization.service';
+import { UrlStateService } from '../../core/services/url-state.service';
 
 // e1 nests a zone within a zone, so a counting implementation without a
 // recursion step (only looking at the top-level zones) would under-report it.
@@ -148,6 +149,24 @@ class RouterStub {
     }
 }
 
+class MockUrlStateService {
+    params: { [key: string]: string } = {};
+    written: { [key: string]: unknown } = {};
+
+    get(key: string): string | null {
+        return this.params[key] ?? null;
+    }
+
+    getBoolean(key: string, fallback: boolean): boolean {
+        const value = this.params[key];
+        return value === undefined ? fallback : value === 'true';
+    }
+
+    set(params: { [key: string]: unknown }): void {
+        Object.assign(this.written, params);
+    }
+}
+
 /** Builds a File-like object whose FileReader read resolves to the given text. */
 function fakeFileList(content: string, name = 'environment.json'): FileList {
     const file = new File([content], name, { type: 'application/json' });
@@ -185,6 +204,7 @@ describe('EnvironmentsComponent', () => {
                 { provide: Router, useClass: RouterStub },
                 { provide: PermissionsService, useClass: MockPermissionsService },
                 { provide: AuthorizationService, useClass: MockAuthorizationService },
+                { provide: UrlStateService, useClass: MockUrlStateService },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(EnvironmentsComponent);
@@ -339,6 +359,30 @@ describe('EnvironmentsComponent', () => {
         tick(300);
         expect(filtered().length).toBe(2);
     }));
+
+    it('should restore the all=true toggle from the URL for an admin on first load', () => {
+        authorizationService.isAdmin = true;
+        const urlState = TestBed.inject(UrlStateService) as unknown as MockUrlStateService;
+        urlState.params = { all: 'true' };
+        fixture = TestBed.createComponent(EnvironmentsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        expect(component.showAllEnvironments).toBe(true);
+        expect(environmentsService.listCalls).toEqual([true]);
+    });
+
+    it('should write the toggle to the URL when the admin switches it', () => {
+        authorizationService.isAdmin = true;
+        fixture = TestBed.createComponent(EnvironmentsComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+        const urlState = TestBed.inject(UrlStateService) as unknown as MockUrlStateService;
+
+        component.toggleAllEnvironments(true);
+
+        expect(urlState.written).toEqual({ all: true });
+    });
 
     it('should open the share dialog for an environment', () => {
         fixture.detectChanges();

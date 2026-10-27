@@ -25,6 +25,9 @@ export interface Attribute {
     origin: string;
 }
 
+/** Origin of the account's default attributes, which the device repository merges into every device it returns. */
+export const defaultAttributeOrigin = 'default';
+
 export interface DeviceInstancesBaseModel {
     attributes?: Attribute[];
     device_type_id: string;

@@ -16,7 +16,7 @@
 
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { Subject, takeUntil } from 'rxjs';
 import { UtilService } from 'src/app/core/services/util.service';
@@ -33,6 +33,7 @@ import { saveAs } from 'file-saver';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { reportFileName } from '../shared/report-file-name';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
@@ -58,6 +59,7 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     private reportingService = inject(ReportingService);
     private dialogsService = inject(DialogsService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild(MatSort, { static: false }) sort?: MatSort;
@@ -70,6 +72,9 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     readonly dateFormat = LIST_DATE_FORMAT;
     userMayDelete = false;
     pageSize = this.preferencesService.pageSize;
+    pageIndex = 0;
+    sortBy = 'createdAt';
+    sortDirection: SortDirection = 'desc';
     ready = false;
     downloading = false;
     reportJob: ReportJobModel | null = null;
@@ -81,6 +86,13 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnInit() {
+        const sort = this.urlState.getSort('createdAt', 'desc');
+        // the header cannot be cleared, so a sort without a direction is the default sort
+        if (sort.direction !== '') {
+            this.sortBy = sort.active;
+            this.sortDirection = sort.direction;
+        }
+        this.pageIndex = this.urlState.getPage();
         this.userMayDelete = this.reportingService.userHasDeleteReportFileAuthorization();
         if (this.reportId === null) {
             this.ready = true;
@@ -114,11 +126,21 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.paginator === undefined) {
             return;
         }
+        this.paginator.pageIndex = this.pageIndex;
         this.reportsDataSource.paginator = this.paginator;
         this.paginator.page.pipe(takeUntil(this.destroy)).subscribe((event) => {
             this.preferencesService.pageSize = event.pageSize;
             this.pageSize = event.pageSize;
+            this.pageIndex = event.pageIndex;
+            this.urlState.setPage(event.pageIndex);
         });
+    }
+
+    matSortChange($event: Sort) {
+        this.sortBy = $event.active;
+        this.sortDirection = $event.direction || 'desc';
+        this.urlState.setSort($event, 'createdAt', 'desc');
+        this.paginator.firstPage();
     }
 
     /** The refresh button of the toolbar: loads the report and its files again. */
@@ -163,16 +185,32 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
                         duration: 3000,
                     });
                     this.report.reportFiles = (this.report.reportFiles || []).filter((file: ReportFileModel) => file.id !== reportFile.id);
-                    this.reportsDataSource.data = this.report.reportFiles;
+                    this.showRows(this.report.reportFiles);
                 });
             });
+    }
+
+    /**
+     * Shows the rows on the page the paginator is on. The data source moves a page beyond the end back without a page
+     * event, so it is corrected here, with the URL.
+     */
+    private showRows(rows: ReportFileModel[]) {
+        if (this.paginator !== undefined) {
+            const lastPage = Math.max(0, Math.ceil(rows.length / this.paginator.pageSize) - 1);
+            this.paginator.pageIndex = Math.min(this.pageIndex, lastPage);
+            if (this.paginator.pageIndex !== this.pageIndex) {
+                this.pageIndex = this.paginator.pageIndex;
+                this.urlState.setPage(this.pageIndex);
+            }
+        }
+        this.reportsDataSource.data = rows;
     }
 
     private loadReport(reportId: string) {
         this.reportingService.getReport(reportId).subscribe((resp: ReportResponseModel | null) => {
             if (resp !== null) {
                 this.report = resp.data;
-                this.reportsDataSource.data = this.report.reportFiles || [];
+                this.showRows(this.report.reportFiles || []);
             }
             this.ready = true;
         });

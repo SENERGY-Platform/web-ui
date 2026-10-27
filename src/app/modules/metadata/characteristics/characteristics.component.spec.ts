@@ -27,6 +27,9 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeviceTypeService } from '../device-types-overview/shared/device-type.service';
 import { CharacteristicsPermSearchModel } from './shared/characteristics-perm-search.model';
 import { DeviceTypeCharacteristicsModel } from '../device-types-overview/shared/device-type.model';
+import { ConceptsService } from '../concepts/shared/concepts.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 
 describe('CharacteristicsComponent delete', () => {
     const idOne = 'urn:infai:ses:characteristic:1';
@@ -57,6 +60,8 @@ describe('CharacteristicsComponent delete', () => {
                 { provide: MatDialog, useValue: {} },
                 { provide: DeviceTypeService, useValue: {} },
                 { provide: Router, useValue: { getCurrentNavigation: () => null } },
+                { provide: ConceptsService, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
             ],
         });
         TestBed.overrideComponent(CharacteristicsComponent, { set: { template: '', imports: [] } });

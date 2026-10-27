@@ -56,8 +56,8 @@
 
   <div class="list-card" [hidden]="!ready || devicesDataSource.data.length === 0">
     <div class="table-container">
-      <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort matSortActive="created_at"
-        matSortDirection="desc" matSortDisableClear [trackBy]="trackDevice">
+      <table #sort="matSort" mat-table [dataSource]="devicesDataSource" matSort [matSortActive]="sortBy"
+        [matSortDirection]="sortDirection" matSortDisableClear [trackBy]="trackDevice">
 
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef class="select-column">
@@ -129,7 +129,7 @@
       </table>
     </div>
 
-    <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-      (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
+    <mat-paginator #paginator senergyKeepPageInRange [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex"
+      [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
   </div>
 </div>

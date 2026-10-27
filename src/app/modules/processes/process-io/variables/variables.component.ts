@@ -30,6 +30,8 @@ import {MatPaginator} from '@angular/material/paginator';
 import {SearchbarService} from '../../../../core/components/searchbar/shared/searchbar.service';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../../core/directives/keep-page-in-range.directive';
 import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
@@ -53,7 +55,7 @@ import { dialogSize } from '../../../../core/dialog-size';
     templateUrl: './variables.component.html',
     styleUrls: ['./variables.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, MatButton, MatMenu, MatMenuItem, MatMenuTrigger, JsonPipe, DatePipe, ShortKeyPipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatIconButton, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, MatButton, MatMenu, MatMenuItem, MatMenuTrigger, JsonPipe, DatePipe, ShortKeyPipe]
 })
 export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     private processIoService = inject(ProcessIoService);
@@ -63,6 +65,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     private searchbarService = inject(SearchbarService);
     private destroyRef = inject(DestroyRef);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     sort = 'unix_timestamp_in_s.desc';
     keyRegex = '';
@@ -79,7 +82,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     dataSource = new MatTableDataSource<ProcessIoVariable>();
     displayedColumns: string[] = [];
     readonly dateFormat = LIST_DATE_FORMAT;
-    list = new PagedListState(this.preferencesService, () => this.fetchVariables(), { sortBy: 'unix_timestamp_in_s', sortDirection: 'desc' });
+    list = new PagedListState(this.preferencesService, () => this.fetchVariables(), { sortBy: 'unix_timestamp_in_s', sortDirection: 'desc', urlState: this.urlState });
 
 
     constructor() {

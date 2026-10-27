@@ -40,6 +40,8 @@ import {
     UsedInDeviceTypeResponseElement
 } from '../device-types-overview/shared/used-in-device-type.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
 import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
@@ -58,7 +60,7 @@ import { dialogSize } from '../../../core/dialog-size';
     templateUrl: './functions.component.html',
     styleUrls: ['./functions.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTooltip, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTooltip, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class FunctionsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -71,6 +73,7 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private conceptsService = inject(ConceptsService);
+    private urlState = inject(UrlStateService);
     private destroyRef = inject(DestroyRef);
 
     displayedColumns: string[] = [];
@@ -78,9 +81,10 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     listSelection = new ListSelection<DeviceTypeFunctionModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     ready = false;
-    list = new PagedListState(this.preferencesService, () => this.getFunctions(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.getFunctions(), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     searchText = '';
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
@@ -131,7 +135,7 @@ export class FunctionsComponent implements OnInit, AfterViewInit {
     clearConceptFilter(): void {
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: {concept_ids: null},
+            queryParams: {concept_ids: null, page: null},
             queryParamsHandling: 'merge',
         });
     }

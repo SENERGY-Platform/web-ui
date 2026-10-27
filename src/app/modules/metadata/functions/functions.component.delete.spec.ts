@@ -28,6 +28,8 @@ import { DeviceTypeService } from '../device-types-overview/shared/device-type.s
 import { DeviceTypeFunctionModel } from '../device-types-overview/shared/device-type.model';
 import { ConceptsService } from '../concepts/shared/concepts.service';
 import { AuthorizationService } from '../../../core/services/authorization.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 
 describe('FunctionsComponent delete', () => {
     const idOne = 'urn:infai:ses:function:1';
@@ -61,6 +63,7 @@ describe('FunctionsComponent delete', () => {
                 { provide: AuthorizationService, useValue: {} },
                 { provide: ActivatedRoute, useValue: {} },
                 { provide: Router, useValue: { getCurrentNavigation: () => null } },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
             ],
         });
         TestBed.overrideComponent(FunctionsComponent, { set: { template: '', imports: [] } });

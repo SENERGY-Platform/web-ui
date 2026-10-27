@@ -42,6 +42,7 @@ import { SearchbarService } from '../../core/components/searchbar/shared/searchb
 import { PageHeaderComponent } from '../../core/components/page-header/page-header.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { dialogSize } from '../../core/dialog-size';
+import { UrlStateService } from '../../core/services/url-state.service';
 
 /** One row of the table: the environment plus its counts, computed once per reload. */
 export interface EnvironmentRow {
@@ -64,6 +65,7 @@ export class EnvironmentsComponent implements OnInit {
     private permissionsService = inject(PermissionsService);
     private authorizationService = inject(AuthorizationService);
     private searchbarService = inject(SearchbarService);
+    private urlState = inject(UrlStateService);
     private destroyRef = inject(DestroyRef);
 
     displayedColumns = ['name', 'type', 'owner', 'zones', 'assets', 'channels'];
@@ -95,6 +97,7 @@ export class EnvironmentsComponent implements OnInit {
             this.searchText = text.trim();
             this.dataSource.filter = this.searchText.toLowerCase();
         });
+        this.showAllEnvironments = this.userIsAdmin && this.urlState.getBoolean('all', false);
         this.reload();
     }
 
@@ -112,7 +115,12 @@ export class EnvironmentsComponent implements OnInit {
 
     /** Admin-only toggle (see the header's mat-slide-toggle): reloads with or without other users' environments. */
     toggleAllEnvironments(showAll: boolean): void {
+        // the chip also reports the state restored from the URL, which is no change
+        if (showAll === this.showAllEnvironments) {
+            return;
+        }
         this.showAllEnvironments = showAll;
+        this.urlState.set({ all: showAll });
         this.reload();
     }
 

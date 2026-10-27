@@ -95,7 +95,8 @@
 
     <div class="list-card" [hidden]="!ready || total === 0">
       <div class="table-container">
-        <table mat-table [dataSource]="sortedData" matSort (matSortChange)="sortData($event)">
+        <table mat-table [dataSource]="sortedData" matSort (matSortChange)="sortChanged($event)"
+          [matSortActive]="sort.active" [matSortDirection]="sort.direction">
           <ng-container matColumnDef="select">
             <th mat-header-cell *matHeaderCellDef class="select-column">
               <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -190,7 +191,7 @@
             (click)="row.id !== 'admin-all' && editPolicy(row)"></tr>
         </table>
       </div>
-      <mat-paginator #paginator [length]="total" [pageSize]="preferencesService.pageSize"
+      <mat-paginator #paginator [length]="total" [pageSize]="preferencesService.pageSize" [pageIndex]="pageIndex"
         [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
     </div>
 

@@ -27,6 +27,7 @@ import { NotificationModel } from './shared/notification.model';
 import { DialogsService } from '../../services/dialogs.service';
 import { PreferencesService } from '../../services/preferences.service';
 import { SearchbarService } from '../searchbar/shared/searchbar.service';
+import { UrlStateService } from '../../services/url-state.service';
 
 describe('NotificationsComponent write failures', () => {
     let component: NotificationsComponent;
@@ -59,6 +60,8 @@ describe('NotificationsComponent write failures', () => {
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: MatDialog, useValue: {} },
                 { provide: Router, useValue: {} },
+                // the router is a stub, so the URL state is one as well
+                { provide: UrlStateService, useValue: { get: () => null, getPage: () => 0, set: () => undefined, setPage: () => undefined } },
                 { provide: MatSnackBar, useValue: snackBar },
             ],
         });

@@ -36,11 +36,37 @@ import { PreferencesService } from '../../../core/services/preferences.service';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 
 const deployment = (id: string, disabled?: boolean): DeploymentsModel =>
     ({ id, name: 'name-' + id, definition_id: 'def-' + id, diagram: '<svg></svg>', online: true, disabled, deploymentTime: new Date(Date.UTC(2026, 0, 2, 10, 0)) }) as DeploymentsModel;
 
 const hub = { id: 'hub-1', name: 'Hub' } as HubModel;
+
+/** Reads from `params`, records the writes; the parsing rules themselves are pinned in the UrlStateService spec. */
+class FakeUrlState {
+    params: Record<string, string> = {};
+    set = jasmine.createSpy('set');
+    setPage = jasmine.createSpy('setPage');
+    setSort = jasmine.createSpy('setSort');
+
+    get(key: string): string | null {
+        return this.params[key] ?? null;
+    }
+
+    getShown(key: string, fallback: boolean): boolean {
+        const value = this.get(key);
+        return value === 'show' ? true : value === 'hide' ? false : fallback;
+    }
+
+    getPage(): number {
+        return Number(this.get('page') ?? 0);
+    }
+
+    getSort(active: string, direction: string): { active: string; direction: string } {
+        return { active: this.get('sort') ?? active, direction: this.get('dir') ?? direction };
+    }
+}
 
 class MockDeploymentsService {
     result: { disabled: boolean } | null = null;
@@ -97,10 +123,12 @@ describe('ProcessDeploymentsComponent', () => {
     let snackBar: jasmine.SpyObj<MatSnackBar>;
     let searchText: Subject<string>;
     let routeParams: Record<string, string>;
+    let urlState: FakeUrlState;
 
     async function setup(configure: (service: MockDeploymentsService) => void = () => undefined) {
         confirmed = true;
         routeParams = {};
+        urlState = new FakeUrlState();
         openConfirmDialog = jasmine.createSpy('openConfirmDialog').and.callFake(() => ({ afterClosed: () => of(confirmed) }));
         snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
         searchText = new Subject<string>();
@@ -123,6 +151,7 @@ describe('ProcessDeploymentsComponent', () => {
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([hub]) } },
                 { provide: MetadataExistenceService, useValue: { warningsForBpmn: (docs: { key: string }[]) => of(new Map(docs.slice(0, 1).map((d) => [d.key, 'Missing: urn:x']))) } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
+                { provide: UrlStateService, useValue: urlState },
             ],
         }).compileComponents();
         service = TestBed.inject(DeploymentsService) as unknown as MockDeploymentsService;
@@ -456,6 +485,68 @@ describe('ProcessDeploymentsComponent', () => {
 
             expect(snackBar.open).toHaveBeenCalledWith('Error while switching the deployment off! !', 'close', { panelClass: 'snack-bar-error' });
             expect(item.disabled).toBeFalse();
+        });
+    });
+
+    describe('view state in the URL', () => {
+        beforeEach(() => setup((s) => (s.items = Array.from({ length: 60 }, (_, i) => deployment('d' + i)))));
+
+        const firstChunks = () => service.getAllArgs.filter((args) => args[2] === 0);
+        const shownNames = () => rows().map((r) => r.querySelector('.name-cell')?.textContent?.trim());
+
+        it('restores the generated filter, the sort and the page before the first load and loads once', () => {
+            urlState.params = { generated: 'show', sort: 'name', dir: 'asc', page: '1' };
+            render();
+
+            expect(firstChunks().length).toBe(1);
+            expect(firstChunks()[0].slice(3, 6)).toEqual(['name', 'asc', '']);
+            expect(component.showGenerated).toBeTrue();
+            expect(component.dataSource.paginator?.pageIndex).toBe(1);
+            expect(shownNames()[0]).toBe('name-d20');
+            expect(urlState.set).not.toHaveBeenCalled();
+            expect(urlState.setPage).not.toHaveBeenCalled();
+        });
+
+        it('takes only a sortable column with a direction from the URL', () => {
+            urlState.params = { sort: 'diagram', dir: 'asc' };
+            render();
+
+            expect(firstChunks()[0].slice(3, 5)).toEqual(['deploymentTime', 'desc']);
+        });
+
+        it('moves a page beyond the end to the last page and writes it', () => {
+            urlState.params = { page: '7' };
+            render();
+
+            expect(component.dataSource.paginator?.pageIndex).toBe(2);
+            expect(shownNames()[0]).toBe('name-d40');
+            expect(urlState.setPage).toHaveBeenCalledOnceWith(2);
+        });
+
+        it('returns to the first page on a later search', () => {
+            urlState.params = { page: '1' };
+            render();
+
+            searchText.next('d');
+            fixture.detectChanges();
+
+            expect(component.dataSource.paginator?.pageIndex).toBe(0);
+            expect(urlState.setPage).toHaveBeenCalledWith(0);
+        });
+
+        it('writes a page change, a sort change and a filter change', async () => {
+            render();
+            // the data source hands the length to the paginator asynchronously
+            await fixture.whenStable();
+
+            component.dataSource.paginator?.nextPage();
+            expect(urlState.setPage).toHaveBeenCalledWith(1);
+
+            component.matSortChange({ active: 'name', direction: 'asc' });
+            expect(urlState.setSort).toHaveBeenCalledOnceWith({ active: 'name', direction: 'asc' }, 'deploymentTime', 'desc');
+
+            component.filterItems(true);
+            expect(urlState.set).toHaveBeenCalledOnceWith({ generated: 'show', page: null });
         });
     });
 });

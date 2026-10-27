@@ -20,6 +20,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideRouter, Router } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 import { ReportsComponent } from './reports.component';
 import { ReportingService } from '../shared/reporting.service';
@@ -27,21 +28,27 @@ import { ReportModel } from '../shared/reporting.model';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 
 describe('ReportsComponent list', () => {
     let fixture: ComponentFixture<ReportsComponent>;
     let component: ReportsComponent;
     let service: jasmine.SpyObj<ReportingService>;
     let router: Router;
+    let search: BehaviorSubject<string>;
+    let urlState: UrlStateServiceMock;
 
     const withFiles = { id: 'r1', name: 'Energy', templateName: 'energy', reportFiles: [{ id: 'f1' }, { id: 'f2' }], createdAt: '2026-01-02T10:00:00Z', updatedAt: '2026-01-03T10:00:00Z' } as ReportModel;
     const withoutFiles = { id: 'r2', name: 'Water', templateName: 'water', reportFiles: [] } as unknown as ReportModel;
 
-    function init(rights = { create: true, read: true, update: true, delete: true }) {
+    function init(rights = { create: true, read: true, update: true, delete: true }, urlParams: Record<string, string> = {}, pageSize = 20) {
+        search = new BehaviorSubject('');
         service = jasmine.createSpyObj<ReportingService>('ReportingService', [
             'getReports', 'userHasCreateReportAuthorization', 'userHasReadReportFileAuthorization', 'userHasUpdateReportAuthorization', 'userHasDeleteReportAuthorization',
         ]);
-        service.getReports.and.returnValue(of({ data: [withFiles, withoutFiles] }));
+        // answered after the view exists, as a request is
+        service.getReports.and.returnValue(of({ data: [withFiles, withoutFiles] }).pipe(delay(1)));
         service.userHasCreateReportAuthorization.and.returnValue(rights.create);
         service.userHasReadReportFileAuthorization.and.returnValue(rights.read);
         service.userHasUpdateReportAuthorization.and.returnValue(rights.update);
@@ -53,8 +60,16 @@ describe('ReportsComponent list', () => {
                 provideRouter([]),
                 { provide: ReportingService, useValue: service },
                 { provide: DialogsService, useValue: {} },
-                { provide: SearchbarService, useValue: { currentSearchText: new BehaviorSubject(''), changeMessage: () => undefined } },
-                { provide: PreferencesService, useValue: { pageSize: 20 } },
+                { provide: SearchbarService, useValue: { currentSearchText: search, changeMessage: () => undefined } },
+                { provide: PreferencesService, useValue: { pageSize } },
+                {
+                    provide: UrlStateService,
+                    useFactory: () => {
+                        urlState = new UrlStateServiceMock();
+                        urlState.params = urlParams;
+                        return urlState;
+                    },
+                },
             ],
         }).compileComponents();
         router = TestBed.inject(Router);
@@ -116,4 +131,36 @@ describe('ReportsComponent list', () => {
 
         expect(fixture.nativeElement.querySelector('senergy-page-header button').textContent).toContain('New report');
     }));
+    describe('view state in the URL', () => {
+        const rights = { create: true, read: true, update: true, delete: true };
+        const firstRowText = () => (fixture.nativeElement.querySelector('tr[mat-row]') as HTMLElement).textContent;
+
+        it('opens on the page and the sort of the URL without writing them back', fakeAsync(() => {
+            init(rights, { page: '1', sort: 'name', dir: 'desc' }, 1);
+
+            expect(component.paginator.pageIndex).toBe(1);
+            expect(firstRowText()).toContain('Energy');
+            expect(urlState.writes).toEqual([]);
+        }));
+
+        it('moves a page beyond the end to the last page and writes it', fakeAsync(() => {
+            init(rights, { page: '5' }, 1);
+
+            expect(component.paginator.pageIndex).toBe(1);
+            expect(urlState.writes).toEqual([{ page: 1 }]);
+        }));
+
+        it('goes back to the first page for a new search and writes the sort of a header click', fakeAsync(() => {
+            init(rights, { page: '1' }, 1);
+
+            search.next('e');
+            tick(10);
+            fixture.detectChanges();
+            expect(component.paginator.pageIndex).toBe(0);
+            expect(urlState.writes).toContain({ page: null });
+
+            component.matSortChange({ active: 'name', direction: 'desc' });
+            expect(urlState.writes[urlState.writes.length - 1]).toEqual({ sort: 'name', dir: 'desc', page: null });
+        }));
+    });
 });

@@ -26,6 +26,8 @@ import { DeviceGroupModel } from './shared/device-groups.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('DeviceGroupsComponent delete', () => {
     const one = { id: 'urn:infai:ses:device-group:1', name: 'One' } as DeviceGroupModel;
@@ -56,6 +58,7 @@ describe('DeviceGroupsComponent delete', () => {
                 { provide: DialogsService, useValue: dialogs },
                 { provide: MatSnackBar, useValue: snackBar },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: PermissionsService, useValue: permissions },
             ],

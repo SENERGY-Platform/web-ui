@@ -36,8 +36,8 @@
 
   <div class="list-card" [hidden]="!ready || reportsDataSource.data.length === 0">
     <div class="table-container">
-      <table mat-table [dataSource]="reportsDataSource" matSort matSortActive="name"
-        matSortDirection="asc" matSortDisableClear>
+      <table mat-table [dataSource]="reportsDataSource" matSort (matSortChange)="matSortChange($event)"
+        [matSortActive]="sortBy" [matSortDirection]="sortDirection" matSortDisableClear>
 
         <ng-container matColumnDef="name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>

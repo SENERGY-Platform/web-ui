@@ -88,4 +88,39 @@ describe('DeviceInstancesEditDialogComponent', () => {
         expect(newComponent(deviceWithNickname()).readOnly).toBeFalse();
         expect(newComponent(deviceWithNickname(), true).readOnly).toBeTrue();
     });
+
+    describe('attributes of other origins', () => {
+        const connectorAttr = { key: 'senergy/lora/dev-addr', value: 'abc', origin: 'lorawan-platform-connector' };
+        const defaultAttr = { key: 'last_message_max_age', value: '1h', origin: 'default' };
+        const ownAttr = { key: 'timezone', value: 'Europe/Berlin', origin: 'web-ui' };
+
+        it('are locked until unlocked, account defaults stay locked', () => {
+            const component = newComponent({ ...deviceWithNickname(), attributes: [connectorAttr, defaultAttr, ownAttr] });
+            expect(component.hasForeignAttributes()).toBeTrue();
+            expect(component.editableAttribute(ownAttr)).toBeTrue();
+            expect(component.editableAttribute(connectorAttr)).toBeFalse();
+            expect(component.editableAttribute(defaultAttr)).toBeFalse();
+
+            component.foreignAttributesUnlocked = true;
+            expect(component.editableAttribute(connectorAttr)).toBeTrue();
+            expect(component.editableAttribute(defaultAttr)).toBeFalse();
+        });
+
+        it('do not include account defaults or the nickname', () => {
+            const component = newComponent({ ...deviceWithNickname(), attributes: [...deviceWithNickname().attributes!, defaultAttr] });
+            expect(component.hasForeignAttributes()).toBeFalse();
+        });
+
+        it('offer the lock in the title only where the dialog edits', () => {
+            const device = { ...deviceWithNickname(), attributes: [connectorAttr] };
+            const lock = (readOnly: boolean) => {
+                newComponent(device, readOnly);
+                const fixture = TestBed.createComponent(DeviceInstancesEditDialogComponent);
+                fixture.detectChanges();
+                return fixture.nativeElement.querySelector('h2 .foreign-attributes-lock');
+            };
+            expect(lock(false)).not.toBeNull();
+            expect(lock(true)).toBeNull();
+        });
+    });
 });

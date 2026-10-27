@@ -34,6 +34,8 @@ import { SmartServiceInstanceDialogService } from '../instances/shared/instance-
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { ContentReviewService } from '../requests/shared/content-review.service';
 import { ProposeDialogComponent } from '../requests/propose-dialog/propose-dialog.component';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('SmartServiceReleasesComponent propose action', () => {
     let fixture: ComponentFixture<SmartServiceReleasesComponent>;
@@ -69,6 +71,7 @@ describe('SmartServiceReleasesComponent propose action', () => {
                 { provide: MatDialog, useValue: { open: openDialog } },
                 { provide: DialogsService, useValue: {} },
                 { provide: Router, useValue: { navigate } },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
                 { provide: SmartServiceInstanceDialogService, useValue: {} },
                 { provide: ContentReviewService, useValue: { canProposeRelease } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },

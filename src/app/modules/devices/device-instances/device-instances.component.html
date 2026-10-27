@@ -136,7 +136,7 @@
   <div class="list-card" [hidden]="!ready || dataSource.data.length === 0">
     <div class="table-container">
       <table mat-table [dataSource]="dataSource" matSort (matSortChange)="matSortChange($event)"
-        [matSortActive]="list.sortBy" [matSortDirection]="list.sortDirection">
+        [matSortActive]="list.sortColumn" [matSortDirection]="list.sortDirection">
         <ng-container matColumnDef="select">
           <th mat-header-cell *matHeaderCellDef class="select-column">
             <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -267,7 +267,7 @@
       </mat-menu>
     </div>
 
-    <mat-paginator #paginator [length]="totalCount" [pageSize]="preferencesService.pageSize"
+    <mat-paginator #paginator senergyKeepPageInRange [length]="totalCount" [pageSize]="preferencesService.pageSize" [pageIndex]="list.pageIndex"
       [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
   </div>
 </div>

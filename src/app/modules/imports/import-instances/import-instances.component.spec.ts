@@ -20,6 +20,8 @@ import { CoreModule } from '../../../core/core.module';
 import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -124,6 +126,7 @@ describe('ImportInstancesComponent', () => {
                 { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
                 { provide: DialogsService, useValue: deleteDialogServiceSpy },
                 { provide: Router, useValue: routerSpy },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
                 { provide: ActivatedRoute, useValue: activatedRouteSpy },
                 { provide: SearchbarService, useValue: searchbarSpy },
                 { provide: MatDialog, useValue: dialogSpy },
@@ -180,6 +183,48 @@ describe('ImportInstancesComponent', () => {
         dialogSpy.open.calls.reset();
         component.export(testInstance);
         expect(dialogSpy.open).toHaveBeenCalled();
+    });
+
+    describe('view state in the URL', () => {
+        let urlState: UrlStateServiceMock;
+        let storedToggle: string | null;
+
+        beforeEach(() => {
+            urlState = TestBed.inject(UrlStateService) as UrlStateServiceMock;
+            storedToggle = localStorage.getItem('import.instances.excludeGenerated');
+        });
+
+        afterEach(() => {
+            if (storedToggle === null) {
+                localStorage.removeItem('import.instances.excludeGenerated');
+            } else {
+                localStorage.setItem('import.instances.excludeGenerated', storedToggle);
+            }
+        });
+
+        it('takes the generated toggle from the URL over the stored one', () => {
+            localStorage.setItem('import.instances.excludeGenerated', 'true');
+
+            urlState.params = { generated: 'show' };
+            component.ngOnInit();
+            expect(component.excludeGenerated).toBeFalse();
+
+            urlState.params = { generated: 'hide' };
+            component.ngOnInit();
+            expect(component.excludeGenerated).toBeTrue();
+        });
+
+        it('writes the toggle as show or hide with the page dropped, and nothing when the value did not change', () => {
+            component.excludeGenerated = false;
+
+            component.setExcludeGenerated(false);
+            expect(urlState.writes).toEqual([]);
+
+            component.setExcludeGenerated(true);
+            component.setExcludeGenerated(false);
+            expect(urlState.writes).toContain({ generated: 'hide', page: null });
+            expect(urlState.writes).toContain({ generated: 'show', page: null });
+        });
     });
 
     describe('header checkbox', () => {

@@ -16,7 +16,7 @@
 
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, convertToParamMap, ParamMap, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -24,7 +24,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { delay } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { DeviceInstancesComponent } from './device-instances.component';
 import { DeviceInstancesService } from './shared/device-instances.service';
@@ -36,6 +36,8 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { CoreModule } from '../../../core/core.module';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 
 describe('DeviceInstancesComponent list', () => {
     let component: DeviceInstancesComponent;
@@ -45,13 +47,16 @@ describe('DeviceInstancesComponent list', () => {
     const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
     const exportDataService: Spy<ExportDataService> = createSpyFromClass<ExportDataService>(ExportDataService);
     let dialogService: Spy<DeviceInstancesDialogService>;
+    let routeParams: BehaviorSubject<ParamMap>;
+    let urlState: UrlStateServiceMock;
     const device = (write: boolean): DeviceInstanceModel => ({
         id: 'urn:device:1', name: 'meter', display_name: 'Meter', device_type_id: 'dt', device_type_name: 'Smart meter',
         connection_state: 'online', shared: false, attributes: [{ key: 'inactive', value: 'true', origin: 'web-ui' }],
         permissions: { read: true, write, administrate: write, execute: true },
     } as unknown as DeviceInstanceModel);
 
-    function init(share = true, nameRight = true) {
+    function init(share = true, nameRight = true, urlParams: Record<string, string> = {}) {
+        routeParams = new BehaviorSubject(convertToParamMap(urlParams));
         service.getDeviceInstances.and.returnValue(of({ result: [device(true)], total: 1 }).pipe(delay(1)));
         service.userHasShareAuthorization.and.returnValue(share);
         service.userHasDeleteAuthorization.and.returnValue(true);
@@ -76,6 +81,15 @@ describe('DeviceInstancesComponent list', () => {
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: DialogsService, useValue: {} },
                 { provide: MatDialog, useValue: { open: jasmine.createSpy('open') } },
+                { provide: ActivatedRoute, useValue: { queryParamMap: routeParams } },
+                {
+                    provide: UrlStateService,
+                    useFactory: () => {
+                        urlState = new UrlStateServiceMock();
+                        urlState.params = urlParams;
+                        return urlState;
+                    },
+                },
             ],
         }).compileComponents();
         spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
@@ -175,4 +189,45 @@ describe('DeviceInstancesComponent list', () => {
         expect(chip().classList).not.toContain('failed');
         expect(chip().classList).not.toContain('hollow');
     }));
+    describe('view state in the URL', () => {
+        const lastRequest = () => service.getDeviceInstances.calls.mostRecent().args[0];
+
+        it('makes one opening load with the filter and the page of the URL', fakeAsync(() => {
+            init(true, true, { 'network-id': 'n1', page: '2', sort: 'log_state', dir: 'desc' });
+            discardPeriodicTasks();
+
+            expect(service.getDeviceInstances).toHaveBeenCalledTimes(1);
+            expect(lastRequest()).toEqual(jasmine.objectContaining({ hubId: 'n1', offset: 2 * component.list.pageSize, sortBy: 'annotations.connected', sortDesc: true }));
+            expect(component.list.sortColumn).toBe('log_state');
+            expect(urlState.writes).toEqual([]);
+        }));
+
+        it('reloads once for a filter that changed in the URL and not for a write of another key', fakeAsync(() => {
+            init(true, true, { 'network-id': 'n1' });
+            service.getDeviceInstances.calls.reset();
+
+            routeParams.next(convertToParamMap({ 'network-id': 'n1', sort: 'display_name', dir: 'desc' }));
+            tick(10);
+            expect(service.getDeviceInstances).not.toHaveBeenCalled();
+
+            routeParams.next(convertToParamMap({ 'network-id': 'n2' }));
+            tick(10);
+            discardPeriodicTasks();
+            expect(service.getDeviceInstances).toHaveBeenCalledTimes(1);
+            expect(lastRequest().hubId).toBe('n2');
+        }));
+
+        it('drops the page when the filters are written', fakeAsync(() => {
+            init(true, true, { page: '2' });
+            discardPeriodicTasks();
+            const navigate = TestBed.inject(Router).navigate as jasmine.Spy;
+
+            component.routerNetwork = 'n3';
+            component.updateQueryParams();
+
+            const extras = navigate.calls.mostRecent().args[1];
+            expect(extras.queryParamsHandling).toBe('merge');
+            expect(extras.queryParams).toEqual(jasmine.objectContaining({ 'network-id': 'n3', page: null, 'device-id': null }));
+        }));
+    });
 });

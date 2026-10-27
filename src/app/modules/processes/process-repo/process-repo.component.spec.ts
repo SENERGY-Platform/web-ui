@@ -17,6 +17,8 @@
 import { TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Router } from '@angular/router';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, Subject } from 'rxjs';
 import { ProcessRepoComponent } from './process-repo.component';
@@ -50,6 +52,7 @@ describe('ProcessRepoComponent', () => {
     let repoService: jasmine.SpyObj<ProcessRepoService>;
     let permissionsService: jasmine.SpyObj<PermissionsService>;
     let responses: Subject<ListResponse>[];
+    let urlState: UrlStateServiceMock;
 
     beforeEach(() => {
         responses = [];
@@ -83,8 +86,10 @@ describe('ProcessRepoComponent', () => {
                 { provide: DialogsService, useValue: {} },
                 { provide: MatSnackBar, useValue: jasmine.createSpyObj('MatSnackBar', ['open']) },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
             ],
         });
+        urlState = TestBed.inject(UrlStateService) as UrlStateServiceMock;
         component = TestBed.createComponent(ProcessRepoComponent).componentInstance;
     });
 
@@ -162,5 +167,30 @@ describe('ProcessRepoComponent', () => {
         responses[1].next({ result: [process('b', 'u1')], total: 1 });
 
         expect(component.selection.selected).toEqual([]);
+    });
+    it('opens on the tab the URL names, with its owner filter in the first load', () => {
+        urlState.params = { tab: '2' };
+
+        component.ngOnInit();
+
+        expect(component.activeIndex).toBe(2);
+        expect(ownerFilterOfCall(0)).toEqual({ notOwner: 'u1' });
+        expect(urlState.writes).toEqual([]);
+    });
+
+    it('takes a tab beyond the last one as the last tab', () => {
+        urlState.params = { tab: '9' };
+
+        component.ngOnInit();
+
+        expect(component.activeIndex).toBe(2);
+    });
+
+    it('writes the tab with the sort and the page dropped when the tab changes', () => {
+        component.setIndex(1);
+        component.setIndex(0);
+
+        expect(urlState.writes[0]).toEqual({ tab: 1, sort: null, dir: null, page: null });
+        expect(urlState.writes[1]).toEqual({ tab: null, sort: null, dir: null, page: null });
     });
 });

@@ -52,6 +52,8 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
 import { MatCheckbox } from '@angular/material/checkbox';
 import { DatePipe } from '@angular/common';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 
 /** The reason of a thrown error as ": reason", empty when there is none to show. */
 function errorSuffix(err: unknown): string {
@@ -64,7 +66,7 @@ function errorSuffix(err: unknown): string {
     templateUrl: './pipeline-registry.component.html',
     styleUrls: ['./pipeline-registry.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, DatePipe]
 })
 export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     private pipelineRegistryService = inject(PipelineRegistryService);
@@ -82,6 +84,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     private activatedRoute = inject(ActivatedRoute);
     private router = inject(Router);
     private smartServiceModuleService = inject(SmartServiceModuleService);
+    private urlState = inject(UrlStateService);
 
     readonly dateFormat = LIST_DATE_FORMAT;
     dataSource: MatTableDataSource<PipelineModel> = new MatTableDataSource();
@@ -90,7 +93,7 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
     listSelection = new ListSelection<PipelineModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     totalCount = 0;
-    list = new PagedListState(this.preferencesService, () => this.loadPipelines().pipe(tap(pipelines => this.setPipelines(pipelines))), { sortBy: 'createdat', sortDirection: 'desc' });
+    list = new PagedListState(this.preferencesService, () => this.loadPipelines().pipe(tap(pipelines => this.setPipelines(pipelines))), { sortBy: 'createdat', sortDirection: 'desc', urlState: this.urlState });
     search: string | undefined = undefined;
 
     userId: string | Error = '';
@@ -327,12 +330,13 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
                     this.routerFlow = filterSelectionInner.flows;
                     this.routerFlowNames = filterSelectionInner.flowNames;
                     const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames,
-                        flow: this.routerFlow, flowName: this.routerFlowNames};
+                        flow: this.routerFlow, flowName: this.routerFlowNames, page: null};
                     this.router.navigate(
                         [],
                         {
                             relativeTo: this.activatedRoute,
-                            queryParams
+                            queryParams,
+                            queryParamsHandling: 'merge',
                         },
                     );
                     this.cd.detectChanges();
@@ -353,12 +357,13 @@ export class PipelineRegistryComponent implements OnInit, AfterViewInit {
             this.routerFlowNames!.splice(i, 1);
         }
         const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames,
-            flow: this.routerFlow, flowName: this.routerFlowNames};
+            flow: this.routerFlow, flowName: this.routerFlowNames, page: null};
         this.router.navigate(
             [],
             {
                 relativeTo: this.activatedRoute,
-                queryParams
+                queryParams,
+                queryParamsHandling: 'merge',
             },
         );
         this.reload();

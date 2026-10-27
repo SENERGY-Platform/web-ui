@@ -188,9 +188,12 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
     }
     // edit old device is the same for all 'mode' options
     this.data.device.local_id += '_' + this.datePipe.transform(new Date(), 'yy_MM_dd');
-    const attrIndex = this.data.device.attributes?.findIndex(a => a.key === 'inactive') || -1;
-    if (attrIndex != -1) {
-      this.data.device.attributes![attrIndex].value = 'true'; // just checked
+    const inactiveAttr = this.data.device.attributes?.find(a => a.key === 'inactive');
+    if (inactiveAttr !== undefined) {
+      inactiveAttr.value = 'true';
+      if (inactiveAttr.origin === this.deviceInstancesService.defaultOrigin) {
+        inactiveAttr.origin = 'web-ui'; // account defaults are not saved with the device
+      }
     } else {
       const attr: Attribute = {
         key: 'inactive',

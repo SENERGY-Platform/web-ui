@@ -27,9 +27,11 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { MatSort, MatSortHeader } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { switchMap } from 'rxjs/operators';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import {PermissionsDialogService} from '../../permissions/shared/permissions-dialog.service';
 import {PermissionsV2RightsAndIdModel} from '../../permissions/shared/permissions-resource.model';
 import {PipelineRegistryService} from '../pipeline-registry/shared/pipeline-registry.service';
@@ -55,7 +57,7 @@ import {HttpErrorResponse} from '@angular/common/http';
     templateUrl: './operator-repo.component.html',
     styleUrls: ['./operator-repo.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatIcon, MatTooltip, MatSortHeader, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, SpinnerComponent]
 })
 export class OperatorRepoComponent implements OnInit, AfterViewInit {
     private operatorRepoService = inject(OperatorRepoService);
@@ -70,6 +72,7 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
     private pipeService = inject(PipelineRegistryService);
     private flowService = inject(FlowRepoService);
     private router = inject(Router);
+    private urlState = inject(UrlStateService);
 
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     @ViewChild('sort', { static: false }) sort!: MatSort;
@@ -78,6 +81,8 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
     selection = this.listSelection.model;
     displayedColumns: string[] = ['select', 'name', 'pub', 'version', 'image', 'actions'];
     totalCount = 0;
+    pageIndex = 0;
+    initialSort: { active: string; direction: SortDirection } = { active: 'name', direction: 'asc' };
 
     operators = [] as OperatorModel[];
     operatorsDataSource = new MatTableDataSource<OperatorModel>();
@@ -98,6 +103,8 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
     flowOperatorUsagePerOperator: FlowOperatorUsage[] = [];
 
     ngOnInit() {
+        this.initialSort = this.urlState.getSort('name', 'asc');
+        this.pageIndex = this.urlState.getPage();
         this.userHasCreateAuthorization = this.operatorRepoService.userHasCreateAuthorization();
         this.userHasUpdateAuthorization = this.operatorRepoService.userHasUpdateAuthorization();
         this.userHasDeleteAuthorization = this.operatorRepoService.userHasDeleteAuthorization();
@@ -114,9 +121,15 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit() {
         this.operatorsDataSource.sort = this.sort;
-        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        this.sort.sortChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((sort: Sort) => {
             this.paginator.pageIndex = 0;
+            this.pageIndex = 0;
             this.selectionClear();
+            this.urlState.setSort(sort, 'name', 'asc');
+        });
+        this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e: PageEvent) => {
+            this.pageIndex = e.pageIndex;
+            this.urlState.setPage(e.pageIndex);
         });
 
         // set up once: a search or reload only triggers this pipeline, a new one per call would multiply the requests
@@ -135,12 +148,10 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
                 takeUntilDestroyed(this.destroyRef),
             )
             .subscribe((resp: { operators: OperatorModel[]; totalCount: number }) => {
-                if (resp.operators.length > 0) {
-                    this.operators = resp.operators;
-                    this.operatorsDataSource.data = this.operators;
-
-                    this.totalCount = resp.totalCount;
-                }
+                // an empty page too: the paginator needs the total to move a page from the URL beyond the end back
+                this.operators = resp.operators;
+                this.operatorsDataSource.data = this.operators;
+                this.totalCount = resp.totalCount;
                 this.loadOperatorPermissions();
                 this.ready = true;
             });
@@ -223,8 +234,16 @@ export class OperatorRepoComponent implements OnInit, AfterViewInit {
     }
 
     private initSearchAndGetOperators() {
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((searchText: string) => {
             this.searchText = searchText;
+            if (!opening) {
+                this.paginator.pageIndex = 0;
+                this.pageIndex = 0;
+                this.urlState.setPage(0);
+            }
+            opening = false;
             this.getOperators(true);
         });
     }

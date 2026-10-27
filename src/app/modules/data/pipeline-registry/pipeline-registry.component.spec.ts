@@ -31,6 +31,8 @@ import { UtilService } from '../../../core/services/util.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { SmartServiceModuleService } from '../../smart-services/instances/shared/modules.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('PipelineRegistryComponent delete', () => {
     const one = { id: 'pipeline-1', name: 'One', operators: [] } as unknown as PipelineModel;
@@ -69,6 +71,7 @@ describe('PipelineRegistryComponent delete', () => {
                 { provide: SmartServiceModuleService, useValue: {} },
                 { provide: ActivatedRoute, useValue: {} },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
             ],
         });
         TestBed.overrideComponent(PipelineRegistryComponent, { set: { template: '', imports: [] } });

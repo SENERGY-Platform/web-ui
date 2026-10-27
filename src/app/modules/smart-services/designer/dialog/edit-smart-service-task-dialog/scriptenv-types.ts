@@ -15,20 +15,20 @@
  */
 
 /*
- * VENDORED -- do not edit by hand. This is doc/script-env.d.ts of
- * github.com/SENERGY-Platform/smart-service-module-worker-lib, where it is generated
- * from the go source by `go generate ./...`, wrapped as a string.
+ * VENDORED -- do not edit by hand. This is docs/scripts/modules/script-env.d.ts of
+ * github.com/SENERGY-Platform/automation-engine, where it is generated from the go source
+ * by `go generate ./pkg/scriptdoc`, wrapped as a string.
  *
  * Refresh with:
  *
- *   npm run vendor:scriptenv-types -- <path-to>/doc/script-env.d.ts \
+ *   npm run vendor:scriptenv-types -- <path-to>/docs/scripts/modules/script-env.d.ts \
  *     src/app/modules/smart-services/designer/dialog/edit-smart-service-task-dialog/scriptenv-types.ts
  */
 
 /** Declarations handed to the code editor as a TypeScript extra lib. */
 export const smartServiceScriptEnvTypes = `
 /*
- * Copyright (c) 2026 InfAI (CC SES)
+ * Copyright 2026 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,13 @@ export const smartServiceScriptEnvTypes = `
  */
 
 /*
- * generated in github.com/SENERGY-Platform/smart-service-module-worker-lib with a command like:
- * go generate ./...
+ * generated in github.com/SENERGY-Platform/automation-engine with:
+ * go generate ./pkg/scriptdoc
  *
- * declares what a smart-service pre/postscript may use. property names are the names
- * the script runtime exposes, which are the json tag names of the underlying go structs.
-*/
+ * the script API of pre- and postscripts of module tasks. property names are the names the
+ * script runtime exposes, the json tag names of the underlying go structs.
+ */
+
 
 interface Aspect {
     id: string;
@@ -347,13 +348,21 @@ declare const deviceRepo: {
 
 declare const inputs: {
     /**
-     * Exists checks if a process worker input exists
+     * Exists checks if a process worker input or a variable of the instance exists
      */
     exists(name: string): boolean;
     /**
-     * Get value of a process worker input
+     * Get value of a process worker input; a name that is no input of the task finds the variable
+     * of the instance, e.g. a start parameter
+     * @deprecated use getValue, which returns selections and lists as values instead of JSON text
      */
     get(name: string): any;
+    /**
+     * GetValue returns a process worker input or a variable of the instance as a value: JSON text
+     * of an object or a list, as IoT and multiple selections arrive, becomes that object or list,
+     * also in each element of a list; other values stay as they are
+     */
+    getValue(name: string): any;
     /**
      * List input values sorted by their names
      */
@@ -375,6 +384,7 @@ declare const outputs: {
     set(name: string, value: any): void;
     /**
      * SetJson marshals the given value to json and sets it as a process worker output
+     * @deprecated use set; the engine keeps values as they are, Camunda needed the JSON text
      */
     setJson(name: string, value: any): void;
 };
@@ -382,6 +392,7 @@ declare const outputs: {
 declare const util: {
     /**
      * GetDevicesWithServiceFromEntityString finds a list of iot-options where the entity is the same the input, but the Service field is set with those that match the input criteria
+     * @deprecated use getDevicesWithServiceFromIotOption with the option as a value, e.g. from inputs.getValue
      */
     getDevicesWithServiceFromEntityString(entityStr: string, criteria: FilterCriteria[]): IotOption[];
     /**
@@ -397,7 +408,7 @@ declare const util: {
      */
     getUserToken(): string;
     /**
-     * GroupIotOptionsByDevice groups a list of model.IotOption by their device id; options that are not devices will be grouped under ""
+     * GroupIotOptionsByDevice groups a list of IotOption by their device id; options that are not devices will be grouped under ""
      */
     groupIotOptionsByDevice(entities: IotOption[]): Record<string, IotOption[]>;
     /**
@@ -410,6 +421,7 @@ declare const util: {
     isDeviceGroupIotOption(entity: IotOption): boolean;
     /**
      * IsDeviceGroupIotOptionStr checks if the input is a device-group
+     * @deprecated use isDeviceGroupIotOption with the option as a value, e.g. from inputs.getValue
      */
     isDeviceGroupIotOptionStr(entityStr: string): boolean;
     /**
@@ -418,6 +430,7 @@ declare const util: {
     isDeviceIotOption(entity: IotOption): boolean;
     /**
      * IsDeviceIotOptionStr checks if the input is a device
+     * @deprecated use isDeviceIotOption with the option as a value, e.g. from inputs.getValue
      */
     isDeviceIotOptionStr(entityStr: string): boolean;
     /**
@@ -426,6 +439,7 @@ declare const util: {
     isImportIotOption(entity: IotOption): boolean;
     /**
      * IsImportIotOptionStr checks if the input is a import
+     * @deprecated use isImportIotOption with the option as a value, e.g. from inputs.getValue
      */
     isImportIotOptionStr(entityStr: string): boolean;
 };
@@ -449,8 +463,15 @@ declare const variables: {
     exists(name: string): boolean;
     /**
      * Read value of a smart-service instance variable
+     * @deprecated use readValue, which returns selections and lists as values instead of JSON text
      */
     read(name: string): any;
+    /**
+     * ReadValue returns a smart-service instance variable as a value: JSON text of an object or a
+     * list, as IoT and multiple selections arrive, becomes that object or list, also in each element
+     * of a list; other values stay as they are
+     */
+    readValue(name: string): any;
     /**
      * Ref creates a reference to a variable (e.g. "my_var_name" --> "{{.my_var_name}}")
      * throws exception if variable is unknown

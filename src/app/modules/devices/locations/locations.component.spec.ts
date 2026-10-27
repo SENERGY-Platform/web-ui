@@ -25,6 +25,8 @@ import { LocationsService } from './shared/locations.service';
 import { ExtendedLocationModel } from './shared/locations.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('LocationsComponent delete', () => {
     const one = { id: 'urn:infai:ses:location:1', name: 'One' } as ExtendedLocationModel;
@@ -51,6 +53,7 @@ describe('LocationsComponent delete', () => {
                 { provide: DialogsService, useValue: dialogs },
                 { provide: MatSnackBar, useValue: snackBar },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
                 { provide: PermissionsDialogService, useValue: {} },
             ],
         });

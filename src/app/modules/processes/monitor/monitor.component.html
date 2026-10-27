@@ -65,7 +65,7 @@
         <div class="list-card" [hidden]="animation || isLoadingResultsRunning || totalCountRunning === 0">
           <div class="table-container">
             <table #sortRunning="matSort" mat-table [dataSource]="dataSourceRunning" matSort
-              matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
+              [matSortActive]="sortActive" [matSortDirection]="sortDirection" matSortDisableClear>
               <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef class="select-column">
                   <mat-checkbox (change)="$event ? masterToggleRunning() : null"
@@ -118,8 +118,8 @@
               <tr mat-row *matRowDef="let row; columns: displayedColumnsRunning;" [class.clickable-row]="!isPlaceholder(row)" (click)="!isPlaceholder(row) && openDetailsDialog(row.id)"></tr>
             </table>
           </div>
-          <mat-paginator #paginatorRunning [length]="totalCountRunning" [pageSize]="preferencesService.pageSize"
-            [pageSizeOptions]="[20, 50, 75, 100]" (page)="paginatorRunningPage($event)" showFirstLastButtons></mat-paginator>
+          <mat-paginator #paginatorRunning senergyKeepPageInRange [length]="totalCountRunning" [pageSize]="preferencesService.pageSize"
+            [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="paginatorRunningPage($event)" showFirstLastButtons></mat-paginator>
         </div>
       </div>
     </mat-tab>
@@ -170,7 +170,7 @@
         <div class="list-card" [hidden]="animation || isLoadingResultsFinished || totalCountFinished === 0">
           <div class="table-container">
             <table #sortFinished="matSort" mat-table [dataSource]="dataSourceFinished" matSort
-              matSortActive="startTime" matSortDirection="desc" matSortDisableClear>
+              [matSortActive]="sortActive" [matSortDirection]="sortDirection" matSortDisableClear>
               <ng-container matColumnDef="select">
                 <th mat-header-cell *matHeaderCellDef class="select-column">
                   <mat-checkbox (change)="$event ? masterToggle() : null"
@@ -229,8 +229,8 @@
               <tr mat-row *matRowDef="let row; columns: displayedColumnsFinished;" [class.clickable-row]="row.state !== 'COMPLETED'" (click)="row.state !== 'COMPLETED' && openDetailsDialog(row.id)"></tr>
             </table>
           </div>
-          <mat-paginator #paginatorFinished [length]="totalCountFinished" [pageSize]="preferencesService.pageSize"
-            [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
+          <mat-paginator #paginatorFinished senergyKeepPageInRange [length]="totalCountFinished" [pageSize]="preferencesService.pageSize"
+            [pageIndex]="pageIndex" [pageSizeOptions]="[20, 50, 75, 100]" (page)="selectionClear($event)" showFirstLastButtons></mat-paginator>
         </div>
       </div>
     </mat-tab>

@@ -35,20 +35,23 @@ import { PermissionsDialogService } from '../permissions/shared/permissions-dial
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { CoreModule } from '../../core/core.module';
+import { UrlStateService } from '../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../core/services/url-state.service.mock';
 
 describe('ExportComponent list', () => {
     let component: ExportComponent;
     let fixture: ComponentFixture<ExportComponent>;
     let router: Router;
+    let urlState: UrlStateServiceMock;
 
     const service: Spy<ExportService> = createSpyFromClass<ExportService>(ExportService);
     const permissions: Spy<PermissionsService> = createSpyFromClass<PermissionsService>(PermissionsService);
     const exportData: Spy<ExportDataService> = createSpyFromClass<ExportDataService>(ExportDataService);
     const exp = { ID: 'exp-1', Name: 'Temperature', Description: 'Hourly', FilterType: 'deviceId', Generated: true } as ExportModel;
 
-    function init(rights = { create: true, update: true, delete: true }) {
+    function init(rights = { create: true, update: true, delete: true }, urlParams: Record<string, string> = {}, total = 1) {
         ['data.exports.showGenerated', 'data.exports.search', 'data.exports.searchField'].forEach(key => localStorage.removeItem(key));
-        service.getExports.and.returnValue(of({ instances: [exp], total: 1 } as any));
+        service.getExports.and.returnValue(of({ instances: [exp], total } as any));
         service.userHasCreateAuthorization.and.returnValue(rights.create);
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
         service.userHasDeleteAuthorization.and.returnValue(rights.delete);
@@ -66,6 +69,14 @@ describe('ExportComponent list', () => {
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: AuthorizationService, useValue: { getUserId: () => 'me', getUserRoles: () => [] } },
                 { provide: DialogsService, useValue: {} },
+                {
+                    provide: UrlStateService,
+                    useFactory: () => {
+                        urlState = new UrlStateServiceMock();
+                        urlState.params = urlParams;
+                        return urlState;
+                    },
+                },
             ],
         }).compileComponents();
         router = TestBed.inject(Router);
@@ -173,4 +184,37 @@ describe('ExportComponent list', () => {
         component.showGenerated = true;
         expect(component.filtered).toBeTrue();
     }));
+    describe('view state in the URL', () => {
+        it('makes one opening load with the page, sort, toggle and search field of the URL and writes nothing', fakeAsync(() => {
+            init({ create: true, update: true, delete: true }, { page: '1', sort: 'name', dir: 'asc', generated: 'show', 'search-field': 'description' }, 100);
+            discardPeriodicTasks();
+
+            expect(service.getExports).toHaveBeenCalledTimes(1);
+            const [internal, search, pageSize, offset, ...rest] = service.getExports.calls.mostRecent().args;
+            expect([internal, search, offset, ...rest]).toEqual([false, '', pageSize, 'name', 'asc', undefined, 'description']);
+            expect(component.paginator.pageIndex).toBe(1);
+            expect(urlState.writes).toEqual([]);
+        }));
+
+        it('takes only one of the offered search fields from the URL', fakeAsync(() => {
+            init({ create: true, update: true, delete: true }, { 'search-field': 'name;drop' });
+            discardPeriodicTasks();
+
+            expect(component.searchField).toBe('name');
+        }));
+
+        it('writes the toggle and the search field explicitly and returns to the first page', fakeAsync(() => {
+            init({ create: true, update: true, delete: true }, { page: '1' }, 100);
+
+            component.setShowGenerated(true);
+            component.searchField = 'description';
+            component.searchFieldChanged();
+            tick(10);
+            discardPeriodicTasks();
+
+            expect(urlState.writes).toContain({ generated: 'show' });
+            expect(urlState.writes).toContain({ 'search-field': 'description' });
+            expect(urlState.writes).toContain({ page: null });
+        }));
+    });
 });

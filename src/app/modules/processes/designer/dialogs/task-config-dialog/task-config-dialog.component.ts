@@ -106,6 +106,11 @@ export class TaskConfigDialogComponent implements OnInit {
     private listedAspectIds: { [functionType: string]: string[] } = { Measuring: [], Controlling: [] };
     private classified = new Map<string, AspectClassification>();
     private functionsSubscription?: Subscription;
+    /**
+     * The function a device class or aspect change cleared, with its loaded characteristic. The next listing that
+     * answers selects it again if it offers it; a function the user picks meanwhile replaces it.
+     */
+    private kept: { func: DeviceTypeFunctionModel; characteristic: DeviceTypeCharacteristicsModel } | null = null;
 
     constructor() {
         this.selection = this.data.selection;
@@ -271,6 +276,9 @@ export class TaskConfigDialogComponent implements OnInit {
 
     private initFunctions(): void {
         this.functionFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((func) => {
+            if (func) {
+                this.kept = null;
+            }
             this.getBaseCharacteristics(func);
             if (this.unlistedFunction && func !== this.unlistedFunction) {
                 this.functions = this.functions.filter((f) => f !== this.unlistedFunction);
@@ -282,14 +290,22 @@ export class TaskConfigDialogComponent implements OnInit {
                 this.deviceClasses = this.deviceClasses.filter((c) => c !== this.unlistedDeviceClass);
                 this.unlistedDeviceClass = null;
             }
-            this.resetFunctions();
-            this.getFunctions();
+            this.reloadFunctions();
         });
 
-        this.aspectFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-            this.resetFunctions();
-            this.getFunctions();
-        });
+        this.aspectFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.reloadFunctions());
+    }
+
+    /**
+     * A changed device class or aspect selection keeps the selected function if the new selection offers it too.
+     * The function is cleared while the new listing loads, so Save cannot write a function the selection may not offer.
+     */
+    private reloadFunctions(): void {
+        if (this.functionFormControl.value) {
+            this.kept = { func: this.functionFormControl.value, characteristic: this.characteristic };
+        }
+        this.resetFunctions();
+        this.getFunctions();
     }
 
     /**
@@ -321,7 +337,24 @@ export class TaskConfigDialogComponent implements OnInit {
             this.functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
             this.refreshSelected(this.functionFormControl, this.functions);
             this.offerStoredFunction();
+            this.selectKept();
         });
+    }
+
+    /**
+     * Silent, so the characteristic is not loaded anew: Save would otherwise be enabled while it is still empty. One
+     * that was not loaded yet when the function was cleared arrives from the request still running for it.
+     */
+    private selectKept(): void {
+        const kept = this.kept;
+        this.kept = null;
+        const listed = kept ? this.functions.find((f) => f.id === kept.func.id) : undefined;
+        if (kept && listed) {
+            this.functionFormControl.setValue(listed, { emitEvent: false });
+            if (kept.characteristic.id) {
+                this.characteristic = kept.characteristic;
+            }
+        }
     }
 
     private selectedAspectIds(): string[] {

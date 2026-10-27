@@ -36,6 +36,8 @@ import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsV2RightsAndIdModel } from '../../permissions/shared/permissions-resource.model';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
 import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
@@ -53,7 +55,7 @@ import { snackError } from 'src/app/core/services/snack-bar-messages';
     templateUrl: './import-types.component.html',
     styleUrls: ['./import-types.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, CurrencyPipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatIcon, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, CurrencyPipe]
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit {
     private importTypesService = inject(ImportTypesService);
@@ -67,6 +69,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     private costService = inject(CostService);
     private permissionsService = inject(PermissionsService);
     private prefeencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = ['name', 'description', 'image', 'actions'];
     dataSource = new MatTableDataSource<ImportTypeModelWithCostEstimation>();
@@ -74,9 +77,10 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     listSelection = new ListSelection<ImportTypeModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
     dataReady = false;
-    list = new PagedListState(this.prefeencesService, () => this.load().pipe(tap(() => this.dataReady = true)), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.prefeencesService, () => this.load().pipe(tap(() => this.dataReady = true)), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     searchText = '';
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;

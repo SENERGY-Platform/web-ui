@@ -38,6 +38,7 @@ import {PermissionsEditComponent} from '../permissions-edit/permissions-edit.com
 import {DialogsService} from '../../../../core/services/dialogs.service';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
 import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../../core/components/list-toolbar/list-toolbar.component';
 import { EmptyStateComponent } from '../../../../core/components/empty-state/empty-state.component';
@@ -76,6 +77,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     private snackBar = inject(MatSnackBar);
     private searchbarService = inject(SearchbarService);
     preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
 
     public displayedColumns = ['select', 'subject', 'resource', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'actions'];
@@ -121,6 +123,7 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     };
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     total = 0;
+    pageIndex = 0;
     selectedUser = '';
     selectedRole = '';
     selectedClientID = '';
@@ -157,20 +160,33 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
     }
 
     public ngOnInit() {
+        // read before the load, so the first list is the filtered one and a page from the URL is not clamped to the whole list
+        this.query = this.urlState.get('search') || '';
+        this.selectedUser = this.urlState.get('user') || '';
+        this.selectedRole = this.urlState.get('role') || '';
+        this.selectedClientID = this.urlState.get('client') || '';
+        this.selectedEndpoint = this.urlState.get('endpoint') || '';
+        this.sort = this.urlState.getSort('', '');
+        this.pageIndex = this.urlState.getPage();
         this.loadPolicies();
         this.userIsAdmin = this.authService.userIsAdmin();
         this.initAutoComplete();
+        // the first search is the one the page was opened with, so it keeps the page from the URL
+        let opening = true;
         this.searchbarService.currentSearchText.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((text) => {
             this.query = text;
             if (this.ready) {
-                this.filter();
+                this.filter(opening);
             }
+            opening = false;
         });
     }
 
     ngAfterViewInit() {
         this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
             this.preferencesService.pageSize = e.pageSize;
+            this.pageIndex = e.pageIndex;
+            this.urlState.setPage(this.pageIndex);
             this.sortData(this.sort, this.matching, e);
         });
     }
@@ -273,14 +289,24 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /** Bound to the table's matSortChange: another order puts other rows on every page, so the list returns to the first one. */
+    public sortChanged(sort: Sort) {
+        this.pageIndex = 0;
+        this.urlState.setSort(sort, '', '');
+        this.sortData(sort);
+    }
+
     public sortData(sort: Sort, policies: PermissionModel[] | undefined = undefined, pageEvent: PageEvent | undefined = undefined) {
         this.sort = sort;
         policies = policies || this.matching;
         const pageSize = pageEvent?.pageSize || this.paginator?.pageSize || 20;
-        const pageIndex = pageEvent?.pageIndex || 0;
-        if (!pageEvent && this.paginator) {
-            this.paginator.pageIndex = 0;
+        // a page from the URL beyond the end of a list that has become shorter moves to the last page
+        const lastPage = Math.max(0, Math.ceil(policies.length / pageSize) - 1);
+        if (this.pageIndex > lastPage) {
+            this.pageIndex = lastPage;
+            this.urlState.setPage(lastPage);
         }
+        const pageIndex = this.pageIndex;
         if (sort == null) {
             this.total = policies.length;
             this.sortedData = policies.slice(pageSize * pageIndex, pageSize * (pageIndex + 1));
@@ -437,11 +463,15 @@ export class PermissionsListComponent implements OnInit, AfterViewInit {
         this.filter();
     }
 
-    /** Applies the search and the filters to the loaded policies and shows the first page. */
-    filter() {
+    /** Applies the search and the filters to the loaded policies and shows the first page, except for the opening search. */
+    filter(keepPage = false) {
         const matching = this.matchingPolicies();
         if (matching) {
             this.matching = matching;
+            if (!keepPage) {
+                this.pageIndex = 0;
+                this.urlState.set({ user: this.selectedUser, role: this.selectedRole, client: this.selectedClientID, endpoint: this.selectedEndpoint, page: null });
+            }
             this.sortData(this.sort);
         }
     }

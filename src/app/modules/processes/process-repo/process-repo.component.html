@@ -25,7 +25,7 @@
   </ng-container>
 </senergy-page-header>
 
-<mat-tab-group dynamicHeight (selectedIndexChange)="setIndex($event)">
+<mat-tab-group dynamicHeight [selectedIndex]="activeIndex" (selectedIndexChange)="setIndex($event)">
   @for (tab of tabs; track tab) {
     <mat-tab [label]="tab">
       <senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
@@ -131,7 +131,7 @@
           (click)="openProcess(row)"></tr>
       </table>
     </div>
-    <mat-paginator #paginator [length]="totalCount" [pageSize]="list.pageSize" [pageSizeOptions]="[20, 50, 75, 100]"
-      showFirstLastButtons></mat-paginator>
+    <mat-paginator #paginator senergyKeepPageInRange [length]="totalCount" [pageSize]="list.pageSize" [pageIndex]="list.pageIndex"
+      [pageSizeOptions]="[20, 50, 75, 100]" showFirstLastButtons></mat-paginator>
   </div>
 </div>

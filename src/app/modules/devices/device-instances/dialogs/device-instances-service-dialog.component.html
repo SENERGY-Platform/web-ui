@@ -50,7 +50,7 @@
                 <span class="muted">{{service.description}}</span>
               }
               @if (serviceTables[i]?.time; as time) {
-                <span class="muted">Updated {{time | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+                <span class="muted" [matTooltip]="(time | date:'dd.MM.yyyy - HH:mm:ss') ?? ''">Updated {{timeAgo(time)}}</span>
               }
             </div>
             <div class="service-actions">
@@ -157,7 +157,7 @@
 
   @if (showValues) {
     <section class="block values-block">
-      <h3>Current values @if (tilesTime) {<span class="hint">{{tilesTime | date:'dd.MM.yyyy - HH:mm:ss'}}</span>}</h3>
+      <h3>Current values @if (tilesTime) {<span class="hint" [matTooltip]="(tilesTime | date:'dd.MM.yyyy - HH:mm:ss') ?? ''">{{timeAgo(tilesTime)}}</span>}</h3>
       @if (errorOccured) {
         <p class="muted">{{errorMessage}}</p>
       } @else if (!valuesLoaded) {
@@ -195,6 +195,34 @@
           <p class="muted">Loading</p>
         }
       </div>
+    </section>
+  }
+
+  @if (receivers.length > 0) {
+    <section class="block">
+      <h3>Receivers</h3>
+      <table class="values receivers">
+        <tbody>
+          @for (receiver of receivers; track $index) {
+            <tr>
+              <td class="field">
+                @switch (receivedLastMessage(receiver)) {
+                  @case (true) {
+                    <span class="status-chip online" matTooltip="Seen within 2 minutes of the last message">{{receiver.nimbus}}</span>
+                  }
+                  @case (false) {
+                    <span class="status-chip failed" matTooltip="Not seen within 2 minutes of the last message">{{receiver.nimbus}}</span>
+                  }
+                  @default {
+                    <span class="status-chip" matTooltip="Status could not be checked">{{receiver.nimbus}}</span>
+                  }
+                }
+              </td>
+              <td class="value" [matTooltip]="(receiver.time | date:'dd.MM.yyyy - HH:mm:ss') ?? ''">{{timeAgo(receiver.time)}}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
     </section>
   }
 

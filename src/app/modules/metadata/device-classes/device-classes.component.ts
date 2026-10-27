@@ -29,6 +29,8 @@ import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { MatPaginator } from '@angular/material/paginator';
 import {
     UsedInDeviceTypeQuery,
@@ -53,7 +55,7 @@ import { dialogSize } from '../../../core/dialog-size';
     templateUrl: './device-classes.component.html',
     styleUrls: ['./device-classes.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class DeviceClassesComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -64,16 +66,18 @@ export class DeviceClassesComponent implements OnInit, AfterViewInit {
     private dialogsService = inject(DialogsService);
     private deviceTypeService = inject(DeviceTypeService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = [];
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeDeviceClassModel>();
     listSelection = new ListSelection<DeviceTypeDeviceClassModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     searchText = '';
-    list = new PagedListState(this.preferencesService, () => this.getDeviceClasses(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.getDeviceClasses(), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;

@@ -28,6 +28,7 @@ import { NotificationModel } from './shared/notification.model';
 import { DialogsService } from '../../services/dialogs.service';
 import { PreferencesService } from '../../services/preferences.service';
 import { SearchbarService } from '../searchbar/shared/searchbar.service';
+import { UrlStateService } from '../../services/url-state.service';
 
 describe('NotificationsComponent list', () => {
     let fixture: ComponentFixture<NotificationsComponent>;
@@ -47,6 +48,8 @@ describe('NotificationsComponent list', () => {
                 { provide: NotificationService, useValue: service },
                 { provide: DialogsService, useValue: {} },
                 { provide: Router, useValue: router },
+                // the router is a stub, so the URL state is one as well
+                { provide: UrlStateService, useValue: { get: () => null, getPage: () => 0, set: () => undefined, setPage: () => undefined } },
                 { provide: SearchbarService, useValue: { currentSearchText: new BehaviorSubject(''), changeMessage: () => undefined } },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
             ],

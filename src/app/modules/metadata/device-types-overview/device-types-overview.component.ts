@@ -29,6 +29,8 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -47,7 +49,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './device-types-overview.component.html',
     styleUrls: ['./device-types-overview.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
@@ -58,6 +60,7 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     private router = inject(Router);
     private deviceInstancesDialogService = inject(DeviceInstancesDialogService);
     private preferencesSerivce = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = [];
     deviceTypes: DeviceTypeModel[] = [];
@@ -65,12 +68,13 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     dataSource = new MatTableDataSource<DeviceTypeModel>();
     listSelection = new ListSelection<DeviceTypeModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     searchControl = new FormControl<string | null>('');
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     searchText = '';
-    list = new PagedListState(this.preferencesSerivce, () => this.getDeviceTypes(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesSerivce, () => this.getDeviceTypes(), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;

@@ -311,6 +311,46 @@ describe('process writers on the process designer modeler', () => {
             expect(hasEditableInputs(selected())).toBe(true);
         });
 
+        describe('configured anew', () => {
+            const celsius = { id: 'urn:infai:ses:characteristic:celsius', name: 'celsius', type: 'https://schema.org/Float' };
+            const fahrenheit = { ...celsius, id: 'urn:infai:ses:characteristic:fahrenheit' };
+            const controllingInfo = (aspects: any[], characteristic = celsius) =>
+                connectorInfo({ function: controlling, aspect: aspects[0], aspects, characteristic, completionStrategy: 'optimistic' });
+            const io = () => selected().businessObject.extensionElements.values[0];
+
+            it('keeps the edited input values when the aspects change and the characteristic stays', () => {
+                writeDeviceTask(services, element('Task_1'), controllingInfo([air]));
+                expect(io().inputParameters[1].value).toBe('0');
+                io().inputParameters[1].value = '${target}';
+
+                writeDeviceTask(services, selected(), controllingInfo([air, water]));
+
+                expect(io().inputParameters.map((p: any) => p.name)).toEqual(['payload', 'inputs']);
+                expect(io().inputParameters[1].value).toBe('${target}');
+                expect(JSON.parse(io().inputParameters[0].value).aspects.map((node: any) => node.id)).toEqual([air.id, water.id]);
+            });
+
+            it('writes the default input values for another characteristic', () => {
+                writeDeviceTask(services, element('Task_1'), controllingInfo([air]));
+                io().inputParameters[1].value = '21';
+
+                writeDeviceTask(services, selected(), controllingInfo([air], fahrenheit));
+
+                expect(io().inputParameters[1].value).toBe('0');
+                expect(JSON.parse(io().inputParameters[0].value).characteristic_id).toBe(fahrenheit.id);
+            });
+
+            it('keeps the renamed output variables when the aspects change and the characteristic stays', () => {
+                writeDeviceTask(services, element('Task_1'), connectorInfo({ aspect: air, aspects: [air], characteristic: celsius }));
+                expect(io().outputParameters.map((p: any) => [p.name, p.value])).toEqual([['outputs', '${result}']]);
+                io().outputParameters[0].name = 'temperature';
+
+                writeDeviceTask(services, selected(), connectorInfo({ aspect: water, aspects: [water], characteristic: celsius }));
+
+                expect(io().outputParameters.map((p: any) => [p.name, p.value])).toEqual([['temperature', '${result}']]);
+            });
+        });
+
         it('opens the selection empty for a task without a payload', () => {
             expect(readDeviceTask(element('Task_connector'))).toBeUndefined();
             expect(readDeviceTask(element('Task_1'))).toBeUndefined();

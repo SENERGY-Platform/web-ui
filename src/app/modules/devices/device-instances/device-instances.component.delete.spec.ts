@@ -30,6 +30,8 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { DeviceTypeService } from '../../metadata/device-types-overview/shared/device-type.service';
 import { ExportDataService } from 'src/app/widgets/shared/export-data.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('DeviceInstancesComponent delete', () => {
     const one = { id: 'urn:infai:ses:device:1', name: 'One', display_name: 'One' } as DeviceInstanceModel;
@@ -63,6 +65,7 @@ describe('DeviceInstancesComponent delete', () => {
                 { provide: ExportDataService, useValue: {} },
                 { provide: ActivatedRoute, useValue: {} },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
             ],
         });
         TestBed.overrideComponent(DeviceInstancesComponent, { set: { template: '', imports: [] } });

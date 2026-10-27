@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick, waitForAsync } from '@angular/core/testing';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import { Observable, of, Subject } from 'rxjs';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -351,6 +352,24 @@ describe('EnvironmentDetailComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('opens the tab from the URL once the environment is loaded and writes the tab it shows', fakeAsync(() => {
+        const urlState = TestBed.inject(UrlStateService);
+        spyOn(urlState, 'getInt').and.returnValue(1);
+        const set = spyOn(urlState, 'set');
+
+        loadWith(nestedEnvironment);
+        expect(component.selectedTabIndex).toBe(0);
+        tick();
+        fixture.detectChanges();
+        tick(500);
+
+        expect(component.selectedTabIndex).toBe(1);
+        expect(set).toHaveBeenCalledWith({ tab: 1 });
+        // the Effects tab loads its graph when it opens
+        httpMock.expectOne(environmentsUrl + '/e1/effects').flush({});
+        discardPeriodicTasks();
+    }));
 
     it('loads the environment, builds the tree and selects the root by default', () => {
         loadWith(nestedEnvironment);

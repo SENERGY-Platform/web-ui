@@ -50,6 +50,8 @@ import { SpinnerComponent } from '../../../core/components/spinner/spinner.compo
 import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
 import { ListSelection } from '../../../core/classes/list-selection';
 import { PagedListState } from '../../../core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { bulkDelete, confirmDelete, countLabel, noneNullOrServerError } from '../../../core/services/delete-flows';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
@@ -59,7 +61,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './process-repo.component.html',
     styleUrls: ['./process-repo.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTabGroup, MatTab, MatButton, MatIconButton, MatTooltip, MatIcon, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, HoverPreviewComponent, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTabGroup, MatTab, MatButton, MatIconButton, MatTooltip, MatIcon, MatCheckbox, RouterLink, MatMenuTrigger, MatMenu, MatMenuItem, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, HoverPreviewComponent, DatePipe]
 })
 export class ProcessRepoComponent implements OnInit, AfterViewInit {
     private sanitizer = inject(DomSanitizer);
@@ -74,6 +76,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
     private permissionsService = inject(PermissionsService);
     private metadataExistenceService = inject(MetadataExistenceService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
     private destroyRef = inject(DestroyRef);
 
     readonly tabs = ['All', 'Own', 'Shared'];
@@ -87,7 +90,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
     dataSource = new MatTableDataSource<ProcessModel>([]);
     listSelection = new ListSelection<ProcessModel>(() => this.dataSource.data);
     selection = this.listSelection.model;
-    list = new PagedListState(this.preferencesService, () => this.loadProcesses(), { sortBy: 'date', sortDirection: 'desc' });
+    list = new PagedListState(this.preferencesService, () => this.loadProcesses(), { sortBy: 'date', sortDirection: 'desc', urlState: this.urlState });
     permissionsPerModel: PermissionsV2RightsAndIdModel[] = [];
     userIdToName: { [key: string]: string } = {};
     /** Metadata warning per process id of the page shown. */
@@ -108,6 +111,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
+        // the owner filter of the tab is needed by the first load, so the tab is restored before it
+        this.activeIndex = Math.min(this.urlState.getInt('tab', 0), this.tabs.length - 1);
         this.userHasCreateAuthorization = this.processRepoService.userHasCreateAuthorization();
         this.userHasUpdateAuthorization = this.processRepoService.userHasUpdateAuthorization();
         this.userHasDeleteAuthorization = this.processRepoService.userHasDeleteAuthorization();
@@ -142,6 +147,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
 
     setIndex(index: number): void {
         this.activeIndex = index;
+        // the tab starts from the default sort below, so the URL drops the previous one
+        this.urlState.set({ tab: index > 0 ? index : null, sort: null, dir: null, page: null });
         this.searchText = '';
         this.list.sortBy = 'date';
         this.list.sortDirection = 'desc';

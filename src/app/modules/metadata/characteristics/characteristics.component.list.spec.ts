@@ -31,17 +31,23 @@ import { CoreModule } from '../../../core/core.module';
 import { DeviceTypeCharacteristicsModel } from '../device-types-overview/shared/device-type.model';
 import { ConceptsPermSearchModel } from '../concepts/shared/concepts-perm-search.model';
 import { CharacteristicsPermSearchModel } from './shared/characteristics-perm-search.model';
+import { ConceptsService } from '../concepts/shared/concepts.service';
+import { DeviceTypeConceptModel } from '../device-types-overview/shared/device-type.model';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { UrlStateServiceMock } from '../../../core/services/url-state.service.mock';
 
 describe('CharacteristicsComponent list', () => {
     let component: CharacteristicsComponent;
     let fixture: ComponentFixture<CharacteristicsComponent>;
+    let urlState: UrlStateServiceMock;
 
     const service: Spy<CharacteristicsService> = createSpyFromClass<CharacteristicsService>(CharacteristicsService);
     const deviceTypeService: Spy<DeviceTypeService> = createSpyFromClass<DeviceTypeService>(DeviceTypeService);
     const dialogStub = { open: jasmine.createSpy('open') };
+    const conceptsService = jasmine.createSpyObj<ConceptsService>('ConceptsService', ['getConceptWithoutCharacteristics']);
     const temperature = { id: 'urn:infai:ses:characteristic:1', name: 'Celsius', display_unit: '°C', type: 'https://schema.org/Float' } as DeviceTypeCharacteristicsModel;
 
-    function init(rights = { update: true, delete: true, create: true }) {
+    function init(rights = { update: true, delete: true, create: true }, urlParams: Record<string, string> = {}) {
         service.getCharacteristics.and.returnValue(of({ result: [temperature], total: 1 }));
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
         service.userHasDeleteAuthorization.and.returnValue(rights.delete);
@@ -56,6 +62,15 @@ describe('CharacteristicsComponent list', () => {
                 { provide: CharacteristicsService, useValue: service },
                 { provide: DeviceTypeService, useValue: deviceTypeService },
                 { provide: MatDialog, useValue: dialogStub },
+                { provide: ConceptsService, useValue: conceptsService },
+                {
+                    provide: UrlStateService,
+                    useFactory: () => {
+                        urlState = new UrlStateServiceMock();
+                        urlState.params = urlParams;
+                        return urlState;
+                    },
+                },
             ],
         }).compileComponents();
         fixture = TestBed.createComponent(CharacteristicsComponent);
@@ -130,4 +145,32 @@ describe('CharacteristicsComponent list', () => {
         expect(chip.textContent).toContain('Concept: Temperature');
         expect(chip.textContent).not.toContain('urn:');
     }));
+    describe('view state in the URL', () => {
+        const rights = { update: true, delete: true, create: true };
+        const concept = { id: 'c1', name: 'Temperature', characteristic_ids: ['a', 'b'] } as DeviceTypeConceptModel;
+
+        beforeEach(() => {
+            conceptsService.getConceptWithoutCharacteristics.and.returnValue(of(concept));
+        });
+
+        it('looks the concept filter up by the id the URL kept and loads once with it', fakeAsync(() => {
+            init(rights, { concept_id: 'c1' });
+            discardPeriodicTasks();
+
+            expect(conceptsService.getConceptWithoutCharacteristics).toHaveBeenCalledWith('c1');
+            expect(service.getCharacteristics).toHaveBeenCalledTimes(1);
+            expect(service.getCharacteristics.calls.mostRecent().args[5]).toEqual(['a', 'b']);
+            expect(component.selectedTag).toBe('Temperature');
+        }));
+
+        it('drops the concept and the page from the URL when the filter is removed', fakeAsync(() => {
+            init(rights, { concept_id: 'c1' });
+            discardPeriodicTasks();
+
+            component.tagRemoved();
+
+            expect(urlState.writes).toContain({ concept_id: null, page: null });
+            expect(service.getCharacteristics.calls.mostRecent().args[5]).toEqual([]);
+        }));
+    });
 });

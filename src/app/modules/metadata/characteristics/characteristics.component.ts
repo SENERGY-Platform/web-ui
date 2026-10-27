@@ -36,6 +36,9 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { UsedInDeviceTypeQuery, UsedInDeviceTypeResponseElement } from '../device-types-overview/shared/used-in-device-type.model';
 import {DeviceTypeService} from '../device-types-overview/shared/device-type.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
+import { ConceptsService } from '../concepts/shared/concepts.service';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
 import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
@@ -54,7 +57,7 @@ import { dialogSize } from '../../../core/dialog-size';
     templateUrl: './characteristics.component.html',
     styleUrls: ['./characteristics.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatButton, MatIconButton, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatTooltip, MatButton, MatIconButton, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class CharacteristicsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -66,18 +69,21 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     private dialogsService = inject(DialogsService);
     private deviceTypeService = inject(DeviceTypeService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
+    private conceptsService = inject(ConceptsService);
 
     displayedColumns: string[] = [];
     ready = false;
     dataSource = new MatTableDataSource<DeviceTypeCharacteristicsModel>();
     listSelection = new ListSelection<DeviceTypeCharacteristicsModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
-    routerConcept: ConceptsPermSearchModel | null = null;
+    routerConcept: Pick<ConceptsPermSearchModel, 'name' | 'characteristic_ids'> | null = null;
     selectedTag = '';
     searchText = '';
-    list = new PagedListState(this.preferencesService, () => this.getCharacteristics(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.getCharacteristics(), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -89,7 +95,16 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit() {
-        this.initSearch();
+        const conceptId = this.urlState.get('concept_id');
+        if (this.routerConcept === null && conceptId !== null) {
+            // a reload carries no navigation state, so the concept filter is looked up by the id the URL kept
+            this.conceptsService.getConceptWithoutCharacteristics(conceptId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((concept) => {
+                this.routerConcept = concept;
+                this.initSearch();
+            });
+        } else {
+            this.initSearch();
+        }
         this.checkAuthorization();
     }
 
@@ -168,6 +183,7 @@ export class CharacteristicsComponent implements OnInit, AfterViewInit {
     tagRemoved(): void {
         this.routerConcept = null;
         this.selectedTag = '';
+        this.urlState.set({ concept_id: null, page: null });
         this.reload();
     }
 

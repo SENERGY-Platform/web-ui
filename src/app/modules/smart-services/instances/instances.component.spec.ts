@@ -29,6 +29,8 @@ import { SmartServiceModuleService } from './shared/modules.service';
 import { SmartServiceInstanceDialogService } from './shared/instance-dialog.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('SmartServiceInstancesComponent', () => {
     let getInstances: jasmine.Spy;
@@ -38,7 +40,7 @@ describe('SmartServiceInstancesComponent', () => {
 
     const answer = (name: string) => ({ instances: [{ id: name, name } as any], total: 100 });
 
-    const create = (params: { [key: string]: string }) => {
+    const create = (params: { [key: string]: string }, urlParams: { [key: string]: string } = {}) => {
         navigate = jasmine.createSpy('navigate');
         TestBed.configureTestingModule({
             providers: [
@@ -53,6 +55,14 @@ describe('SmartServiceInstancesComponent', () => {
                 { provide: SmartServiceInstanceDialogService, useValue: {} },
                 { provide: AuthorizationService, useValue: { userIsDeveloper: () => false } },
                 { provide: SmartServiceReleasesService, useValue: { getExtendedReleaseList } },
+                {
+                    provide: UrlStateService,
+                    useFactory: () => {
+                        const urlState = new UrlStateServiceMock();
+                        urlState.params = urlParams;
+                        return urlState;
+                    },
+                },
             ],
         });
         component = TestBed.runInInjectionContext(() => new SmartServiceInstancesComponent());
@@ -69,6 +79,22 @@ describe('SmartServiceInstancesComponent', () => {
         component.ngOnInit();
 
         expect(getInstances.calls.mostRecent().args[0].offset).toBe(40);
+    });
+
+    it('restores the sort of the URL on the first load', () => {
+        create({}, { sort: 'created_at', dir: 'desc' });
+        component.ngOnInit();
+
+        expect(getInstances.calls.mostRecent().args[0]).toEqual(jasmine.objectContaining({ sort: 'created_at.desc' }));
+    });
+
+    it('writes the sort along with the other parameters', () => {
+        create({});
+        component.ngOnInit();
+
+        component.matSortChange({ active: 'created_at', direction: 'desc' });
+
+        expect(navigate.calls.mostRecent().args[1].queryParams).toEqual(jasmine.objectContaining({ sort: 'created_at', dir: 'desc' }));
     });
 
     it('goes back to the first page when the sorting changes', () => {

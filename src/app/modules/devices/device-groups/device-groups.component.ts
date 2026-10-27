@@ -26,6 +26,8 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { DeviceGroupModel } from './shared/device-groups.model';
@@ -51,7 +53,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './device-groups.component.html',
     styleUrls: ['./device-groups.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatChipListbox, MatChipOption, MatTooltip, MatIcon, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatChipListbox, MatChipOption, MatTooltip, MatIcon, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     private deviceGroupsService = inject(DeviceGroupsService);
@@ -63,17 +65,19 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     private permissionsDialogService = inject(PermissionsDialogService);
     private permissionsService = inject(PermissionsService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns: string[] = [];
     listSelection = new ListSelection<DeviceGroupModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     instances = [];
     dataSource = new MatTableDataSource<DeviceGroupModel>();
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     ready = false;
     searchText = '';
-    list = new PagedListState(this.preferencesService, () => this.getDeviceGroups(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.getDeviceGroups(), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -84,6 +88,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
     allDataLoaded = false;
 
     ngOnInit() {
+        this.hideGenerated = !this.urlState.getShown('generated', false);
         this.initSearch();
         this.checkAuthorization();
     }
@@ -168,6 +173,7 @@ export class DeviceGroupsComponent implements OnInit, AfterViewInit {
             return;
         }
         this.hideGenerated = hide;
+        this.urlState.set({ generated: hide ? null : 'show', page: null });
         this.reload();
     }
 

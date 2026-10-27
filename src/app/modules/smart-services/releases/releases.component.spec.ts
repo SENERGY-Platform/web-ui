@@ -34,6 +34,8 @@ import { PermissionsDialogService } from '../../permissions/shared/permissions-d
 import { SmartServiceInstanceDialogService } from '../instances/shared/instance-dialog.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { ContentReviewService } from '../requests/shared/content-review.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('SmartServiceReleasesComponent', () => {
     let fixture: ComponentFixture<SmartServiceReleasesComponent>;
@@ -62,6 +64,7 @@ describe('SmartServiceReleasesComponent', () => {
                 { provide: MatSnackBar, useValue: {} },
                 { provide: DialogsService, useValue: {} },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
                 { provide: SmartServiceInstanceDialogService, useValue: {} },
                 { provide: ContentReviewService, useValue: { canProposeRelease: () => false } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },

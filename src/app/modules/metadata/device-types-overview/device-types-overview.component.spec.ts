@@ -25,6 +25,8 @@ import { DeviceTypeService } from './shared/device-type.service';
 import { DeviceTypeModel } from './shared/device-type.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
+import { UrlStateService } from 'src/app/core/services/url-state.service';
+import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
 describe('DeviceTypesOverviewComponent delete', () => {
     // The slash makes encodeURIComponent visible in the assertions.
@@ -52,6 +54,7 @@ describe('DeviceTypesOverviewComponent delete', () => {
                 { provide: DialogsService, useValue: dialogs },
                 { provide: MatSnackBar, useValue: snackBar },
                 { provide: Router, useValue: {} },
+                { provide: UrlStateService, useClass: UrlStateServiceMock },
                 { provide: DeviceInstancesDialogService, useValue: {} },
             ],
         });

@@ -32,9 +32,10 @@ const german: Record<Key, string> = {
 /**
  * The approximate length of a duration in words, e.g. "3 Stunden", with moment's thresholds: up to 44 seconds are
  * "a few seconds", from 45 seconds on it counts minutes, from 45 minutes hours, from 22 hours days, from 26 days
- * months and from 11 months years, each rounded. German for any "de" locale, English otherwise.
+ * months and from 11 months years, each rounded. German for any "de" locale, English otherwise. `ss` is moment's
+ * threshold of the same name: from how many seconds on they are counted instead of "a few seconds".
  */
-export function humanizeDuration(d: Duration, locale: string): string {
+export function humanizeDuration(d: Duration, locale: string, thresholds: { ss?: number } = {}): string {
     if (!d.valid) {
         return 'Invalid date';
     }
@@ -46,7 +47,7 @@ export function humanizeDuration(d: Duration, locale: string): string {
     const months = Math.round(durationAs(abs, 'months'));
     const years = Math.round(durationAs(abs, 'years'));
     const [key, n]: [Key, number?] =
-        seconds <= 44 ? ['s', seconds] :
+        seconds <= (thresholds.ss ?? 44) ? ['s', seconds] :
         seconds < 45 ? ['ss', seconds] :
         minutes <= 1 ? ['m'] :
         minutes < 45 ? ['mm', minutes] :

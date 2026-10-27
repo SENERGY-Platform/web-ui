@@ -121,14 +121,23 @@ describe('AuthorizationService', () => {
             service = TestBed.inject(AuthorizationService);
         });
 
-        it('takes the user id from the stored sub first, then from the token', () => {
+        // localStorage keeps the sub of an earlier login in this browser; the Own tab of the process
+        // repository then asked for the models of that other account
+        it('takes the user id from the current token before the stored sub', () => {
+            localStorage.setItem('sub', 'earlier-user');
             expect(service.getUserId()).toBe('user-1');
-            localStorage.setItem('sub', 'stored');
-            expect(service.getUserId()).toBe('stored');
         });
 
-        it('reports a missing subject as an Error value', () => {
+        it('falls back to the stored sub without a subject in the token', () => {
             (keycloak as { subject?: string }).subject = undefined;
+            localStorage.setItem('sub', 'stored-user');
+            expect(service.getUserId()).toBe('stored-user');
+        });
+
+        it('reports a missing subject and an empty stored sub as an Error value', () => {
+            (keycloak as { subject?: string }).subject = undefined;
+            expect(service.getUserId()).toEqual(Error('Could not load sub'));
+            localStorage.setItem('sub', '');
             expect(service.getUserId()).toEqual(Error('Could not load sub'));
         });
 

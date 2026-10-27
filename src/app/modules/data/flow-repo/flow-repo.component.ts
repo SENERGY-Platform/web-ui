@@ -57,6 +57,8 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { parseSvgImage, svgImageDataUrl } from '../../../core/svg-image';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 
 
 @Component({
@@ -72,7 +74,7 @@ import { parseSvgImage, svgImageDataUrl } from '../../../core/svg-image';
         }
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, HoverPreviewComponent, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, SpinnerComponent, CurrencyPipe, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatSortHeader, HoverPreviewComponent, RouterLink, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, SpinnerComponent, CurrencyPipe, DatePipe]
 })
 export class FlowRepoComponent implements OnInit, AfterViewInit {
     private flowRepoService = inject(FlowRepoService);
@@ -91,6 +93,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
     private activatedRoute = inject(ActivatedRoute);
     private cd = inject(ChangeDetectorRef);
+    private urlState = inject(UrlStateService);
 
     @ViewChild('paginator', {static: false}) paginator!: MatPaginator;
     flows: FlowModel[] = [];
@@ -106,7 +109,7 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
 
     displayedColumns: string[] = ['image', 'name', 'pub', 'cost', 'dateUpdated', 'actions'];
     totalCount = 0;
-    list = new PagedListState(this.preferencesService, () => this.loadFlows(), { sortBy: 'dateUpdated', sortDirection: 'desc' });
+    list = new PagedListState(this.preferencesService, () => this.loadFlows(), { sortBy: 'dateUpdated', sortDirection: 'desc', urlState: this.urlState });
 
     shareUser = '';
 
@@ -297,12 +300,13 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
                 if (filterSelectionInner != null) {
                     this.routerOperator = filterSelectionInner.operators;
                     this.routerOperatorNames = filterSelectionInner.operatorNames;
-                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+                    const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames, page: null};
                     this.router.navigate(
                         [],
                         {
                             relativeTo: this.activatedRoute,
-                            queryParams
+                            queryParams,
+                            queryParamsHandling: 'merge',
                         },
                     );
                     this.cd.detectChanges();
@@ -318,12 +322,13 @@ export class FlowRepoComponent implements OnInit, AfterViewInit {
             this.routerOperator!.splice(i, 1);
             this.routerOperatorNames!.splice(i, 1);
         }
-        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames};
+        const queryParams: Params = {operator: this.routerOperator, operatorName: this.routerOperatorNames, page: null};
         this.router.navigate(
             [],
             {
                 relativeTo: this.activatedRoute,
-                queryParams
+                queryParams,
+                queryParamsHandling: 'merge',
             },
         );
         this.reload();

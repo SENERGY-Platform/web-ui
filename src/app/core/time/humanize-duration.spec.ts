@@ -65,6 +65,13 @@ describe('humanizeDuration', () => {
         expect(humanizeDuration(duration({ hours: 1.5, minutes: 10 }), 'de')).toBe('Invalid date');
     });
 
+    it('counts seconds from the ss threshold on', () => {
+        expect(humanizeDuration(duration(1000), 'en', { ss: 1 })).toBe('a few seconds');
+        expect(humanizeDuration(duration(3000), 'en', { ss: 1 })).toBe('3 seconds');
+        expect(humanizeDuration(duration(44000), 'de', { ss: 1 })).toBe('44 Sekunden');
+        expect(humanizeDuration(duration(45000), 'en', { ss: 1 })).toBe('a minute');
+    });
+
     it('falls back to English for other locales', () => {
         expect(humanizeDuration(duration('PT90M'), 'en-US')).toBe('2 hours');
         expect(humanizeDuration(duration('PT90M'), 'fr')).toBe('2 hours');

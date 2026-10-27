@@ -1,11 +1,12 @@
 name: 'Tests'
 
 on:
+  # master runs the tests through prod.yml, which waits for them before it tags: a push there is the release
   push:
     branches:
       - dev
-      - master
       - feat/ui-upgrade
+  workflow_call:
   workflow_dispatch:
 
 jobs:

@@ -43,7 +43,7 @@ import { DatePipe } from '@angular/common';
 import { MatChipSet, MatChip, MatChipRemove, MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
+import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
@@ -54,12 +54,16 @@ import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
 import { ListSelection } from '../../../core/classes/list-selection';
 import { loadAllPages } from '../../../core/classes/load-all-pages';
 import { PreferencesService } from '../../../core/services/preferences.service';
+import { UrlStateService } from '../../../core/services/url-state.service';
 import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
 import { dialogSize } from '../../../core/dialog-size';
 
 /** Deployments are read in chunks this size, because the online state of each chunk is looked up with its ids in one URL. */
 const CHUNK = 50;
+
+/** The columns with a sort header, the only sort keys taken from the URL. */
+const SORTABLE = ['name', 'deploymentTime'];
 
 @Component({
     selector: 'senergy-process-deployments',
@@ -82,6 +86,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private fogDeploymentsFactory = inject(DeploymentsFogFactory);
     private hubsService = inject(NetworksService);
     private metadataExistenceService = inject(MetadataExistenceService);
+    private urlState = inject(UrlStateService);
     private destroyRef = inject(DestroyRef);
     preferencesService = inject(PreferencesService);
 
@@ -104,8 +109,11 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     userHasDeleteAuthorization = false;
 
-    private sortBy = 'deploymentTime';
-    private sortOrder = 'desc';
+    sortBy = 'deploymentTime';
+    sortOrder: SortDirection = 'desc';
+    // the page from the URL, taken by the opening load once the rows are in; null afterwards
+    private openingPage: number | null = null;
+    private paginatorRef?: MatPaginator;
     private source = 'sepl';
     private getAllSub = new Subscription();
     private requestedHubId: string | null = null;
@@ -135,8 +143,10 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     @ViewChild('paginator', { static: false })
     set paginator(value: MatPaginator | undefined) {
-        if (value) {
+        if (value && value !== this.paginatorRef) {
+            this.paginatorRef = value;
             this.dataSource.paginator = value;
+            value.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => this.urlState.setPage(e.pageIndex));
         }
     }
 
@@ -148,6 +158,15 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
     ngOnInit() {
         this.userHasDeleteAuthorization = this.platformDeploymentsService.userHasDeleteAuthorization();
+        this.showGenerated = this.urlState.getShown('generated', false);
+        this.source = this.showGenerated ? '' : 'sepl';
+        const sort = this.urlState.getSort('deploymentTime', 'desc');
+        // only the sortable columns; the header cannot be cleared, so a sort without a direction is the default sort
+        if (SORTABLE.includes(sort.active) && sort.direction !== '') {
+            this.sortBy = sort.active;
+            this.sortOrder = sort.direction;
+        }
+        this.openingPage = this.urlState.getPage();
 
         this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
         this.deploymentIdFilter = this.route.snapshot.queryParamMap.get('deploymentId');
@@ -213,9 +232,25 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.selection.clear();
         this.metadataChecked.clear();
         this.metadataWarnings = new Map();
+        // the first load is the one the page was opened with and keeps the page from the URL
+        const openingPage = this.openingPage;
+        this.openingPage = null;
         this.getAllSub = this.load().subscribe((deployments) => {
+            const paginator = this.dataSource.paginator;
+            if (openingPage !== null && paginator) {
+                // set before the data, which the data source renders at the paginator's page; a page beyond the end
+                // would be moved back by the data source without a page event, so it is corrected here with the URL
+                const lastPage = Math.max(0, Math.ceil(deployments.length / paginator.pageSize) - 1);
+                paginator.pageIndex = Math.min(openingPage, lastPage);
+                if (paginator.pageIndex !== openingPage) {
+                    this.urlState.setPage(paginator.pageIndex);
+                }
+            }
             this.dataSource.data = deployments;
-            this.dataSource.paginator?.firstPage();
+            if (openingPage === null) {
+                paginator?.firstPage();
+                this.urlState.setPage(0);
+            }
             this.ready = true;
         });
     }
@@ -223,6 +258,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     matSortChange(event: Sort): void {
         this.sortBy = event.active;
         this.sortOrder = event.direction || 'desc';
+        this.urlState.setSort(event, 'deploymentTime', 'desc');
         this.reload();
     }
 
@@ -412,8 +448,13 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     filterItems(show: boolean): void {
+        // the chip also reports the state restored from the URL, which is no change
+        if (show === this.showGenerated) {
+            return;
+        }
         this.showGenerated = show;
         this.source = show ? '' : 'sepl';
+        this.urlState.set({ generated: show ? 'show' : null, page: null });
         this.reload();
     }
 

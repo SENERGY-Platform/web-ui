@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, Output, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges, ChangeDetectionStrategy, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 import {SearchbarService} from './shared/searchbar.service';
+import { UrlStateService } from '../../services/url-state.service';
 import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
@@ -32,6 +35,8 @@ import { MatTooltip } from '@angular/material/tooltip';
 })
 export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     private searchbarService = inject(SearchbarService);
+    private urlState = inject(UrlStateService);
+    private destroyRef = inject(DestroyRef);
 
     @Input() searchTextIn = '';
     @Input() disable = false;
@@ -48,9 +53,19 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
         } else {
             this.formControl.enable();
         }
+        // the search of a reloaded or shared link wins over the initial text a page passes in
+        const urlSearch = this.urlState.get('search');
+        if (urlSearch !== null) {
+            this.formControl.setValue(urlSearch);
+        }
         if (this.formControl.value !== '') {
             this.changeSearchtext();
         }
+        this.formControl.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
+            if ((this.urlState.get('search') || '') !== (value ?? '')) {
+                this.urlState.set({ search: value });
+            }
+        });
     }
 
     ngOnChanges(changes: SimpleChanges) {

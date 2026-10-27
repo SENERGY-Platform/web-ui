@@ -34,6 +34,10 @@ import { PipelineRegistryService } from '../pipeline-registry/shared/pipeline-re
 import { FlowRepoService } from '../flow-repo/shared/flow-repo.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { CoreModule } from '../../../core/core.module';
+import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+
+/** The page size the list starts with, as the preferences store it. */
+const storedPageSize = (): number => JSON.parse(localStorage.getItem('PreferencesService/pageSize') || '20');
 
 describe('OperatorRepoComponent list', () => {
     let component: OperatorRepoComponent;
@@ -44,8 +48,11 @@ describe('OperatorRepoComponent list', () => {
     const permissions: Spy<PermissionsService> = createSpyFromClass<PermissionsService>(PermissionsService);
     const operator = { _id: 'op-1', name: 'Alpha', description: 'First', image: 'img:1', userId: 'me' } as OperatorModel;
 
-    function init(rights = { create: true, update: true, delete: true }, perms = { read: true, write: true, administrate: true }) {
-        service.getOperators.and.returnValue(of({ operators: [operator], totalCount: 1 }));
+    function init(rights = { create: true, update: true, delete: true }, perms = { read: true, write: true, administrate: true }, url = '') {
+        // a test with a URL sets the answers itself
+        if (url === '') {
+            service.getOperators.and.returnValue(of({ operators: [operator], totalCount: 1 }));
+        }
         service.userHasCreateAuthorization.and.returnValue(rights.create);
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
         service.userHasDeleteAuthorization.and.returnValue(rights.delete);
@@ -66,6 +73,10 @@ describe('OperatorRepoComponent list', () => {
         }).compileComponents();
         router = TestBed.inject(Router);
         spyOn(router, 'navigate').and.resolveTo(true);
+        if (url !== '') {
+            router.navigateByUrl(url);
+            tick();
+        }
         fixture = TestBed.createComponent(OperatorRepoComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -140,4 +151,69 @@ describe('OperatorRepoComponent list', () => {
         expect(row.querySelector('.truncate-cell')?.textContent).toContain('First');
         expect(row.querySelector('.type-chip')?.textContent).toBe('Owner');
     }));
+
+    describe('view state in the URL', () => {
+        const rights = { create: true, update: true, delete: true };
+        const perms = { read: true, write: true, administrate: true };
+        const lastCall = () => service.getOperators.calls.mostRecent().args;
+        const settle = () => {
+            tick(10);
+            fixture.detectChanges();
+            tick(10);
+        };
+
+        it('restores sort and page before the first load', fakeAsync(() => {
+            service.getOperators.and.returnValue(of({ operators: [operator], totalCount: 500 }));
+            init(rights, perms, '/?page=1&sort=name&dir=desc');
+            settle();
+            discardPeriodicTasks();
+
+            const pageSize = component.preferencesService.pageSize;
+            expect(service.getOperators).toHaveBeenCalledTimes(1);
+            expect(lastCall()).toEqual(['', pageSize, pageSize, 'name', 'desc']);
+            expect(router.url).toBe('/?page=1&sort=name&dir=desc');
+        }));
+
+        it('moves an empty page beyond the end to the last page and writes it', fakeAsync(() => {
+            const total = storedPageSize() + 1;
+            service.getOperators.and.returnValues(of({ operators: [], totalCount: total }), of({ operators: [operator], totalCount: total }));
+            init(rights, perms, '/?page=4');
+            settle();
+            discardPeriodicTasks();
+
+            expect(service.getOperators).toHaveBeenCalledTimes(2);
+            expect(lastCall()[2]).toBe(component.preferencesService.pageSize);
+            expect(component.totalCount).toBe(total);
+            expect(router.url).toBe('/?page=1');
+        }));
+
+        it('returns to the first page on a later search', fakeAsync(() => {
+            service.getOperators.and.returnValue(of({ operators: [operator], totalCount: 500 }));
+            init(rights, perms, '/?page=2');
+
+            TestBed.inject(SearchbarService).changeMessage('alp');
+            tick(400);
+            settle();
+            discardPeriodicTasks();
+
+            expect(lastCall().slice(0, 3)).toEqual(['alp', component.preferencesService.pageSize, 0]);
+            expect(router.url).toBe('/');
+        }));
+
+        it('writes a page change and a sort change, the sort dropping the page', fakeAsync(() => {
+            service.getOperators.and.returnValue(of({ operators: [operator], totalCount: 500 }));
+            init(rights, perms, '/?keep=1');
+
+            component.paginator.nextPage();
+            settle();
+            expect(router.url).toBe('/?keep=1&page=1');
+
+            component.sort.sort({ id: 'name', start: 'desc', disableClear: true });
+            settle();
+            discardPeriodicTasks();
+
+            expect(lastCall().slice(2, 5)).toEqual([0, 'name', 'desc']);
+            expect(router.url).toBe('/?keep=1&sort=name&dir=desc');
+        }));
+    });
 });

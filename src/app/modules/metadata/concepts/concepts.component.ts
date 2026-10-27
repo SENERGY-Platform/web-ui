@@ -30,6 +30,8 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { PagedListState } from 'src/app/core/classes/paged-list-state';
+import { UrlStateService } from '../../../core/services/url-state.service';
+import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
 import { MatPaginator } from '@angular/material/paginator';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
@@ -50,7 +52,7 @@ import { dialogSize } from '../../../core/dialog-size';
     templateUrl: './concepts.component.html',
     styleUrls: ['./concepts.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
 })
 export class ConceptsComponent implements OnInit, AfterViewInit {
     private dialog = inject(MatDialog);
@@ -62,6 +64,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
     private preferencesService = inject(PreferencesService);
+    private urlState = inject(UrlStateService);
 
     displayedColumns = ['select', 'name', 'characteristics', 'conversions', 'actions'];
     concepts: DeviceTypeConceptModel[] = [];
@@ -69,10 +72,11 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     dataSource = new MatTableDataSource(this.concepts);
     listSelection = new ListSelection<DeviceTypeConceptModel>(() => this.dataSource.connect().value);
     selection = this.listSelection.model;
-    totalCount = 200;
+    // 0 until the first answer, so the paginator keeps a page from the URL until the real length is known
+    totalCount = 0;
     @ViewChild('paginator', { static: false }) paginator!: MatPaginator;
     searchText = '';
-    list = new PagedListState(this.preferencesService, () => this.getConcepts(), { sortBy: 'name', sortDirection: 'asc' });
+    list = new PagedListState(this.preferencesService, () => this.getConcepts(), { sortBy: 'name', sortDirection: 'asc', urlState: this.urlState });
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
@@ -245,7 +249,7 @@ export class ConceptsComponent implements OnInit, AfterViewInit {
     }
 
     showCharacteristics(concept: DeviceTypeConceptModel) {
-        this.router.navigateByUrl('/metadata/characteristics', { state: concept });
+        this.router.navigate(['/metadata/characteristics'], { queryParams: { concept_id: concept.id }, state: concept });
     }
 
     private getConcepts(): Observable<DeviceTypeConceptModel[]> {

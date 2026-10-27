@@ -16,9 +16,9 @@
 
 /*
  * Vendors the smart-service script environment declarations, which are generated
- * upstream by `go generate ./...`:
+ * upstream by `go generate ./pkg/scriptdoc` in the automation-engine, which runs the scripts:
  *
- *   npm run vendor:scriptenv-types -- ../smart-service-module-worker-lib/doc/script-env.d.ts
+ *   npm run vendor:scriptenv-types -- ../automation-engine/docs/scripts/modules/script-env.d.ts
  *
  * The declarations are wrapped in a string rather than kept as a .d.ts because the
  * editor hands them to monaco as an extra lib at runtime, and because a .d.ts under
@@ -72,13 +72,13 @@ const header = `/*
  */
 
 /*
- * VENDORED -- do not edit by hand. This is doc/script-env.d.ts of
- * github.com/SENERGY-Platform/smart-service-module-worker-lib, where it is generated
- * from the go source by \`go generate ./...\`, wrapped as a string.
+ * VENDORED -- do not edit by hand. This is docs/scripts/modules/script-env.d.ts of
+ * github.com/SENERGY-Platform/automation-engine, where it is generated from the go source
+ * by \`go generate ./pkg/scriptdoc\`, wrapped as a string.
  *
  * Refresh with:
  *
- *   npm run vendor:scriptenv-types -- <path-to>/doc/script-env.d.ts \\
+ *   npm run vendor:scriptenv-types -- <path-to>/docs/scripts/modules/script-env.d.ts \\
  *     ${destinationInRepo}
  */
 `;
