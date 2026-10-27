@@ -59,6 +59,7 @@ import { KeycloakConfidentialService } from './services/keycloak-confidential.se
 import { MatErrorMessagesDirective } from './directives/matError.directive';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from './directives/close-mtx-select-on-scroll.directive';
+import { KeepPageInRangeDirective } from './directives/keep-page-in-range.directive';
 import { NotificationsComponent } from './components/notifications/notifications.component';
 import { FilterDialogComponent } from './components/filter-dialog/filter-dialog.component';
 import { keycloakServiceToken } from './services/keycloak-service.token';
@@ -101,6 +102,7 @@ export { keycloakServiceToken };
         MatTabsModule,
         MtxSelectModule,
         CloseMtxSelectOnScrollDirective,
+        KeepPageInRangeDirective,
     ],
     declarations: [
         SidenavComponent,
@@ -142,6 +144,7 @@ export { keycloakServiceToken };
         FilterDialogComponent,
         CodeEditorComponent,
         AspectSelectComponent,
+        KeepPageInRangeDirective,
     ],
     providers: [
         {

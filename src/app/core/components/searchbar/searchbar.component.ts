@@ -16,7 +16,10 @@
 
 import {Component, Input, OnChanges, OnDestroy, OnInit, SimpleChange, SimpleChanges} from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
+import {Subscription} from 'rxjs';
+import {debounceTime} from 'rxjs/operators';
 import {SearchbarService} from './shared/searchbar.service';
+import {UrlStateService} from '../../services/url-state.service';
 
 @Component({
     selector: 'senergy-searchbar',
@@ -28,8 +31,9 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     @Input() disable = false;
     @Input() supportRefresh = true;
     formControl = new UntypedFormControl(this.searchTextIn);
+    private urlSub = new Subscription();
 
-    constructor(private searchbarService: SearchbarService) {}
+    constructor(private searchbarService: SearchbarService, private urlState: UrlStateService) {}
 
     ngOnInit(): void {
         if (this.disable) {
@@ -37,9 +41,19 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
         } else {
             this.formControl.enable();
         }
+        // the search of a reloaded or shared link wins over the initial text a page passes in
+        const urlSearch = this.urlState.get('search');
+        if (urlSearch !== null) {
+            this.formControl.setValue(urlSearch);
+        }
         if (this.formControl.value !== '') {
             this.changeSearchtext();
         }
+        this.urlSub = this.formControl.valueChanges.pipe(debounceTime(300)).subscribe((value: string) => {
+            if ((this.urlState.get('search') || '') !== value) {
+                this.urlState.set({ search: value });
+            }
+        });
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -67,6 +81,7 @@ export class SearchbarComponent implements OnDestroy, OnChanges, OnInit {
     }
 
     ngOnDestroy() {
+        this.urlSub.unsubscribe();
         this.searchbarService.changeMessage('');
     }
 }

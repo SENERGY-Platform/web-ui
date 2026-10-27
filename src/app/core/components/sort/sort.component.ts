@@ -24,6 +24,8 @@ import { SortModel } from './shared/sort.model';
 })
 export class SortComponent implements OnChanges {
     @Input() sortAttributes: SortModel[] = [];
+    /** The value of the attribute shown as selected; the first attribute when it names none. */
+    @Input() selectedValue?: string;
     @Output() messageEvent: EventEmitter<SortModel> = new EventEmitter();
 
     selected = 0;
@@ -55,8 +57,10 @@ export class SortComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.sortAttributes) {
             const input: SimpleChange = changes.sortAttributes;
-            this.selected = 0;
             this.sortAttributes = input.currentValue;
+        }
+        if (changes.sortAttributes || changes.selectedValue) {
+            this.selected = Math.max(0, this.sortAttributes.findIndex((attribute) => attribute.value === this.selectedValue));
         }
     }
 }
