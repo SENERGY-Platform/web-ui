@@ -66,7 +66,7 @@
             <button mat-icon-button color="accent" matTooltip="Latest step" (click)="last()" [disabled]="loading">
                 <mat-icon>last_page</mat-icon>
             </button>
-            <mat-form-field class="debugger-jump" subscriptSizing="dynamic">
+            <mat-form-field class="debugger-jump" color="accent" subscriptSizing="dynamic">
                 <mat-label>Jump to time</mat-label>
                 <input matInput type="datetime-local" step="1" [(ngModel)]="jumpTime" (keyup.enter)="jumpToTime()">
             </mat-form-field>
@@ -129,7 +129,7 @@
                 <div class="color-warn" *ngFor="let i of selectedIncidents">{{ i.message }}</div>
             </div>
 
-            <mat-tab-group [selectedIndex]="tabIndex" (selectedIndexChange)="setTab($event)" animationDuration="0ms">
+            <mat-tab-group color="accent" [selectedIndex]="tabIndex" (selectedIndexChange)="setTab($event)" animationDuration="0ms">
                 <mat-tab label="Waiting ({{ state.waits?.length || 0 }})">
                     <div class="debugger-tab">
                         <div *ngIf="!state.waits?.length" class="debugger-muted">No element waits.</div>
