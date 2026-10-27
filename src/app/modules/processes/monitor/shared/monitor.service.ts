@@ -28,6 +28,15 @@ import { ProcessIncidentsService } from '../../incidents/shared/process-incident
 import { ProcessIncidentsModel } from '../../incidents/shared/process-incidents.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { AutomationEngineService } from '../../../../core/services/automation-engine.service';
+import { EngineInstance } from '../../../../core/model/automation-engine.model';
+
+// columns of the monitor tables and the sort fields of the engine; the others are not sortable there
+const instanceSort = new Map([
+    ['startTime', 'started_at'],
+    ['endTime', 'ended_at'],
+    ['definitionName', 'deployment_name'],
+]);
 
 @Injectable({
     providedIn: 'root',
@@ -41,7 +50,8 @@ export class MonitorService {
         private errorHandlerService: ErrorHandlerService,
         private dialog: MatDialog,
         private processIncidentsService: ProcessIncidentsService,
-        private ladonService: LadonService
+        private ladonService: LadonService,
+        private automationEngineService: AutomationEngineService,
     ) {
         this.authorizations = this.ladonService.getUserAuthorizationsForURI(environment.processServiceUrl);
     }
@@ -94,6 +104,46 @@ export class MonitorService {
                         'getFilteredHistoryInstances',
                         {} as MonitorProcessTotalModel,
                     ),
+                ),
+            );
+    }
+
+    /**
+     * Instances of the platform and of the hubs, read from the engine, because the routes of the old
+     * services list either the platform or one hub. networkId as in DeploymentsService.listOfNetworks.
+     * Instances a hub has not reported yet are neither running nor finished and are not listed.
+     */
+    getInstancesOfNetworks(
+        filter: 'running' | 'finished',
+        search: string,
+        deploymentId: string | undefined,
+        limit: number,
+        offset: number,
+        sortActive: string,
+        order: string,
+        businessKey?: string,
+        networkId?: string,
+    ): Observable<MonitorProcessTotalModel> {
+        const sortField = instanceSort.get(sortActive);
+        return this.automationEngineService
+            .listInstances({
+                state: filter,
+                limit,
+                offset,
+                sort: sortField && order ? sortField + '.' + order : undefined,
+                deployment_id: deploymentId,
+                deployment_name: deploymentId ? undefined : search,
+                // the business key of an instance is its id; the old engine prefixed some with wardened:
+                ids: businessKey ? businessKey.split(',').map((key) => key.replace(/^wardened:/, '')) : undefined,
+                network_id: networkId,
+            })
+            .pipe(
+                map((page) => ({ total: page.total, data: (page.items || []).map(historicInstance) })),
+                catchError(
+                    this.errorHandlerService.handleError(MonitorService.name, 'getInstancesOfNetworks', {
+                        total: 0,
+                        data: [],
+                    } as MonitorProcessTotalModel),
                 ),
             );
     }
@@ -151,4 +201,37 @@ export class MonitorService {
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
     }
+}
+
+/** an instance of the engine in the format of the history of the old engine, which the tables show */
+function historicInstance(instance: EngineInstance): MonitorProcessModel {
+    const ended = instance.ended_at ? new Date(instance.ended_at).getTime() : undefined;
+    return {
+        id: instance.id,
+        businessKey: instance.id,
+        processDefinitionId: instance.deployment_id,
+        processDefinitionKey: instance.deployment_id,
+        processDefinitionName: instance.deployment_name,
+        processDefinitionVersion: instance.deployment_version,
+        startTime: instance.started_at,
+        endTime: instance.ended_at || '',
+        durationInMillis: ended === undefined ? 0 : ended - new Date(instance.started_at).getTime(),
+        state: historicState(instance.state),
+        deleteReason: instance.state === 'completed' ? '' : instance.end_reason || '',
+        tenantId: instance.owner,
+        network_id: instance.network_id || undefined,
+    } as MonitorProcessModel;
+}
+
+// the states of the history of the old engine; the details of an instance are offered for all but COMPLETED
+function historicState(state: string): string {
+    switch (state) {
+        case 'completed':
+            return 'COMPLETED';
+        case 'terminated':
+            return 'EXTERNALLY_TERMINATED';
+        case 'incident':
+            return 'INTERNALLY_TERMINATED';
+    }
+    return 'ACTIVE';
 }

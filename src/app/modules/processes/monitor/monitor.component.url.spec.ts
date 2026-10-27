@@ -30,7 +30,6 @@ import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 import { ProcessMonitorComponent } from './monitor.component';
-import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { MonitorService } from './shared/monitor.service';
 import { CoreModule } from '../../../core/core.module';
 import { SearchbarComponent } from '../../../core/components/searchbar/searchbar.component';
@@ -44,7 +43,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
     let fixture: ComponentFixture<ProcessMonitorComponent>;
     let router: Router;
 
-    // arguments of getFilteredHistoryInstances: filter, search type, search value, limit, offset, sort, order
+    // arguments of getInstancesOfNetworks: filter, search, deployment id, limit, offset, sort, order
     const loads = (filter: string) => getInstances.calls.allArgs().filter((args) => args[0] === filter);
     const lastLoad = (filter: string) => loads(filter)[loads(filter).length - 1];
 
@@ -52,8 +51,8 @@ describe('ProcessMonitorComponent view state in the URL', () => {
         localStorage.removeItem('PreferencesService/pageSize');
         // 30 running and 100 finished processes: the Running paginator has fewer pages than the Finished one
         // answered after the first check, like a request
-        getInstances = jasmine.createSpy('getFilteredHistoryInstances').and.callFake((filter: string) =>
-            of({ total: filter === 'unfinished' ? 30 : 100, data: [] }).pipe(delay(1)),
+        getInstances = jasmine.createSpy('getInstancesOfNetworks').and.callFake((filter: string) =>
+            of({ total: filter === 'running' ? 30 : 100, data: [] }).pipe(delay(1)),
         );
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
@@ -63,8 +62,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
                 provideRouter([]),
                 provideHttpClient(withInterceptorsFromDi()),
                 provideHttpClientTesting(),
-                { provide: MonitorService, useValue: { getFilteredHistoryInstances: getInstances } },
-                { provide: MonitorFogFactory, useValue: {} },
+                { provide: MonitorService, useValue: { getInstancesOfNetworks: getInstances } },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([]) } },
                 { provide: DialogsService, useValue: {} },
                 { provide: UtilService, useValue: { dateIsToday: () => false } },
@@ -104,7 +102,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
 
     it('loads the tab it switches to with the defaults and not with the view of the other tab', fakeAsync(() => {
         open('/?page=1&sort=id&dir=asc');
-        expect(lastLoad('unfinished').slice(4, 7)).toEqual([20, 'id', 'asc']);
+        expect(lastLoad('running').slice(4, 7)).toEqual([20, 'id', 'asc']);
 
         selectTab(1);
         discardPeriodicTasks();
@@ -116,14 +114,14 @@ describe('ProcessMonitorComponent view state in the URL', () => {
 
     it('clears the search in the URL and in the searchbars when the tab changes', fakeAsync(() => {
         open('/?search=foo');
-        expect(lastLoad('unfinished')[2]).toBe('foo');
+        expect(lastLoad('running')[1]).toBe('foo');
 
         selectTab(1);
         discardPeriodicTasks();
         flush();
 
         expect(router.url).toBe('/?tab=1');
-        expect(lastLoad('finished')[2]).toBe('');
+        expect(lastLoad('finished')[1]).toBe('');
         const searchbars = fixture.debugElement.queryAll(By.directive(SearchbarComponent));
         expect(searchbars.length).toBeGreaterThan(0);
         searchbars.forEach((searchbar) => {

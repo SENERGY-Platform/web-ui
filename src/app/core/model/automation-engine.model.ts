@@ -48,6 +48,72 @@ export interface EngineDeployment {
     source?: string;
     disabled?: boolean;
     version?: number;
+    /** the gateway the deployment runs on; empty is the cloud */
+    network_id?: string;
+    created_at?: string;
+}
+
+/** model.Page, the answer of the list calls */
+export interface EnginePage<T> {
+    items: T[];
+    total: number;
+    limit: number;
+    offset: number;
+}
+
+/**
+ * Value of network_id for the deployments and instances of the cloud. Without network_id the lists
+ * hold those of the cloud and of every gateway.
+ */
+export const ENGINE_CLOUD_NETWORK = 'cloud';
+
+/** query of GET /namespaces/{ns}/deployments */
+export interface EngineDeploymentListOptions {
+    limit?: number;
+    offset?: number;
+    search?: string;
+    /** name, created_at or updated_at, with .asc or .desc */
+    sort?: string;
+    ids?: string[];
+    /** sepl leaves out the deployments of widgets (generated) */
+    source?: string;
+    /** ENGINE_CLOUD_NETWORK or the id of a gateway; empty lists all */
+    network_id?: string;
+}
+
+/** query of GET /namespaces/{ns}/instances */
+export interface EngineInstanceListOptions {
+    limit?: number;
+    offset?: number;
+    /** running, finished, completed, terminated or incident */
+    state?: string;
+    deployment_id?: string;
+    deployment_name?: string;
+    ids?: string[];
+    /** started_at, ended_at, created_at, deployment_name or state, with .asc or .desc */
+    sort?: string;
+    /** ENGINE_CLOUD_NETWORK or the id of a gateway; empty lists all */
+    network_id?: string;
+}
+
+/** model.NetworkResource: desired and applied state of a resource of a gateway */
+export interface EngineNetworkResource {
+    /** deployment or instance */
+    kind: string;
+    id: string;
+    deleted?: boolean;
+    /** pending, applied or failed */
+    state: string;
+    error?: string;
+}
+
+/** model.Network, only the fields the web-ui reads; resources only when one network is read */
+export interface EngineNetwork {
+    id: string;
+    name?: string;
+    online: boolean;
+    last_contact?: string;
+    resources?: EngineNetworkResource[];
 }
 
 /** body of POST and PUT /namespaces/{ns}/schedules (model.ScheduleInput) */

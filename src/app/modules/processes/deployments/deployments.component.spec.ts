@@ -31,9 +31,6 @@ import { of, Subject } from 'rxjs';
 
 import { ProcessDeploymentsComponent } from './deployments.component';
 import { DeploymentsService } from './shared/deployments.service';
-import { DeploymentsFogFactory, DeploymentsFogService } from './shared/deployments-fog.service';
-import { HttpClient } from '@angular/common/http';
-import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { DeploymentsModel } from './shared/deployments.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { ResponsiveService } from '../../../core/services/responsive.service';
@@ -44,8 +41,8 @@ import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { UrlStateService } from '../../../core/services/url-state.service';
 
-const deployment = (id: string, disabled?: boolean): DeploymentsModel =>
-    ({ id, name: 'name-' + id, definition_id: 'def-' + id, diagram: '<svg></svg>', online: true, disabled }) as DeploymentsModel;
+const deployment = (id: string, disabled?: boolean, networkId?: string): DeploymentsModel =>
+    ({ id, name: 'name-' + id, definition_id: 'def-' + id, diagram: '<svg></svg>', online: true, disabled, network_id: networkId }) as DeploymentsModel;
 
 const hub = { id: 'hub-1', name: 'Hub' } as HubModel;
 
@@ -58,7 +55,7 @@ class MockDeploymentsService {
         return true;
     }
 
-    getAll(_query: string, _limit: number, offset: number) {
+    listOfNetworks(_query: string, _limit: number, offset: number, _feature: string, _order: string, _source: string, _networkId?: string) {
         return of(offset === 0 ? this.items : []);
     }
 
@@ -100,7 +97,6 @@ describe('ProcessDeploymentsComponent', () => {
                     provide: ActivatedRoute,
                     useValue: { snapshot: { queryParamMap: { get: () => null } }, queryParamMap: of({ get: () => null }) },
                 },
-                { provide: DeploymentsFogFactory, useValue: { withHubId: () => new MockDeploymentsService() } },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([hub]) } },
                 { provide: MetadataExistenceService, useValue: {} },
                 { provide: UrlStateService, useValue: { getShown: () => false, getSort: (active: string, direction: string) => ({ active, direction }), set: () => undefined, setSort: () => undefined } },
@@ -138,7 +134,7 @@ describe('ProcessDeploymentsComponent', () => {
     it('keeps loading after a short chunk and stops only at an empty one', () => {
         // the wrapper drops deployments without a virtual id, so the first chunk comes back short
         const chunks = [[deployment('a')], [deployment('b')], []];
-        const getAll = spyOn(service, 'getAll').and.callFake(() => of(chunks.shift() || []));
+        const getAll = spyOn(service, 'listOfNetworks').and.callFake(() => of(chunks.shift() || []));
         renderWithChunkSize(2);
 
         expect(getAll.calls.allArgs().map((args) => [args[1], args[2]])).toEqual([[2, 0], [2, 2], [2, 4]]);
@@ -146,7 +142,7 @@ describe('ProcessDeploymentsComponent', () => {
     });
 
     it('does not ask for the next chunk after an empty one', () => {
-        const getAll = spyOn(service, 'getAll').and.returnValue(of([]));
+        const getAll = spyOn(service, 'listOfNetworks').and.returnValue(of([]));
         renderWithChunkSize(2);
         component.onScroll();
 
@@ -154,25 +150,33 @@ describe('ProcessDeploymentsComponent', () => {
     });
 
     it('reports a delete on a hub as sent, not as done', () => {
-        component.hub = hub;
-        (component as any).showDeleteSuccess(false);
+        (component as any).showDeleteSuccess(false, true);
 
         expect(snackBar.open.calls.mostRecent().args[0]).toBe('Delete sent to the hub; the deployment disappears once the hub confirms.');
     });
 
     it('reports a delete on the platform as done', () => {
-        component.hub = null;
-        (component as any).showDeleteSuccess(true);
+        (component as any).showDeleteSuccess(true, false);
 
         expect(snackBar.open.calls.mostRecent().args[0]).toBe('Deployments deleted successfully.');
     });
 
-    it('treats a hub deployment as gone once the DELETE was accepted', (done) => {
-        const fog = new DeploymentsFogService('hub-1', {} as HttpClient, {} as ErrorHandlerService, {} as NetworksService);
-        fog.checkForDeletedDeploymentWithRetries('d1', 10, 100).subscribe((exists) => {
-            expect(exists).toBeFalse();
-            done();
-        });
+    it('lists the deployments of all networks until one is selected', () => {
+        const list = spyOn(service, 'listOfNetworks').and.callThrough();
+        render();
+        component.selectNetwork('cloud', false);
+        component.selectNetwork(hub.id, false);
+        component.selectNetwork(null, false);
+
+        expect(list.calls.allArgs().map((args) => args[6])).toEqual([undefined, 'cloud', 'hub-1', undefined]);
+    });
+
+    it('shows on each deployment whether it runs on the platform or on which hub', () => {
+        service.items = [deployment('cloud-deployment'), deployment('hub-deployment', false, hub.id)];
+        render();
+
+        const labels = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('.network-label')).map((l) => l.textContent?.trim());
+        expect(labels).toEqual(['cloud Platform', 'router Hub']);
     });
 
     it('shows an on/off toggle per deployment, on only for the ones that are not disabled', () => {
@@ -191,12 +195,11 @@ describe('ProcessDeploymentsComponent', () => {
         expect(runButtons.map((b) => b?.disabled)).toEqual([false, true]);
     });
 
-    it('hides the toggle while a fog hub is selected', () => {
-        render();
-        component.selectHub(hub, false);
+    it('shows the toggle only for deployments of the platform', () => {
+        service.items = [deployment('cloud-deployment'), deployment('hub-deployment', false, hub.id)];
         render();
 
-        expect(toggles().length).toBe(0);
+        expect(toggles().length).toBe(1);
     });
 
     it('asks for confirmation before switching off and then sends the change', () => {

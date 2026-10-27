@@ -26,9 +26,11 @@
             <mat-icon>device_hub</mat-icon>
         </button>
         <mat-menu #deploymentEnvironment="matMenu">
-            <button mat-menu-item [ngClass]="{'hub-selected': !hub}" (click)="selectHub(null)">Senergy-Platform</button>
-            <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}"
-                (click)="selectHub(h)">{{h.name}}</button>
+            <button mat-menu-item [ngClass]="{'hub-selected': networkFilter === null}" (click)="selectNetwork(null)">All</button>
+            <button mat-menu-item [ngClass]="{'hub-selected': networkFilter === cloudNetwork}"
+                (click)="selectNetwork(cloudNetwork)">Senergy-Platform</button>
+            <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': networkFilter === h.id}"
+                (click)="selectNetwork(h.id)">{{h.name}}</button>
         </mat-menu>
         <button matTooltip="show generated" mat-icon-button color="accent" (click)="filterItems(true)"
             *ngIf="!this.showGenerated" class="suffix">
@@ -44,10 +46,6 @@
         </button>
         <senergy-sort [sortAttributes]="sortAttributes" [selectedValue]="sortAttribute.value" class="suffix-sort"
             (messageEvent)="receiveSortingAttribute($event)"></senergy-sort>
-        <button matTooltip="refresh fog deployment sync" mat-icon-button color="accent" (click)="refreshSync()"
-                *ngIf="this.refreshSyncF" class="suffix">
-            <mat-icon>refresh</mat-icon>
-        </button>
     </div>
     <div class="deployment-filter-row" *ngIf="deploymentIdFilter">
         <mat-chip-set aria-label="Deployment filter">
@@ -78,14 +76,19 @@
                                 <div class="truncate footer-item-header" matTooltip="{{item.value.name}}">
                                     {{item.value.name}}
                                 </div>
-                                <div class="truncate footer-item-subtitle"
-                                    matTooltip="{{item.value.deploymentTime | date:'medium'}}">
-                                    {{item.value.deploymentTime | date:"medium"}}
+                                <div fxLayout="row" fxLayoutAlign="start center" class="footer-item-subtitle">
+                                    <span fxFlex class="truncate" matTooltip="{{item.value.deploymentTime | date:'medium'}}">
+                                        {{item.value.deploymentTime | date:"medium"}}
+                                    </span>
+                                    <span class="truncate network-label" matTooltip="Runs on {{networkName(item.value.network_id)}}">
+                                        <mat-icon inline>{{item.value.network_id ? 'router' : 'cloud'}}</mat-icon>
+                                        {{networkName(item.value.network_id)}}
+                                    </span>
                                 </div>
                                 <div fxLayout="row" fxLayoutAlign="center center" class="footer-buttons">
                                     <mat-checkbox formControlName="selected" (change)="countCheckboxes()">
                                     </mat-checkbox>
-                                    <mat-slide-toggle *ngIf="!hub" color="accent" class="deployment-toggle"
+                                    <mat-slide-toggle *ngIf="!item.value.network_id" color="accent" class="deployment-toggle"
                                         [checked]="!item.value.disabled" matTooltip="Switch deployment on or off"
                                         (change)="toggleDeploymentEnabled(item, $event)">
                                     </mat-slide-toggle>

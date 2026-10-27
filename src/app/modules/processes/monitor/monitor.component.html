@@ -24,12 +24,6 @@
                         matTooltip="Deployment Environment" color="accent">
                         <mat-icon>device_hub</mat-icon>
                     </button>
-                    <mat-menu #deploymentEnvironment="matMenu">
-                        <button mat-menu-item [ngClass]="{'hub-selected': !hub}"
-                            (click)="selectHubWithReload(null)">Senergy-Platform</button>
-                        <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': hub?.id === h.id}"
-                            (click)="selectHubWithReload(h)">{{h.name}}</button>
-                    </mat-menu>
                     <mat-chip-listbox class="offset" *ngIf="selectedDeployment !== null">
                         <mat-chip-option [removable]="true" (removed)="removeChip()" color="accent" selected>
                             {{selectedDeployment.name}}
@@ -71,6 +65,14 @@
                                     <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
                                 </ng-container>
 
+                                <ng-container matColumnDef="network">
+                                    <th mat-header-cell *matHeaderCellDef>Runs on</th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <mat-icon inline class="network-icon">{{element.network_id ? 'router' : 'cloud'}}</mat-icon>
+                                        {{networkName(element.network_id)}}
+                                    </td>
+                                </ng-container>
+
                                 <ng-container matColumnDef="id">
                                     <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
                                     <td mat-cell *matCellDef="let element"> {{element.id}} </td>
@@ -99,7 +101,6 @@
                                 <ng-container matColumnDef="action">
                                     <th mat-header-cell *matHeaderCellDef>Action</th>
                                     <td mat-cell *matCellDef="let element">
-                                        <mat-icon *ngIf="element.is_placeholder || element.marked_for_delete" color="warn" class="icon-spin" matTooltip="waiting for sync with hub">sync</mat-icon>
                                         <button matTooltip="Stop" mat-icon-button color="accent"
                                             (click)="stop(element)">
                                             <mat-icon>stop</mat-icon>
@@ -141,11 +142,6 @@
                         matTooltip="Deployment Environment" color="accent">
                         <mat-icon>device_hub</mat-icon>
                     </button>
-                    <mat-menu #deploymentEnvironment="matMenu">
-                        <button mat-menu-item (click)="selectHubWithReload(null)">Senergy-Platform</button>
-                        <button mat-menu-item *ngFor="let hub of hubList"
-                            (click)="selectHubWithReload(hub)">{{hub.name}}</button>
-                    </mat-menu>
                     <mat-chip-listbox class="offset" *ngIf="selectedDeployment !== null">
                         <mat-chip-option [removable]="true" (removed)="removeChip()" color="accent" selected>
                             {{selectedDeployment.name}}
@@ -187,6 +183,14 @@
                                 <ng-container matColumnDef="definitionName">
                                     <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
                                     <td mat-cell *matCellDef="let element"> {{element.processDefinitionName}} </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="network">
+                                    <th mat-header-cell *matHeaderCellDef>Runs on</th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <mat-icon inline class="network-icon">{{element.network_id ? 'router' : 'cloud'}}</mat-icon>
+                                        {{networkName(element.network_id)}}
+                                    </td>
                                 </ng-container>
 
                                 <ng-container matColumnDef="id">
@@ -285,3 +289,10 @@
 </div>
 <senergy-spinner [elementCount]="0" [show]="animation || isLoadingResultsFinished || isLoadingResultsRunning">
 </senergy-spinner>
+<mat-menu #deploymentEnvironment="matMenu">
+    <button mat-menu-item [ngClass]="{'hub-selected': networkFilter === null}" (click)="selectNetworkWithReload(null)">All</button>
+    <button mat-menu-item [ngClass]="{'hub-selected': networkFilter === cloudNetwork}"
+        (click)="selectNetworkWithReload(cloudNetwork)">Senergy-Platform</button>
+    <button mat-menu-item *ngFor="let h of hubList" [ngClass]="{'hub-selected': networkFilter === h.id}"
+        (click)="selectNetworkWithReload(h.id)">{{h.name}}</button>
+</mat-menu>

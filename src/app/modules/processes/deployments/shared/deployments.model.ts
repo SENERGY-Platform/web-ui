@@ -28,6 +28,8 @@ export interface DeploymentsModel {
     selected: boolean;
     sync: boolean | undefined | null;
     disabled?: boolean;
+    /** the hub the deployment runs on; undefined is the platform */
+    network_id?: string;
 }
 
 export interface DeploymentsOfflineReasonsModel {

@@ -25,9 +25,14 @@ import {
     EngineDebugState,
     EngineDeployment,
     EngineDeploymentInput,
+    EngineDeploymentListOptions,
     EngineDeploymentVersion,
     EngineEventReconstruction,
     EngineHistoryVariable,
+    EngineInstance,
+    EngineInstanceListOptions,
+    EngineNetwork,
+    EnginePage,
     EngineSchedule,
     EngineScheduleInput,
     EngineVariable,
@@ -58,7 +63,8 @@ export function engineErrorMessage(err: unknown): string {
  * Calls of the automation-engine API under /namespaces/{ns}/... . Errors are logged and answered with
  * null or a status, as in the other services of this app. The debugging calls are the exception: they
  * pass the error on, because the debugger shows the message of the engine (a step no longer
- * available, a gateway not reachable); engineErrorMessage reads it.
+ * available, a gateway not reachable); engineErrorMessage reads it. The list and network calls pass
+ * it on as well, the services of the process pages answer it in their own format.
  */
 @Injectable({
     providedIn: 'root',
@@ -97,6 +103,23 @@ export class AutomationEngineService {
                 map((resp) => ({ status: resp.status })),
                 catchError(this.errorHandlerService.handleError(AutomationEngineService.name, 'deleteSchedule', { status: 500 })),
             );
+    }
+
+    listDeployments(options: EngineDeploymentListOptions, namespace: string = PROCESSES_NAMESPACE): Observable<EnginePage<EngineDeployment>> {
+        return this.http.get<EnginePage<EngineDeployment>>(this.namespaceUrl(namespace) + '/deployments', { params: listParams(options) });
+    }
+
+    getDeployment(id: string, namespace: string = PROCESSES_NAMESPACE): Observable<EngineDeployment> {
+        return this.http.get<EngineDeployment>(this.namespaceUrl(namespace) + '/deployments/' + encodeURIComponent(id));
+    }
+
+    listInstances(options: EngineInstanceListOptions, namespace: string = PROCESSES_NAMESPACE): Observable<EnginePage<EngineInstance>> {
+        return this.http.get<EnginePage<EngineInstance>>(this.namespaceUrl(namespace) + '/instances', { params: listParams(options) });
+    }
+
+    /** a gateway with the desired and applied state of its deployments and instances */
+    getNetwork(id: string): Observable<EngineNetwork> {
+        return this.http.get<EngineNetwork>(environment.automationEngineUrl + '/networks/' + encodeURIComponent(id));
     }
 
     getDeploymentVersion(namespace: string, id: string, version: number): Observable<EngineDeploymentVersion> {
@@ -170,5 +193,17 @@ function stepParams(step: EngineHistoryStep): HttpParams {
     if (step.time) {
         params = params.set('time', step.time);
     }
+    return params;
+}
+
+/** query of a list call; empty values and lists are left out, lists are sent comma separated */
+function listParams(options: EngineDeploymentListOptions | EngineInstanceListOptions): HttpParams {
+    let params = new HttpParams();
+    Object.entries(options).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+            return;
+        }
+        params = params.set(key, Array.isArray(value) ? value.join(',') : value);
+    });
     return params;
 }

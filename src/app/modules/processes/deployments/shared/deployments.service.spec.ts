@@ -117,21 +117,76 @@ describe('DeploymentsService', () => {
         },
     ));
 
-    it('should take the disabled state of a single deployment from its engine definition', inject(
+    it('should list the deployments of all networks without network_id and source', inject(
         [DeploymentsService, HttpTestingController],
         (service: DeploymentsService, http: HttpTestingController) => {
             let received: DeploymentsModel[] | undefined;
-            service.list('', 1, 0, 'deploymentTime', 'desc', '', 'deplid').subscribe((resp) => (received = resp));
+            service.listOfNetworks('', 2, 0, 'deploymentTime', 'desc', '').subscribe((resp) => (received = resp));
 
-            http.expectOne(environment.processDeploymentUrl + '/v3/deployments/deplid?with_options=false').flush({
-                id: 'deplid',
-                name: 'alarm',
-                diagram: { svg: '<svg></svg>' },
+            const list = http.expectOne((r) => r.url === environment.automationEngineUrl + '/namespaces/processes/deployments');
+            expect(list.request.params.keys().sort()).toEqual(['limit', 'offset', 'sort']);
+            expect(list.request.params.get('sort')).toBe('created_at.desc');
+            list.flush({
+                items: [
+                    { id: 'cloud-1', name: 'alarm', created_at: '2026-10-27T10:00:00Z', disabled: true },
+                    { id: 'hub-1-deployment', name: 'light', created_at: '2026-10-27T11:00:00Z', network_id: 'hub-1' },
+                ],
+                total: 2,
+                limit: 2,
+                offset: 0,
             });
-            http.expectOne(environment.processServiceUrl + '/v2/deployments/deplid/definition').flush([{ suspended: true }]);
-            http.expectOne(environment.processDeploymentUrl + '/dependencies?ids=deplid').flush([]);
-            expect(received?.length).toBe(1);
-            expect(received?.[0].disabled).toBeTrue();
+            http.expectOne(environment.processServiceUrl + '/v2/process-definitions/cloud-1/diagram').flush('<svg>1</svg>');
+            http.expectOne(environment.processServiceUrl + '/v2/process-definitions/hub-1-deployment/diagram').flush('<svg>2</svg>');
+            // devices are checked for the platform deployment only, the hub for the hub deployment
+            http.expectOne(environment.processDeploymentUrl + '/dependencies?ids=cloud-1').flush([]);
+            http.expectOne(environment.automationEngineUrl + '/networks/hub-1').flush({
+                id: 'hub-1',
+                name: 'Hub',
+                online: false,
+                resources: [{ kind: 'deployment', id: 'hub-1-deployment', state: 'pending' }],
+            });
+            http.verify();
+
+            expect(received?.map((d) => [d.id, d.network_id, d.diagram, d.disabled, d.online, d.sync])).toEqual([
+                ['cloud-1', undefined, '<svg>1</svg>', true, true, false],
+                ['hub-1-deployment', 'hub-1', '<svg>2</svg>', false, false, true],
+            ]);
+            expect(received?.[1].offline_reasons.map((r) => r.description)).toEqual(['Hub offline']);
+        },
+    ));
+
+    it('should pass the selected network and the source on', inject(
+        [DeploymentsService, HttpTestingController],
+        (service: DeploymentsService, http: HttpTestingController) => {
+            service.listOfNetworks('alarm', 10, 20, 'name', 'asc', 'sepl', 'cloud').subscribe(() => {});
+
+            const list = http.expectOne((r) => r.url === environment.automationEngineUrl + '/namespaces/processes/deployments');
+            expect(list.request.params.get('network_id')).toBe('cloud');
+            expect(list.request.params.get('source')).toBe('sepl');
+            expect(list.request.params.get('search')).toBe('alarm');
+            expect(list.request.params.get('sort')).toBe('name.asc');
+            expect(list.request.params.get('offset')).toBe('20');
+        },
+    ));
+
+    it('should keep a hub deployment that the hub could not apply offline with its error', inject(
+        [DeploymentsService, HttpTestingController],
+        (service: DeploymentsService, http: HttpTestingController) => {
+            let received: DeploymentsModel | null | undefined;
+            service.getDeploymentOfNetworks('d1').subscribe((resp) => (received = resp));
+
+            http.expectOne(environment.automationEngineUrl + '/namespaces/processes/deployments/d1').flush({ id: 'd1', name: 'light', network_id: 'hub-1' });
+            http.expectOne(environment.processServiceUrl + '/v2/process-definitions/d1/diagram').flush('<svg></svg>');
+            http.expectOne(environment.automationEngineUrl + '/networks/hub-1').flush({
+                id: 'hub-1',
+                name: 'Hub',
+                online: true,
+                resources: [{ kind: 'deployment', id: 'd1', state: 'failed', error: 'unknown device' }],
+            });
+
+            expect(received?.online).toBeFalse();
+            expect(received?.sync).toBeFalse();
+            expect(received?.offline_reasons.map((r) => r.description)).toEqual(['Hub could not apply the deployment: unknown device']);
         },
     ));
 

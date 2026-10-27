@@ -36,7 +36,6 @@ import { DeviceGroupsPipelineHelperDialogComponent } from '../../../device-group
 import { SmartServiceInstanceService } from 'src/app/modules/smart-services/instances/shared/instances.service';
 import { SmartServiceReleasesService } from 'src/app/modules/smart-services/releases/shared/release.service';
 import { NetworksService } from '../../../networks/shared/networks.service';
-import { DeploymentsFogFactory } from 'src/app/modules/processes/deployments/shared/deployments-fog.service';
 import { DeploymentsService } from 'src/app/modules/processes/deployments/shared/deployments.service';
 import {
   V2DeploymentsPreparedFilterCriteriaModel,
@@ -108,7 +107,6 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
     private smartServiceInstanceService: SmartServiceInstanceService,
     private smartServiceReleasesService: SmartServiceReleasesService,
     private networksService: NetworksService,
-    private deploymentsFogFactory: DeploymentsFogFactory,
     private deploymentsService: DeploymentsService,
 
     @Inject(MAT_DIALOG_DATA) private data: {
@@ -334,7 +332,7 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
         obs.push(this.deploymentsService.v3getAllDeployments()); // cloud processes-deployments
         obs.push(this.networksService.listSyncNetworks().pipe(concatMap(networks => { // fog processes-deployments
           const obs2: Observable<V2DeploymentsPreparedModel[]>[] = [of([])];
-          networks.forEach(network => obs2.push(this.deploymentsFogFactory.withHubId(network.id).getAllFogDeployments().pipe(map(deployments => deployments.map(d => d.deployment_model)))));
+          networks.forEach(network => obs2.push(this.deploymentsService.getAllNetworkDeployments(network.id)));
           return forkJoin(obs2);
         }), map(obs2 => obs2.flat())));
         return forkJoin(obs);

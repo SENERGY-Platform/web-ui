@@ -55,6 +55,7 @@ mat-grid-tile-footer {
 
 .footer-item-subtitle {
     min-height: 20px;
+    gap: 8px;
     margin-top: -4px;
     padding: 5px;
     margin-bottom: 16px;
@@ -136,4 +137,9 @@ mat-grid-list {
 
 .deployment-toggle {
     margin-left: 8px;
+}
+
+.network-label {
+    max-width: 50%;
+    color: rgba(0, 0, 0, .6);
 }

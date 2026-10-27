@@ -35,11 +35,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { CamundaVariable } from './shared/deployments-definition.model';
 import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-start-parameter-dialog.component';
-import { DeploymentsFogFactory } from './shared/deployments-fog.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { UrlStateService } from '../../../core/services/url-state.service';
+import { ENGINE_CLOUD_NETWORK } from '../../../core/model/automation-engine.model';
 
 const grids = new Map([
     ['xs', 1],
@@ -85,28 +85,11 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     selectedItems: DeploymentsModel[] = [];
     rowHeight = 282;
     hubList: HubModel[] = [];
-    hub: HubModel | undefined | null;
+    /** null lists the deployments of the platform and of all hubs, ENGINE_CLOUD_NETWORK those of the platform, a hub id those of that hub */
+    networkFilter: string | null = null;
+    readonly cloudNetwork = ENGINE_CLOUD_NETWORK;
     metadataCheckRequested = false;
     metadataCheckRunning = false;
-
-    deploymentsService: {
-        getDeployment(deploymentId: string): Observable<DeploymentsModel | null>;
-        getAll(
-            query: string,
-            limit: number,
-            offset: number,
-            feature: string,
-            order: string,
-            source: string,
-        ): Observable<DeploymentsModel[]>;
-        checkForDeletedDeploymentWithRetries(id: string, maxRetries: number, intervalInMs: number): Observable<boolean>;
-        getDeploymentInputParameters(deploymentId: string): Observable<Map<string, CamundaVariable> | null>;
-        startDeployment(deploymentId: string): Observable<any | null>;
-        v2deleteDeployment(deploymentId: string): Observable<{ status: number }>;
-        getDeploymentDiagramXml(deploymentId: string): Observable<string>;
-    };
-
-    refreshSyncF: undefined | null | {refreshSync():Observable<{ status: number }>};
 
     @ViewChild('mainPanel', { static: false }) mainPanel!: ElementRef;
 
@@ -114,7 +97,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         private sanitizer: DomSanitizer,
         private utilService: UtilService,
         private searchbarService: SearchbarService,
-        private platformDeploymentsService: DeploymentsService,
+        private deploymentsService: DeploymentsService,
         private responsiveService: ResponsiveService,
         private snackBar: MatSnackBar,
         private clipboardService: ClipboardService,
@@ -122,17 +105,14 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         private route: ActivatedRoute,
         private dialogsService: DialogsService,
         private dialog: MatDialog,
-        private fogDeploymentsFactory: DeploymentsFogFactory,
         private _formBuilder: FormBuilder,
         private hubsService: NetworksService,
         private metadataExistenceService: MetadataExistenceService,
         private urlState: UrlStateService,
-    ) {
-        this.deploymentsService = platformDeploymentsService;
-    }
+    ) {}
 
     ngOnInit() {
-        this.userHasDeleteAuthorization = this.platformDeploymentsService.userHasDeleteAuthorization();
+        this.userHasDeleteAuthorization = this.deploymentsService.userHasDeleteAuthorization();
         this.showGenerated = this.urlState.getShown('generated', false);
         this.sortAttribute = this.restoreSortAttribute();
         this.source = this.showGenerated ? '' : 'sepl';
@@ -152,8 +132,9 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
             this.requestedHubId = hubId;
             this.deploymentIdFilter = deploymentId;
 
-            if (hubChanged) {
-                this.applyHubSelectionFromQueryParam();
+            // before the hubs are known, their answer applies the parameter
+            if (hubChanged && this.hubSelectionResolved) {
+                this.applyNetworkSelectionFromQueryParam();
             }
 
             if (deploymentChanged && !hubChanged && this.searchInitialized) {
@@ -163,7 +144,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
         this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;
-            this.applyHubSelectionFromQueryParam();
+            this.applyNetworkSelectionFromQueryParam();
             this.hubSelectionResolved = true;
             this.tryInitializeSearchAndLoad();
         });
@@ -213,19 +194,11 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         return attribute;
     }
 
-    selectHub(hub: HubModel | null, updateQueryParam = true) {
-        this.hub = hub;
-        if (hub) {
-            const service = this.fogDeploymentsFactory.withHubId(hub.id);
-            this.deploymentsService = service;
-            this.refreshSyncF = service;
-        } else {
-            this.deploymentsService = this.platformDeploymentsService;
-            this.refreshSyncF = null;
-        }
+    selectNetwork(networkFilter: string | null, updateQueryParam = true) {
+        this.networkFilter = networkFilter;
 
         if (updateQueryParam) {
-            this.requestedHubId = hub?.id || null;
+            this.requestedHubId = networkFilter;
             this.deploymentIdFilter = null;
             this.router.navigate([], {
                 relativeTo: this.route,
@@ -273,19 +246,15 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     navigateToMonitorSection(deployment: DeploymentsModel, activeTab: number) {
-        this.router.navigateByUrl('/processes/monitor', { state: { deployment, activeTab, hub: this.hub } });
+        this.router.navigateByUrl('/processes/monitor', { state: { deployment, activeTab } });
     }
 
-    refreshSync(): void {
-        if(this.refreshSyncF) {
-            this.refreshSyncF.refreshSync().subscribe((result) => {
-                if (result.status !== 200) {
-                    this.showSnackBarError('refreshing fog deployment sync!');
-                } else {
-                    this.getRepoItems(true);
-                }
-            });
+    /** where a deployment runs: the platform or the name of its hub */
+    networkName(networkId: string | undefined): string {
+        if (!networkId) {
+            return 'Platform';
         }
+        return this.hubList.find((hub) => hub.id === networkId)?.name || networkId;
     }
 
     deleteDeployment(deployment: DeploymentsModel): void {
@@ -303,7 +272,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                                     if (exists) {
                                         this.showSnackBarError('deleting the deployment!');
                                     } else {
-                                        this.showDeleteSuccess(false);
+                                        this.showDeleteSuccess(false, !!deployment.network_id);
                                     }
                                     this.serverOffset = Math.max(0, this.serverOffset - 1);
                                     this.setRepoItemsParams(1);
@@ -344,7 +313,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     private setDeploymentDisabled(item: AbstractControl, disabled: boolean, revert: () => void): void {
-        this.platformDeploymentsService.setDeploymentDisabled(item.value.id, disabled).subscribe((resp) => {
+        this.deploymentsService.setDeploymentDisabled(item.value.id, disabled).subscribe((resp) => {
             if (resp === null) {
                 this.showSnackBarError('switching the deployment ' + (disabled ? 'off' : 'on') + '!');
                 revert();
@@ -408,7 +377,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                                 this.selectedItems.length === 1 ? 'deleting the deployment!' : 'deleting the deployments!',
                             );
                         } else {
-                            this.showDeleteSuccess(this.selectedItems.length !== 1);
+                            this.showDeleteSuccess(this.selectedItems.length !== 1, this.selectedItems.some((item) => !!item.network_id));
                         }
                         this.getRepoItems(true);
                     });
@@ -455,26 +424,15 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.initSearchAndGetDevices();
     }
 
-    private applyHubSelectionFromQueryParam(): void {
-        if (!this.hubList.length) {
+    private applyNetworkSelectionFromQueryParam(): void {
+        const requested = this.requestedHubId;
+        if (requested && requested !== ENGINE_CLOUD_NETWORK && !this.hubList.some((hub) => hub.id === requested)) {
+            // a hub that is gone or no longer shared
+            this.selectNetwork(null);
             return;
         }
-
-        if (!this.requestedHubId) {
-            if (this.hub !== null) {
-                this.selectHub(null, false);
-            }
-            return;
-        }
-
-        const selectedHub = this.hubList.find((hub) => hub.id === this.requestedHubId) || null;
-        if (!selectedHub) {
-            this.selectHub(null);
-            return;
-        }
-
-        if (this.hub?.id !== selectedHub.id) {
-            this.selectHub(selectedHub, false);
+        if (this.networkFilter !== requested) {
+            this.selectNetwork(requested, false);
         }
     }
 
@@ -488,7 +446,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.getAllSub.unsubscribe(); // only one request at a time
 
         if (this.deploymentIdFilter) {
-            this.getAllSub = this.deploymentsService.getDeployment(this.deploymentIdFilter).subscribe((deployment) => {
+            this.getAllSub = this.deploymentsService.getDeploymentOfNetworks(this.deploymentIdFilter).subscribe((deployment) => {
                 if (deployment) {
                     this.addToFormArray([deployment]);
                 }
@@ -499,7 +457,15 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         }
 
         this.getAllSub = this.deploymentsService
-            .getAll(this.searchText, this.limit, this.offset, this.sortAttribute.value, this.sortAttribute.order, this.source)
+            .listOfNetworks(
+                this.searchText,
+                this.limit,
+                this.offset,
+                this.sortAttribute.value,
+                this.sortAttribute.order,
+                this.source,
+                this.networkFilter || undefined,
+            )
             .subscribe((repoItems: DeploymentsModel[]) => {
                 this.serverOffset = this.offset + this.limit;
                 this.addToFormArray(repoItems);
@@ -555,6 +521,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
                     image: this.provideImg(repoItem.diagram),
                     sync: repoItem.sync,
                     disabled: repoItem.disabled === true,
+                    network_id: repoItem.network_id,
                     selected: false,
                     metadataWarning: '',
                 }),
@@ -605,8 +572,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     }
 
     // A hub removes the deployment only after it confirms the delete command, so success there means "sent".
-    private showDeleteSuccess(plural: boolean): void {
-        if (this.hub) {
+    private showDeleteSuccess(plural: boolean, onHub: boolean): void {
+        if (onHub) {
             this.snackBar.open(
                 'Delete sent to the hub; the ' + (plural ? 'deployments disappear' : 'deployment disappears') + ' once the hub confirms.',
                 undefined,
