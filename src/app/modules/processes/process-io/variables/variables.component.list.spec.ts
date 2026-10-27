@@ -19,7 +19,8 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { of, Subject } from 'rxjs';
 
 import { ProcessIoVariablesComponent } from './variables.component';
 import { ProcessIoService } from '../shared/process-io.service';
@@ -95,4 +96,45 @@ describe('ProcessIoVariablesComponent list', () => {
 
         expect(fixture.nativeElement.querySelector('senergy-page-header button').textContent).toContain('New variable');
     }));
+
+    describe('view state in the URL', () => {
+        it('takes the total of the search the page opened with, however late the unfiltered count answers', fakeAsync(() => {
+            const unfiltered = new Subject<{ count: number }>();
+            service = jasmine.createSpyObj<ProcessIoService>('ProcessIoService', [
+                'userHasCreateAuthorization', 'userHasUpdateAuthorization', 'userHasDeleteAuthorization', 'countVariables', 'listVariables', 'remove',
+            ]);
+            service.userHasCreateAuthorization.and.returnValue(true);
+            service.userHasUpdateAuthorization.and.returnValue(true);
+            service.userHasDeleteAuthorization.and.returnValue(true);
+            service.countVariables.and.callFake((search: string) => (search === '' ? unfiltered : of({ count: 30 })));
+            service.listVariables.and.returnValue(of([variable]));
+            TestBed.configureTestingModule({
+                schemas: [NO_ERRORS_SCHEMA],
+                imports: [NoopAnimationsModule, MatSnackBarModule, ProcessIoVariablesComponent],
+                providers: [
+                    provideRouter([]),
+                    { provide: ProcessIoService, useValue: service },
+                    { provide: DialogsService, useValue: {} },
+                    { provide: MatDialog, useValue: {} },
+                ],
+            }).compileComponents();
+            const router = TestBed.inject(Router);
+            router.navigateByUrl('/?search=foo&page=4');
+            tick();
+            fixture = TestBed.createComponent(ProcessIoVariablesComponent);
+            fixture.detectChanges();
+            tick(400);
+            fixture.detectChanges();
+
+            unfiltered.next({ count: 5000 });
+            tick(400);
+            fixture.detectChanges();
+            tick(400);
+            discardPeriodicTasks();
+
+            expect(fixture.componentInstance.totalCount).toBe(30);
+            expect(fixture.componentInstance.list.pageIndex).toBe(1);
+            expect(router.url).toBe('/?search=foo&page=1');
+        }));
+    });
 });

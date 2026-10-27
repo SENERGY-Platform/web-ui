@@ -103,6 +103,8 @@ export class CertificatesComponent implements OnInit, AfterViewInit {
     this.sortBy = $event.active;
     this.sortDirection = $event.direction || 'desc';
     this.urlState.setSort($event, 'issued_at', 'desc');
+    // setSort drops the page from the URL, so the table follows
+    this.paginator.firstPage();
   }
 
   revoke(cert: CertificateInfo) {

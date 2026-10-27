@@ -216,16 +216,13 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit {
     }
 
     updateQueryParams() {
-         const queryParams: any = {};
-        if (this.id !== undefined) {
-            queryParams['id'] = this.id;
-        }
-
+        // merged, so the search the searchbar keeps in the URL stays
         this.router.navigate(
             [],
             {
                 relativeTo: this.activatedRoute,
-                queryParams,
+                queryParams: { id: this.id ?? null },
+                queryParamsHandling: 'merge',
             },
         );
     }

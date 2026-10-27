@@ -146,5 +146,17 @@ describe('CertificatesComponent list', () => {
             component.matSortChange({ active: 'serial_number', direction: 'asc' });
             expect(urlState.writes[urlState.writes.length - 1]).toEqual({ sort: 'serial_number', dir: 'asc', page: null });
         }));
+
+        it('returns the table to the first page when the sort changes, as the URL does', fakeAsync(() => {
+            init(true, { page: '1' }, 1);
+            expect(component.paginator.pageIndex).toBe(1);
+
+            component.sort!.sort({ id: 'serial_number', start: 'asc', disableClear: true });
+            fixture.detectChanges();
+
+            expect(urlState.writes).toContain({ sort: 'serial_number', dir: 'asc', page: null });
+            expect(component.paginator.pageIndex).toBe(0);
+            expect(firstRowText()).toContain('aa');
+        }));
     });
 });

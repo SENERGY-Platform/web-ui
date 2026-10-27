@@ -61,5 +61,10 @@ key named after what they filter (`user`, `role`, `month`, `concept_id`).
   handler returns when the value did not change, or the page loads twice.
 - Client-side tables (`MatTableDataSource` with `.paginator`/`.sort`) restore the paginator's `pageIndex` once the
   data is in, since the data source moves a paginator beyond the last page back to the last page.
+- A page with tabs keeps page and sort per tab: only the selected tab's table takes `page`, `sort` and `dir` from the
+  URL and writes them, and the load reads them from the page's own fields, not from the table. A tab switch writes
+  `search`, `sort`, `dir` and `page` as `null` in the same `set` as `tab` and loads the new tab from the defaults. The
+  toolbars bind `[searchTextIn]="searchText"`, so the cleared search shows in the searchbar of every tab, which all
+  exist from the start.
 - Infinite-scroll lists have no page parameter. Their `senergy-sort` dropdown keeps `sort`/`dir` too: the page
   restores its sort attribute (value and order) and passes it as `[selectedValue]`.

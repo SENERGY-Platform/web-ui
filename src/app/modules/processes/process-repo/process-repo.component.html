@@ -28,7 +28,7 @@
 <mat-tab-group dynamicHeight [selectedIndex]="activeIndex" (selectedIndexChange)="setIndex($event)">
   @for (tab of tabs; track tab) {
     <mat-tab [label]="tab">
-      <senergy-list-toolbar [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
+      <senergy-list-toolbar [searchTextIn]="searchText" [selectedCount]="selection.selected.length" (clearSelection)="selectionClear()" (refresh)="reload()">
         <ng-container bulkActions>
           @if (userHasDeleteAuthorization) {
             <button matButton="outlined" color="warn" (click)="deleteMultipleItems()">

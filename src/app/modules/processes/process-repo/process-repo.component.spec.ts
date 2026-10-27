@@ -190,7 +190,7 @@ describe('ProcessRepoComponent', () => {
         component.setIndex(1);
         component.setIndex(0);
 
-        expect(urlState.writes[0]).toEqual({ tab: 1, sort: null, dir: null, page: null });
-        expect(urlState.writes[1]).toEqual({ tab: null, sort: null, dir: null, page: null });
+        expect(urlState.writes[0]).toEqual({ tab: 1, search: null, sort: null, dir: null, page: null });
+        expect(urlState.writes[1]).toEqual({ tab: null, search: null, sort: null, dir: null, page: null });
     });
 });

@@ -147,8 +147,8 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
 
     setIndex(index: number): void {
         this.activeIndex = index;
-        // the tab starts from the default sort below, so the URL drops the previous one
-        this.urlState.set({ tab: index > 0 ? index : null, sort: null, dir: null, page: null });
+        // the tab starts without a search and on the default sort below, so the URL drops the previous ones
+        this.urlState.set({ tab: index > 0 ? index : null, search: null, sort: null, dir: null, page: null });
         this.searchText = '';
         this.list.sortBy = 'date';
         this.list.sortDirection = 'desc';

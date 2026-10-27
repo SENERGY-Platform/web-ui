@@ -147,7 +147,8 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
         this.list.connect(this.paginator, this.destroyRef);
         this.paginator.page.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
             this.pageIndex = this.paginator.pageIndex;
-            this.updateQueryParams();
+            // replaced, so a page moved into range by keepPageInRange leaves no entry that Back would return to
+            this.updateQueryParams(true);
         });
 
         this.restoreScrollPosition();
@@ -418,17 +419,13 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     clearQueryParams(): void {
-        this.router.navigate([], {
-            relativeTo: this.activatedRoute,
-            queryParams: {},
-            queryParamsHandling: ''
-        });
         this.instanceId = undefined;
         this.expandedInstance = undefined;
         this.expandedInstanceId = undefined;
         this.tableScrollTop = 0;
-        // the navigation resets the page only after this load has started
         this.pageIndex = 0;
+        // writes the filters and the sort the list keeps, so the URL matches what the load below shows
+        this.updateQueryParams();
         if (this.tableContainer?.nativeElement) {
             this.tableContainer.nativeElement.scrollTop = 0;
         }

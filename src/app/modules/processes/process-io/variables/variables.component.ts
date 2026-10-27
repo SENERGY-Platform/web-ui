@@ -16,7 +16,7 @@
 
 import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, tap } from 'rxjs';
+import { Observable, Subject, switchMap, tap } from 'rxjs';
 import {ProcessIoService} from '../shared/process-io.service';
 import {ProcessIoVariable} from '../shared/process-io.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -83,7 +83,8 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     displayedColumns: string[] = [];
     readonly dateFormat = LIST_DATE_FORMAT;
     list = new PagedListState(this.preferencesService, () => this.fetchVariables(), { sortBy: 'unix_timestamp_in_s', sortDirection: 'desc', urlState: this.urlState });
-
+    // only the count of the latest search counts, however late an earlier one answers
+    private totalSearches = new Subject<string>();
 
     constructor() {
         this.userHasCreateAuthorization = this.processIoService.userHasCreateAuthorization();
@@ -98,7 +99,16 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
             ...(this.userHasUpdateAuthorization || this.userHasDeleteAuthorization ? ['actions'] : []),
         ];
 
-        this.updateTotal();
+        this.totalSearches
+            .pipe(
+                switchMap((keyRegex) => this.processIoService.countVariables(keyRegex)),
+                takeUntilDestroyed(this.destroyRef),
+            )
+            .subscribe((value) => {
+                if (value) {
+                    this.totalCount = value.count;
+                }
+            });
     }
 
     ngOnInit() {
@@ -130,11 +140,7 @@ export class ProcessIoVariablesComponent implements AfterViewInit, OnInit {
     }
 
     updateTotal(){
-        this.processIoService.countVariables(this.keyRegex).subscribe(value => {
-            if (value) {
-                this.totalCount = value.count;
-            }
-        });
+        this.totalSearches.next(this.keyRegex);
     }
 
     loadVariables(){

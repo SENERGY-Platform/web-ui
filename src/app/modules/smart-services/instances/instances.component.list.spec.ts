@@ -37,6 +37,7 @@ describe('SmartServiceInstancesComponent list', () => {
     let getInstances: jasmine.Spy;
     let getInstance: jasmine.Spy;
     let getModules: jasmine.Spy;
+    let navigate: jasmine.Spy;
 
     const instance = {
         id: 'i1', name: 'Heating', description: 'Keeps it warm', release_id: 'r1', new_release_id: 'r2', user_id: 'u1', error: 'module failed',
@@ -44,9 +45,9 @@ describe('SmartServiceInstancesComponent list', () => {
         permissions_info: { shared: true, permissions: { administrate: true, execute: true, read: true, write: true } },
     } as SmartServiceInstanceModel;
 
-    function init(deleteRight = true) {
+    function init(deleteRight = true, url = '', total = 1) {
         getInstance = jasmine.createSpy('getInstance').and.returnValue(of(instance));
-        getInstances = jasmine.createSpy('getInstances').and.returnValue(of({ instances: [instance], total: 1 }));
+        getInstances = jasmine.createSpy('getInstances').and.returnValue(of({ instances: [instance], total }));
         getModules = jasmine.createSpy('getModules').and.returnValue(of([{ module_type: 'widget', module_data: {} }]));
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
@@ -64,7 +65,11 @@ describe('SmartServiceInstancesComponent list', () => {
                 { provide: SmartServiceReleasesService, useValue: { getExtendedReleaseList: () => of({ releases: [], total: 0 }) } },
             ],
         }).compileComponents();
-        spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+        navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+        if (url !== '') {
+            TestBed.inject(Router).navigateByUrl(url);
+            tick();
+        }
         fixture = TestBed.createComponent(SmartServiceInstancesComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -124,5 +129,15 @@ describe('SmartServiceInstancesComponent list', () => {
         expect(component.mayAdminister(instance)).toBeTrue();
         expect(component.mayAdminister({ ...instance, permissions_info: { shared: false, permissions: { administrate: false } } } as SmartServiceInstanceModel)).toBeFalse();
         expect(component.mayAdminister({ ...instance, permissions_info: undefined } as unknown as SmartServiceInstanceModel)).toBeTrue();
+    }));
+
+    it('replaces the history entry when a page beyond the end is moved back, so Back does not return to it', fakeAsync(() => {
+        init(true, '/?page=50', 50);
+        fixture.detectChanges();
+        tick(400);
+
+        expect(component.pageIndex).toBe(2);
+        expect(navigate.calls.mostRecent().args[1].queryParams['page']).toBe(2);
+        expect(navigate.calls.mostRecent().args[1].replaceUrl).toBeTrue();
     }));
 });

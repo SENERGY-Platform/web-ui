@@ -44,7 +44,7 @@ describe('SmartServiceInstancesComponent', () => {
         navigate = jasmine.createSpy('navigate');
         TestBed.configureTestingModule({
             providers: [
-                { provide: SmartServiceInstanceService, useValue: { userHasDeleteAuthorization: () => false, getInstances } },
+                { provide: SmartServiceInstanceService, useValue: { userHasDeleteAuthorization: () => false, getInstances, getInstance: () => of({ id: 'i1', name: 'single' }) } },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: DialogsService, useValue: {} },
                 { provide: Router, useValue: { navigate } },
@@ -119,6 +119,16 @@ describe('SmartServiceInstancesComponent', () => {
         component.clearQueryParams();
 
         expect(getInstances.calls.mostRecent().args[0].offset).toBe(0);
+    });
+
+    it('keeps a non-default sort in the URL when the single instance filter is removed', () => {
+        create({ instance_id: 'i1' }, { sort: 'created_at', dir: 'desc' });
+        component.ngOnInit();
+
+        component.clearQueryParams();
+
+        expect(component.list.sortBy).toBe('created_at');
+        expect(navigate.calls.mostRecent().args[1].queryParams).toEqual({ sort: 'created_at', dir: 'desc' });
     });
 
     it('shows the newest load when an older one is answered last', () => {
