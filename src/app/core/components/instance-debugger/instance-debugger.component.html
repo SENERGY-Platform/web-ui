@@ -1,0 +1,301 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="layout-margin debugger">
+    <div class="debugger-header">
+        <button mat-icon-button color="accent" matTooltip="Back" (click)="back()">
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="debugger-title">
+            <div class="debugger-name">{{ state?.instance?.name || state?.instance?.deployment_name || instanceId }}</div>
+            <div class="debugger-subtitle" *ngIf="state">
+                {{ state.instance.id }} &middot; {{ state.instance.deployment_name }} v{{ state.instance.deployment_version }}
+                &middot; run {{ state.instance.run }}
+                <span *ngIf="state.instance.network_id">&middot; gateway {{ state.instance.network_id }}</span>
+            </div>
+        </div>
+        <mat-chip-set *ngIf="state">
+            <mat-chip [class.chip-warn]="state.instance.state === 'incident' || state.instance.state === 'terminated'">
+                {{ state.instance.state }}
+            </mat-chip>
+            <mat-chip *ngIf="mode === 'live'" [matTooltip]="streamError || ''">
+                <mat-icon matChipAvatar>{{ streamStatus === 'live' ? 'sensors' : streamStatus === 'polling' ? 'sync' : streamStatus === 'ended' ? 'stop_circle' : 'hourglass_empty' }}</mat-icon>
+                {{ streamStatus }}
+            </mat-chip>
+        </mat-chip-set>
+    </div>
+
+    <div class="debugger-toolbar">
+        <ng-container *ngIf="mode === 'live'">
+            <mat-slide-toggle [checked]="evaluateEvents" (change)="toggleEvaluateEvents($event.checked)"
+                matTooltip="Evaluate the current value of the sources of waiting events">
+                Evaluate events
+            </mat-slide-toggle>
+            <button mat-stroked-button color="accent" (click)="last()" [disabled]="!state">
+                <mat-icon>history</mat-icon> History
+            </button>
+        </ng-container>
+        <ng-container *ngIf="mode === 'history'">
+            <button mat-icon-button color="accent" matTooltip="First available step" (click)="first()"
+                [disabled]="loading || !state || state.seq <= firstSeq()">
+                <mat-icon>first_page</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" matTooltip="Step back" (click)="previous()"
+                [disabled]="loading || !state || state.seq <= firstSeq()">
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span class="debugger-step" *ngIf="state">step {{ state.seq }} of {{ latestSeq }}
+                <span class="debugger-muted">&middot; {{ state.time | date: 'dd.MM.yy HH:mm:ss.SSS' }}</span></span>
+            <button mat-icon-button color="accent" matTooltip="Step forward" (click)="next()"
+                [disabled]="loading || !state || state.seq >= latestSeq">
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" matTooltip="Latest step" (click)="last()" [disabled]="loading">
+                <mat-icon>last_page</mat-icon>
+            </button>
+            <mat-form-field class="debugger-jump" subscriptSizing="dynamic">
+                <mat-label>Jump to time</mat-label>
+                <input matInput type="datetime-local" step="1" [(ngModel)]="jumpTime" (keyup.enter)="jumpToTime()">
+            </mat-form-field>
+            <button mat-icon-button color="accent" matTooltip="Jump to the last step at or before this time"
+                (click)="jumpToTime()" [disabled]="!jumpTime || loading">
+                <mat-icon>search</mat-icon>
+            </button>
+            <button mat-stroked-button color="accent" (click)="startLive()">
+                <mat-icon>sensors</mat-icon> {{ running ? 'Live' : 'Current state' }}
+            </button>
+            <mat-spinner *ngIf="loading" [diameter]="24" color="accent"></mat-spinner>
+        </ng-container>
+    </div>
+
+    <div class="debugger-notice color-warn" *ngIf="error">{{ error }}</div>
+    <div class="debugger-notice color-warn" *ngIf="state?.offline">
+        The gateway does not answer. This is the last state it reported; variables, runs and history are not available.
+    </div>
+    <div class="debugger-notice" *ngIf="mode === 'live' && streamStatus === 'polling'">
+        The live stream is not available ({{ streamError }}), the state is read every few seconds.
+    </div>
+    <div class="debugger-notice" *ngIf="mode === 'live' && streamStatus === 'reconnecting'">
+        Connection lost ({{ streamError }}), reconnecting.
+    </div>
+    <div class="debugger-notice" *ngIf="mode === 'history' && state?.truncated">
+        Older steps were removed; the history begins at step {{ firstSeq() }}.
+    </div>
+
+    <div class="debugger-body">
+        <div class="debugger-diagram-container">
+            <div #diagram class="debugger-diagram"></div>
+            <div class="debugger-notice color-warn" *ngIf="diagramError">{{ diagramError }}</div>
+            <div class="debugger-legend">
+                <span class="legend legend-active">active</span>
+                <span class="legend legend-waiting">waiting</span>
+                <span class="legend legend-trigger">would trigger now</span>
+                <span class="legend legend-passed">passed</span>
+                <span class="legend legend-incident">incident</span>
+            </div>
+        </div>
+
+        <div class="debugger-panel" *ngIf="state">
+            <div class="debugger-selected" *ngIf="selectedElementId">
+                <div class="debugger-section-title">
+                    {{ elementName(selectedElementId) }}
+                    <button mat-icon-button matTooltip="Clear selection" (click)="selectElement(null)">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+                <div class="debugger-muted">{{ selectedElementId }}</div>
+                <div *ngIf="selectedStats as stats">
+                    {{ stats.count }} {{ stats.count === 1 ? 'pass' : 'passes' }}, last {{ stats.last_at | date: 'dd.MM.yy HH:mm:ss' }}
+                    <div class="color-warn" *ngIf="stats.last_error">last error {{ stats.error_at | date: 'dd.MM.yy HH:mm:ss' }}: {{ stats.last_error }}</div>
+                </div>
+                <div *ngIf="!selectedStats">not passed in this run</div>
+                <div *ngFor="let a of selectedActive">
+                    active since {{ a.since | date: 'dd.MM.yy HH:mm:ss' }}<span *ngIf="a.tokens > 1">, {{ a.tokens }} tokens</span>
+                </div>
+                <div *ngFor="let w of selectedWaits">waits for {{ w.kind }} since {{ w.since | date: 'dd.MM.yy HH:mm:ss' }}</div>
+                <div class="color-warn" *ngFor="let i of selectedIncidents">{{ i.message }}</div>
+            </div>
+
+            <mat-tab-group [selectedIndex]="tabIndex" (selectedIndexChange)="setTab($event)" animationDuration="0ms">
+                <mat-tab label="Waiting ({{ state.waits?.length || 0 }})">
+                    <div class="debugger-tab">
+                        <div *ngIf="!state.waits?.length" class="debugger-muted">No element waits.</div>
+                        <div class="debugger-card" *ngFor="let w of state.waits"
+                            [class.debugger-card-selected]="w.element_id === selectedElementId">
+                            <div class="debugger-section-title clickable" (click)="selectElement(w.element_id)">
+                                {{ elementName(w.element_id) }} <span class="debugger-muted">{{ w.kind }} since {{ w.since | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                            </div>
+                            <div *ngIf="w.gateway_id" class="debugger-muted">part of the event-based gateway {{ elementName(w.gateway_id) }}</div>
+
+                            <ng-container *ngIf="w.message">
+                                <div>message <code>{{ w.message.name }}</code></div>
+                                <div class="debugger-source" *ngFor="let source of w.message.events">
+                                    <div>{{ sourceLabel(source) }}</div>
+                                    <div class="debugger-muted">value in <code>{{ source.value_variable }}</code></div>
+                                    <pre class="debugger-code">{{ source.script }}</pre>
+                                    <div *ngIf="source.current as current">
+                                        <span [class.color-warn]="!!current.error">current value {{ preview(current.value) }}</span>
+                                        <span *ngIf="current.time" class="debugger-muted"> of {{ current.time | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                                        &rarr; <b>{{ current.triggered ? 'would trigger' : 'would not trigger' }}</b>
+                                        <div class="color-warn" *ngIf="current.error">{{ current.error }}</div>
+                                        <pre class="debugger-code" *ngIf="current.logs?.length">{{ current.logs?.join('\n') }}</pre>
+                                    </div>
+                                    <div *ngIf="!source.current && mode === 'live' && !evaluateEvents" class="debugger-muted">
+                                        Switch on "Evaluate events" for the current value.
+                                    </div>
+                                </div>
+                                <button mat-stroked-button color="accent" *ngIf="w.message.events?.length"
+                                    (click)="reconstructEvaluations(w)" [disabled]="loadingReconstruction">
+                                    Reconstruct evaluations
+                                </button>
+                            </ng-container>
+
+                            <div *ngIf="w.timer">
+                                timer <code>{{ w.timer.definition }}</code> <span *ngIf="w.timer.kind">({{ w.timer.kind }})</span>
+                                <span *ngIf="w.timer.due_at">, due {{ w.timer.due_at | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                            </div>
+
+                            <div *ngIf="w.task">
+                                task <code>{{ w.task.task_type }}</code> <span *ngIf="w.task.state">{{ w.task.state }}</span>,
+                                attempt {{ w.task.attempt }}, {{ w.task.retries }} retries
+                                <span *ngIf="w.task.timeout">, timeout {{ w.task.timeout }}</span>
+                                <span *ngIf="w.task.due_at">, due {{ w.task.due_at | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                                <div class="color-warn" *ngIf="w.task.last_error">{{ w.task.last_error }}</div>
+                                <table class="debugger-table" *ngIf="w.task.subtasks?.length">
+                                    <tr><th>Device</th><th>Service</th><th>Done</th><th>Tries</th><th>Last try</th></tr>
+                                    <tr *ngFor="let s of w.task.subtasks">
+                                        <td>{{ s.device_id }}</td><td>{{ s.service_id }}</td><td>{{ s.done ? 'yes' : 'no' }}</td>
+                                        <td>{{ s.tries }}</td><td>{{ s.last_try | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div *ngIf="w.join">join: {{ w.join.arrived }} of {{ w.join.required }} branches arrived</div>
+
+                            <div class="debugger-reconstruction" *ngIf="reconstruction && reconstruction.element_id === w.element_id">
+                                <div class="debugger-section-title">Reconstructed evaluations (run {{ reconstruction.run }})</div>
+                                <div class="color-warn" *ngFor="let hint of reconstruction.hints">{{ hint }}</div>
+                                <div class="debugger-muted" *ngFor="let l of reconstruction.limitations">{{ l }}</div>
+                                <div *ngFor="let p of reconstruction.waiting">
+                                    waited {{ p.from | date: 'dd.MM.yy HH:mm:ss' }} &ndash; {{ p.to ? (p.to | date: 'dd.MM.yy HH:mm:ss') : 'now' }}
+                                    {{ p.correlated ? '(correlated)' : '' }}
+                                </div>
+                                <table class="debugger-table" *ngIf="reconstruction.evaluations?.length">
+                                    <tr><th>Time</th><th>Source</th><th>Value</th><th>Triggered</th><th>Error</th></tr>
+                                    <tr *ngFor="let e of reconstruction.evaluations" [class.debugger-row-trigger]="e.triggered">
+                                        <td>{{ e.time | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                                        <td class="debugger-muted">{{ e.event_description_id }}</td>
+                                        <td>{{ preview(e.value) }}</td>
+                                        <td>{{ e.triggered ? 'yes' : 'no' }}</td>
+                                        <td class="color-warn">{{ e.error }}</td>
+                                    </tr>
+                                </table>
+                                <div *ngIf="!reconstruction.evaluations?.length" class="debugger-muted">No values in the time series while the element waited.</div>
+                                <div *ngFor="let c of reconstruction.correlations">
+                                    correlated at {{ c.time | date: 'dd.MM.yy HH:mm:ss' }} (step {{ c.seq }})
+                                </div>
+                                <button mat-stroked-button color="accent" *ngIf="reconstruction.next"
+                                    (click)="reconstructEvaluations(w, true)" [disabled]="loadingReconstruction">More</button>
+                            </div>
+                            <div class="color-warn" *ngIf="reconstructionError && !loadingReconstruction">{{ reconstructionError }}</div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <mat-tab label="Variables ({{ variableRows.length }})">
+                    <div class="debugger-tab">
+                        <div *ngIf="variableRows.length === 0" class="debugger-muted">No variables.</div>
+                        <table class="debugger-table" *ngIf="variableRows.length > 0">
+                            <tr><th>Name</th><th>Type</th><th>Value</th><th>Changed</th></tr>
+                            <tr *ngFor="let row of variableRows">
+                                <td>
+                                    {{ row.name }}
+                                    <div class="debugger-muted" *ngIf="row.elementId">local at {{ elementName(row.elementId) }}</div>
+                                </td>
+                                <td>{{ row.variable.type }}</td>
+                                <td class="debugger-value">
+                                    <ng-container *ngIf="fullValues.get(variableKey(row)) as full; else shortValue">
+                                        <pre class="debugger-code" *ngIf="!full.error && !full.unavailable">{{ pretty(full.value) }}</pre>
+                                        <span class="debugger-muted" *ngIf="full.unavailable">The complete value is kept only at snapshots of the history.</span>
+                                        <span class="color-warn" *ngIf="full.error">{{ full.error }}</span>
+                                    </ng-container>
+                                    <ng-template #shortValue>
+                                        <code>{{ preview(row.variable.value) }}</code>
+                                        <button mat-button color="accent" *ngIf="row.variable.truncated"
+                                            [disabled]="loadingValues.has(variableKey(row))" (click)="loadFullValue(row)">
+                                            load {{ row.variable.size ? (row.variable.size | number) + ' bytes' : 'complete value' }}
+                                        </button>
+                                    </ng-template>
+                                </td>
+                                <td>
+                                    {{ row.variable.updated_at | date: 'dd.MM.yy HH:mm:ss' }}
+                                    <div class="debugger-muted clickable" *ngIf="row.variable.element_id"
+                                        (click)="selectElement(row.variable.element_id!)">by {{ elementName(row.variable.element_id) }}</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </mat-tab>
+
+                <mat-tab label="Incidents ({{ state.incidents?.length || 0 }})">
+                    <div class="debugger-tab">
+                        <div *ngIf="!state.incidents?.length" class="debugger-muted">No open incidents.</div>
+                        <div class="debugger-card" *ngFor="let i of state.incidents">
+                            <div class="debugger-section-title clickable" (click)="selectElement(i.element_id || null)">
+                                {{ i.element_name || elementName(i.element_id) }}
+                                <span class="debugger-muted">{{ i.time | date: 'dd.MM.yy HH:mm:ss' }}, run {{ i.run }}</span>
+                            </div>
+                            <div class="color-warn">{{ i.message }}</div>
+                            <pre class="debugger-code" *ngIf="i.variables">{{ pretty(i.variables) }}</pre>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <mat-tab label="Activities">
+                    <div class="debugger-tab">
+                        <div *ngIf="activities.length === 0" class="debugger-muted">
+                            {{ mode === 'live' ? 'Entries appear here as the instance proceeds.' : 'No entries.' }}
+                        </div>
+                        <table class="debugger-table" *ngIf="activities.length > 0">
+                            <tr><th>Step</th><th>Time</th><th>Element</th><th>Entry</th></tr>
+                            <tr *ngFor="let a of activities" class="clickable" [class.debugger-row-current]="mode === 'history' && a.seq === state.seq"
+                                (click)="jumpToActivity(a)" matTooltip="Show the state after this step">
+                                <td>{{ a.seq }}<span class="debugger-muted" *ngIf="a.run !== state.instance.run"> (run {{ a.run }})</span></td>
+                                <td>{{ a.time | date: 'HH:mm:ss.SSS' }}</td>
+                                <td>{{ elementName(a.element_id) }}</td>
+                                <td class="debugger-value">{{ describe(a) }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </mat-tab>
+
+                <mat-tab label="Runs" *ngIf="state.runs?.length">
+                    <div class="debugger-tab">
+                        <table class="debugger-table">
+                            <tr><th>Run</th><th>Version</th><th>Cause</th><th>State</th><th>Started</th><th>Ended</th></tr>
+                            <tr *ngFor="let r of state.runs">
+                                <td>{{ r.run }}</td><td>{{ r.deployment_version }}</td><td>{{ r.cause }}</td>
+                                <td>{{ r.state }} <span class="debugger-muted" *ngIf="r.end_reason">{{ r.end_reason }}</span></td>
+                                <td>{{ r.started_at | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                                <td>{{ r.ended_at | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

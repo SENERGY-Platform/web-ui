@@ -17,7 +17,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { AutomationEngineService } from './automation-engine.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AutomationEngineService, engineErrorMessage } from './automation-engine.service';
 import { environment } from '../../../environments/environment';
 import { EngineDeployment, EngineSchedule } from '../model/automation-engine.model';
 
@@ -79,5 +80,43 @@ describe('AutomationEngineService', () => {
         expect(req.request.body).toEqual({ deployment_id: 'dep-1', cron: '0/30 * * * * *', created_by: 'widget-1' });
         req.flush({ id: 's-1', namespace: 'processes', deployment_id: 'dep-1', cron: '0/30 * * * * *' });
         expect(created!.id).toBe('s-1');
+    });
+
+    it('reads the debug state, a step of the history and complete variable values of an instance', () => {
+        const instance = environment.automationEngineUrl + '/namespaces/smart-services/instances/i%2F1';
+        service.getDebugState('smart-services', 'i/1', true).subscribe();
+        expect(http.expectOne(instance + '/debug?evaluate_events=true').request.method).toBe('GET');
+
+        service.getHistoryState('smart-services', 'i/1').subscribe();
+        http.expectOne(instance + '/history');
+        service.getHistoryState('smart-services', 'i/1', { seq: 12 }).subscribe();
+        http.expectOne(instance + '/history?seq=12');
+        service.getHistoryState('smart-services', 'i/1', { time: '2026-10-27T10:00:00.000Z' }).subscribe();
+        http.expectOne((r) => r.url === instance + '/history' && r.params.get('time') === '2026-10-27T10:00:00.000Z');
+
+        service.getVariable('smart-services', 'i/1', 'a b', 'Task_1').subscribe();
+        http.expectOne(instance + '/variables/a%20b?element_id=Task_1');
+        service.getHistoryVariable('smart-services', 'i/1', 'a', { seq: 3 }).subscribe();
+        http.expectOne(instance + '/history/variables/a?seq=3');
+
+        service.getActivities('smart-services', 'i/1', 10, 21).subscribe();
+        http.expectOne(instance + '/activities?after_seq=10&limit=21');
+        service.getEventEvaluations('smart-services', 'i/1', 'Catch_1', 2, '2026-10-27T10:00:00Z').subscribe();
+        http.expectOne(instance + '/event-evaluations?element_id=Catch_1&run=2&after=2026-10-27T10:00:00Z');
+
+        service.getDeploymentVersion('smart-services', 'd-1', 3).subscribe();
+        http.expectOne(environment.automationEngineUrl + '/namespaces/smart-services/deployments/d-1/versions/3');
+    });
+
+    it('passes debugging errors on with the message of the engine', () => {
+        let message = '';
+        service.getHistoryState('processes', 'i-1', { seq: 1 }).subscribe({ error: (err) => (message = engineErrorMessage(err)) });
+        http.expectOne(base() + '/instances/i-1/history?seq=1').flush(
+            { kind: 'not_found', message: 'step 1 of instance i-1 is no longer available, the earliest is 40' },
+            { status: 404, statusText: 'Not Found' },
+        );
+        expect(message).toBe('step 1 of instance i-1 is no longer available, the earliest is 40');
+        expect(engineErrorMessage(new HttpErrorResponse({ status: 0 }))).toBe('the automation-engine is not reachable');
+        expect(engineErrorMessage(new HttpErrorResponse({ status: 502, statusText: 'Bad Gateway', error: 'html' }))).toBe('502 Bad Gateway');
     });
 });

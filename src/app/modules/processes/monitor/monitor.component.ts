@@ -44,8 +44,8 @@ import { UrlStateService } from 'src/app/core/services/url-state.service';
 export class ProcessMonitorComponent implements OnInit, OnDestroy, AfterViewInit {
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
-    displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'delete'];
-    displayedColumnsRunning: string[] = ['select', 'definitionName', 'id', 'startTime', 'action'];
+    displayedColumnsFinished: string[] = ['select', 'definitionName', 'id', 'startTime', 'endTime', 'duration', 'info', 'debug', 'delete'];
+    displayedColumnsRunning: string[] = ['select', 'definitionName', 'id', 'startTime', 'debug', 'action'];
     selection = new SelectionModel<MonitorProcessModel>(true, []);
     selectionRunning = new SelectionModel<MonitorProcessModel>(true, []);
     activeIndex = 0;

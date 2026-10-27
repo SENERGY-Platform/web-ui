@@ -1,0 +1,235 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.debugger-header,
+.debugger-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.debugger-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.debugger-name {
+    font-size: 18px;
+}
+
+.debugger-subtitle,
+.debugger-muted {
+    opacity: 0.7;
+    font-size: 12px;
+}
+
+.debugger-toolbar {
+    margin: 8px 0;
+    min-height: 48px;
+}
+
+.debugger-step {
+    white-space: nowrap;
+}
+
+.debugger-jump {
+    width: 230px;
+}
+
+.debugger-notice {
+    margin: 4px 0;
+}
+
+.debugger-body {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.debugger-diagram-container {
+    flex: 3;
+    min-width: 0;
+}
+
+.debugger-diagram {
+    height: 65vh;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    background: white;
+}
+
+.debugger-panel {
+    flex: 2;
+    min-width: 0;
+    max-height: 75vh;
+    overflow: auto;
+}
+
+@media (max-width: 1100px) {
+    .debugger-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .debugger-panel {
+        max-height: none;
+    }
+}
+
+.debugger-tab {
+    padding: 8px 0;
+}
+
+.debugger-card,
+.debugger-selected {
+    border: 1px solid rgba(128, 128, 128, 0.3);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 8px;
+}
+
+.debugger-card-selected {
+    border-color: #1e88e5;
+}
+
+.debugger-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.debugger-source,
+.debugger-reconstruction {
+    margin: 8px 0;
+    padding-left: 8px;
+    border-left: 3px solid rgba(128, 128, 128, 0.3);
+}
+
+.debugger-code {
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 12px;
+    margin: 4px 0;
+    max-height: 300px;
+    overflow: auto;
+}
+
+.debugger-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+}
+
+.debugger-table th,
+.debugger-table td {
+    text-align: left;
+    vertical-align: top;
+    padding: 4px 6px;
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.debugger-value {
+    word-break: break-all;
+}
+
+.debugger-row-current {
+    background: rgba(30, 136, 229, 0.15);
+}
+
+.debugger-row-trigger {
+    background: rgba(251, 140, 0, 0.15);
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.chip-warn {
+    color: #e53935;
+}
+
+.debugger-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.legend::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 4px;
+    vertical-align: middle;
+    border: 2px solid;
+    border-radius: 2px;
+}
+
+.legend-active::before { border-color: #1e88e5; }
+.legend-waiting::before { border-color: #fb8c00; border-style: dashed; }
+.legend-trigger::before { border-color: #fb8c00; background: #ffe0b2; }
+.legend-passed::before { border-color: #43a047; background: #e8f5e9; }
+.legend-incident::before { border-color: #e53935; background: #ffebee; }
+
+/* markers of bpmn-js, set by applyMarks; the diagram is rendered outside the view encapsulation */
+.debugger-diagram ::ng-deep .djs-shape.debug-passed .djs-visual > :first-child {
+    fill: #e8f5e9 !important;
+    stroke: #43a047 !important;
+}
+
+.debugger-diagram ::ng-deep .djs-connection.debug-passed .djs-visual > path {
+    stroke: #43a047 !important;
+    stroke-width: 3px !important;
+}
+
+.debugger-diagram ::ng-deep .djs-shape.debug-waiting .djs-visual > :first-child {
+    stroke: #fb8c00 !important;
+    stroke-width: 3px !important;
+    stroke-dasharray: 6 3;
+}
+
+.debugger-diagram ::ng-deep .djs-shape.debug-would-trigger .djs-visual > :first-child {
+    fill: #ffe0b2 !important;
+}
+
+.debugger-diagram ::ng-deep .djs-shape.debug-active .djs-visual > :first-child {
+    stroke: #1e88e5 !important;
+    stroke-width: 4px !important;
+}
+
+.debugger-diagram ::ng-deep .djs-shape.debug-incident .djs-visual > :first-child {
+    fill: #ffebee !important;
+    stroke: #e53935 !important;
+    stroke-width: 4px !important;
+}
+
+.debugger-diagram ::ng-deep .djs-element.debug-selected .djs-outline {
+    visibility: visible;
+    stroke: #1e88e5;
+    stroke-width: 2px;
+    stroke-dasharray: 4 2;
+}
+
+.debugger-diagram ::ng-deep .debug-count {
+    background: #43a047;
+    color: white;
+    border-radius: 10px;
+    padding: 0 6px;
+    font-size: 12px;
+    line-height: 18px;
+}
