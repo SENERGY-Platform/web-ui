@@ -35,8 +35,46 @@
     width: 16%;
 }
 
-#connectionHistoryPanel {
+#connectionHistoryPanel, #receiversPanel {
     margin-bottom: 1rem;
+}
+
+#receiversPanel table {
+    width: 100%;
+}
+
+#receiversPanel .state-column {
+    width: 4%;
+    text-align: center;
+}
+
+#receiversPanel .state-column .circle {
+    margin: 0 auto;
+}
+
+/* aligned with the time in the service panel headers below, which ends 48px before the panel edge:
+   24px header padding, 8px toggle indicator and 16px description margin. The panel body takes 24px of it. */
+#receiversPanel .ago-column {
+    text-align: right;
+    padding-right: 24px;
+}
+
+.circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.green {
+    background: #008700;
+}
+
+.red {
+    background: #db0000;
+}
+
+.grey {
+    background: grey;
 }
 
 .clipboard-success {

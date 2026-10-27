@@ -93,14 +93,49 @@
             </ng-template>
         </mat-expansion-panel>
 
+        <mat-expansion-panel id="receiversPanel" *ngIf="receivers.length > 0">
+            <mat-expansion-panel-header>
+                <mat-panel-title fxFlex>Receivers</mat-panel-title>
+            </mat-expansion-panel-header>
+            <ng-template matExpansionPanelContent>
+                <table mat-table [dataSource]="receivers">
+                    <ng-container matColumnDef="state">
+                        <th mat-header-cell *matHeaderCellDef class="state-column">State</th>
+                        <td mat-cell *matCellDef="let element" class="state-column">
+                            <div class="circle grey" *ngIf="receivedLastMessage(element) === undefined"
+                                 matTooltip="Status could not be checked"></div>
+                            <div class="circle green" *ngIf="receivedLastMessage(element) === true"
+                                 matTooltip="Seen within 2 minutes of the last message"></div>
+                            <div class="circle red" *ngIf="receivedLastMessage(element) === false"
+                                 matTooltip="Not seen within 2 minutes of the last message"></div>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="nimbus">
+                        <th mat-header-cell *matHeaderCellDef>Receiver</th>
+                        <td mat-cell *matCellDef="let element">{{element.nimbus}}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="ago">
+                        <th mat-header-cell *matHeaderCellDef class="ago-column">Last Seen</th>
+                        <td mat-cell *matCellDef="let element" class="ago-column">
+                            <span [matTooltip]="(element.time | date:'dd.MM.yyyy - HH:mm:ss') ?? ''">{{timeAgo(element.time)}}</span>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['state', 'nimbus', 'ago']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['state', 'nimbus', 'ago'];"></tr>
+                </table>
+            </ng-template>
+        </mat-expansion-panel>
+
         <mat-expansion-panel *ngFor="let service of services; let i = index">
             <mat-expansion-panel-header>
                 <mat-panel-title fxFlex>{{service.name}}</mat-panel-title>
                 <mat-panel-description>
-                    {{service.description}}
-                    <span
-                        *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0">{{lastValueArray[i][0].response.time
-                        | date:'dd.MM.yyyy - HH:mm:ss'}}</span>
+                    <span fxFlex>{{service.description}}</span>
+                    <span *ngIf="lastValueArray[i] !== undefined && lastValueArray[i].length > 0 && lastValueArray[i][0].response.time as time"
+                        [matTooltip]="(time | date:'dd.MM.yyyy - HH:mm:ss') ?? ''">{{timeAgo(time)}}</span>
                 </mat-panel-description>
             </mat-expansion-panel-header>
 

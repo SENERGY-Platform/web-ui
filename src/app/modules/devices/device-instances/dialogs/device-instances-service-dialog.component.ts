@@ -35,6 +35,9 @@ import { DeviceInstancesService } from '../shared/device-instances.service';
 import { ChartsExportVAxesModel } from 'src/app/widgets/charts/export/shared/charts-export-properties.model';
 import { MatExpansionPanel } from '@angular/material/expansion';
 import { detectAndMergeFlapping } from '../shared/flapping.function';
+import { wmbusLastSeen, wmbusReceiverTolerance } from '../shared/wmbus-last-seen.function';
+import { concatMap, map, of } from 'rxjs';
+import moment from 'moment';
 
 @Component({
     templateUrl: './device-instances-service-dialog.component.html',
@@ -67,6 +70,10 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
 
     connectionHistory: any[][][] = [];
     userCanLoadConnectionHistory = false;
+    receivers: { nimbus: string; time: Date }[] = [];
+    lastMessageTime: Date | undefined;
+    /** Time the relative times count from, so they change only with a refresh. */
+    refreshedAt = new Date();
     clipboardTooltip = 'Copy to Clipboard';
     clipboardTooltipTimeout: unknown[] = [];
     userIsDeveloper = false;
@@ -118,8 +125,11 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
     }
 
     refresh() {
+        this.refreshedAt = new Date();
         this.exportDataService.getLastValuesTimescale(this.lastValueElements).subscribe({
             next: (lastValues) => {
+                const times = lastValues.filter(v => v.time !== null).map(v => new Date(v.time as string).valueOf());
+                this.lastMessageTime = times.length > 0 ? new Date(Math.max(...times)) : undefined;
                 this.lastValueArray = [];
                 let counter = 0;
                 this.deviceType.services.forEach((_, serviceIndex) => {
@@ -164,6 +174,39 @@ export class DeviceInstancesServiceDialogComponent implements OnInit {
                 this.connectionHistory[0][0].reverse();
             });
         }
+        // the attributes change with every received telegram, so they are read anew instead of taken from the device list
+        this.deviceInstancesService.getDeviceInstance(this.device.id).pipe(
+            concatMap(device => {
+                const entries = wmbusLastSeen(device?.attributes);
+                if (entries.length === 0) {
+                    return of([]);
+                }
+                // a nimbus the user may not read is missing from the result and shown by its id
+                return this.deviceInstancesService.getDeviceListByIds(entries.map(e => e.nimbusId)).pipe(map(nimbuses => entries.map(e => {
+                    const nimbus = nimbuses.find(n => n.id === e.nimbusId);
+                    return {
+                        nimbus: nimbus ? (nimbus.display_name || nimbus.name) : e.nimbusId,
+                        time: e.time,
+                    };
+                })));
+            }),
+        ).subscribe(receivers => this.receivers = receivers);
+    }
+
+    timeAgo(time: Date | string): string {
+        // the web-ui is in English, while the global moment locale may have been set to German elsewhere.
+        // Seconds are counted from 2 on instead of 45, since English moment has no singular for a single second.
+        // A message that came in while refreshing is later than refreshedAt and counts as just now.
+        const diff = Math.min(moment(time).diff(this.refreshedAt), 0);
+        return moment.duration(diff).locale('en').humanize(true, { ss: 1 });
+    }
+
+    /** Whether the nimbus received the last message of the device, or undefined while that message is unknown. */
+    receivedLastMessage(receiver: { time: Date }): boolean | undefined {
+        if (this.lastMessageTime === undefined) {
+            return undefined;
+        }
+        return Math.abs(receiver.time.valueOf() - this.lastMessageTime.valueOf()) <= wmbusReceiverTolerance;
     }
 
     close(): void {
