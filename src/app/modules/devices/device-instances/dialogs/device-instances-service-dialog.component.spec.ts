@@ -63,15 +63,19 @@ describe('DeviceInstancesServiceDialogComponent', () => {
         return component;
     };
 
-    const now = Date.now();
+    // taken per test, so a long suite run before this file does not shift the expected minutes
+    let now = Date.now();
+    beforeEach(() => {
+        now = Date.now();
+    });
     const ago = (ms: number) => new Date(now - ms).toISOString();
-    const receiverAttributes = [
+    const receiverAttributes = () => [
         { key: 'wmbus/last_seen/' + nimbusB, value: ago(3 * 24 * 3600 * 1000), origin: nimbusB },
         { key: 'wmbus/last_seen/' + nimbusA, value: ago(12 * 60 * 1000), origin: nimbusA },
     ];
 
     it('lists each receiving nimbus by name, most recent first', () => {
-        const component = newComponent(receiverAttributes, [{ id: nimbusA, name: 'nimbus-a', display_name: 'Nimbus A' } as DeviceInstanceModel]);
+        const component = newComponent(receiverAttributes(), [{ id: nimbusA, name: 'nimbus-a', display_name: 'Nimbus A' } as DeviceInstanceModel]);
 
         expect(deviceInstancesServiceSpy.getDeviceListByIds).toHaveBeenCalledWith([nimbusA, nimbusB]);
         // nimbus b is not readable for the user and keeps its id
@@ -105,7 +109,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
     });
 
     it('marks the nimbuses that received the last message within the tolerance', () => {
-        const component = newComponent(receiverAttributes, [], [
+        const component = newComponent(receiverAttributes(), [], [
             { time: ago(12 * 60 * 1000 - 110 * 1000), value: 1 },
             { time: null, value: null },
         ]);
@@ -114,7 +118,7 @@ describe('DeviceInstancesServiceDialogComponent', () => {
     });
 
     it('leaves the state open while the last message is unknown', () => {
-        const component = newComponent(receiverAttributes, [], [{ time: null, value: null }]);
+        const component = newComponent(receiverAttributes(), [], [{ time: null, value: null }]);
 
         expect(component.receivers.map(r => component.receivedLastMessage(r))).toEqual([undefined, undefined]);
     });
