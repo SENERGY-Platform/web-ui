@@ -53,14 +53,15 @@ const MAX_RETRY_MS = 30000;
 
 /**
  * Follows an instance through the live stream of the automation-engine (GET .../live): a snapshot, then
- * deltas merged with applyDebugMessage, then the end state. A browser cannot set the Authorization
- * header on a WebSocket, so the token goes as subprotocol next to "bearer"; Kong copies it into the
- * header for Ladon, and the engine verifies it against Keycloak. An interrupted stream resumes after the
+ * deltas merged with applyDebugMessage, then the end state. The stream has its own ingress past Kong
+ * (automationEngineWebsocketUrl): a browser cannot set the Authorization header on a WebSocket, which
+ * Ladon needs. The token goes as subprotocol next to "bearer", and the engine verifies it against
+ * Keycloak itself. An interrupted stream resumes after the
  * last sequence; close code 4401 after the first message means the token expired and reconnects at once
  * with a new one.
  *
- * If the first connection does not bring a single message, the WebSocket is not usable here: Kong
- * refused the upgrade, or the engine runs without KEYCLOAK_CERT_URL and closes with 4401. The stream
+ * If the first connection does not bring a single message, the WebSocket is not usable here: the
+ * ingress is missing, or the engine runs without KEYCLOAK_CERT_URL and closes with 4401. The stream
  * then reads GET .../debug every POLL_INTERVAL_MS instead.
  */
 @Injectable({
@@ -183,7 +184,7 @@ export class InstanceDebugStreamService {
                         if (stopped) {
                             return;
                         }
-                        const url = liveUrl(environment.automationEngineUrl, namespace, id, state?.seq || 0, evaluateEvents, window.location.href);
+                        const url = liveUrl(environment.automationEngineWebsocketUrl, namespace, id, state?.seq || 0, evaluateEvents, window.location.href);
                         let ws: WebSocket;
                         try {
                             ws = this.openSocket(url, [BEARER_PROTOCOL, token.replace(/^bearer\s+/i, '')]);

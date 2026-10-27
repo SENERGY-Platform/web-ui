@@ -95,6 +95,15 @@ describe('liveUrl', () => {
         );
     });
 
+    it('keeps a WebSocket scheme of the base', () => {
+        expect(liveUrl('wss://ws.example.org', 'processes', 'i-1', 0, false, 'http://localhost:4200/')).toBe(
+            'wss://ws.example.org/namespaces/processes/instances/i-1/live',
+        );
+        expect(liveUrl('ws://localhost:8080/', 'processes', 'i-1', 0, false, 'https://ui.example.org/')).toBe(
+            'ws://localhost:8080/namespaces/processes/instances/i-1/live',
+        );
+    });
+
     it('resolves a base without scheme against the page', () => {
         expect(liveUrl('/engine', 'processes', 'i-1', 0, false, 'https://ui.example.org/processes/monitor')).toBe(
             'wss://ui.example.org/engine/namespaces/processes/instances/i-1/live',

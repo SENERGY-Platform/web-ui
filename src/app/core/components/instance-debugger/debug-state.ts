@@ -54,12 +54,17 @@ export function applyDebugMessage(state: EngineDebugState, delta: EngineDebugMes
 }
 
 /**
- * URL of the live stream of an instance. The token is not part of it: it goes as first message, so it
- * does not end up in access logs. A base URL without scheme is resolved against the page.
+ * URL of the live stream of an instance. The token is not part of it: it goes as subprotocol, so it
+ * does not end up in access logs. A base URL without scheme is resolved against the page; http and https
+ * become ws and wss.
  */
-export function liveUrl(engineUrl: string, namespace: string, id: string, after: number, evaluateEvents: boolean, page: string): string {
-    const url = new URL(engineUrl.replace(/\/+$/, '') + '/namespaces/' + encodeURIComponent(namespace) + '/instances/' + encodeURIComponent(id) + '/live', page);
-    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+export function liveUrl(websocketUrl: string, namespace: string, id: string, after: number, evaluateEvents: boolean, page: string): string {
+    const url = new URL(websocketUrl.replace(/\/+$/, '') + '/namespaces/' + encodeURIComponent(namespace) + '/instances/' + encodeURIComponent(id) + '/live', page);
+    if (url.protocol === 'https:' || url.protocol === 'wss:') {
+        url.protocol = 'wss:';
+    } else {
+        url.protocol = 'ws:';
+    }
     if (after > 0) {
         url.searchParams.set('after', String(after));
     }
