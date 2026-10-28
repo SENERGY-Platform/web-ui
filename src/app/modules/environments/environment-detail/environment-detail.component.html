@@ -20,10 +20,12 @@
   <div class="container" [class.has-save-bar]="isDirty" [class.has-problems]="problems.length > 0">
     <senergy-page-header [title]="environment.name || 'Environment'" [description]="ownerLine" backLabel="Environments"
       backLink="/environments">
-      <button pageActions matButton="outlined" type="button" class="reload" [disabled]="isSaving" (click)="discard()"
-        matTooltip="Load the stored environment again; unsaved changes are discarded">
-        <mat-icon>refresh</mat-icon> Reload
-      </button>
+      @if (!isDirty) {
+        <button pageActions matButton="outlined" type="button" class="reload" (click)="discard()"
+          matTooltip="Load the stored environment again">
+          <mat-icon>refresh</mat-icon> Reload
+        </button>
+      }
     </senergy-page-header>
     @if (problems.length > 0) {
       <div class="problems-list">

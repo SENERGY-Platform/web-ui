@@ -1263,7 +1263,7 @@ describe('EnvironmentDetailComponent', () => {
             expect(fixture.nativeElement.querySelectorAll('form.node-form button').length).toBeGreaterThan(0);
         });
 
-        it('reloads the stored document from the header without unsaved changes, and offers it while there are some', () => {
+        it('reloads the stored document from the header, and leaves unsaved changes to the bar\'s Discard', () => {
             loadWith(nestedEnvironment);
             const reloadButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('.page-actions button.reload');
             expect(saveBar()).toBeNull();
@@ -1277,7 +1277,8 @@ describe('EnvironmentDetailComponent', () => {
 
             component.markDirty();
             fixture.detectChanges();
-            expect(reloadButton().disabled).toBe(false);
+            expect(reloadButton()).toBeNull();
+            expect(saveBar()).not.toBeNull();
         });
 
         it('shows the save bar only while there are unsaved changes, outside the tab group', () => {
