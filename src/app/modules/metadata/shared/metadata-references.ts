@@ -38,8 +38,12 @@ const kindLabels: { [kind in MetadataKind]: { one: string; many: string } } = {
     'characteristic': { one: 'characteristic', many: 'characteristics' },
 };
 
-// the trailing ':' keeps 'urn:infai:ses:aspect-class:...' out, it is not a metadata reference
-const metadataUrnPattern = new RegExp('urn:infai:ses:(' + [...urnSegmentToKind.keys()].join('|') + '):[A-Za-z0-9_-]+', 'g');
+// the trailing ':' keeps 'urn:infai:ses:aspect-class:...' out, it is not a metadata reference; only a
+// whole uuid counts, since a long script is split over several parameters and may cut an id in two
+const metadataUrnPattern = new RegExp(
+    'urn:infai:ses:(' + [...urnSegmentToKind.keys()].join('|') + '):[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}(?![A-Za-z0-9_-])',
+    'g',
+);
 
 // moddle keeps back-references to the rest of the diagram; following them would attribute another
 // element's metadata to this one

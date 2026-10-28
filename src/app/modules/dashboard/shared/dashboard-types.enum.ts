@@ -49,6 +49,7 @@ export enum DashboardTypesEnum {
     ChartsDevicePerGateway = 'charts_device_per_gateway',
     ChartsDeviceDowntimeRatePerGateway = 'charts_device_downtime_rate_per_gateway',
     ChartsDeviceTotalDowntime = 'charts_device_total_downtime',
+    AutomationSuggestions = 'automation_suggestions',
 }
 
 export function dashboardTypesEnumFromString(s: string): DashboardTypesEnum {
@@ -90,5 +91,6 @@ export function resizable(type: DashboardTypesEnum): boolean {
         case DashboardTypesEnum.ChartsDevicePerGateway: return true;
         case DashboardTypesEnum.ChartsDeviceDowntimeRatePerGateway: return true;
         case DashboardTypesEnum.ChartsDeviceTotalDowntime: return true;
+        case DashboardTypesEnum.AutomationSuggestions: return true;
     }
 }

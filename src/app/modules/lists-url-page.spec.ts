@@ -91,7 +91,7 @@ const LISTS: ListCase[] = [
     { component: LocationsComponent, services: [LocationsService, DialogsService, PermissionsDialogService] },
     {
         component: NetworksComponent,
-        services: [NetworksService, DeviceInstancesService, DialogsService, PermissionsDialogService, PermissionsService],
+        services: [NetworksService, DeviceInstancesService, DialogsService, PermissionsDialogService, PermissionsService, AuthorizationService],
     },
     {
         component: ImportInstancesComponent,

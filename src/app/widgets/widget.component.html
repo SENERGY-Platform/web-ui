@@ -141,6 +141,11 @@
         <senergy-anomaly-detection class="widget ly-fill" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom"></senergy-anomaly-detection>
       </div>
     }
+    @case ('automation_suggestions') {
+      <div class="ly-fill">
+        <senergy-automation-suggestions class="widget ly-fill" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom"></senergy-automation-suggestions>
+      </div>
+    }
     @case ('open_window') {
       <div class="ly-fill">
         <senergy-open-window class="widget ly-fill" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom"></senergy-open-window>

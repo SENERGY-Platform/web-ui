@@ -47,6 +47,13 @@ describe('metadata-references', () => {
         expect(collectMetadataUrnsFromText(xml).sort()).toEqual([aspect, deviceClass, characteristic, measuring].sort());
     });
 
+    it('skips an id that a split script cuts in two', () => {
+        const xml =
+            '<camunda:inputParameter name="prescript_01">getRequest(null, "' + characteristic.slice(0, -6) + '</camunda:inputParameter>' +
+            '<camunda:inputParameter name="prescript_02">' + characteristic.slice(-6) + '", "' + aspect + '")</camunda:inputParameter>';
+        expect(collectMetadataUrnsFromText(xml)).toEqual([aspect]);
+    });
+
     it('reads the ids out of an object graph and stops at back references', () => {
         const parent = { criteria: controlling };
         const businessObject: any = {
