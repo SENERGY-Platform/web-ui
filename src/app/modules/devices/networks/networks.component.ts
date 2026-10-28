@@ -218,6 +218,11 @@ export class NetworksComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /** An inactive hub gets no alerts, so its health chip is replaced whatever the report says. */
+    isInactive(network: HubModel): boolean {
+        return network.attributes?.some(a => a.key === 'inactive' && a.value === 'true') ?? false;
+    }
+
     healthTooltip(health: HubHealthModel): string {
         const reasons = health.reasons?.length ? health.reasons.join('; ') + '. ' : '';
         return reasons + (health.received ? 'Reported ' + formatDate(health.received, LIST_DATE_FORMAT, this.locale) : '');

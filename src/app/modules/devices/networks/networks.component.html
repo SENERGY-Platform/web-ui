@@ -83,7 +83,9 @@
           <th mat-header-cell *matHeaderCellDef>Health</th>
           <td mat-cell *matCellDef="let network">
             @let health = hubIdToHealth[network.id];
-            @if (!health) {
+            @if (isInactive(network)) {
+              <span class="status-chip muted" matTooltip="Alerts and notifications are off">Inactive</span>
+            } @else if (!health) {
               <span class="muted">–</span>
             } @else {
               <span [matTooltip]="healthTooltip(health)">

@@ -177,12 +177,54 @@ describe('NetworksEditDialogComponent saved network', () => {
         expect(sentNetwork().attributes).toBeUndefined();
     });
 
+    const inactiveToggle = () => root().querySelector('mat-slide-toggle') as HTMLElement;
+    const toggleInactive = () => {
+        inactiveToggle().querySelector<HTMLButtonElement>('button[role="switch"]')!.click();
+        fixture.detectChanges(false);
+    };
+
+    it('adds the inactive attribute with origin web-ui when the toggle is switched on and leaves the others alone', async () => {
+        await open({ network: stored() });
+
+        toggleInactive();
+        component.save();
+
+        const expected = stored();
+        expected.attributes!.push({ key: 'inactive', value: 'true', origin: 'web-ui' });
+        expect(sentNetwork()).toEqual(expected);
+    });
+
+    it('removes the inactive attribute when the toggle is switched off and leaves the others alone', async () => {
+        const network = stored();
+        network.attributes!.splice(1, 0, { key: 'inactive', value: 'true', origin: 'web-ui' });
+        await open({ network });
+        expect(inactiveToggle().classList).toContain('mat-mdc-slide-toggle-checked');
+
+        toggleInactive();
+        component.save();
+
+        expect(sentNetwork()).toEqual(stored());
+    });
+
+    it('sends an inactive attribute that was not touched as it was and lists it only by the toggle', async () => {
+        const network = stored();
+        network.attributes!.push({ key: 'inactive', value: 'true', origin: 'lorawan-connector' });
+        await open({ network });
+
+        const keys = Array.from(root().querySelectorAll('.attribute mtx-select')).length;
+        component.save();
+
+        expect(keys).toBe(2);
+        expect(sentNetwork().attributes?.find((a) => a.key === 'inactive')).toEqual({ key: 'inactive', value: 'true', origin: 'lorawan-connector' });
+    });
+
     it('offers only Close and no editing when opened read-only', async () => {
         await open({ network: stored(), readOnly: true });
 
         const buttons = Array.from(root().querySelectorAll('mat-dialog-actions button')).map((b) => b.textContent?.trim());
         expect(buttons).toEqual(['Close']);
         expect(field('Name')?.disabled).toBeTrue();
+        expect(inactiveToggle().querySelector<HTMLButtonElement>('button[role="switch"]')?.disabled).toBeTrue();
         expect(component.translateInteraction?.getActive()).toBeFalse();
         expect(root().textContent).not.toContain('Add attribute');
     });

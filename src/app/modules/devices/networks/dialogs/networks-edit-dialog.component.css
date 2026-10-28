@@ -30,6 +30,12 @@
     width: 100%;
 }
 
+.inactive-hint {
+    margin: 2px 0 16px;
+    font-size: var(--app-text-xs);
+    color: var(--mat-sys-on-surface-variant);
+}
+
 .attribute {
     display: flex;
     align-items: baseline;

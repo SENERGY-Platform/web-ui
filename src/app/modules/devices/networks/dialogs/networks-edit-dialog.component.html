@@ -28,6 +28,8 @@
           <mat-label>Name</mat-label>
           <input matInput [(ngModel)]="network.name" [disabled]="readOnly">
         </mat-form-field>
+        <mat-slide-toggle class="inactive-toggle" [(ngModel)]="inactive" [disabled]="readOnly">Inactive</mat-slide-toggle>
+        <p class="inactive-hint">No alerts or notifications for this gateway</p>
       </senergy-form-section>
 
       <senergy-form-section title="Attributes">

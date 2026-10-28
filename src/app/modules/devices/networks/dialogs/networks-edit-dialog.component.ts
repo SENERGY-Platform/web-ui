@@ -43,10 +43,13 @@ import { MatErrorMessagesDirective } from '../../../../core/directives/matError.
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MapComponent } from '../../map/map.component';
 import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
 import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
 import { DatePipe } from '@angular/common';
+
+const INACTIVE_ATTRIBUTE = 'inactive';
 
 export interface NetworksEditDialogData {
     network?: HubModel;
@@ -57,7 +60,7 @@ export interface NetworksEditDialogData {
     templateUrl: './networks-edit-dialog.component.html',
     styleUrls: ['./networks-edit-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DialogHeaderComponent, FormSectionComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MatError, MatErrorMessagesDirective, MatTooltip, MatIconButton, MatIcon, MatButton, MapComponent, MatDialogActions, DatePipe]
+    imports: [DialogHeaderComponent, FormSectionComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, MatFormField, MatLabel, MatInput, FormsModule, MtxSelect, MatError, MatErrorMessagesDirective, MatTooltip, MatIconButton, MatIcon, MatButton, MatSlideToggle, MapComponent, MatDialogActions, DatePipe]
 })
 export class NetworksEditDialogComponent implements OnInit, AfterViewInit {
     private cd = inject(ChangeDetectorRef);
@@ -69,7 +72,11 @@ export class NetworksEditDialogComponent implements OnInit, AfterViewInit {
     readOnly = false;
     title: string;
     knownAttributes = ['last_message_max_age', 'senergy/lora/eui'];
-    hiddenAttributes = ['location-lat', 'location-lon'];
+    /** Shown elsewhere in the dialog: the location by the map, `inactive` by the toggle. */
+    hiddenAttributes = ['location-lat', 'location-lon', INACTIVE_ATTRIBUTE];
+    /** An inactive hub raises no alerts and sends no notifications; set on save only when the toggle was changed. */
+    inactive = false;
+    private initiallyInactive = false;
     @ViewChild('mapBody') mapBody: ElementRef | undefined;
     mapView = new View({
         center: [0, 0],
@@ -105,6 +112,7 @@ export class NetworksEditDialogComponent implements OnInit, AfterViewInit {
             device_local_ids: null,
             device_ids: null,
         };
+        this.initiallyInactive = this.inactive = !!this.network.attributes?.some(a => a.key === INACTIVE_ATTRIBUTE && a.value === 'true');
         this.network.attributes?.forEach(value => {
             if (this.knownAttributes.includes(value.key) && !this.hiddenAttributes.includes(value.key)) {
                 this.addAttribute()(value.key);
@@ -234,6 +242,10 @@ export class NetworksEditDialogComponent implements OnInit, AfterViewInit {
     }
 
     save(): void {
+        if (this.inactive !== this.initiallyInactive) {
+            const others = (this.network.attributes ?? []).filter(a => a.key !== INACTIVE_ATTRIBUTE);
+            this.network.attributes = this.inactive ? [...others, { key: INACTIVE_ATTRIBUTE, value: 'true', origin: 'web-ui' }] : others;
+        }
         this.dialogRef.close(this.network);
     }
 

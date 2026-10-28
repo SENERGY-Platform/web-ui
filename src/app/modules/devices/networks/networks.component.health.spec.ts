@@ -109,6 +109,18 @@ describe('NetworksComponent health and owner columns', () => {
         expect(cells[4].querySelector('.status-chip')).toBeNull();
     }));
 
+    it('shows an inactive hub as inactive whatever its report says', fakeAsync(() => {
+        const inactive = { ...hub('urn:hub:inactive'), attributes: [{ key: 'inactive', value: 'true', origin: 'web-ui' }] };
+        const notInactive = { ...hub('urn:hub:flagged-off'), attributes: [{ key: 'inactive', value: 'false', origin: 'web-ui' }] };
+        init({ hubs: [inactive, notInactive], reports: [report('urn:hub:inactive', 2, false, ['no heartbeat']), report('urn:hub:flagged-off', 2)] });
+        discardPeriodicTasks();
+
+        const cells = healthCells();
+        expect(cells.map((c) => c.textContent?.trim())).toEqual(['Inactive', 'Unhealthy']);
+        expect(cells[0].querySelector('.status-chip.muted')).not.toBeNull();
+        expect(cells[0].querySelector('.status-chip.failed')).toBeNull();
+    }));
+
     it('puts the health column directly after the connection and does not sort it', fakeAsync(() => {
         init();
         discardPeriodicTasks();
