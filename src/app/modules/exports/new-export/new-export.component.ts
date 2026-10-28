@@ -64,7 +64,7 @@ import { AddTagFn } from '@ng-matero/extensions/select';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { stateMatcher } from '../../data/operator-repo/shared/operator-validation';
-import { parseSvgImage, svgImageMarkup } from '../../../core/svg-image';
+import { fitSvgImageHeight, parseSvgImage, svgImageMarkup } from '../../../core/svg-image';
 
 @Component({
     selector: 'senergy-new-export',
@@ -512,8 +512,7 @@ export class NewExportComponent implements OnInit {
                     this.resetVars();
                     const svg = parseSvgImage(pipe.image);
                     if (svg !== null) {
-                        const viewbox = svg.getAttribute('viewbox')!.split(' ');
-                        svg.setAttribute('height', viewbox[3]);
+                        fitSvgImageHeight(svg);
                         this.image = this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
                         if (pipe.operators.length === 1) {
                             this.operator = pipe.operators[0];
@@ -619,8 +618,7 @@ export class NewExportComponent implements OnInit {
         const pipeline: PipelineModel | null = this.exportForm.getRawValue().pipeline;
         const svg = parseSvgImage(pipeline?.image);
         if (svg !== null) {
-            const viewbox = svg.getAttribute('viewbox')!.split(' ');
-            svg.setAttribute('height', viewbox[3]);
+            fitSvgImageHeight(svg);
             const elements = svg.getElementsByClassName('joint-cell') as any;
             for (const element of elements) {
                 if (element.attributes['model-id'].value === id) {

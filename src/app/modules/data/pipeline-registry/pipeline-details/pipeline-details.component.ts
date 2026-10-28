@@ -23,7 +23,7 @@ import { DeviceInstancesService } from '../../../devices/device-instances/shared
 import { DeviceTypeServiceModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel} from '../../../devices/device-instances/shared/device-instances.model';
 import {Location} from '@angular/common';
-import { parseSvgImage, svgImageDataUrl } from '../../../../core/svg-image';
+import { fitSvgImageHeight, parseSvgImage, svgImageDataUrl } from '../../../../core/svg-image';
 
 @Component({
     selector: 'senergy-pipeline-details',
@@ -84,8 +84,7 @@ export class PipelineDetailsComponent implements OnInit {
                     });
                     const svg = parseSvgImage(this.pipe.image);
                     if (svg !== null) {
-                        const viewbox = svg.getAttribute('viewbox')!.split(' ');
-                        svg.setAttribute('height', viewbox[3]);
+                        fitSvgImageHeight(svg);
                         this.imageUrl = svgImageDataUrl(svg);
                     }
                 }

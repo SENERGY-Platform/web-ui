@@ -50,7 +50,7 @@ import { OperatorRepoService } from '../../operator-repo/shared/operator-repo.se
 import { ImportInstancesService } from '../../../imports/import-instances/shared/import-instances.service';
 import { ImportInstancesModel } from '../../../imports/import-instances/shared/import-instances.model';
 import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
-import { parseSvgImage, svgImageMarkup } from '../../../../core/svg-image';
+import { fitSvgImageHeight, parseSvgImage, svgImageMarkup } from '../../../../core/svg-image';
 
 interface CustomSelectable {
     id: string;
@@ -1186,8 +1186,7 @@ export class DeployFlowComponent implements OnInit, OnDestroy {
         if (svg === null) {
             return undefined;
         }
-        const viewbox = svg.getAttribute('viewbox')!.split(' ');
-        svg.setAttribute('height', viewbox[3]);
+        fitSvgImageHeight(svg);
         const elements = svg.getElementsByClassName('joint-cell') as any;
         for (const element of elements) {
             if (element.attributes['model-id'].value === pipelineGroup.get('operatorId')?.value) {
