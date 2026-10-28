@@ -72,7 +72,7 @@ import { PageHeaderComponent } from '../../../core/components/page-header/page-h
 import { FormSectionComponent } from '../../../core/components/form-section/form-section.component';
 import { SaveBarComponent } from '../../../core/components/save-bar/save-bar.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
-import { parseSvgImage, svgImageMarkup } from '../../../core/svg-image';
+import { fitSvgImageHeight, parseSvgImage, svgImageMarkup } from '../../../core/svg-image';
 
 type ExportValueGroup = FormGroup<{
     Name: FormControl<string | null>;
@@ -555,8 +555,7 @@ export class NewExportComponent implements OnInit {
                     this.resetVars();
                     const svg = parseSvgImage(pipe.image);
                     if (svg !== null) {
-                        const viewbox = svg.getAttribute('viewbox')!.split(' ');
-                        svg.setAttribute('height', viewbox[3]);
+                        fitSvgImageHeight(svg);
                         this.image = this.sanitizer.bypassSecurityTrustHtml(svgImageMarkup(svg));
                         if (pipe.operators.length === 1) {
                             this.operator = pipe.operators[0];
@@ -663,8 +662,7 @@ export class NewExportComponent implements OnInit {
         const pipeline: PipelineModel | null = this.exportForm.getRawValue().pipeline;
         const svg = parseSvgImage(pipeline?.image);
         if (svg !== null) {
-            const viewbox = svg.getAttribute('viewbox')!.split(' ');
-            svg.setAttribute('height', viewbox[3]);
+            fitSvgImageHeight(svg);
             const elements = svg.getElementsByClassName('joint-cell') as any;
             for (const element of elements) {
                 if (element.attributes['model-id'].value === id) {

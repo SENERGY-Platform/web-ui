@@ -26,7 +26,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
-import { parseSvgImage, svgImageDataUrl } from '../../../../core/svg-image';
+import { fitSvgImageHeight, parseSvgImage, svgImageDataUrl } from '../../../../core/svg-image';
 import { FlowEngineService } from '../../flow-repo/shared/flow-engine.service';
 import { PageHeaderComponent } from '../../../../core/components/page-header/page-header.component';
 import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
@@ -94,11 +94,7 @@ export class PipelineDetailsComponent implements OnInit {
                     });
                     const svg = parseSvgImage(this.pipe.image);
                     if (svg !== null) {
-                        // the designer writes a lowercase viewbox; without either spelling the image keeps its own height
-                        const height = (svg.getAttribute('viewbox') ?? svg.getAttribute('viewBox'))?.trim().split(/[\s,]+/)[3];
-                        if (height !== undefined) {
-                            svg.setAttribute('height', height);
-                        }
+                        fitSvgImageHeight(svg);
                         this.imageUrl = svgImageDataUrl(svg);
                     }
                 }

@@ -366,6 +366,21 @@ describe('NewExportComponent', () => {
             expect(operatorRect(OTHER_OPERATOR_ID).getAttribute('stroke')).toBe('red');
             expect(saved()?.Filter).toBe(PIPELINE_ID + ':' + OTHER_OPERATOR_ID);
         }));
+
+        // SNRGY-4998: other tools write viewBox, and an image without one used to throw before it was shown
+        for (const [name, markup, height] of [
+            ['a camel-case viewBox', PIPELINE_IMAGE.replace('viewbox=', 'viewBox='), '100'],
+            ['no viewBox', PIPELINE_IMAGE.replace(' viewbox="0 0 200 100"', ''), '100'],
+        ] as const) {
+            it('shows an image with ' + name + ' and marks the exported operator', fakeAsync(() => {
+                openForEditing(existingExport(), 'export-1', {image: markup, fixture: (f) => (fixture = f)});
+                fixture.detectChanges();
+
+                const svg = fixture.nativeElement.querySelector('.widget-image svg') as SVGSVGElement;
+                expect(svg.getAttribute('height')).toBe(height);
+                expect(operatorRect(OPERATOR_ID).getAttribute('stroke')).toBe('red');
+            }));
+        }
     });
 
     it('sets the time path and its format when an operator is chosen', fakeAsync(() => {

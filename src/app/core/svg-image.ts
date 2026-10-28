@@ -56,6 +56,15 @@ export function parseSvgImage(markup: unknown): Element | null {
     return root;
 }
 
+/** Sets the height to the viewBox height, so the image is not stretched to its container; without a viewBox the height stays. */
+export function fitSvgImageHeight(svg: Element): void {
+    // the designer writes a lowercase viewbox, other tools viewBox
+    const height = (svg.getAttribute('viewbox') ?? svg.getAttribute('viewBox'))?.trim().split(/[\s,]+/)[3];
+    if (height !== undefined) {
+        svg.setAttribute('height', height);
+    }
+}
+
 /** Markup for [innerHtml], for sites that need the image as live DOM (clicks on operators). */
 export function svgImageMarkup(svg: Element): string {
     return new XMLSerializer().serializeToString(sanitize(svg));

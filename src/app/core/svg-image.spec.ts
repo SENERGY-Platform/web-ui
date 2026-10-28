@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { parseSvgImage, svgImageDataUrl, svgImageMarkup } from './svg-image';
+import { fitSvgImageHeight, parseSvgImage, svgImageDataUrl, svgImageMarkup } from './svg-image';
 import { decodeSvgDataUrl, FLOW_IMAGE, HOSTILE_IMAGE, liveMarkup } from './svg-image.mock';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -63,6 +63,24 @@ describe('svg-image', () => {
             for (const markup of [undefined, null, '', {}, '<html/>', '<svg/>', 'plain text', ...malformed]) {
                 expect(parseSvgImage(markup)).withContext(String(markup)).toBeNull();
             }
+        });
+    });
+
+    describe('fitSvgImageHeight', () => {
+        const svg = (attributes: string) => parseSvgImage('<svg xmlns="http://www.w3.org/2000/svg" ' + attributes + '/>')!;
+
+        it('takes the height from a lowercase viewbox, a camel-case viewBox and comma separators', () => {
+            for (const attributes of ['viewbox="0 0 200 40" height="100%"', 'viewBox="0 0 200 40" height="100%"', 'viewBox=" 0,0,200,40 " height="100%"']) {
+                const image = svg(attributes);
+                fitSvgImageHeight(image);
+                expect(image.getAttribute('height')).withContext(attributes).toBe('40');
+            }
+        });
+
+        it('leaves the height of an image without a viewBox', () => {
+            const image = svg('width="200" height="100%"');
+            fitSvgImageHeight(image);
+            expect(image.getAttribute('height')).toBe('100%');
         });
     });
 

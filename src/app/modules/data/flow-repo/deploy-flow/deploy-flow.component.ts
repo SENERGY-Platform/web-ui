@@ -64,7 +64,7 @@ import { PageHeaderComponent } from '../../../../core/components/page-header/pag
 import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
 import { SaveBarComponent } from '../../../../core/components/save-bar/save-bar.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
-import { parseSvgImage, svgImageMarkup } from '../../../../core/svg-image';
+import { fitSvgImageHeight, parseSvgImage, svgImageMarkup } from '../../../../core/svg-image';
 
 interface CustomSelectable {
     id: string;
@@ -1134,11 +1134,7 @@ export class DeployFlowComponent implements OnInit {
         if (svg === null) {
             return undefined;
         }
-        // the designer writes a lowercase viewbox; without either spelling the image keeps its own height
-        const height = (svg.getAttribute('viewbox') ?? svg.getAttribute('viewBox'))?.trim().split(/[\s,]+/)[3];
-        if (height !== undefined) {
-            svg.setAttribute('height', height);
-        }
+        fitSvgImageHeight(svg);
         for (const element of Array.from(svg.getElementsByClassName('joint-cell'))) {
             if (element.getAttribute('model-id') === operatorId) {
                 for (const node of Array.from(element.children)) {
