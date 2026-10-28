@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef, LOCALE_ID } from '@angular/core';
+import { formatDate } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { NetworksService } from './shared/networks.service';
-import { ExtendedHubModel, ExtendedHubTotalModel, HubModel } from './shared/networks.model';
-import { forkJoin, Observable, map } from 'rxjs';
+import { ExtendedHubModel, ExtendedHubTotalModel, HubHealthModel, HubModel } from './shared/networks.model';
+import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NetworksDeleteDialogComponent } from './dialogs/networks-delete-dialog.component';
@@ -37,6 +38,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PreferencesService } from 'src/app/core/services/preferences.service';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
+import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
 import { EmptyStateComponent } from '../../../core/components/empty-state/empty-state.component';
@@ -68,6 +71,8 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     private permissionsService = inject(PermissionsService);
     private preferencesService = inject(PreferencesService);
     private urlState = inject(UrlStateService);
+    private authorizationService = inject(AuthorizationService);
+    private locale = inject(LOCALE_ID);
 
     displayedColumns: string[] = [];
     dataSource = new MatTableDataSource<ExtendedHubModel>();
@@ -90,8 +95,11 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     userHasCreateAuthorization = false;
     userHasLoraCertAuthorization = false;
 
-    userIdToName: { [key: string]: string } = {};
+    userIsAdmin = this.authorizationService.userIsAdmin();
 
+    userIdToName: { [key: string]: string } = {};
+    hubIdToHealth: { [key: string]: HubHealthModel } = {};
+    private healthSub = new Subscription();
 
     ngOnInit() {
         this.initSearch();
@@ -110,8 +118,10 @@ export class NetworksComponent implements OnInit, AfterViewInit {
             ...(this.userHasDeleteAuthorization ? ['select'] : []),
             'name',
             'connection',
+            'health',
             'number_devices',
             'shared',
+            ...(this.userIsAdmin ? ['owner'] : []),
             'actions',
         ];
     }
@@ -194,15 +204,29 @@ export class NetworksComponent implements OnInit, AfterViewInit {
                     this.totalCount = networks.total;
                     this.loadUserNames(networks.result.map(n => ({ creator: n.owner_id, shared: n.shared })));
                     this.dataSource.data = networks.result;
+                    this.loadHealth(networks.result.map(n => n.id));
                     return networks.result;
                 })
             );
     }
 
+    /** Not part of the page load: the table shows before the health answers, and a newer load drops an older query. */
+    private loadHealth(ids: string[]) {
+        this.healthSub.unsubscribe();
+        this.healthSub = this.networksService.queryHubHealth(ids).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(reports => {
+            this.hubIdToHealth = Object.fromEntries(reports.map(report => [report.hub_id, report]));
+        });
+    }
+
+    healthTooltip(health: HubHealthModel): string {
+        const reasons = health.reasons?.length ? health.reasons.join('; ') + '. ' : '';
+        return reasons + (health.received ? 'Reported ' + formatDate(health.received, LIST_DATE_FORMAT, this.locale) : '');
+    }
+
     private loadUserNames(elements: { creator: string; shared: boolean }[]) {
         const missingCreators: string[] = [];
         elements?.forEach(element => {
-            if (element.shared && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
+            if ((this.userIsAdmin || element.shared) && element.creator && !this.userIdToName[element.creator] && !missingCreators.includes(element.creator)) {
                 missingCreators.push(element.creator);
             }
         });

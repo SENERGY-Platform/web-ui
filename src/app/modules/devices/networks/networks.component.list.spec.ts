@@ -32,6 +32,7 @@ import { PermissionsService } from '../../permissions/shared/permissions.service
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { CoreModule } from '../../../core/core.module';
+import { AuthorizationService } from '../../../core/services/authorization.service';
 
 describe('NetworksComponent list', () => {
     let component: NetworksComponent;
@@ -47,6 +48,7 @@ describe('NetworksComponent list', () => {
 
     function init(rights = { update: true, delete: true, create: true }, write = true) {
         service.listExtendedHubs.and.returnValue(of({ result: [hub(write)], total: 1 }));
+        service.queryHubHealth.and.returnValue(of([]));
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
         service.userHasDeleteAuthorization.and.returnValue(rights.delete);
         service.userHasCreateAuthorization.and.returnValue(rights.create);
@@ -60,6 +62,7 @@ describe('NetworksComponent list', () => {
                 { provide: NetworksService, useValue: service },
                 { provide: DeviceInstancesService, useValue: {} },
                 { provide: PermissionsService, useValue: {} },
+                { provide: AuthorizationService, useValue: { userIsAdmin: () => false } },
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: DialogsService, useValue: {} },
                 { provide: MatDialog, useValue: dialogStub },

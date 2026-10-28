@@ -38,6 +38,18 @@ export interface ExtendedHubModel extends HubModel {
     permissions: PermissionsRightsModel;
 }
 
+/** Latest health report of a hub as answered by connection-log; `report` is the raw report and not shown. */
+export interface HubHealthModel {
+    hub_id: string;
+    /** 0 undetermined, 1 healthy, 2 unhealthy */
+    state: number;
+    reasons: string[];
+    report: unknown;
+    report_time: string;
+    received: string;
+    /** received longer ago than the backend's stale age */
+    stale: boolean;
+}
 
 export interface LoraCertsModel {
     certificate: string;

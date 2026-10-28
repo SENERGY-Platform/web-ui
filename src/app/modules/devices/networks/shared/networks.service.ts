@@ -15,7 +15,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { catchError, concatMap, map } from 'rxjs/operators';
@@ -23,6 +23,7 @@ import { Observable, of } from 'rxjs';
 import {
     ExtendedHubModel,
     ExtendedHubTotalModel,
+    HubHealthModel,
     HubModel,
     LoraCertsModel,
 } from './networks.model';
@@ -125,6 +126,24 @@ export class NetworksService {
                     return m;
                 }),
             );
+    }
+
+    /** Latest health reports of the given hubs; hubs without access or without a report are missing from the answer. */
+    queryHubHealth(ids: string[]): Observable<HubHealthModel[]> {
+        // an empty id list would make connection-log answer for every hub the user may read
+        if (ids.length === 0) {
+            return of([]);
+        }
+        return this.http.post<HubHealthModel[]>(environment.connectionLogUrl + '/current/query/health', { ids }).pipe(
+            map((resp) => resp || []),
+            catchError((error: HttpErrorResponse) => {
+                // no right on connection-log is an ordinary state of the user, not a failure to report
+                if (error.status === 401 || error.status === 403) {
+                    return this.errorHandlerService.handleErrorQuietly<HubHealthModel[]>(NetworksService.name, 'queryHubHealth', [])(error);
+                }
+                return this.errorHandlerService.handleError<HubHealthModel[]>(NetworksService.name, 'queryHubHealth', [])(error);
+            }),
+        );
     }
 
     openNetworkEditDialog(network?: HubModel, readOnly = false): void {
