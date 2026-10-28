@@ -18,7 +18,7 @@
   <div class="annotation-chart" [style.width.px]="layout.width + 2" [style.height.px]="layout.height + 2" (mouseleave)="legend = { entries: legend.entries }">
     <div class="legend">
       @for (entry of legend.entries; track $index) {
-        <span [style.color]="entry.color"><span class="legend-dot" [style.background-color]="entry.color"></span>{{entry.label}}&nbsp;&nbsp;</span>@if (entry.value !== undefined) {<span>: {{entry.value}}</span>}&nbsp;&nbsp;
+        <span [style.color]="entry.color"><span class="legend-dot" [style.background-color]="entry.color"></span>{{entry.label}}&nbsp;&nbsp;</span>@if (entry.value !== undefined) {<span>: {{entry.value}}</span>}<span>&nbsp;&nbsp;</span>
       }
       @if (legend.date !== undefined) {
         <span>|&nbsp;{{legend.date}}</span>
