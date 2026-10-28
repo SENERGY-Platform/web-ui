@@ -30,6 +30,7 @@ import { SearchbarService } from 'src/app/core/components/searchbar/shared/searc
 import { NetworksComponent } from './networks.component';
 import { NetworksService } from './shared/networks.service';
 import { HubModel } from './shared/networks.model';
+import { AuthorizationService } from 'src/app/core/services/authorization.service';
 import { UrlStateService } from 'src/app/core/services/url-state.service';
 import { UrlStateServiceMock } from 'src/app/core/services/url-state.service.mock';
 
@@ -56,6 +57,7 @@ describe('NetworksComponent getLoraCerts', () => {
                 { provide: MatSnackBar, useValue: snackBar },
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: PermissionsService, useValue: {} },
+                { provide: AuthorizationService, useValue: { userIsAdmin: () => false } },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
             ],
         });

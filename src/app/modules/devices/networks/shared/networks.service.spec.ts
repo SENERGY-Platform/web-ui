@@ -52,4 +52,63 @@ describe('NetworksService', () => {
         expect(result).toBeNull();
         expect(open.calls.mostRecent().args[0]).toContain('request failed (500)');
     });
+
+    describe('queryHubHealth', () => {
+        const isQuery = (r: { method: string; url: string }) => r.method === 'POST' && r.url.endsWith('/current/query/health');
+
+        it('sends no request without ids, since connection-log would answer for every hub then', () => {
+            const service = TestBed.inject(NetworksService);
+            const http = TestBed.inject(HttpTestingController);
+            let result: unknown = 'unset';
+
+            service.queryHubHealth([]).subscribe((r) => result = r);
+
+            http.expectNone(isQuery);
+            expect(result).toEqual([]);
+        });
+
+        it('posts the ids and answers with the reports', () => {
+            const service = TestBed.inject(NetworksService);
+            const http = TestBed.inject(HttpTestingController);
+            const reports = [{ hub_id: 'h1', state: 1, reasons: [], report: {}, report_time: '', received: '2026-10-12T08:30:00Z', stale: false }];
+            let result: unknown;
+
+            service.queryHubHealth(['h1', 'h2']).subscribe((r) => result = r);
+            const req = http.expectOne(isQuery);
+            expect(req.request.body).toEqual({ ids: ['h1', 'h2'] });
+            req.flush(reports);
+
+            expect(result).toEqual(reports);
+        });
+
+        for (const status of [401, 403]) {
+            it('answers an empty list without a snack bar on ' + status, () => {
+                const open = spyOn(TestBed.inject(MatSnackBar), 'open');
+                spyOn(console, 'error');
+                const service = TestBed.inject(NetworksService);
+                const http = TestBed.inject(HttpTestingController);
+                let result: unknown = 'unset';
+
+                service.queryHubHealth(['h1']).subscribe((r) => result = r);
+                http.expectOne(isQuery).flush('access denied', { status, statusText: 'Forbidden' });
+
+                expect(result).toEqual([]);
+                expect(open).not.toHaveBeenCalled();
+            });
+        }
+
+        it('answers an empty list and names the backend on another error', () => {
+            const open = spyOn(TestBed.inject(MatSnackBar), 'open');
+            spyOn(console, 'error');
+            const service = TestBed.inject(NetworksService);
+            const http = TestBed.inject(HttpTestingController);
+            let result: unknown = 'unset';
+
+            service.queryHubHealth(['h1']).subscribe((r) => result = r);
+            http.expectOne(isQuery).flush('boom', { status: 500, statusText: 'Internal Server Error' });
+
+            expect(result).toEqual([]);
+            expect(open.calls.mostRecent().args[0]).toContain('request failed (500)');
+        });
+    });
 });
