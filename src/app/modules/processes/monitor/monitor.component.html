@@ -23,12 +23,13 @@
         (clearSelection)="selectionClearRunning()" (refresh)="reload()">
         <ng-container toolbarFilters>
           <button matButton="outlined" [matMenuTriggerFor]="hubMenuRunning">
-            <mat-icon>device_hub</mat-icon> {{hub ? hub.name : 'Senergy-Platform'}}
+            <mat-icon>device_hub</mat-icon> {{networkFilterLabel}}
           </button>
           <mat-menu #hubMenuRunning="matMenu">
-            <button mat-menu-item [class.hub-selected]="!hub" (click)="selectHubWithReload(null)">Senergy-Platform</button>
+            <button mat-menu-item [class.hub-selected]="networkFilter === null" (click)="selectNetworkWithReload(null)">All networks</button>
+            <button mat-menu-item [class.hub-selected]="networkFilter === cloudNetwork" (click)="selectNetworkWithReload(cloudNetwork)">Senergy-Platform</button>
             @for (h of hubList; track h.id) {
-              <button mat-menu-item [class.hub-selected]="hub?.id === h.id" (click)="selectHubWithReload(h)">{{h.name}}</button>
+              <button mat-menu-item [class.hub-selected]="networkFilter === h.id" (click)="selectNetworkWithReload(h.id)">{{h.name}}</button>
             }
           </mat-menu>
           @if (selectedDeployment !== null) {
@@ -96,6 +97,14 @@
                   }
                 </td>
               </ng-container>
+              <ng-container matColumnDef="network">
+                <th mat-header-cell *matHeaderCellDef>Runs on</th>
+                <td mat-cell *matCellDef="let element">
+                  <span class="network-cell">
+                    <mat-icon inline>{{element.network_id ? 'router' : 'cloud'}}</mat-icon> {{networkName(element.network_id)}}
+                  </span>
+                </td>
+              </ng-container>
               <ng-container matColumnDef="startTime">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Started</th>
                 <td mat-cell *matCellDef="let element" class="muted">{{ element.startTime | date: dateFormat }}</td>
@@ -110,6 +119,7 @@
                     @if (!isPlaceholder(element)) {
                       <button mat-menu-item (click)="openDetailsDialog(element.id)"><mat-icon>info</mat-icon> Details</button>
                     }
+                    <a mat-menu-item [routerLink]="['/processes/monitor/debug', element.id]"><mat-icon>bug_report</mat-icon> Debug</a>
                     <button mat-menu-item [disabled]="selectionRunning.selected.length > 0" (click)="stop(element)"><mat-icon>stop</mat-icon> Stop</button>
                   </mat-menu>
                 </td>
@@ -128,12 +138,13 @@
         (clearSelection)="selectionClear()" (refresh)="reload()">
         <ng-container toolbarFilters>
           <button matButton="outlined" [matMenuTriggerFor]="hubMenuFinished">
-            <mat-icon>device_hub</mat-icon> {{hub ? hub.name : 'Senergy-Platform'}}
+            <mat-icon>device_hub</mat-icon> {{networkFilterLabel}}
           </button>
           <mat-menu #hubMenuFinished="matMenu">
-            <button mat-menu-item [class.hub-selected]="!hub" (click)="selectHubWithReload(null)">Senergy-Platform</button>
+            <button mat-menu-item [class.hub-selected]="networkFilter === null" (click)="selectNetworkWithReload(null)">All networks</button>
+            <button mat-menu-item [class.hub-selected]="networkFilter === cloudNetwork" (click)="selectNetworkWithReload(cloudNetwork)">Senergy-Platform</button>
             @for (h of hubList; track h.id) {
-              <button mat-menu-item [class.hub-selected]="hub?.id === h.id" (click)="selectHubWithReload(h)">{{h.name}}</button>
+              <button mat-menu-item [class.hub-selected]="networkFilter === h.id" (click)="selectNetworkWithReload(h.id)">{{h.name}}</button>
             }
           </mat-menu>
           @if (selectedDeployment !== null) {
@@ -199,6 +210,14 @@
                     [class.warning]="element.state === 'EXTERNALLY_TERMINATED'">{{stateLabel(element.state)}}</span>
                 </td>
               </ng-container>
+              <ng-container matColumnDef="network">
+                <th mat-header-cell *matHeaderCellDef>Runs on</th>
+                <td mat-cell *matCellDef="let element">
+                  <span class="network-cell">
+                    <mat-icon inline>{{element.network_id ? 'router' : 'cloud'}}</mat-icon> {{networkName(element.network_id)}}
+                  </span>
+                </td>
+              </ng-container>
               <ng-container matColumnDef="startTime">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Started</th>
                 <td mat-cell *matCellDef="let element" class="muted">{{ element.startTime | date: dateFormat }}</td>
@@ -221,6 +240,7 @@
                     @if (element.state !== 'COMPLETED') {
                       <button mat-menu-item (click)="openDetailsDialog(element.id)"><mat-icon>info</mat-icon> Details</button>
                     }
+                    <a mat-menu-item [routerLink]="['/processes/monitor/debug', element.id]"><mat-icon>bug_report</mat-icon> Debug</a>
                     <button mat-menu-item class="danger" [disabled]="selection.selected.length > 0" (click)="deleteSingleItem(element)"><mat-icon>delete</mat-icon> Delete</button>
                   </mat-menu>
                 </td>

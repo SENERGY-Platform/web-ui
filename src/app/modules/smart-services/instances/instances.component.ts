@@ -25,7 +25,7 @@ import { PreferencesService } from 'src/app/core/services/preferences.service';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { MatPaginator } from '@angular/material/paginator';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
@@ -69,7 +69,7 @@ import { ChangedResourcesHintComponent } from '../changed-resources/changed-reso
         ]),
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatMenu, MatMenuItem, MatMenuTrigger, SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, JsonPipe, DatePipe, ChangedResourcesHintComponent]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatMenu, MatMenuItem, MatMenuTrigger, SpinnerComponent, MatChipSet, MatChip, MatIcon, MatChipAvatar, MatChipRemove, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatTooltip, MatSortHeader, MatIconButton, MatProgressSpinner, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, JsonPipe, DatePipe, ChangedResourcesHintComponent, RouterLink]
 })
 export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     private instancesService = inject(SmartServiceInstanceService);

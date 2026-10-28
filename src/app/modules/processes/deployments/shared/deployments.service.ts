@@ -17,7 +17,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { Observable, of, timer } from 'rxjs';
+import { forkJoin, Observable, of, timer } from 'rxjs';
 import { catchError, concatMap, map, mergeMap, retryWhen } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { DeploymentDependenciesModel, DeploymentsModel, ProcessStartParameter } from './deployments.model';
@@ -30,6 +30,9 @@ import {
 } from './deployments-prepared-v2.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
+import { AutomationEngineService } from '../../../../core/services/automation-engine.service';
+import { EngineDeployment, EngineNetwork } from '../../../../core/model/automation-engine.model';
+import { DeploymentsFogMetadataModel } from './deployments-fog.model';
 
 @Injectable({
     providedIn: 'root',
@@ -38,6 +41,7 @@ export class DeploymentsService {
     private http = inject(HttpClient);
     private errorHandlerService = inject(ErrorHandlerService);
     private ladonService = inject(LadonService);
+    private automationEngineService = inject(AutomationEngineService);
 
     authorizations: PermissionTestResponse;
 
@@ -55,48 +59,98 @@ export class DeploymentsService {
         return this.list(query, limit, offset, feature, order, source);
     }
 
-    list(query: string, limit: number, offset: number, feature: string, order: string, source: string, id?: string): Observable<DeploymentsModel[]> {
-        let deployments: Observable<DeploymentsModel[]>;
-        if (id) {
-            deployments = this.getSingleDeployment(id).pipe(map((deployment) => (deployment ? [deployment] : [])));
-        } else {
-            deployments = this.getAllMinimal(query, limit, offset, feature, order, source);
-        }
-        return deployments.pipe(
+    list(query: string, limit: number, offset: number, feature: string, order: string, source: string): Observable<DeploymentsModel[]> {
+        return this.getAllMinimal(query, limit, offset, feature, order, source).pipe(
             concatMap((result) => this.completeOnlineState(result)),
             catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAll', [])),
         );
     }
 
-    private getSingleDeployment(id: string): Observable<DeploymentsModel | null> {
-        return this.http
-            .get<Omit<DeploymentsModel, 'diagram'> & { diagram: string | { svg: string } }>(
-                environment.processDeploymentUrl + '/v3/deployments/' + encodeURIComponent(id) + '?with_options=false',
-            )
+    /**
+     * Deployments of the platform and of the gateways, read from the engine, because the routes of the
+     * old services list either the platform or one gateway. networkId undefined lists all,
+     * ENGINE_CLOUD_NETWORK those of the platform and a hub id those of that hub.
+     */
+    listOfNetworks(
+        query: string,
+        limit: number,
+        offset: number,
+        feature: string,
+        order: string,
+        source: string,
+        networkId?: string,
+    ): Observable<DeploymentsModel[]> {
+        const sort = (feature === 'deploymentTime' ? 'created_at' : feature) + '.' + order;
+        return this.automationEngineService
+            .listDeployments({ search: query, limit, offset, sort, source, network_id: networkId })
             .pipe(
-                map((deployment) => {
-                    if (deployment && typeof deployment.diagram === 'object' && deployment.diagram !== null) {
-                        return { ...deployment, diagram: deployment.diagram.svg } as DeploymentsModel;
-                    }
-                    return deployment as DeploymentsModel;
-                }),
-                concatMap((deployment) => this.completeDisabledState(deployment)),
+                concatMap((page) => this.completeEngineDeployments(page.items || [])),
+                catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'listOfNetworks', [])),
             );
     }
 
-    // process-deployment does not know the on/off state; the engine's definition carries it as `suspended`.
-    private completeDisabledState(deployment: DeploymentsModel | null): Observable<DeploymentsModel | null> {
-        if (!deployment) {
-            return of(deployment);
+    /** a deployment of the platform or of a gateway, as listOfNetworks lists it */
+    getDeploymentOfNetworks(id: string): Observable<DeploymentsModel | null> {
+        return this.automationEngineService.getDeployment(id).pipe(
+            concatMap((deployment) => this.completeEngineDeployments([deployment])),
+            map((deployments) => deployments[0] || null),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeploymentOfNetworks', null)),
+        );
+    }
+
+    /**
+     * Diagram, and the state of devices or hub: a deployment of the platform is offline while one of its
+     * devices is, one of a hub while the hub is. A hub deployment also waits for sync until the hub
+     * applied it. A failing part leaves the deployments as they are instead of emptying the list.
+     */
+    private completeEngineDeployments(items: EngineDeployment[]): Observable<DeploymentsModel[]> {
+        const deployments = items.map(
+            (d) =>
+                ({
+                    id: d.id,
+                    name: d.name,
+                    definition_id: d.id,
+                    deploymentTime: d.created_at,
+                    diagram: '',
+                    disabled: d.disabled === true,
+                    network_id: d.network_id || undefined,
+                    online: true,
+                    offline_reasons: [],
+                    sync: false,
+                }) as unknown as DeploymentsModel,
+        );
+        if (deployments.length === 0) {
+            return of(deployments);
         }
+        const platform = deployments.filter((d) => !d.network_id);
+        const networkIds = deployments.map((d) => d.network_id).filter((id, i, a): id is string => !!id && a.indexOf(id) === i);
+        return forkJoin([
+            forkJoin(deployments.map((d) => this.getDiagramSvg(d.id))),
+            this.completeOnlineState(platform).pipe(catchError(() => of(platform))),
+            networkIds.length === 0
+                ? of([] as (EngineNetwork | null)[])
+                : forkJoin(networkIds.map((id) => this.automationEngineService.getNetwork(id).pipe(catchError(() => of(null))))),
+        ]).pipe(
+            map(([diagrams, _, networks]) => {
+                deployments.forEach((d, i) => (d.diagram = diagrams[i]));
+                deployments.forEach((d) => {
+                    const network = networks.find((n) => n?.id === d.network_id);
+                    if (network) {
+                        applyNetworkState(d, network);
+                    }
+                });
+                return deployments;
+            }),
+        );
+    }
+
+    /** the SVG of the current version; the route of the old engine answers it without the BPMN */
+    private getDiagramSvg(deploymentId: string): Observable<string> {
         return this.http
-            .get<{ suspended?: boolean }[]>(
-                environment.processServiceUrl + '/v2/deployments/' + encodeURIComponent(deployment.id) + '/definition',
-            )
-            .pipe(
-                map((definitions) => ({ ...deployment, disabled: (definitions || [])[0]?.suspended === true })),
-                catchError(() => of(deployment)),
-            );
+            .get(environment.processServiceUrl + '/v2/process-definitions/' + encodeURIComponent(deploymentId) + '/diagram', {
+                responseType: 'text',
+            })
+            .pipe(catchError(() => of('')));
     }
 
     private completeOnlineState(deployments: DeploymentsModel[]): Observable<DeploymentsModel[]> {
@@ -197,13 +251,6 @@ export class DeploymentsService {
         );
     }
 
-    getDeployment(deploymentId: string): Observable<DeploymentsModel | null> {
-        return this.list('', 1, 0, 'deploymentTime', 'desc', '', deploymentId).pipe(
-            map((deployments) => (deployments.length > 0 ? deployments[0] : null)),
-            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getDeployment', null)),
-        );
-    }
-
     getMissingDependencies(id: string): Observable<DeploymentsMissingDependenciesModel | null> {
         return this.http
             .get<DeploymentsMissingDependenciesModel>(environment.processDeploymentUrl + '/dependencies/' + encodeURIComponent(id))
@@ -289,8 +336,12 @@ export class DeploymentsService {
             );
     }
 
-    getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null> {
-        return this.http.get<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/prepared-deployments/' + processId).pipe(
+    /** with a networkId the options are those for that hub */
+    getPreparedDeployments(processId: string, networkId?: string): Observable<V2DeploymentsPreparedModel | null> {
+        const url = networkId
+            ? environment.processFogDeploymentUrl + '/prepared-deployments/' + encodeURIComponent(networkId) + '/' + encodeURIComponent(processId)
+            : environment.processDeploymentUrl + '/v3/prepared-deployments/' + processId;
+        return this.http.get<V2DeploymentsPreparedModel>(url).pipe(
             catchError(this.errorHandlerService.handleErrorWithSnackBar('Error: unable to load prepared process deployment', DeploymentsService.name, 'getPreparedDeployments', null)),
             map((deployment) => {
                 deployment?.elements?.forEach((element) => {
@@ -354,6 +405,14 @@ export class DeploymentsService {
         );
     }
 
+    /** the deployments of a hub in the format of v3getAllDeployments, which lists only those of the platform */
+    getAllNetworkDeployments(networkId: string): Observable<V2DeploymentsPreparedModel[]> {
+        return this.http.get<DeploymentsFogMetadataModel[] | null>(environment.processSyncUrl + '/metadata/' + encodeURIComponent(networkId)).pipe(
+            map((metadata) => (metadata || []).map((m) => m.deployment_model)),
+            catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getAllNetworkDeployments', [])),
+        );
+    }
+
     // deprecated
     getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null> {
         return this.http
@@ -363,9 +422,13 @@ export class DeploymentsService {
             .pipe(catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'getConfigurables', null)));
     }
 
-    v2postDeployments(deployment: V2DeploymentsPreparedModel, source: string = 'sepl'): Observable<{ status: number; id: string }> {
+    /** with a networkId the deployment runs on that hub */
+    v2postDeployments(deployment: V2DeploymentsPreparedModel, source: string = 'sepl', networkId?: string): Observable<{ status: number; id: string }> {
+        const url = networkId
+            ? environment.processFogDeploymentUrl + '/deployments/' + encodeURIComponent(networkId) + '?source=' + source
+            : environment.processDeploymentUrl + '/v3/deployments?source=' + source;
         return this.http
-            .post<V2DeploymentsPreparedModel>(environment.processDeploymentUrl + '/v3/deployments?source=' + source, deployment, {
+            .post<V2DeploymentsPreparedModel>(url, deployment, {
                 observe: 'response',
             })
             .pipe(
@@ -401,5 +464,35 @@ export class DeploymentsService {
 
     userHasReadAuthorization(): boolean {
         return this.authorizations['GET'];
+    }
+}
+
+/**
+ * A hub that is offline makes its deployments offline. A deployment the hub has not applied yet waits
+ * for sync, one it could not apply is offline with the error of the hub.
+ */
+function applyNetworkState(deployment: DeploymentsModel, network: EngineNetwork): void {
+    const name = network.name || network.id;
+    if (!network.online) {
+        deployment.online = false;
+        deployment.offline_reasons.push({
+            id: network.id,
+            type: 'network_offline',
+            description: name + ' offline',
+            additional_info: { name },
+        });
+    }
+    const resource = (network.resources || []).find((r) => r.kind === 'deployment' && r.id === deployment.id);
+    if (resource?.state === 'pending') {
+        deployment.sync = true;
+    }
+    if (resource?.state === 'failed') {
+        deployment.online = false;
+        deployment.offline_reasons.push({
+            id: network.id,
+            type: 'network_failed',
+            description: name + ' could not apply the deployment' + (resource.error ? ': ' + resource.error : ''),
+            additional_info: { name },
+        });
     }
 }

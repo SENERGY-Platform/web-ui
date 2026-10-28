@@ -119,6 +119,7 @@
                   <button mat-menu-item (click)="upgradeInstance(instance)"><mat-icon>upgrade</mat-icon> Upgrade to the newer release</button>
                 }
               }
+              <a mat-menu-item [routerLink]="['/smart-services/instances/debug', instance.id]"><mat-icon>bug_report</mat-icon> Debug</a>
               @if (showLogs) {
                 <a mat-menu-item [href]="logsUrl(instance)" target="_blank" rel="noopener noreferrer"><mat-icon>plagiarism</mat-icon> Show logs</a>
               }

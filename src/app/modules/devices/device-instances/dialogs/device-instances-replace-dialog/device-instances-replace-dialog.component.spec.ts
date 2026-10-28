@@ -34,7 +34,6 @@ import { PipelineRegistryService } from 'src/app/modules/data/pipeline-registry/
 import { SmartServiceInstanceService } from 'src/app/modules/smart-services/instances/shared/instances.service';
 import { SmartServiceReleasesService } from 'src/app/modules/smart-services/releases/shared/release.service';
 import { NetworksService } from '../../../networks/shared/networks.service';
-import { DeploymentsFogFactory } from 'src/app/modules/processes/deployments/shared/deployments-fog.service';
 import { DeploymentsService } from 'src/app/modules/processes/deployments/shared/deployments.service';
 import { PipelineInputSelectionModel } from 'src/app/modules/data/flow-repo/deploy-flow/shared/pipeline-request.model';
 import { V2DeploymentsPreparedFilterCriteriaModel } from 'src/app/modules/processes/deployments/shared/deployments-prepared-v2.model';
@@ -114,7 +113,6 @@ describe('DeviceInstancesReplaceDialogComponent save', () => {
                 { provide: SmartServiceInstanceService, useValue: createSpyFromClass(SmartServiceInstanceService) },
                 { provide: SmartServiceReleasesService, useValue: createSpyFromClass(SmartServiceReleasesService) },
                 { provide: NetworksService, useValue: createSpyFromClass(NetworksService) },
-                { provide: DeploymentsFogFactory, useValue: createSpyFromClass(DeploymentsFogFactory) },
                 { provide: DeploymentsService, useValue: createSpyFromClass(DeploymentsService) },
                 { provide: MatDialog, useValue: createSpyFromClass(MatDialog) },
                 provideHttpClient(withInterceptorsFromDi()),

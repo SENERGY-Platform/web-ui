@@ -28,3 +28,10 @@
 .hub-selected {
     background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
 }
+
+.network-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}

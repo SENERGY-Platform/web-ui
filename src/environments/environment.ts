@@ -46,6 +46,8 @@ export const environment = {
     processSchedulerUrl: 'http://localhost',
     /* automation-engine API (/namespaces/...); the old process routes reach it under /deprecated/... */
     automationEngineUrl: 'http://localhost',
+    /* live debug stream of the automation-engine; an own ingress past Kong, which cannot pass a browser WebSocket */
+    automationEngineWebsocketUrl: 'ws://localhost',
     operatorRepoUrl: 'http://localhost',
     exportService: 'http://localhost',
     brokerExportServiceUrl: 'http://localhost',

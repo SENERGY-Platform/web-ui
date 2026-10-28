@@ -1,0 +1,427 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div class="layout-margin debugger">
+    <div class="debugger-header">
+        <button mat-icon-button color="accent" matTooltip="Back" (click)="back()">
+            <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="debugger-title">
+            <div class="debugger-name">{{ state?.instance?.name || state?.instance?.deployment_name || instanceId }}</div>
+            @if (state) {
+                <div class="debugger-subtitle">
+                    {{ state.instance.id }} &middot; {{ state.instance.deployment_name }} v{{ state.instance.deployment_version }}
+                    &middot; run {{ state.instance.run }}
+                    @if (state.instance.network_id) {
+                        <span>&middot; gateway {{ state.instance.network_id }}</span>
+                    }
+                </div>
+            }
+        </div>
+        @if (state) {
+            <mat-chip-set>
+                <mat-chip [class.chip-warn]="state.instance.state === 'incident' || state.instance.state === 'terminated'">
+                    {{ state.instance.state }}
+                </mat-chip>
+                @if (mode === 'live') {
+                    <mat-chip [matTooltip]="streamError || ''">
+                        <mat-icon matChipAvatar>{{ streamStatus === 'live' ? 'sensors' : streamStatus === 'polling' ? 'sync' : streamStatus === 'ended' ? 'stop_circle' : 'hourglass_empty' }}</mat-icon>
+                        {{ streamStatus }}
+                    </mat-chip>
+                }
+            </mat-chip-set>
+        }
+    </div>
+
+    <div class="debugger-toolbar">
+        @if (mode === 'live') {
+            <mat-slide-toggle [checked]="evaluateEvents" (change)="toggleEvaluateEvents($event.checked)"
+                matTooltip="Evaluate the current value of the sources of waiting events">
+                Evaluate events
+            </mat-slide-toggle>
+            <button mat-stroked-button color="accent" (click)="last()" [disabled]="!state">
+                <mat-icon>history</mat-icon> History
+            </button>
+        } @else {
+            <button mat-icon-button color="accent" matTooltip="First available step" (click)="first()"
+                [disabled]="loading || !state || state.seq <= firstSeq()">
+                <mat-icon>first_page</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" matTooltip="Step back" (click)="previous()"
+                [disabled]="loading || !state || state.seq <= firstSeq()">
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            @if (state) {
+                <span class="debugger-step">step {{ state.seq }} of {{ latestSeq }}
+                    <span class="debugger-muted">&middot; {{ state.time | date: 'dd.MM.yy HH:mm:ss.SSS' }}</span></span>
+            }
+            <button mat-icon-button color="accent" matTooltip="Step forward" (click)="next()"
+                [disabled]="loading || !state || state.seq >= latestSeq">
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" matTooltip="Latest step" (click)="last()" [disabled]="loading">
+                <mat-icon>last_page</mat-icon>
+            </button>
+            <mat-form-field class="debugger-jump" color="accent" subscriptSizing="dynamic">
+                <mat-label>Jump to time</mat-label>
+                <input matInput type="datetime-local" step="1" [(ngModel)]="jumpTime" (keyup.enter)="jumpToTime()">
+            </mat-form-field>
+            <button mat-icon-button color="accent" matTooltip="Jump to the last step at or before this time"
+                (click)="jumpToTime()" [disabled]="!jumpTime || loading">
+                <mat-icon>search</mat-icon>
+            </button>
+            <button mat-stroked-button color="accent" (click)="startLive()">
+                <mat-icon>sensors</mat-icon> {{ running ? 'Live' : 'Current state' }}
+            </button>
+            @if (loading) {
+                <mat-spinner [diameter]="24" color="accent"></mat-spinner>
+            }
+        }
+    </div>
+
+    @if (error) {
+        <div class="debugger-notice color-warn">{{ error }}</div>
+    }
+    @if (state?.offline) {
+        <div class="debugger-notice color-warn">
+            The gateway does not answer. This is the last state it reported; variables, runs and history are not available.
+        </div>
+    }
+    @if (mode === 'live' && streamStatus === 'polling') {
+        <div class="debugger-notice">
+            The live stream is not available ({{ streamError }}), the state is read every few seconds.
+        </div>
+    }
+    @if (mode === 'live' && streamStatus === 'reconnecting') {
+        <div class="debugger-notice">
+            Connection lost ({{ streamError }}), reconnecting.
+        </div>
+    }
+    @if (mode === 'history' && state?.truncated) {
+        <div class="debugger-notice">
+            Older steps were removed; the history begins at step {{ firstSeq() }}.
+        </div>
+    }
+
+    <div class="debugger-body">
+        <div class="debugger-diagram-container">
+            <div #diagram class="debugger-diagram"></div>
+            @if (diagramError) {
+                <div class="debugger-notice color-warn">{{ diagramError }}</div>
+            }
+            <div class="debugger-legend">
+                <span class="legend legend-active">active</span>
+                <span class="legend legend-waiting">waiting</span>
+                <span class="legend legend-trigger">would trigger now</span>
+                <span class="legend legend-passed">passed</span>
+                <span class="legend legend-incident">incident</span>
+            </div>
+        </div>
+
+        @if (state) {
+            <div class="debugger-panel">
+                @if (selectedElementId) {
+                    <div class="debugger-selected">
+                        <div class="debugger-section-title">
+                            {{ elementName(selectedElementId) }}
+                            <button mat-icon-button matTooltip="Clear selection" (click)="selectElement(null)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                        <div class="debugger-muted">{{ selectedElementId }}</div>
+                        @if (selectedStats; as stats) {
+                            <div>
+                                {{ stats.count }} {{ stats.count === 1 ? 'pass' : 'passes' }}, last {{ stats.last_at | date: 'dd.MM.yy HH:mm:ss' }}
+                                @if (stats.last_error) {
+                                    <div class="color-warn">last error {{ stats.error_at | date: 'dd.MM.yy HH:mm:ss' }}: {{ stats.last_error }}</div>
+                                }
+                            </div>
+                        } @else {
+                            <div>not passed in this run</div>
+                        }
+                        @for (a of selectedActive; track $index) {
+                            <div>
+                                active since {{ a.since | date: 'dd.MM.yy HH:mm:ss' }}@if (a.tokens > 1) {<span>, {{ a.tokens }} tokens</span>}
+                            </div>
+                        }
+                        @for (w of selectedWaits; track $index) {
+                            <div>waits for {{ w.kind }} since {{ w.since | date: 'dd.MM.yy HH:mm:ss' }}</div>
+                        }
+                        @for (i of selectedIncidents; track $index) {
+                            <div class="color-warn">{{ i.message }}</div>
+                        }
+                    </div>
+                }
+
+                <mat-tab-group color="accent" [selectedIndex]="tabIndex" (selectedIndexChange)="setTab($event)" animationDuration="0ms">
+                    <mat-tab label="Waiting ({{ state.waits?.length || 0 }})">
+                        <div class="debugger-tab">
+                            @for (w of state.waits; track $index) {
+                                <div class="debugger-card" [class.debugger-card-selected]="w.element_id === selectedElementId">
+                                    <div class="debugger-section-title clickable" (click)="selectElement(w.element_id)">
+                                        {{ elementName(w.element_id) }} <span class="debugger-muted">{{ w.kind }} since {{ w.since | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                                    </div>
+                                    @if (w.gateway_id) {
+                                        <div class="debugger-muted">part of the event-based gateway {{ elementName(w.gateway_id) }}</div>
+                                    }
+
+                                    @if (w.message) {
+                                        <div>message <code>{{ w.message.name }}</code></div>
+                                        @for (source of w.message.events; track $index) {
+                                            <div class="debugger-source">
+                                                <div>{{ sourceLabel(source) }}</div>
+                                                <div class="debugger-muted">value in <code>{{ source.value_variable }}</code></div>
+                                                <pre class="debugger-code">{{ source.script }}</pre>
+                                                @if (source.current; as current) {
+                                                    <div>
+                                                        <span [class.color-warn]="!!current.error">current value {{ preview(current.value) }}</span>
+                                                        @if (current.time) {
+                                                            <span class="debugger-muted"> of {{ current.time | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                                                        }
+                                                        &rarr; <b>{{ current.triggered ? 'would trigger' : 'would not trigger' }}</b>
+                                                        @if (current.error) {
+                                                            <div class="color-warn">{{ current.error }}</div>
+                                                        }
+                                                        @if (current.logs?.length) {
+                                                            <pre class="debugger-code">{{ current.logs?.join('\n') }}</pre>
+                                                        }
+                                                    </div>
+                                                } @else if (mode === 'live' && !evaluateEvents) {
+                                                    <div class="debugger-muted">
+                                                        Switch on "Evaluate events" for the current value.
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        @if (w.message.events?.length) {
+                                            <button mat-stroked-button color="accent" (click)="reconstructEvaluations(w)" [disabled]="loadingReconstruction">
+                                                Reconstruct evaluations
+                                            </button>
+                                        }
+                                    }
+
+                                    @if (w.timer) {
+                                        <div>
+                                            timer <code>{{ w.timer.definition }}</code>
+                                            @if (w.timer.kind) {
+                                                <span>({{ w.timer.kind }})</span>
+                                            }
+                                            @if (w.timer.due_at) {
+                                                <span>, due {{ w.timer.due_at | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                                            }
+                                        </div>
+                                    }
+
+                                    @if (w.task) {
+                                        <div>
+                                            task <code>{{ w.task.task_type }}</code>
+                                            @if (w.task.state) {
+                                                <span>{{ w.task.state }}</span>
+                                            },
+                                            attempt {{ w.task.attempt }}, {{ w.task.retries }} retries
+                                            @if (w.task.timeout) {
+                                                <span>, timeout {{ w.task.timeout }}</span>
+                                            }
+                                            @if (w.task.due_at) {
+                                                <span>, due {{ w.task.due_at | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                                            }
+                                            @if (w.task.last_error) {
+                                                <div class="color-warn">{{ w.task.last_error }}</div>
+                                            }
+                                            @if (w.task.subtasks?.length) {
+                                                <table class="debugger-table">
+                                                    <tr><th>Device</th><th>Service</th><th>Done</th><th>Tries</th><th>Last try</th></tr>
+                                                    @for (s of w.task.subtasks; track $index) {
+                                                        <tr>
+                                                            <td>{{ s.device_id }}</td><td>{{ s.service_id }}</td><td>{{ s.done ? 'yes' : 'no' }}</td>
+                                                            <td>{{ s.tries }}</td><td>{{ s.last_try | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                                                        </tr>
+                                                    }
+                                                </table>
+                                            }
+                                        </div>
+                                    }
+
+                                    @if (w.join) {
+                                        <div>join: {{ w.join.arrived }} of {{ w.join.required }} branches arrived</div>
+                                    }
+
+                                    @if (reconstruction && reconstruction.element_id === w.element_id) {
+                                        <div class="debugger-reconstruction">
+                                            <div class="debugger-section-title">Reconstructed evaluations (run {{ reconstruction.run }})</div>
+                                            @for (hint of reconstruction.hints; track $index) {
+                                                <div class="color-warn">{{ hint }}</div>
+                                            }
+                                            @for (l of reconstruction.limitations; track $index) {
+                                                <div class="debugger-muted">{{ l }}</div>
+                                            }
+                                            @for (p of reconstruction.waiting; track $index) {
+                                                <div>
+                                                    waited {{ p.from | date: 'dd.MM.yy HH:mm:ss' }} &ndash; {{ p.to ? (p.to | date: 'dd.MM.yy HH:mm:ss') : 'now' }}
+                                                    {{ p.correlated ? '(correlated)' : '' }}
+                                                </div>
+                                            }
+                                            @if (reconstruction.evaluations?.length) {
+                                                <table class="debugger-table">
+                                                    <tr><th>Time</th><th>Source</th><th>Value</th><th>Triggered</th><th>Error</th></tr>
+                                                    @for (e of reconstruction.evaluations; track $index) {
+                                                        <tr [class.debugger-row-trigger]="e.triggered">
+                                                            <td>{{ e.time | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                                                            <td class="debugger-muted">{{ e.event_description_id }}</td>
+                                                            <td>{{ preview(e.value) }}</td>
+                                                            <td>{{ e.triggered ? 'yes' : 'no' }}</td>
+                                                            <td class="color-warn">{{ e.error }}</td>
+                                                        </tr>
+                                                    }
+                                                </table>
+                                            } @else {
+                                                <div class="debugger-muted">No values in the time series while the element waited.</div>
+                                            }
+                                            @for (c of reconstruction.correlations; track $index) {
+                                                <div>correlated at {{ c.time | date: 'dd.MM.yy HH:mm:ss' }} (step {{ c.seq }})</div>
+                                            }
+                                            @if (reconstruction.next) {
+                                                <button mat-stroked-button color="accent" (click)="reconstructEvaluations(w, true)" [disabled]="loadingReconstruction">More</button>
+                                            }
+                                        </div>
+                                    }
+                                    @if (reconstructionError && !loadingReconstruction) {
+                                        <div class="color-warn">{{ reconstructionError }}</div>
+                                    }
+                                </div>
+                            } @empty {
+                                <div class="debugger-muted">No element waits.</div>
+                            }
+                        </div>
+                    </mat-tab>
+
+                    <mat-tab label="Variables ({{ variableRows.length }})">
+                        <div class="debugger-tab">
+                            @if (variableRows.length === 0) {
+                                <div class="debugger-muted">No variables.</div>
+                            } @else {
+                                <table class="debugger-table">
+                                    <tr><th>Name</th><th>Type</th><th>Value</th><th>Changed</th></tr>
+                                    @for (row of variableRows; track $index) {
+                                        <tr>
+                                            <td>
+                                                {{ row.name }}
+                                                @if (row.elementId) {
+                                                    <div class="debugger-muted">local at {{ elementName(row.elementId) }}</div>
+                                                }
+                                            </td>
+                                            <td>{{ row.variable.type }}</td>
+                                            <td class="debugger-value">
+                                                @if (fullValues.get(variableKey(row)); as full) {
+                                                    @if (!full.error && !full.unavailable) {
+                                                        <pre class="debugger-code">{{ pretty(full.value) }}</pre>
+                                                    }
+                                                    @if (full.unavailable) {
+                                                        <span class="debugger-muted">The complete value is kept only at snapshots of the history.</span>
+                                                    }
+                                                    @if (full.error) {
+                                                        <span class="color-warn">{{ full.error }}</span>
+                                                    }
+                                                } @else {
+                                                    <code>{{ preview(row.variable.value) }}</code>
+                                                    @if (row.variable.truncated) {
+                                                        <button mat-button color="accent" [disabled]="loadingValues.has(variableKey(row))" (click)="loadFullValue(row)">
+                                                            load {{ row.variable.size ? (row.variable.size | number) + ' bytes' : 'complete value' }}
+                                                        </button>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                {{ row.variable.updated_at | date: 'dd.MM.yy HH:mm:ss' }}
+                                                @if (row.variable.element_id) {
+                                                    <div class="debugger-muted clickable" (click)="selectElement(row.variable.element_id!)">by {{ elementName(row.variable.element_id) }}</div>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </table>
+                            }
+                        </div>
+                    </mat-tab>
+
+                    <mat-tab label="Incidents ({{ state.incidents?.length || 0 }})">
+                        <div class="debugger-tab">
+                            @for (i of state.incidents; track $index) {
+                                <div class="debugger-card">
+                                    <div class="debugger-section-title clickable" (click)="selectElement(i.element_id || null)">
+                                        {{ i.element_name || elementName(i.element_id) }}
+                                        <span class="debugger-muted">{{ i.time | date: 'dd.MM.yy HH:mm:ss' }}, run {{ i.run }}</span>
+                                    </div>
+                                    <div class="color-warn">{{ i.message }}</div>
+                                    @if (i.variables) {
+                                        <pre class="debugger-code">{{ pretty(i.variables) }}</pre>
+                                    }
+                                </div>
+                            } @empty {
+                                <div class="debugger-muted">No open incidents.</div>
+                            }
+                        </div>
+                    </mat-tab>
+
+                    <mat-tab label="Activities">
+                        <div class="debugger-tab">
+                            @if (activities.length === 0) {
+                                <div class="debugger-muted">
+                                    {{ mode === 'live' ? 'Entries appear here as the instance proceeds.' : 'No entries.' }}
+                                </div>
+                            } @else {
+                                <table class="debugger-table">
+                                    <tr><th>Step</th><th>Time</th><th>Element</th><th>Entry</th></tr>
+                                    @for (a of activities; track $index) {
+                                        <tr class="clickable" [class.debugger-row-current]="mode === 'history' && a.seq === state.seq"
+                                            (click)="jumpToActivity(a)" matTooltip="Show the state after this step">
+                                            <td>{{ a.seq }}@if (a.run !== state.instance.run) {<span class="debugger-muted"> (run {{ a.run }})</span>}</td>
+                                            <td>{{ a.time | date: 'HH:mm:ss.SSS' }}</td>
+                                            <td>{{ elementName(a.element_id) }}</td>
+                                            <td class="debugger-value">{{ describe(a) }}</td>
+                                        </tr>
+                                    }
+                                </table>
+                            }
+                        </div>
+                    </mat-tab>
+
+                    @if (state.runs?.length) {
+                        <mat-tab label="Runs">
+                            <div class="debugger-tab">
+                                <table class="debugger-table">
+                                    <tr><th>Run</th><th>Version</th><th>Cause</th><th>State</th><th>Started</th><th>Ended</th></tr>
+                                    @for (r of state.runs; track r.run) {
+                                        <tr>
+                                            <td>{{ r.run }}</td><td>{{ r.deployment_version }}</td><td>{{ r.cause }}</td>
+                                            <td>{{ r.state }}
+                                                @if (r.end_reason) {
+                                                    <span class="debugger-muted">{{ r.end_reason }}</span>
+                                                }
+                                            </td>
+                                            <td>{{ r.started_at | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                                            <td>{{ r.ended_at | date: 'dd.MM.yy HH:mm:ss' }}</td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </mat-tab>
+                    }
+                </mat-tab-group>
+            </div>
+        }
+    </div>
+</div>

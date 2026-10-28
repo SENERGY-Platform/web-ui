@@ -32,4 +32,6 @@ export interface MonitorProcessModel {
     superCaseInstanceId: string;
     superProcessInstanceId: string;
     tenantId: string;
+    /** the hub the instance runs on; undefined is the platform */
+    network_id?: string;
 }

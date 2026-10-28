@@ -26,14 +26,11 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DeploymentsConfigInitializerService } from './shared/deployments-config-initializer.service';
 import {
     DeploymentsSelectionPathOptionModel,
-    V2DeploymentsPreparedConfigurableModel,
     V2DeploymentsPreparedElementModel, V2DeploymentsPreparedModel, V2DeploymentsPreparedSelectionModel,
     V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel
 } from '../shared/deployments-prepared-v2.model';
 import { FlowRepoService } from '../../../data/flow-repo/shared/flow-repo.service';
 import { FlowModel } from '../../../data/flow-repo/shared/flow.model';
-import { Observable } from 'rxjs';
-import { DeploymentsFogFactory } from '../shared/deployments-fog.service';
 import { HubModel } from '../../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../../devices/networks/shared/networks.service';
 import { OperatorRepoService } from '../../../data/operator-repo/shared/operator-repo.service';
@@ -66,14 +63,13 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private _formBuilder = inject(FormBuilder);
     private processRepoService = inject(ProcessRepoService);
     private utilService = inject(UtilService);
-    private platformDeploymentsService = inject(DeploymentsService);
+    private deploymentsService = inject(DeploymentsService);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private deploymentsConfigInitializerService = inject(DeploymentsConfigInitializerService);
     private flowRepoService = inject(FlowRepoService);
     private operatorRepoService = inject(OperatorRepoService);
-    private deploymentFogFactory = inject(DeploymentsFogFactory);
     private hubsService = inject(NetworksService);
     private characteristicsService = inject(CharacteristicsService);
     private cd = inject(ChangeDetectorRef);
@@ -90,23 +86,16 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     handlerList: { _id?: string; name: string }[] = [];
     ready = false;
     optionGroups: Map<number, V2DeploymentsPreparedSelectionOptionModelWithGroup[]> = new Map();
-    deploymentsService: {
-        getPreparedDeployments(processId: string): Observable<V2DeploymentsPreparedModel | null>;
-        v2getDeployments(deploymentId: string): Observable<V2DeploymentsPreparedModel | null>;
-        v2postDeployments(deployment: V2DeploymentsPreparedModel): Observable<{ status: number; id: string }>;
-        getConfigurables(characteristicId: string, serviceId: string): Observable<V2DeploymentsPreparedConfigurableModel[] | null>;
-    };
+    /** the hub to deploy to; undefined is the platform */
+    private networkId: string | undefined;
     selectedHubForm: FormControl = new FormControl(null);
     hubList: HubModel[] = [];
     characteristicNames: Map<string, string> = new Map();
 
     constructor() {
-        const platformDeploymentsService = this.platformDeploymentsService;
-
         this.getRouterParams();
         this.getFlows();
         this.getOperators();
-        this.deploymentsService = platformDeploymentsService;
     }
 
     ngOnInit() {
@@ -121,10 +110,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         this.selectedHubForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: HubModel) => {
             if (value && value.id && value.id !== '') {
                 this.handlerList = this.operatorImageList;
-                this.deploymentsService = this.deploymentFogFactory.withHubId(value.id);
+                this.networkId = value.id;
             } else {
                 this.handlerList = this.flowList;
-                this.deploymentsService = this.platformDeploymentsService;
+                this.networkId = undefined;
             }
             this.setDeployment();
         });
@@ -133,7 +122,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     setDeployment() {
         this.ready = false;
         if (this.processId !== undefined) {
-            this.deploymentsService.getPreparedDeployments(this.processId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
+            this.deploymentsService.getPreparedDeployments(this.processId, this.networkId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
                 this.deployment = deployment;
                 this.initOptionGroups(deployment);
                 this.initFormGroup(deployment);
@@ -185,7 +174,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 element.task.selection.selection_options = [];
             }
         });
-        this.deploymentsService.v2postDeployments(raw).subscribe((resp: { status: number }) => {
+        this.deploymentsService.v2postDeployments(raw, 'sepl', this.networkId).subscribe((resp: { status: number }) => {
             if (resp.status === 200) {
                 snackSuccess(this.snackBar, 'Deployment stored successfully.');
             } else {

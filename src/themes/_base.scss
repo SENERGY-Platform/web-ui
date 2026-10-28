@@ -19,6 +19,7 @@
 @use '@ng-matero/extensions' as mtx;
 @use 'design';
 @use 'designer-panel';
+@use 'instance-debugger';
 @use 'palette-neutral';
 
 // The theme shared by all tenants. A tenant passes its tonal palettes: the brand colour is the
@@ -223,4 +224,5 @@
 
   @include design.styles();
   @include designer-panel.colors();
+  @include instance-debugger.styles();
 }

@@ -16,11 +16,6 @@
 
 <senergy-page-header title="Deployments" description="Process models that are deployed and can be started, on the platform or on a hub.">
   <ng-container pageActions>
-    @if (refreshSyncF) {
-      <button matButton="outlined" (click)="refreshSync()">
-        <mat-icon>sync</mat-icon> Refresh hub sync
-      </button>
-    }
     <button matButton="outlined" [disabled]="!ready || metadataCheckRunning" (click)="checkMissingMetadata()"
       matTooltip="Reads the diagram of every deployment on the page and marks those that reference missing metadata">
       <mat-icon>rule</mat-icon> Check metadata
@@ -32,12 +27,13 @@
   (clearSelection)="selectionClear()" (refresh)="reload()">
   <ng-container toolbarFilters>
     <button matButton="outlined" [matMenuTriggerFor]="deploymentEnvironment">
-      <mat-icon>device_hub</mat-icon> {{hub ? hub.name : 'Senergy-Platform'}}
+      <mat-icon>device_hub</mat-icon> {{networkFilterLabel}}
     </button>
     <mat-menu #deploymentEnvironment="matMenu">
-      <button mat-menu-item [class.hub-selected]="!hub" (click)="selectHub(null)">Senergy-Platform</button>
+      <button mat-menu-item [class.hub-selected]="networkFilter === null" (click)="selectNetwork(null)">All networks</button>
+      <button mat-menu-item [class.hub-selected]="networkFilter === cloudNetwork" (click)="selectNetwork(cloudNetwork)">Senergy-Platform</button>
       @for (h of hubList; track h.id) {
-        <button mat-menu-item [class.hub-selected]="hub?.id === h.id" (click)="selectHub(h)">{{h.name}}</button>
+        <button mat-menu-item [class.hub-selected]="networkFilter === h.id" (click)="selectNetwork(h.id)">{{h.name}}</button>
       }
     </mat-menu>
     <mat-chip-listbox aria-label="Filter">
@@ -111,7 +107,7 @@
           <th mat-header-cell *matHeaderCellDef>Status</th>
           <td mat-cell *matCellDef="let row">
             <div class="status-cell">
-              @if (!hub) {
+              @if (!row.network_id) {
                 @if (row.disabled) {
                   <span class="status-chip">Switched off</span>
                 } @else {
@@ -126,6 +122,15 @@
                   (click)="showOfflineReasons(row.offline_reasons)">Missing dependencies</button>
               }
             </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="network">
+          <th mat-header-cell *matHeaderCellDef>Network</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="network-cell" [matTooltip]="'Runs on ' + networkName(row.network_id)">
+              <mat-icon inline>{{row.network_id ? 'router' : 'cloud'}}</mat-icon> {{networkName(row.network_id)}}
+            </span>
           </td>
         </ng-container>
 
@@ -148,7 +153,7 @@
               <button mat-menu-item (click)="navigateToMonitorSection(row, 1)"><mat-icon>history</mat-icon> Show history</button>
               <button mat-menu-item (click)="copyDeployment(row.id)"><mat-icon>content_copy</mat-icon> Copy deployment</button>
               <button mat-menu-item (click)="copyEndpoint(row.id)"><mat-icon>link</mat-icon> Copy endpoint</button>
-              @if (!hub) {
+              @if (!row.network_id) {
                 <button mat-menu-item (click)="toggleDeploymentEnabled(row)">
                   <mat-icon>{{row.disabled ? 'toggle_on' : 'toggle_off'}}</mat-icon> {{row.disabled ? 'Switch on' : 'Switch off'}}
                 </button>

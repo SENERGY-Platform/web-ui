@@ -99,6 +99,8 @@ describe('ProcessIoVariablesComponent list', () => {
 
     describe('view state in the URL', () => {
         it('takes the total of the search the page opened with, however late the unfiltered count answers', fakeAsync(() => {
+            // the expected page assumes the default page size; another spec may have stored a different one
+            localStorage.removeItem('PreferencesService/pageSize');
             const unfiltered = new Subject<{ count: number }>();
             service = jasmine.createSpyObj<ProcessIoService>('ProcessIoService', [
                 'userHasCreateAuthorization', 'userHasUpdateAuthorization', 'userHasDeleteAuthorization', 'countVariables', 'listVariables', 'remove',

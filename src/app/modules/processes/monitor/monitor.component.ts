@@ -18,21 +18,20 @@ import { map, startWith, switchMap } from 'rxjs/operators';
 
 import { AfterViewInit, Component, EventEmitter, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { merge, Observable } from 'rxjs';
+import { merge } from 'rxjs';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
 import { MonitorService } from './shared/monitor.service';
 import { MonitorProcessModel } from './shared/monitor-process.model';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
-import { ActivatedRoute, Navigation, Router } from '@angular/router';
+import { ActivatedRoute, Navigation, Router, RouterLink } from '@angular/router';
 import { DeploymentsModel } from '../deployments/shared/deployments.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
-import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { ListToolbarComponent } from '../../../core/components/list-toolbar/list-toolbar.component';
@@ -49,6 +48,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { UrlStateService } from 'src/app/core/services/url-state.service';
 import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
+import { ENGINE_CLOUD_NETWORK } from 'src/app/core/model/automation-engine.model';
 
 interface TableView {
     sortActive: string;
@@ -65,16 +65,15 @@ function defaultTableView(): TableView {
     templateUrl: './monitor.component.html',
     styleUrls: ['./monitor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatTabGroup, MatTab, PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatChip, MatChipRemove, MatChipSet, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, SpinnerComponent, DatePipe]
+    imports: [MatTabGroup, MatTab, PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatTooltip, MatMenuTrigger, MatIcon, MatMenu, MatMenuItem, MatChip, MatChipRemove, MatChipSet, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, SpinnerComponent, DatePipe, RouterLink]
 })
 export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
-    private plattformMonitorService = inject(MonitorService);
+    private monitorService = inject(MonitorService);
     private dialogsService = inject(DialogsService);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private hubsService = inject(NetworksService);
-    private fogMonitorFactory = inject(MonitorFogFactory);
     readonly dateFormat = LIST_DATE_FORMAT;
     preferencesService = inject(PreferencesService);
     private destroyRef = inject(DestroyRef);
@@ -82,8 +81,8 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
 
     dataSourceFinished = new MatTableDataSource<MonitorProcessModel>();
     dataSourceRunning = new MatTableDataSource<MonitorProcessModel>();
-    displayedColumnsFinished: string[] = ['select', 'definitionName', 'status', 'startTime', 'endTime', 'duration', 'actions'];
-    displayedColumnsRunning: string[] = ['select', 'definitionName', 'status', 'startTime', 'actions'];
+    displayedColumnsFinished: string[] = ['select', 'definitionName', 'status', 'network', 'startTime', 'endTime', 'duration', 'actions'];
+    displayedColumnsRunning: string[] = ['select', 'definitionName', 'status', 'network', 'startTime', 'actions'];
     listSelection = new ListSelection<MonitorProcessModel>(() => this.dataSourceFinished.connect().value);
     listSelectionRunning = new ListSelection<MonitorProcessModel>(() => this.dataSourceRunning.connect().value);
     selection = this.listSelection.model;
@@ -115,30 +114,11 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     private tablesInitialized = false;
 
     hubList: HubModel[] = [];
-    hub: HubModel | undefined | null;
-
-    private monitorService: {
-        deleteInstances(id: string): Observable<string>;
-        deleteMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>;
-        stopInstances(id: string): Observable<string>;
-        stopMultipleInstances(processes: MonitorProcessModel[]): Observable<string[]>;
-        getFilteredHistoryInstances(
-            filter: string,
-            searchtype: string,
-            searchvalue: string,
-            limit: number,
-            offset: number,
-            value: string,
-            order: string,
-            businessKey?: string,
-        ): Observable<MonitorProcessTotalModel>;
-        openDetailsDialog(id: string): void;
-    };
+    /** null lists the instances of the platform and of all hubs, ENGINE_CLOUD_NETWORK those of the platform, a hub id those of that hub */
+    networkFilter: string | null = null;
+    readonly cloudNetwork = ENGINE_CLOUD_NETWORK;
 
     constructor() {
-        const plattformMonitorService = this.plattformMonitorService;
-
-        this.monitorService = plattformMonitorService;
         this.getRouterParams();
     }
 
@@ -170,8 +150,9 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
             this.requestedHubId = hubId;
             this.businessKeyFilter = businessKey;
 
-            if (hubChanged) {
-                this.applyHubSelectionFromQueryParam();
+            // before the hubs are known, their answer applies the parameter
+            if (hubChanged && this.hubSelectionResolved) {
+                this.applyNetworkSelectionFromQueryParam();
             }
 
             if (this.tablesInitialized) {
@@ -183,7 +164,7 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
 
         this.hubsService.listSyncNetworks().subscribe((result) => {
             this.hubList = result;
-            this.applyHubSelectionFromQueryParam();
+            this.applyNetworkSelectionFromQueryParam();
             this.hubSelectionResolved = true;
             this.tryInitializeTables();
         });
@@ -198,16 +179,11 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         setTimeout(() => this.animationDone());
     }
 
-    selectHub(hub: HubModel | null, updateQueryParam = false) {
-        this.hub = hub;
-        if (hub) {
-            this.monitorService = this.fogMonitorFactory.withHubId(hub.id);
-        } else {
-            this.monitorService = this.plattformMonitorService;
-        }
+    selectNetwork(networkFilter: string | null, updateQueryParam = false) {
+        this.networkFilter = networkFilter;
 
         if (updateQueryParam) {
-            this.requestedHubId = hub?.id || null;
+            this.requestedHubId = networkFilter;
             this.businessKeyFilter = null;
             this.router.navigate([], {
                 relativeTo: this.route,
@@ -218,9 +194,9 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         }
     }
 
-    selectHubWithReload(hub: HubModel | null) {
-        this.selectHub(hub, true);
-        // the URL page is dropped by the navigation in selectHub
+    selectNetworkWithReload(networkFilter: string | null) {
+        this.selectNetwork(networkFilter, true);
+        // the URL page is dropped by the navigation in selectNetwork
         this.resetPaginator();
         this.reload();
     }
@@ -267,7 +243,23 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
 
     /** True while the search or a filter narrows the list; picks the empty-state text. */
     get filtered(): boolean {
-        return this.searchText !== '' || this.selectedDeployment !== null || !!this.businessKeyFilter;
+        return this.searchText !== '' || this.selectedDeployment !== null || !!this.businessKeyFilter || this.networkFilter !== null;
+    }
+
+    /** where an instance runs: the platform or the name of its hub */
+    networkName(networkId: string | undefined): string {
+        if (!networkId) {
+            return 'Platform';
+        }
+        return this.hubList.find((hub) => hub.id === networkId)?.name || networkId;
+    }
+
+    /** the label of the network filter button */
+    get networkFilterLabel(): string {
+        if (this.networkFilter === null) {
+            return 'All networks';
+        }
+        return this.networkFilter === ENGINE_CLOUD_NETWORK ? 'Senergy-Platform' : this.networkName(this.networkFilter);
     }
 
     /** A placeholder waits for the hub to sync; the platform knows no instance to show details of yet. */
@@ -400,16 +392,16 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
                 startWith({}),
                 switchMap(() => {
                     this.isLoadingResultsRunning = true;
-                    const searchParams = this.setSearchParams();
-                    return this.monitorService.getFilteredHistoryInstances(
-                        'unfinished',
-                        searchParams.searchType,
-                        searchParams.searchValue,
+                    return this.monitorService.getInstancesOfNetworks(
+                        'running',
+                        this.searchText,
+                        this.selectedDeployment?.id,
                         this.paginatorRunning.pageSize,
                         this.paginatorRunning.pageSize * this.runningView.pageIndex,
                         this.runningView.sortActive,
                         this.runningView.sortDirection,
                         this.businessKeyFilter || undefined,
+                        this.networkFilter || undefined,
                     );
                 }),
                 map((resp: MonitorProcessTotalModel) => {
@@ -444,16 +436,16 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
                 startWith({}),
                 switchMap(() => {
                     this.isLoadingResultsFinished = true;
-                    const searchParams = this.setSearchParams();
-                    return this.monitorService.getFilteredHistoryInstances(
+                    return this.monitorService.getInstancesOfNetworks(
                         'finished',
-                        searchParams.searchType,
-                        searchParams.searchValue,
+                        this.searchText,
+                        this.selectedDeployment?.id,
                         this.paginatorFinished.pageSize,
                         this.paginatorFinished.pageSize * this.finishedView.pageIndex,
                         this.finishedView.sortActive,
                         this.finishedView.sortDirection,
                         this.businessKeyFilter || undefined,
+                        this.networkFilter || undefined,
                     );
                 }),
                 map((resp: MonitorProcessTotalModel) => {
@@ -466,20 +458,6 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
                 this.dataSourceFinished.data = data || [];
                 this.isLoadingResultsFinished = false;
             });
-    }
-
-    private setSearchParams(): { searchType: string; searchValue: string } {
-        let searchType = '';
-        let searchValue = '';
-
-        if (this.selectedDeployment === null) {
-            searchType = 'processDefinitionNameLike';
-            searchValue = this.searchText;
-        } else {
-            searchType = 'processDefinitionId';
-            searchValue = this.selectedDeployment.definition_id;
-        }
-        return { searchType, searchValue };
     }
 
     private initSearch() {
@@ -525,15 +503,11 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
                 const params = navigation.extras.state as {
                     deployment: DeploymentsModel;
                     activeTab: number;
-                    hub?: HubModel;
                     businesskey?: string;
                 };
                 this.selectedDeployment = params.deployment;
                 this.activeIndex = params.activeTab;
                 this.navigationTab = params.activeTab;
-                if (params.hub) {
-                    this.selectHub(params.hub, true);
-                }
                 if (params.businesskey) {
                     this.businessKeyFilter = params.businesskey;
                     this.router.navigate([], {
@@ -557,26 +531,15 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         this.initFinished();
     }
 
-    private applyHubSelectionFromQueryParam(): void {
-        if (!this.hubList.length) {
+    private applyNetworkSelectionFromQueryParam(): void {
+        const requested = this.requestedHubId;
+        if (requested && requested !== ENGINE_CLOUD_NETWORK && !this.hubList.some((hub) => hub.id === requested)) {
+            // a hub that is gone or no longer shared
+            this.selectNetwork(null, true);
             return;
         }
-
-        if (!this.requestedHubId) {
-            if (this.hub !== null) {
-                this.selectHub(null, false);
-            }
-            return;
-        }
-
-        const selectedHub = this.hubList.find((hub) => hub.id === this.requestedHubId) || null;
-        if (!selectedHub) {
-            this.selectHub(null, true);
-            return;
-        }
-
-        if (this.hub?.id !== selectedHub.id) {
-            this.selectHub(selectedHub, false);
+        if (this.networkFilter !== requested) {
+            this.selectNetwork(requested, false);
         }
     }
 

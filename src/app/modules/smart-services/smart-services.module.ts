@@ -64,6 +64,7 @@ import {CriteriaListComponent} from './designer/dialog/edit-smart-service-task-d
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import { SmartServiceInstancesComponent } from './instances/instances.component';
+import { InstanceDebuggerComponent } from 'src/app/core/components/instance-debugger/instance-debugger.component';
 import {
     EsstdExportComponentComponent
 } from './designer/dialog/edit-smart-service-task-dialog/esstd-export-component/esstd-export-component.component';
@@ -111,6 +112,12 @@ const requestDetail: Route = {
     data: { header: 'Requests' },
 };
 
+const instanceDebug: Route = {
+    path: 'smart-services/instances/debug/:id',
+    component: InstanceDebuggerComponent,
+    data: { header: 'Instances', namespace: 'smart-services', back: '/smart-services/instances' },
+};
+
 const designerReleaseExport: Route = {
     path: 'smart-services/releases/designer/:releaseId',
     component: SmartServiceDesignerComponent,
@@ -138,6 +145,7 @@ const designer: Route = {
             instances,
             requests,
             requestDetail,
+            instanceDebug,
             designer,
             designerEdit,
             designerReleaseExport

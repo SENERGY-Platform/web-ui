@@ -25,9 +25,9 @@ import { SearchbarService } from '../../../core/components/searchbar/shared/sear
 import { MonitorService } from './shared/monitor.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
-import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { MonitorProcessModel } from './shared/monitor-process.model';
+import { HubModel } from '../../devices/networks/shared/networks.model';
 
 describe('ProcessMonitorComponent list', () => {
     let fixture: ComponentFixture<ProcessMonitorComponent>;
@@ -36,9 +36,9 @@ describe('ProcessMonitorComponent list', () => {
     const run = { id: 'p1', processDefinitionName: 'Washer', startTime: '2026-01-02T10:00:00Z', state: 'ACTIVE' } as MonitorProcessModel;
 
     async function init() {
-        monitorService = jasmine.createSpyObj<MonitorService>('MonitorService', ['getFilteredHistoryInstances', 'openDetailsDialog']);
+        monitorService = jasmine.createSpyObj<MonitorService>('MonitorService', ['getInstancesOfNetworks', 'openDetailsDialog']);
         // asynchronous like the HTTP call it stands for
-        monitorService.getFilteredHistoryInstances.and.callFake(() => scheduled([{ total: 1, data: [run] } as any], asapScheduler));
+        monitorService.getInstancesOfNetworks.and.callFake(() => scheduled([{ total: 1, data: [run] } as any], asapScheduler));
         await TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
             imports: [NoopAnimationsModule, ProcessMonitorComponent],
@@ -48,7 +48,6 @@ describe('ProcessMonitorComponent list', () => {
                 { provide: MonitorService, useValue: monitorService },
                 { provide: DialogsService, useValue: {} },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([]) } },
-                { provide: MonitorFogFactory, useValue: {} },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
             ],
@@ -61,12 +60,12 @@ describe('ProcessMonitorComponent list', () => {
 
     it('reloads exactly once when the refresh button is clicked', async () => {
         await init();
-        monitorService.getFilteredHistoryInstances.calls.reset();
+        monitorService.getInstancesOfNetworks.calls.reset();
 
         (fixture.nativeElement.querySelector('senergy-searchbar button') as HTMLButtonElement).click();
         await fixture.whenStable();
 
-        expect(monitorService.getFilteredHistoryInstances).toHaveBeenCalledTimes(1);
+        expect(monitorService.getInstancesOfNetworks).toHaveBeenCalledTimes(1);
     });
 
     it('opens the details of a running process on a row click', async () => {
@@ -99,8 +98,55 @@ describe('ProcessMonitorComponent list', () => {
         await init();
         const component = fixture.componentInstance;
 
-        expect(component.displayedColumnsRunning).toEqual(['select', 'definitionName', 'status', 'startTime', 'actions']);
-        expect(component.displayedColumnsFinished).toEqual(['select', 'definitionName', 'status', 'startTime', 'endTime', 'duration', 'actions']);
+        expect(component.displayedColumnsRunning).toEqual(['select', 'definitionName', 'status', 'network', 'startTime', 'actions']);
+        expect(component.displayedColumnsFinished).toEqual(['select', 'definitionName', 'status', 'network', 'startTime', 'endTime', 'duration', 'actions']);
+    });
+
+    it('shows where each instance runs: the platform, a known hub by name, an unknown one by its id', async () => {
+        await init();
+        const component = fixture.componentInstance;
+        component.hubList = [{ id: 'hub-1', name: 'Hub' } as HubModel];
+        monitorService.getInstancesOfNetworks.and.callFake(() =>
+            scheduled([{ total: 3, data: [run, { ...run, id: 'p2', network_id: 'hub-1' }, { ...run, id: 'p3', network_id: 'hub-x' }] } as any], asapScheduler),
+        );
+        component.reload();
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        const cells = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('tr[mat-row] .network-cell')).map((c) => c.textContent?.replace(/\s+/g, ' ').trim());
+        expect(cells).toEqual(['cloud Platform', 'router Hub', 'router hub-x']);
+    });
+
+    it('lists the instances of all networks until one is selected', async () => {
+        await init();
+        const component = fixture.componentInstance;
+        const networks = () => monitorService.getInstancesOfNetworks.calls.allArgs().map((args) => args[8]);
+        expect(networks()).toEqual([undefined, undefined]);
+        monitorService.getInstancesOfNetworks.calls.reset();
+
+        component.selectNetworkWithReload('cloud');
+        await fixture.whenStable();
+        component.selectNetworkWithReload('hub-1');
+        await fixture.whenStable();
+        component.selectNetworkWithReload(null);
+        await fixture.whenStable();
+
+        expect(networks()).toEqual(['cloud', 'hub-1', undefined]);
+        expect(component.filtered).toBeFalse();
+        component.selectNetwork('hub-1');
+        expect(component.filtered).toBeTrue();
+    });
+
+    it('offers the debugger of an instance in its row menu, after the details', async () => {
+        await init();
+
+        (fixture.nativeElement.querySelector('tr[mat-row] button[aria-label="Actions"]') as HTMLButtonElement).click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        const items = Array.from<HTMLElement>(document.querySelectorAll('.mat-mdc-menu-panel [mat-menu-item]'));
+        expect(items.map((i) => (i.textContent || '').replace(/\s+/g, ' ').trim())).toEqual(['info Details', 'bug_report Debug', 'stop Stop']);
+        expect(items[1].getAttribute('href')).toBe('/processes/monitor/debug/p1');
     });
 
     it('does not open details for a placeholder row that waits for the hub sync', async () => {
@@ -114,7 +160,7 @@ describe('ProcessMonitorComponent list', () => {
 
     it('leaves a placeholder row unclickable', async () => {
         await init();
-        monitorService.getFilteredHistoryInstances.and.callFake(() => scheduled([{ total: 1, data: [{ ...run, is_placeholder: true }] } as any], asapScheduler));
+        monitorService.getInstancesOfNetworks.and.callFake(() => scheduled([{ total: 1, data: [{ ...run, is_placeholder: true }] } as any], asapScheduler));
         (fixture.nativeElement.querySelector('senergy-searchbar button') as HTMLButtonElement).click();
         await fixture.whenStable();
         fixture.detectChanges();

@@ -25,7 +25,6 @@ import { ProcessMonitorComponent } from './monitor.component';
 import { MonitorService } from './shared/monitor.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
-import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { MonitorProcessModel } from './shared/monitor-process.model';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
@@ -44,17 +43,17 @@ describe('ProcessMonitorComponent view state in the URL', () => {
     let component: ProcessMonitorComponent;
     let router: Router;
     let requests: Request[];
-    let totals: { unfinished: number; finished: number };
+    let totals: { running: number; finished: number };
 
     const row = { id: 'p1', processDefinitionName: 'Washer', startTime: '2026-01-02T10:00:00Z', state: 'ACTIVE' } as MonitorProcessModel;
 
     function open(url: string): void {
         requests = [];
-        const monitorService = jasmine.createSpyObj<MonitorService>('MonitorService', ['getFilteredHistoryInstances', 'openDetailsDialog']);
+        const monitorService = jasmine.createSpyObj<MonitorService>('MonitorService', ['getInstancesOfNetworks', 'openDetailsDialog']);
         // answered after the view exists, as a request is
-        monitorService.getFilteredHistoryInstances.and.callFake((filter, _type, search, _limit, offset, sort, order) => {
+        monitorService.getInstancesOfNetworks.and.callFake((filter, search, _deploymentId, _limit, offset, sort, order) => {
             requests.push({ filter, search, offset, sort, order });
-            return of({ total: totals[filter as 'finished' | 'unfinished'], data: [row] } as MonitorProcessTotalModel).pipe(delay(1));
+            return of({ total: totals[filter as 'finished' | 'running'], data: [row] } as MonitorProcessTotalModel).pipe(delay(1));
         });
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
@@ -64,7 +63,6 @@ describe('ProcessMonitorComponent view state in the URL', () => {
                 { provide: MonitorService, useValue: monitorService },
                 { provide: DialogsService, useValue: {} },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([]) } },
-                { provide: MonitorFogFactory, useValue: {} },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
             ],
@@ -96,7 +94,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
     const searchTexts = (): string[] => Array.from(fixture.nativeElement.querySelectorAll('senergy-searchbar input')).map((i) => (i as HTMLInputElement).value);
 
     beforeEach(() => {
-        totals = { unfinished: 5, finished: 100 };
+        totals = { running: 5, finished: 100 };
     });
 
     describe('page and sort of the tabs', () => {
@@ -106,7 +104,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
             expect(component.paginatorFinished.pageIndex).toBe(3);
             expect(component.paginatorRunning.pageIndex).toBe(0);
             expect(requestsOf('finished').map((r) => r.offset)).toEqual([60]);
-            expect(requestsOf('unfinished').map((r) => r.offset)).toEqual([0]);
+            expect(requestsOf('running').map((r) => r.offset)).toEqual([0]);
             expect(router.url).toBe('/?tab=1&page=3');
             expect(fixture.nativeElement.querySelector('.mat-mdc-paginator-range-label').textContent).toContain('61');
         }));
@@ -120,7 +118,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
             expect(router.url).toBe('/?tab=1&page=4');
             expect(component.paginatorFinished.pageIndex).toBe(4);
             expect(component.paginatorRunning.pageIndex).toBe(0);
-            expect(requestsOf('unfinished').length).toBe(1);
+            expect(requestsOf('running').length).toBe(1);
             expect(lastOf('finished').offset).toBe(80);
         }));
 
@@ -128,11 +126,11 @@ describe('ProcessMonitorComponent view state in the URL', () => {
             open('/?tab=1&sort=endTime&dir=asc');
 
             expect(lastOf('finished')).toEqual(jasmine.objectContaining({ sort: 'endTime', order: 'asc' }));
-            expect(lastOf('unfinished')).toEqual(jasmine.objectContaining({ sort: 'startTime', order: 'desc' }));
+            expect(lastOf('running')).toEqual(jasmine.objectContaining({ sort: 'startTime', order: 'desc' }));
         }));
 
         it('starts the tab it switches to on the first page before it loads', fakeAsync(() => {
-            totals.unfinished = 100;
+            totals.running = 100;
             open('/');
             component.paginatorRunning.nextPage();
             settle();
@@ -164,7 +162,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
     describe('search of the tabs', () => {
         it('clears the search in the URL and in the searchbars when the tab changes', fakeAsync(() => {
             open('/?search=foo');
-            expect(lastOf('unfinished').search).toBe('foo');
+            expect(lastOf('running').search).toBe('foo');
 
             clickTab(1);
 
@@ -174,7 +172,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
 
             clickTab(0);
 
-            expect(lastOf('unfinished').search).toBe('');
+            expect(lastOf('running').search).toBe('');
             expect(router.url).toBe('/');
             expect(searchTexts()).toEqual(['']);
         }));

@@ -39,3 +39,10 @@ button.chip-button {
 .deployment-disabled .name-cell {
     opacity: 0.6;
 }
+
+.network-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}

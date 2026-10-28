@@ -191,17 +191,17 @@ export class ReportFilesComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     /**
-     * Shows the rows on the page the paginator is on. The data source moves a page beyond the end back without a page
-     * event, so it is corrected here, with the URL.
+     * Shows the rows on the page of the list. The data source moves a page beyond the end back without a page event, so
+     * it is corrected here, with the URL, also for an answer that arrives before the paginator exists.
      */
     private showRows(rows: ReportFileModel[]) {
+        const lastPage = Math.max(0, Math.ceil(rows.length / this.pageSize) - 1);
+        if (this.pageIndex > lastPage) {
+            this.pageIndex = lastPage;
+            this.urlState.setPage(lastPage);
+        }
         if (this.paginator !== undefined) {
-            const lastPage = Math.max(0, Math.ceil(rows.length / this.paginator.pageSize) - 1);
-            this.paginator.pageIndex = Math.min(this.pageIndex, lastPage);
-            if (this.paginator.pageIndex !== this.pageIndex) {
-                this.pageIndex = this.paginator.pageIndex;
-                this.urlState.setPage(this.pageIndex);
-            }
+            this.paginator.pageIndex = this.pageIndex;
         }
         this.reportsDataSource.data = rows;
     }

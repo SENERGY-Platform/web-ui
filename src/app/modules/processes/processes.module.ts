@@ -79,6 +79,7 @@ import { ScriptEditorDialogComponent } from './designer/dialogs/script-editor-di
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import { SortComponent } from 'src/app/core/components/sort/sort.component';
+import { InstanceDebuggerComponent } from 'src/app/core/components/instance-debugger/instance-debugger.component';
 
 const processRepo: Route = {
     path: 'processes/repository',
@@ -103,6 +104,11 @@ const processMonitor: Route = {
     pathMatch: 'full',
     component: ProcessMonitorComponent,
     data: { header: 'Monitor' },
+};
+const processMonitorDebug: Route = {
+    path: 'processes/monitor/debug/:id',
+    component: InstanceDebuggerComponent,
+    data: { header: 'Monitor', namespace: 'processes', back: '/processes/monitor' },
 };
 const processDesignerEdit: Route = {
     path: 'processes/designer/:id',
@@ -129,6 +135,7 @@ const processIo: Route = {
             processRepo,
             processDeployments,
             processMonitor,
+            processMonitorDebug,
             processDesignerEdit,
             processDesigner,
             processDeploymentsConfig,

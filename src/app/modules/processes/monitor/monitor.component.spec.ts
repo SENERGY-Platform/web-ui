@@ -29,7 +29,6 @@ import { SearchbarService } from '../../../core/components/searchbar/shared/sear
 import { MonitorService } from './shared/monitor.service';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
-import { MonitorFogFactory } from './shared/monitor-fog.service';
 import { UtilService } from '../../../core/services/util.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 
@@ -37,9 +36,9 @@ import { PreferencesService } from '../../../core/services/preferences.service';
 // and fires animationDone, which hides the missing first load.
 describe('ProcessMonitorComponent first load with animations enabled', () => {
     it('reveals the instance tables without waiting for a tab animation', async () => {
-        const monitorService = jasmine.createSpyObj<MonitorService>('MonitorService', ['getFilteredHistoryInstances']);
+        const monitorService = jasmine.createSpyObj<MonitorService>('MonitorService', ['getInstancesOfNetworks']);
         // asynchronous like the HTTP call it stands for
-        monitorService.getFilteredHistoryInstances.and.returnValue(scheduled([{ total: 1, data: [] } as any], asapScheduler));
+        monitorService.getInstancesOfNetworks.and.returnValue(scheduled([{ total: 1, data: [] } as any], asapScheduler));
 
         await TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
@@ -50,7 +49,6 @@ describe('ProcessMonitorComponent first load with animations enabled', () => {
                 { provide: MonitorService, useValue: monitorService },
                 { provide: DialogsService, useValue: {} },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([]) } },
-                { provide: MonitorFogFactory, useValue: {} },
                 { provide: UtilService, useValue: { dateIsToday: () => false } },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: false } },

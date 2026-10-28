@@ -27,7 +27,6 @@ import { map } from 'rxjs/operators';
 
 import { ProcessDeploymentsComponent } from './deployments.component';
 import { DeploymentsService } from './shared/deployments.service';
-import { DeploymentsFogFactory } from './shared/deployments-fog.service';
 import { DeploymentsModel } from './shared/deployments.model';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
@@ -38,8 +37,8 @@ import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { UrlStateService } from '../../../core/services/url-state.service';
 
-const deployment = (id: string, disabled?: boolean): DeploymentsModel =>
-    ({ id, name: 'name-' + id, definition_id: 'def-' + id, diagram: '<svg></svg>', online: true, disabled, deploymentTime: new Date(Date.UTC(2026, 0, 2, 10, 0)) }) as DeploymentsModel;
+const deployment = (id: string, disabled?: boolean, networkId?: string): DeploymentsModel =>
+    ({ id, name: 'name-' + id, definition_id: 'def-' + id, diagram: '<svg></svg>', online: true, disabled, network_id: networkId, deploymentTime: new Date(Date.UTC(2026, 0, 2, 10, 0)) }) as DeploymentsModel;
 
 const hub = { id: 'hub-1', name: 'Hub' } as HubModel;
 
@@ -82,13 +81,13 @@ class MockDeploymentsService {
         return this.deleteRight;
     }
 
-    getAll(...args: unknown[]) {
+    listOfNetworks(...args: unknown[]) {
         this.getAllArgs.push(args);
         const [, limit, offset] = args as [string, number, number];
         return of(this.items.slice(offset, offset + limit).map((item) => ({ ...item })));
     }
 
-    getDeployment() {
+    getDeploymentOfNetworks() {
         return of(this.single);
     }
 
@@ -147,7 +146,6 @@ describe('ProcessDeploymentsComponent', () => {
                 { provide: ClipboardService, useValue: {} },
                 { provide: Router, useValue: { navigate: () => Promise.resolve(true), navigateByUrl: () => Promise.resolve(true) } },
                 { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: params }, queryParamMap: of(params) } },
-                { provide: DeploymentsFogFactory, useValue: { withHubId: () => new MockDeploymentsService() } },
                 { provide: NetworksService, useValue: { listSyncNetworks: () => of([hub]) } },
                 { provide: MetadataExistenceService, useValue: { warningsForBpmn: (docs: { key: string }[]) => of(new Map(docs.slice(0, 1).map((d) => [d.key, 'Missing: urn:x']))) } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
@@ -224,13 +222,20 @@ describe('ProcessDeploymentsComponent', () => {
             expect(run.disabled).toBeTrue();
         });
 
-        it('hides the switch item and the status chips of the platform while a fog hub is selected', async () => {
-            render();
-            component.selectHub(hub, false);
+        it('hides the switch item and the switch chip of a deployment that runs on a hub', async () => {
+            service.items = [deployment('on-hub', false, hub.id)];
             render();
 
             expect(rows()[0].querySelector('.status-chip.online')).toBeNull();
             expect(await menuLabels(0)).not.toContain('Switch off');
+        });
+
+        it('shows on each deployment whether it runs on the platform or on which hub', () => {
+            service.items = [deployment('cloud-deployment'), deployment('hub-deployment', false, hub.id), deployment('unknown-hub', false, 'hub-x')];
+            render();
+
+            const labels = rows().map((r) => r.querySelector('.network-cell')?.textContent?.replace(/\s+/g, ' ').trim());
+            expect(labels).toEqual(['cloud Platform', 'router Hub', 'router hub-x']);
         });
     });
 
@@ -272,8 +277,8 @@ describe('ProcessDeploymentsComponent', () => {
         it('reads on after a chunk the engine wrapper shortened', () => {
             // the wrapper drops deployments without a virtual id, so the first chunk holds 49 of 50 rows
             service.items = Array.from({ length: 60 }, (_, i) => deployment('d' + i));
-            const getAll = service.getAll.bind(service);
-            service.getAll = (...args: unknown[]) => getAll(...args).pipe(map((page) => (args[2] === 0 ? page.slice(1) : page)));
+            const getAll = service.listOfNetworks.bind(service);
+            service.listOfNetworks = (...args: unknown[]) => getAll(...args).pipe(map((page) => (args[2] === 0 ? page.slice(1) : page)));
             render();
 
             expect(component.dataSource.data.length).toBe(59);
@@ -296,6 +301,34 @@ describe('ProcessDeploymentsComponent', () => {
             component.matSortChange({ active: 'name', direction: 'asc' });
 
             expect(service.getAllArgs[0].slice(3, 5)).toEqual(['name', 'asc']);
+        });
+
+        it('lists the deployments of all networks until one is selected', () => {
+            render();
+            component.selectNetwork('cloud', false);
+            component.selectNetwork(hub.id, false);
+            component.selectNetwork(null, false);
+
+            expect(firstChunks().map((args) => args[6])).toEqual([undefined, 'cloud', 'hub-1', undefined]);
+        });
+
+        it('names the selected network on the filter button', () => {
+            render();
+            const label = () => component.networkFilterLabel;
+            expect(label()).toBe('All networks');
+            component.selectNetwork('cloud', false);
+            expect(label()).toBe('Senergy-Platform');
+            component.selectNetwork(hub.id, false);
+            expect(label()).toBe('Hub');
+        });
+
+        it('shows the no-match empty state while a network is selected', () => {
+            service.items = [];
+            render();
+            component.selectNetwork(hub.id, false);
+            fixture.detectChanges();
+
+            expect(fixture.nativeElement.querySelector('senergy-empty-state .empty-title')?.textContent).toBe('No matching deployments');
         });
 
         it('shows the empty state with its no-match variant while a filter is on', () => {
@@ -354,9 +387,18 @@ describe('ProcessDeploymentsComponent', () => {
             expect(snackBar.open).toHaveBeenCalledWith('Deployments deleted successfully.', undefined, { duration: 2000 });
         });
 
-        it('reports a delete on a hub as sent, not as done', () => {
+        it('reports a single delete on a hub as sent', () => {
+            service.items = [deployment('on-hub', false, hub.id)];
             render();
-            component.hub = hub;
+
+            component.deleteDeployment(component.dataSource.data[0]);
+
+            expect(snackBar.open.calls.mostRecent().args[0]).toBe('Delete sent to the hub; the deployment disappears once the hub confirms.');
+        });
+
+        it('reports a delete on a hub as sent, not as done', () => {
+            service.items = [deployment('on-hub', false, hub.id)];
+            render();
             component.selection.select(component.dataSource.data[0]);
 
             component.deleteMultipleItems();
@@ -547,6 +589,26 @@ describe('ProcessDeploymentsComponent', () => {
 
             component.filterItems(true);
             expect(urlState.set).toHaveBeenCalledOnceWith({ generated: 'show', page: null });
+        });
+
+        it('takes the platform from hubId without rewriting the URL', () => {
+            const router = TestBed.inject(Router);
+            const navigate = spyOn(router, 'navigate').and.resolveTo(true);
+            routeParams['hubId'] = 'cloud';
+            render();
+            expect(firstChunks().map((args) => args[6])).toEqual(['cloud']);
+            expect(navigate).not.toHaveBeenCalled();
+        });
+
+        it('lists all networks when hubId names a hub that is gone', () => {
+            const router = TestBed.inject(Router);
+            const navigate = spyOn(router, 'navigate').and.resolveTo(true);
+            routeParams['hubId'] = 'hub-gone';
+            render();
+
+            expect(component.networkFilter).toBeNull();
+            expect(firstChunks().map((args) => args[6])).toEqual([undefined]);
+            expect(navigate.calls.mostRecent().args[1]?.queryParams).toEqual({ hubId: null, deploymentId: null });
         });
     });
 });
