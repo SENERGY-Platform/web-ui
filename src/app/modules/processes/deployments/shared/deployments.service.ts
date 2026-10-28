@@ -15,7 +15,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { forkJoin, Observable, of, timer } from 'rxjs';
 import { catchError, concatMap, map, mergeMap, retryWhen } from 'rxjs/operators';
@@ -309,30 +309,6 @@ export class DeploymentsService {
             .pipe(
                 map((resp) => ({ status: resp.status })),
                 catchError(this.errorHandlerService.handleError(DeploymentsService.name, 'v2deleteDeployment', { status: 500 })),
-            );
-    }
-
-    /**
-     * For clean-ups: a 404 means the deployment is already gone (answered quietly); other failures answer their real status.
-     * `quiet` logs such a failure without the error notice.
-     */
-    v2deleteDeploymentIfExists(deploymentId: string, quiet = false): Observable<{ status: number }> {
-        return this.http
-            .delete(environment.processDeploymentUrl + '/v3/deployments/' + encodeURIComponent(deploymentId), {
-                responseType: 'text',
-                observe: 'response',
-            })
-            .pipe(
-                map((resp) => ({ status: resp.status })),
-                catchError((error: HttpErrorResponse) => {
-                    const handlers = this.errorHandlerService;
-                    if (error?.status === 404) {
-                        return handlers.handleErrorQuietly(DeploymentsService.name, 'v2deleteDeploymentIfExists: already gone', { status: 404 })(error);
-                    }
-                    // bound, because the handlers use the service's own members
-                    const handle = quiet ? handlers.handleErrorQuietly.bind(handlers) : handlers.handleError.bind(handlers);
-                    return handle(DeploymentsService.name, 'v2deleteDeploymentIfExists', { status: error?.status >= 400 ? error.status : 500 })(error);
-                }),
             );
     }
 

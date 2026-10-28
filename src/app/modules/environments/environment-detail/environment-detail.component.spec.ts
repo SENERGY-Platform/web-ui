@@ -1263,6 +1263,23 @@ describe('EnvironmentDetailComponent', () => {
             expect(fixture.nativeElement.querySelectorAll('form.node-form button').length).toBeGreaterThan(0);
         });
 
+        it('reloads the stored document from the header without unsaved changes, and offers it while there are some', () => {
+            loadWith(nestedEnvironment);
+            const reloadButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('.page-actions button.reload');
+            expect(saveBar()).toBeNull();
+
+            reloadButton().click();
+            const reload = httpMock.expectOne(environmentsUrl + '/e1');
+            expect(reload.request.method).toBe('GET');
+            reload.flush(JSON.parse(JSON.stringify({ ...nestedEnvironment, name: 'Plant A renamed' })));
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('.page-title').textContent).toBe('Plant A renamed');
+
+            component.markDirty();
+            fixture.detectChanges();
+            expect(reloadButton().disabled).toBe(false);
+        });
+
         it('shows the save bar only while there are unsaved changes, outside the tab group', () => {
             loadWith(nestedEnvironment);
             expect(saveBar()).toBeNull();

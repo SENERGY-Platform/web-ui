@@ -25,10 +25,6 @@ import { environment } from '../../../../../environments/environment';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
-import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
-import { LadonService } from '../../../admin/permissions/shared/services/ladom.service';
 
 describe('DeploymentsService', () => {
     beforeEach(() => {
@@ -208,51 +204,3 @@ describe('DeploymentsService', () => {
         },
     ));
 });
-
-describe('DeploymentsService.v2deleteDeploymentIfExists', () => {
-    let reported: string[];
-
-    function serviceFailingWith(status: number): DeploymentsService {
-        reported = [];
-        // reached through `this`, so a handler called unbound fails the spec
-        const handlers = {
-            record(kind: string, result: unknown) {
-                return () => {
-                    reported.push(kind);
-                    return of(result);
-                };
-            },
-            handleError(_s: string, _m: string, result: unknown) {
-                return this.record('notice', result);
-            },
-            handleErrorQuietly(_s: string, _m: string, result: unknown) {
-                return this.record('quiet', result);
-            },
-        };
-        TestBed.configureTestingModule({
-            providers: [
-                { provide: HttpClient, useValue: { delete: () => throwError(() => new HttpErrorResponse({ status })) } },
-                { provide: ErrorHandlerService, useValue: handlers },
-                { provide: LadonService, useValue: { getUserAuthorizationsForURI: () => ({}) } },
-            ],
-        });
-        return TestBed.runInInjectionContext(() => new DeploymentsService());
-    }
-
-    it('shows the error notice for a failure other than 404', (done) => {
-        serviceFailingWith(502).v2deleteDeploymentIfExists('d1').subscribe((result) => {
-            expect(result).toEqual({ status: 502 });
-            expect(reported).toEqual(['notice']);
-            done();
-        });
-    });
-
-    it('logs that failure without the error notice when asked to be quiet', (done) => {
-        serviceFailingWith(502).v2deleteDeploymentIfExists('d1', true).subscribe((result) => {
-            expect(result).toEqual({ status: 502 });
-            expect(reported).toEqual(['quiet']);
-            done();
-        });
-    });
-});
-
