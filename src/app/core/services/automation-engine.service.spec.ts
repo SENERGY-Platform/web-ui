@@ -119,4 +119,57 @@ describe('AutomationEngineService', () => {
         expect(engineErrorMessage(new HttpErrorResponse({ status: 0 }))).toBe('the automation-engine is not reachable');
         expect(engineErrorMessage(new HttpErrorResponse({ status: 502, statusText: 'Bad Gateway', error: 'html' }))).toBe('502 Bad Gateway');
     });
+
+    describe('smart-services namespace', () => {
+        const smartBase = () => environment.automationEngineUrl + '/namespaces/smart-services';
+
+        it('starts a maintenance procedure with string variables and answers its status', () => {
+            let status: number | undefined;
+            service.startMaintenanceProcedure('inst-1', 'accept_suggestion', { suggestion_id: 's1', auto_off_s: '' })
+                .subscribe((r) => (status = r.status));
+            const req = http.expectOne(smartBase() + '/instances/inst-1/maintenance-procedures/accept_suggestion/start');
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual({ variables: { suggestion_id: 's1', auto_off_s: '' } });
+            req.flush({}, { status: 201, statusText: 'Created' });
+            expect(status).toBe(201);
+        });
+
+        it('lists the modules of an instance by type and key', () => {
+            let items: unknown[] | undefined;
+            service.listModules({ instanceId: 'inst-1', moduleType: 'process_deployment', key: 'suggestion:s1' })
+                .subscribe((list) => (items = list.items));
+            const req = http.expectOne((r) => r.url === smartBase() + '/modules');
+            expect(req.request.method).toBe('GET');
+            expect(req.request.params.get('instance_id')).toBe('inst-1');
+            expect(req.request.params.get('module_type')).toBe('process_deployment');
+            expect(req.request.params.get('key')).toBe('suggestion:s1');
+            req.flush({ items: [{ id: 'm1' }], total: 1, limit: 100, offset: 0 });
+            expect(items).toEqual([{ id: 'm1' }]);
+        });
+
+        it('leaves out the optional list filters', () => {
+            service.listModules({ instanceId: 'inst-1' }).subscribe();
+            const req = http.expectOne((r) => r.url === smartBase() + '/modules');
+            expect(req.request.params.has('module_type')).toBeFalse();
+            expect(req.request.params.has('key')).toBeFalse();
+            req.flush({ items: [], total: 0, limit: 100, offset: 0 });
+        });
+
+        it('deletes a module by its id and answers the status', () => {
+            let status: number | undefined;
+            service.deleteModule('mod/1').subscribe((r) => (status = r.status));
+            const req = http.expectOne(smartBase() + '/modules/mod%2F1');
+            expect(req.request.method).toBe('DELETE');
+            req.flush('', { status: 204, statusText: 'No Content' });
+            expect(status).toBe(204);
+        });
+
+        it('does not catch a 403, so the caller can show it', () => {
+            let error: unknown;
+            service.listModules({ instanceId: 'inst-1' }).subscribe({ error: (e: unknown) => (error = e) });
+            http.expectOne((r) => r.url === smartBase() + '/modules')
+                .flush({ error: 'forbidden' }, { status: 403, statusText: 'Forbidden' });
+            expect((error as { status: number }).status).toBe(403);
+        });
+    });
 });

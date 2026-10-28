@@ -1,0 +1,125 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<mat-card appearance="outlined">
+  <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
+  <mat-card-content id="{{widget.id}}">
+    <div *ngIf="!configured" fxLayout="column" fxLayoutAlign="center center">
+      <div>Please configure widget!</div>
+    </div>
+
+    <ng-container *ngIf="configured">
+      <senergy-widget-spinner [show]="!ready"></senergy-widget-spinner>
+
+      <div *ngIf="ready">
+        <div *ngIf="loadError" class="message error">{{ loadError }}</div>
+        <div *ngIf="actionError" class="message error">{{ actionError }}</div>
+
+        <ng-container *ngIf="!loadError">
+          <div class="list">
+            <div *ngIf="view.items.length === 0" class="message">
+              {{ view.exportMissing ? 'No suggestion list yet. It appears after the first training.' : 'No suggestion.' }}
+            </div>
+
+            <mat-card appearance="outlined" class="card" *ngFor="let item of view.items">
+              <ng-container *ngIf="openItem(item) as resolved">
+                <div class="title">{{ resolved.label }}</div>
+                <div class="subtitle">{{ subtitleText(resolved.suggestion) }}</div>
+                <div class="middle">
+                  <div *ngIf="resolved.autoOffAvailable" class="chip-row">
+                    <mat-chip-set>
+                      <mat-chip-option color="accent" [selected]="autoOffEnabled(resolved)"
+                        [disabled]="busy.has(resolved.suggestion.id)"
+                        (selectionChange)="setAutoOffEnabled(resolved, $event.selected)">
+                        <mat-icon matChipAvatar *ngIf="!autoOffEnabled(resolved)">timer_off</mat-icon>
+                        {{ autoOffEnabled(resolved) ? 'Off after ' + autoOffSeconds(resolved) + ' s' : 'No auto-off' }}
+                      </mat-chip-option>
+                    </mat-chip-set>
+                    <button mat-icon-button matTooltip="Change duration" [disabled]="busy.has(resolved.suggestion.id)"
+                      (click)="changeDuration(resolved)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                <div *ngIf="autoOffInvalid(resolved)" class="message error">Enter whole seconds from 5 to 3600.</div>
+                <div class="actions">
+                  <button mat-stroked-button [disabled]="busy.has(resolved.suggestion.id)" (click)="dismiss(resolved.suggestion)">
+                    <ng-container *ngTemplateOutlet="busyLabel; context: { text: 'Dismiss', busy: busy.has(resolved.suggestion.id) }"></ng-container>
+                  </button>
+                  <button mat-flat-button color="accent" [disabled]="busy.has(resolved.suggestion.id) || autoOffInvalid(resolved)"
+                    (click)="accept(resolved)">
+                    <ng-container *ngTemplateOutlet="busyLabel; context: { text: 'Accept', busy: busy.has(resolved.suggestion.id) }"></ng-container>
+                  </button>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="acceptedItem(item) as automation">
+                <div class="title">{{ automation.label }}</div>
+                <div class="subtitle">{{ automationSubtitle(automation) }}</div>
+                <div class="middle">
+                  <mat-icon class="state-dot" color="accent">circle</mat-icon>
+                  <span>{{ stateText(automation) }}</span>
+                </div>
+                <div class="actions">
+                  <button mat-stroked-button [disabled]="removing(automation) || updating(automation)" (click)="remove(automation)">
+                    <ng-container *ngTemplateOutlet="busyLabel; context: { text: 'Remove', busy: removing(automation) }"></ng-container>
+                  </button>
+                  <button *ngIf="canEdit(automation)" mat-flat-button color="accent"
+                    [disabled]="removing(automation) || updating(automation)" (click)="editAutomation(automation)">
+                    <ng-container *ngTemplateOutlet="busyLabel; context: { text: 'Edit', busy: updating(automation) }"></ng-container>
+                  </button>
+                </div>
+              </ng-container>
+            </mat-card>
+          </div>
+
+          <ng-container *ngIf="view.dismissed.length > 0">
+            <button mat-button class="section-toggle" [attr.aria-expanded]="dismissedOpen" (click)="toggleDismissed()">
+              <mat-icon>{{ dismissedOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+              Dismissed ({{ view.dismissed.length }})
+            </button>
+            <div *ngIf="dismissedOpen" class="list">
+              <div *ngFor="let resolved of view.dismissed" class="dismissed-row">
+                <div class="dismissed-text">
+                  <div class="title">{{ resolved.label }}</div>
+                  <div class="subtitle">{{ windowText(resolved.suggestion) }}</div>
+                </div>
+                <button mat-button [disabled]="busy.has(resolved.suggestion.id)" (click)="restore(resolved)">
+                  <ng-container *ngTemplateOutlet="busyLabel; context: { text: 'Restore', busy: busy.has(resolved.suggestion.id) }"></ng-container>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </ng-container>
+  </mat-card-content>
+  <div>
+    <senergy-widget-footer [widgetHasUpdateableProperties]="true"
+      [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [refreshing]="refreshing"
+      [userHasDeleteAuthorization]="userHasDeleteAuthorization" [optionZoom]="true"
+      [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId"
+      [widget]="widget" (editEvent)="edit()"></senergy-widget-footer>
+  </div>
+</mat-card>
+
+<!-- A label that keeps its size while busy: the text stays in place, hidden, and a 16 px spinner sits over it. -->
+<ng-template #busyLabel let-text="text" let-busy="busy">
+  <span class="busy-label" [class.busy]="busy">
+    <span class="label-text">{{ text }}</span>
+    <mat-spinner *ngIf="busy" [diameter]="16"></mat-spinner>
+  </span>
+</ng-template>

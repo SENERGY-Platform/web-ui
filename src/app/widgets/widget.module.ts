@@ -84,6 +84,7 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSortModule } from '@angular/material/sort';
+import { MatChipsModule } from '@angular/material/chips';
 import { ProcessSchedulerComponent } from './process-scheduler/process-scheduler.component';
 import { ProcessSchedulerScheduleDialogComponent } from './process-scheduler/dialogs/process-scheduler-schedule-dialog.component';
 import { ProcessSchedulerScheduleEditDialogComponent } from './process-scheduler/dialogs/process-scheduler-schedule-edit-dialog.component';
@@ -122,6 +123,10 @@ import { LastAnomalyComponent } from './anomaly/sub-widgets/last/last-anomaly.co
 import { AnomalyPhasesComponent } from './anomaly/sub-widgets/timeline/anomaly-phases.component';
 import { AnomalyReconstructionComponent } from './anomaly/reconstruction/reconstruction.component';
 import { LineComponent } from './anomaly/sub-widgets/line/line.component';
+import { AutomationSuggestionsComponent } from './automation-suggestions/automation-suggestions.component';
+import { AutomationSuggestionsEditComponent } from './automation-suggestions/dialog/edit/edit.component';
+import { AutoOffDialogComponent } from './automation-suggestions/dialog/auto-off/auto-off-dialog.component';
+import { AcceptedAutomationDialogComponent } from './automation-suggestions/dialog/accepted-automation/accepted-automation-dialog.component';
 import { BadVentilationComponent } from './bad-ventilation/bad-ventilation.component';
 import { EditVentilationWidgetComponent } from './bad-ventilation/dialog/edit/edit.component';
 import { MatTreeModule } from '@angular/material/tree';
@@ -175,6 +180,7 @@ registerLocaleData(localeDe, 'de');
         MatRadioModule,
         MatSortModule,
         MatSliderModule,
+        MatChipsModule,
         MatDatepickerModule,
         NgApexchartsModule,
         MatTreeModule,
@@ -262,6 +268,10 @@ registerLocaleData(localeDe, 'de');
         AnomalyPhasesComponent,
         AnomalyReconstructionComponent,
         LineComponent,
+        AutomationSuggestionsComponent,
+        AutomationSuggestionsEditComponent,
+        AutoOffDialogComponent,
+        AcceptedAutomationDialogComponent,
         BadVentilationComponent,
         EditVentilationWidgetComponent,
         AxisConfigComponent,

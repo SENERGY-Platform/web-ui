@@ -86,6 +86,7 @@ export class DashboardNewWidgetDialogComponent implements OnInit{
         { value: DashboardTypesEnum.ConsumptionProfile, viewValue: 'Consumption Profile', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.BadVentilation, viewValue: 'Bad Ventilation', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.Floorplan, viewValue: 'Floorplan', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.AutomationSuggestions, viewValue: 'Automation Suggestions', disabled: false, tooltip: '' },
     ];
     switchCategories: SwitchCategories[] = [
         {

@@ -90,6 +90,9 @@
   <div *ngSwitchCase="'anomaly_detection'" fxFill>
     <senergy-anomaly-detection class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-anomaly-detection>
   </div>
+  <div *ngSwitchCase="'automation_suggestions'" fxFill>
+    <senergy-automation-suggestions class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-automation-suggestions>
+  </div>
   <div *ngSwitchCase="'open_window'" fxFill>
     <senergy-open-window class="widget" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom" fxFill></senergy-open-window>
   </div>

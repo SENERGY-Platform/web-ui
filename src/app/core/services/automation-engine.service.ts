@@ -42,6 +42,27 @@ import {
 export const PROCESSES_NAMESPACE = 'processes';
 export const SMART_SERVICES_NAMESPACE = 'smart-services';
 
+/** One module of a smart service instance as the automation-engine lists it. Only the fields the web-ui reads. */
+export interface AutomationEngineModule {
+    id: string;
+    instance_id: string;
+    module_type: string;
+    /** keys the module was deployed under, e.g. `suggestion:<id>` */
+    keys?: string[];
+    module_data: {
+        process_deployment_name?: string;
+        export?: { ID?: string };
+        [field: string]: unknown;
+    };
+}
+
+export interface AutomationEngineModuleList {
+    items: AutomationEngineModule[];
+    total: number;
+    limit: number;
+    offset: number;
+}
+
 /** a step of the history: an activity sequence number, or the last step at or before a time; neither is the latest */
 export interface EngineHistoryStep {
     seq?: number;
@@ -120,6 +141,48 @@ export class AutomationEngineService {
     /** a gateway with the desired and applied state of its deployments and instances */
     getNetwork(id: string): Observable<EngineNetwork> {
         return this.http.get<EngineNetwork>(environment.automationEngineUrl + '/networks/' + encodeURIComponent(id));
+    }
+
+    /**
+     * Starts a maintenance procedure of a smart service instance. All variables are strings.
+     * Errors are not caught: the caller shows them, a 403 in particular has to reach the user.
+     */
+    startMaintenanceProcedure(
+        instanceId: string,
+        procedure: string,
+        variables: Record<string, string>,
+        namespace: string = SMART_SERVICES_NAMESPACE,
+    ): Observable<{ status: number }> {
+        const url = this.namespaceUrl(namespace) + '/instances/' + encodeURIComponent(instanceId) +
+            '/maintenance-procedures/' + encodeURIComponent(procedure) + '/start';
+        return this.http
+            .post(url, { variables }, { observe: 'response', responseType: 'text' })
+            .pipe(map((resp) => ({ status: resp.status })));
+    }
+
+    /**
+     * Lists the modules of an instance, optionally by module type and by one deployment key.
+     * Errors are not caught: the caller shows them, a 403 in particular has to reach the user.
+     */
+    listModules(
+        query: { instanceId: string; moduleType?: string; key?: string },
+        namespace: string = SMART_SERVICES_NAMESPACE,
+    ): Observable<AutomationEngineModuleList> {
+        let params = new HttpParams().set('instance_id', query.instanceId);
+        if (query.moduleType) {
+            params = params.set('module_type', query.moduleType);
+        }
+        if (query.key) {
+            params = params.set('key', query.key);
+        }
+        return this.http.get<AutomationEngineModuleList>(this.namespaceUrl(namespace) + '/modules', { params });
+    }
+
+    /** Removes one module and its deployment. Errors are not caught, see listModules. */
+    deleteModule(moduleId: string, namespace: string = SMART_SERVICES_NAMESPACE): Observable<{ status: number }> {
+        return this.http
+            .delete(this.namespaceUrl(namespace) + '/modules/' + encodeURIComponent(moduleId), { observe: 'response', responseType: 'text' })
+            .pipe(map((resp) => ({ status: resp.status })));
     }
 
     getDeploymentVersion(namespace: string, id: string, version: number): Observable<EngineDeploymentVersion> {
