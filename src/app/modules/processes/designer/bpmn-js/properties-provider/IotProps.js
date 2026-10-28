@@ -607,7 +607,10 @@ export function external(group, element, bpmnjs, eventBus, bpmnFactory, replace,
                     if (connectorInfo.function.rdf_type === "https://senergy.infai.org/ontology/MeasuringFunction") {
                         script = createTextInputParameter(bpmnjs, "payload", getPayload(connectorInfo, false));
                         inputs = [script];
-                        outputs = createTaskParameter(bpmnjs, generateStructure(connectorInfo.characteristic, false, ''), 'outputs', 'output');
+                        // results names device, service and value of every answer, which a task on a device group needs to
+                        // tell its members apart; result alone leaves out the devices that did not answer
+                        outputs = createTaskParameter(bpmnjs, generateStructure(connectorInfo.characteristic, false, ''), 'outputs', 'output')
+                            .concat([createOutputParameter(bpmnjs, 'outputs_results', '${results}')]);
                     }
                     keepParameterEdits(previousElement, connectorInfo.characteristic.id, inputs, outputs);
 

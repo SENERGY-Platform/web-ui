@@ -149,11 +149,27 @@ describe('IotProps task configured anew', () => {
 
     it('keeps the renamed output variables when the aspects change and the characteristic stays', () => {
         const before = configure(task, measuringInfo([air]));
-        expect(io(before).outputParameters.map((p: any) => [p.name, p.value])).toEqual([['outputs', '${result}']]);
+        expect(io(before).outputParameters.map((p: any) => [p.name, p.value])).toEqual([
+            ['outputs', '${result}'],
+            ['outputs_results', '${results}'],
+        ]);
         io(before).outputParameters[0].name = 'temperature';
+        io(before).outputParameters[1].name = 'readings';
         const after = configure(before, measuringInfo([water]));
-        expect(io(after).outputParameters.map((p: any) => [p.name, p.value])).toEqual([['temperature', '${result}']]);
+        expect(io(after).outputParameters.map((p: any) => [p.name, p.value])).toEqual([
+            ['temperature', '${result}'],
+            ['readings', '${results}'],
+        ]);
         expect(JSON.parse(io(after).inputParameters[0].value).aspects).toEqual([water]);
+    });
+
+    it('maps the device, service and value of every answer of a measuring task to outputs_results', () => {
+        const outputs = io(configure(task, measuringInfo([air]))).outputParameters;
+        expect(outputs.find((p: any) => p.value === '${results}')?.name).toBe('outputs_results');
+    });
+
+    it('maps no results for a controlling task, which reads nothing', () => {
+        expect(io(configure(task, controllingInfo([air]))).outputParameters).toEqual([]);
     });
 });
 

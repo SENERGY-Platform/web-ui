@@ -19,6 +19,14 @@ import { Pipe, PipeTransform } from '@angular/core';
 @Pipe({ name: 'shortOutputVariableName' })
 export class ShortOutputVariableNamePipe implements PipeTransform {
     transform(value: string): string {
-        return value.substring('${result.outputs.'.length, value.length - 1);
+        const prefix = '${result.outputs.';
+        if (value.startsWith(prefix)) {
+            return value.substring(prefix.length, value.length - 1);
+        }
+        // the expressions the designer generates today: ${result}, ${result.<path>}, ${results}
+        if (value.startsWith('${') && value.endsWith('}')) {
+            return value.substring(2, value.length - 1);
+        }
+        return value;
     }
 }
