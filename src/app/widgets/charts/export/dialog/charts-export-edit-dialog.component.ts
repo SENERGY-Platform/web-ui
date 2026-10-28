@@ -300,7 +300,7 @@ export class ChartsExportEditDialogComponent implements OnInit {
                 );
 
                 if (!sameExportAxisExists && !sameDeviceAxisExsits) {
-                    this.dataSource.data.splice(i);
+                    this.dataSource.data.splice(i, 1);
                 }
             }
 
