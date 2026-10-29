@@ -51,6 +51,30 @@
             </mat-checkbox>
           </div>
           <div>
+            <mat-form-field appearance="outline" color="accent" class="full-width">
+              <mat-label>Runtime Devices</mat-label>
+              <input matInput [(ngModel)]="processDevices" #processDevicesInput placeholder='["urn:infai:ses:device:..."]'
+                matTooltip="optional JSON list of device ids the process finds only at runtime, e.g. targets of a command whose payload a script builds; with Prefer Fog Deployment the process goes to a gateway only if that gateway carries these devices as well as the selected ones, otherwise it stays in the cloud">
+              <button mat-icon-button matSuffix [matMenuTriggerFor]="menuProcessDevices">
+                <mat-icon>data_object</mat-icon>
+              </button>
+              <mat-menu #menuProcessDevices="matMenu">
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')"
+                  (click)="processDevices = appendParam(processDevices, param, processDevicesInput)"
+                  [matTooltip]="param.name">
+                  Value: {{param.label || param.name}}
+                </button>
+                <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                  (click)="processDevices = appendParam(processDevices, param, processDevicesInput)"
+                  [matTooltip]="param.name">
+                  {{param.label || param.name}}
+                </button>
+              </mat-menu>
+              <mat-error senergyError label="Runtime Devices"></mat-error>
+            </mat-form-field>
+            <div *ngIf="processDevicesProblem() as problem" style="color: var(--warn-color, #f44336)">{{problem}}</div>
+          </div>
+          <div>
             <mat-checkbox class="checkbox-margin" [(ngModel)]="processRestart" appStringCheckboxValue trueValue="true"
               falseValue="false">
               Restart on Incident

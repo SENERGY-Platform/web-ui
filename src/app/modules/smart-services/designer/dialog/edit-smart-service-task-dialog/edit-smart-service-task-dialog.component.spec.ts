@@ -73,6 +73,9 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         flowRepoService.getFlows.and.returnValue(of({ flows: [] }));
         const importTypesService = createSpyFromClass(ImportTypesService);
         importTypesService.listImportTypes.and.returnValue(of({ result: [], total: 0 }));
+        // the process tab loads the process models when it is the topic
+        const processRepoService = createSpyFromClass(ProcessRepoService);
+        processRepoService.getProcessModels.and.returnValue(of({ result: [], total: 0 }));
 
         const info: SmartServiceTaskDescription = { name: 'task', topic, inputs, outputs: [], smartServiceInputs: { inputs: [] } };
         TestBed.configureTestingModule({
@@ -82,7 +85,7 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { info, element: { id: 'task', incoming: [] } as unknown as BpmnElement } },
-                { provide: ProcessRepoService, useValue: createSpyFromClass(ProcessRepoService) },
+                { provide: ProcessRepoService, useValue: processRepoService },
                 { provide: DeploymentsService, useValue: createSpyFromClass(DeploymentsService) },
                 { provide: FlowRepoService, useValue: flowRepoService },
                 { provide: ParserService, useValue: createSpyFromClass(ParserService) },
@@ -298,6 +301,46 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
             expect(generate({ aspect_id: water.id, aspect_ids: [air.id] })).toEqual([
                 { aspect_id: air.id, aspect_ids: [air.id, water.id], device_class_id: undefined, function_id: 'f', interaction: 'request' },
             ]);
+        });
+    });
+
+    describe('runtime devices of a process deployment', () => {
+        const devicesKey = 'process_deployment.devices';
+        const withDevices = (value: string) => init([{ name: devicesKey, type: 'text', value }], [air, water], 'process_deployment');
+
+        it('accepts no devices, a list of device ids and a value only known at runtime', () => {
+            for (const value of ['', '[]', '["urn:infai:ses:device:1", "urn:infai:ses:device:2"]', '${targets}', '["${trigger}"]']) {
+                TestBed.resetTestingModule();
+                withDevices(value);
+                expect(component.processDevicesProblem()).withContext(value).toBe('');
+                expect(component.isInvalid()).withContext(value).toBeFalse();
+            }
+        });
+
+        // the automation-engine fails the task on them instead of placing the process unnoticed
+        it('blocks Save on values the engine rejects', () => {
+            for (const value of ['urn:infai:ses:device:1', '{"id":"urn:infai:ses:device:1"}', '[1]', '["a",']) {
+                TestBed.resetTestingModule();
+                withDevices(value);
+                expect(component.processDevicesProblem()).withContext(value).toContain('JSON list of device ids');
+                expect(component.isInvalid()).withContext(value).toBeTrue();
+            }
+        });
+
+        it('saves the devices with the task', () => {
+            withDevices('');
+            component.processDevices = '["urn:infai:ses:device:1"]';
+            component.ok();
+            const result = dialogRef.close.calls.mostRecent().args[0] as SmartServiceTaskDescription;
+            expect(result.inputs.find(input => input.name === devicesKey)?.value).toBe('["urn:infai:ses:device:1"]');
+        });
+
+        it('keeps the devices when another process model is chosen', () => {
+            withDevices('["urn:infai:ses:device:1"]');
+            const deployments = TestBed.inject(DeploymentsService) as unknown as Spy<DeploymentsService>;
+            deployments.getPreparedDeployments.and.returnValue(of({ id: 'other-model', name: 'other', elements: [] } as unknown as V2DeploymentsPreparedModel));
+            component.ensureProcessTaskParameter('other-model');
+            expect(component.processDevices).toBe('["urn:infai:ses:device:1"]');
         });
     });
 });

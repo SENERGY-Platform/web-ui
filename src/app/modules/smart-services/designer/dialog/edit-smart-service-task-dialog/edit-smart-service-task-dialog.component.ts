@@ -451,6 +451,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                         { name: 'process_deployment.name', value: this.selectedProcessModelPreparation.name, type: 'text' },
                         this.knownInputValues.get('process_deployment.module_data') || { name: 'process_deployment.module_data', value: '{}', type: 'text' },
                         this.knownInputValues.get(this.processFogFieldName) || { name: this.processFogFieldName, value: 'false', type: 'text' },
+                        this.knownInputValues.get(this.processDevicesFieldName) || { name: this.processDevicesFieldName, value: '', type: 'text' },
                         this.knownInputValues.get(this.processRestartFieldName) || { name: this.processRestartFieldName, value: 'false', type: 'text' },
                         this.knownInputValues.get(this.processNotifyFieldName) || { name: this.processNotifyFieldName, value: 'true', type: 'text' }
                     ];
@@ -585,6 +586,33 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     set processFog(value: string) {
         this.setFieldValue(this.processFogFieldName, 'text', value);
+    }
+
+    // devices the process finds only at runtime; with prefer_fog_deployment the gateway has to carry them too
+    processDevicesFieldName = 'process_deployment.devices';
+    get processDevices(): string {
+        return this.getFieldValue(this.processDevicesFieldName, 'text', '');
+    }
+
+    set processDevices(value: string) {
+        this.setFieldValue(this.processDevicesFieldName, 'text', value);
+    }
+
+    /** Why the automation-engine would fail the task on the runtime devices; empty if they are valid or only known at runtime. */
+    processDevicesProblem(): string {
+        const value = this.processDevices.trim();
+        if (!value || value.includes('${')) {
+            return '';
+        }
+        try {
+            const ids = JSON.parse(value);
+            if (Array.isArray(ids) && ids.every(id => typeof id === 'string')) {
+                return '';
+            }
+        } catch (_) {
+            // reported below
+        }
+        return 'Runtime Devices must be a JSON list of device ids, e.g. ["urn:infai:ses:device:..."]';
     }
 
     processRestartFieldName = 'process_deployment.on_incident.restart';
@@ -1551,6 +1579,8 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             return true;
         }
         switch (this.result.topic) {
+            case 'process_deployment':
+                return this.processDevicesProblem() !== '';
             case 'export':
                 if (!this.exportRequest.Name) {
                     return true;
