@@ -135,7 +135,7 @@
                 <mat-tab label="Waiting ({{ state.waits?.length || 0 }})">
                     <div class="debugger-tab">
                         <div *ngIf="!state.waits?.length" class="debugger-muted">No element waits.</div>
-                        <div class="debugger-card" *ngFor="let w of state.waits"
+                        <div class="debugger-card" *ngFor="let w of state.waits; trackBy: trackWait"
                             [class.debugger-card-selected]="w.element_id === selectedElementId">
                             <div class="debugger-section-title clickable" (click)="selectElement(w.element_id)">
                                 {{ elementName(w.element_id) }} <span class="debugger-muted">{{ w.kind }} since {{ w.since | date: 'dd.MM.yy HH:mm:ss' }}</span>
@@ -245,7 +245,7 @@
                         <div *ngIf="variableRows.length === 0" class="debugger-muted">No variables.</div>
                         <table class="debugger-table" *ngIf="variableRows.length > 0">
                             <tr><th>Name</th><th>Type</th><th>Value</th><th>Changed</th><th *ngIf="canIntervene"></th></tr>
-                            <tr *ngFor="let row of variableRows">
+                            <tr *ngFor="let row of variableRows; trackBy: trackVariable">
                                 <td>
                                     {{ row.name }}
                                     <div class="debugger-muted" *ngIf="row.elementId">local at {{ elementName(row.elementId) }}</div>

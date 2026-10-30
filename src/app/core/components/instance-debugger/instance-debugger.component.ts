@@ -500,6 +500,15 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
         return (row.elementId || '') + '/' + row.name;
     }
 
+    /**
+     * variableRows builds new rows on every check; without tracking, the rows and the editor in them would be
+     * created anew each time, and the ngModel of a new editor asks for the next check: the page hangs.
+     */
+    trackVariable = (_: number, row: DebugVariableRow): string => this.variableKey(row);
+
+    /** a delta of the live stream replaces the waits; an open trigger form keeps its element and focus */
+    trackWait = (_: number, wait: EngineWait): string => wait.element_id + '/' + wait.kind;
+
     loadFullValue(row: DebugVariableRow): void {
         const key = this.variableKey(row);
         this.loadingValues.add(key);

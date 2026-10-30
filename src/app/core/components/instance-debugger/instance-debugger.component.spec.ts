@@ -253,6 +253,21 @@ describe('InstanceDebuggerComponent', () => {
         flushDiagram();
     });
 
+    it('keeps the variable editor across checks', () => {
+        query = { tab: '1' };
+        create();
+        stream.next({ status: 'live', activities: [], state: debugState() });
+        component.editVariable(component.variableRows.find((r) => r.name === 'a')!);
+        fixture.detectChanges();
+        const editor = fixture.nativeElement.querySelector('.debugger-value textarea');
+        expect(editor).not.toBeNull();
+        // the rows are built anew on every check; created anew in the DOM as well, the ngModel of each new
+        // editor asked for the next check and the page hung
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('.debugger-value textarea')).toBe(editor);
+        flushDiagram();
+    });
+
     it('passes local variables of a triggered event and loads a cut value before editing it', async () => {
         create();
         const wait = { element_id: 'Task_A', kind: 'message', since: '', message: { name: 'm' } };
