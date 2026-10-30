@@ -183,6 +183,116 @@ describe('InstanceDebuggerComponent', () => {
         expect(fixture.nativeElement.textContent).toContain('the earliest is 40');
     });
 
+    it('searches the history and jumps to an entry found', async () => {
+        create();
+        stream.next({ status: 'live', activities: [], state: debugState() });
+        flushDiagram();
+        await until(() => component.diagramElements.length > 0);
+        expect(component.diagramElements).toEqual([
+            { id: 'Task_A', name: 'Do A' },
+            { id: 'Start', name: 'Start' },
+        ]);
+
+        component.search = { variable: ' level ', value: '21', kind: undefined };
+        component.runSearch();
+        const found = { instance_id: 'i-1', run: 1, seq: 7, time: '', kind: 'variable_set', data: { name: 'level', value: 21.5 } };
+        http.expectOne(instance() + '/activities?after_seq=0&limit=50&variable=level&value=21').flush({
+            items: Array.from({ length: 50 }, (_, i) => ({ ...found, seq: i + 1 })),
+            truncated: false,
+        });
+        expect(component.searchHasMore).toBeTrue();
+        component.runSearch(true);
+        http.expectOne(instance() + '/activities?after_seq=50&limit=50&variable=level&value=21').flush({ items: [{ ...found, seq: 70 }], truncated: false });
+        expect(component.searchHasMore).toBeFalse();
+        expect(component.shownActivities.length).toBe(51);
+
+        component.jumpToActivity(component.shownActivities[50]);
+        http.expectOne(instance() + '/history?seq=70').flush(debugState({ seq: 70 }));
+        http.expectOne((r) => r.url === instance() + '/activities' && !r.params.has('variable')).flush({ items: [], truncated: false });
+        expect(component.shownActivities.length).toBe(51);
+
+        component.clearSearch();
+        expect(component.shownActivities).toEqual([]);
+        component.runSearch();
+        http.expectNone((r) => r.url === instance() + '/activities');
+    });
+
+    it('sets a variable and triggers a waiting timer while following the instance live', () => {
+        create();
+        const wait = { element_id: 'Task_A', kind: 'timer', since: '', timer: { definition: 'PT1H' } };
+        stream.next({ status: 'live', activities: [], state: debugState({ waits: [wait] }) });
+        fixture.detectChanges();
+        expect(component.canIntervene).toBeTrue();
+        expect(fixture.nativeElement.textContent).toContain('Fire now');
+
+        const row = component.variableRows.find((r) => r.name === 'a')!;
+        component.editVariable(row);
+        expect(component.editing?.text).toBe('1');
+        component.editing!.text = 'warm';
+        component.saveVariable();
+        expect(component.editing?.error).toContain('double quotes');
+        http.expectNone(instance() + '/variables/a');
+        component.editing!.text = '{"target": 21}';
+        component.saveVariable();
+        const put = http.expectOne(instance() + '/variables/a');
+        expect(put.request.method).toBe('PUT');
+        expect(put.request.body).toEqual({ value: { target: 21 } });
+        put.flush(null, { status: 204, statusText: 'No Content' });
+        expect(component.editing).toBeNull();
+        expect(component.actionDone).toBe('Variable a set.');
+
+        component.startTrigger(wait);
+        component.trigger();
+        const post = http.expectOne(instance() + '/waits/Task_A/trigger');
+        expect(post.request.method).toBe('POST');
+        expect(post.request.body).toEqual({});
+        post.flush({ kind: 'forbidden', message: 'missing right write on instance i-1' }, { status: 403, statusText: 'Forbidden' });
+        fixture.detectChanges();
+        expect(fixture.nativeElement.textContent).toContain('missing right write on instance i-1');
+        expect(component.triggering).not.toBeNull();
+        flushDiagram();
+    });
+
+    it('passes local variables of a triggered event and loads a cut value before editing it', async () => {
+        create();
+        const wait = { element_id: 'Task_A', kind: 'message', since: '', message: { name: 'm' } };
+        const big = { value: 'abc', type: 'string', updated_at: '', truncated: true, size: 5000 };
+        stream.next({ status: 'live', activities: [], state: debugState({ waits: [wait], variables: { big } }) });
+        flushDiagram();
+        await until(() => component.elementName('Task_A') === 'Do A');
+
+        component.startTrigger(wait);
+        component.triggering!.text = '[1]';
+        component.trigger();
+        expect(component.triggering?.error).toBe('not a JSON object');
+        component.triggering!.text = '{"event": 42}';
+        component.trigger();
+        const post = http.expectOne(instance() + '/waits/Task_A/trigger');
+        expect(post.request.body).toEqual({ local_variables: { event: 42 } });
+        post.flush(null, { status: 204, statusText: 'No Content' });
+        expect(component.triggering).toBeNull();
+        expect(component.actionDone).toBe('Do A triggered.');
+
+        component.editVariable(component.variableRows[0]);
+        http.expectOne(instance() + '/variables/big').flush({ name: 'big', value: 'abcdef', type: 'string' });
+        expect(component.editing).toEqual({ name: 'big', text: '"abcdef"' });
+    });
+
+    it('offers no interventions for an instance on a gateway or a step of the history', () => {
+        create();
+        const wait = { element_id: 'Task_A', kind: 'timer', since: '', timer: { definition: 'PT1H' } };
+        stream.next({ status: 'live', activities: [], state: debugState({ waits: [wait], instance: { ...debugState().instance, network_id: 'n-1' } }) });
+        fixture.detectChanges();
+        expect(component.canIntervene).toBeFalse();
+        expect(fixture.nativeElement.textContent).not.toContain('Fire now');
+        flushDiagram();
+
+        component.loadStep({ seq: 3 });
+        http.expectOne(instance() + '/history?seq=3').flush(debugState({ seq: 3, waits: [wait] }));
+        http.expectOne((r) => r.url === instance() + '/activities').flush({ items: [], truncated: false });
+        expect(component.canIntervene).toBeFalse();
+    });
+
     it('loads the complete value of a truncated local variable at the step shown', () => {
         query = { step: '4' };
         create();

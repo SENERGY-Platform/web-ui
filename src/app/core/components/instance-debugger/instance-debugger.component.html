@@ -91,6 +91,8 @@
     <div class="debugger-notice" *ngIf="mode === 'live' && streamStatus === 'reconnecting'">
         Connection lost ({{ streamError }}), reconnecting.
     </div>
+    <div class="debugger-notice color-warn" *ngIf="actionError">{{ actionError }}</div>
+    <div class="debugger-notice" *ngIf="actionDone">{{ actionDone }}</div>
     <div class="debugger-notice" *ngIf="mode === 'history' && state?.truncated">
         Older steps were removed; the history begins at step {{ firstSeq() }}.
     </div>
@@ -168,6 +170,29 @@
                                 <span *ngIf="w.timer.due_at">, due {{ w.timer.due_at | date: 'dd.MM.yy HH:mm:ss' }}</span>
                             </div>
 
+                            <div class="debugger-actions" *ngIf="canTrigger(w)">
+                                <ng-container *ngIf="triggering?.elementId === w.element_id && triggering as t; else triggerButton">
+                                    <div class="debugger-muted">
+                                        {{ w.kind === 'timer' ? 'The timer fires now instead of at its due time.' : 'The event is correlated now, without evaluating its condition.' }}
+                                    </div>
+                                    <mat-form-field class="debugger-input" color="accent" subscriptSizing="dynamic" *ngIf="w.kind === 'message'">
+                                        <mat-label>Local variables, a JSON object (optional)</mat-label>
+                                        <textarea matInput rows="3" [(ngModel)]="t.text" placeholder='{"event": 42}'></textarea>
+                                    </mat-form-field>
+                                    <div class="color-warn" *ngIf="t.error">{{ t.error }}</div>
+                                    <button mat-flat-button color="accent" (click)="trigger()" [disabled]="acting">
+                                        {{ w.kind === 'timer' ? 'Fire' : 'Trigger' }}
+                                    </button>
+                                    <button mat-button (click)="triggering = null" [disabled]="acting">Cancel</button>
+                                </ng-container>
+                                <ng-template #triggerButton>
+                                    <button mat-stroked-button color="accent" (click)="startTrigger(w)" [disabled]="acting">
+                                        <mat-icon>{{ w.kind === 'timer' ? 'alarm_on' : 'bolt' }}</mat-icon>
+                                        {{ w.kind === 'timer' ? 'Fire now' : 'Trigger now' }}
+                                    </button>
+                                </ng-template>
+                            </div>
+
                             <div *ngIf="w.task">
                                 task <code>{{ w.task.task_type }}</code> <span *ngIf="w.task.state">{{ w.task.state }}</span>,
                                 attempt {{ w.task.attempt }}, {{ w.task.retries }} retries
@@ -219,7 +244,7 @@
                     <div class="debugger-tab">
                         <div *ngIf="variableRows.length === 0" class="debugger-muted">No variables.</div>
                         <table class="debugger-table" *ngIf="variableRows.length > 0">
-                            <tr><th>Name</th><th>Type</th><th>Value</th><th>Changed</th></tr>
+                            <tr><th>Name</th><th>Type</th><th>Value</th><th>Changed</th><th *ngIf="canIntervene"></th></tr>
                             <tr *ngFor="let row of variableRows">
                                 <td>
                                     {{ row.name }}
@@ -227,23 +252,40 @@
                                 </td>
                                 <td>{{ row.variable.type }}</td>
                                 <td class="debugger-value">
-                                    <ng-container *ngIf="fullValues.get(variableKey(row)) as full; else shortValue">
-                                        <pre class="debugger-code" *ngIf="!full.error && !full.unavailable">{{ pretty(full.value) }}</pre>
-                                        <span class="debugger-muted" *ngIf="full.unavailable">The complete value is kept only at snapshots of the history.</span>
-                                        <span class="color-warn" *ngIf="full.error">{{ full.error }}</span>
+                                    <ng-container *ngIf="isEditing(row) && editing as e; else currentValue">
+                                        <mat-form-field class="debugger-input" color="accent" subscriptSizing="dynamic">
+                                            <mat-label>Value as JSON</mat-label>
+                                            <textarea matInput rows="4" [(ngModel)]="e.text"></textarea>
+                                        </mat-form-field>
+                                        <div class="color-warn" *ngIf="e.error">{{ e.error }}</div>
+                                        <button mat-flat-button color="accent" (click)="saveVariable()" [disabled]="acting">Save</button>
+                                        <button mat-button (click)="editing = null" [disabled]="acting">Cancel</button>
                                     </ng-container>
-                                    <ng-template #shortValue>
-                                        <code>{{ preview(row.variable.value) }}</code>
-                                        <button mat-button color="accent" *ngIf="row.variable.truncated"
-                                            [disabled]="loadingValues.has(variableKey(row))" (click)="loadFullValue(row)">
-                                            load {{ row.variable.size ? (row.variable.size | number) + ' bytes' : 'complete value' }}
-                                        </button>
+                                    <ng-template #currentValue>
+                                        <ng-container *ngIf="fullValues.get(variableKey(row)) as full; else shortValue">
+                                            <pre class="debugger-code" *ngIf="!full.error && !full.unavailable">{{ pretty(full.value) }}</pre>
+                                            <span class="debugger-muted" *ngIf="full.unavailable">The complete value is kept only at snapshots of the history.</span>
+                                            <span class="color-warn" *ngIf="full.error">{{ full.error }}</span>
+                                        </ng-container>
+                                        <ng-template #shortValue>
+                                            <code>{{ preview(row.variable.value) }}</code>
+                                            <button mat-button color="accent" *ngIf="row.variable.truncated"
+                                                [disabled]="loadingValues.has(variableKey(row))" (click)="loadFullValue(row)">
+                                                load {{ row.variable.size ? (row.variable.size | number) + ' bytes' : 'complete value' }}
+                                            </button>
+                                        </ng-template>
                                     </ng-template>
                                 </td>
                                 <td>
                                     {{ row.variable.updated_at | date: 'dd.MM.yy HH:mm:ss' }}
                                     <div class="debugger-muted clickable" *ngIf="row.variable.element_id"
                                         (click)="selectElement(row.variable.element_id!)">by {{ elementName(row.variable.element_id) }}</div>
+                                </td>
+                                <td *ngIf="canIntervene">
+                                    <button mat-icon-button color="accent" *ngIf="!row.elementId && !isEditing(row)" matTooltip="Set the value"
+                                        (click)="editVariable(row)" [disabled]="acting">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
                                 </td>
                             </tr>
                         </table>
@@ -266,12 +308,44 @@
 
                 <mat-tab label="Activities">
                     <div class="debugger-tab">
-                        <div *ngIf="activities.length === 0" class="debugger-muted">
-                            {{ mode === 'live' ? 'Entries appear here as the instance proceeds.' : 'No entries.' }}
+                        <form class="debugger-search" (ngSubmit)="runSearch()">
+                            <mat-form-field color="accent" subscriptSizing="dynamic">
+                                <mat-label>Kind</mat-label>
+                                <mat-select name="kind" [(ngModel)]="search.kind">
+                                    <mat-option [value]="undefined">any</mat-option>
+                                    <mat-option *ngFor="let k of activityKinds" [value]="k">{{ kindLabel(k) }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field color="accent" subscriptSizing="dynamic">
+                                <mat-label>Element</mat-label>
+                                <mat-select name="element" [(ngModel)]="search.element_id">
+                                    <mat-option [value]="undefined">any</mat-option>
+                                    <mat-option *ngFor="let e of diagramElements" [value]="e.id">{{ e.name }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <mat-form-field color="accent" subscriptSizing="dynamic">
+                                <mat-label>Variable</mat-label>
+                                <input matInput name="variable" [(ngModel)]="search.variable">
+                            </mat-form-field>
+                            <mat-form-field color="accent" subscriptSizing="dynamic"
+                                matTooltip="Values that contain this text, ignoring case; numbers and objects as JSON. Values above 4 KiB are searched in their beginning.">
+                                <mat-label>Value</mat-label>
+                                <input matInput name="value" [(ngModel)]="search.value">
+                            </mat-form-field>
+                            <button mat-icon-button color="accent" type="submit" matTooltip="Search all runs" [disabled]="searching">
+                                <mat-icon>search</mat-icon>
+                            </button>
+                            <button mat-icon-button type="button" *ngIf="searchResults" matTooltip="Clear the search" (click)="clearSearch()">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </form>
+                        <div class="color-warn" *ngIf="searchError">{{ searchError }}</div>
+                        <div *ngIf="shownActivities.length === 0" class="debugger-muted">
+                            {{ searchResults ? 'No entry matches.' : mode === 'live' ? 'Entries appear here as the instance proceeds.' : 'No entries.' }}
                         </div>
-                        <table class="debugger-table" *ngIf="activities.length > 0">
+                        <table class="debugger-table" *ngIf="shownActivities.length > 0">
                             <tr><th>Step</th><th>Time</th><th>Element</th><th>Entry</th></tr>
-                            <tr *ngFor="let a of activities" class="clickable" [class.debugger-row-current]="mode === 'history' && a.seq === state.seq"
+                            <tr *ngFor="let a of shownActivities" class="clickable" [class.debugger-row-current]="mode === 'history' && a.seq === state.seq"
                                 (click)="jumpToActivity(a)" matTooltip="Show the state after this step">
                                 <td>{{ a.seq }}<span class="debugger-muted" *ngIf="a.run !== state.instance.run"> (run {{ a.run }})</span></td>
                                 <td>{{ a.time | date: 'HH:mm:ss.SSS' }}</td>
@@ -279,6 +353,7 @@
                                 <td class="debugger-value">{{ describe(a) }}</td>
                             </tr>
                         </table>
+                        <button mat-stroked-button color="accent" *ngIf="searchResults && searchHasMore" (click)="runSearch(true)" [disabled]="searching">More</button>
                     </div>
                 </mat-tab>
 

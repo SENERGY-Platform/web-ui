@@ -144,3 +144,49 @@ export function describeActivity(activity: EngineActivity): string {
     }
     return text;
 }
+
+/** kinds of the activity log (model.ActivityKind of the engine), for the search in the history (DBG-16) */
+export const ACTIVITY_KINDS = [
+    'run_started',
+    'run_ended',
+    'element_entered',
+    'element_left',
+    'flow_taken',
+    'condition_evaluated',
+    'variable_set',
+    'variable_deleted',
+    'script_log',
+    'timer_scheduled',
+    'timer_fired',
+    'message_waiting',
+    'message_correlated',
+    'wait_cancelled',
+    'task_created',
+    'task_failed',
+    'task_completed',
+    'incident',
+    'join_waiting',
+    'restart_scheduled',
+    'modules_changed',
+    'modules_removed',
+];
+
+/**
+ * Reads a value typed into the debugger as JSON. With objectOnly, empty text is no value and anything but
+ * an object is an error, for the local variables of a triggered event.
+ */
+export function parseJsonInput(text: string, objectOnly = false): { value?: any; error?: string } {
+    if (objectOnly && text.trim() === '') {
+        return {};
+    }
+    let value: any;
+    try {
+        value = JSON.parse(text);
+    } catch {
+        return { error: objectOnly ? 'not a JSON object' : 'not valid JSON; put text in double quotes' };
+    }
+    if (objectOnly && (value === null || typeof value !== 'object' || Array.isArray(value))) {
+        return { error: 'not a JSON object' };
+    }
+    return { value };
+}

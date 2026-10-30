@@ -21,6 +21,7 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ErrorHandlerService } from './error-handler.service';
 import {
+    EngineActivityFilter,
     EngineActivityPage,
     EngineDebugState,
     EngineDeployment,
@@ -222,9 +223,28 @@ export class AutomationEngineService {
     }
 
     /** activity entries after afterSeq, in sequence order */
-    getActivities(namespace: string, id: string, afterSeq: number, limit: number): Observable<EngineActivityPage> {
-        const params = new HttpParams().set('after_seq', afterSeq).set('limit', limit);
+    getActivities(namespace: string, id: string, afterSeq: number, limit: number, filter: EngineActivityFilter = {}): Observable<EngineActivityPage> {
+        let params = new HttpParams().set('after_seq', afterSeq).set('limit', limit);
+        (['kind', 'element_id', 'variable', 'value'] as const).forEach((key) => {
+            if (filter[key]) {
+                params = params.set(key, filter[key]!);
+            }
+        });
         return this.http.get<EngineActivityPage>(this.instanceUrl(namespace, id) + '/activities', { params });
+    }
+
+    /** sets an instance variable (RUN-05); needs the write right. Errors are not caught, the debugger shows them. */
+    setVariable(namespace: string, id: string, name: string, value: any): Observable<void> {
+        return this.http.put<void>(this.instanceUrl(namespace, id) + '/variables/' + encodeURIComponent(name), { value });
+    }
+
+    /**
+     * Triggers what an element waits for at once (DBG-17): a message or device event without its condition,
+     * a timer before it is due. Needs the write right. Errors are not caught, the debugger shows them.
+     */
+    triggerWait(namespace: string, id: string, elementId: string, localVariables?: { [name: string]: any }): Observable<void> {
+        const body = localVariables && Object.keys(localVariables).length > 0 ? { local_variables: localVariables } : {};
+        return this.http.post<void>(this.instanceUrl(namespace, id) + '/waits/' + encodeURIComponent(elementId) + '/trigger', body);
     }
 
     /** evaluations of a device event reconstructed from the time series; after continues with next of the previous page */

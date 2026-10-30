@@ -233,3 +233,23 @@
     font-size: 12px;
     line-height: 18px;
 }
+
+.debugger-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.debugger-search mat-form-field {
+    width: 150px;
+}
+
+.debugger-actions {
+    margin-top: 8px;
+}
+
+.debugger-input {
+    width: 100%;
+}

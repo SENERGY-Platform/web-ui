@@ -306,6 +306,16 @@ export interface EngineActivityPage {
     truncated: boolean;
 }
 
+/** filters of the activity list; variable and value search the history (DBG-16) */
+export interface EngineActivityFilter {
+    kind?: string;
+    element_id?: string;
+    /** entries that set or delete this variable */
+    variable?: string;
+    /** entries that set a variable to a value containing this text, ignoring case */
+    value?: string;
+}
+
 /** model.DebugState, live (GET .../debug, live stream) and at a step of the history (GET .../history) */
 export interface EngineDebugState {
     instance: EngineInstance;
