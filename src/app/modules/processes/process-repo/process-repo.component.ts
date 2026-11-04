@@ -184,7 +184,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
     }
 
     permission(process: ProcessModel): void {
-        this.permissionsDialogService.openPermissionV2Dialog('processmodel', process._id, process.name);
+        this.permissionsDialogService.openPermissionV2Dialog('processes_models', process._id, process.name);
     }
 
     downloadDiagram(process: ProcessModel): void {
@@ -280,7 +280,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit {
             .pipe(
                 concatMap((resp) => {
                     const ids = resp.result.map((e) => e._id);
-                    const permissions = ids.length > 0 ? this.permissionsService.getComputedResourcePermissionsV2('processmodel', ids) : of([]);
+                    const permissions = ids.length > 0 ? this.permissionsService.getComputedResourcePermissionsV2('processes_models', ids) : of([]);
                     return permissions.pipe(
                         tap((perm) => (this.permissionsPerModel = perm)),
                         map(() => resp),

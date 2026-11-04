@@ -74,6 +74,16 @@ describe('SmartServiceInstancesComponent', () => {
         getExtendedReleaseList = jasmine.createSpy('getExtendedReleaseList').and.returnValue(of({ releases: [], total: 0 }));
     });
 
+    it('shares an instance on the topic of the automation-engine', () => {
+        create({});
+        const openPermissionV2Dialog = jasmine.createSpy('openPermissionV2Dialog');
+        (component as any).permissionsDialogService = { openPermissionV2Dialog };
+
+        component.shareInstance({ id: 'i1', name: 'Instance' } as any);
+
+        expect(openPermissionV2Dialog).toHaveBeenCalledWith('smart-services_instances', 'i1', 'Instance');
+    });
+
     it('restores the page of the URL on the first load', () => {
         create({ page: '2' });
         component.ngOnInit();

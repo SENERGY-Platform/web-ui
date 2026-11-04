@@ -342,7 +342,11 @@ export function writeDeviceTask(services: TaskServices, element: any, connectorI
         }
         if (connectorInfo.function.rdf_type === measuringFunction) {
             inputs = [inputParameter(moddle, 'payload', getPayload(connectorInfo, false))];
-            outputs = taskParameters(moddle, generateStructure(connectorInfo.characteristic, false, ''), 'outputs', false);
+            // results names device, service and value of every answer, which a task on a device group needs to tell its
+            // members apart; result alone leaves out the devices that did not answer
+            outputs = taskParameters(moddle, generateStructure(connectorInfo.characteristic, false, ''), 'outputs', false).concat([
+                outputParameter(moddle, 'outputs_results', '${results}'),
+            ]);
         }
         keepParameterEdits(previous, connectorInfo.characteristic?.id, inputs, outputs);
         setExtension(moddle, task, inputOutput(moddle, inputs, outputs));

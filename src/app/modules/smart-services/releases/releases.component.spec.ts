@@ -86,6 +86,20 @@ describe('SmartServiceReleasesComponent', () => {
         return Array.from(document.querySelectorAll('.mat-mdc-menu-panel button')).map((b) => (b.textContent || '').replace(/\s+/g, ' ').trim().replace(/^\w+ /, ''));
     }
 
+    it('shares a release, also an older version, on the deployment it belongs to', async () => {
+        await init([]);
+        const dialog = TestBed.inject(PermissionsDialogService) as any;
+        dialog.openPermissionV2Dialog = jasmine.createSpy('openPermissionV2Dialog');
+
+        component.permission(release('dep-1') as any);
+        component.permission(release('dep-1:v2') as any);
+
+        expect(dialog.openPermissionV2Dialog.calls.allArgs()).toEqual([
+            ['smart-services_deployments', 'dep-1', 'dep-1'],
+            ['smart-services_deployments', 'dep-1', 'dep-1:v2'],
+        ]);
+    });
+
     it('renders releases with and without changed resources and a chip only at the changed one', async () => {
         await init([release('plain'), release('changed', { changed_resources: [{ kind: 'flow', id: 'flow-1', reason: 'gone', at: 1760000000 }] })]);
 

@@ -196,3 +196,23 @@
 .legend-trigger::before { border-color: var(--debug-waiting); background: var(--debug-trigger-fill); }
 .legend-passed::before { border-color: var(--debug-passed); background: var(--debug-passed-fill); }
 .legend-incident::before { border-color: var(--debug-incident); background: var(--debug-incident-fill); }
+
+.debugger-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.debugger-search mat-form-field {
+    width: 150px;
+}
+
+.debugger-actions {
+    margin-top: 8px;
+}
+
+.debugger-input {
+    width: 100%;
+}

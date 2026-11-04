@@ -25,6 +25,7 @@ import {
     MARKER_PASSED,
     MARKER_WAITING,
     MARKER_WOULD_TRIGGER,
+    parseJsonInput,
 } from './debug-state';
 
 describe('applyDebugMessage', () => {
@@ -160,5 +161,22 @@ describe('describeActivity', () => {
         const long = describeActivity({ instance_id: 'i', run: 1, seq: 3, time: '', kind: 'script_log', data: { message: 'x'.repeat(400) } });
         expect(long.endsWith('...')).toBeTrue();
         expect(long.length).toBeLessThan(330);
+    });
+});
+
+describe('parseJsonInput', () => {
+    it('reads a variable value as JSON and asks for quotes around text', () => {
+        expect(parseJsonInput('{"a": [1, 2]}')).toEqual({ value: { a: [1, 2] } });
+        expect(parseJsonInput('"on"')).toEqual({ value: 'on' });
+        expect(parseJsonInput('null')).toEqual({ value: null });
+        expect(parseJsonInput('on').error).toContain('double quotes');
+    });
+
+    it('takes only an object or nothing for local variables', () => {
+        expect(parseJsonInput('  ', true)).toEqual({});
+        expect(parseJsonInput('{"event": 42}', true)).toEqual({ value: { event: 42 } });
+        expect(parseJsonInput('42', true).error).toBe('not a JSON object');
+        expect(parseJsonInput('[1]', true).error).toBe('not a JSON object');
+        expect(parseJsonInput('{', true).error).toBe('not a JSON object');
     });
 });

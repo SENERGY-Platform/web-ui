@@ -288,6 +288,7 @@ describe('process writers on the process designer modeler', () => {
                 'outputs.r': '${result.r}',
                 'outputs.g': '${result.g}',
                 'outputs.b': '${result.b}',
+                'outputs_results': '${results}',
             });
             expect(readDeviceTask(selected()).aspects.map((node: any) => node.id)).toEqual([air.id, water.id]);
             expect(hasOutputsForTopic(selected(), 'pessimistic')).toBe(true);
@@ -300,7 +301,7 @@ describe('process writers on the process designer modeler', () => {
             writeDeviceTask(services, element('Task_1'), connectorInfo({ characteristic: { ...rgb, sub_characteristics: [integer('r'), unknown] } }));
 
             const task = byId(await saved(), selected().id);
-            expect(parameters(task, 'camunda:outputParameter')).toEqual({ 'outputs.r': '${result.r}' });
+            expect(parameters(task, 'camunda:outputParameter')).toEqual({ 'outputs.r': '${result.r}', 'outputs_results': '${results}' });
         });
 
         it('offers Edit Input only for inputs besides the payload', () => {
@@ -342,12 +343,29 @@ describe('process writers on the process designer modeler', () => {
 
             it('keeps the renamed output variables when the aspects change and the characteristic stays', () => {
                 writeDeviceTask(services, element('Task_1'), connectorInfo({ aspect: air, aspects: [air], characteristic: celsius }));
-                expect(io().outputParameters.map((p: any) => [p.name, p.value])).toEqual([['outputs', '${result}']]);
+                expect(io().outputParameters.map((p: any) => [p.name, p.value])).toEqual([
+                    ['outputs', '${result}'],
+                    ['outputs_results', '${results}'],
+                ]);
                 io().outputParameters[0].name = 'temperature';
+                io().outputParameters[1].name = 'readings';
 
                 writeDeviceTask(services, selected(), connectorInfo({ aspect: water, aspects: [water], characteristic: celsius }));
 
-                expect(io().outputParameters.map((p: any) => [p.name, p.value])).toEqual([['temperature', '${result}']]);
+                expect(io().outputParameters.map((p: any) => [p.name, p.value])).toEqual([
+                    ['temperature', '${result}'],
+                    ['readings', '${results}'],
+                ]);
+            });
+
+            it('maps the device, service and value of every answer of a measuring task to outputs_results', () => {
+                writeDeviceTask(services, element('Task_1'), connectorInfo({ aspect: air, aspects: [air], characteristic: celsius }));
+                expect(io().outputParameters.find((p: any) => p.value === '${results}')?.name).toBe('outputs_results');
+            });
+
+            it('maps no results for a controlling task, which reads nothing', () => {
+                writeDeviceTask(services, element('Task_1'), controllingInfo([air]));
+                expect(io().outputParameters).toEqual([]);
             });
         });
 

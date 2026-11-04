@@ -27,10 +27,12 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Subscription } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { Observable, Subscription } from 'rxjs';
 import NavigatedViewer from 'bpmn-js/lib/NavigatedViewer';
 import {
     EngineActivity,
+    EngineActivityFilter,
     EngineActiveElement,
     EngineDebugState,
     EngineDebugVariable,
@@ -43,12 +45,14 @@ import {
 import { AutomationEngineService, EngineHistoryStep, PROCESSES_NAMESPACE, engineErrorMessage } from '../../services/automation-engine.service';
 import { UrlStateService } from '../../services/url-state.service';
 import { DebugStreamStatus, InstanceDebugStreamService } from './debug-stream.service';
-import { describeActivity, diagramMarks, instanceIsRunning } from './debug-state';
+import { ACTIVITY_KINDS, describeActivity, diagramMarks, instanceIsRunning, parseJsonInput } from './debug-state';
 
 /** how many entries of the live stream the activity list keeps */
 const LIVE_ACTIVITY_LIMIT = 200;
 /** entries the history shows before and after the current step */
 const HISTORY_ACTIVITY_WINDOW = 10;
+/** entries a search in the history loads at once */
+const SEARCH_PAGE = 50;
 
 export interface DebugVariableRow {
     name: string;
@@ -79,6 +83,7 @@ export interface DebugVariableRow {
         MatProgressSpinnerModule,
         MatFormFieldModule,
         MatInputModule,
+        MatSelectModule,
     ],
     templateUrl: './instance-debugger.component.html',
     styleUrls: ['./instance-debugger.component.css'],
@@ -119,6 +124,22 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
     reconstruction: EngineEventReconstruction | null = null;
     reconstructionError: string | null = null;
     loadingReconstruction = false;
+    /** elements of the diagram, for the search */
+    diagramElements: { id: string; name: string }[] = [];
+    readonly activityKinds = ACTIVITY_KINDS;
+    /** search in the history (DBG-16) */
+    search: EngineActivityFilter = {};
+    /** entries found, in order; null while no search is shown */
+    searchResults: EngineActivity[] | null = null;
+    searchHasMore = false;
+    searching = false;
+    searchError: string | null = null;
+    /** interventions (DBG-17): the variable being set, the waiting element being triggered */
+    editing: { name: string; text: string; error?: string } | null = null;
+    triggering: { elementId: string; text: string; error?: string } | null = null;
+    acting = false;
+    actionError: string | null = null;
+    actionDone: string | null = null;
 
     private backUrl = '/';
     /** the page was opened from another page of the app, not through a link; the URL writes below are navigations too */
@@ -130,6 +151,7 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
     private streamSub: Subscription | null = null;
     private requestSub: Subscription | null = null;
     private activitiesSub: Subscription | null = null;
+    private searchSub: Subscription | null = null;
 
     ngOnInit(): void {
         this.namespace = this.route.snapshot.data['namespace'] || PROCESSES_NAMESPACE;
@@ -152,6 +174,7 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
         this.streamSub?.unsubscribe();
         this.requestSub?.unsubscribe();
         this.activitiesSub?.unsubscribe();
+        this.searchSub?.unsubscribe();
         this.diagramLoading?.unsubscribe();
         this.viewer?.destroy();
         this.viewer = null;
@@ -332,6 +355,7 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
         }
         this.diagramError = null;
         this.appliedMarkers = [];
+        this.diagramElements = this.listDiagramElements(viewer);
         viewer.get<any>('canvas').zoom('fit-viewport');
         this.applyMarks();
     }
@@ -340,6 +364,16 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
     private diagramVersion(state: EngineDebugState): number {
         const run = this.stateRun(state);
         return (state.runs || []).find((r) => r.run === run)?.deployment_version || state.instance.deployment_version;
+    }
+
+    private listDiagramElements(viewer: NavigatedViewer): { id: string; name: string }[] {
+        const skipped = ['label', 'bpmn:Process', 'bpmn:Collaboration', 'bpmn:Participant', 'bpmn:Lane'];
+        return viewer
+            .get<any>('elementRegistry')
+            .getAll()
+            .filter((e: any) => !e.waypoints && !skipped.includes(e.type))
+            .map((e: any) => ({ id: e.id, name: e.businessObject?.name || e.id }))
+            .sort((a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name));
     }
 
     private stateRun(state: EngineDebugState): number {
@@ -476,6 +510,23 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
         return (row.elementId || '') + '/' + row.name;
     }
 
+    /**
+     * variableRows builds new rows on every check; without tracking, the rows and the editor in them would be
+     * created anew each time, and the ngModel of a new editor asks for the next check: the page hangs.
+     */
+    trackVariable = (_: number, row: DebugVariableRow): string => this.variableKey(row);
+
+    /**
+     * a delta of the live stream replaces the waits; an open trigger form keeps its element and focus. Two tokens can
+     * wait at the same element, so equal keys are numbered in order, as @for needs unique keys.
+     */
+    trackWait = (index: number, wait: EngineWait): string => {
+        const key = (w: EngineWait) => w.element_id + '/' + w.kind + '/' + (w.task?.job_id || '');
+        const own = key(wait);
+        const before = (this.state?.waits || []).slice(0, index).filter((w) => key(w) === own).length;
+        return before > 0 ? own + '#' + before : own;
+    };
+
     loadFullValue(row: DebugVariableRow): void {
         const key = this.variableKey(row);
         this.loadingValues.add(key);
@@ -518,6 +569,162 @@ export class InstanceDebuggerComponent implements OnInit, OnDestroy {
                     this.reconstructionError = engineErrorMessage(err);
                 },
             });
+    }
+
+    // --- search in the history (DBG-16) --------------------------------------------------------------
+
+    kindLabel(kind: string): string {
+        return kind.replace(/_/g, ' ');
+    }
+
+    /** searches all runs; more continues after the last entry found */
+    runSearch(more = false): void {
+        const filter: EngineActivityFilter = {};
+        (['kind', 'element_id', 'variable', 'value'] as const).forEach((key) => {
+            const value = this.search[key]?.trim();
+            if (value) {
+                filter[key] = value;
+            }
+        });
+        if (Object.keys(filter).length === 0) {
+            this.clearSearch();
+            return;
+        }
+        const found = more ? this.searchResults || [] : [];
+        const after = found.length > 0 ? found[found.length - 1].seq : 0;
+        this.searching = true;
+        this.searchError = null;
+        this.searchSub?.unsubscribe();
+        this.searchSub = this.automationEngineService.getActivities(this.namespace, this.instanceId, after, SEARCH_PAGE, filter).subscribe({
+            next: (page) => {
+                const items = page.items || [];
+                this.searching = false;
+                this.searchResults = found.concat(items);
+                this.searchHasMore = items.length === SEARCH_PAGE;
+            },
+            error: (err) => {
+                this.searching = false;
+                this.searchError = engineErrorMessage(err);
+            },
+        });
+    }
+
+    clearSearch(): void {
+        this.searchSub?.unsubscribe();
+        this.search = {};
+        this.searchResults = null;
+        this.searchHasMore = false;
+        this.searching = false;
+        this.searchError = null;
+    }
+
+    /** the search results while a search is shown, otherwise the entries of the stream or around the step */
+    get shownActivities(): EngineActivity[] {
+        return this.searchResults ?? this.activities;
+    }
+
+    // --- interventions (DBG-17) ---------------------------------------------------------------------
+
+    /**
+     * Interventions change the instance, so they are offered only live and while it runs. Instances on a
+     * gateway are refused by the engine. Whether the user has the write right only the engine knows; its
+     * answer is shown.
+     */
+    get canIntervene(): boolean {
+        return this.mode === 'live' && this.running && !!this.state && !this.state.instance.network_id && !this.state.offline;
+    }
+
+    canTrigger(wait: EngineWait): boolean {
+        return this.canIntervene && (wait.kind === 'message' || wait.kind === 'timer');
+    }
+
+    isEditing(row: DebugVariableRow): boolean {
+        return this.canIntervene && !row.elementId && this.editing?.name === row.name;
+    }
+
+    /** opens the editor with the complete value, loaded first if the state holds it cut */
+    editVariable(row: DebugVariableRow): void {
+        this.triggering = null;
+        this.actionError = null;
+        this.actionDone = null;
+        const full = this.fullValues.get(this.variableKey(row));
+        if (!row.variable.truncated) {
+            this.editing = { name: row.name, text: JSON.stringify(row.variable.value, null, 2) };
+            return;
+        }
+        if (full && !full.error && !full.unavailable) {
+            this.editing = { name: row.name, text: JSON.stringify(full.value, null, 2) };
+            return;
+        }
+        this.acting = true;
+        this.automationEngineService.getVariable(this.namespace, this.instanceId, row.name).subscribe({
+            next: (v) => {
+                this.acting = false;
+                this.editing = { name: row.name, text: JSON.stringify(v.value, null, 2) };
+            },
+            error: (err) => {
+                this.acting = false;
+                this.actionError = engineErrorMessage(err);
+            },
+        });
+    }
+
+    saveVariable(): void {
+        const editing = this.editing;
+        if (!editing) {
+            return;
+        }
+        const parsed = parseJsonInput(editing.text);
+        if (parsed.error) {
+            editing.error = parsed.error;
+            return;
+        }
+        this.act(this.automationEngineService.setVariable(this.namespace, this.instanceId, editing.name, parsed.value), 'Variable ' + editing.name + ' set.', () => {
+            this.editing = null;
+            this.fullValues.delete('/' + editing.name);
+        });
+    }
+
+    startTrigger(wait: EngineWait): void {
+        this.editing = null;
+        this.actionError = null;
+        this.actionDone = null;
+        this.triggering = { elementId: wait.element_id, text: '' };
+    }
+
+    trigger(): void {
+        const triggering = this.triggering;
+        if (!triggering) {
+            return;
+        }
+        const parsed = parseJsonInput(triggering.text, true);
+        if (parsed.error) {
+            triggering.error = parsed.error;
+            return;
+        }
+        this.act(
+            this.automationEngineService.triggerWait(this.namespace, this.instanceId, triggering.elementId, parsed.value),
+            this.elementName(triggering.elementId) + ' triggered.',
+            () => (this.triggering = null),
+        );
+    }
+
+    /** the live stream or the polling shows what the intervention changed */
+    private act(request: Observable<void>, done: string, after: () => void): void {
+        this.acting = true;
+        this.actionError = null;
+        this.actionDone = null;
+        request.subscribe({
+            next: () => {
+                this.acting = false;
+                this.actionDone = done;
+                after();
+            },
+            error: (err) => {
+                this.acting = false;
+                this.actionError = engineErrorMessage(err);
+            },
+        });
     }
 
     setTab(index: number): void {

@@ -125,7 +125,7 @@ describe('process designer buttons', () => {
         await d.click('Select Function');
         await d.select(d.selected().id);
         await d.click('Select Output-Variables');
-        expect(d.callbacks['editOutput'].calls.mostRecent().args[0].map((output: any) => output.name)).toEqual(['outputs.r', 'outputs.g', 'outputs.b']);
+        expect(d.callbacks['editOutput'].calls.mostRecent().args[0].map((output: any) => output.name)).toEqual(['outputs.r', 'outputs.g', 'outputs.b', 'outputs_results']);
         expect(d.buttonLabels()).not.toContain('Edit Input');
 
         d.callbacks['findIotDeviceType'] = answering('findIotDeviceType', 1, connectorInfo({ function: controlling, completionStrategy: 'optimistic' }));

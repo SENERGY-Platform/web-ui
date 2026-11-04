@@ -136,6 +136,18 @@ describe('ProcessRepoComponent', () => {
         expect(component.hasXPermission({ _id: 'a' })).toBeFalse();
     });
 
+    it('reads and shares the rights of process models on the topic of the automation-engine', () => {
+        const dialog = TestBed.inject(PermissionsDialogService) as any;
+        dialog.openPermissionV2Dialog = jasmine.createSpy('openPermissionV2Dialog');
+
+        load(0);
+        responses[0].next({ result: [process('a', 'u1')], total: 1 });
+        component.permission(process('a', 'u1'));
+
+        expect(permissionsService.getComputedResourcePermissionsV2).toHaveBeenCalledWith('processes_models', ['a']);
+        expect(dialog.openPermissionV2Dialog).toHaveBeenCalledWith('processes_models', 'a', 'a');
+    });
+
     it('drops the answer of a superseded listing', () => {
         load(0);
         load(1);

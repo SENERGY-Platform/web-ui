@@ -110,6 +110,12 @@
             Connection lost ({{ streamError }}), reconnecting.
         </div>
     }
+    @if (actionError) {
+        <div class="debugger-notice color-warn">{{ actionError }}</div>
+    }
+    @if (actionDone) {
+        <div class="debugger-notice">{{ actionDone }}</div>
+    }
     @if (mode === 'history' && state?.truncated) {
         <div class="debugger-notice">
             Older steps were removed; the history begins at step {{ firstSeq() }}.
@@ -169,7 +175,7 @@
                 <mat-tab-group color="accent" [selectedIndex]="tabIndex" (selectedIndexChange)="setTab($event)" animationDuration="0ms">
                     <mat-tab label="Waiting ({{ state.waits?.length || 0 }})">
                         <div class="debugger-tab">
-                            @for (w of state.waits; track $index) {
+                            @for (w of state.waits; track trackWait($index, w)) {
                                 <div class="debugger-card" [class.debugger-card-selected]="w.element_id === selectedElementId">
                                     <div class="debugger-section-title clickable" (click)="selectElement(w.element_id)">
                                         {{ elementName(w.element_id) }} <span class="debugger-muted">{{ w.kind }} since {{ w.since | date: 'dd.MM.yy HH:mm:ss' }}</span>
@@ -221,6 +227,34 @@
                                             }
                                             @if (w.timer.due_at) {
                                                 <span>, due {{ w.timer.due_at | date: 'dd.MM.yy HH:mm:ss' }}</span>
+                                            }
+                                        </div>
+                                    }
+
+                                    @if (canTrigger(w)) {
+                                        <div class="debugger-actions">
+                                            @if (triggering?.elementId === w.element_id && triggering; as t) {
+                                                <div class="debugger-muted">
+                                                    {{ w.kind === 'timer' ? 'The timer fires now instead of at its due time.' : 'The event is correlated now, without evaluating its condition.' }}
+                                                </div>
+                                                @if (w.kind === 'message') {
+                                                    <mat-form-field class="debugger-input" color="accent" subscriptSizing="dynamic">
+                                                        <mat-label>Local variables, a JSON object (optional)</mat-label>
+                                                        <textarea matInput rows="3" [(ngModel)]="t.text" placeholder='{"event": 42}'></textarea>
+                                                    </mat-form-field>
+                                                }
+                                                @if (t.error) {
+                                                    <div class="color-warn">{{ t.error }}</div>
+                                                }
+                                                <button mat-flat-button color="accent" (click)="trigger()" [disabled]="acting">
+                                                    {{ w.kind === 'timer' ? 'Fire' : 'Trigger' }}
+                                                </button>
+                                                <button mat-button (click)="triggering = null" [disabled]="acting">Cancel</button>
+                                            } @else {
+                                                <button mat-stroked-button color="accent" (click)="startTrigger(w)" [disabled]="acting">
+                                                    <mat-icon>{{ w.kind === 'timer' ? 'alarm_on' : 'bolt' }}</mat-icon>
+                                                    {{ w.kind === 'timer' ? 'Fire now' : 'Trigger now' }}
+                                                </button>
                                             }
                                         </div>
                                     }
@@ -314,8 +348,8 @@
                                 <div class="debugger-muted">No variables.</div>
                             } @else {
                                 <table class="debugger-table">
-                                    <tr><th>Name</th><th>Type</th><th>Value</th><th>Changed</th></tr>
-                                    @for (row of variableRows; track $index) {
+                                    <tr><th>Name</th><th>Type</th><th>Value</th><th>Changed</th>@if (canIntervene) {<th></th>}</tr>
+                                    @for (row of variableRows; track trackVariable($index, row)) {
                                         <tr>
                                             <td>
                                                 {{ row.name }}
@@ -325,22 +359,34 @@
                                             </td>
                                             <td>{{ row.variable.type }}</td>
                                             <td class="debugger-value">
-                                                @if (fullValues.get(variableKey(row)); as full) {
-                                                    @if (!full.error && !full.unavailable) {
-                                                        <pre class="debugger-code">{{ pretty(full.value) }}</pre>
+                                                @if (isEditing(row) && editing; as e) {
+                                                    <mat-form-field class="debugger-input" color="accent" subscriptSizing="dynamic">
+                                                        <mat-label>Value as JSON</mat-label>
+                                                        <textarea matInput rows="4" [(ngModel)]="e.text"></textarea>
+                                                    </mat-form-field>
+                                                    @if (e.error) {
+                                                        <div class="color-warn">{{ e.error }}</div>
                                                     }
-                                                    @if (full.unavailable) {
-                                                        <span class="debugger-muted">The complete value is kept only at snapshots of the history.</span>
-                                                    }
-                                                    @if (full.error) {
-                                                        <span class="color-warn">{{ full.error }}</span>
-                                                    }
+                                                    <button mat-flat-button color="accent" (click)="saveVariable()" [disabled]="acting">Save</button>
+                                                    <button mat-button (click)="editing = null" [disabled]="acting">Cancel</button>
                                                 } @else {
-                                                    <code>{{ preview(row.variable.value) }}</code>
-                                                    @if (row.variable.truncated) {
-                                                        <button mat-button color="accent" [disabled]="loadingValues.has(variableKey(row))" (click)="loadFullValue(row)">
-                                                            load {{ row.variable.size ? (row.variable.size | number) + ' bytes' : 'complete value' }}
-                                                        </button>
+                                                    @if (fullValues.get(variableKey(row)); as full) {
+                                                        @if (!full.error && !full.unavailable) {
+                                                            <pre class="debugger-code">{{ pretty(full.value) }}</pre>
+                                                        }
+                                                        @if (full.unavailable) {
+                                                            <span class="debugger-muted">The complete value is kept only at snapshots of the history.</span>
+                                                        }
+                                                        @if (full.error) {
+                                                            <span class="color-warn">{{ full.error }}</span>
+                                                        }
+                                                    } @else {
+                                                        <code>{{ preview(row.variable.value) }}</code>
+                                                        @if (row.variable.truncated) {
+                                                            <button mat-button color="accent" [disabled]="loadingValues.has(variableKey(row))" (click)="loadFullValue(row)">
+                                                                load {{ row.variable.size ? (row.variable.size | number) + ' bytes' : 'complete value' }}
+                                                            </button>
+                                                        }
                                                     }
                                                 }
                                             </td>
@@ -350,6 +396,15 @@
                                                     <div class="debugger-muted clickable" (click)="selectElement(row.variable.element_id!)">by {{ elementName(row.variable.element_id) }}</div>
                                                 }
                                             </td>
+                                            @if (canIntervene) {
+                                                <td>
+                                                    @if (!row.elementId && !isEditing(row)) {
+                                                        <button mat-icon-button color="accent" matTooltip="Set the value" (click)="editVariable(row)" [disabled]="acting">
+                                                            <mat-icon>edit</mat-icon>
+                                                        </button>
+                                                    }
+                                                </td>
+                                            }
                                         </tr>
                                     }
                                 </table>
@@ -378,14 +433,54 @@
 
                     <mat-tab label="Activities">
                         <div class="debugger-tab">
-                            @if (activities.length === 0) {
+                            <form class="debugger-search" (ngSubmit)="runSearch()">
+                                <mat-form-field color="accent" subscriptSizing="dynamic">
+                                    <mat-label>Kind</mat-label>
+                                    <mat-select name="kind" [(ngModel)]="search.kind">
+                                        <mat-option [value]="undefined">any</mat-option>
+                                        @for (k of activityKinds; track k) {
+                                            <mat-option [value]="k">{{ kindLabel(k) }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-form-field color="accent" subscriptSizing="dynamic">
+                                    <mat-label>Element</mat-label>
+                                    <mat-select name="element" [(ngModel)]="search.element_id">
+                                        <mat-option [value]="undefined">any</mat-option>
+                                        @for (e of diagramElements; track e.id) {
+                                            <mat-option [value]="e.id">{{ e.name }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-form-field color="accent" subscriptSizing="dynamic">
+                                    <mat-label>Variable</mat-label>
+                                    <input matInput name="variable" [(ngModel)]="search.variable">
+                                </mat-form-field>
+                                <mat-form-field color="accent" subscriptSizing="dynamic"
+                                    matTooltip="Values that contain this text, ignoring case; numbers and objects as JSON. Values above 4 KiB are searched in their beginning.">
+                                    <mat-label>Value</mat-label>
+                                    <input matInput name="value" [(ngModel)]="search.value">
+                                </mat-form-field>
+                                <button mat-icon-button color="accent" type="submit" matTooltip="Search all runs" [disabled]="searching">
+                                    <mat-icon>search</mat-icon>
+                                </button>
+                                @if (searchResults) {
+                                    <button mat-icon-button type="button" matTooltip="Clear the search" (click)="clearSearch()">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                }
+                            </form>
+                            @if (searchError) {
+                                <div class="color-warn">{{ searchError }}</div>
+                            }
+                            @if (shownActivities.length === 0) {
                                 <div class="debugger-muted">
-                                    {{ mode === 'live' ? 'Entries appear here as the instance proceeds.' : 'No entries.' }}
+                                    {{ searchResults ? 'No entry matches.' : mode === 'live' ? 'Entries appear here as the instance proceeds.' : 'No entries.' }}
                                 </div>
                             } @else {
                                 <table class="debugger-table">
                                     <tr><th>Step</th><th>Time</th><th>Element</th><th>Entry</th></tr>
-                                    @for (a of activities; track $index) {
+                                    @for (a of shownActivities; track $index) {
                                         <tr class="clickable" [class.debugger-row-current]="mode === 'history' && a.seq === state.seq"
                                             (click)="jumpToActivity(a)" matTooltip="Show the state after this step">
                                             <td>{{ a.seq }}@if (a.run !== state.instance.run) {<span class="debugger-muted"> (run {{ a.run }})</span>}</td>
@@ -395,6 +490,9 @@
                                         </tr>
                                     }
                                 </table>
+                            }
+                            @if (searchResults && searchHasMore) {
+                                <button mat-stroked-button color="accent" (click)="runSearch(true)" [disabled]="searching">More</button>
                             }
                         </div>
                     </mat-tab>
