@@ -115,6 +115,20 @@ describe('ProcessRepoComponent', () => {
         expect(component.hasXPermission({ _id: 'c' })).toBeTrue();
     });
 
+    it('reads and shares the rights of process models on the topic of the automation-engine', () => {
+        const permissions = TestBed.inject(PermissionsService);
+        spyOn(permissions, 'getComputedResourcePermissionsV2').and.callThrough();
+        const dialog = TestBed.inject(PermissionsDialogService) as any;
+        dialog.openPermissionV2Dialog = jasmine.createSpy('openPermissionV2Dialog');
+
+        load(0);
+        responses[0].next({ result: [process('a', 'u1')], total: 1 });
+        component.permission(process('a', 'u1'));
+
+        expect(permissions.getComputedResourcePermissionsV2).toHaveBeenCalledWith('processes_models', ['a']);
+        expect(dialog.openPermissionV2Dialog).toHaveBeenCalledWith('processes_models', 'a', 'a');
+    });
+
     it('reports and reloads once after deleting several selected process models', () => {
         const dialogs = TestBed.inject(DialogsService) as any;
         dialogs.openDeleteDialog = () => ({ afterClosed: () => of(true) });

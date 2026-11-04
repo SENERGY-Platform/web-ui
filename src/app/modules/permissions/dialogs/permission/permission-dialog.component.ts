@@ -87,13 +87,13 @@ export class PermissionDialogComponent implements OnInit {
                     administrate: 'delete device, change permissions'
                 };
                 break;
-            case 'processmodel':
+            case 'processes_models':
                 break;
             case 'hubs':
                 break;
             case 'locations':
                 break;
-            case 'smart_service_releases':
+            case 'smart-services_deployments':
                 break;
         }
     }

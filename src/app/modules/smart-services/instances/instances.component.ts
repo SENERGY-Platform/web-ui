@@ -396,7 +396,7 @@ export class SmartServiceInstancesComponent implements OnInit, AfterViewInit {
     }
 
     shareInstance(instance: SmartServiceInstanceModel) {
-        this.permissionsDialogService.openPermissionV2Dialog('smart_service_instances', instance.id, instance.name);
+        this.permissionsDialogService.openPermissionV2Dialog('smart-services_instances', instance.id, instance.name);
     }
 
     clearQueryParams(): void {

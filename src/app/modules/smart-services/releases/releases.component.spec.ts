@@ -68,6 +68,19 @@ describe('SmartServiceReleasesComponent', () => {
         fixture = TestBed.createComponent(SmartServiceReleasesComponent);
     });
 
+    it('shares a release, also an older version, on the deployment it belongs to', () => {
+        const dialog = TestBed.inject(PermissionsDialogService) as any;
+        dialog.openPermissionV2Dialog = jasmine.createSpy('openPermissionV2Dialog');
+
+        fixture.componentInstance.permission(release('dep-1') as any);
+        fixture.componentInstance.permission(release('dep-1:v2') as any);
+
+        expect(dialog.openPermissionV2Dialog.calls.allArgs()).toEqual([
+            ['smart-services_deployments', 'dep-1', 'dep-1'],
+            ['smart-services_deployments', 'dep-1', 'dep-1:v2'],
+        ]);
+    });
+
     it('renders releases with and without changed resources and hints only at the changed one', () => {
         // the stubbed answer is synchronous, so ready flips inside the first check; the app gets it asynchronously
         fixture.detectChanges(false);

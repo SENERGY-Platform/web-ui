@@ -278,7 +278,8 @@ export class SmartServiceReleasesComponent implements OnInit, AfterViewInit, OnD
     }
 
     permission(release: SmartServiceReleaseModel): void {
-        this.permissionsDialogService.openPermissionV2Dialog('smart_service_releases', release.id, release.name);
+        // the automation-engine keeps the rights of all versions on their deployment; an older version's id is <deployment id>:v<version>
+        this.permissionsDialogService.openPermissionV2Dialog('smart-services_deployments', release.id.split(':v')[0], release.name);
     }
 
     updateQueryParams() {

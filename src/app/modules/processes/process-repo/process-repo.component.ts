@@ -158,7 +158,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     permission(process: ProcessModel): void {
-        this.permissionsDialogService.openPermissionV2Dialog('processmodel', process._id, process.name);
+        this.permissionsDialogService.openPermissionV2Dialog('processes_models', process._id, process.name);
     }
 
     downloadDiagram(process: ProcessModel): void {
@@ -308,7 +308,7 @@ export class ProcessRepoComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.sortAttribute.value,
                 this.sortAttribute.order,
                 this.getOwnerFilter(),
-            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processmodel', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = this.permissionsPerModel.concat(perm)), map(_ => x))))
+            ).pipe(concatMap(x => this.permissionsService.getComputedResourcePermissionsV2('processes_models', x.result.map(e => e._id)).pipe(map(perm => this.permissionsPerModel = this.permissionsPerModel.concat(perm)), map(_ => x))))
             .subscribe(repoItems => {
                 this.loadUserNames(repoItems.result);
                 this.animationDone = true;
