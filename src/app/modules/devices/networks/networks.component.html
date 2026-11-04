@@ -103,6 +103,25 @@
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="updates">
+          <th mat-header-cell *matHeaderCellDef>Updates</th>
+          <td mat-cell *matCellDef="let network">
+            @let modules = moduleVersions(network);
+            @if (modules) {
+              @let pending = pendingUpdates(modules);
+              @if (pending.length === 0) {
+                <span class="status-chip online">Up to date</span>
+              } @else {
+                <span [matTooltip]="updatesTooltip(pending)">
+                  <span class="status-chip warning">{{pending.length === 1 ? '1 update' : pending.length + ' updates'}}</span>
+                </span>
+              }
+            } @else {
+              <span class="muted" [matTooltip]="moduleVersionsTooltip(network)">–</span>
+            }
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="number_devices">
           <th mat-header-cell *matHeaderCellDef class="num">Devices</th>
           <td mat-cell *matCellDef="let network" class="num">{{network.device_local_ids?.length || 0}}</td>

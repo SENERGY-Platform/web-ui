@@ -51,6 +51,51 @@ export interface HubHealthModel {
     stale: boolean;
 }
 
+export interface HubModuleVersion {
+    id: string;
+    name: string;
+    source: string;
+    channel: string;
+    version: string;
+    /** empty when the module is up to date */
+    next_version: string;
+}
+
+/** The part of a gateway health report that carries the module versions. */
+export interface HubHealthReport {
+    /** absent or null when the gateway cannot tell */
+    module_versions?: HubModuleVersion[] | null;
+    module_versions_error?: string;
+}
+
+/** Reads the module versions from `HubHealthModel.report`; undefined when the report does not have that shape. */
+export function readHubHealthReport(report: unknown): HubHealthReport | undefined {
+    if (typeof report !== 'object' || report === null) {
+        return undefined;
+    }
+    const raw = report as Record<string, unknown>;
+    const modules = raw['module_versions'];
+    const error = raw['module_versions_error'];
+    if (error !== undefined && typeof error !== 'string') {
+        return undefined;
+    }
+    if (modules === undefined || modules === null) {
+        return { module_versions: modules, module_versions_error: error };
+    }
+    if (!Array.isArray(modules) || !modules.every(isHubModuleVersion)) {
+        return undefined;
+    }
+    return { module_versions: modules, module_versions_error: error };
+}
+
+function isHubModuleVersion(value: unknown): value is HubModuleVersion {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+    const raw = value as Record<string, unknown>;
+    return ['id', 'name', 'source', 'channel', 'version', 'next_version'].every(key => typeof raw[key] === 'string');
+}
+
 export interface LoraCertsModel {
     certificate: string;
     key: string;

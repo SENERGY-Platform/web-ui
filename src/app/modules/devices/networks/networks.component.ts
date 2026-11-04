@@ -19,7 +19,7 @@ import { formatDate } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { NetworksService } from './shared/networks.service';
-import { ExtendedHubModel, ExtendedHubTotalModel, HubHealthModel, HubModel } from './shared/networks.model';
+import { ExtendedHubModel, ExtendedHubTotalModel, HubHealthModel, HubModel, HubModuleVersion, readHubHealthReport } from './shared/networks.model';
 import { forkJoin, Observable, Subscription, map } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -119,6 +119,7 @@ export class NetworksComponent implements OnInit, AfterViewInit {
             'name',
             'connection',
             'health',
+            'updates',
             'number_devices',
             'shared',
             ...(this.userIsAdmin ? ['owner'] : []),
@@ -226,6 +227,29 @@ export class NetworksComponent implements OnInit, AfterViewInit {
     healthTooltip(health: HubHealthModel): string {
         const reasons = health.reasons?.length ? health.reasons.join('; ') + '. ' : '';
         return reasons + (health.received ? 'Reported ' + formatDate(health.received, LIST_DATE_FORMAT, this.locale) : '');
+    }
+
+    /** The module versions of the hub's health report; undefined when the gateway does not report them. */
+    moduleVersions(network: HubModel): HubModuleVersion[] | undefined {
+        return readHubHealthReport(this.hubIdToHealth[network.id]?.report)?.module_versions ?? undefined;
+    }
+
+    /** The gateway's error, or the generic reason. Empty without a health report, so the dash has no tooltip then. */
+    moduleVersionsTooltip(network: HubModel): string {
+        const health = this.hubIdToHealth[network.id];
+        if (!health) {
+            return '';
+        }
+        return readHubHealthReport(health.report)?.module_versions_error || 'Gateway does not report module versions';
+    }
+
+    pendingUpdates(modules: HubModuleVersion[]): HubModuleVersion[] {
+        return modules.filter(entry => entry.next_version !== '');
+    }
+
+    /** The pending modules in the order the gateway reported them, joined like the health reasons. */
+    updatesTooltip(pending: HubModuleVersion[]): string {
+        return pending.map(entry => `${entry.name || entry.id} ${entry.version} → ${entry.next_version}`).join('; ');
     }
 
     private loadUserNames(elements: { creator: string; shared: boolean }[]) {
