@@ -592,4 +592,46 @@ describe('TaskConfigDialogComponent', () => {
             expect(result.aspect.aspect_class_id).toBe(environmentClass);
         });
     });
+
+    describe('group concurrency', () => {
+        it('keeps the stored concurrency of a pessimistic task and saves it as a number', () => {
+            init(measuringSelection({ aspect: air, aspects: [air], groupConcurrency: 3 }), { [air.id]: [temperature] });
+            expect(component.groupConcurrencyFormControl.enabled).toBeTrue();
+            expect(component.groupConcurrencyFormControl.value).toBe(3);
+            component.groupConcurrencyFormControl.setValue('2');
+            expect(savedResult().groupConcurrency).toBe(2);
+        });
+
+        it('saves null when the field is empty, leaving the concurrency to the engine', () => {
+            init(measuringSelection({ aspect: air, aspects: [air] }), { [air.id]: [temperature] });
+            expect(component.groupConcurrencyFormControl.value).toBeNull();
+            expect(savedResult().groupConcurrency).toBeNull();
+            component.groupConcurrencyFormControl.setValue('');
+            expect(savedResult().groupConcurrency).toBeNull();
+        });
+
+        it('offers no concurrency for an optimistic task, which sends to every device at once', () => {
+            init(null, {});
+            expect(component.completionStrategyFormControl.value).toBe('optimistic');
+            expect(component.groupConcurrencyFormControl.disabled).toBeTrue();
+            component.completionStrategyFormControl.setValue('pessimistic');
+            component.groupConcurrencyFormControl.setValue(2);
+            component.completionStrategyFormControl.setValue('optimistic');
+            expect(component.groupConcurrencyFormControl.disabled).toBeTrue();
+            expect(savedResult().groupConcurrency).toBeNull();
+        });
+
+        it('blocks Save for a concurrency the engine would reject', () => {
+            init(measuringSelection({ aspect: air, aspects: [air] }), { [air.id]: [temperature] });
+            for (const value of [0, -1, 1.5]) {
+                component.groupConcurrencyFormControl.setValue(value);
+                fixture.detectChanges();
+                expect(component.groupConcurrencyFormControl.invalid).withContext(String(value)).toBeTrue();
+                expect(fixture.nativeElement.querySelector('mat-dialog-actions button[color="accent"]').disabled).withContext(String(value)).toBeTrue();
+            }
+            component.groupConcurrencyFormControl.setValue(4);
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('mat-dialog-actions button[color="accent"]').disabled).toBeFalse();
+        });
+    });
 });

@@ -32,6 +32,11 @@ export interface DeviceTypeSelectionRefModel {
     completionStrategy: string;
     retries: number;
     prefer_events: boolean;
+    /**
+     * senergy:groupConcurrency of the service task: for a device group, how many devices wait for their answer at
+     * the same time. Null or absent leaves it to the engine (GROUP_CONCURRENCY); an engine without the setting ignores it.
+     */
+    groupConcurrency?: number | null;
 }
 
 export interface DeviceTypeSelectionResultModel extends DeviceTypeSelectionRefModel {

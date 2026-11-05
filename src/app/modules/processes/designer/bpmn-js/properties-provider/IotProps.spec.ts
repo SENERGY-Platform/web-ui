@@ -34,9 +34,9 @@ const connectorInfo = (overrides: any) => ({
     ...overrides,
 });
 
-const serviceElement = (payload: any, topic = 'pessimistic') => ({
+const serviceElement = (payload: any, topic = 'pessimistic', attrs: { [name: string]: string } = {}) => ({
     businessObject: {
-        get: (name: string) => (name === 'camunda:topic' ? topic : undefined),
+        get: (name: string) => (name === 'camunda:topic' ? topic : attrs[name]),
         extensionElements: { values: [{ inputParameters: [{ name: 'payload', value: JSON.stringify(payload) }] }] },
     },
 });
@@ -90,6 +90,12 @@ describe('IotProps task payload', () => {
         expect(selection.aspects).toEqual([air]);
     });
 
+    it('reads the group concurrency of the task, and null where the engine decides', () => {
+        const payload = { function: measuring, device_class: null, aspect: air };
+        expect((getDeviceTypeServiceFromServiceElement(serviceElement(payload, 'pessimistic', { 'senergy:groupConcurrency': '3' })) as any).groupConcurrency).toBe(3);
+        expect((getDeviceTypeServiceFromServiceElement(serviceElement(payload)) as any).groupConcurrency).toBeNull();
+    });
+
     it('reads no aspects for a controlling task without aspects', () => {
         const selection: any = getDeviceTypeServiceFromServiceElement(
             serviceElement({ function: controlling, device_class: deviceClass, aspect: null }, 'optimistic'),
@@ -116,8 +122,16 @@ describe('IotProps task configured anew', () => {
         };
         const bpmnFactory = {
             create: () => {
-                const businessObject: any = {};
-                businessObject.get = (name: string) => (name === 'camunda:topic' ? businessObject.topic : undefined);
+                const businessObject: any = { $attrs: {} };
+                businessObject.get = (name: string) => (name === 'camunda:topic' ? businessObject.topic : businessObject.$attrs[name]);
+                // as moddle stores attributes of other namespaces: undefined removes them
+                businessObject.set = (name: string, value: any) => {
+                    if (value === undefined) {
+                        delete businessObject.$attrs[name];
+                    } else {
+                        businessObject.$attrs[name] = value;
+                    }
+                };
                 return businessObject;
             },
         };
@@ -166,6 +180,12 @@ describe('IotProps task configured anew', () => {
     it('maps the device, service and value of every answer of a measuring task to outputs_results', () => {
         const outputs = io(configure(task, measuringInfo([air]))).outputParameters;
         expect(outputs.find((p: any) => p.value === '${results}')?.name).toBe('outputs_results');
+    });
+
+    it('writes the group concurrency as senergy:groupConcurrency and leaves it out without one', () => {
+        expect(configure(task, connectorInfo({ aspect: air, aspects: [air], groupConcurrency: 2 })).businessObject.$attrs).toEqual({ 'senergy:groupConcurrency': '2' });
+        expect(configure(task, connectorInfo({ aspect: air, aspects: [air], groupConcurrency: null })).businessObject.$attrs).toEqual({});
+        expect('groupConcurrency' in JSON.parse(getPayload(connectorInfo({ groupConcurrency: 2 }), false))).toBe(false);
     });
 
     it('maps no results for a controlling task, which reads nothing', () => {

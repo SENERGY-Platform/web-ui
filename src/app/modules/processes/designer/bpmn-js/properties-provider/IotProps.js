@@ -287,6 +287,12 @@ function keepParameterEdits(element, characteristicId, inputs, outputs) {
     });
 }
 
+// senergy:groupConcurrency of a service task, null if it leaves the concurrency to the engine
+function groupConcurrencyOf(bo) {
+    var value = parseInt(bo.get('senergy:groupConcurrency'), 10);
+    return value > 0 ? value : null;
+}
+
 export function getDeviceTypeServiceFromServiceElement(element) {
     var bo = getBusinessObject(element);
     var extentionElements = bo.extensionElements;
@@ -302,7 +308,8 @@ export function getDeviceTypeServiceFromServiceElement(element) {
                 aspects: selectedAspectNodes(payload),
                 completionStrategy: bo.get('camunda:topic'),
                 retries: payload.retries,
-                prefer_events: payload.prefer_event
+                prefer_events: payload.prefer_event,
+                groupConcurrency: groupConcurrencyOf(bo)
               };
             }
         }
@@ -594,6 +601,8 @@ export function external(group, element, bpmnjs, eventBus, bpmnFactory, replace,
                 toExternalServiceTask(bpmnFactory, replace, selection, element, function (serviceTask, element) {
                     serviceTask.topic = connectorInfo.completionStrategy;
                     serviceTask.name = getTaskName(connectorInfo, serviceTask.name);
+                    // the engine keeps the attribute when it rewrites the external task at deploy (SNRGY-5093)
+                    serviceTask.set('senergy:groupConcurrency', connectorInfo.groupConcurrency ? String(connectorInfo.groupConcurrency) : undefined);
 
                     var script;
                     var inputs;
