@@ -62,12 +62,9 @@ export class DashboardNewWidgetDialogComponent implements OnInit{
             tooltip: EnergyPredictionRequirementsService.requirement,
             requirementsService: this.energyPredictionRequirementsService,
         },
-        {
-            value: DashboardTypesEnum.AirQuality,
-            viewValue: 'Air Quality',
-            disabled: false,
-            tooltip: '',
-        },
+        // Air Quality is mothballed: existing widgets keep working, new ones cannot be created.
+        // Why and how to revive it: docs/the-air-quality-widget-is-mothballed.md
+        // {value: DashboardTypesEnum.AirQuality, viewValue: 'Air Quality', disabled: false, tooltip: ''},
         {
             value: DashboardTypesEnum.ProcessIncidentList,
             viewValue: 'Process incident list',
