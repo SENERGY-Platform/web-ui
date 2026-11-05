@@ -39,7 +39,8 @@ export class CharacteristicsEditDialogComponent implements OnInit, AfterViewInit
     private destroyRef = inject(DestroyRef);
     private dialogRef = inject<MatDialogRef<CharacteristicsEditDialogComponent>>(MatDialogRef);
 
-    @ViewChild('characteristicElementComponent', { static: false }) characteristicElementComponent!: CharacteristicElementComponent;
+    // static: the element is outside any @if, and the Save binding and a cached answer in ngOnInit read it before the first view query
+    @ViewChild('characteristicElementComponent', { static: true }) characteristicElementComponent!: CharacteristicElementComponent;
 
     characteristicPerm: CharacteristicsPermSearchModel | undefined = undefined;
 
