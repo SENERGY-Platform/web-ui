@@ -17,6 +17,7 @@
 import { NgModule } from '@angular/core';
 
 import {Route, RouterModule} from '@angular/router';
+import {unsavedChangesGuard} from '../../core/guards/unsaved-changes.guard';
 
 import { CoreModule } from '../../core/core.module';
 import { ProcessRepoComponent } from '../processes/process-repo/process-repo.component';
@@ -113,12 +114,14 @@ const processMonitorDebug: Route = {
 const processDesignerEdit: Route = {
     path: 'processes/designer/:id',
     component: ProcessDesignerComponent,
+    canDeactivate: [unsavedChangesGuard],
     data: { header: 'Designer' },
 };
 const processDesigner: Route = {
     path: 'processes/designer',
     pathMatch: 'full',
     component: ProcessDesignerComponent,
+    canDeactivate: [unsavedChangesGuard],
     data: { header: 'Designer' },
 };
 

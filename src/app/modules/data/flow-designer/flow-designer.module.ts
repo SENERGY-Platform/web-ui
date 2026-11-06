@@ -35,11 +35,18 @@ import { MatCardModule } from '@angular/material/card';
 import { MtxSelectModule } from '@ng-matero/extensions/select';
 import { CloseMtxSelectOnScrollDirective } from 'src/app/core/directives/close-mtx-select-on-scroll.directive';
 import {FlowDesignerComponent} from './flow-designer.component';
+import {unsavedChangesGuard} from '../../../core/guards/unsaved-changes.guard';
 import {FlowUpdateDialogComponent} from './update-dialog/flow-update-dialog.component';
 import {DiagramEditorComponent} from '../diagram-editor/diagram-editor.component';
 
-const designer: Route = { path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
-const designerEdit: Route = { path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent, data: { header: 'Designer' } };
+const designer: Route = {
+    path: 'data/designer', pathMatch: 'full', component: FlowDesignerComponent,
+    canDeactivate: [unsavedChangesGuard], data: { header: 'Designer' },
+};
+const designerEdit: Route = {
+    path: 'data/designer/:id', pathMatch: 'full', component: FlowDesignerComponent,
+    canDeactivate: [unsavedChangesGuard], data: { header: 'Designer' },
+};
 
 @NgModule({
     imports: [

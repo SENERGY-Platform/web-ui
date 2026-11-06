@@ -17,6 +17,7 @@
 import { NgModule } from '@angular/core';
 
 import {Route, RouterModule} from '@angular/router';
+import {unsavedChangesGuard} from '../../core/guards/unsaved-changes.guard';
 
 import { CoreModule } from '../../core/core.module';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
@@ -121,17 +122,20 @@ const instanceDebug: Route = {
 const designerReleaseExport: Route = {
     path: 'smart-services/releases/designer/:releaseId',
     component: SmartServiceDesignerComponent,
+    canDeactivate: [unsavedChangesGuard],
     data: { header: 'Designer' },
 };
 const designerEdit: Route = {
     path: 'smart-services/designer/:id',
     component: SmartServiceDesignerComponent,
+    canDeactivate: [unsavedChangesGuard],
     data: { header: 'Designer' },
 };
 const designer: Route = {
     path: 'smart-services/designer',
     pathMatch: 'full',
     component: SmartServiceDesignerComponent,
+    canDeactivate: [unsavedChangesGuard],
     data: { header: 'Designer' },
 };
 
