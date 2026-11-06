@@ -40,6 +40,19 @@ The placeholder is the same string for every key of one kind. A spec that tells
 two functions or two aspects apart has to set distinct values for them first, as
 the `ac-control` specs do, or both compare equal.
 
+## A deployed /assets/env.json is the build placeholder
+
+Fetching `/assets/env.json` from a deployed instance returns a file whose values
+are almost all empty — only `version` and `commit` carry anything, because the
+image build fills those. That is not a broken deployment, and it says nothing
+about the instance's configuration.
+
+`initializerService` loads that path **only** when `!environment.production`. A
+production build takes its values from `environment.configUrl`, which
+`window.env` points at the service that renders the template. So the placeholder
+is what a browser sees at that path in production, while the app itself never
+reads it.
+
 ## There is no third renderer
 
 The template is filled by `build-env.sh` (`build-env.cmd` on Windows) and the
