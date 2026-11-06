@@ -93,7 +93,7 @@
         </div>
       </senergy-form-section>
     </div>
-    <senergy-save-bar saveLabel="Deploy" status="Ready to deploy" (save)="startPipeline()"
+    <senergy-save-bar saveLabel="Deploy" [status]="saveStatus()" (save)="startPipeline()"
       (discard)="discard()"></senergy-save-bar>
   }
 </div>

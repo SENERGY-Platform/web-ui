@@ -72,3 +72,53 @@ describe('DeployFlowClassicComponent page while the devices load', () => {
         expect(fixture.componentInstance.devices).toEqual([[devices, devices], [devices], [devices, devices]]);
     });
 });
+
+describe('DeployFlowClassicComponent save bar', () => {
+    const inputs = [
+        { id: 'op1', name: 'Operator 1', inPorts: ['in1'], deploymentType: 'cloud', operatorId: 'operator-1', config: [] },
+    ] as unknown as ParseModel[];
+    const devices = [{ id: 'd1', display_name: 'Device 1' }] as DeviceInstanceModel[];
+
+    let fixture: ComponentFixture<DeployFlowClassicComponent>;
+
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            providers: [
+                provideRouter([]),
+                { provide: FlowEngineService, useValue: { startPipeline: () => of({}) } },
+                { provide: MatSnackBar, useValue: { open: jasmine.createSpy('open') } },
+                { provide: ParserService, useValue: { getInputs: () => of(inputs) } },
+                { provide: DeviceInstancesService, useValue: { getDeviceInstances: () => of({ result: devices, total: 1 }) } },
+                { provide: DeviceTypeService, useValue: {} },
+                { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'flow' } } } },
+            ],
+        });
+        fixture = TestBed.createComponent(DeployFlowClassicComponent);
+        fixture.detectChanges();
+    });
+
+    const status = () => (fixture.nativeElement.querySelector('senergy-save-bar .status') as HTMLElement).textContent;
+
+    it('asks for the required fields while the pipeline has no name', () => {
+        expect(status()).toBe('Fill in the required fields to deploy the flow');
+    });
+
+    it('treats a name of blanks as no name, because the pipeline would be nameless in the list', () => {
+        fixture.componentInstance.name = '   ';
+        fixture.detectChanges();
+
+        expect(status()).toBe('Fill in the required fields to deploy the flow');
+    });
+
+    it('is ready once the pipeline has a name', () => {
+        fixture.componentInstance.name = 'A pipeline';
+        fixture.detectChanges();
+
+        expect(status()).toBe('Ready to deploy');
+    });
+
+    it('leaves Deploy enabled either way, so the classic form still submits what it always did', () => {
+        expect((fixture.nativeElement.querySelector('senergy-save-bar button.save') as HTMLButtonElement).disabled).toBeFalse();
+    });
+});

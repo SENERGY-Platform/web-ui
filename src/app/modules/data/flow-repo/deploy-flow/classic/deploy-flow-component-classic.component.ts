@@ -125,6 +125,11 @@ export class DeployFlowClassicComponent {
         });
     }
 
+    /** The same minimum as the new deployment form, where a pipeline needs a name and nothing else is required. */
+    saveStatus(): string {
+        return this.name.trim() === '' ? 'Fill in the required fields to deploy the flow' : 'Ready to deploy';
+    }
+
     /** There is nothing stored to restore on a new pipeline, so Discard returns to the flows. */
     discard() {
         this.router.navigate(['/data/flow-repo']);
