@@ -92,10 +92,15 @@ export function exportValidator(): ValidatorFn {
         }
 
         if (exportCreatedByWidget.value === true) {
+            // id and name are filled automatically, but the export is built from the chosen value
             exportId.setErrors(null);
             exportValueName.setErrors(null);
+            if (!hasValue(exportValuePath)) {
+                exportValuePath.setErrors({ 'missing value': true });
+                return { 'missing value': 'exportValuePath' };
+            }
             exportValuePath.setErrors(null);
-            return null; // values will be filled automatically
+            return null;
         }
         if (!hasValue(deviceId) && !hasValue(exportId)) {
             exportId.setErrors({ 'missing value': true });
