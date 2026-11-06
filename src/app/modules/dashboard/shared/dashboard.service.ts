@@ -19,7 +19,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardNewDialogComponent } from '../dialogs/dashboard-new-dialog.component';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { DashboardModel } from './dashboard.model';
 import { Observable, of, Subject } from 'rxjs';
@@ -77,10 +77,24 @@ export class DashboardService {
      * Answers [] on an error, or null with `quiet`, which logs it without the error notice. `bypassCache` neither reads
      * nor writes the session cache and asks for the full list, so the answer cannot lag a write; a 304 then answers null.
      */
+    private dashboardsCacheKey(): string {
+        return DashboardService.name + '/getDashboards';
+    }
+
+    /**
+     * Drops the cached list. A delete cannot invalidate it on its own: the collection's Last-Modified falls back to
+     * the newest remaining document, so the conditional read answers 304 and the cache still holds what was deleted.
+     */
+    private forgetCachedDashboards(): void {
+        try {
+            sessionStorage.removeItem(this.dashboardsCacheKey());
+        } catch (_) { }
+    }
+
     getDashboards(): Observable<DashboardModel[]>;
     getDashboards(options: { quiet?: boolean; bypassCache?: boolean }): Observable<DashboardModel[] | null>;
     getDashboards(options: { quiet?: boolean; bypassCache?: boolean } = {}): Observable<DashboardModel[] | null> {
-        const key = DashboardService.name + '/getDashboards';
+        const key = this.dashboardsCacheKey();
         const stored = options.bypassCache ? null : sessionStorage.getItem(key);
         let cached: { dashboards: DashboardModel[]; lastModified: string } | undefined;
         if (stored !== null) {
@@ -121,7 +135,10 @@ export class DashboardService {
     deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel | null> {
         return this.http
             .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboards/' + dashboardId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteDashboard', null)));
+            .pipe(
+                tap(() => this.forgetCachedDashboards()),
+                catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteDashboard', null)),
+            );
     }
 
     updateDashboard(dashboard: DashboardModel): Observable<DashboardModel | null> {
@@ -163,7 +180,10 @@ export class DashboardService {
     deleteWidget(dashboardId: string, widgetId: string): Observable<DashboardResponseMessageModel | null> {
         return this.http
             .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId + '/' + widgetId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', null)));
+            .pipe(
+                tap(() => this.forgetCachedDashboards()),
+                catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', null)),
+            );
     }
 
     updateWidgetProperty(dashboardId: string, widgetId: string, pathToProperty: string[], newValue: any): Observable<DashboardResponseMessageModel> {

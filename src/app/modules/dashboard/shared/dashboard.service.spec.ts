@@ -236,6 +236,28 @@ describe('DashboardService write failures', () => {
             expect(result?.map((d) => d.id)).toEqual(['cached']);
         });
 
+        it('forgets the cached list when a dashboard is deleted, which a 304 cannot tell', () => {
+            cache('gone');
+            service.deleteDashboard('gone').subscribe();
+            http.expectOne((r) => r.method === 'DELETE' && r.url.endsWith('/dashboards/gone')).flush({ message: 'ok' });
+
+            service.getDashboards().subscribe();
+            const req = nextGet();
+            expect(req.request.headers.get('If-Modified-Since')).toBe(epoch);
+            req.flush([]);
+        });
+
+        it('forgets the cached list when a widget is deleted', () => {
+            cache('dash');
+            service.deleteWidget('dash', 'widget').subscribe();
+            http.expectOne((r) => r.method === 'DELETE' && r.url.endsWith('/widgets/dash/widget')).flush({ message: 'ok' });
+
+            service.getDashboards().subscribe();
+            const req = nextGet();
+            expect(req.request.headers.get('If-Modified-Since')).toBe(epoch);
+            req.flush([]);
+        });
+
         it('by default answers an empty list on a 304 without a cache', () => {
             let result: DashboardModel[] | undefined;
             service.getDashboards().subscribe((r) => (result = r));
