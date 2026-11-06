@@ -93,6 +93,13 @@
     <input type="number" matInput [formControl]="retriesFormControl">
     <mat-error senergyError label="Retries"></mat-error>
   </mat-form-field>
+  <mat-form-field appearance="outline" class="form-field" color="accent">
+    <mat-label>Group Concurrency</mat-label>
+    <input type="number" min="1" step="1" matInput [formControl]="groupConcurrencyFormControl" placeholder="engine setting"
+      matTooltip="for a device group: how many devices wait for their answer at the same time; empty uses the setting of the engine"
+      matTooltipPosition="right">
+    <mat-error senergyError label="Group Concurrency"></mat-error>
+  </mat-form-field>
 </form>
 
 <mat-checkbox class="form-filed-checkbox" [formControl]="preferEventsFormControl"
@@ -104,6 +111,6 @@
 
 <mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" [disabled]="functionFormControl.value === '' || aspectClassCollision" (click)="save()">Save
+  <button mat-raised-button color="accent" [disabled]="functionFormControl.value === '' || aspectClassCollision || groupConcurrencyFormControl.invalid" (click)="save()">Save
   </button>
 </mat-dialog-actions>

@@ -60,9 +60,9 @@ const connectorInfo = (overrides: any) => ({
     ...overrides,
 });
 
-const serviceElement = (payload: any, topic = 'pessimistic') => ({
+const serviceElement = (payload: any, topic = 'pessimistic', attrs: { [name: string]: string } = {}) => ({
     businessObject: {
-        get: (name: string) => (name === 'camunda:topic' ? topic : undefined),
+        get: (name: string) => (name === 'camunda:topic' ? topic : attrs[name]),
         extensionElements: { values: [{ inputParameters: [{ name: 'payload', value: JSON.stringify(payload) }] }] },
     },
 });
@@ -114,6 +114,13 @@ describe('process writers: task payload', () => {
         const selection: any = readDeviceTask(serviceElement({ function: measuring, device_class: null, aspect: air }));
         expect(selection.aspect).toEqual(air);
         expect(selection.aspects).toEqual([air]);
+    });
+
+    it('reads the group concurrency of the task, and null where the engine decides', () => {
+        const payload = { function: measuring, device_class: null, aspect: air };
+
+        expect(readDeviceTask(serviceElement(payload, 'pessimistic', { 'senergy:groupConcurrency': '3' })).groupConcurrency).toBe(3);
+        expect(readDeviceTask(serviceElement(payload)).groupConcurrency).toBeNull();
     });
 
     it('reads no aspects for a controlling task', () => {
@@ -293,6 +300,18 @@ describe('process writers on the process designer modeler', () => {
             expect(readDeviceTask(selected()).aspects.map((node: any) => node.id)).toEqual([air.id, water.id]);
             expect(hasOutputsForTopic(selected(), 'pessimistic')).toBe(true);
             expect(hasOutputsForTopic(selected(), 'export')).toBe(false);
+        });
+
+        it('writes the group concurrency as senergy:groupConcurrency and leaves it out without one', async () => {
+            writeDeviceTask(services, element('Task_1'), connectorInfo({ aspect: air, aspects: [air], groupConcurrency: 2 }));
+
+            expect(byId(await saved(), selected().id).getAttribute('senergy:groupConcurrency')).toBe('2');
+            expect(readDeviceTask(selected()).groupConcurrency).toBe(2);
+
+            writeDeviceTask(services, selected(), connectorInfo({ aspect: air, aspects: [air], groupConcurrency: null }));
+
+            expect(byId(await saved(), selected().id).getAttribute('senergy:groupConcurrency')).toBeNull();
+            expect(readDeviceTask(selected()).groupConcurrency).toBeNull();
         });
 
         // the old writer put an undefined entry into the output list for an unknown characteristic type

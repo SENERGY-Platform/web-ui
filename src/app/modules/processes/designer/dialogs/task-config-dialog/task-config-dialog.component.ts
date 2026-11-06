@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import {
     compareAspectIds,
@@ -80,6 +80,9 @@ export class TaskConfigDialogComponent implements OnInit {
     completionStrategyFormControl = new FormControl<string | null>('');
     retriesFormControl = new FormControl<number | null>({ value: 0, disabled: true }, [rangeValidator(-1, 100)]);
     preferEventsFormControl = new FormControl<boolean | null>({ value: false, disabled: true });
+    /** Empty leaves it to the engine; the engine rejects anything but a positive integer at deploy. */
+    groupConcurrencyFormControl = new FormControl<number | string | null>({ value: null, disabled: true },
+        [Validators.min(1), Validators.pattern(/^\d+$/)]);
 
 
 
@@ -145,9 +148,19 @@ export class TaskConfigDialogComponent implements OnInit {
             characteristic: this.characteristic,
             completionStrategy: this.completionStrategyFormControl.value as string,
             retries: this.retriesFormControl.value as number,
-            prefer_events: this.preferEventsFormControl.value as boolean
+            prefer_events: this.preferEventsFormControl.value as boolean,
+            groupConcurrency: this.groupConcurrency(),
         };
         this.dialogRef.close(this.result);
+    }
+
+    /** Only a pessimistic task waits for answers; an optimistic one sends to every device at once. */
+    private groupConcurrency(): number | null {
+        const value = this.groupConcurrencyFormControl.value;
+        if (this.groupConcurrencyFormControl.disabled || value === null || value === '') {
+            return null;
+        }
+        return Number(value);
     }
 
     /**
@@ -225,10 +238,13 @@ export class TaskConfigDialogComponent implements OnInit {
                 this.retriesFormControl.disable();
                 this.preferEventsFormControl.patchValue(false);
                 this.preferEventsFormControl.disable();
+                this.groupConcurrencyFormControl.patchValue(null);
+                this.groupConcurrencyFormControl.disable();
             }
             if (completionStrategy === 'pessimistic') {
                 this.retriesFormControl.enable();
                 this.preferEventsFormControl.enable();
+                this.groupConcurrencyFormControl.enable();
                 this.retriesFormControl.patchValue(-1);
             }
         });
@@ -420,13 +436,16 @@ export class TaskConfigDialogComponent implements OnInit {
             this.completionStrategyFormControl.setValue(this.selection.completionStrategy);
             this.retriesFormControl.setValue(this.selection.retries || 0);
             this.preferEventsFormControl.setValue(this.selection.prefer_events || false);
+            this.groupConcurrencyFormControl.setValue(this.selection.groupConcurrency ?? null);
             if (this.selection.completionStrategy === 'optimistic') {
                 this.retriesFormControl.disable();
                 this.preferEventsFormControl.disable();
+                this.groupConcurrencyFormControl.disable();
             }
             if (this.selection.completionStrategy === 'pessimistic') {
                 this.retriesFormControl.enable();
                 this.preferEventsFormControl.enable();
+                this.groupConcurrencyFormControl.enable();
             }
         } else {
             this.optionsFormControl.setValue('Controlling');

@@ -268,6 +268,12 @@ function taskParameters(moddle: any, structure: any, path: string, input: boolea
         .map((entry) => (input ? inputParameter(moddle, entry.path, entry.value) : outputParameter(moddle, entry.path, entry.value)));
 }
 
+/** senergy:groupConcurrency of a service task, null if it leaves the concurrency to the engine. */
+function groupConcurrencyOf(bo: any): number | null {
+    const value = parseInt(bo.get('senergy:groupConcurrency'), 10);
+    return value > 0 ? value : null;
+}
+
 export function readDeviceTask(element: any): any {
     const bo = businessObject(element);
     const first = firstExtension(element);
@@ -284,6 +290,7 @@ export function readDeviceTask(element: any): any {
         completionStrategy: bo.get('camunda:topic'),
         retries: payload.retries,
         prefer_events: payload.prefer_event,
+        groupConcurrency: groupConcurrencyOf(bo),
     };
 }
 
@@ -333,6 +340,8 @@ export function writeDeviceTask(services: TaskServices, element: any, connectorI
     replaceTask(services, element, 'bpmn:ServiceTask', true, (task) => {
         task.topic = connectorInfo.completionStrategy;
         task.name = getTaskName(connectorInfo, task.name);
+        // the engine keeps the attribute when it rewrites the external task at deploy (SNRGY-5093)
+        task.set('senergy:groupConcurrency', connectorInfo.groupConcurrency ? String(connectorInfo.groupConcurrency) : undefined);
         let inputs: any[] | undefined;
         let outputs: any[] | undefined;
         if (connectorInfo.function.rdf_type === controllingFunction) {
