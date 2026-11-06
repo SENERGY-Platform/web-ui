@@ -19,7 +19,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { DashboardNewDialogComponent } from '../dialogs/dashboard-new-dialog.component';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { DashboardModel } from './dashboard.model';
 import { Observable, of, Subject } from 'rxjs';
@@ -69,8 +69,22 @@ export class DashboardService {
 
     /** REST Services */
 
+    private dashboardsCacheKey(): string {
+        return DashboardService.name + '/getDashboards';
+    }
+
+    /**
+     * Drops the cached list. A delete cannot invalidate it on its own: the collection's Last-Modified falls back to
+     * the newest remaining document, so the conditional read answers 304 and the cache still holds what was deleted.
+     */
+    private forgetCachedDashboards(): void {
+        try {
+            sessionStorage.removeItem(this.dashboardsCacheKey());
+        } catch (_) { }
+    }
+
     getDashboards(): Observable<DashboardModel[]> {
-        const key = DashboardService.name + '/getDashboards';
+        const key = this.dashboardsCacheKey();
         const stored = sessionStorage.getItem(key);
         let cached: { dashboards: DashboardModel[]; lastModified: string } | undefined;
         if (stored !== null) {
@@ -102,7 +116,10 @@ export class DashboardService {
     deleteDashboard(dashboardId: string): Observable<DashboardResponseMessageModel> {
         return this.http
             .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/dashboards/' + dashboardId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteDashboard', { message: 'error delete' })));
+            .pipe(
+                tap(() => this.forgetCachedDashboards()),
+                catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteDashboard', { message: 'error delete' })),
+            );
     }
 
     updateDashboard(dashboard: DashboardModel): Observable<DashboardModel> {
@@ -144,7 +161,10 @@ export class DashboardService {
     deleteWidget(dashboardId: string, widgetId: string): Observable<DashboardResponseMessageModel> {
         return this.http
             .delete<DashboardResponseMessageModel>(environment.dashboardServiceUrl + '/widgets/' + dashboardId + '/' + widgetId)
-            .pipe(catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', { message: 'error delete' })));
+            .pipe(
+                tap(() => this.forgetCachedDashboards()),
+                catchError(this.errorHandlerService.handleError(DashboardService.name, 'deleteWidget', { message: 'error delete' })),
+            );
     }
 
     updateWidgetProperty(dashboardId: string, widgetId: string, pathToProperty: string[], newValue: any): Observable<DashboardResponseMessageModel> {
