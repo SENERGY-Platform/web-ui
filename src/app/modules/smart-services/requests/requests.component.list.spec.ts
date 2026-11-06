@@ -16,7 +16,8 @@
 
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { LOCALE_ID, NO_ERRORS_SCHEMA } from '@angular/core';
+import { formatDate } from '@angular/common';
 import { MATERIAL_ANIMATIONS } from '@angular/material/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
@@ -28,6 +29,7 @@ import { ReviewRequestModel, ReviewRequestState } from './shared/content-review.
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { SearchbarService } from '../../../core/components/searchbar/shared/searchbar.service';
+import { LIST_DATE_FORMAT } from '../../../core/classes/list-date-format';
 
 describe('RequestsComponent list', () => {
     let fixture: ComponentFixture<RequestsComponent>;
@@ -37,13 +39,19 @@ describe('RequestsComponent list', () => {
     let navigate: jasmine.Spy;
     let confirm: jasmine.Spy;
 
+    const CREATED_AT = '2026-10-20T10:00:00Z';
+    const UPDATED_AT = '2026-10-21T11:30:00Z';
+
     const request = (id: string, state: ReviewRequestState, author = 'me'): ReviewRequestModel => ({
         id, state, name: 'service ' + id, author_id: author, author_name: 'Author ' + author, kind: 'smart-service', design_id: 'd', release_id: 'r',
         test_description: 'check', test_parameters: null, test_case: null, error: '',
         test: { status: 'none', at: null, detail: '' }, sync: { status: 'none', files: null, truncated: false, commit: '', at: null, detail: '' },
         files: { status: 'none', at: null, detail: '', truncated: false, count: 0, operation_id: '' },
-        operations: null, history: null, created_at: '2026-10-20T10:00:00Z', updated_at: '2026-10-21T11:30:00Z', version: 1,
+        operations: null, history: null, created_at: CREATED_AT, updated_at: UPDATED_AT, version: 1,
     });
+
+    /** The date pipe renders in the browser's time zone, so the expectation is built the same way, not written out. */
+    const rendered = (iso: string) => formatDate(iso, LIST_DATE_FORMAT, TestBed.inject(LOCALE_ID));
 
     interface Options {
         reviewer?: boolean;
@@ -109,8 +117,8 @@ describe('RequestsComponent list', () => {
         expect(inReview.querySelector('.status-chip.warning')?.textContent).toContain('In review');
         expect(published.querySelector('.status-chip.online')?.textContent).toContain('Published');
         expect(failed.querySelector('.status-chip.failed')?.textContent).toContain('Failed');
-        expect(inReview.textContent).toContain('20.10.2026 10:00');
-        expect(inReview.textContent).toContain('21.10.2026 11:30');
+        expect(inReview.textContent).toContain(rendered(CREATED_AT));
+        expect(inReview.textContent).toContain(rendered(UPDATED_AT));
     });
 
     it('offers the all-requests chip to reviewers only', async () => {
