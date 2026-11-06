@@ -18,7 +18,6 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { DeviceStatusElementModel } from './device-status-properties.model';
-import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { HttpClient } from '@angular/common/http';
 import { AutomationEngineService } from '../../../core/services/automation-engine.service';
@@ -35,20 +34,9 @@ export class DeviceStatusService {
     private automationEngineService = inject(AutomationEngineService);
     private http = inject(HttpClient);
 
+    /** Deletes what the widget generated; a resource that is already gone counts as deleted. */
     deleteElements(elements: DeviceStatusElementModel[] | undefined): void {
-        if (elements) {
-            elements.forEach((element: DeviceStatusElementModel) => {
-                if (element.exportId) {
-                    this.exportService.stopPipeline({ ID: element.exportId } as ExportModel).subscribe();
-                }
-                if (element.deploymentId) {
-                    this.automationEngineService.deleteDeployment(element.deploymentId).subscribe();
-                }
-                if (element.scheduleId) {
-                    this.automationEngineService.deleteSchedule(element.scheduleId).subscribe();
-                }
-            });
-        }
+        this.deleteResources(this.generatedResources(elements)).subscribe();
     }
 
     /** The generated resources the given elements refer to. */

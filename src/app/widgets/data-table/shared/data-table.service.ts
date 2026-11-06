@@ -17,7 +17,6 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
-import { ExportModel } from '../../../modules/exports/shared/export.model';
 import { ExportService } from '../../../modules/exports/shared/export.service';
 import { AutomationEngineService } from '../../../core/services/automation-engine.service';
 import { DataTableElementModel } from './data-table.model';
@@ -33,13 +32,9 @@ export class DataTableService {
     private exportService = inject(ExportService);
     private automationEngineService = inject(AutomationEngineService);
 
+    /** Deletes what the widget generated; a resource that is already gone counts as deleted. */
     deleteElements(elements: DataTableElementModel[] | undefined): void {
-        if (elements === undefined) {
-            return;
-        }
-        elements.forEach((element) => {
-            this.deleteElement(element);
-        });
+        this.deleteResources(this.generatedResources(elements)).subscribe();
     }
 
     /**
@@ -75,24 +70,5 @@ export class DataTableService {
             deployment: (id) => this.automationEngineService.deleteDeploymentIfExists(id),
             schedule: (id) => this.automationEngineService.deleteScheduleIfExists(id),
         };
-    }
-
-    deleteElement(element: DataTableElementModel, shouldSubscribe: boolean = true): Observable<any>[] {
-        const observables: Observable<any>[] = [];
-        if (element.exportCreatedByWidget) {
-            observables.push(this.exportService.stopPipeline({ ID: element.exportId } as ExportModel));
-        }
-        if (element.elementDetails.device?.deploymentId) {
-            observables.push(this.automationEngineService.deleteDeployment(element.elementDetails.device?.deploymentId));
-        }
-        if (element.elementDetails.device?.scheduleId) {
-            observables.push(this.automationEngineService.deleteSchedule(element.elementDetails.device?.scheduleId));
-        }
-        if (shouldSubscribe) {
-            observables.forEach((o) => o.subscribe());
-            return [];
-        } else {
-            return observables;
-        }
     }
 }
