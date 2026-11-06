@@ -19,7 +19,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
-import { PipelineDetailsComponent } from './pipeline-details.component';
+import { MASKED_CONFIG_VALUE, PipelineDetailsComponent } from './pipeline-details.component';
 import { PipelineRegistryService } from '../shared/pipeline-registry.service';
 import { PipelineModel } from '../shared/pipeline.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -64,5 +64,43 @@ describe('PipelineDetailsComponent image', () => {
         expect(image.documentElement.getAttribute('height')).toBe('100');
         expect(image.documentElement.getAttribute('viewBox')).toBe('0 0 200 100');
         expect(image.querySelector('[model-id="op-1"] > rect')).withContext('the operator is drawn').not.toBeNull();
+    });
+});
+
+describe('PipelineDetailsComponent operator config', () => {
+    let fixture: ComponentFixture<PipelineDetailsComponent>;
+
+    beforeEach(() => {
+        const pipeline = {
+            id: 'pipe-1', name: 'a pipeline', flowId: 'flow-1',
+            operators: [{
+                id: 'op-1', name: 'Averager', imageId: 'img-1',
+                config: new Map([['window', '5'], ['userToken', 'Bearer not-for-the-page'], ['API_KEY', 'not-for-the-page-either']]),
+                inputTopics: [],
+            }],
+        } as unknown as PipelineModel;
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            declarations: [PipelineDetailsComponent],
+            providers: [
+                { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => pipeline.id } } } },
+                { provide: PipelineRegistryService, useValue: { getPipeline: () => of(pipeline) } },
+                { provide: DeviceTypeService, useValue: {} },
+                { provide: DeviceInstancesService, useValue: {} },
+                { provide: Location, useValue: {} },
+            ],
+        });
+        fixture = TestBed.createComponent(PipelineDetailsComponent);
+        fixture.detectChanges();
+    });
+
+    it('hides a config value whose key names a credential, because a shared pipeline is readable by others', () => {
+        const config = fixture.componentInstance.getConfigByOperatorId('op-1') as unknown as [string, string][];
+
+        expect(config).toEqual([
+            ['window', '5'],
+            ['userToken', MASKED_CONFIG_VALUE],
+            ['API_KEY', MASKED_CONFIG_VALUE],
+        ]);
     });
 });
