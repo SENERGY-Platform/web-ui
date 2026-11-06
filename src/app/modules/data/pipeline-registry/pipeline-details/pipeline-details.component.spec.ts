@@ -18,7 +18,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { of } from 'rxjs';
-import { PipelineDetailsComponent } from './pipeline-details.component';
+import { MASKED_CONFIG_VALUE, PipelineDetailsComponent } from './pipeline-details.component';
 import { PipelineRegistryService } from '../shared/pipeline-registry.service';
 import { PipelineModel } from '../shared/pipeline.model';
 import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
@@ -139,6 +139,23 @@ describe('PipelineDetailsComponent values', () => {
         const all = texts(page).filter((t) => t !== 'Show All');
         return all.slice(all.indexOf('Averager - op-1 - img-1'));
     };
+
+    it('hides a config value whose key names a credential, because a shared pipeline is readable by others', () => {
+        open({
+            ...pipeline,
+            operators: [{
+                id: 'op-1', name: 'Averager', imageId: 'img-1',
+                config: new Map([['window', '5'], ['userToken', 'Bearer not-for-the-page'], ['API_KEY', 'not-for-the-page-either']]),
+                inputTopics: [],
+            }],
+        } as unknown as PipelineModel);
+        const text = texts(page).join(' | ');
+
+        expect(text).toContain('window: 5');
+        expect(text).toContain('userToken: ' + MASKED_CONFIG_VALUE);
+        expect(text).toContain('API_KEY: ' + MASKED_CONFIG_VALUE);
+        expect(text).not.toContain('not-for-the-page');
+    });
 
     it('shows name, description, ids and the flow link', () => {
         open();

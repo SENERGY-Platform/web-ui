@@ -32,6 +32,11 @@ import { PageHeaderComponent } from '../../../../core/components/page-header/pag
 import { FormSectionComponent } from '../../../../core/components/form-section/form-section.component';
 import { SpinnerComponent } from '../../../../core/components/spinner/spinner.component';
 
+/** Config keys whose value is a credential. A pipeline can be shared, so its details must not print them. */
+const SECRET_CONFIG_KEY = /token|secret|password|passwd|credential|api[-_]?key/i;
+
+export const MASKED_CONFIG_VALUE = '••••••••';
+
 @Component({
     selector: 'senergy-pipeline-details',
     templateUrl: './pipeline-details.component.html',
@@ -65,7 +70,7 @@ export class PipelineDetailsComponent implements OnInit {
                         if (operator.config) {
                             const c = [] as unknown as [[string, string]];
                             operator.config.forEach((value: string, key: string) => {
-                                c.push([key, value]);
+                                c.push([key, SECRET_CONFIG_KEY.test(key) ? MASKED_CONFIG_VALUE : value]);
                             });
                             this.configs.set(operator.id, c);
                         }
