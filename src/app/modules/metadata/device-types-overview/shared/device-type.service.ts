@@ -373,6 +373,10 @@ export class DeviceTypeService {
     }
 
     private listImportTypeCriteria(): Observable<{ function_id?: string; aspect_id?: string }[]> {
+        // without the right to read import types the listing answers 403; the aspects of the devices stand on their own
+        if (this.importTypesService.userHasReadAuthorization() !== true) {
+            return of([]);
+        }
         return this.importTypesService.listImportTypes('', 9999, 0, 'name.asc').pipe(
             map((importTypes) => importTypes.result.flatMap((importType) => this.contentVariableCriteria(importType.output))),
         );

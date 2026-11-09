@@ -100,6 +100,7 @@ describe('DeviceTypeService import-type criteria', () => {
         ({ name: 'v', type: 'float', sub_content_variables: null, use_as_tag: false, ...fields });
 
     let listImportTypes: jasmine.Spy;
+    let userHasReadAuthorization: jasmine.Spy;
 
     // aspect_id outside aspect_ids is what the import-repository would fold into the list
     const importOutput = variable({
@@ -111,7 +112,8 @@ describe('DeviceTypeService import-type criteria', () => {
 
     beforeEach(() => {
         listImportTypes = jasmine.createSpy('listImportTypes').and.callFake(() => of({ result: [{ output: importOutput } as ImportTypeModel], total: 1 }));
-        const importTypesService = { listImportTypes };
+        userHasReadAuthorization = jasmine.createSpy('userHasReadAuthorization').and.returnValue(true);
+        const importTypesService = { listImportTypes, userHasReadAuthorization };
         TestBed.configureTestingModule({
             schemas: [NO_ERRORS_SCHEMA],
             imports: [MatDialogModule, MatSnackBarModule],
@@ -161,6 +163,16 @@ describe('DeviceTypeService import-type criteria', () => {
         const requests = httpMock.match((req) => req.url.startsWith(environment.deviceRepoUrl + '/functions?ids='));
         requests.forEach((req) => req.flush(decodeURIComponent(req.request.url.split('ids=')[1]).split(',').map((id) => ({ id, name: id }))));
         expect(functionIds.map((ids) => [...ids].sort())).toEqual([[humidity, temperature].sort(), [temperature]]);
+    });
+
+    // the import-repository answers 403 without the read right, which the device dialog showed as a snack bar
+    it('asks for no import types without the right to read them', () => {
+        userHasReadAuthorization.and.returnValue(false);
+        let ids: string[] | undefined;
+        service.getAspectNodesWithMeasuringFunction().subscribe((nodes) => (ids = nodes.map((node) => node.id)));
+        httpMock.expectOne(environment.deviceRepoUrl + '/aspect-nodes?function=measuring-function').flush([{ id: air }]);
+        expect(listImportTypes).not.toHaveBeenCalled();
+        expect(ids).toEqual([air]);
     });
 
     it('answers an empty list per aspect, and requests nothing, without aspects', () => {
