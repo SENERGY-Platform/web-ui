@@ -135,6 +135,7 @@ interface Harness {
     component: NewExportComponent;
     saved: () => ExportModel | undefined;
     failNextSave: () => void;
+    snackOpen: jasmine.Spy;
 }
 
 // The image binding of the real template, for the specs that render the component.
@@ -147,6 +148,7 @@ const openForEditing = (
 ): Harness => {
     let saved: ExportModel | undefined;
     let fail = false;
+    const snackOpen = jasmine.createSpy('open');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
         providers: [
@@ -185,7 +187,7 @@ const openForEditing = (
             ...(rendered?.realTemplate ? [] : [{ provide: Router, useValue: {navigate: () => undefined} }]),
             // a rendered spec keeps the real DomSanitizer, so what reaches the page is what Angular lets through
             ...(rendered === undefined ? [{ provide: DomSanitizer, useValue: {bypassSecurityTrustHtml: (html: string) => html} }] : []),
-            { provide: MatSnackBar, useValue: {open: () => undefined} },
+            { provide: MatSnackBar, useValue: {open: snackOpen} },
             { provide: ImportInstancesService, useValue: {listImportInstances: () => of([importInstance])} },
             {
                 provide: ImportTypesService,
@@ -214,7 +216,7 @@ const openForEditing = (
     }
     tick(200); // the load defers twice: once for the form, once for onChanges
 
-    return {component, saved: () => saved, failNextSave: () => (fail = true)};
+    return {component, saved: () => saved, failNextSave: () => (fail = true), snackOpen};
 };
 
 interface CreateHarness {
@@ -384,6 +386,20 @@ describe('NewExportComponent', () => {
             }));
         }
     });
+
+    it('says which pipeline of an export could not be found', fakeAsync(() => {
+        // the pipeline is deleted, or no longer shared with this user
+        const {component, snackOpen} = openForEditing({...existingExport(), Filter: 'pipeline-gone:' + OPERATOR_ID});
+
+        expect(component.exportForm.getRawValue().pipeline).toBeNull();
+        expect(snackOpen.calls.allArgs().map((args) => args[0]).join(' ')).toContain('pipeline-gone');
+    }));
+
+    it('says nothing about the pipeline of an export that is there', fakeAsync(() => {
+        const {snackOpen} = openForEditing();
+
+        expect(snackOpen.calls.allArgs().map((args) => args[0]).join(' ')).not.toContain('was not found');
+    }));
 
     it('sets the time path and its format when an operator is chosen', fakeAsync(() => {
         const {component} = openForEditing();

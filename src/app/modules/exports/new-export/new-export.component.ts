@@ -282,6 +282,7 @@ export class NewExportComponent implements OnInit {
                 } else if (exp.FilterType === 'operatorId') {
                     this.exportForm.patchValue({selector: 'pipe'});
                     this.disableUnusedSources('pipe');
+                    this.reportMissingPipeline(exp.Filter.split(':')[0]);
                     this.pipelines.forEach((pipeline) => {
                         if (pipeline.id === exp.Filter.split(':')[0]) {
                             this.exportForm.patchValue({pipeline});
@@ -310,6 +311,7 @@ export class NewExportComponent implements OnInit {
                     }
                     this.exportForm.patchValue({selector: 'pipe'});
                     this.disableUnusedSources('pipe');
+                    this.reportMissingPipeline(exp.Filter);
                     this.pipelines.forEach((pipeline) => {
                         if (pipeline.id === exp.Filter) {
                             this.exportForm.patchValue({pipeline});
@@ -622,6 +624,17 @@ export class NewExportComponent implements OnInit {
                 });
             }
         }
+    }
+
+    /**
+     * The pipeline of an export that is gone or out of reach is not among the loaded ones, and the form
+     * then shows an empty pipeline and an operator field that asks for one, with nothing saying why.
+     */
+    private reportMissingPipeline(pipelineId: string) {
+        if (this.pipelines.some((pipeline) => pipeline.id === pipelineId)) {
+            return;
+        }
+        snackError(this.snackBar, 'Pipeline ' + pipelineId + ' was not found. It is deleted, or not shared with you.');
     }
 
     traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) {
