@@ -27,6 +27,7 @@ import {
 import { DesignerDialogService } from './shared/designer-dialog.service';
 import { DesignerHelperService } from './shared/designer-helper.service';
 import { ProcessRepoService } from '../process-repo/shared/process-repo.service';
+import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DesignerErrorModel } from './shared/designer-error.model';
@@ -62,6 +63,7 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
     protected designerService = inject(DesignerHelperService);
     protected processRepoService = inject(ProcessRepoService);
     private snackBar = inject(MatSnackBar);
+    private location = inject(Location);
     private metadataExistenceService = inject(MetadataExistenceService);
 
     modeler: any;
@@ -270,6 +272,7 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
                                     snackError(this.snackBar, 'Error while saving the model!');
                                     return;
                                 }
+                                this.takeOverId(saved._id);
                                 this.unsaved.markSaved(snapshot);
                                 snackSuccess(this.snackBar, 'Model saved.');
                             });
@@ -278,6 +281,19 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
                     );
                 }
             });
+    }
+
+    /**
+     * The repository assigns the id of a new model. Without taking it over, the page stays on the route for a
+     * new model and every further save writes another one, instead of updating the one just created. The URL
+     * is replaced rather than navigated to, so the diagram on the canvas stays as it is.
+     */
+    private takeOverId(savedId: string | undefined) {
+        if (this.id !== '' || !savedId) {
+            return;
+        }
+        this.id = savedId;
+        this.location.replaceState('/processes/designer/' + savedId);
     }
 
     importBPMN(event: any): void {

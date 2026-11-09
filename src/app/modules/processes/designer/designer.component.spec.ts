@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -29,7 +30,7 @@ import { createProcessModeler } from './bpmn-js/bpmn-js';
 import { fetchText, importXml, mountModeler, MountedModeler, panelSettled, until } from '../../../../testing/bpmn-modeler';
 
 // Only the services a test passes in are used; the other injected dependencies are empty stubs.
-const buildDesigner = (stubs: { designerService?: unknown; processRepoService?: unknown; snackBar?: unknown }): ProcessDesignerComponent => {
+const buildDesigner = (stubs: { designerService?: unknown; processRepoService?: unknown; snackBar?: unknown; location?: unknown }): ProcessDesignerComponent => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
         providers: [
@@ -41,6 +42,7 @@ const buildDesigner = (stubs: { designerService?: unknown; processRepoService?: 
             { provide: ProcessRepoService, useValue: stubs.processRepoService ?? {} },
             { provide: MatSnackBar, useValue: stubs.snackBar ?? {} },
             { provide: MetadataExistenceService, useValue: {} },
+            { provide: Location, useValue: stubs.location ?? { replaceState: () => undefined } },
         ],
     });
     return TestBed.runInInjectionContext(() => new ProcessDesignerComponent());
@@ -55,6 +57,7 @@ describe('ProcessDesignerComponent load and save', () => {
     let component: ProcessDesignerComponent;
     let saveProcess: jasmine.Spy;
     let snackBar: jasmine.SpyObj<any>;
+    let replaceState: jasmine.Spy;
     let xml: string;
 
     beforeEach(async () => {
@@ -64,7 +67,8 @@ describe('ProcessDesignerComponent load and save', () => {
         snackBar = jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']);
         const processRepoService = { saveProcess, getProcessModel: () => of({ bpmn_xml: xml }) };
         const designerService = { checkConstraints: () => of([]) };
-        component = buildDesigner({ designerService, processRepoService, snackBar });
+        replaceState = jasmine.createSpy('replaceState');
+        component = buildDesigner({ designerService, processRepoService, snackBar, location: { replaceState } });
         component.modeler = mounted.modeler;
         component.id = 'model-1';
     });
@@ -104,6 +108,25 @@ describe('ProcessDesignerComponent load and save', () => {
 
         expect(saveProcess.calls.mostRecent().args[0]).toBe('');
         expect(saveProcess.calls.count()).toBe(1);
+    });
+
+    it('takes over the id the repository gave a new model, so a second save updates it', async () => {
+        saveProcess.and.returnValue(of({ _id: 'model-new' }));
+        component.id = '';
+        component.loadProcessDiagram('model-1');
+        await until(() => !!element('Task_device'));
+
+        component.save();
+        await until(() => saveProcess.calls.count() > 0);
+
+        expect(saveProcess.calls.mostRecent().args[0]).toBe('');
+        expect(replaceState).toHaveBeenCalledWith('/processes/designer/model-new');
+        expect(component.id).toBe('model-new');
+
+        component.save();
+        await until(() => saveProcess.calls.count() > 1);
+
+        expect(saveProcess.calls.mostRecent().args[0]).toBe('model-new');
     });
 
     it('reports an error and not success when the model could not be saved', async () => {
