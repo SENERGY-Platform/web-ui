@@ -150,14 +150,15 @@ export class DataTableHelperService {
 
     preloadDevicesOfFunctionAndAspect(aspectId: string, functionId: string): Observable<DeviceSelectablesModel[]> {
         const key = aspectId + functionId;
-        if (this.aspectFunctionsCache.has(key)) {
+        // the devices are cached under this key; aspectFunctionsCache is keyed by aspect alone and never matches
+        if (this.deviceInstancesCache.has(key)) {
             return of(this.deviceInstancesCache.get(key) || []);
         }
         const filter = [{ function_id: functionId, aspect_id: aspectId }];
 
         return this.deviceInstancesService.getDeviceSelections(filter, true).pipe(
             map((devices) => {
-                this.deviceInstancesCache.set(aspectId + functionId, devices);
+                this.deviceInstancesCache.set(key, devices);
                 return devices;
             }),
         );
