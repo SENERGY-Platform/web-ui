@@ -104,6 +104,11 @@ export interface ReportCreateResponseModel {
     jobId: string | null;
 }
 
+/** What a stored report answers with: the id the service assigned it. */
+export interface ReportSaveResponseModel {
+    id: string | null;
+}
+
 export type ReportJobStatus = 'pending' | 'running' | 'done' | 'failed';
 
 /**

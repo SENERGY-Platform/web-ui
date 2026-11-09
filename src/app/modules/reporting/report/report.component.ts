@@ -23,7 +23,8 @@ import {
     ReportModel,
     ReportResponseModel,
     TemplateModel,
-    TemplateResponseModel
+    TemplateResponseModel,
+    ReportSaveResponseModel,
 } from '../shared/reporting.model';
 import { reportJobDone, reportJobFailed, reportJobLabel } from '../shared/report-job';
 import { ReportingService } from '../shared/reporting.service';
@@ -326,7 +327,33 @@ export class ReportComponent implements OnInit, OnDestroy {
         const sent = this.snapshot(null);
         this.saving = true;
         this.reportingService.saveReport(this.buildReport(null)).pipe(finalize(() => this.saving = false))
-            .subscribe(resp => this.showResult(resp, 'Report saved', 'ReportSave', sent));
+            .subscribe(resp => {
+                const id = this.storedId(resp);
+                if (id !== null) {
+                    this.reportId = id;
+                }
+                this.showResult(resp, 'Report saved', 'ReportSave', id === null ? sent : this.snapshotWithId(sent, id));
+                if (id !== null) {
+                    this.router.navigateByUrl('/reporting/edit/' + id);
+                }
+            });
+    }
+
+    /**
+     * The id the service assigned a report it just stored. Without taking it over the page stays on the route
+     * for a new report and every further save stores another one. A service that answers without an id leaves
+     * the page as it was, which is how saving worked before.
+     */
+    private storedId(resp: HttpResponse<ReportSaveResponseModel> | null): string | null {
+        if (this.reportId !== null || resp === null || resp.status < 200 || resp.status >= 300) {
+            return null;
+        }
+        return resp.body?.id || null;
+    }
+
+    /** What was sent now has an id. buildReport appends the id last, so this is its snapshot under that id. */
+    private snapshotWithId(snapshot: string, id: string): string {
+        return JSON.stringify({ ...JSON.parse(snapshot), id });
     }
 
     update() {
@@ -501,7 +528,7 @@ export class ReportComponent implements OnInit, OnDestroy {
     }
 
     /** What was sent is now stored; edits made while the request was out stay unsaved. */
-    private showResult(resp: HttpResponse<string> | null, message: string, action: string, sent: string) {
+    private showResult(resp: HttpResponse<unknown> | null, message: string, action: string, sent: string) {
         if (resp !== null && resp.status >= 200 && resp.status < 300) {
             this.baseline = sent;
             this.stored = true;

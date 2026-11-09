@@ -28,7 +28,8 @@ import {
     ReportListResponseModel, ReportModel,
     ReportResponseModel,
     TemplateListResponseModel,
-    TemplateResponseModel
+    TemplateResponseModel,
+    ReportSaveResponseModel,
 } from './reporting.model';
 import { reportJobDone } from './report-job';
 import { LadonService } from '../../admin/permissions/shared/services/ladom.service';
@@ -139,8 +140,8 @@ export class ReportingService {
         );
     }
 
-    saveReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<string> | null> {
-        return this.http.post<string>(this.reportUrl, data, {observe: 'response'})
+    saveReport(data: ReportModel = {} as ReportModel): Observable<HttpResponse<ReportSaveResponseModel> | null> {
+        return this.http.post<ReportSaveResponseModel>(this.reportUrl, data, {observe: 'response'})
             .pipe(
                 catchError(this.errorHandlerService.handleErrorWithSnackBar('Report could not be saved', ReportingService.name, 'saveReport: Error', null)),
             );

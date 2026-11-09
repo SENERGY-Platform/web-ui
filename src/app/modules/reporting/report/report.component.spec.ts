@@ -38,7 +38,8 @@ import {
     ReportModel,
     ReportObjectModel,
     ReportResponseModel,
-    TemplateResponseModel
+    TemplateResponseModel,
+    ReportSaveResponseModel,
 } from '../shared/reporting.model';
 import { CoreModule } from '../../../core/core.module';
 import { DeviceInstancesService } from '../../devices/device-instances/shared/device-instances.service';
@@ -121,9 +122,9 @@ class MockReportingService {
         return of(this.createResponse);
     }
 
-    saveReport(report: ReportModel): Observable<HttpResponse<string> | null> {
+    saveReport(report: ReportModel): Observable<HttpResponse<ReportSaveResponseModel> | null> {
         this.saved.push(report);
-        return of(new HttpResponse<string>({ status: 200 }));
+        return of(new HttpResponse<ReportSaveResponseModel>({ status: 200, body: { id: 'r-saved' } }));
     }
 
     updateReport(report: ReportModel): Observable<HttpResponse<string> | null> {
@@ -364,6 +365,43 @@ describe('ReportComponent', () => {
             expect(component.unsaved).toBe(false);
         });
 
+        it('should take over the id of the stored report and move to its edit route', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+
+            component.saveChanges();
+
+            expect(reportingService.saved.length).toBe(1);
+            expect(component.reportId).toBe('r-saved');
+            expect(router.navigateByUrl).toHaveBeenCalledWith('/reporting/edit/r-saved');
+            expect(component.unsaved).toBe(false);
+        });
+
+        it('should update the stored report on a second save instead of storing another one', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+            component.saveChanges();
+
+            component.form.controls.name.setValue('Another name');
+            component.saveChanges();
+
+            expect(reportingService.saved.length).toBe(1);
+            expect(reportingService.updated.map((report) => report.id)).toEqual(['r-saved']);
+        });
+
+        // A service that does not answer with an id leaves the page as saving worked before.
+        it('should stay on the route for a new report when the answer carries no id', () => {
+            fixture.detectChanges();
+            component.form.controls.name.setValue('My Report');
+            spyOn(reportingService, 'saveReport').and.returnValue(of(new HttpResponse<ReportSaveResponseModel>({ status: 200 })));
+
+            component.saveChanges();
+
+            expect(component.reportId).toBeNull();
+            expect(router.navigateByUrl).not.toHaveBeenCalled();
+            expect(component.unsaved).toBe(false);
+        });
+
         it('should keep the changes unsaved when saving fails', () => {
             fixture.detectChanges();
             component.form.controls.name.setValue('My Report');
@@ -378,13 +416,13 @@ describe('ReportComponent', () => {
         it('should keep edits made while the save was out unsaved', () => {
             fixture.detectChanges();
             component.form.controls.name.setValue('My Report');
-            const response = new Subject<HttpResponse<string> | null>();
+            const response = new Subject<HttpResponse<ReportSaveResponseModel> | null>();
             spyOn(reportingService, 'saveReport').and.returnValue(response);
 
             component.saveChanges();
             expect(component.saving).toBe(true);
             component.form.controls.name.setValue('Other name');
-            response.next(new HttpResponse<string>({ status: 200 }));
+            response.next(new HttpResponse<ReportSaveResponseModel>({ status: 200, body: { id: 'r-saved' } }));
             response.complete();
 
             expect(component.saving).toBe(false);
