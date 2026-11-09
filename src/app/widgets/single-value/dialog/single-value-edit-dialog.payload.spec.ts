@@ -64,16 +64,20 @@ describe('SingleValueEditDialogComponent saved widget', () => {
         targetCharacteristic: 'char-w',
     };
 
+    let unhandled: unknown[];
+
     beforeEach(() => {
         spies = configureSingleValueDialogTestBed();
-        // Picking a device makes the service listener read the cleared service ('') and throw; rxjs rethrows that on a timer.
-        config.onUnhandledError = () => undefined;
+        // rxjs rethrows an error thrown in a subscriber on a timer; collected here so no spec can leave one behind
+        unhandled = [];
+        config.onUnhandledError = (error) => unhandled.push(error);
     });
 
     afterEach(async () => {
         // the rethrow runs on a timer, so wait for it before the hook goes away
         await new Promise((resolve) => setTimeout(resolve));
         config.onUnhandledError = null;
+        expect(unhandled).toEqual([]);
     });
 
     function open(properties: object): void {

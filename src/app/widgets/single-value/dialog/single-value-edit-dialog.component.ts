@@ -266,7 +266,8 @@ export class SingleValueEditDialogComponent implements OnInit {
             const service = serviceValue as DeviceTypeServiceModel;
             this.paths = [];
             this.form.get('vAxis')?.patchValue('');
-            if (service === undefined || service == null) {
+            // a device change clears this field with '', which is neither null nor a service
+            if (!service) {
                 return;
             }
             this.loadDeviceServiceValues(service);
