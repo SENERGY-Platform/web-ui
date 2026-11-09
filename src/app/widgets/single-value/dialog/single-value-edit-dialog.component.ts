@@ -87,6 +87,10 @@ type SingleValueForm = FormGroup<{
     }>;
 }>;
 
+/** The form defaults a widget without these properties keeps. */
+const DEFAULT_FONT_SIZE = 128;
+const DEFAULT_AGGREGATION = SingleValueAggregations.Latest;
+
 @Component({
     templateUrl: './single-value-edit-dialog.component.html',
     styleUrls: ['./single-value-edit-dialog.component.css'],
@@ -186,7 +190,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             name: ['', Validators.required],
             type: this.fb.control<string | null | undefined>(''),
             format: this.fb.control<string | null | undefined>(''),
-            threshold: this.fb.control<number | null | undefined>(128),
+            threshold: this.fb.control<number | null | undefined>(DEFAULT_FONT_SIZE),
             math: this.fb.control<string | null | undefined>(''),
             measurement: this.fb.control<Picked<ChartsExportMeasurementModel>>(''),
             group: this.fb.group({
@@ -198,7 +202,7 @@ export class SingleValueEditDialogComponent implements OnInit {
             service: this.fb.control<Picked<DeviceTypeServiceModel>>({}),
             deviceGroupId: this.fb.control<string | null | undefined>(''),
             deviceGroupCriteria: this.fb.control<Picked<DeviceGroupCriteriaModel>>({}),
-            deviceGroupAggregation: this.fb.control<SingleValueAggregations | null | undefined>(SingleValueAggregations.Latest),
+            deviceGroupAggregation: this.fb.control<SingleValueAggregations | null | undefined>(DEFAULT_AGGREGATION),
             targetCharacteristic: this.fb.control<string | null | undefined>(''),
             timestampConfig: this.fb.group({
                 showTimestamp: new FormControl<boolean>(false),
@@ -344,21 +348,25 @@ export class SingleValueEditDialogComponent implements OnInit {
         return this.dashboardService.getWidget(this.dashboardId, this.widgetId).pipe(
             map((widget: WidgetModel) => {
                 this.widget = widget;
+                const sourceType = this.widget.properties.sourceType || 'export';
                 this.form.patchValue({
                     vAxis: widget.properties.vAxis,
                     vAxisLabel: widget.properties.vAxisLabel,
                     name: widget.name,
                     type: widget.properties.type,
                     format: widget.properties.format,
-                    threshold: widget.properties.threshold,
+                    // a widget without these keeps the form default instead of being patched with undefined
+                    threshold: widget.properties.threshold ?? DEFAULT_FONT_SIZE,
                     math: widget.properties.math,
-                    sourceType: this.widget.properties.sourceType || 'export',
+                    sourceType,
                     measurement: this.widget.properties.measurement,
                     device: this.widget.properties.device,
                     service: this.widget.properties.service,
                     deviceGroupId: this.widget.properties.deviceGroupId,
                     deviceGroupCriteria: this.widget.properties.deviceGroupCriteria,
-                    deviceGroupAggregation: this.widget.properties.deviceGroupAggregation,
+                    deviceGroupAggregation: sourceType === 'deviceGroup'
+                        ? this.widget.properties.deviceGroupAggregation ?? DEFAULT_AGGREGATION
+                        : this.widget.properties.deviceGroupAggregation,
                     targetCharacteristic: this.widget.properties.targetCharacteristic,
                 });
 
@@ -488,11 +496,12 @@ export class SingleValueEditDialogComponent implements OnInit {
 
     updateProperties(): Observable<DashboardResponseMessageModel> {
         const measurement = this.form.get('measurement')?.value as ChartsExportMeasurementModel | null | undefined;
-        this.widget.properties.measurement = {
-            id: measurement?.id as string,
-            name: measurement?.name as string,
-            values: measurement?.values as ExportValueModel[],
-            exportDatabaseId: measurement?.exportDatabaseId,
+        // an empty field used to be stored as an empty object, which looked like a configured export
+        this.widget.properties.measurement = measurement?.id === undefined ? undefined : {
+            id: measurement.id,
+            name: measurement.name,
+            values: measurement.values,
+            exportDatabaseId: measurement.exportDatabaseId,
         };
         this.widget.properties.vAxis = this.form.get('vAxis')?.value as ExportValueModel || undefined;
         this.widget.properties.vAxisLabel = this.form.get('vAxisLabel')?.value || undefined;

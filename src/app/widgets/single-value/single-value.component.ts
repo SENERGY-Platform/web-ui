@@ -19,7 +19,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild, ChangeDetectionStrateg
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {WidgetModel} from '../../modules/dashboard/shared/dashboard-widget.model';
 import {DomSanitizer} from '@angular/platform-browser';
-import {SingleValueService} from './shared/single-value.service';
+import {SingleValueService, singleValueConfigured} from './shared/single-value.service';
 import {SingleValueAggregations, SingleValueModel} from './shared/single-value.model';
 import {DashboardService} from '../../modules/dashboard/shared/dashboard.service';
 import {Observable, map} from 'rxjs';
@@ -259,7 +259,7 @@ export class SingleValueComponent implements OnInit {
     }
 
     private setConfigured() {
-        this.configured = this.widget.properties.measurement !== undefined;
+        this.configured = singleValueConfigured(this.widget.properties);
     }
 
     private sortHighlightConfigs() {

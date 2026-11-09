@@ -56,6 +56,21 @@ import {
     environment
 } from '../../../../environments/environment';
 
+/**
+ * True once the widget carries the source its values are queried from. Each source type is
+ * configured through its own fields; only an export is held in `measurement`.
+ */
+export function singleValueConfigured(properties: WidgetModel['properties']): boolean {
+    switch (properties.sourceType) {
+    case 'device':
+        return properties.device !== undefined && properties.service !== undefined;
+    case 'deviceGroup':
+        return properties.deviceGroupId !== undefined;
+    default: // an export, and a legacy widget without a source type
+        return properties.measurement !== undefined;
+    }
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -78,7 +93,7 @@ export class SingleValueService {
     getValues(widget: WidgetModel, date?: Date): Observable<SingleValueModel[]> {
         const m = widget.properties.measurement;
         const name = widget.properties.vAxis ? widget.properties.vAxis.Name : '';
-        if (m) {
+        if (singleValueConfigured(widget.properties)) {
             const requestPayload: QueriesRequestElementInfluxModel[] | QueriesRequestV2ElementTimescaleModel[] = [{
                 columns: [{
                     name: name.length > 0 ? name : undefined,
@@ -134,9 +149,9 @@ export class SingleValueService {
 
             let o: Observable<any[][]> | undefined;
             if (widget.properties.sourceType === 'export' || widget.properties.sourceType === undefined) { // undefined for legacy widgets
-                (requestPayload[0] as QueriesRequestElementInfluxModel).measurement = m.id;
-                (requestPayload[0] as QueriesRequestElementTimescaleModel).exportId = m.id;
-                switch (m.exportDatabaseId) {
+                (requestPayload[0] as QueriesRequestElementInfluxModel).measurement = m!.id;
+                (requestPayload[0] as QueriesRequestElementTimescaleModel).exportId = m!.id;
+                switch (m!.exportDatabaseId) {
                 case environment.exportDatabaseIdInternalTimescaleDb:
                     queryMultiple();
                     o = this.exportDataService.queryTimescale(requestPayload);

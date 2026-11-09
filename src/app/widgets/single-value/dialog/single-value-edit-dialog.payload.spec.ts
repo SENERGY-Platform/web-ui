@@ -111,8 +111,7 @@ describe('SingleValueEditDialogComponent saved widget', () => {
 
         component.save();
 
-        // today's code always sends the export field, empty when the widget has none
-        expect(sent()).toEqual({ ...JSON.parse(JSON.stringify(deviceProperties)), measurement: {} });
+        expect(sent()).toEqual(JSON.parse(JSON.stringify(deviceProperties)));
     });
 
     it('sends an untouched device group widget back as it loaded', () => {
@@ -120,7 +119,18 @@ describe('SingleValueEditDialogComponent saved widget', () => {
 
         component.save();
 
-        expect(sent()).toEqual({ ...JSON.parse(JSON.stringify(groupProperties)), measurement: {} });
+        expect(sent()).toEqual(JSON.parse(JSON.stringify(groupProperties)));
+    });
+
+    it('keeps the aggregation default for a device group widget stored without one', () => {
+        const { deviceGroupAggregation: _dropped, ...withoutAggregation } = groupProperties;
+        open(withoutAggregation);
+
+        expect(component.form.get('deviceGroupAggregation')?.value).toBe(SingleValueAggregations.Latest);
+
+        component.save();
+
+        expect(sent()).toEqual({ ...JSON.parse(JSON.stringify(withoutAggregation)), deviceGroupAggregation: 'latest' });
     });
 
     it('sends the form defaults for a stored widget that carries only a name', () => {
@@ -128,9 +138,9 @@ describe('SingleValueEditDialogComponent saved widget', () => {
 
         component.save();
 
-        // the font size and the aggregation default are overwritten by the stored (absent) values when loading
+        // an absent property keeps the form default; the aggregation belongs to a device group and stays out
         expect(sent()).toEqual({
-            measurement: {},
+            threshold: 128,
             group: {},
             sourceType: 'export',
             timestampConfig: { showTimestamp: false, highlightTimestamp: false, warningTimeLevel: 'd', warningAge: 1, problemTimeLevel: 'd', problemAge: 7 },
