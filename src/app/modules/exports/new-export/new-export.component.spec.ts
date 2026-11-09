@@ -395,6 +395,26 @@ describe('NewExportComponent', () => {
         expect(snackOpen.calls.allArgs().map((args) => args[0]).join(' ')).toContain('pipeline-gone');
     }));
 
+    it('says which device of an export could not be found', fakeAsync(() => {
+        // the device is deleted, or no longer shared with this user
+        const {component, snackOpen} = openForEditing({...existingExport(), Filter: 'device-gone', FilterType: 'deviceId'} as ExportModel);
+
+        expect(component.exportForm.getRawValue().device).toBeNull();
+        expect(snackOpen.calls.allArgs().map((args) => args[0]).join(' ')).toContain('device-gone');
+    }));
+
+    it('says which import of an export could not be found', fakeAsync(() => {
+        const {snackOpen} = openForEditing({...existingImportExport(), Filter: 'import-gone'} as ExportModel);
+
+        expect(snackOpen.calls.allArgs().map((args) => args[0]).join(' ')).toContain('import-gone');
+    }));
+
+    it('says nothing about the import of an export that is there', fakeAsync(() => {
+        const {snackOpen} = openForEditing(existingImportExport());
+
+        expect(snackOpen.calls.allArgs().map((args) => args[0]).join(' ')).not.toContain('was not found');
+    }));
+
     it('says nothing about the pipeline of an export that is there', fakeAsync(() => {
         const {snackOpen} = openForEditing();
 

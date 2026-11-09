@@ -256,6 +256,7 @@ export class NewExportComponent implements OnInit {
                 if (exp.FilterType === 'deviceId') {
                     this.exportForm.patchValue({selector: 'device'});
                     this.disableUnusedSources('device');
+                    this.reportMissingSource('Device', exp.Filter, this.devices.some((device) => device.id === exp.Filter));
                     setTimeout(() => {
                         this.devices.forEach((device) => {
                             if (device.id === exp.Filter) {
@@ -282,7 +283,7 @@ export class NewExportComponent implements OnInit {
                 } else if (exp.FilterType === 'operatorId') {
                     this.exportForm.patchValue({selector: 'pipe'});
                     this.disableUnusedSources('pipe');
-                    this.reportMissingPipeline(exp.Filter.split(':')[0]);
+                    this.reportMissingSource('Pipeline', exp.Filter.split(':')[0], this.pipelines.some((pipeline) => pipeline.id === exp.Filter.split(':')[0]));
                     this.pipelines.forEach((pipeline) => {
                         if (pipeline.id === exp.Filter.split(':')[0]) {
                             this.exportForm.patchValue({pipeline});
@@ -311,7 +312,7 @@ export class NewExportComponent implements OnInit {
                     }
                     this.exportForm.patchValue({selector: 'pipe'});
                     this.disableUnusedSources('pipe');
-                    this.reportMissingPipeline(exp.Filter);
+                    this.reportMissingSource('Pipeline', exp.Filter, this.pipelines.some((pipeline) => pipeline.id === exp.Filter));
                     this.pipelines.forEach((pipeline) => {
                         if (pipeline.id === exp.Filter) {
                             this.exportForm.patchValue({pipeline});
@@ -330,9 +331,9 @@ export class NewExportComponent implements OnInit {
                 } else if (exp.FilterType === 'import_id') {
                     this.exportForm.patchValue({selector: 'import'});
                     this.disableUnusedSources('import');
-                    const importInstance: ImportInstancesModel =
-                        this.imports.find((i) => i.id === exp.Filter) || ({} as ImportInstancesModel);
-                    this.exportForm.patchValue({import: importInstance});
+                    const found = this.imports.find((i) => i.id === exp.Filter);
+                    this.reportMissingSource('Import', exp.Filter, found !== undefined);
+                    this.exportForm.patchValue({import: found || ({} as ImportInstancesModel)});
                     this.getImportType(exp.ServiceName).subscribe((type) => {
                         type.output.sub_content_variables?.forEach((output) => this.traverseDataStructure('', output));
                     });
@@ -627,14 +628,14 @@ export class NewExportComponent implements OnInit {
     }
 
     /**
-     * The pipeline of an export that is gone or out of reach is not among the loaded ones, and the form
-     * then shows an empty pipeline and an operator field that asks for one, with nothing saying why.
+     * The source of an export that is gone or out of reach is not among the loaded ones, and the form then
+     * shows an empty source field and fields that ask for one, with nothing saying why.
      */
-    private reportMissingPipeline(pipelineId: string) {
-        if (this.pipelines.some((pipeline) => pipeline.id === pipelineId)) {
+    private reportMissingSource(kind: string, id: string, found: boolean) {
+        if (found) {
             return;
         }
-        snackError(this.snackBar, 'Pipeline ' + pipelineId + ' was not found. It is deleted, or not shared with you.');
+        snackError(this.snackBar, kind + ' ' + id + ' was not found. It is deleted, or not shared with you.');
     }
 
     traverseDataStructure(pathString: string, field: DeviceTypeContentVariableModel | ImportTypeContentVariableModel) {
