@@ -20,47 +20,84 @@ mat-card {
     box-sizing: border-box;
 }
 
-.widget-icon-orange {
-    background: #f39c12;
-}
-
-.widget-icon-green {
-    background: #00a65a;
-}
-
-.widget-icon-red {
-    background: #dd4b39;
-}
-
-.mat-32 {
-    height: 32px;
-    width: 32px;
-    font-size: 32px;
-}
-
-.kpi-1-3 {
-    margin-left: 16px;
-}
-
-.kpi-header-1-3 {
-    margin-left: 14px;
-}
-
-.kpi-text-1-3 {
-    margin-top: 6px;
-    margin-left: 4px;
-}
-
 mat-card-content {
     height: calc(100% - 72px);
     margin: 0;
     overflow-y: hidden;
 }
 
-.white {
-    color: white;
+.states {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-.clickable {
+/* Each state takes the same share of the card, so the three rows stay aligned in every tile size. */
+.state {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 4px;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
     cursor: pointer;
+}
+
+.state + .state {
+    border-top: var(--app-hairline);
+}
+
+.state:hover {
+    background-color: var(--app-hover);
+}
+
+.badge {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--app-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* A wash of the status colour carries the state; the full blocks of the old theme drowned the numbers. */
+.badge.online {
+    background-color: color-mix(in srgb, var(--app-status-ok) 12%, transparent);
+    color: var(--app-status-ok);
+}
+
+.badge.offline {
+    background-color: color-mix(in srgb, var(--app-status-failed) 12%, transparent);
+    color: var(--app-status-failed);
+}
+
+.badge.unknown {
+    background-color: color-mix(in srgb, var(--app-status-warning) 14%, transparent);
+    color: var(--app-status-warning);
+}
+
+.label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.count {
+    flex: none;
+    font-size: var(--mat-sys-headline-small-size, 20px);
+    line-height: 1;
+}
+
+.total {
+    font-size: var(--mat-sys-body-medium-size, 14px);
+    color: var(--mat-sys-on-surface-variant);
 }
