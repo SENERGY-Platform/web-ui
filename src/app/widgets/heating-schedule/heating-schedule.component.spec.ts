@@ -35,12 +35,16 @@ describe('HeatingScheduleComponent', () => {
     const configuredWidget = { id: 'w1', name: 'Heating', type: 'heating_schedule', properties: { heatingSchedule: { instanceId: 'inst-1' } } } as unknown as WidgetModel;
     const schedule = '{"windows":[{"weekdays":[0,1,2,3,4,5,6],"from":"00:00","to":"00:00","temperature":21}]}';
 
-    const instanceWith = (scheduleText: string, setback: unknown): SmartServiceInstanceModel => ({
+    const option = (id: string, label: string) => JSON.stringify({ device_selection: { device_id: id, service_id: null, path: null }, label });
+    const thermostats = JSON.stringify([option('urn:a', 'Hall'), option('urn:b', 'Bath'), option('urn:c', 'Kitchen')]);
+    const zonesSchedule = '{"zones":[{"name":"Bath","devices":["urn:b"],"windows":[{"weekdays":[0,1,2,3,4,5,6],"from":"00:00","to":"00:00","temperature":24}],"setback":19},{"name":"Rest","windows":[]}]}';
+
+    const instanceWith = (scheduleText: string, setback: unknown, thermostatsValue = '[]'): SmartServiceInstanceModel => ({
         id: 'inst-1',
         name: 'Home',
         release_id: 'rel-1',
         parameters: [
-            { id: 'thermostats', value: '[]', label: 'Thermostats' },
+            { id: 'thermostats', value: thermostatsValue, label: 'Thermostats' },
             { id: 'schedule', value: scheduleText, label: 'Schedule' },
             { id: 'setback', value: setback, label: 'Setback' },
         ],
@@ -88,6 +92,93 @@ describe('HeatingScheduleComponent', () => {
         expect(fixture.nativeElement.querySelector('.next')).toBeNull();
         expect(fixture.nativeElement.querySelectorAll('.bar').length).toBe(7);
         expect(fixture.nativeElement.querySelector('.edit-schedule')).not.toBeNull();
+    });
+
+    it('shows one block per zone with its thermostats, its own target and its own week', () => {
+        instances.getInstance.and.returnValue(of(instanceWith(zonesSchedule, 17, thermostats)));
+        component.widget = configuredWidget;
+        fixture.detectChanges();
+        init.next('w1');
+        fixture.detectChanges();
+
+        const zones: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.zone'));
+        expect(zones.length).toBe(2);
+        expect(zones[0].querySelector('.zone-name')!.textContent).toBe('Bath');
+        expect(zones[0].querySelector('.zone-devices')!.textContent).toBe('Bath');
+        expect(zones[0].querySelector('.current')!.textContent).toContain('24 °C');
+        expect(zones[1].querySelector('.zone-name')!.textContent).toBe('Rest');
+        expect(zones[1].querySelector('.zone-devices')!.textContent).toBe('Hall, Kitchen');
+        expect(zones[1].querySelector('.current')!.textContent).toContain('17 °C');
+        expect(fixture.nativeElement.querySelectorAll('.bar').length).toBe(14);
+    });
+
+    it('leaves a zone without a selected thermostat out and shows a legacy plan without a zone name', () => {
+        const gone = '{"zones":[{"name":"Weg","devices":["urn:x"],"windows":[]},{"name":"Da","devices":["urn:a"],"windows":[]}]}';
+        instances.getInstance.and.returnValue(of(instanceWith(gone, 17, thermostats)));
+        component.widget = configuredWidget;
+        fixture.detectChanges();
+        init.next('w1');
+        fixture.detectChanges();
+        expect(Array.from(fixture.nativeElement.querySelectorAll('.zone-name')).map((element) => (element as HTMLElement).textContent)).toEqual(['Da']);
+
+        instances.getInstance.and.returnValue(of(instanceWith(schedule, 17, thermostats)));
+        init.next('w1');
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelectorAll('.zone').length).toBe(1);
+        expect(fixture.nativeElement.querySelector('.zone-name')).toBeNull();
+    });
+
+    it('shortens a long thermostat list and keeps the full one as title', () => {
+        const many = JSON.stringify(['a', 'b', 'c', 'd', 'e'].map((id) => option('urn:' + id, 'T' + id)));
+        instances.getInstance.and.returnValue(of(instanceWith(zonesSchedule, 17, many)));
+        component.widget = configuredWidget;
+        fixture.detectChanges();
+        init.next('w1');
+        fixture.detectChanges();
+
+        const devices: HTMLElement = fixture.nativeElement.querySelectorAll('.zone-devices')[1];
+        expect(devices.textContent).toBe('Ta, Tc, Td and 1 more');
+        expect(devices.title).toBe('Ta, Tc, Td, Te');
+    });
+
+    it('shows a resolution error of the smart service and offers no editor', () => {
+        const twice = '{"zones":[{"name":"X","devices":["urn:a"],"windows":[]},{"name":"Y","devices":["urn:a"],"windows":[]}]}';
+        instances.getInstance.and.returnValue(of(instanceWith(twice, 17, thermostats)));
+        component.widget = configuredWidget;
+        fixture.detectChanges();
+        init.next('w1');
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.textContent).toContain('cannot be read');
+        expect(fixture.nativeElement.textContent).toContain('Hall');
+        expect(fixture.nativeElement.querySelector('.zone')).toBeNull();
+        expect(fixture.nativeElement.querySelector('.edit-schedule')).toBeNull();
+    });
+
+    it('shows the raw text next to a resolution error', () => {
+        const twice = '{"zones":[{"name":"X","devices":["urn:a"],"windows":[]},{"name":"Y","devices":["urn:a"],"windows":[]}]}';
+        instances.getInstance.and.returnValue(of(instanceWith(twice, 17, thermostats)));
+        component.widget = configuredWidget;
+        fixture.detectChanges();
+        init.next('w1');
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector('.raw').textContent).toBe(twice);
+    });
+
+    it('hands the stored zones, the setback and the thermostats to the editor', () => {
+        instances.getInstance.and.returnValue(of(instanceWith(zonesSchedule, 17, thermostats)));
+        dialog.open.and.returnValue({ afterClosed: () => of(false) } as never);
+        component.widget = configuredWidget;
+        fixture.detectChanges();
+        init.next('w1');
+
+        component.editSchedule();
+
+        const data = dialog.open.calls.mostRecent().args[1]!.data as { zones: { name: string; devices: string[] | null }[]; setback: number; thermostats: { label: string }[] };
+        expect(data.zones.map((zone) => [zone.name, zone.devices])).toEqual([['Bath', ['urn:b']], ['Rest', null]]);
+        expect(data.setback).toBe(17);
+        expect(data.thermostats.map((thermostat) => thermostat.label)).toEqual(['Hall', 'Bath', 'Kitchen']);
     });
 
     it('shows a failed load as an error and offers no editor', () => {
@@ -151,6 +242,17 @@ describe('HeatingScheduleComponent', () => {
 
         expect(fixture.nativeElement.textContent).toContain('cannot show window 1');
         expect(fixture.nativeElement.querySelector('.edit-schedule')).toBeNull();
+    });
+
+    it('names the zone of a window the editor cannot show', () => {
+        const stored = '{"zones":[{"name":"Bath","windows":[{"from":"24:00","to":"06:00","temperature":20}]}]}';
+        instances.getInstance.and.returnValue(of(instanceWith(stored, 17, thermostats)));
+        component.widget = configuredWidget;
+        fixture.detectChanges();
+        init.next('w1');
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.textContent).toContain('cannot show window 1 of zone Bath');
     });
 
     it('reloads after the editor saved', () => {

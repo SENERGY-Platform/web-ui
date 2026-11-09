@@ -18,47 +18,93 @@
 
 <mat-dialog-content>
     <div class="ly-column">
-        @for (window of windows; track window; let i = $index) {
-            <div class="window">
-                <div class="row">
-                    <mat-button-toggle-group multiple [(ngModel)]="window.weekdays" [attr.aria-label]="'Weekdays of window ' + (i + 1)">
-                        @for (name of weekdayNames; track name; let day = $index) {
-                            <mat-button-toggle [value]="day">{{ name }}</mat-button-toggle>
-                        }
-                    </mat-button-toggle-group>
-                    <button mat-icon-button class="remove" (click)="remove(i)" aria-label="Remove time window">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </div>
-                <div class="row">
-                    <mat-form-field appearance="outline" class="time">
-                        <mat-label>From</mat-label>
-                        <input matInput type="time" step="300" [(ngModel)]="window.from" [disabled]="window.allDay">
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="time">
-                        <mat-label>To</mat-label>
-                        <input matInput type="time" step="300" [(ngModel)]="window.to" [disabled]="window.allDay">
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="temperature">
-                        <mat-label>Temperature</mat-label>
-                        <input matInput type="number" [min]="minTemperature" [max]="maxTemperature" step="0.5" [(ngModel)]="window.temperature">
-                        <span matTextSuffix>°C</span>
-                    </mat-form-field>
-                    <mat-slide-toggle [(ngModel)]="window.allDay">All day</mat-slide-toggle>
-                </div>
-            </div>
-        }
-        <div>
-            <button mat-stroked-button (click)="add()">
-                <mat-icon>add</mat-icon> Add time window
-            </button>
-        </div>
         <mat-form-field appearance="outline" class="temperature setback">
             <mat-label>Setback temperature</mat-label>
             <input matInput type="number" [min]="minTemperature" [max]="maxTemperature" step="1" [(ngModel)]="setback">
             <span matTextSuffix>°C</span>
         </mat-form-field>
-        <div class="hint">Outside all windows the setback temperature applies. Overlapping windows use the highest temperature. Times are Berlin time.</div>
+        <div class="hint">Outside all windows the setback temperature applies, unless a zone has its own. Overlapping windows use the highest temperature. Times are Berlin time.</div>
+
+        @for (zone of zones; track zone; let z = $index) {
+            <div class="zone">
+                <div class="row">
+                    <mat-form-field appearance="outline" class="zone-name">
+                        <mat-label>Zone name</mat-label>
+                        <input matInput [(ngModel)]="zone.name" [placeholder]="'Zone ' + (z + 1)">
+                    </mat-form-field>
+                    <button mat-icon-button class="remove" (click)="removeZone(z)" [disabled]="zones.length < 2" aria-label="Remove zone">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+
+                <mat-slide-toggle [ngModel]="zone.rest" (ngModelChange)="setRest(zone, $event)" [disabled]="restElsewhere(zone)">All other thermostats</mat-slide-toggle>
+                @if (!zone.rest) {
+                    <div class="devices">
+                        @for (thermostat of thermostats; track thermostat.deviceId) {
+                            <mat-checkbox [checked]="zone.devices.includes(thermostat.deviceId)" [disabled]="takenBy(zone, thermostat.deviceId) !== null"
+                                (change)="setDevice(zone, thermostat.deviceId, $event.checked)">
+                                {{ thermostat.label }}
+                                @if (takenBy(zone, thermostat.deviceId); as other) {
+                                    <span class="taken">({{ other }})</span>
+                                }
+                            </mat-checkbox>
+                        }
+                    </div>
+                }
+
+                @for (window of zone.windows; track window; let i = $index) {
+                    <div class="window">
+                        <div class="row">
+                            <mat-button-toggle-group multiple [(ngModel)]="window.weekdays" [attr.aria-label]="'Weekdays of window ' + (i + 1)">
+                                @for (name of weekdayNames; track name; let day = $index) {
+                                    <mat-button-toggle [value]="day">{{ name }}</mat-button-toggle>
+                                }
+                            </mat-button-toggle-group>
+                            <button mat-icon-button class="remove" (click)="removeWindow(zone, i)" aria-label="Remove time window">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <mat-form-field appearance="outline" class="time">
+                                <mat-label>From</mat-label>
+                                <input matInput type="time" step="300" [(ngModel)]="window.from" [disabled]="window.allDay">
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="time">
+                                <mat-label>To</mat-label>
+                                <input matInput type="time" step="300" [(ngModel)]="window.to" [disabled]="window.allDay">
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="temperature">
+                                <mat-label>Temperature</mat-label>
+                                <input matInput type="number" [min]="minTemperature" [max]="maxTemperature" step="0.5" [(ngModel)]="window.temperature">
+                                <span matTextSuffix>°C</span>
+                            </mat-form-field>
+                            <mat-slide-toggle [(ngModel)]="window.allDay">All day</mat-slide-toggle>
+                        </div>
+                    </div>
+                }
+                <div class="row">
+                    <button mat-stroked-button (click)="addWindow(zone)">
+                        <mat-icon>add</mat-icon> Add time window
+                    </button>
+                </div>
+
+                <div class="row">
+                    <mat-slide-toggle [(ngModel)]="zone.ownSetback">Own setback temperature</mat-slide-toggle>
+                    @if (zone.ownSetback) {
+                        <mat-form-field appearance="outline" class="temperature own-setback">
+                            <mat-label>Setback</mat-label>
+                            <input matInput type="number" [min]="minTemperature" [max]="maxTemperature" step="1" [(ngModel)]="zone.setback">
+                            <span matTextSuffix>°C</span>
+                        </mat-form-field>
+                    }
+                </div>
+            </div>
+        }
+        <div>
+            <button mat-stroked-button class="add-zone" (click)="addZone()">
+                <mat-icon>add</mat-icon> Add zone
+            </button>
+        </div>
         @if (problem) {
             <div class="problem">{{ problem }}</div>
         }

@@ -20,6 +20,23 @@ mat-card-content {
     font-size: 0.85em;
 }
 
+.zone {
+    margin-bottom: 20px;
+}
+
+.zone-name {
+    font-weight: 500;
+    font-size: 1.1em;
+}
+
+.zone-devices {
+    opacity: 0.75;
+    font-size: 0.85em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .now {
     margin-bottom: 12px;
 }

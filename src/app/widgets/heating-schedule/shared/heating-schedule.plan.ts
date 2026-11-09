@@ -81,23 +81,22 @@ function numberOf(value: unknown): number | undefined {
     return Number.isFinite(parsed) ? parsed : undefined;
 }
 
-/** Reads the schedule text and the setback with the same rules as the smart service. Throws HeatingPlanError. */
-export function parseHeatingPlan(schedule: string, setback: unknown): HeatingPlan {
-    let document: { windows?: unknown } | null;
-    try {
-        document = JSON.parse(schedule);
-    } catch (error) {
-        throw new HeatingPlanError(error instanceof Error ? error.message : 'The schedule is not valid JSON.');
-    }
-    if (!document || !Array.isArray(document.windows)) {
-        throw new HeatingPlanError('The schedule needs a list "windows".');
-    }
+/** A setback or zone setback as the smart service reads it. Throws HeatingPlanError. */
+export function parseSetback(setback: unknown, name = 'The setback temperature'): number {
     const low = numberOf(setback);
     if (low === undefined) {
-        throw new HeatingPlanError('The setback temperature is not a number: ' + setback);
+        throw new HeatingPlanError(name + ' is not a number: ' + setback);
     }
-    const windows = (document.windows as RawWindow[]).map((raw, index): HeatingWindow => {
-        const name = 'Window ' + (index + 1) + ': ';
+    return low;
+}
+
+/** Checks a stored list of windows with the rules of the smart service; `where` prefixes the messages. Throws HeatingPlanError. */
+export function parseWindows(list: unknown, where = ''): HeatingWindow[] {
+    if (!Array.isArray(list)) {
+        throw new HeatingPlanError(where + 'The schedule needs a list "windows".');
+    }
+    return (list as RawWindow[]).map((raw, index): HeatingWindow => {
+        const name = where + 'Window ' + (index + 1) + ': ';
         const given = raw?.weekdays;
         const weekdays: unknown = given === undefined || given === null || (Array.isArray(given) && given.length === 0) ? ALL_DAYS : given;
         if (!Array.isArray(weekdays)) {
@@ -119,19 +118,36 @@ export function parseHeatingPlan(schedule: string, setback: unknown): HeatingPla
         }
         return { weekdays: [...weekdays], from: timeText(from), to: timeText(to), temperature };
     });
-    return { windows, setback: low };
+}
+
+/** Reads the schedule text and the setback with the same rules as the smart service. Throws HeatingPlanError. */
+export function parseHeatingPlan(schedule: string, setback: unknown): HeatingPlan {
+    let document: { windows?: unknown } | null;
+    try {
+        document = JSON.parse(schedule);
+    } catch (error) {
+        throw new HeatingPlanError(error instanceof Error ? error.message : 'The schedule is not valid JSON.');
+    }
+    if (!document || !Array.isArray(document.windows)) {
+        throw new HeatingPlanError('The schedule needs a list "windows".');
+    }
+    const low = parseSetback(setback);
+    return { windows: parseWindows(document.windows), setback: low };
+}
+
+/** The window objects with exactly the keys the smart service reads. */
+export function windowsJson(windows: HeatingWindow[]): object[] {
+    return windows.map((window) => ({
+        weekdays: window.weekdays,
+        from: window.from,
+        to: window.to,
+        temperature: window.temperature,
+    }));
 }
 
 /** The compact JSON text with exactly the keys the smart service reads. */
 export function serialiseSchedule(windows: HeatingWindow[]): string {
-    return JSON.stringify({
-        windows: windows.map((window) => ({
-            weekdays: window.weekdays,
-            from: window.from,
-            to: window.to,
-            temperature: window.temperature,
-        })),
-    });
+    return JSON.stringify({ windows: windowsJson(windows) });
 }
 
 /** Last Sunday of the month (0-based) at 01:00 UTC, the instant the EU changes the offset. */

@@ -20,6 +20,7 @@ export const HEATING_RELEASE_NAME = 'Heizungssteuerung';
 /** Ids of the release parameters the widget reads and writes. */
 export const HEATING_SCHEDULE_PARAMETER = 'schedule';
 export const HEATING_SETBACK_PARAMETER = 'setback';
+export const HEATING_THERMOSTATS_PARAMETER = 'thermostats';
 
 export interface HeatingScheduleConfig {
     instanceId: string;

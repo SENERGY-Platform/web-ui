@@ -28,7 +28,7 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
 import { WidgetHeaderComponent } from '../components/widget-header/widget-header.component';
 import { WidgetSpinnerComponent } from '../components/widget-spinner/widget-spinner.component';
 import { HeatingScheduleDialogComponent, HeatingScheduleDialogData, toEditable } from './dialog/schedule/schedule-dialog.component';
-import { HEATING_SCHEDULE_PARAMETER, HEATING_SETBACK_PARAMETER, heatingInstanceId } from './shared/heating-schedule.model';
+import { HEATING_SCHEDULE_PARAMETER, HEATING_SETBACK_PARAMETER, HEATING_THERMOSTATS_PARAMETER, heatingInstanceId } from './shared/heating-schedule.model';
 import {
     HeatingPlan,
     HeatingPlanError,
@@ -36,13 +36,14 @@ import {
     WEEKDAY_NAMES,
     nextSwitch,
     nextSwitchText,
-    parseHeatingPlan,
+    parseSetback,
     target,
     temperatureText,
     timeText,
     weekSegments,
 } from './shared/heating-schedule.plan';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
+import { HeatingThermostat, HeatingZoneDocument, ResolvedZone, parseThermostats, parseZoneDocument, resolveZones, zoneLabel } from './shared/heating-schedule.zones';
 
 /** A bar segment of the week overview; position and size in percent of the day. */
 export interface BarSegment {
@@ -56,6 +57,20 @@ export interface WeekRow {
     name: string;
     segments: BarSegment[];
 }
+
+/** A zone as the widget shows it. */
+export interface ZoneView {
+    name: string;
+    /** the thermostats of the zone, shortened; the full list is the title */
+    devices: string;
+    devicesTitle: string;
+    plan: HeatingPlan;
+    currentText: string;
+    nextText: string | null;
+    rows: WeekRow[];
+}
+
+const MAX_SHOWN_DEVICES = 3;
 
 const LOAD_ERROR = 'The heating schedule could not be loaded.';
 
@@ -81,12 +96,13 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     /** the stored schedule text when it cannot be read, shown next to the error */
     rawSchedule: string | null = null;
     instance: SmartServiceInstanceModel | null = null;
-    plan: HeatingPlan | null = null;
-    currentText = '';
-    nextText: string | null = null;
+    /** the stored schedule and the thermostats the editor starts from */
+    document: HeatingZoneDocument | null = null;
+    setback = 0;
+    thermostats: HeatingThermostat[] = [];
+    zones: ZoneView[] = [];
     /** why the editor cannot take over the stored plan, if it cannot */
     editorNote: string | null = null;
-    rows: WeekRow[] = [];
     readonly hours = [0, 6, 12, 18, 24];
 
     private initSubscription = new Subscription();
@@ -114,7 +130,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     }
 
     get canEditSchedule(): boolean {
-        return this.plan !== null && this.editorNote === null && this.instance?.permissions_info?.permissions?.administrate !== false;
+        return this.document !== null && this.editorNote === null && this.instance?.permissions_info?.permissions?.administrate !== false;
     }
 
     load(): void {
@@ -141,7 +157,8 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     private fail(message: string): void {
         this.instance = null;
         this.rawSchedule = null;
-        this.plan = null;
+        this.document = null;
+        this.zones = [];
         this.loadError = message;
         this.finishLoad();
     }
@@ -149,22 +166,34 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     private show(instance: SmartServiceInstanceModel): void {
         this.instance = instance;
         const schedule = parameterValue(instance, HEATING_SCHEDULE_PARAMETER);
-        const setback = parameterValue(instance, HEATING_SETBACK_PARAMETER);
+        const scheduleText = typeof schedule === 'string' ? schedule : '';
         this.rawSchedule = null;
         this.editorNote = null;
+        this.document = null;
+        this.zones = [];
+        let document: HeatingZoneDocument;
         try {
-            this.plan = parseHeatingPlan(typeof schedule === 'string' ? schedule : '', setback);
+            document = parseZoneDocument(scheduleText);
+        } catch (error) {
+            // the raw text is shown so that nothing the editor cannot read is lost from sight
+            this.rawSchedule = typeof schedule === 'string' ? schedule : JSON.stringify(schedule ?? null);
+            this.loadError = 'The stored heating schedule cannot be read: ' + errorText(error);
+            this.finishLoad();
+            return;
+        }
+        try {
+            const setback = parseSetback(parameterValue(instance, HEATING_SETBACK_PARAMETER));
+            const thermostats = parseThermostats(parameterValue(instance, HEATING_THERMOSTATS_PARAMETER));
+            this.zones = resolveZones(document.zones, setback, thermostats, document.legacy).map((zone) => zoneView(zone));
+            this.document = document;
+            this.setback = setback;
+            this.thermostats = thermostats;
             this.loadError = null;
-            const unreadable = this.plan.windows.findIndex((window) => toEditable(window) === null);
-            if (unreadable >= 0) {
-                this.editorNote = 'The schedule editor cannot show window ' + (unreadable + 1) + ' without changing it. Edit the smart service parameters instead.';
-            }
-            this.rows = this.buildRows(this.plan);
+            this.editorNote = editorNote(document);
             this.updateNow();
         } catch (error) {
-            this.plan = null;
             this.rawSchedule = typeof schedule === 'string' ? schedule : JSON.stringify(schedule ?? null);
-            this.loadError = 'The stored heating schedule cannot be read: ' + (error instanceof HeatingPlanError ? error.message : 'unknown error');
+            this.loadError = 'The stored heating schedule cannot be read: ' + errorText(error);
         }
         this.finishLoad();
     }
@@ -175,31 +204,24 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     }
 
     private updateNow(): void {
-        if (this.plan === null) {
-            return;
-        }
         const now = Date.now();
-        this.currentText = temperatureText(target(this.plan, now));
-        const next = nextSwitch(this.plan, now);
-        this.nextText = next === null ? null : nextSwitchText(next, now);
-    }
-
-    private buildRows(plan: HeatingPlan): WeekRow[] {
-        const week = weekSegments(plan);
-        const temperatures = week.flat().map((segment) => segment.temperature);
-        const low = Math.min(...temperatures);
-        const high = Math.max(...temperatures);
-        return week.map((segments, day) => ({
-            name: WEEKDAY_NAMES[day],
-            segments: segments.map((segment) => barSegment(segment, low, high)),
-        }));
+        for (const zone of this.zones) {
+            zone.currentText = temperatureText(target(zone.plan, now));
+            const next = nextSwitch(zone.plan, now);
+            zone.nextText = next === null ? null : nextSwitchText(next, now);
+        }
     }
 
     editSchedule(): void {
-        if (this.instance === null || this.plan === null) {
+        if (this.instance === null || this.document === null) {
             return;
         }
-        const data: HeatingScheduleDialogData = { instance: this.instance, plan: this.plan };
+        const data: HeatingScheduleDialogData = {
+            instance: this.instance,
+            zones: this.document.zones,
+            setback: this.setback,
+            thermostats: this.thermostats,
+        };
         this.dialog.open<HeatingScheduleDialogComponent, HeatingScheduleDialogData, boolean>(HeatingScheduleDialogComponent, {
             data,
             ...dialogSize('m'),
@@ -217,6 +239,53 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
 
 function parameterValue(instance: SmartServiceInstanceModel, id: string): unknown {
     return (instance.parameters ?? []).find((parameter) => parameter.id === id)?.value;
+}
+
+function errorText(error: unknown): string {
+    return error instanceof HeatingPlanError ? error.message : 'unknown error';
+}
+
+/** Why the editor cannot take over the stored plan, or null when it can. */
+function editorNote(document: HeatingZoneDocument): string | null {
+    for (let z = 0; z < document.zones.length; z++) {
+        const unreadable = document.zones[z].windows.findIndex((window) => toEditable(window) === null);
+        if (unreadable >= 0) {
+            const where = document.legacy ? '' : ' of zone ' + zoneLabel(document.zones[z].name, z);
+            return 'The schedule editor cannot show window ' + (unreadable + 1) + where + ' without changing it. Edit the smart service parameters instead.';
+        }
+    }
+    return null;
+}
+
+/** "Bath, Kitchen, Hall and 2 more" */
+function deviceSummary(labels: string[]): string {
+    if (labels.length <= MAX_SHOWN_DEVICES) {
+        return labels.join(', ');
+    }
+    return labels.slice(0, MAX_SHOWN_DEVICES).join(', ') + ' and ' + (labels.length - MAX_SHOWN_DEVICES) + ' more';
+}
+
+function zoneView(zone: ResolvedZone): ZoneView {
+    return {
+        name: zone.name,
+        devices: deviceSummary(zone.labels),
+        devicesTitle: zone.labels.join(', '),
+        plan: zone.plan,
+        currentText: '',
+        nextText: null,
+        rows: buildRows(zone.plan),
+    };
+}
+
+function buildRows(plan: HeatingPlan): WeekRow[] {
+    const week = weekSegments(plan);
+    const temperatures = week.flat().map((segment) => segment.temperature);
+    const low = Math.min(...temperatures);
+    const high = Math.max(...temperatures);
+    return week.map((segments, day) => ({
+        name: WEEKDAY_NAMES[day],
+        segments: segments.map((segment) => barSegment(segment, low, high)),
+    }));
 }
 
 /** Warmer segments get a stronger tint; a plan with one temperature only gets the middle tint. */

@@ -90,6 +90,22 @@ describe('HeatingScheduleService.saveSchedule', () => {
         ]);
     });
 
+    it('sends the thermostats of several devices byte for byte next to a zones schedule', () => {
+        const several = '["{\\"device_selection\\":{\\"device_id\\":\\"urn:infai:ses:device:a\\",\\"service_id\\":null,\\"path\\":null},\\"label\\":\\"A\\"}","{\\"device_selection\\":{\\"device_id\\":\\"urn:infai:ses:device:b\\",\\"service_id\\":null,\\"path\\":null},\\"label\\":\\"B\\"}"]';
+        instances.getInstance.and.returnValue(of(instanceOf(several)));
+        releases.getReleaseParameters.and.returnValue(of(releaseParameters()));
+        instances.updateInstanceParameters.and.returnValue(of(instance));
+        const schedule = '{"zones":[{"name":"A","devices":["urn:infai:ses:device:a"],"windows":[],"setback":19},{"name":"Rest","windows":[]}]}';
+
+        service.saveSchedule('inst-1', schedule, 16).subscribe();
+
+        expect(instances.updateInstanceParameters.calls.mostRecent().args[1]).toEqual([
+            { id: 'thermostats', value: several, label: 'Thermostats' },
+            { id: 'schedule', value: schedule, label: 'Schedule' },
+            { id: 'setback', value: 16, label: 'Setback' },
+        ]);
+    });
+
     it('merges into the instance as it is when saving, not as the widget loaded it', () => {
         instances.getInstance.and.returnValue(of(instanceOf(otherThermostats)));
         releases.getReleaseParameters.and.returnValue(of(releaseParameters()));
@@ -100,6 +116,18 @@ describe('HeatingScheduleService.saveSchedule', () => {
         expect(instances.getInstance).toHaveBeenCalledWith('inst-1');
         const sent = instances.updateInstanceParameters.calls.mostRecent().args[1];
         expect(sent.find((parameter) => parameter.id === 'thermostats')?.value).toBe(otherThermostats);
+    });
+
+    it('writes nothing when the thermostats of the fresh instance leave no zone with a thermostat', () => {
+        instances.getInstance.and.returnValue(of(instanceOf('[]')));
+        releases.getReleaseParameters.and.returnValue(of(releaseParameters()));
+        let result: boolean | undefined;
+        const schedule = '{"zones":[{"name":"A","devices":["urn:infai:ses:device:a"],"windows":[]}]}';
+
+        service.saveSchedule('inst-1', schedule, 17).subscribe((saved) => (result = saved));
+
+        expect(result).toBeFalse();
+        expect(instances.updateInstanceParameters).not.toHaveBeenCalled();
     });
 
     it('writes nothing when the instance cannot be read again', () => {

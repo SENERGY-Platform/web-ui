@@ -34,32 +34,38 @@
           }
         }
 
-        @if (plan) {
-          <div class="now">
-            <div class="current">{{ currentText }}</div>
-            @if (nextText) {
-              <div class="next">{{ nextText }}</div>
+        @for (zone of zones; track $index) {
+          <div class="zone">
+            @if (document && !document.legacy) {
+              <div class="zone-name">{{ zone.name }}</div>
+              <div class="zone-devices" [title]="zone.devicesTitle">{{ zone.devices }}</div>
             }
-          </div>
+            <div class="now">
+              <div class="current">{{ zone.currentText }}</div>
+              @if (zone.nextText) {
+                <div class="next">{{ zone.nextText }}</div>
+              }
+            </div>
 
-          <div class="week">
-            @for (row of rows; track row.name) {
-              <div class="day">
-                <span class="day-name">{{ row.name }}</span>
-                <div class="bar">
-                  @for (segment of row.segments; track segment) {
-                    <div class="segment" [style.left.%]="segment.left" [style.width.%]="segment.width"
-                      [style.background-color]="segment.color" [title]="segment.title"></div>
+            <div class="week">
+              @for (row of zone.rows; track row.name) {
+                <div class="day">
+                  <span class="day-name">{{ row.name }}</span>
+                  <div class="bar">
+                    @for (segment of row.segments; track segment) {
+                      <div class="segment" [style.left.%]="segment.left" [style.width.%]="segment.width"
+                        [style.background-color]="segment.color" [title]="segment.title"></div>
+                    }
+                  </div>
+                </div>
+              }
+              <div class="day axis">
+                <span class="day-name"></span>
+                <div class="bar-axis">
+                  @for (hour of hours; track hour) {
+                    <span [style.left.%]="hour / 24 * 100">{{ hour }}</span>
                   }
                 </div>
-              </div>
-            }
-            <div class="day axis">
-              <span class="day-name"></span>
-              <div class="bar-axis">
-                @for (hour of hours; track hour) {
-                  <span [style.left.%]="hour / 24 * 100">{{ hour }}</span>
-                }
               </div>
             </div>
           </div>

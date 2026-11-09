@@ -29,7 +29,9 @@ import { initParameterValues, parametersSatisfied, toSmartServiceParameters } fr
 import { SmartServiceExtendedParameterModel } from 'src/app/modules/smart-services/releases/shared/release.model';
 import { SmartServiceReleasesService } from 'src/app/modules/smart-services/releases/shared/release.service';
 import { HeatingScheduleEditComponent } from '../dialog/edit/edit.component';
-import { HEATING_SCHEDULE_PARAMETER, HEATING_SETBACK_PARAMETER } from './heating-schedule.model';
+import { HEATING_SCHEDULE_PARAMETER, HEATING_SETBACK_PARAMETER, HEATING_THERMOSTATS_PARAMETER } from './heating-schedule.model';
+import { HeatingPlanError } from './heating-schedule.plan';
+import { resolveSchedule } from './heating-schedule.zones';
 
 @Injectable({
     providedIn: 'root',
@@ -78,6 +80,13 @@ export class HeatingScheduleService {
         const setbackParameter = parameters.find((parameter) => parameter.id === HEATING_SETBACK_PARAMETER);
         if (scheduleParameter === undefined || setbackParameter === undefined) {
             snackError(this.snackBar, 'The smart service has no schedule parameters.');
+            return of(false);
+        }
+        // the thermostats may have changed since the editor opened; a plan without a process would be refused by the service
+        try {
+            resolveSchedule(schedule, setback, instance.parameters?.find((parameter) => parameter.id === HEATING_THERMOSTATS_PARAMETER)?.value);
+        } catch (error) {
+            snackError(this.snackBar, 'The zones no longer fit the thermostats: ' + (error instanceof HeatingPlanError ? error.message : 'unknown error'));
             return of(false);
         }
         scheduleParameter.value = schedule;

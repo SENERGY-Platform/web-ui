@@ -21,7 +21,8 @@ import { Subject, of } from 'rxjs';
 import { DialogsService } from 'src/app/core/services/dialogs.service';
 import { HeatingWindow, weekSegments } from '../../shared/heating-schedule.plan';
 import { HeatingScheduleService } from '../../shared/heating-schedule.service';
-import { EditableWindow, HeatingScheduleDialogComponent, newWindow, toEditable, toWindows, validate } from './schedule-dialog.component';
+import { HeatingZone, serialiseZones } from '../../shared/heating-schedule.zones';
+import { EditableWindow, EditableZone, HeatingScheduleDialogComponent, newWindow, newZone, toEditable, toEditableZones, toWindows, toZones, validate, validateZones } from './schedule-dialog.component';
 
 describe('heating schedule editor rules', () => {
     const window = (change: Partial<EditableWindow> = {}): EditableWindow => ({ ...newWindow(), ...change });
@@ -87,6 +88,171 @@ describe('heating schedule editor rules', () => {
     });
 });
 
+describe('zone editor rules', () => {
+    const thermostats = [{ deviceId: 'urn:a', label: 'A' }, { deviceId: 'urn:b', label: 'B' }];
+    const zone = (change: Partial<EditableZone> = {}): EditableZone => ({ ...newZone(0), ...change });
+
+    it('accepts one rest zone and a list of zones that share the thermostats', () => {
+        expect(validateZones([zone({ rest: true })], 17, thermostats)).toBeNull();
+        expect(validateZones([zone({ name: 'X', devices: ['urn:a'] }), zone({ name: 'Y', rest: true })], 17, thermostats)).toBeNull();
+    });
+
+    it('refuses a thermostat in two zones', () => {
+        expect(validateZones([zone({ name: 'X', devices: ['urn:a'] }), zone({ name: 'Y', devices: ['urn:a'] })], 17, thermostats)).toContain('X');
+    });
+
+    it('refuses two rest zones', () => {
+        expect(validateZones([zone({ name: 'X', rest: true }), zone({ name: 'Y', rest: true })], 17, thermostats)).toContain('Only one zone');
+    });
+
+    it('refuses zone names that are equal after trimming and counts an empty name as its position', () => {
+        expect(validateZones([zone({ name: 'Bad', devices: ['urn:a'] }), zone({ name: ' Bad ', devices: ['urn:b'] })], 17, thermostats)).toContain('unique');
+        expect(validateZones([zone({ name: '', devices: ['urn:a'] }), zone({ name: 'Zone 1', devices: ['urn:b'] })], 17, thermostats)).toContain('unique');
+    });
+
+    it('needs at least one zone with a selected thermostat', () => {
+        expect(validateZones([zone({ devices: [] })], 17, thermostats)).toContain('No zone has a thermostat');
+        expect(validateZones([zone({ rest: true })], 17, [])).toContain('No zone has a thermostat');
+    });
+
+    it('checks the windows of every zone with its name and the own setback only when it is switched on', () => {
+        expect(validateZones([zone({ name: 'X', rest: true, windows: [newWindow(), { ...newWindow(), temperature: 40 }] })], 17, thermostats)).toMatch(/^X, Window 2: /);
+        expect(validateZones([zone({ rest: true, ownSetback: false, setback: 2 })], 17, thermostats)).toBeNull();
+        expect(validateZones([zone({ rest: true, ownSetback: true, setback: 2 })], 17, thermostats)).toContain('own setback');
+        expect(validateZones([zone({ rest: true })], null, thermostats)).toContain('setback');
+    });
+
+    it('takes the stored zones over and keeps device ids that are not selected', () => {
+        const zones = toEditableZones([
+            { name: 'Bad', devices: ['urn:a', 'urn:gone'], windows: [{ weekdays: [0], from: '06:00', to: '08:00', temperature: 20 }], setback: 19 },
+            { name: 'Rest', devices: null, windows: [], setback: null },
+        ], 17)!;
+
+        expect(zones.map((entry) => [entry.name, entry.rest, entry.devices, entry.ownSetback, entry.setback])).toEqual([
+            ['Bad', false, ['urn:a', 'urn:gone'], true, 19],
+            ['Rest', true, [], false, 17],
+        ]);
+    });
+
+    it('has no form for a window it cannot show', () => {
+        expect(toEditableZones([{ name: 'X', devices: null, windows: [{ weekdays: [0], from: '24:00', to: '06:00', temperature: 20 }], setback: null }], 17)).toBeNull();
+    });
+
+    it('writes an unselected device id back unchanged, also after another thermostat is toggled', () => {
+        const stored: HeatingZone[] = [{ name: 'Bad', devices: ['urn:gone', 'urn:a'], windows: [], setback: null }, { name: 'Rest', devices: null, windows: [], setback: null }];
+        const zones = toEditableZones(stored, 17)!;
+
+        expect(toZones(zones)).toEqual(stored);
+
+        zones[0].devices = zones[0].devices.filter((id) => id !== 'urn:a');
+        expect(toZones(zones)[0].devices).toEqual(['urn:gone']);
+    });
+
+    it('writes the form back as stored zones and the legacy shape for a lone rest zone', () => {
+        expect(toZones([zone({ name: ' Bad ', devices: ['urn:a'], ownSetback: true, setback: 19 }), zone({ name: 'Rest', rest: true })])).toEqual([
+            { name: 'Bad', devices: ['urn:a'], windows: [{ weekdays: [0, 1, 2, 3, 4], from: '06:00', to: '08:00', temperature: 20 }], setback: 19 },
+            { name: 'Rest', devices: null, windows: [{ weekdays: [0, 1, 2, 3, 4], from: '06:00', to: '08:00', temperature: 20 }], setback: null },
+        ]);
+        expect(serialiseZones(toZones([zone({ name: 'Alle', rest: true })]))).toBe('{"windows":[{"weekdays":[0,1,2,3,4],"from":"06:00","to":"08:00","temperature":20}]}');
+        expect(serialiseZones(toZones([zone({ name: ' ', rest: true })]))).toContain('{"windows":');
+        expect(serialiseZones(toZones([zone({ name: 'Living', rest: true })]))).toMatch(/^\{"zones":\[\{"name":"Living","windows"/);
+    });
+});
+
+describe('HeatingScheduleDialogComponent zones', () => {
+    let fixture: ComponentFixture<HeatingScheduleDialogComponent>;
+    let component: HeatingScheduleDialogComponent;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [HeatingScheduleDialogComponent],
+            providers: [
+                { provide: MatDialogRef, useValue: { disableClose: false, close: jasmine.createSpy('close') } },
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
+                        instance: { id: 'inst-1' },
+                        zones: [{ name: 'Alle', devices: null, windows: [], setback: null }],
+                        setback: 17,
+                        thermostats: [{ deviceId: 'urn:a', label: 'A' }, { deviceId: 'urn:b', label: 'B' }],
+                    },
+                },
+                { provide: DialogsService, useValue: { openConfirmDialog: () => ({ afterClosed: () => of(true) }) } },
+                { provide: HeatingScheduleService, useValue: jasmine.createSpyObj('HeatingScheduleService', ['saveSchedule']) },
+            ],
+        })
+            .overrideComponent(HeatingScheduleDialogComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } })
+            .compileComponents();
+        fixture = TestBed.createComponent(HeatingScheduleDialogComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
+
+    it('adds a named zone with the default window and keeps the names unique', () => {
+        component.addZone();
+        component.addZone();
+
+        expect(component.zones.map((zone) => zone.name)).toEqual(['Alle', 'Zone 2', 'Zone 3']);
+        expect(component.zones[1].windows).toEqual([newWindow()]);
+        expect(component.zones[1].devices).toEqual([]);
+
+        component.removeZone(1);
+        component.addZone();
+
+        expect(component.zones.map((zone) => zone.name)).toEqual(['Alle', 'Zone 3', 'Zone 4']);
+    });
+
+    it('keeps at least one zone', () => {
+        component.removeZone(0);
+
+        expect(component.zones.length).toBe(1);
+    });
+
+    it('locks a thermostat that another zone has and the rest toggle while one zone has it', () => {
+        component.setRest(component.zones[0], false);
+        component.addZone();
+        component.setDevice(component.zones[0], 'urn:a', true);
+
+        expect(component.takenBy(component.zones[1], 'urn:a')).toBe('Alle');
+        expect(component.takenBy(component.zones[0], 'urn:a')).toBeNull();
+        expect(component.restElsewhere(component.zones[1])).toBeFalse();
+
+        component.setRest(component.zones[1], true);
+
+        expect(component.restElsewhere(component.zones[0])).toBeTrue();
+        expect(component.restElsewhere(component.zones[1])).toBeFalse();
+    });
+
+    it('keeps the thermostats of a zone while it is the rest zone and writes them again after the toggle is off', () => {
+        const zone = toEditableZones([{ name: 'Bad', devices: ['urn:gone', 'urn:a'], windows: [], setback: null }], 17)![0];
+        component.zones = [zone];
+
+        component.setRest(zone, true);
+        expect(toZones(component.zones)[0].devices).toBeNull();
+
+        component.setRest(zone, false);
+        expect(toZones(component.zones)[0].devices).toEqual(['urn:gone', 'urn:a']);
+    });
+
+    it('does not lock a thermostat for other zones because a rest zone still holds its hidden id', () => {
+        component.setRest(component.zones[0], false);
+        component.addZone();
+        component.setDevice(component.zones[0], 'urn:a', true);
+        component.setRest(component.zones[0], true);
+
+        expect(component.takenBy(component.zones[1], 'urn:a')).toBeNull();
+    });
+
+    it('adds and removes single thermostats', () => {
+        component.setRest(component.zones[0], false);
+        component.setDevice(component.zones[0], 'urn:a', true);
+        component.setDevice(component.zones[0], 'urn:b', true);
+        component.setDevice(component.zones[0], 'urn:a', false);
+
+        expect(component.zones[0].devices).toEqual(['urn:b']);
+    });
+});
+
 describe('HeatingScheduleDialogComponent save', () => {
     let fixture: ComponentFixture<HeatingScheduleDialogComponent>;
     let dialogRef: { disableClose: boolean; close: jasmine.Spy };
@@ -102,7 +268,7 @@ describe('HeatingScheduleDialogComponent save', () => {
             imports: [HeatingScheduleDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
-                { provide: MAT_DIALOG_DATA, useValue: { instance: { id: 'inst-1' }, plan: { windows: [], setback: 17 } } },
+                { provide: MAT_DIALOG_DATA, useValue: { instance: { id: 'inst-1' }, zones: [{ name: 'Alle', devices: null, windows: [], setback: null }], setback: 17, thermostats: [{ deviceId: 'urn:a', label: 'A' }] } },
                 { provide: DialogsService, useValue: { openConfirmDialog: () => ({ afterClosed: () => of(true) }) } },
                 { provide: HeatingScheduleService, useValue: service },
             ],
