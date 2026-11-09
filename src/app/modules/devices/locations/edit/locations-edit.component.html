@@ -52,7 +52,18 @@
                 <mat-icon>close</mat-icon>
               </button>
             </div>
-          } @empty {
+          }
+          @for (id of unresolvedDeviceGroupIds; track id) {
+            <div class="device-row">
+              <mat-icon class="unresolved-icon" matTooltip="This device group is deleted or not visible to you">help_outline</mat-icon>
+              <span class="device-name unresolved" [matTooltip]="id">{{id}}</span>
+              <button mat-icon-button type="button" [disabled]="isSaving" (click)="removeDeviceGroup(id)"
+                matTooltip="Remove" aria-label="Remove device group">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+          @if (deviceGroupsForm.value.length === 0 && unresolvedDeviceGroupIds.length === 0) {
             <p class="empty">No device groups.</p>
           }
         </div>

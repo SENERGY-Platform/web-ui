@@ -49,6 +49,11 @@ describe('LocationsEditComponent', () => {
         { id: 'device:id-3', name: 'Switch' },
     ];
 
+    const groups = [
+        { id: 'group:id-1', name: 'Group one' },
+        { id: 'group:id-2', name: 'Group two' },
+    ];
+
     beforeEach(
         fakeAsync(() => {
             const locationServiceSpy: Spy<LocationsService> = createSpyFromClass<LocationsService>(LocationsService);
@@ -56,7 +61,7 @@ describe('LocationsEditComponent', () => {
             const deviceServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
             deviceServiceSpy.getDeviceListByIds.and.callFake((ids: string[]) => of(devices.filter((d) => ids.includes(d.id))));
             const groupServiceSpy: Spy<DeviceGroupsService> = createSpyFromClass<DeviceGroupsService>(DeviceGroupsService);
-            groupServiceSpy.getDeviceGroupListByIds.and.callFake((ids: string[]) => of(ids.map((id) => ({ id, name: 'Group ' + id }))));
+            groupServiceSpy.getDeviceGroupListByIds.and.callFake((ids: string[]) => of(groups.filter((g) => ids.includes(g.id))));
 
             TestBed.configureTestingModule({
                 schemas: [NO_ERRORS_SCHEMA],
@@ -126,6 +131,28 @@ describe('LocationsEditComponent', () => {
             expect(component.locationForm.get('device_ids')?.value).toEqual(['device:id-1', 'device:id-2']);
             expect(component.locationForm.get('device_group_ids')?.value).toEqual(['group:id-1']);
             expect(component.devicesForm.value.length).toBe(2);
+        }),
+    );
+
+    it(
+        'lists a device group the repository does not answer for by its id',
+        fakeAsync(() => {
+            settle();
+            const el: HTMLElement = fixture.nativeElement;
+
+            // a group of the location that is deleted, or not visible to this user
+            component.addDeviceGroup('group:id-9');
+            settle();
+
+            expect(component.unresolvedDeviceGroupIds).toEqual(['group:id-9']);
+            const unresolved = Array.from(el.querySelectorAll('.device-name.unresolved')).map((e) => e.textContent);
+            expect(unresolved).toEqual(['group:id-9']);
+            expect(component.deviceGroupsForm.value.length).toBe(1);
+
+            component.removeDeviceGroup('group:id-9');
+            settle();
+
+            expect(component.unresolvedDeviceGroupIds).toEqual([]);
         }),
     );
 

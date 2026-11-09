@@ -66,8 +66,9 @@ export class LocationsEditComponent implements OnInit {
     devicesForm: FormControl = new FormControl([]); // []DeviceInstancesBaseModel
     deviceGroupsForm: FormControl = new FormControl([]);
 
-    /** Ids of the location the device repository does not answer for: deleted devices, or devices this user may not see. */
+    /** Ids of the location the repository does not answer for: deleted entries, or entries this user may not see. */
     unresolvedDeviceIds: string[] = [];
+    unresolvedDeviceGroupIds: string[] = [];
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
     deviceGroupCache: Map<string, DeviceGroupModel> = new Map<string, DeviceGroupModel>();
 
@@ -435,10 +436,13 @@ export class LocationsEditComponent implements OnInit {
                 for (const group of groups) {
                     this.deviceGroupCache.set(group.id, group);
                 }
+                const answered = new Set(groups.map((group) => group.id));
+                this.unresolvedDeviceGroupIds = idsForRepoSearch.filter((id) => !answered.has(id));
                 const sortedResult = fromCache.concat(groups).sort(sortByName);
                 this.deviceGroupsForm.setValue(sortedResult);
             });
         } else {
+            this.unresolvedDeviceGroupIds = [];
             const sortedResult = fromCache.sort(sortByName);
             this.deviceGroupsForm.setValue(sortedResult);
         }
