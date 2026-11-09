@@ -130,6 +130,28 @@ describe('LocationsEditComponent', () => {
     );
 
     it(
+        'lists a device the repository does not answer for by its id, so it can still be removed',
+        fakeAsync(() => {
+            settle();
+            const el: HTMLElement = fixture.nativeElement;
+
+            // a device of the location that is deleted, or not visible to this user
+            component.addDevice('device:id-9');
+            settle();
+
+            expect(component.unresolvedDeviceIds).toEqual(['device:id-9']);
+            expect(el.querySelector('.device-name.unresolved')?.textContent).toContain('device:id-9');
+            expect(component.devicesForm.value.length).toBe(2);
+
+            component.removeDevice('device:id-9');
+            settle();
+
+            expect(component.unresolvedDeviceIds).toEqual([]);
+            expect(el.querySelectorAll('.device-name.unresolved').length).toBe(0);
+        }),
+    );
+
+    it(
         'discard on a new location returns to the list',
         fakeAsync(() => {
             component.id = '';

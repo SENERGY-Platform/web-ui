@@ -69,3 +69,14 @@
     padding: 12px 16px;
     color: var(--mat-sys-on-surface-variant);
 }
+
+/* A device the repository does not answer for is listed by its id, so it can still be removed. */
+.device-name.unresolved {
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+}
+
+.unresolved-icon {
+    color: var(--mat-sys-on-surface-variant);
+    flex: none;
+}

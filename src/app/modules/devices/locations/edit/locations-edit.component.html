@@ -72,7 +72,18 @@
                 <mat-icon>close</mat-icon>
               </button>
             </div>
-          } @empty {
+          }
+          @for (id of unresolvedDeviceIds; track id) {
+            <div class="device-row">
+              <mat-icon class="unresolved-icon" matTooltip="This device is deleted or not visible to you">help_outline</mat-icon>
+              <span class="device-name unresolved" [matTooltip]="id">{{id}}</span>
+              <button mat-icon-button type="button" [disabled]="isSaving" (click)="removeDevice(id)"
+                matTooltip="Remove" aria-label="Remove device">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          }
+          @if (devicesForm.value.length === 0 && unresolvedDeviceIds.length === 0) {
             <p class="empty">No devices.</p>
           }
         </div>

@@ -66,6 +66,8 @@ export class LocationsEditComponent implements OnInit {
     devicesForm: FormControl = new FormControl([]); // []DeviceInstancesBaseModel
     deviceGroupsForm: FormControl = new FormControl([]);
 
+    /** Ids of the location the device repository does not answer for: deleted devices, or devices this user may not see. */
+    unresolvedDeviceIds: string[] = [];
     deviceCache: Map<string, DeviceInstancesBaseModel> = new Map<string, DeviceInstancesBaseModel>();
     deviceGroupCache: Map<string, DeviceGroupModel> = new Map<string, DeviceGroupModel>();
 
@@ -390,10 +392,14 @@ export class LocationsEditComponent implements OnInit {
                 for (const device of devices) {
                     this.deviceCache.set(device.id, device);
                 }
+                // an id the answer leaves out used to vanish from the list, with no way to remove it from the location
+                const answered = new Set(devices.map((device) => device.id));
+                this.unresolvedDeviceIds = idsForRepoSearch.filter((id) => !answered.has(id));
                 const sortedResult = fromCache.concat(devices).sort(sortByName);
                 this.devicesForm.setValue(sortedResult);
             });
         } else {
+            this.unresolvedDeviceIds = [];
             const sortedResult = fromCache.sort(sortByName);
             this.devicesForm.setValue(sortedResult);
         }
