@@ -170,7 +170,8 @@ export class ReportsComponent implements OnInit, AfterViewInit {
                         duration: 3000,
                     });
                     this.reports = this.reports.filter((r: ReportModel) => r.id !== id);
-                    this.showRows(this.reports);
+                    // through the filter, so the shortened list keeps the search as it does on a load
+                    this.filter(this.searchText);
                 });
             });
     }

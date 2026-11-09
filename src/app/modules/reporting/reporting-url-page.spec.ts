@@ -30,6 +30,7 @@ import { TemplatesComponent } from './templates/templates.component';
 import { ReportingService } from './shared/reporting.service';
 import { DialogsService } from '../../core/services/dialogs.service';
 import { UtilService } from '../../core/services/util.service';
+import { SearchbarService } from '../../core/components/searchbar/shared/searchbar.service';
 
 /** The client-side tables keep the page of the URL in range themselves: the data source moves a page beyond the end back without telling anyone. */
 describe('reporting tables with a page in the URL', () => {
@@ -103,4 +104,102 @@ describe('reporting tables with a page in the URL', () => {
             expect(router.url).toBe('/?page=1');
         }));
     });
+});
+
+/** Deleting a row shortens the list, so the page it leaves behind has to be corrected like a load does. */
+describe('reporting tables after a delete', () => {
+    // two full pages of 20 and a last page with one row
+    const rows = (prefix: string) => Array.from({ length: 41 }, (_, i) => ({ id: prefix + i, name: prefix + i, templateName: 't', type: 'pdf', createdAt: '2026-01-01T00:00:00Z' }));
+
+    function configure(component: typeof ReportsComponent | typeof ReportFilesComponent) {
+        localStorage.removeItem('PreferencesService/pageSize');
+        const reporting = {
+            userHasReadReportFileAuthorization: () => false,
+            userHasUpdateReportAuthorization: () => false,
+            userHasDeleteReportAuthorization: () => true,
+            userHasCreateReportAuthorization: () => false,
+            userHasDeleteReportFileAuthorization: () => true,
+            getReports: () => of({ data: rows('report') }),
+            getReport: () => of({ data: { id: 'r1', name: 'r', reportFiles: rows('file') } }),
+            getUnfinishedReportJob: () => NEVER,
+            deleteReport: () => of({ status: 200 }),
+            deleteReportFile: () => of({ status: 200 }),
+        };
+        TestBed.configureTestingModule({
+            schemas: [NO_ERRORS_SCHEMA],
+            imports: [component, NoopAnimationsModule, MatTableModule, MatSortModule, MatPaginatorModule, MatSnackBarModule],
+            providers: [
+                { provide: ReportingService, useValue: reporting },
+                { provide: DialogsService, useValue: { openDeleteDialog: () => ({ afterClosed: () => of(true) }) } },
+                { provide: UtilService, useValue: {} },
+                { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'r1' } } } },
+            ],
+        });
+    }
+
+    function open(component: typeof ReportsComponent | typeof ReportFilesComponent, url: string) {
+        const router = TestBed.inject(Router);
+        router.navigateByUrl(url);
+        tick();
+        const fixture = TestBed.createComponent(component as typeof ReportsComponent);
+        fixture.detectChanges();
+        tick(400);
+        fixture.detectChanges();
+        tick(400);
+        discardPeriodicTasks();
+        flush();
+        return { fixture, router };
+    }
+
+    it('ReportsComponent moves the page back when the last row of the last page goes', fakeAsync(() => {
+        configure(ReportsComponent);
+
+        const { fixture, router } = open(ReportsComponent, '/?page=2');
+        const list = fixture.componentInstance;
+        expect(list.pageIndex).toBe(2);
+
+        list.deleteReport({ id: 'report40', name: 'report40' } as never);
+        tick(400);
+        discardPeriodicTasks();
+        flush();
+
+        expect(list.paginator.pageIndex).toBe(1);
+        expect(list.pageIndex).toBe(1);
+        expect(router.url).toBe('/?page=1');
+    }));
+
+    it('ReportFilesComponent moves the page back when the last row of the last page goes', fakeAsync(() => {
+        configure(ReportFilesComponent);
+
+        const { fixture, router } = open(ReportFilesComponent, '/?page=2');
+        const list = fixture.componentInstance as unknown as ReportFilesComponent;
+        expect((list as unknown as { pageIndex: number }).pageIndex).toBe(2);
+
+        list.delete(new Event('click'), { id: 'file40' } as never);
+        tick(400);
+        discardPeriodicTasks();
+        flush();
+
+        expect((list as unknown as { pageIndex: number }).pageIndex).toBe(1);
+        expect(router.url).toBe('/?page=1');
+    }));
+
+    it('ReportsComponent keeps the search when a row goes', fakeAsync(() => {
+        configure(ReportsComponent);
+
+        const { fixture } = open(ReportsComponent, '/');
+        const list = fixture.componentInstance;
+        TestBed.inject(SearchbarService).changeMessage('report4');
+        tick(400);
+        flush();
+        // report4, report40 and the rest up to report49 that the 41 rows reach
+        expect(list.reportsDataSource.data.length).toBe(2);
+
+        list.deleteReport({ id: 'report40', name: 'report40' } as never);
+        tick(400);
+        discardPeriodicTasks();
+        flush();
+
+        expect(list.reportsDataSource.data.map((report) => report.id)).toEqual(['report4']);
+    }));
 });
