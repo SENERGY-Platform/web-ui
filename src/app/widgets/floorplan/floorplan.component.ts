@@ -336,6 +336,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       userHasUpdateNameAuthorization: this.userHasUpdateNameAuthorization(),
       userHasUpdatePropertiesAuthorization: this.userHasUpdatePropertiesAuthorization(),
       aspectRatio: this.imageWrapper.nativeElement.offsetWidth / this.imageWrapper.nativeElement.offsetHeight,
+      imageSize: [this.imageWrapper.nativeElement.offsetWidth, this.imageWrapper.nativeElement.offsetHeight],
     };
     const editDialogRef = this.dialog.open(FloorplanEditDialogComponent, dialogConfig);
 

@@ -20,7 +20,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormArray, FormControl, FormGroup, NonNullableFormBuilder, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DialogHeaderComponent } from '../../../core/components/dialog-header/dialog-header.component';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { Observable, Subscription, concatMap, forkJoin, map, of } from 'rxjs';
+import { Observable, Subscription, concatMap, debounceTime, distinctUntilChanged, forkJoin, map, of, switchMap } from 'rxjs';
 import { ErrorHandlerService } from 'src/app/core/services/error-handler.service';
 import { DashboardResponseMessageModel } from 'src/app/modules/dashboard/shared/dashboard-response-message.model';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
@@ -61,13 +61,20 @@ import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionP
 import { MatTooltip } from '@angular/material/tooltip';
 import { MtxSelect, MtxOption, MtxSelectLabelTemplate, MtxSelectOptionTemplate } from '@ng-matero/extensions/select';
 import { ColorPickerDirective } from 'ngx-color-picker';
+import { Map as OlMap, View } from 'ol';
+import { useGeographic } from 'ol/proj';
+import { MapComponent } from '../../../modules/devices/map/map.component';
+import { basemapAttribution, basemapLayer, MapSection, moveIntoSection, renderSection } from '../shared/floorplan-map';
+import { PhotonHit, photonMinQueryLength, PhotonService } from 'src/app/core/services/photon.service';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
 
 @Component({
     selector: 'senergy-floorplan-edit-dialog',
     templateUrl: './floorplan-edit-dialog.component.html',
     styleUrl: './floorplan-edit-dialog.component.css',
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatIconButton, MatIcon, ImageCropperComponent, NgClass, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MtxSelect, MtxOption, MatHint, MtxSelectLabelTemplate, MtxSelectOptionTemplate, ColorPickerDirective, MatDialogActions, MatButton]
+    imports: [DialogHeaderComponent, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, WidgetSpinnerComponent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatError, MatErrorMessagesDirective, MatCheckbox, MatIconButton, MatIcon, ImageCropperComponent, NgClass, MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatExpansionPanelDescription, MatExpansionPanelContent, MatTooltip, MtxSelect, MtxOption, MatHint, MtxSelectLabelTemplate, MtxSelectOptionTemplate, ColorPickerDirective, MatDialogActions, MatButton, MapComponent, MatAutocomplete, MatAutocompleteTrigger, MatOption]
 })
 export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   private dialogRef = inject<MatDialogRef<FloorplanEditDialogComponent>>(MatDialogRef);
@@ -81,6 +88,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   private cd = inject(ChangeDetectorRef);
   private el = inject(ElementRef);
   private destroyRef = inject(DestroyRef);
+  private photonService = inject(PhotonService);
 
   dashboardId = '';
   widgetId = '';
@@ -104,6 +112,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
 
   form = new FormGroup({
     image: new FormControl<string | null>(null),
+    bbox: new FormControl<MapSection | null>(null),
     placements: new FormArray([].map(this.newPlacement)),
     dotSize: new FormControl<number>(25, { validators: [Validators.required, Validators.min(1)] }),
     showUnplacedTable: new FormControl<boolean>(false),
@@ -115,8 +124,18 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   ];
 
   aspectRatio = 1;
+  /** CSS pixels of the widget's drawing area, the map section is drawn at this size */
+  imageSize: number[] | undefined;
   cropping = false;
   croppedImage?: string;
+  selectingSection = false;
+  /** created on first use, so only a widget showing a map section loads tiles */
+  sectionMap: OlMap | undefined;
+  maySearchSection = this.photonService.userMaySearch();
+  sectionSearch = new FormControl<string | PhotonHit>('');
+  sectionHits: PhotonHit[] = [];
+  sectionAttribution = basemapAttribution();
+  canLocate = 'geolocation' in navigator;
 
   @ViewChild('fileInput', { static: true }) public fileInput!: ElementRef;
   @ViewChild('canvas', { static: false }) canvas: ElementRef<HTMLCanvasElement> | undefined;
@@ -129,6 +148,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
         userHasUpdateNameAuthorization: boolean;
         userHasUpdatePropertiesAuthorization: boolean;
         aspectRatio: number;
+        imageSize?: number[];
     }>(MAT_DIALOG_DATA);
 
     this.dashboardId = data.dashboardId;
@@ -136,6 +156,19 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     this.userHasUpdateNameAuthorization = data.userHasUpdateNameAuthorization;
     this.userHasUpdatePropertiesAuthorization = data.userHasUpdatePropertiesAuthorization;
     this.aspectRatio = data.aspectRatio;
+    this.imageSize = data.imageSize;
+
+    this.sectionSearch.valueChanges.pipe(
+      debounceTime(300),
+      // a selected hit is the value as well, it is not searched for again
+      map(v => typeof v === 'string' ? v.trim() : ''),
+      distinctUntilChanged(),
+      switchMap(q => q.length < photonMinQueryLength ? of([]) : this.photonService.search(q)),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(hits => {
+      this.sectionHits = hits;
+      this.cd.markForCheck();
+    });
   }
 
   ngOnInit(): void {
@@ -204,6 +237,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => {
         this.draw();
+        this.sectionMap?.updateSize();
       }, 30);
     }));
     ro.observe(this.el.nativeElement);
@@ -264,7 +298,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     }
     const reader = new FileReader();
     reader.onload = () => {
-      this.form.patchValue({ image: reader.result as string });
+      this.form.patchValue({ image: reader.result as string, bbox: null });
       this.draw();
       for (let i = 0; i < 5; i++) {
         setTimeout(() => { // needs to draw ready=true first
@@ -299,7 +333,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
 
   // Method to remove the uploaded image
   removeImage(): void {
-    this.form.patchValue({ image: undefined });
+    this.form.patchValue({ image: undefined, bbox: null });
   }
 
   addNewPlacement(): void {
@@ -407,6 +441,11 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   }
 
   placePlacement(i: number) {
+    // the image to place on is hidden while it is cropped or a map section is chosen; the button is disabled
+    // then, but stays hoverable for its tooltip, so its clicks still arrive here
+    if (this.cropping || this.selectingSection) {
+      return;
+    }
     this.placing = i;
   }
 
@@ -569,6 +608,98 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       this.draw();
     }, 30);
+  }
+
+  startSelectingSection() {
+    if (this.sectionMap === undefined) {
+      // the coordinates are lon/lat, as in the networks dialog
+      useGeographic();
+      this.sectionMap = new OlMap({
+        // below zoom 3 the view can reach past the latitudes Web Mercator covers, the section would not match the image
+        view: new View({ center: [12.380809087977605, 51.3386072545588], zoom: 5, minZoom: 3, maxZoom: 21, enableRotation: false }),
+        controls: [],
+      });
+      const sectionMap = this.sectionMap;
+      basemapLayer().then(
+        layer => sectionMap.addLayer(layer),
+        () => this.errorHandlerService.showErrorInSnackBar('Could not load the map section'));
+    }
+    this.selectingSection = true;
+    // the map gets its element with the next change detection, its size is known only then
+    setTimeout(() => {
+      this.sectionMap?.updateSize();
+      const bbox = this.form.value.bbox;
+      if (bbox) {
+        this.sectionMap?.getView().fit(bbox);
+      }
+    });
+  }
+
+  stopSelectingSection(save: boolean) {
+    const sectionMap = this.sectionMap;
+    if (!save || sectionMap === undefined) {
+      this.selectingSection = false;
+      setTimeout(() => this.draw(), 30);
+      return;
+    }
+    const bbox = sectionMap.getView().calculateExtent(sectionMap.getSize());
+    // a hidden widget has no size, its section is then drawn as large as it was chosen
+    const size = this.imageSize !== undefined && this.imageSize[0] > 0 && this.imageSize[1] > 0 ? this.imageSize : sectionMap.getSize() || [0, 0];
+    renderSection(bbox, size).then(rendered => {
+      this.applySection(rendered.image, rendered.section);
+      this.selectingSection = false;
+      this.cd.markForCheck();
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => { // the canvas shows again only after the next change detection, as after an upload
+          this.draw();
+        }, i * 100);
+      }
+    }, () => this.errorHandlerService.showErrorInSnackBar('Could not load the map section'));
+  }
+
+  hitLabel(hit: PhotonHit | string | null): string {
+    return typeof hit === 'string' ? hit : hit?.label || '';
+  }
+
+  /** Moves the map to a found place, an area as a whole, an address close enough to tell the buildings apart */
+  showHit(hit: PhotonHit) {
+    if (hit.extent !== undefined) {
+      this.sectionMap?.getView().fit(hit.extent, { maxZoom: 18 });
+    } else {
+      this.centerSection(hit.lon, hit.lat);
+    }
+  }
+
+  private centerSection(lon: number, lat: number) {
+    const view = this.sectionMap?.getView();
+    view?.setCenter([lon, lat]);
+    view?.setZoom(18);
+  }
+
+  /** Without an animation, a click during one would start from the zoom it had reached and fall short */
+  zoomSection(delta: number) {
+    const view = this.sectionMap?.getView();
+    const zoom = view?.getZoom();
+    if (view !== undefined && zoom !== undefined) {
+      view.setZoom(zoom + delta);
+    }
+  }
+
+  /** Moves the map to where the device is, the browser asks for permission first */
+  locateMe() {
+    navigator.geolocation.getCurrentPosition(
+      position => this.centerSection(position.coords.longitude, position.coords.latitude),
+      () => this.errorHandlerService.showErrorInSnackBar('Could not determine your location'),
+    );
+  }
+
+  /** Shows the section, placed elements keep their spot on the map */
+  applySection(snapshot: string, bbox: MapSection) {
+    const previous = this.form.value.bbox;
+    if (previous) {
+      this.form.controls.placements.controls.forEach(p => p.patchValue({ position: moveIntoSection(p.value.position, previous, bbox) }));
+    }
+    this.form.patchValue({ image: snapshot, bbox });
   }
 
   async imageCropped(event: ImageCroppedEvent) {

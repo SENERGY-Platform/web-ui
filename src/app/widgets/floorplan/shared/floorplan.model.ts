@@ -29,6 +29,8 @@ import {
 export interface FloorplanWidgetPropertiesModel {
     floorplan?: {
         image: string | null;
+        /** the map section the image was drawn from, as [west, south, east, north] in degrees; null for an uploaded image */
+        bbox?: number[] | null;
         placements: FloorplanWidgetCapabilityModel[];
         dotSize: number;
         showUnplacedTable?: boolean;

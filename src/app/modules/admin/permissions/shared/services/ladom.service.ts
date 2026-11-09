@@ -173,6 +173,8 @@ export class LadonService {
 
             environment.mosesUrl + '/environments',
             environment.mosesUrl + '/datasets',
+
+            environment.photonUrl + '/api',
         ];
 
         serviceEndpoints.forEach(endpointURL => {

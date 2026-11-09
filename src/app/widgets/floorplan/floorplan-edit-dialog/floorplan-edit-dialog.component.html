@@ -44,16 +44,26 @@
       <div class="file-upload-wrapper" (drop)="onFileDrop($event)"
         (dragover)="onDragOver($event)">
         <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />
-        @if (form.value.image === null || form.value.image === undefined) {
-          <div class="upload-wrapper">
-            <button mat-icon-button (click)="fileInput.click()"><mat-icon>upload</mat-icon></button>
-            <p>Upload Image</p>
+        @if ((form.value.image === null || form.value.image === undefined) && !selectingSection) {
+          <div class="source-wrapper">
+            <div class="upload-wrapper">
+              <button mat-icon-button (click)="fileInput.click()"><mat-icon>upload</mat-icon></button>
+              <p>Upload Image</p>
+            </div>
+            <div class="upload-wrapper">
+              <button mat-icon-button (click)="startSelectingSection()"><mat-icon>map</mat-icon></button>
+              <p>Select Map Section</p>
+            </div>
           </div>
         }
-        @if (form.value.image !== null && form.value.image !== undefined) {
+        @if ((form.value.image !== null && form.value.image !== undefined) || selectingSection) {
           <div class="delete-wrapper">
-            @if (!cropping) {
-              <button mat-icon-button color="accent" (click)="startCropping()"><mat-icon>crop</mat-icon></button>
+            @if (!cropping && !selectingSection) {
+              @if (form.value.bbox) {
+                <button mat-icon-button color="accent" (click)="startSelectingSection()"><mat-icon>map</mat-icon></button>
+              } @else {
+                <button mat-icon-button color="accent" (click)="startCropping()"><mat-icon>crop</mat-icon></button>
+              }
             }
             @if (cropping) {
               <button mat-icon-button color="accent" (click)="stopCropping(true)"><mat-icon>check</mat-icon></button>
@@ -61,16 +71,46 @@
             @if (cropping) {
               <button mat-icon-button color="warn" (click)="stopCropping(false)"><mat-icon>close</mat-icon></button>
             }
-            <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
+            @if (selectingSection) {
+              <button mat-icon-button color="accent" (click)="stopSelectingSection(true)"><mat-icon>check</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="stopSelectingSection(false)"><mat-icon>close</mat-icon></button>
+            }
+            @if (form.value.image !== null && form.value.image !== undefined) {
+              <button mat-icon-button color="warn" (click)="removeImage()"><mat-icon>delete</mat-icon></button>
+            }
           </div>
         }
         @if (cropping) {
           <image-cropper [imageBase64]="form.value.image || undefined" [aspectRatio]="aspectRatio" [containWithinAspectRatio]="true" [maintainAspectRatio]="true"
           (imageCropped)="imageCropped($event)"></image-cropper>
         }
+        @if (selectingSection) {
+          @if (maySearchSection) {
+            <mat-form-field class="full-width">
+              <mat-label>Search address</mat-label>
+              <input matInput [formControl]="sectionSearch" [matAutocomplete]="sectionSearchHits">
+              <mat-autocomplete #sectionSearchHits="matAutocomplete" [displayWith]="hitLabel" (optionSelected)="showHit($event.option.value)">
+                @for (hit of sectionHits; track hit) {
+                  <mat-option [value]="hit">{{hit.label}}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+          }
+          <div class="map-section" [style.--aspect-ratio]="aspectRatio">
+            <app-map [map]="sectionMap"></app-map>
+            <div class="map-controls">
+              <button mat-icon-button (click)="zoomSection(1)" matTooltip="Zoom in" matTooltipPosition="left"><mat-icon>add</mat-icon></button>
+              <button mat-icon-button (click)="zoomSection(-1)" matTooltip="Zoom out" matTooltipPosition="left"><mat-icon>remove</mat-icon></button>
+              @if (canLocate) {
+                <button mat-icon-button (click)="locateMe()" matTooltip="Locate me" matTooltipPosition="left"><mat-icon>my_location</mat-icon></button>
+              }
+            </div>
+          </div>
+          <p class="map-credit">{{ sectionAttribution }}</p>
+        }
         @if (form.value.image !== null && form.value.image !== undefined) {
           <div
-            [hidden]="(form.value.image === null && form.value.image === undefined) || cropping" class="image-wrapper" #imageWrapper>
+            [hidden]="(form.value.image === null && form.value.image === undefined) || cropping || selectingSection" class="image-wrapper" #imageWrapper>
             <canvas #canvas [ngClass]="{'placing': placing !== undefined}" (click)="placeSelected($event)"> </canvas>
           </div>
         }
@@ -106,7 +146,9 @@
                   <div class="mat-form-field-wrapper">
                     <mat-checkbox formControlName="showAlias">Display alias</mat-checkbox>
                     <mat-checkbox formControlName="showAliasWhenZoomed">When maximized</mat-checkbox>
-                    <button mat-icon-button color="accent" [disabled]="cropping" (click)="placePlacement(i); false" matTooltip="Place on Map">
+                    <!-- stays hoverable while disabled, so the tooltip can say why -->
+                    <button mat-icon-button color="accent" [disabled]="cropping || selectingSection" [disabledInteractive]="true" (click)="placePlacement(i); false"
+                      [matTooltip]="selectingSection ? 'Confirm or discard the map section first' : 'Place on Map'">
                       <mat-icon>point_scan</mat-icon>
                     </button>
                     @if (isPlaced(tab)) {

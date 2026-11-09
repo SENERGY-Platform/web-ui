@@ -29,6 +29,9 @@ import { ConceptsService } from '../../../modules/metadata/concepts/shared/conce
 import { DeviceClassesService } from '../../../modules/metadata/device-classes/shared/device-classes.service';
 import { FunctionsService } from '../../../modules/metadata/functions/shared/functions.service';
 import { FloorplanEditDialogComponent } from './floorplan-edit-dialog.component';
+import { PhotonService } from '../../../core/services/photon.service';
+import { Map as OlMap, View } from 'ol';
+import { useGeographic } from 'ol/proj';
 
 describe('FloorplanEditDialogComponent', () => {
     let component: FloorplanEditDialogComponent;
@@ -49,6 +52,7 @@ describe('FloorplanEditDialogComponent', () => {
                 { provide: FunctionsService, useValue: createSpyFromClass<FunctionsService>(FunctionsService) },
                 { provide: DeviceClassesService, useValue: createSpyFromClass<DeviceClassesService>(DeviceClassesService) },
                 { provide: ConceptsService, useValue: conceptsSpy },
+                { provide: PhotonService, useValue: createSpyFromClass<PhotonService>(PhotonService) },
             ],
         }).compileComponents();
     }));
@@ -86,6 +90,100 @@ describe('FloorplanEditDialogComponent', () => {
 
         expect(component.isPlaced(tab)).toBeFalse();
         expect(component.draw).toHaveBeenCalled();
+    });
+
+    it('does not start placing while a map section is chosen', () => {
+        component.addNewPlacement();
+        component.selectingSection = true;
+
+        component.placePlacement(0);
+
+        expect(component.placing).toBeUndefined();
+    });
+
+    describe('map section', () => {
+        const sectionMap = () => {
+            useGeographic();
+            return new OlMap({ view: new View({ center: [12.38, 51.34], zoom: 5 }), controls: [] });
+        };
+
+        it('is forgotten with the image', () => {
+            component.form.patchValue({ image: 'data:image/webp;base64,', bbox: [10, 50, 12, 52] });
+
+            component.removeImage();
+
+            expect(component.form.controls.bbox.value).toBeNull();
+        });
+
+        it('keeps placed elements on their spot when it changes', () => {
+            component.applySection('data:image/webp;base64,a', [10, 50, 12, 52]);
+            component.addNewPlacement();
+            component.form.controls.placements.at(0).patchValue({ position: { x: 0.75, y: 0.4 } });
+
+            component.applySection('data:image/webp;base64,b', [11, 50, 12, 52]);
+
+            const position = component.form.controls.placements.at(0).value.position;
+            expect(position.x).toBeCloseTo(0.5, 9);
+            expect(position.y).toBeCloseTo(0.4, 9);
+            expect(component.form.value.image).toBe('data:image/webp;base64,b');
+            expect(component.form.value.bbox).toEqual([11, 50, 12, 52]);
+        });
+
+        it('centers a found address', () => {
+            // a map without layers, the basemap would be fetched from basemap.de
+            component.sectionMap = sectionMap();
+
+            component.showHit({ label: 'Augustusplatz 10, 04109 Leipzig', lon: 12.381, lat: 51.339 });
+
+            const view = component.sectionMap!.getView();
+            expect(view.getCenter()![0]).toBeCloseTo(12.381, 6);
+            expect(view.getCenter()![1]).toBeCloseTo(51.339, 6);
+            expect(view.getZoom()).toBe(18);
+        });
+
+        it('zooms the map section', () => {
+            component.sectionMap = sectionMap();
+
+            component.zoomSection(1);
+
+            expect(component.sectionMap.getView().getZoom()).toBe(6);
+        });
+
+        it('centers the device position', () => {
+            component.sectionMap = sectionMap();
+            spyOn(navigator.geolocation, 'getCurrentPosition').and.callFake(success =>
+                success({ coords: { longitude: 13.4, latitude: 52.5 } } as GeolocationPosition));
+
+            component.locateMe();
+
+            const view = component.sectionMap.getView();
+            expect(view.getCenter()![0]).toBeCloseTo(13.4, 6);
+            expect(view.getCenter()![1]).toBeCloseTo(52.5, 6);
+            expect(view.getZoom()).toBe(18);
+        });
+
+        it('shows a found area as a whole', () => {
+            // a map without layers, the basemap would be fetched from basemap.de
+            component.sectionMap = sectionMap();
+
+            component.showHit({ label: 'Leipzig', lon: 12.37, lat: 51.34, extent: [12.23, 51.23, 12.54, 51.45] });
+
+            // fit() lands exactly on the extent, up to rounding
+            const [west, south, east, north] = component.sectionMap!.getView().calculateExtent([100, 100]);
+            expect(west).toBeLessThanOrEqual(12.23 + 1e-9);
+            expect(south).toBeLessThanOrEqual(51.23 + 1e-9);
+            expect(east).toBeGreaterThanOrEqual(12.54 - 1e-9);
+            expect(north).toBeGreaterThanOrEqual(51.45 - 1e-9);
+        });
+
+        it('keeps the positions of an uploaded image when it is the first section', () => {
+            component.addNewPlacement();
+            component.form.controls.placements.at(0).patchValue({ position: { x: 0.75, y: 0.4 } });
+
+            component.applySection('data:image/webp;base64,a', [11, 50, 12, 52]);
+
+            expect(component.form.controls.placements.at(0).value.position).toEqual({ x: 0.75, y: 0.4 });
+        });
     });
 
     it('keeps the alias display settings of an existing placement', () => {

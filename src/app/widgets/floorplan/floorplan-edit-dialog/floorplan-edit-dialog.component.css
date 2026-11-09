@@ -23,12 +23,47 @@
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 10px;
+  /* the map section takes the place of the image, so the preview keeps its size */
+  --preview-height: 300px;
 }
 
 .upload-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.source-wrapper {
+  display: flex;
+  gap: 3rem;
+}
+
+.map-section {
+  position: relative;
+  width: min(100%, calc(var(--preview-height) * var(--aspect-ratio)));
+  aspect-ratio: var(--aspect-ratio);
+}
+
+.map-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .mat-mdc-icon-button {
+    --mat-icon-button-state-layer-size: 32px;
+    padding: 4px;
+    background: var(--mat-sys-surface);
+    box-shadow: var(--mat-sys-level1);
+  }
+}
+
+.map-credit {
+  margin: 8px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: var(--app-text-xs);
 }
 
 .image-preview {
@@ -52,7 +87,7 @@
 }
 
 .image-wrapper {
-  height: 300px;
+  height: var(--preview-height);
   width: 100%;
 }
 

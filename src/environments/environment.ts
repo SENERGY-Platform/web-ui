@@ -134,6 +134,7 @@ export const environment = {
     certAuthorityUrl: 'http://localhost',
     lorawanConnectorUrl: 'http://localhost',
     mosesUrl: 'http://localhost',
+    photonUrl: 'http://localhost',
     mockPermissionsV2: false,
     mockCostService: false,
 };
