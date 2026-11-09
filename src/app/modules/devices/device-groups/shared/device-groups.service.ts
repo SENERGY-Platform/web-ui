@@ -17,7 +17,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import {ErrorHandlerService} from '../../../../core/services/error-handler.service';
-import {Observable} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {environment} from '../../../../../environments/environment';
 import {catchError, map} from 'rxjs/operators';
 import {DeviceGroupCriteriaModel, DeviceGroupHelperResultModel, DeviceGroupModel} from './device-groups.model';
@@ -170,9 +170,19 @@ export class DeviceGroupsService {
         return this._getDeviceGroups({ids, filterGenericDuplicateCriteria}).pipe(map(x => x.result));
     }
 
+    /**
+     * The names of functions the caller already references, e.g. for the labels of a floorplan. Over the
+     * listing, not the query route: that one needs a POST right on the device repository, which an account
+     * that may only read does not have, and the widget would lose its units. The listing ignores limit and
+     * offset while `ids` is set, so it answers the same rows.
+     */
     getFunctionListByIds(ids: string[]): Observable<DeviceTypeFunctionModel[]> {
+        if (ids.length === 0) {
+            // without ids the query route answered with the first page of all functions
+            return of([]);
+        }
         return this.http
-            .post<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/query/functions', {ids})
+            .get<DeviceTypeFunctionModel[]>(environment.deviceRepoUrl + '/functions', {params: new HttpParams().set('ids', ids.join(','))})
             .pipe(
                 map((resp) => resp || []),
                 catchError(this.errorHandlerService.handleError(DeviceGroupsService.name, 'getFunctionListByIds(ids)', [])),
