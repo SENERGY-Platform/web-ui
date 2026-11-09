@@ -23,6 +23,8 @@ import {
 } from '@angular/forms';
 import { duration, durationAs, durationParts } from '../../../../../core/time/iso-duration';
 import {
+    analyticsEventSource,
+    analyticsFilterType,
     ConditionalEventModel,
     DeploymentsSelectionConfigurableModel,
     DeploymentsSelectionPathOptionModel,
@@ -342,6 +344,7 @@ export class DeploymentsConfigInitializerService {
             selected_service_id: [{ value: selection.selected_service_id, disabled: disable }],
             selected_device_group_id: [{ value: selection.selected_device_group_id, disabled: disable }],
             selected_import_id: [{ value: selection.selected_import_id, disabled: disable }],
+            selected_generic_event_source: [{ value: selection.selected_generic_event_source ?? null, disabled: disable }],
             selected_path_option: [{ value: undefined, disabled: disable }],
             selected_path: this.iniPathOptionFormControl(selection.selected_path, disable),
             show: false,
@@ -350,8 +353,10 @@ export class DeploymentsConfigInitializerService {
                 control => {
                     const selectedGroupId = control.get('selected_device_group_id')?.value;
                     const selectedPath = control.get('selected_path.path')?.value;
+                    // the output of an analytics operator is taken as a whole, without a path
+                    const selectedAnalytics = control.get('selected_generic_event_source')?.value;
                     if(!selectedPath || selectedPath === '') {
-                        if( selectedGroupId &&  selectedGroupId !== '') {
+                        if( (selectedGroupId &&  selectedGroupId !== '') || selectedAnalytics) {
                             control.get('selected_path.path')?.setErrors(null);
                             return;
                         } else {
@@ -444,7 +449,9 @@ export class DeploymentsConfigInitializerService {
             device_group: [selectionOption.device_group],
             import: selectionOption.import,
             importType: selectionOption.importType,
-            path_options: this._formBuilder.control(selectionOption.path_options)
+            path_options: this._formBuilder.control(selectionOption.path_options),
+            // only options the dialog adds for analytics operators carry it
+            ...(selectionOption.analytics ? { analytics: this._formBuilder.control(selectionOption.analytics) } : {}),
         });
     }
 
@@ -490,6 +497,10 @@ export class DeploymentsConfigInitializerService {
                 result = index;
             }
             if (option.import && selection.selected_import_id && selection.selected_import_id === option.import.id) {
+                result = index;
+            }
+            if (option.analytics && selection.selected_generic_event_source?.filter_type === analyticsFilterType &&
+                selection.selected_generic_event_source.filter_ids === analyticsEventSource(option.analytics).filter_ids) {
                 result = index;
             }
         });

@@ -25,6 +25,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { DeploymentsConfigInitializerService } from './shared/deployments-config-initializer.service';
 import {
+    AnalyticsOperatorOptionModel,
+    analyticsEventSource,
     DeploymentsSelectionPathOptionModel,
     V2DeploymentsPreparedElementModel, V2DeploymentsPreparedModel, V2DeploymentsPreparedSelectionModel,
     V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel
@@ -47,6 +49,10 @@ import { DeploymentsConfigTimeEventComponent } from './components/time-event/dep
 import { MatButton } from '@angular/material/button';
 import { KeyValuePipe } from '@angular/common';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
+import { PipelineModel } from '../../../data/pipeline-registry/shared/pipeline.model';
+import { AuthorizationService } from '../../../../core/services/authorization.service';
+import { forkJoin, map, Observable, of } from 'rxjs';
 
 interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2DeploymentsPreparedSelectionOptionModel {
     group?: string;
@@ -72,6 +78,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private operatorRepoService = inject(OperatorRepoService);
     private hubsService = inject(NetworksService);
     private characteristicsService = inject(CharacteristicsService);
+    private pipelineRegistryService = inject(PipelineRegistryService);
+    private authorizationService = inject(AuthorizationService);
     private cd = inject(ChangeDetectorRef);
     private destroyRef = inject(DestroyRef);
 
@@ -122,7 +130,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     setDeployment() {
         this.ready = false;
         if (this.processId !== undefined) {
-            this.deploymentsService.getPreparedDeployments(this.processId, this.networkId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
+            forkJoin([this.deploymentsService.getPreparedDeployments(this.processId, this.networkId), this.analyticsOptions()]).subscribe(([deployment, analytics]) => {
+                ProcessDeploymentsConfigComponent.addAnalyticsOptions(deployment, analytics);
                 this.deployment = deployment;
                 this.initOptionGroups(deployment);
                 this.initFormGroup(deployment);
@@ -131,9 +140,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.cd.detectChanges();
             });
         } else if (this.deploymentId !== undefined) {
-            this.deploymentsService.v2getDeployments(this.deploymentId).subscribe((deployment: V2DeploymentsPreparedModel | null) => {
+            forkJoin([this.deploymentsService.v2getDeployments(this.deploymentId), this.analyticsOptions()]).subscribe(([deployment, analytics]) => {
                 if (deployment) {
                     deployment.id = '';
+                    ProcessDeploymentsConfigComponent.addAnalyticsOptions(deployment, analytics);
                     this.initOptionGroups(deployment);
                     this.initFormGroup(deployment);
                     this.deployment = deployment;
@@ -147,6 +157,52 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         } else {
             this.router.navigateByUrl('processes/repository');
         }
+    }
+
+    /**
+     * the cloud operators of the user's own pipelines, whose output a message event can wait for;
+     * the automation-engine accepts only pipelines of the owner of the deployment and no gateway
+     */
+    private analyticsOptions(): Observable<AnalyticsOperatorOptionModel[]> {
+        const userId = this.authorizationService.getUserId();
+        if (this.networkId !== undefined || userId instanceof Error) {
+            return of([]);
+        }
+        return this.pipelineRegistryService.getPipelines().pipe(
+            map((pipelines: PipelineModel[]) => {
+                const result: AnalyticsOperatorOptionModel[] = [];
+                pipelines.filter((pipeline) => pipeline.userId === userId).forEach((pipeline) => {
+                    (pipeline.operators || []).filter((operator) => operator.deploymentType !== 'local').forEach((operator) => {
+                        result.push({ pipeline_id: pipeline.id, pipeline_name: pipeline.name, operator_id: operator.id, operator_name: operator.name });
+                    });
+                });
+                return result;
+            }),
+        );
+    }
+
+    /**
+     * adds the analytics operators to the options of every event; the automation-engine offers
+     * device events, and events without device criteria, as conditional events
+     */
+    static addAnalyticsOptions(deployment: V2DeploymentsPreparedModel | null, analytics: AnalyticsOperatorOptionModel[]): void {
+        if (!deployment || analytics.length === 0) {
+            return;
+        }
+        deployment.elements?.forEach((element) => {
+            const selection = element.conditional_event?.selection;
+            if (!selection) {
+                return;
+            }
+            if (!selection.selection_options) {
+                selection.selection_options = [];
+            }
+            analytics.forEach((option) => {
+                selection.selection_options.push({
+                    device: null, services: [], device_group: null, import: null, importType: null, path_options: null, analytics: option,
+                });
+            });
+        });
     }
 
     initFormGroup(deployment: V2DeploymentsPreparedModel | null): void {
@@ -233,7 +289,11 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             const selectedDeviceGroupId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_device_group_id');
             const selectedDeviceId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_device_id');
             const selectedImportId = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_import_id');
+            const selectedGenericEventSource = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_generic_event_source');
             const selectedPathOption = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_path');
+            if (option) {
+                selectedGenericEventSource?.patchValue(option.analytics ? analyticsEventSource(option.analytics) : null);
+            }
             if (option && option.device_group) {
                 selectedDeviceGroupId?.patchValue(option.device_group.id);
                 selectedDeviceId?.patchValue(null);
@@ -248,6 +308,11 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 selectedDeviceGroupId?.patchValue(null);
                 selectedDeviceId?.patchValue(null);
                 selectedImportId?.patchValue(option.import.id);
+            }
+            if (option && option.analytics) {
+                selectedDeviceGroupId?.patchValue(null);
+                selectedDeviceId?.patchValue(null);
+                selectedImportId?.patchValue(null);
             }
             const defaultSelectedService = that.setSelectedServiceId(elementIndex, selectionOptionIndex, elementType);
             if (defaultSelectedService && option && option.path_options && option.path_options[defaultSelectedService]) {
@@ -364,7 +429,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 (o) =>
                     (o.device && o.device.id === option.device?.id) ||
                     (o.device_group && o.device_group.id === option.device_group?.id) ||
-                    (o.import && o.import.id === option.import?.id),
+                    (o.import && o.import.id === option.import?.id) ||
+                    (o.analytics && o.analytics.pipeline_id === option.analytics?.pipeline_id && o.analytics.operator_id === option.analytics?.operator_id),
             );
         };
     }
@@ -392,6 +458,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
         if (option.import) {
             return option.import.name;
+        }
+        if (option.analytics) {
+            return option.analytics.pipeline_name + ' / ' + option.analytics.operator_name;
         }
         return '';
     }
@@ -477,6 +546,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             }
             if (option.import) {
                 (option as V2DeploymentsPreparedSelectionOptionModelWithGroup).group = 'Imports';
+                result.push(option);
+            }
+            if (option.analytics) {
+                (option as V2DeploymentsPreparedSelectionOptionModelWithGroup).group = 'Analytics';
                 result.push(option);
             }
         }

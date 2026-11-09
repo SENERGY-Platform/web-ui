@@ -123,6 +123,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selected_path_option: undefined,
@@ -219,6 +220,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selected_path_option: undefined,
@@ -311,6 +313,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selected_path_option: undefined,
@@ -410,6 +413,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selected_path_option: undefined,
@@ -510,6 +514,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selected_path_option: undefined,
@@ -606,6 +611,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selected_path_option: undefined,
@@ -666,6 +672,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selection_options: [
@@ -735,6 +742,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
 
                                 selected_path: nullPath,
                                 selected_path_option: undefined,
@@ -828,6 +836,7 @@ describe('DeploymentsConfigInitializerService', () => {
                                 selected_service_id: null,
                                 selected_device_group_id: null,
                                 selected_import_id: null,
+                                selected_generic_event_source: null,
                                 selected_path: selectedPath,
                                 selected_path_option: undefined,
                             },

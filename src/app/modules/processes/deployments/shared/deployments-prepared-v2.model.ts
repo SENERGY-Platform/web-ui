@@ -122,8 +122,37 @@ export interface V2DeploymentsPreparedSelectionModel {
     selected_service_id: string | null;
     selected_device_group_id: string | null;
     selected_import_id: string | null;
+    // the output of an analytics operator; the automation-engine reads it with filter_type
+    // 'operatorId' and filter_ids '<pipeline id>:<operator id>' and ignores the topic
+    selected_generic_event_source?: GenericEventSourceModel | null;
     selected_path: DeploymentsSelectionPathOptionModel | null;
     show?: boolean;
+}
+
+export interface GenericEventSourceModel {
+    filter_type: string;
+    filter_ids: string;
+    topic: string;
+}
+
+// an operator of a pipeline of the user whose output a message event can wait for; the web-ui
+// adds these options itself, the prepared deployment does not carry them
+export interface AnalyticsOperatorOptionModel {
+    pipeline_id: string;
+    pipeline_name: string;
+    operator_id: string;
+    operator_name: string;
+}
+
+export const analyticsFilterType = 'operatorId';
+
+export function analyticsEventSource(option: AnalyticsOperatorOptionModel): GenericEventSourceModel {
+    return {
+        filter_type: analyticsFilterType,
+        filter_ids: option.pipeline_id + ':' + option.operator_id,
+        // as the flow deploy dialog names the topic of a cloud operator
+        topic: 'analytics-' + option.operator_name,
+    };
 }
 
 export interface V2DeploymentsPreparedSelectionOptionModel {
@@ -133,6 +162,7 @@ export interface V2DeploymentsPreparedSelectionOptionModel {
     import: ImportInstancesModel | null;
     importType: ImportTypeModel | null;
     path_options: {[key: string]: DeploymentsSelectionPathOptionModel[]} | null;
+    analytics?: AnalyticsOperatorOptionModel | null;
 }
 
 export interface DeploymentsSelectionPathOptionModel {

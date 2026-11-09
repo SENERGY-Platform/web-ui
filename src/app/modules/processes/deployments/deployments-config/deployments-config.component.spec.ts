@@ -37,7 +37,12 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormGroup } from '@angular/forms';
 import { DeploymentsConfigInitializerService } from './shared/deployments-config-initializer.service';
-import { DeploymentsSelectionPathOptionModel } from '../shared/deployments-prepared-v2.model';
+import { DeploymentsSelectionPathOptionModel, GenericEventSourceModel, V2DeploymentsPreparedFilterCriteriaModel } from '../shared/deployments-prepared-v2.model';
+import { HubModel } from '../../../devices/networks/shared/networks.model';
+import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
+import { PipelineModel } from '../../../data/pipeline-registry/shared/pipeline.model';
+import { AuthorizationService } from '../../../../core/services/authorization.service';
+import { AuthorizationServiceMock } from '../../../../core/services/authorization.service.mock';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({}), aspectNodes: undefined, functionId: '', isVoid: false, value: null, type: '', configurables: [] };
 // setSelectedPathOption(ctrl, null) writes aspectNodes as [] rather than leaving it undefined, unlike the pristine form init above.
@@ -49,6 +54,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
 
     const routerSpy: Spy<Router> = createSpyFromClass<Router>(Router);
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
+    const pipelineRegistryServiceSpy: Spy<PipelineRegistryService> = createSpyFromClass<PipelineRegistryService>(PipelineRegistryService);
+    pipelineRegistryServiceSpy.getPipelines.and.returnValue(of([]));
 
     function initSpies(): void {
         TestBed.configureTestingModule({
@@ -67,6 +74,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
             providers: [
                 { provide: Router, useValue: routerSpy },
                 { provide: DeploymentsService, useValue: deploymentsServiceSpy },
+                { provide: PipelineRegistryService, useValue: pipelineRegistryServiceSpy },
+                { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 {
                     provide: ActivatedRoute,
                     useValue: {
@@ -119,6 +128,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: '',
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
                             selected_path: nullPath,
                             selected_path_option: undefined,
                             selection_options: [
@@ -220,6 +230,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: 'urn:infai:ses:service:9ce22b54-3538-475b-bbfd-09056449f8f9',
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: {
                                 path: 'value.root.value',
@@ -331,6 +342,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             show: true,
                             selection_options_index: 1,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPathReset,
                             selected_path_option: undefined,
@@ -466,6 +478,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPath,
                             selected_path_option: undefined,
@@ -556,6 +569,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPath,
                             selected_path_option: undefined,
@@ -642,6 +656,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPath,
                             selected_path_option: undefined,
@@ -748,6 +763,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: 'urn:infai:ses:service:4535f01d-051f-4644-a747-e01c86aa3943',
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPathReset,
                             selected_path_option: undefined,
@@ -848,6 +864,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: 'urn:infai:ses:service:1b0ef253-16f7-4b65-8a15-fe79fccf7e70',
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPathReset,
                             selected_path_option: undefined,
@@ -945,6 +962,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: 'urn:infai:ses:service:562c2a95-5edd-4d11-8ce4-dde9a788001e',
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPathReset,
                             selected_path_option: undefined,
@@ -1047,6 +1065,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPath,
                             selected_path_option: undefined,
@@ -1148,6 +1167,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPath,
                             selected_path_option: undefined,
@@ -1245,6 +1265,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: null,
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPath,
                             selected_path_option: undefined,
@@ -1358,6 +1379,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPathReset,
                             selected_path_option: undefined,
@@ -1469,6 +1491,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPathReset,
                             selected_path_option: undefined,
@@ -1577,6 +1600,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                             selected_service_id: null,
                             selected_device_group_id: 'urn:infai:ses:device-group:foo-bar-batz-group-1',
                             selected_import_id: null,
+                            selected_generic_event_source: null,
 
                             selected_path: nullPathReset,
                             selected_path_option: undefined,
@@ -1612,5 +1636,79 @@ describe('ProcessDeploymentsConfigComponent', () => {
         delete (withoutAspectNodesKey as any).aspectNodes;
         component.setSelectedPathOption(ctrl, withoutAspectNodesKey);
         expect(ctrl.getRawValue().aspectNodes).toEqual([]);
+    });
+
+    describe('analytics operators as event source', () => {
+        // a catch event without device criteria, as the automation-engine prepares it
+        function eventDeployment(selectedGenericEventSource: GenericEventSourceModel | null): V2DeploymentsPreparedModel {
+            return {
+                id: '', name: 'Thermostat', description: '', version: 3, executable: true,
+                diagram: { svg: '', xml_raw: '', xml_deployed: '' },
+                elements: [{
+                    bpmn_id: 'IntermediateCatchEvent_19vzrj3', group: null, name: 'Get New Timer', order: 0,
+                    time_event: null, notification: null, message_event: null, task: null,
+                    conditional_event: {
+                        event_id: '', script: '', value_variable: 'value', variables: {}, qos: 0,
+                        selection: {
+                            filter_criteria: {} as V2DeploymentsPreparedFilterCriteriaModel,
+                            selected_device_id: null, selected_service_id: null, selected_device_group_id: null, selected_import_id: null,
+                            selected_generic_event_source: selectedGenericEventSource,
+                            selected_path: null,
+                            selection_options: [],
+                        },
+                    },
+                }],
+            };
+        }
+
+        const pipelines = [
+            { id: 'p1', name: 'Lueften', userId: 'test', operators: [
+                { id: 'o1', name: 'stopping', deploymentType: 'cloud' },
+                { id: 'o2', name: 'local-stopping', deploymentType: 'local' },
+            ] },
+            { id: 'p2', name: 'Foreign', userId: 'someone-else', operators: [{ id: 'o1', name: 'stopping', deploymentType: 'cloud' }] },
+        ] as unknown as PipelineModel[];
+
+        afterEach(() => {
+            pipelineRegistryServiceSpy.getPipelines.and.returnValue(of([]));
+        });
+
+        it('offers the cloud operators of the own pipelines and selects one as generic event source', () => {
+            pipelineRegistryServiceSpy.getPipelines.and.returnValue(of(pipelines));
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(eventDeployment(null)));
+            initSpies();
+
+            const options = component.optionGroups.get(0) || [];
+            expect(options.map((o) => component.getViewValue(o))).toEqual(['Lueften / stopping']);
+            expect(options[0].group).toBe('Analytics');
+
+            component.changeConditionalEventSelectionOption(0, 0);
+            const selection = component.deploymentFormGroup.getRawValue().elements[0].conditional_event.selection;
+            expect(selection.selected_generic_event_source).toEqual({ filter_type: 'operatorId', filter_ids: 'p1:o1', topic: 'analytics-stopping' });
+            expect(selection.selected_device_id).toBeNull();
+            expect(selection.selected_import_id).toBeNull();
+            expect(selection.selected_path.path).toBe('');
+            expect(component.elementsFormArray.at(0).get('conditional_event.selection.selected_path.path')?.errors).toBeNull();
+        });
+
+        it('shows the operator of a stored deployment as selected', () => {
+            pipelineRegistryServiceSpy.getPipelines.and.returnValue(of(pipelines));
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(eventDeployment({ filter_type: 'operatorId', filter_ids: 'p1:o1', topic: '' })));
+            initSpies();
+
+            const selection = component.deploymentFormGroup.getRawValue().elements[0].conditional_event.selection;
+            expect(selection.selection_options_index).toBe(0);
+        });
+
+        it('does not offer analytics operators for a deployment to a hub', () => {
+            pipelineRegistryServiceSpy.getPipelines.and.returnValue(of(pipelines));
+            // a fresh deployment per request, as over HTTP
+            deploymentsServiceSpy.getPreparedDeployments.and.callFake(() => of(eventDeployment(null)));
+            initSpies();
+            expect(component.optionGroups.get(0)?.length).toBe(1);
+            // choosing a hub loads the deployment again, for the hub
+            component.selectedHubForm.setValue({ id: 'hub-1', name: 'Hub', device_local_ids: null } as HubModel);
+            expect(component.optionGroups.get(0)).toEqual([]);
+        });
     });
 });
