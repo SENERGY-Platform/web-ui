@@ -23,7 +23,9 @@ import { of } from 'rxjs';
 import { Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { NewExportComponent } from './new-export.component';
-import { ExportModel } from '../shared/export.model';
+import { By } from '@angular/platform-browser';
+import { MtxSelect } from '@ng-matero/extensions/select';
+import { DatabaseType, ExportDatabaseModel, ExportModel } from '../shared/export.model';
 import { DeviceTypeModel, DeviceTypeServiceModel } from '../../metadata/device-types-overview/shared/device-type.model';
 import { DeviceInstanceModel } from '../../devices/device-instances/shared/device-instances.model';
 import { PipelineModel } from '../../data/pipeline-registry/shared/pipeline.model';
@@ -141,7 +143,7 @@ const IMAGE_TEMPLATE = '<span class="widget-image" [innerHtml]="image" (click)="
 const openForEditing = (
     exp: ExportModel = existingExport(),
     id: string | null = 'export-1',
-    rendered?: {image: string; fixture: (fixture: ComponentFixture<NewExportComponent>) => void; realTemplate?: boolean; loadDelay?: number},
+    rendered?: {image: string; fixture: (fixture: ComponentFixture<NewExportComponent>) => void; realTemplate?: boolean; loadDelay?: number; databases?: ExportDatabaseModel[]},
 ): Harness => {
     let saved: ExportModel | undefined;
     let fail = false;
@@ -158,7 +160,7 @@ const openForEditing = (
                 provide: ExportService,
                 useValue: {
                     getTimestampFormats: () => ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ'],
-                    getExportDatabases: () => of([]),
+                    getExportDatabases: () => of(rendered?.databases ?? []),
                     getExport: () => (rendered?.loadDelay ? of(exp).pipe(delay(rendered.loadDelay)) : of(exp)),
                     editExport: (_id: string, edited: ExportModel) => {
                         saved = {...edited};
@@ -386,14 +388,12 @@ describe('NewExportComponent', () => {
     it('sets the time path and its format when an operator is chosen', fakeAsync(() => {
         const {component} = openForEditing();
         component.exportForm.patchValue({timestampFormat: null});
-        component.formatControl.setValue('');
 
         component.operatorChanged(pipeline.operators[1]);
         tick();
 
         expect(component.exportForm.getRawValue().timePath).toBe('time');
         expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
-        expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%S.%fZ');
     }));
 
     it('sets the time path and the seconds format when an import is chosen', fakeAsync(() => {
@@ -405,7 +405,6 @@ describe('NewExportComponent', () => {
 
         expect(component.exportForm.getRawValue().timePath).toBe('time');
         expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
-        expect(component.formatControl.value).toBe('%Y-%m-%dT%H:%M:%SZ');
         component.onSubmit();
         expect(saved()?.TimestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
     }));
@@ -601,6 +600,23 @@ describe('NewExportComponent', () => {
         const el = (selector: string) => fixture.nativeElement.querySelector(selector) as HTMLElement;
         const status = () => el('senergy-save-bar .status').textContent;
         const barButton = (name: string) => el('senergy-save-bar button.' + name) as HTMLButtonElement;
+
+        // The timestamp format is offered for a timescale database only, which no other spec here renders.
+        const TIMESCALE_DB = {ID: 'timescale-db', Name: 'Timescale', Type: DatabaseType.timescaledb} as ExportDatabaseModel;
+
+        it('shows the stored timestamp format of a timescale export', fakeAsync(() => {
+            const {component} = openForEditing({...existingExport(), TimestampFormat: '%Y-%m-%dT%H:%M:%SZ'}, 'export-1',
+                {image: PIPELINE_IMAGE, fixture: (f) => (fixture = f), realTemplate: true, databases: [TIMESCALE_DB]});
+            fixture.detectChanges();
+            tick();
+            fixture.detectChanges();
+
+            expect(component.isTimescaleSelected()).toBeTrue();
+            const select: MtxSelect = fixture.debugElement.query(By.css('mtx-select[name="export-timestamp-format"]')).componentInstance;
+            expect((select.items as string[])).toEqual(['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ']);
+            expect(component.exportForm.getRawValue().timestampFormat).toBe('%Y-%m-%dT%H:%M:%SZ');
+            expect(el('mtx-select[name="export-timestamp-format"]').textContent).toContain('%Y-%m-%dT%H:%M:%SZ');
+        }));
 
         it('titles an export that is edited by its stored name and links back to its list', fakeAsync(() => {
             const {component} = render();

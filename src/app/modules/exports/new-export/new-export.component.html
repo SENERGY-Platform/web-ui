@@ -161,8 +161,8 @@
         @if (isTimescaleSelected()) {
           <mat-form-field class="full-width field-limit" color="accent" appearance="outline">
             <mat-label>Timestamp Format</mat-label>
-            <mtx-select formControlName="timestampFormat" placeholder="Choose or write yourself"
-              [formControl]="formatControl" [addTag]="addTimestampFormat()" [items]="timestamp_formats"
+            <mtx-select name="export-timestamp-format" formControlName="timestampFormat"
+              placeholder="Choose or write yourself" [addTag]="addTimestampFormat()" [items]="timestamp_formats"
               appendTo=".ng-select-anchor">
             </mtx-select>
             <mat-error senergyError label="Timestamp Format"></mat-error>

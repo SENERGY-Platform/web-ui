@@ -114,7 +114,6 @@ export class NewExportComponent implements OnInit {
     offset = 0;
     lastPageEvent: PageEvent | undefined;
 
-    formatControl = new FormControl('');
     timestamp_formats: string[] = [];
 
     exportForm = this.fb.group({
@@ -622,10 +621,6 @@ export class NewExportComponent implements OnInit {
                     }
                 });
             }
-
-            this.formatControl.valueChanges.pipe(takeUntil(this.detach$)).subscribe((selection) => {
-                this.exportForm.get('timestampFormat')?.setValue(selection);
-            });
         }
     }
 
@@ -692,7 +687,6 @@ export class NewExportComponent implements OnInit {
             this.paths.set('time', 'string');
             this.paths.set('analytics', this.typeStructure);
             this.exportForm.patchValue({timePath: 'time', timestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ'});
-            this.formatControl.setValue('%Y-%m-%dT%H:%M:%S.%fZ');
             this.autofillValues();
         });
     }
@@ -787,13 +781,11 @@ export class NewExportComponent implements OnInit {
                     timePath: 'time',
                     timestampFormat: '%Y-%m-%dT%H:%M:%S.%fZ'
                 }, {onlySelf: true, emitEvent: false});
-                this.formatControl.setValue('%Y-%m-%dT%H:%M:%S.%fZ');
             } else if (this.exportForm.value.selector === 'import') {
                 this.exportForm.patchValue({timePath: 'time', timestampFormat: '%Y-%m-%dT%H:%M:%SZ'}, {
                     onlySelf: true,
                     emitEvent: false
                 });
-                this.formatControl.setValue('%Y-%m-%dT%H:%M:%SZ');
             } else if (this.exportForm.value.selector === 'device') {
                 this.exportForm.patchValue({timePath: this.timeSuggest, timestampFormat: null}, {
                     onlySelf: true,
@@ -946,7 +938,6 @@ export class NewExportComponent implements OnInit {
             exportDatabaseId: environment.exportDatabaseIdInternalTimescaleDb,
             timestampFormat: '',
         }, {emitEvent: false});
-        this.formatControl.setValue('', {emitEvent: false});
         this.exportForm.controls.device.enable({onlySelf: true, emitEvent: false});
         for (const control of ['service', 'timePath', 'import', 'operator', 'pipeline'] as const) {
             this.exportForm.controls[control].disable({onlySelf: true, emitEvent: false});
@@ -972,13 +963,10 @@ export class NewExportComponent implements OnInit {
     }
 
     addTimestampFormat(): AddTagFn {
-        const that = this;
         return (text: string) => {
-            that.timestamp_formats.push(text);
-            const tmp = that.timestamp_formats;
-            that.timestamp_formats = [];
-            that.timestamp_formats = tmp;
-            that.formatControl.updateValueAndValidity(); // triggers valueChanges pipe
+            // a new array so the select sees the change; what is returned is what it selects
+            this.timestamp_formats = [...this.timestamp_formats, text];
+            return text;
         };
     }
 }
