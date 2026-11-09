@@ -62,7 +62,8 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
     let dialogRef: Spy<MatDialogRef<EditSmartServiceTaskDialogComponent>>;
     let fixture: ComponentFixture<EditSmartServiceTaskDialogComponent>;
 
-    function init(inputs: SmartServiceTaskInputDescription[], listing: DeviceTypeAspectNodeModel[] = [air, water], topic = 'watcher', render = false) {
+    function init(inputs: SmartServiceTaskInputDescription[], listing: DeviceTypeAspectNodeModel[] = [air, water], topic = 'watcher', render = false,
+        incoming: { source: BpmnElement }[] = [], operators: ParseModel[] = []) {
         dialogRef = createSpyFromClass<MatDialogRef<EditSmartServiceTaskDialogComponent>>(MatDialogRef);
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspectNodesWithFunctionOfDevicesOnly.and.returnValue(of(listing));
@@ -77,6 +78,8 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         // the process tab loads the process models when it is the topic
         const processRepoService = createSpyFromClass(ProcessRepoService);
         processRepoService.getProcessModels.and.returnValue(of({ result: [], total: 0 }));
+        const parserService = createSpyFromClass(ParserService);
+        parserService.getInputs.and.returnValue(of(operators));
 
         const info: SmartServiceTaskDescription = { name: 'task', topic, inputs, outputs: [], smartServiceInputs: { inputs: [] } };
         TestBed.configureTestingModule({
@@ -84,11 +87,11 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
             imports: [EditSmartServiceTaskDialogComponent],
             providers: [
                 { provide: MatDialogRef, useValue: dialogRef },
-                { provide: MAT_DIALOG_DATA, useValue: { info, element: { id: 'task', incoming: [] } as unknown as BpmnElement } },
+                { provide: MAT_DIALOG_DATA, useValue: { info, element: { id: 'task', incoming } as unknown as BpmnElement } },
                 { provide: ProcessRepoService, useValue: processRepoService },
                 { provide: DeploymentsService, useValue: createSpyFromClass(DeploymentsService) },
                 { provide: FlowRepoService, useValue: flowRepoService },
-                { provide: ParserService, useValue: createSpyFromClass(ParserService) },
+                { provide: ParserService, useValue: parserService },
                 { provide: ImportTypesService, useValue: importTypesService },
                 { provide: FunctionsService, useValue: functionsService },
                 { provide: DeviceTypeService, useValue: deviceTypeService },
@@ -303,6 +306,31 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
             expect(generate({ aspect_id: water.id, aspect_ids: [air.id] })).toEqual([
                 { aspect_id: air.id, aspect_ids: [air.id, water.id], device_class_id: undefined, function_id: 'f', interaction: 'request' },
             ]);
+        });
+    });
+
+    describe('analytics operators as event source of a process deployment', () => {
+        // an analytics task before the process deployment, with its pipeline id as output
+        const analyticsTask = {
+            id: 'Task_1',
+            businessObject: {
+                $type: 'bpmn:ServiceTask', name: 'Predict', topic: 'analytics',
+                extensionElements: { values: [{ $type: 'camunda:InputOutput', outputParameters: [{ name: 'Task_1_pipeline_id', value: '${pipeline_id}' }], inputParameters: [{ name: 'analytics.flow_id', value: 'f1' }] }] },
+            },
+        } as unknown as BpmnElement;
+        const operators = [{ id: 'o1', name: 'stopping' }, { id: 'o2', name: 'confidence' }] as ParseModel[];
+
+        it('offers every operator of the flow with the pipeline of the analytics task', () => {
+            init([], [air, water], 'process_deployment', false, [{ source: analyticsTask }], operators);
+            expect(component.availableProcessIotSelections).toEqual([
+                { name: 'Predict: stopping', value: '{"pipeline_id":"${Task_1_pipeline_id}","operator_id":"o1"}' },
+                { name: 'Predict: confidence', value: '{"pipeline_id":"${Task_1_pipeline_id}","operator_id":"o2"}' },
+            ]);
+        });
+
+        it('offers none without an analytics task before it', () => {
+            init([], [air, water], 'process_deployment');
+            expect(component.availableProcessIotSelections).toEqual([]);
         });
     });
 

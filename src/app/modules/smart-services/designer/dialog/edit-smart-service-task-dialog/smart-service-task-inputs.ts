@@ -117,6 +117,16 @@ export function newWatcherWorkerInfo(): WatcherWorkerInfo {
  *      Chunking
  ******************************/
 
+/**
+ * the selection of a process_deployment element that waits for the output of an analytics
+ * operator: the pipeline id is the output of the analytics task that created the pipeline,
+ * written as expression, the operator id the id of its node in the flow. The automation-engine
+ * reads the output topic of the operator from the pipeline (SNRGY-5113).
+ */
+export function analyticsOperatorSelection(pipelineVariable: string, operatorId: string): string {
+    return JSON.stringify({ pipeline_id: '${' + pipelineVariable + '}', operator_id: operatorId });
+}
+
 export function chunkString(str: string, length: number): string[] {
     return str.match(new RegExp('[^]{1,' + length + '}', 'g')) || [];
 }

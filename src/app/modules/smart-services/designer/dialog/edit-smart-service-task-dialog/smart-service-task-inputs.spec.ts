@@ -18,6 +18,7 @@ import { SmartServiceTaskInputDescription } from '../../shared/designer.model';
 import { BpmnBusinessObject, BpmnElement } from '../../../../processes/designer/shared/designer.model';
 import { ImportTypeContentVariableModel } from '../../../../imports/import-types/shared/import-types.model';
 import {
+    analyticsOperatorSelection,
     applyDeviceRepositoryInputs,
     applyWatcherInputs,
     chunkString,
@@ -180,6 +181,14 @@ describe('smart-service-task-inputs', () => {
                 { path: 'b.d', characteristic: '' },
             ]);
         });
+    });
+
+    // the automation-engine reads {"pipeline_id", "operator_id"} as the output of an analytics
+    // operator; the pipeline id stays an expression for the process to fill in (SNRGY-5113)
+    it('selects an analytics operator with the pipeline of an earlier task', () => {
+        const value = analyticsOperatorSelection('Task_1_pipeline_id', 'o1');
+        expect(value).toBe('{"pipeline_id":"${Task_1_pipeline_id}","operator_id":"o1"}');
+        expect(JSON.parse(value.replace('${Task_1_pipeline_id}', 'p1'))).toEqual({ pipeline_id: 'p1', operator_id: 'o1' });
     });
 
     describe('incoming outputs', () => {

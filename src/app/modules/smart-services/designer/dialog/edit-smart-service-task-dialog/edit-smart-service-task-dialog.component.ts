@@ -94,6 +94,7 @@ import { IsJsonValidatorDirective } from '../../../../../core/validators/is-json
 import { CodeEditorComponent } from '../../../../../core/components/code-editor/code-editor.component';
 import { AspectSelectComponent } from '../../../../../core/components/aspect-select/aspect-select.component';
 import {
+    analyticsOperatorSelection,
     applyDeviceRepositoryInputs,
     applyWatcherInputs,
     DeviceRepositoryWorkerInfo,
@@ -397,6 +398,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             result.push({ name: field.label || field.name, value: '${' + field.name + '}' });
         });
         this.availableProcessVariables.get('import_selection')?.forEach(field => {
+            result.push({ name: field.label || field.name, value: field.name });
+        });
+        this.availableProcessVariables.get('analytics_operator_selection')?.forEach(field => {
             result.push({ name: field.label || field.name, value: field.name });
         });
         return result;
@@ -1059,6 +1063,9 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if (!this.availableProcessVariables.get('flow_selection')) {
             this.availableProcessVariables.set('flow_selection', []);
         }
+        if (!this.availableProcessVariables.get('analytics_operator_selection')) {
+            this.availableProcessVariables.set('analytics_operator_selection', []);
+        }
         const flowSelectionRaw = this.availableProcessVariables.get('flow_selection_raw')?.filter(value => value.value);
         flowSelectionRaw?.forEach(flowSelection => {
             this.flowParser.getInputs(flowSelection.value).subscribe(fields => {
@@ -1066,8 +1073,12 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     const pipelineFlowSelection = '${' + flowSelection.name + '}:' + value.id;
                     const topic = 'analytics-' + value.name;
                     this.availableProcessVariables.get('flow_selection')?.push({ name: pipelineFlowSelection, label: flowSelection.label + ': ' + value.name, value: topic });
+                    // an event of the deployed process can wait for the output of this operator; the
+                    // automation-engine reads the topic from the pipeline the analytics task created
+                    const eventSource = analyticsOperatorSelection(flowSelection.name, value.id);
+                    this.availableProcessVariables.get('analytics_operator_selection')?.push({ name: eventSource, label: flowSelection.label + ': ' + value.name, value: '' });
                 });
-
+                this.availableProcessIotSelections = this.getAvailableProcessIotSelections();
             });
         });
     }
