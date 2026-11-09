@@ -41,6 +41,7 @@ import { DataTableComponent } from './data-table/data-table.component';
 import { AcControlComponent } from './ac-control/ac-control.component';
 import { AnomalyComponent } from './anomaly/anomaly.component';
 import { AutomationSuggestionsComponent } from './automation-suggestions/automation-suggestions.component';
+import { HeatingScheduleComponent } from './heating-schedule/heating-schedule.component';
 import { OpenWindowComponent } from './charts/open-window/open-window.component';
 import { FakeAnomalyComponent } from './anomaly/fake/fake.component';
 import { PvPredictionComponent } from './pv-prediction/pv-prediction.component';
@@ -55,7 +56,7 @@ import { FloorplanComponent } from './floorplan/floorplan.component';
     templateUrl: './widget.component.html',
     styleUrls: ['./widget.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [SwitchComponent, RangeSliderComponent, DevicesStateComponent, ProcessStateComponent, EventListComponent, RankingListComponent, ChartsExportComponent, ChartsProcessInstancesComponent, ChartsProcessDeploymentsComponent, DeviceDowntimeGatewayComponent, DeviceTotalDowntimeComponent, DeviceGatewayComponent, ProcessModelListComponent, DeviceDowntimeListComponent, SingleValueComponent, MultiValueComponent, EnergyPredictionComponent, AirQualityComponent, ProcessIncidentListComponent, ProcessSchedulerComponent, DeviceStatusComponent, DataTableComponent, AcControlComponent, AnomalyComponent, AutomationSuggestionsComponent, OpenWindowComponent, FakeAnomalyComponent, PvPredictionComponent, PvLoadRecommendationComponent, LeakageDetectionComponent, ConsumptionProfileComponent, BadVentilationComponent, FloorplanComponent]
+    imports: [SwitchComponent, RangeSliderComponent, DevicesStateComponent, ProcessStateComponent, EventListComponent, RankingListComponent, ChartsExportComponent, ChartsProcessInstancesComponent, ChartsProcessDeploymentsComponent, DeviceDowntimeGatewayComponent, DeviceTotalDowntimeComponent, DeviceGatewayComponent, ProcessModelListComponent, DeviceDowntimeListComponent, SingleValueComponent, MultiValueComponent, EnergyPredictionComponent, AirQualityComponent, ProcessIncidentListComponent, ProcessSchedulerComponent, DeviceStatusComponent, DataTableComponent, AcControlComponent, AnomalyComponent, AutomationSuggestionsComponent, HeatingScheduleComponent, OpenWindowComponent, FakeAnomalyComponent, PvPredictionComponent, PvLoadRecommendationComponent, LeakageDetectionComponent, ConsumptionProfileComponent, BadVentilationComponent, FloorplanComponent]
 })
 export class WidgetComponent {
     @Input() dashboardId = '';

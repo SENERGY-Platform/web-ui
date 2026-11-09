@@ -1,0 +1,83 @@
+mat-card {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+mat-card-content {
+    height: calc(100% - 72px);
+    margin: 0;
+    overflow-y: auto;
+}
+
+.message.error {
+    color: var(--mat-sys-error);
+}
+
+.raw {
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 0.85em;
+}
+
+.now {
+    margin-bottom: 12px;
+}
+
+.current {
+    font-size: 2.4em;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.next {
+    opacity: 0.75;
+}
+
+.day {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.day-name {
+    width: 32px;
+    flex: none;
+    font-size: 0.85em;
+}
+
+.bar,
+.bar-axis {
+    position: relative;
+    flex: 1;
+    height: 16px;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.bar {
+    background-color: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);
+}
+
+.segment {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+}
+
+.bar-axis {
+    height: 14px;
+    overflow: visible;
+    font-size: 0.7em;
+    opacity: 0.7;
+}
+
+.bar-axis span {
+    position: absolute;
+    transform: translateX(-50%);
+}
+
+.edit-row {
+    margin-top: 12px;
+}

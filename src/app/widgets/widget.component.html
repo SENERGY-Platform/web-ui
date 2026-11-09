@@ -146,6 +146,11 @@
         <senergy-automation-suggestions class="widget ly-fill" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom"></senergy-automation-suggestions>
       </div>
     }
+    @case ('heating_schedule') {
+      <div class="ly-fill">
+        <senergy-heating-schedule class="widget ly-fill" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom"></senergy-heating-schedule>
+      </div>
+    }
     @case ('open_window') {
       <div class="ly-fill">
         <senergy-open-window class="widget ly-fill" [userHasUpdateNameAuthorization]="userHasUpdateNameAuthorization" [userHasDeleteAuthorization]="userHasDeleteAuthorization" [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization" [dashboardId]="dashboardId" [widget]="widget" [zoom]="zoom"></senergy-open-window>

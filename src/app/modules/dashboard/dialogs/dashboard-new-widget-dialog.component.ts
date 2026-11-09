@@ -100,6 +100,7 @@ export class DashboardNewWidgetDialogComponent implements OnInit{
         { value: DashboardTypesEnum.BadVentilation, viewValue: 'Bad Ventilation', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.Floorplan, viewValue: 'Floorplan', disabled: false, tooltip: '' },
         { value: DashboardTypesEnum.AutomationSuggestions, viewValue: 'Automation Suggestions', disabled: false, tooltip: '' },
+        { value: DashboardTypesEnum.HeatingSchedule, viewValue: 'Heating Schedule', disabled: false, tooltip: '' },
     ];
     switchCategories: SwitchCategories[] = [
         {

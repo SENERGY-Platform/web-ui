@@ -1,0 +1,71 @@
+<!--
+  ~ Copyright 2026 InfAI (CC SES)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<senergy-dialog-header title="Edit heating schedule" (closed)="close()"></senergy-dialog-header>
+
+<mat-dialog-content>
+    <div class="ly-column">
+        @for (window of windows; track window; let i = $index) {
+            <div class="window">
+                <div class="row">
+                    <mat-button-toggle-group multiple [(ngModel)]="window.weekdays" [attr.aria-label]="'Weekdays of window ' + (i + 1)">
+                        @for (name of weekdayNames; track name; let day = $index) {
+                            <mat-button-toggle [value]="day">{{ name }}</mat-button-toggle>
+                        }
+                    </mat-button-toggle-group>
+                    <button mat-icon-button class="remove" (click)="remove(i)" aria-label="Remove time window">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+                <div class="row">
+                    <mat-form-field appearance="outline" class="time">
+                        <mat-label>From</mat-label>
+                        <input matInput type="time" step="300" [(ngModel)]="window.from" [disabled]="window.allDay">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="time">
+                        <mat-label>To</mat-label>
+                        <input matInput type="time" step="300" [(ngModel)]="window.to" [disabled]="window.allDay">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="temperature">
+                        <mat-label>Temperature</mat-label>
+                        <input matInput type="number" [min]="minTemperature" [max]="maxTemperature" step="0.5" [(ngModel)]="window.temperature">
+                        <span matTextSuffix>°C</span>
+                    </mat-form-field>
+                    <mat-slide-toggle [(ngModel)]="window.allDay">All day</mat-slide-toggle>
+                </div>
+            </div>
+        }
+        <div>
+            <button mat-stroked-button (click)="add()">
+                <mat-icon>add</mat-icon> Add time window
+            </button>
+        </div>
+        <mat-form-field appearance="outline" class="temperature setback">
+            <mat-label>Setback temperature</mat-label>
+            <input matInput type="number" [min]="minTemperature" [max]="maxTemperature" step="1" [(ngModel)]="setback">
+            <span matTextSuffix>°C</span>
+        </mat-form-field>
+        <div class="hint">Outside all windows the setback temperature applies. Overlapping windows use the highest temperature. Times are Berlin time.</div>
+        @if (problem) {
+            <div class="problem">{{ problem }}</div>
+        }
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+    <button mat-stroked-button (click)="close()" [disabled]="saving">Cancel</button>
+    <button mat-flat-button color="accent" (click)="save()" [disabled]="problem !== null || saving">Save</button>
+</mat-dialog-actions>

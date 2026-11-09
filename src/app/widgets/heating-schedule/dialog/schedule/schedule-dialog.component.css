@@ -1,0 +1,40 @@
+.window {
+    padding: 12px 12px 0;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background-color: color-mix(in srgb, var(--mat-sys-on-surface) 4%, transparent);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.remove {
+    margin-left: auto;
+}
+
+.time {
+    width: 130px;
+}
+
+.temperature {
+    width: 150px;
+}
+
+.setback {
+    margin-top: 12px;
+}
+
+.hint {
+    opacity: 0.75;
+    font-size: 0.85em;
+}
+
+.problem {
+    margin-top: 8px;
+    color: var(--mat-sys-error);
+}
