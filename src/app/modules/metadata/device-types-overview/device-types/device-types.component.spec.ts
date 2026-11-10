@@ -30,12 +30,19 @@ import {DeviceTypeService} from '../shared/device-type.service';
 import {AspectClassesService} from '../../aspects/shared/aspect-classes.service';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {of} from 'rxjs';
-import {DeviceTypeModel, DeviceTypeProtocolModel, DeviceTypeServiceModel} from '../shared/device-type.model';
+import {
+    DeviceTypeContentTreeModel,
+    DeviceTypeContentVariableModel,
+    DeviceTypeModel,
+    DeviceTypeProtocolModel,
+    DeviceTypeServiceModel
+} from '../shared/device-type.model';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {v4 as uuid} from 'uuid';
 import {MatTreeModule} from '@angular/material/tree';
+import {MatDialogRef} from '@angular/material/dialog';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
@@ -682,6 +689,76 @@ describe('DeviceTypesComponent', () => {
                     expect(sent.description).withContext(func).toBe(func === 'create' ? 'new desc' : 'desc');
                     expect(sent.device_class_id).withContext(func).toBe('device_class_1');
                 }
+            }),
+        );
+    });
+
+    describe('content variable tree', () => {
+        function input(): DeviceTypeContentTreeModel {
+            return component.inputOutputArray(component.services.controls[0], 'inputs')[0];
+        }
+
+        function node(...indices: number[]): DeviceTypeContentVariableModel {
+            let n = input().dataSource.data[indices[0]];
+            indices.slice(1).forEach((i) => n = (n.sub_content_variables || [])[i]);
+            return n;
+        }
+
+        function addFromJson(indices: number[], contentVariable: DeviceTypeContentVariableModel) {
+            spyOn(component['dialog'], 'open').and.returnValue({ afterClosed: () => of(contentVariable) } as unknown as MatDialogRef<unknown>);
+            component.addContentVariableFromJson(input(), indices);
+        }
+
+        const struct = (): DeviceTypeContentVariableModel => ({
+            name: 'struct',
+            type: 'https://schema.org/StructuredValue',
+            serialization_options: [],
+            is_void: false,
+            sub_content_variables: [{ name: 'inner', type: 'https://schema.org/Float', serialization_options: [], is_void: false }],
+        });
+
+        it(
+            'keeps a collapsed node collapsed when a field is deleted',
+            waitForAsync(() => {
+                init('device_id_4711', 'edit');
+                expect(input().tree.isExpanded(node(0))).toBeFalse();
+
+                component.deleteContentVariable(input(), [0, 1]);
+
+                expect(node(0).sub_content_variables?.map((s) => s.name)).toEqual(['level']);
+                expect(input().tree.isExpanded(node(0))).toBeFalse();
+            }),
+        );
+
+        it(
+            'opens a new field and the node it was added to',
+            waitForAsync(() => {
+                init('device_id_4711', 'edit');
+
+                addFromJson([0], struct());
+
+                expect(node(0, 2).name).toBe('struct');
+                expect(input().tree.isExpanded(node(0))).toBeTrue();
+                expect(input().tree.isExpanded(node(0, 2))).toBeTrue();
+            }),
+        );
+
+        it(
+            'keeps the state of the fields behind a deleted one',
+            waitForAsync(() => {
+                init('device_id_4711', 'edit');
+                addFromJson([0], struct());
+
+                component.deleteContentVariable(input(), [0, 0]);
+                expect(node(0, 1).name).toBe('struct');
+                expect(input().tree.isExpanded(node(0))).toBeTrue();
+                expect(input().tree.isExpanded(node(0, 1))).toBeTrue();
+
+                input().tree.collapse(node(0, 1));
+                component.deleteContentVariable(input(), [0, 0]);
+                expect(node(0, 0).name).toBe('struct');
+                expect(input().tree.isExpanded(node(0))).toBeTrue();
+                expect(input().tree.isExpanded(node(0, 0))).toBeFalse();
             }),
         );
     });

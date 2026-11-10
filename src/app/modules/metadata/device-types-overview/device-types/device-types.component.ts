@@ -232,7 +232,11 @@ export class DeviceTypesComponent implements OnInit {
     }
 
     deleteContentVariable(inOut: DeviceTypeContentTreeModel, indices: number[]): void {
-        this.refreshTree(inOut, this.deviceTypeHelperService.deleteTreeData(inOut.dataSource.data, indices));
+        this.refreshTree(
+            inOut,
+            this.deviceTypeHelperService.deleteTreeData(inOut.dataSource.data, indices),
+            (old) => this.deviceTypeHelperService.indicesAfterDelete(old, indices),
+        );
     }
 
     editContent(isInput: boolean, node: DeviceTypeContentVariableModel, inOut: DeviceTypeContentTreeModel): void {
@@ -893,12 +897,47 @@ export class DeviceTypesComponent implements OnInit {
         }
     }
 
-    private refreshTree(inOut: DeviceTypeContentTreeModel, contentVariable: DeviceTypeContentVariableModel[]): void {
+    /**
+     * Shows the changed copy of the tree. The tree control knows expanded nodes by object, and the copy has
+     * new ones, so the state moves over by position: `newIndices` says where an old node sits in the copy.
+     * Nodes without an old counterpart are new and open, together with the nodes above them.
+     */
+    private refreshTree(
+        inOut: DeviceTypeContentTreeModel,
+        contentVariable: DeviceTypeContentVariableModel[],
+        newIndices: (old: number[]) => number[] | undefined = (old) => old,
+    ): void {
+        const key = (indices: number[]) => indices.join('.');
+        const known = new Set<string>();
+        const expanded = new Set<string>();
+        const collect = (node: DeviceTypeContentVariableModel) => {
+            const indices = node.indices && newIndices(node.indices);
+            if (indices) {
+                known.add(key(indices));
+                if (inOut.tree.isExpanded(node)) {
+                    expanded.add(key(indices));
+                }
+            }
+            node.sub_content_variables?.forEach(collect);
+        };
+        inOut.dataSource.data.forEach(collect);
+
+        inOut.tree.expansionModel.clear();
         if (contentVariable[0]) {
             this.deviceTypeHelperService.setIndices(contentVariable[0]);
             inOut.dataSource.data = [contentVariable[0]];
             inOut.tree.dataNodes = inOut.dataSource.data;
-            inOut.tree.expandAll();
+            const restore = (node: DeviceTypeContentVariableModel, ancestors: DeviceTypeContentVariableModel[]) => {
+                const k = key(node.indices || []);
+                if (!known.has(k)) {
+                    inOut.tree.expand(node);
+                    ancestors.forEach((a) => inOut.tree.expand(a));
+                } else if (expanded.has(k)) {
+                    inOut.tree.expand(node);
+                }
+                node.sub_content_variables?.forEach((sub) => restore(sub, [...ancestors, node]));
+            };
+            restore(contentVariable[0], []);
         } else {
             inOut.dataSource.data = [];
         }

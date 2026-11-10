@@ -142,6 +142,20 @@ describe('DeviceTypeHelperService', () => {
         expect(service.deleteTreeData([struct1WithSubStruct2], [0, 0])).toEqual([struct1]);
     });
 
+    it('moves the indices behind a deleted node one place up', () => {
+        const deleted = [0, 1];
+        expect(service.indicesAfterDelete([0], deleted)).toEqual([0]);
+        expect(service.indicesAfterDelete([0, 0], deleted)).toEqual([0, 0]);
+        expect(service.indicesAfterDelete([0, 0, 3], deleted)).toEqual([0, 0, 3]);
+        expect(service.indicesAfterDelete([0, 1], deleted)).toBeUndefined();
+        expect(service.indicesAfterDelete([0, 1, 0], deleted)).toBeUndefined();
+        expect(service.indicesAfterDelete([0, 2], deleted)).toEqual([0, 1]);
+        expect(service.indicesAfterDelete([0, 2, 4], deleted)).toEqual([0, 1, 4]);
+        expect(service.indicesAfterDelete([0, 0, 2], [0, 0, 1])).toEqual([0, 0, 1]);
+        expect(service.indicesAfterDelete([0, 1, 2], [0, 0, 1])).toEqual([0, 1, 2]);
+        expect(service.indicesAfterDelete([0, 1], [0])).toBeUndefined();
+    });
+
     function getStruct(name: string): DeviceTypeContentVariableModel {
         return {
             name,

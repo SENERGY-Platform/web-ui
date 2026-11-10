@@ -64,6 +64,23 @@ export class DeviceTypeHelperService {
         return dataDeepCopy;
     }
 
+    /** Where the node at `indices` sits once the node at `deleted` is gone; undefined for the deleted node and its descendants. */
+    indicesAfterDelete(indices: number[], deleted: number[]): number[] | undefined {
+        const depth = deleted.length - 1;
+        if (indices.length <= depth || !_.isEqual(indices.slice(0, depth), deleted.slice(0, depth))) {
+            return indices;
+        }
+        if (indices[depth] === deleted[depth]) {
+            return undefined;
+        }
+        if (indices[depth] < deleted[depth]) {
+            return indices;
+        }
+        const moved = indices.slice();
+        moved[depth]--;
+        return moved;
+    }
+
     setIndices(contentVariable: DeviceTypeContentVariableModel | undefined, indexIn: number[] = [0]): void {
         if (contentVariable) {
             contentVariable.indices = indexIn;
