@@ -55,15 +55,15 @@ function setAttribute(modeling, element, property, value) {
  * Built on the panel's primitives instead of TextAreaEntry, which trims on blur and paste: the
  * designers always wrote these attributes exactly as typed.
  */
-function AttributeTextEntry(props) {
-    const { element, id, label, property, description } = props;
+function TextEntry(props) {
+    const { element, id, label, getValue, setValue, description } = props;
     const modeling = useService('modeling');
     const debounceInput = useService('debounceInput');
-    const value = getBusinessObject(element).get(property) || '';
+    const value = getValue(element) || '';
     const [localValue, setLocalValue] = useState(value);
     const ref = useShowEntryEvent(id);
 
-    const commit = useCallback((newValue) => setAttribute(modeling, element, property, newValue), [modeling, element, property]);
+    const commit = useCallback((newValue) => setValue(modeling, element, newValue), [modeling, element, setValue]);
     const handleInput = useDebounce(commit, debounceInput);
 
     useEffect(() => {
@@ -109,7 +109,18 @@ function AttributeTextEntry(props) {
 
 /** A text field for an attribute of the element, such as senergy:description, with an optional hint below it. */
 export function attributeTextEntry(id, label, property, description) {
-    return { id, component: AttributeTextEntry, label, property, description, isEdited: isTextAreaEntryEdited };
+    return textEntry(id, label,
+        (element) => getBusinessObject(element).get(property),
+        (modeling, element, value) => setAttribute(modeling, element, property, value),
+        description);
+}
+
+/**
+ * A text field whose value getValue(element) reads and setValue(modeling, element, value) writes,
+ * exactly as typed; setValue is called after the panel's debounce and when leaving the field.
+ */
+export function textEntry(id, label, getValue, setValue, description) {
+    return { id, component: TextEntry, label, getValue, setValue, description, isEdited: isTextAreaEntryEdited };
 }
 
 function AttributeSelectEntry(props) {

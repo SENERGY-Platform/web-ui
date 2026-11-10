@@ -17,6 +17,7 @@
 
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { augmentScriptEntries } from './ScriptEditorEntry';
+import { adaptErrorGroup } from './error-boundary-entries';
 import { attributeSelectEntry, attributeTextEntry, buttonEntry, htmlEntry } from './senergy-entries';
 import { modelServices, refresh } from '../model/bpmn-elements';
 import {
@@ -214,7 +215,7 @@ export default class SenergyPropertiesProvider {
     }
 
     getGroups(element) {
-        return (groups) => senergyGroups(element, this._bpmnjs).concat(augmentScriptEntries(groups));
+        return (groups) => senergyGroups(element, this._bpmnjs).concat(adaptErrorGroup(element, augmentScriptEntries(groups), this._bpmnjs));
     }
 }
 

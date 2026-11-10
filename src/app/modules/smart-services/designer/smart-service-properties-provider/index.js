@@ -16,6 +16,7 @@
 
 import { is } from 'bpmn-js/lib/util/ModelUtil';
 import { augmentScriptEntries } from '../../../processes/designer/bpmn-js/properties-provider/ScriptEditorEntry';
+import { adaptErrorGroup } from '../../../processes/designer/bpmn-js/properties-provider/error-boundary-entries';
 import { attributeTextEntry, buttonEntry } from '../../../processes/designer/bpmn-js/properties-provider/senergy-entries';
 import { modelServices } from '../../../processes/designer/bpmn-js/model/bpmn-elements';
 import {
@@ -112,7 +113,8 @@ class SmartServicePropertiesProvider {
     getGroups(element) {
         // gives the camunda script fields (sequence flow conditions in particular) the same
         // editor button the process designer has; these decide which way a smart service proceeds
-        return (groups) => smartServiceGroups(element, this._bpmnjs).concat(augmentScriptEntries(groups));
+        // and the error boundary event shows only what the engine supports (BPMN-19)
+        return (groups) => smartServiceGroups(element, this._bpmnjs).concat(adaptErrorGroup(element, augmentScriptEntries(groups), this._bpmnjs));
     }
 }
 
