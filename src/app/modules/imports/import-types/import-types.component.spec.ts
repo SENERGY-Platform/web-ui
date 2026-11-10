@@ -34,6 +34,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import {WidgetModule} from '../../../widgets/widget.module';
 import {createSpyFromClass, Spy} from 'jasmine-auto-spies';
 import {ImportTypesService} from './shared/import-types.service';
+import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import {of} from 'rxjs';
 import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {MatTableModule} from '@angular/material/table';
@@ -52,6 +53,8 @@ describe('ImportTypesComponent', () => {
     let fixture: ComponentFixture<ImportTypesComponent>;
 
     const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
+    const importInstancesServiceSpy: Spy<ImportInstancesService> = createSpyFromClass(ImportInstancesService);
+    importInstancesServiceSpy.userHasReadAuthorization.and.returnValue(true);
 
     const permSearchModelExample = {
         id: '0',
@@ -112,6 +115,7 @@ describe('ImportTypesComponent', () => {
                 MatTableModule, ImportTypesComponent],
             providers: [
                 { provide: ImportTypesService, useValue: importTypesServiceSpy },
+                { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
                 { provide: DialogsService, useValue: deleteDialogServiceSpy },
                 { provide: PermissionsDialogService, useValue: permissionsDialogServiceSpy },
                 { provide: SearchbarService, useValue: searchbarSpy },

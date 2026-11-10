@@ -106,6 +106,9 @@
               @if (hasXPermission(m)) {
                 <button mat-menu-item (click)="start(m)"><mat-icon>play_arrow</mat-icon> Start import</button>
               }
+              @if (userMayReadImports) {
+                <button mat-menu-item (click)="showImports(m)"><mat-icon>download</mat-icon> Show imports</button>
+              }
               @if (hasAPermission(m)) {
                 <button mat-menu-item (click)="share(m)"><mat-icon>share</mat-icon> Share</button>
               }

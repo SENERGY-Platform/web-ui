@@ -28,6 +28,8 @@ import { BehaviorSubject, of } from 'rxjs';
 import { ImportInstancesComponent } from './import-instances.component';
 import { ImportInstancesService } from './shared/import-instances.service';
 import { ImportInstancesModel } from './shared/import-instances.model';
+import { ImportTypesService } from '../import-types/shared/import-types.service';
+import { ImportTypeModel } from '../import-types/shared/import-types.model';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { AuthorizationService } from 'src/app/core/services/authorization.service';
@@ -42,11 +44,15 @@ describe('ImportInstancesComponent list', () => {
 
     const service: Spy<ImportInstancesService> = createSpyFromClass<ImportInstancesService>(ImportInstancesService);
     const permissions: Spy<PermissionsService> = createSpyFromClass<PermissionsService>(PermissionsService);
+    const types: Spy<ImportTypesService> = createSpyFromClass<ImportTypesService>(ImportTypesService);
     const instance = { id: 'inst-1', name: 'Weather import', image: 'img:1', generated: true, import_type_id: 'type-1' } as ImportInstancesModel;
 
-    function init(rights = { update: true, delete: true }, perms = { read: true, write: true, execute: true, administrate: true }) {
+    function init(rights = { update: true, delete: true }, perms = { read: true, write: true, execute: true, administrate: true },
+        query: Record<string, string> = {}, readTypes = true) {
         localStorage.removeItem('import.instances.excludeGenerated');
-        params = new BehaviorSubject<ParamMap>(convertToParamMap({}));
+        params = new BehaviorSubject<ParamMap>(convertToParamMap(query));
+        types.userHasReadAuthorization.and.returnValue(readTypes);
+        types.listImportTypes.and.returnValue(of({ result: [{ id: 'type-1', name: 'Weather' } as ImportTypeModel], total: 1 }));
         service.listImportInstances.and.returnValue(of([instance]));
         service.getTotalCountOfInstances.and.returnValue(of(1));
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
@@ -59,6 +65,7 @@ describe('ImportInstancesComponent list', () => {
             imports: [CoreModule, RouterTestingModule, NoopAnimationsModule, MatSnackBarModule, MatDialogModule, MatPaginatorModule, ImportInstancesComponent],
             providers: [
                 { provide: ImportInstancesService, useValue: service },
+                { provide: ImportTypesService, useValue: types },
                 { provide: PermissionsService, useValue: permissions },
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: AuthorizationService, useValue: { getUserId: () => 'me', getUserRoles: () => [] } },
@@ -77,6 +84,8 @@ describe('ImportInstancesComponent list', () => {
 
     afterEach(() => {
         service.listImportInstances.calls.reset();
+        service.getTotalCountOfInstances.calls.reset();
+        types.listImportTypes.calls.reset();
         localStorage.removeItem('import.instances.excludeGenerated');
     });
 
@@ -158,5 +167,57 @@ describe('ImportInstancesComponent list', () => {
         expect(component.filtered).toBeFalse();
         component.excludeGenerated = true;
         expect(component.filtered).toBeTrue();
+    }));
+
+    it('links the import type of a row by its name, and shows the id of a type it cannot name', fakeAsync(() => {
+        init();
+        discardPeriodicTasks();
+
+        expect(types.listImportTypes).toHaveBeenCalledWith('', 1, 0, 'name.asc', ['type-1']);
+        const link = fixture.nativeElement.querySelector('tr.clickable-row td.mat-column-import_type a') as HTMLAnchorElement;
+        expect(link.textContent).toBe('Weather');
+        expect(link.getAttribute('href')).toBe('/imports/types/type-1');
+
+        component.importTypeNames = new Map();
+        fixture.detectChanges();
+        const cell = fixture.nativeElement.querySelector('tr.clickable-row td.mat-column-import_type') as HTMLElement;
+        expect(cell.querySelector('a')).toBeNull();
+        expect(cell.textContent?.trim()).toBe('type-1');
+    }));
+
+    it('has no type column and asks for no import types without the right to read them', fakeAsync(() => {
+        init(undefined, undefined, {}, false);
+        discardPeriodicTasks();
+
+        expect(component.displayedColumns).not.toContain('import_type');
+        expect(types.listImportTypes).not.toHaveBeenCalled();
+    }));
+
+    it('narrows list and count to the import type from the URL and names it in a chip', fakeAsync(() => {
+        init(undefined, undefined, { 'import-type-id': 'type-1', 'import-type-name': 'Weather' });
+        discardPeriodicTasks();
+
+        expect(service.listImportInstances.calls.mostRecent().args[6]).toBe('type-1');
+        expect(service.getTotalCountOfInstances.calls.mostRecent().args[2]).toBe('type-1');
+        const chip = fixture.nativeElement.querySelector('mat-chip-set[aria-label="Type filter"] mat-chip') as HTMLElement;
+        expect(chip.textContent).toContain('Type: Weather');
+        expect(component.filtered).toBeTrue();
+    }));
+
+    it('loads once when the import type filter changes and drops both parameters when the chip is removed', fakeAsync(() => {
+        init();
+        service.listImportInstances.calls.reset();
+
+        params.next(convertToParamMap({ 'import-type-id': 'type-2', 'import-type-name': 'Pollen' }));
+        tick(400);
+        expect(service.listImportInstances).toHaveBeenCalledTimes(1);
+        expect(service.listImportInstances.calls.mostRecent().args[6]).toBe('type-2');
+
+        component.clearImportTypeFilter();
+        discardPeriodicTasks();
+        expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+            queryParams: { 'import-type-id': null, 'import-type-name': null },
+            queryParamsHandling: 'merge',
+        }));
     }));
 });

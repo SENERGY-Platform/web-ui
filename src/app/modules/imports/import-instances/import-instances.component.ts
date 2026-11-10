@@ -26,8 +26,8 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { bulkDelete, countLabel } from '../../../core/services/delete-flows';
 import { ImportInstanceExportDialogComponent } from './import-instance-export-dialog/import-instance-export-dialog.component';
 import { ExportModel } from '../../exports/shared/export.model';
-import { Router, ActivatedRoute } from '@angular/router';
-import { EMPTY, Observable, map, concatMap, tap, catchError, forkJoin } from 'rxjs';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { EMPTY, Observable, map, concatMap, tap, catchError, forkJoin, of } from 'rxjs';
 import { SearchbarService } from 'src/app/core/components/searchbar/shared/searchbar.service';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { ListSelection } from 'src/app/core/classes/list-selection';
@@ -52,16 +52,18 @@ import { DatePipe } from '@angular/common';
 import { snackError } from 'src/app/core/services/snack-bar-messages';
 import { UrlStateService } from '../../../core/services/url-state.service';
 import { KeepPageInRangeDirective } from '../../../core/directives/keep-page-in-range.directive';
+import { ImportTypesService } from '../import-types/shared/import-types.service';
 
 @Component({
     selector: 'senergy-import-instances',
     templateUrl: './import-instances.component.html',
     styleUrls: ['./import-instances.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, MatChipListbox, MatChipOption, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, DatePipe]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, MatButton, MatIconButton, MatMenu, MatMenuItem, MatMenuTrigger, MatTooltip, MatIcon, MatChipSet, MatChip, MatChipRemove, MatChipListbox, MatChipOption, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, DatePipe, RouterLink]
 })
 export class ImportInstancesComponent implements OnInit, AfterViewInit {
     private importInstancesService = inject(ImportInstancesService);
+    private importTypesService = inject(ImportTypesService);
     private destroyRef = inject(DestroyRef);
     private dialog = inject(MatDialog);
     private snackBar = inject(MatSnackBar);
@@ -98,6 +100,11 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
     userID = '';
     userRoles: string[] = [];
     instanceId: string | null = null;
+    importTypeId: string | null = null;
+    // carried in the URL by the import types list, so the chip names the type without a request
+    importTypeName: string | null = null;
+    // names of the import types on the current page; a type missing here is shown by its id
+    importTypeNames = new Map<string, string>();
 
     private paramsSeen = false;
 
@@ -108,8 +115,11 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
         // The first emission only reads the filter; the search starts the first load.
         this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             const instanceId = params.get('id');
-            const changed = this.paramsSeen && instanceId !== this.instanceId;
+            const importTypeId = params.get('import-type-id');
+            const changed = this.paramsSeen && (instanceId !== this.instanceId || importTypeId !== this.importTypeId);
             this.instanceId = instanceId;
+            this.importTypeId = importTypeId;
+            this.importTypeName = params.get('import-type-name');
             this.paramsSeen = true;
             if (changed) {
                 this.reload();
@@ -130,7 +140,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
                 observer.complete();
             });
         }
-        return this.importInstancesService.getTotalCountOfInstances(this.searchText, this.excludeGenerated).pipe(
+        return this.importInstancesService.getTotalCountOfInstances(this.searchText, this.excludeGenerated, this.importTypeId || undefined).pipe(
             map((totalCount: number) => {
                 this.totalCount = totalCount;
                 return totalCount;
@@ -154,15 +164,17 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
         this.userHasUpdateAuthorization = this.importInstancesService.userHasUpdateAuthorization();
         this.userHasDeleteAuthorization = this.importInstancesService.userHasDeleteAuthorization();
         this.userHasCreateAuthorization = this.importInstancesService.userHasCreateAuthorization();
-        // The selection column only exists for the bulk delete.
+        // The selection column only exists for the bulk delete, the type column only with the right to read import types.
         this.displayedColumns = [
             ...(this.userHasDeleteAuthorization ? ['select'] : []),
-            'name', 'status', 'image', 'created_at', 'updated_at', 'actions',
+            'name', 'status',
+            ...(this.importTypesService.userHasReadAuthorization() ? ['import_type'] : []),
+            'image', 'created_at', 'updated_at', 'actions',
         ];
     }
 
     get filtered(): boolean {
-        return this.searchText !== '' || this.excludeGenerated || this.instanceId !== null;
+        return this.searchText !== '' || this.excludeGenerated || this.instanceId !== null || this.importTypeId !== null;
     }
 
     canEdit(m: ImportInstancesModel): boolean {
@@ -217,7 +229,7 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
         this.dataReady = false;
         const ids = this.instanceId ? [this.instanceId] : undefined;
         return this.importInstancesService
-            .listImportInstances(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy + '.' + this.list.sortDirection, this.excludeGenerated, ids)
+            .listImportInstances(this.searchText, this.list.pageSize, this.list.offset, this.list.sortBy + '.' + this.list.sortDirection, this.excludeGenerated, ids, this.importTypeId || undefined)
             .pipe(
                 map((inst: ImportInstancesModel[]) => {
                     this.dataSource.data = inst;
@@ -227,7 +239,25 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
                     map(permissions => this.permissionsPerInstance = permissions),
                     map(_ => a)
                 )),
+                concatMap((a) => this.loadImportTypeNames(a).pipe(map(_ => a))),
             );
+    }
+
+    private loadImportTypeNames(instances: ImportInstancesModel[]): Observable<unknown> {
+        const ids = [...new Set(instances.map(i => i.import_type_id).filter(id => !!id))];
+        if (!this.displayedColumns.includes('import_type') || ids.length === 0) {
+            this.importTypeNames = new Map();
+            return of(null);
+        }
+        return this.importTypesService.listImportTypes('', ids.length, 0, 'name.asc', ids).pipe(
+            map(types => this.importTypeNames = new Map(types.result.map(t => [t.id, t.name]))),
+            // the imports stand without their type names, the column then shows the ids
+            catchError(err => {
+                console.error(err);
+                this.importTypeNames = new Map();
+                return of(null);
+            }),
+        );
     }
 
     private withCount = false;
@@ -291,6 +321,14 @@ export class ImportInstancesComponent implements OnInit, AfterViewInit {
         this.router.navigate([], { 
             relativeTo: this.route,
             queryParams: { id: null },
+            queryParamsHandling: 'merge'
+        });
+    }
+
+    clearImportTypeFilter() {
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { 'import-type-id': null, 'import-type-name': null },
             queryParamsHandling: 'merge'
         });
     }

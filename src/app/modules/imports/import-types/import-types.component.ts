@@ -21,6 +21,7 @@ import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ImportInstancesModel } from '../import-instances/shared/import-instances.model';
+import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { ImportDeployEditDialogComponent } from '../import-deploy-edit-dialog/import-deploy-edit-dialog.component';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -59,6 +60,7 @@ import { snackError } from 'src/app/core/services/snack-bar-messages';
 })
 export class ImportTypesComponent implements OnInit, AfterViewInit {
     private importTypesService = inject(ImportTypesService);
+    private importInstancesService = inject(ImportInstancesService);
     private destroyRef = inject(DestroyRef);
     private router = inject(Router);
     private dialog = inject(MatDialog);
@@ -84,6 +86,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
     userHasUpdateAuthorization = false;
     userHasDeleteAuthorization = false;
     userHasCreateAuthorization = false;
+    userMayReadImports = false;
     permissionsPerType: PermissionsV2RightsAndIdModel[] = [];
 
     ngOnInit(): void {
@@ -99,6 +102,7 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
         this.userHasUpdateAuthorization = this.importTypesService.userHasUpdateAuthorization();
         this.userHasDeleteAuthorization = this.importTypesService.userHasDeleteAuthorization();
         this.userHasCreateAuthorization = this.importTypesService.userHasCreateAuthorization();
+        this.userMayReadImports = this.importInstancesService.userHasReadAuthorization();
 
         // The selection column only exists for the bulk delete.
         this.displayedColumns = [
@@ -140,6 +144,15 @@ export class ImportTypesComponent implements OnInit, AfterViewInit {
                     this.router.navigateByUrl('imports/instances');
                 }
             });
+    }
+
+    showImports(m: ImportTypeModel) {
+        this.router.navigate(['imports/instances'], {
+            queryParams: {
+                'import-type-id': m.id,
+                'import-type-name': m.name,
+            },
+        });
     }
 
     share(m: ImportTypeModel) {

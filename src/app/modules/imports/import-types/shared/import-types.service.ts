@@ -51,6 +51,7 @@ export class ImportTypesService {
         limit: number | undefined,
         offset: number | undefined,
         sort: string,
+        ids?: string[],
     ): Observable<{ result: ImportTypeModel[]; total: number }> {
         let url = environment.importRepoUrl + '/import-types?';
         if (search.length > 0) {
@@ -64,6 +65,9 @@ export class ImportTypesService {
         }
         if (sort.length > 0) {
             url += '&sort=' + sort;
+        }
+        if (ids && ids.length > 0) {
+            url += '&ids=' + ids.map((id) => encodeURIComponent(id)).join(',');
         }
         return this.http
             .get<ImportTypeModel[]>(url, { observe: 'response' }).pipe(

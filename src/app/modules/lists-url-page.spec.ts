@@ -95,11 +95,11 @@ const LISTS: ListCase[] = [
     },
     {
         component: ImportInstancesComponent,
-        services: [ImportInstancesService, DialogsService, UtilService, PermissionsDialogService, PermissionsService, AuthorizationService],
+        services: [ImportInstancesService, ImportTypesService, DialogsService, UtilService, PermissionsDialogService, PermissionsService, AuthorizationService],
     },
     {
         component: ImportTypesComponent,
-        services: [ImportTypesService, PermissionsDialogService, DialogsService, CostService, PermissionsService],
+        services: [ImportTypesService, ImportInstancesService, PermissionsDialogService, DialogsService, CostService, PermissionsService],
     },
     { component: CharacteristicsComponent, services: [CharacteristicsService, DialogsService, DeviceTypeService, ConceptsService] },
     { component: ConceptsComponent, services: [ConceptsService, FunctionsService, DialogsService] },

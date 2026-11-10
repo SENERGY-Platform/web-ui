@@ -33,6 +33,16 @@
         </mat-chip>
       </mat-chip-set>
     }
+    @if (importTypeId) {
+      <mat-chip-set aria-label="Type filter">
+        <mat-chip (removed)="clearImportTypeFilter()">
+          Type: {{importTypeName || importTypeNames.get(importTypeId) || importTypeId}}
+          <button matChipRemove aria-label="Remove the type filter">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      </mat-chip-set>
+    }
   </ng-container>
   <ng-container bulkActions>
     @if (userHasDeleteAuthorization) {
@@ -95,6 +105,16 @@
             } @else {
               <span class="status-chip failed"
                 [matTooltip]="'Import is not running' + (m.status.message ? ': ' + m.status.message : '')">Stopped</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="import_type">
+          <th mat-header-cell *matHeaderCellDef>Type</th>
+          <td mat-cell *matCellDef="let m" (click)="$event.stopPropagation()">
+            @if (importTypeNames.get(m.import_type_id); as typeName) {
+              <a [routerLink]="'/imports/types/' + m.import_type_id">{{typeName}}</a>
+            } @else {
+              <span class="muted">{{m.import_type_id}}</span>
             }
           </td>
         </ng-container>

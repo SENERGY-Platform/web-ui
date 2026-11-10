@@ -42,6 +42,7 @@ export class ImportInstancesService {
         sort: string,
         excludeGenerated: boolean = false,
         ids?: string[],
+        importTypeId?: string,
     ): Observable<ImportInstancesModel[]> {
         let url = environment.importDeployUrl + '/instances?';
         if (search.length > 0) {
@@ -61,6 +62,9 @@ export class ImportInstancesService {
         }
         if (ids && ids.length > 0) {
             url += '&ids=' + ids.map((id) => encodeURIComponent(id)).join(',');
+        }
+        if (importTypeId) {
+            url += '&import_type_id=' + encodeURIComponent(importTypeId);
         }
         return this.http.get<ImportInstancesModel[]>(url).pipe(map((types) => types || []));
     }
@@ -93,11 +97,14 @@ export class ImportInstancesService {
         return this.authorizations['GET'];
     }
 
-    getTotalCountOfInstances(searchText: string, excludeGenerated: boolean): Observable<any> {
+    getTotalCountOfInstances(searchText: string, excludeGenerated: boolean, importTypeId?: string): Observable<any> {
         const options = {params: {}};
         let params = new HttpParams().set('exclude_generated', excludeGenerated);
         if(searchText) {
             params = params.set('search', searchText);
+        }
+        if (importTypeId) {
+            params = params.set('import_type_id', importTypeId);
         }
         options['params'] = params;
         return this.http

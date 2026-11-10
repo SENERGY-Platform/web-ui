@@ -35,6 +35,7 @@ import { MatTreeModule } from '@angular/material/tree';
 import { WidgetModule } from '../../../widgets/widget.module';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { ImportInstancesService } from './shared/import-instances.service';
+import { ImportTypesService } from '../import-types/shared/import-types.service';
 import { of, Subject } from 'rxjs';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MatTableModule } from '@angular/material/table';
@@ -72,6 +73,10 @@ describe('ImportInstancesComponent', () => {
     importInstancesServiceSpy.userHasDeleteAuthorization.and.returnValue(of(true));
     importInstancesServiceSpy.userHasCreateAuthorization.and.returnValue(of(true));
     importInstancesServiceSpy.getTotalCountOfInstances.and.returnValue(of(0));
+
+    const importTypesServiceSpy: Spy<ImportTypesService> = createSpyFromClass(ImportTypesService);
+    importTypesServiceSpy.userHasReadAuthorization.and.returnValue(true);
+    importTypesServiceSpy.listImportTypes.and.returnValue(of({ result: [], total: 0 }));
 
     const deleteDialogServiceSpy: Spy<DialogsService> = createSpyFromClass(DialogsService);
     deleteDialogServiceSpy.openDeleteDialog.and.returnValue({ afterClosed: () => of(true) });
@@ -124,6 +129,7 @@ describe('ImportInstancesComponent', () => {
                 InfiniteScrollModule, ImportInstancesComponent],
             providers: [
                 { provide: ImportInstancesService, useValue: importInstancesServiceSpy },
+                { provide: ImportTypesService, useValue: importTypesServiceSpy },
                 { provide: DialogsService, useValue: deleteDialogServiceSpy },
                 { provide: Router, useValue: routerSpy },
                 { provide: UrlStateService, useClass: UrlStateServiceMock },

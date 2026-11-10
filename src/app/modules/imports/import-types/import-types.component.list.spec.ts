@@ -28,6 +28,7 @@ import { of } from 'rxjs';
 import { ImportTypesComponent } from './import-types.component';
 import { ImportTypesService } from './shared/import-types.service';
 import { ImportTypeModel } from './shared/import-types.model';
+import { ImportInstancesService } from '../import-instances/shared/import-instances.service';
 import { CostService } from '../../cost/shared/cost.service';
 import { PermissionsService } from '../../permissions/shared/permissions.service';
 import { PermissionsDialogService } from '../../permissions/shared/permissions-dialog.service';
@@ -42,9 +43,11 @@ describe('ImportTypesComponent list', () => {
     const service: Spy<ImportTypesService> = createSpyFromClass<ImportTypesService>(ImportTypesService);
     const permissions: Spy<PermissionsService> = createSpyFromClass<PermissionsService>(PermissionsService);
     const cost: Spy<CostService> = createSpyFromClass<CostService>(CostService);
+    const instances: Spy<ImportInstancesService> = createSpyFromClass<ImportInstancesService>(ImportInstancesService);
     const type = { id: 'type-1', name: 'Weather', description: 'Hourly values', image: 'img:1' } as ImportTypeModel;
 
-    function init(rights = { create: true, update: true, delete: true }, perms = { read: true, write: true, execute: true, administrate: true }) {
+    function init(rights = { create: true, update: true, delete: true }, perms = { read: true, write: true, execute: true, administrate: true }, readImports = true) {
+        instances.userHasReadAuthorization.and.returnValue(readImports);
         service.listImportTypes.and.returnValue(of({ result: [type], total: 1 }));
         service.userHasCreateAuthorization.and.returnValue(rights.create);
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
@@ -58,6 +61,7 @@ describe('ImportTypesComponent list', () => {
             providers: [
                 { provide: ImportTypesService, useValue: service },
                 { provide: CostService, useValue: cost },
+                { provide: ImportInstancesService, useValue: instances },
                 { provide: PermissionsService, useValue: permissions },
                 { provide: PermissionsDialogService, useValue: {} },
                 { provide: DialogsService, useValue: {} },
@@ -65,6 +69,7 @@ describe('ImportTypesComponent list', () => {
         }).compileComponents();
         router = TestBed.inject(Router);
         spyOn(router, 'navigateByUrl').and.resolveTo(true);
+        spyOn(router, 'navigate').and.resolveTo(true);
         fixture = TestBed.createComponent(ImportTypesComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -119,5 +124,31 @@ describe('ImportTypesComponent list', () => {
         discardPeriodicTasks();
 
         expect(component.displayedColumns).toEqual(['select', 'name', 'description', 'image', 'actions']);
+    }));
+
+    function menuItem(text: string): HTMLButtonElement | undefined {
+        (fixture.nativeElement.querySelector('td.actions-column button') as HTMLButtonElement).click();
+        fixture.detectChanges();
+        tick();
+        return Array.from(document.querySelectorAll('.mat-mdc-menu-item'))
+            .find(i => i.textContent?.includes(text)) as HTMLButtonElement | undefined;
+    }
+
+    it('opens the imports of a type from its menu, filtered by its id and named in the chip', fakeAsync(() => {
+        init();
+        const item = menuItem('Show imports');
+        expect(item).toBeDefined();
+        item!.click();
+        discardPeriodicTasks();
+
+        expect(router.navigate).toHaveBeenCalledWith(['imports/instances'], {
+            queryParams: { 'import-type-id': 'type-1', 'import-type-name': 'Weather' },
+        });
+    }));
+
+    it('offers no imports of a type without the right to read imports', fakeAsync(() => {
+        init(undefined, undefined, false);
+        expect(menuItem('Show imports')).toBeUndefined();
+        discardPeriodicTasks();
     }));
 });
