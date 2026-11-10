@@ -32,7 +32,10 @@ import {
     DeviceTypeProtocolSegmentModel,
     DeviceTypeServiceGroupModel,
     DeviceTypeServiceModel,
+    DEPRECATED_DEVICE_TYPE_ATTRIBUTE,
+    DEVICE_TYPE_FLAG_ATTRIBUTES,
     functionTypes, senergyConnectorLocalIdConstraint,
+    UNFINISHED_DEVICE_TYPE_ATTRIBUTE,
 } from '../shared/device-type.model';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
@@ -124,7 +127,7 @@ export class DeviceTypesComponent implements OnInit {
     userHasEditAuthorization = this.deviceTypeService.userHasUpdateAuthorization();
 
     timeAttributeKey = 'senergy/time_path';
-    knownDTAttributes = ['senergy/canary-device-type', 'senergy/snowflake-canary-device-type', 'senergy/local-mqtt', 'senergy/zigbee-dc', 'senergy/zigbee-vendor', 'senergy/zigbee-model', 'senergy/zwave-dc', 'senergy/zwave-type-mapping-key', 'senergy/mqtt-generate-services', 'wmbus/driver'];
+    knownDTAttributes = ['senergy/canary-device-type', 'senergy/snowflake-canary-device-type', 'senergy/local-mqtt', 'senergy/zigbee-dc', 'senergy/zigbee-vendor', 'senergy/zigbee-model', 'senergy/zwave-dc', 'senergy/zwave-type-mapping-key', 'senergy/mqtt-generate-services', 'wmbus/driver', DEPRECATED_DEVICE_TYPE_ATTRIBUTE, UNFINISHED_DEVICE_TYPE_ATTRIBUTE];
     knownServiceAttributes = ['senergy/local-mqtt/event-topic-tmpl', 'senergy/local-mqtt/cmd-topic-tmpl', 'senergy/local-mqtt/resp-topic-tmpl', 'senergy/time_path', 'json-unwrap-input', 'json-unwrap-output', 'mgw-service-selection-condition'];
 
     constructor() {
@@ -574,7 +577,7 @@ export class DeviceTypesComponent implements OnInit {
     private initAttrFormGroup(deviceType: DeviceTypeModel) {
         this.attrFormGroup = this._formBuilder.group({
             attributes: this._formBuilder.array(
-                deviceType.attributes ? deviceType.attributes.map((elem: Attribute) => this.createAttrGroup(elem)) : [],
+                deviceType.attributes ? deviceType.attributes.map((elem: Attribute) => this.withFlagDefault(this.createAttrGroup(elem))) : [],
                 Validators.required,
             ),
         });
@@ -928,7 +931,18 @@ export class DeviceTypesComponent implements OnInit {
 
     addDeviceTypeAttr() {
         const formArray = this.attrFormGroup.controls['attributes'] as FormArray;
-        formArray.push(this.createAttrGroup({ origin: 'web-ui' } as Attribute));
+        formArray.push(this.withFlagDefault(this.createAttrGroup({ origin: 'web-ui' } as Attribute)));
+    }
+
+    /** Fills in "true" when a flag attribute becomes the key of a row that has no value yet. */
+    private withFlagDefault(group: FormGroup): FormGroup {
+        group.get('key')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((key: string) => {
+            const value = group.get('value');
+            if (DEVICE_TYPE_FLAG_ATTRIBUTES.includes(key) && !value?.value) {
+                value?.setValue('true');
+            }
+        });
+        return group;
     }
 
     removeServiceAttr(service: AbstractControl, i: number) {

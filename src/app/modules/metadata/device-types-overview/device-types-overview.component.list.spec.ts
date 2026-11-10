@@ -38,8 +38,8 @@ describe('DeviceTypesOverviewComponent list', () => {
     const instancesDialog = jasmine.createSpyObj<DeviceInstancesDialogService>('DeviceInstancesDialogService', ['openDeviceCreateDialog']);
     const plug: DeviceTypeModel = { id: 'urn:infai:ses:device-type:plug', name: 'Plug', description: '', services: [], device_class_id: 'urn:infai:ses:device-class:lamp' };
 
-    function init(rights = { update: true, delete: true, create: true }) {
-        service.getDeviceTypes.and.returnValue(of({ result: [plug], total: 1 }));
+    function init(rights = { update: true, delete: true, create: true }, deviceTypes: DeviceTypeModel[] = [plug]) {
+        service.getDeviceTypes.and.returnValue(of({ result: deviceTypes, total: deviceTypes.length }));
         service.getDeviceClasses.and.returnValue(of([]));
         service.userHasUpdateAuthorization.and.returnValue(rights.update);
         service.userHasDeleteAuthorization.and.returnValue(rights.delete);
@@ -107,5 +107,25 @@ describe('DeviceTypesOverviewComponent list', () => {
 
         expect(component.deviceClassName(plug.device_class_id)).toBe('Lamp');
         expect(component.deviceClassName('unknown')).toBe('');
+    }));
+
+    it('marks deprecated and unfinished device types behind their name', fakeAsync(() => {
+        const old: DeviceTypeModel = { ...plug, id: 'urn:infai:ses:device-type:old', name: 'Old', attributes: [{ key: 'deprecated', value: 'true', origin: '' }] };
+        const generated: DeviceTypeModel = { ...plug, id: 'urn:infai:ses:device-type:gen', name: 'Generated', attributes: [{ key: 'unfinished', value: 'true', origin: '' }] };
+        const notFlagged: DeviceTypeModel = { ...plug, id: 'urn:infai:ses:device-type:no', name: 'No', attributes: [{ key: 'deprecated', value: 'false', origin: '' }] };
+        init(undefined, [plug, old, generated, notFlagged]);
+        discardPeriodicTasks();
+
+        const chips = (name: string) => {
+            const cell = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('td.name-cell')).find(c => c.textContent?.trim().startsWith(name));
+            return Array.from<HTMLElement>(cell?.querySelectorAll('.name-chip') ?? []).map(c => c.textContent?.trim());
+        };
+        expect(chips('Plug')).toEqual([]);
+        expect(chips('Old')).toEqual(['Deprecated']);
+        expect(chips('Generated')).toEqual(['Unfinished']);
+        expect(chips('No')).toEqual([]);
+
+        const greyed = Array.from<HTMLElement>(fixture.nativeElement.querySelectorAll('tr.deprecated td.name-cell')).map(c => c.textContent?.trim().split(/\s+/)[0]);
+        expect(greyed).toEqual(['Old']);
     }));
 });

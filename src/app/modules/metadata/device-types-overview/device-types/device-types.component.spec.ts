@@ -520,6 +520,24 @@ describe('DeviceTypesComponent', () => {
         );
 
         it(
+            'suggests the flag attributes and fills in true when one is picked, but keeps a value already there',
+            waitForAsync(() => {
+                init('device_id_4711', 'edit', true, [{ key: 'senergy/zigbee-vendor', value: 'Acme', origin: 'web-ui' }]);
+                expect(component.knownDTAttributes).toContain('deprecated');
+                expect(component.knownDTAttributes).toContain('unfinished');
+
+                component.addDeviceTypeAttr();
+                const added = component.deviceTypeAttributes.at(1);
+                added.get('key')?.setValue('unfinished');
+                expect(added.get('value')?.value).toBe('true');
+
+                const existing = component.deviceTypeAttributes.at(0);
+                existing.get('key')?.setValue('deprecated');
+                expect(existing.get('value')?.value).toBe('Acme');
+            }),
+        );
+
+        it(
             'disables the save button while saving is blocked',
             waitForAsync(async () => {
                 init('device_id_4711', 'edit');

@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/* A deprecated device type is greyed out: the background of an inactive device and muted text. */
+.deprecated {
+    background-color: var(--mat-sys-surface-container-high);
+}
+
+.deprecated:hover {
+    background-color: var(--mat-sys-surface-container-highest);
+}
+
+.deprecated td {
+    color: var(--mat-sys-on-surface-variant);
+}
+
 .count-column {
     width: 120px;
 }

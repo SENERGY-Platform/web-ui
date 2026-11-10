@@ -24,7 +24,8 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { bulkDelete, confirmDelete, countLabel, everyTrue } from '../../../core/services/delete-flows';
 import { Router } from '@angular/router';
 import { DeviceInstancesDialogService } from '../../devices/device-instances/shared/device-instances-dialog.service';
-import { DeviceTypeDeviceClassModel, DeviceTypeModel } from './shared/device-type.model';
+import { DEPRECATED_DEVICE_TYPE_ATTRIBUTE, DeviceTypeDeviceClassModel, DeviceTypeModel, deviceTypeHasFlag, UNFINISHED_DEVICE_TYPE_ATTRIBUTE } from './shared/device-type.model';
+import { MatTooltip } from '@angular/material/tooltip';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { Sort, MatSort, MatSortHeader } from '@angular/material/sort';
 import { ListSelection } from 'src/app/core/classes/list-selection';
@@ -49,7 +50,7 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
     templateUrl: './device-types-overview.component.html',
     styleUrls: ['./device-types-overview.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective]
+    imports: [PageHeaderComponent, ListToolbarComponent, EmptyStateComponent, SpinnerComponent, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, MatButton, MatIconButton, MatIcon, MatMenu, MatMenuItem, MatMenuTrigger, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, KeepPageInRangeDirective, MatTooltip]
 })
 export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
     private searchbarService = inject(SearchbarService);
@@ -104,6 +105,14 @@ export class DeviceTypesOverviewComponent implements OnInit, AfterViewInit {
             'services',
             'actions',
         ];
+    }
+
+    isDeprecated(deviceType: DeviceTypeModel): boolean {
+        return deviceTypeHasFlag(deviceType, DEPRECATED_DEVICE_TYPE_ATTRIBUTE);
+    }
+
+    isUnfinished(deviceType: DeviceTypeModel): boolean {
+        return deviceTypeHasFlag(deviceType, UNFINISHED_DEVICE_TYPE_ATTRIBUTE);
     }
 
     /** Row click and menu entry: the one device type page, editable with the update right. */

@@ -65,7 +65,15 @@
 
         <ng-container matColumnDef="name">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let deviceType" class="name-cell">{{deviceType.name}}</td>
+          <td mat-cell *matCellDef="let deviceType" class="name-cell">
+            {{deviceType.name}}
+            @if (isDeprecated(deviceType)) {
+              <span class="type-chip name-chip" matTooltip="Replaced by another device type, not meant for new devices">Deprecated</span>
+            }
+            @if (isUnfinished(deviceType)) {
+              <span class="status-chip warning name-chip" matTooltip="Not completed yet, its services may lack functions and characteristics">Unfinished</span>
+            }
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="description">
@@ -110,7 +118,8 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let deviceType; columns: displayedColumns;" class="clickable-row" (click)="openDeviceType(deviceType)"></tr>
+        <tr mat-row *matRowDef="let deviceType; columns: displayedColumns;" class="clickable-row"
+          [class.deprecated]="isDeprecated(deviceType)" (click)="openDeviceType(deviceType)"></tr>
       </table>
     </div>
 

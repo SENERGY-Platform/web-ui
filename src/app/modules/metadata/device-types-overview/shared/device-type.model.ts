@@ -29,6 +29,19 @@ export interface DeviceTypeModel {
     device_class_id: string;
 }
 
+/** Device type attribute with value "true": another device type replaces this one. */
+export const DEPRECATED_DEVICE_TYPE_ATTRIBUTE = 'deprecated';
+
+/** Device type attribute with value "true": the device type still needs manual completion, as one a connector generated. */
+export const UNFINISHED_DEVICE_TYPE_ATTRIBUTE = 'unfinished';
+
+/** Attributes that mark a device type and only take the value "true". */
+export const DEVICE_TYPE_FLAG_ATTRIBUTES = [DEPRECATED_DEVICE_TYPE_ATTRIBUTE, UNFINISHED_DEVICE_TYPE_ATTRIBUTE];
+
+export function deviceTypeHasFlag(deviceType: Pick<DeviceTypeModel, 'attributes'>, key: string): boolean {
+    return deviceType.attributes?.some(a => a.key === key && a.value === 'true') ?? false;
+}
+
 export interface DeviceTypeServiceGroupModel {
     key: string;
     name: string;
