@@ -365,7 +365,7 @@ export class DeviceInstancesReplaceDialogComponent implements OnInit {
       }))),
 
       // get selectables with criteria list
-      concatMap(_ => this.deviceInstancesService.getDeviceSelections(criteria, false)),
+      concatMap(_ => this.deviceInstancesService.getDeviceSelections(criteria)),
       map((selectables: DeviceSelectablesModel[]) => {
         const devicetypeIds = selectables.map(s => s.device.device_type_id);
         this.filteredDeviceTypes = this.deviceTypes.filter(dt => devicetypeIds.includes(dt.id));

@@ -156,7 +156,7 @@ export class DataTableHelperService {
         }
         const filter = [{ function_id: functionId, aspect_id: aspectId }];
 
-        return this.deviceInstancesService.getDeviceSelections(filter, true).pipe(
+        return this.deviceInstancesService.getDeviceSelections(filter).pipe(
             map((devices) => {
                 this.deviceInstancesCache.set(key, devices);
                 return devices;

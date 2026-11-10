@@ -23,7 +23,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { environment } from '../../../../../environments/environment';
-import { Attribute, DeviceInstanceModel } from './device-instances.model';
+import { Attribute, DeviceInstanceModel, DeviceSelectablesFullModel } from './device-instances.model';
 
 describe('DeviceInstancesService', () => {
     let service: DeviceInstancesService;
@@ -46,6 +46,52 @@ describe('DeviceInstancesService', () => {
         }).toThrowError('expected urn:infai:ses:device as prefix');
         expect(service.convertToShortId('')).toBe('');
         expect(service.convertToShortId(undefined)).toBe('');
+    });
+
+    describe('asks device-selection for selectables with the criteria in the body', () => {
+        const criteria = [{ function_id: 'function-1', aspect_ids: ['aspect-1'] }];
+        const url = environment.deviceSelectionUrl + '/v2/query/selectables';
+        let httpMock: HttpTestingController;
+
+        beforeEach(() => {
+            httpMock = TestBed.inject(HttpTestingController);
+        });
+
+        afterEach(() => {
+            httpMock.verify();
+        });
+
+        it('for devices only', () => {
+            service.getDeviceSelections(criteria).subscribe();
+            const req = httpMock.expectOne((r) => r.url === url);
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual(criteria);
+            expect(req.request.params.keys()).toEqual(['include_devices']);
+            expect(req.request.params.get('include_devices')).toBe('true');
+            req.flush([]);
+        });
+
+        it('with groups and imports', () => {
+            service.getDeviceSelectionsFull(criteria).subscribe();
+            const req = httpMock.expectOne((r) => r.url === url);
+            expect(req.request.method).toBe('POST');
+            expect(req.request.body).toEqual(criteria);
+            expect(req.request.params.get('include_devices')).toBe('true');
+            expect(req.request.params.get('include_groups')).toBe('true');
+            expect(req.request.params.get('include_imports')).toBe('true');
+            req.flush([]);
+        });
+
+        it('turns the service path options into a map', () => {
+            let result: DeviceSelectablesFullModel[] = [];
+            service.getDeviceSelectionsFull(criteria, true, false).subscribe((r) => (result = r));
+            const req = httpMock.expectOne((r) => r.url === url);
+            expect(req.request.params.has('include_imports')).toBeFalse();
+            req.flush([{ device: { id: 'device-1' }, servicePathOptions: { 'service-1': [{ path: 'a.b', characteristicId: 'c' }] } }]);
+            const options = result[0].servicePathOptions;
+            expect(options instanceof Map).toBeTrue();
+            expect(options?.get('service-1') as unknown).toEqual([{ path: 'a.b', characteristicId: 'c' }]);
+        });
     });
 
     describe('does not write account default attributes back onto the device', () => {

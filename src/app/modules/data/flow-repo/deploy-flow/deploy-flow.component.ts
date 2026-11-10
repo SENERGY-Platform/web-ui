@@ -581,15 +581,12 @@ export class DeployFlowComponent implements OnInit {
             return of(this.selectables.get(key) || []);
         }
         return this.deviceInstanceService
-            .getDeviceSelectionsFull(
-                [
-                    {
-                        function_id: functionId,
-                        ...criteriaAspectFields(aspectIds),
-                    },
-                ],
-                true,
-            )
+            .getDeviceSelectionsFull([
+                {
+                    function_id: functionId,
+                    ...criteriaAspectFields(aspectIds),
+                },
+            ])
             .pipe(
                 map((selectables) => {
                     this.selectables.set(key, selectables);

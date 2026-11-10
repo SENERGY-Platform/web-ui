@@ -91,7 +91,7 @@ export class AcControlEditDialogComponent implements OnInit {
             interaction: 'request',
             device_class_id: environment.deviceClassThermostat
         }],
-        false, null, null, true, false).subscribe(r => {
+        true, false).subscribe(r => {
             this.selectables = r;
             this.form = this.fb.group({
                 name: [this.widget.name, Validators.required],

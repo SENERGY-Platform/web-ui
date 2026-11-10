@@ -340,24 +340,16 @@ export class DeviceInstancesService {
         );
     }
 
-    getDeviceSelections(
-        criteria: DeviceFilterCriteriaModel[],
-        completeServices: boolean,
-        protocolBlocklist?: string[] | null | undefined,
-        interactionFilter?: string | null | undefined,
-    ): Observable<DeviceSelectablesModel[]> {
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, true, false) as Observable<DeviceSelectablesModel[]>;
+    getDeviceSelections(criteria: DeviceFilterCriteriaModel[]): Observable<DeviceSelectablesModel[]> {
+        return this.getDeviceSelectionsInternal(criteria, false, false) as Observable<DeviceSelectablesModel[]>;
     }
 
     getDeviceSelectionsFull(
         criteria: DeviceFilterCriteriaModel[],
-        completeServices: boolean,
-        protocolBlocklist?: string[] | null | undefined,
-        interactionFilter?: string | null | undefined,
         includeGroups: boolean = true,
         includeImports: boolean = true,
     ): Observable<DeviceSelectablesFullModel[]> {
-        return this.getDeviceSelectionsInternal(criteria, completeServices, protocolBlocklist, interactionFilter, true, includeGroups, includeImports).pipe(
+        return this.getDeviceSelectionsInternal(criteria, includeGroups, includeImports).pipe(
             map((selectables) => {
                 selectables = selectables as DeviceSelectablesFullModel[];
                 selectables.forEach((s: any) => {
@@ -375,38 +367,24 @@ export class DeviceInstancesService {
         );
     }
 
+    /**
+     * The criteria go in the request body, so a long list cannot outgrow the URL. device-selection v2 always
+     * returns service path options and import types; complete_services, filter_protocols and filter_interaction
+     * are v1 parameters it does not read.
+     */
     private getDeviceSelectionsInternal(
         criteria: DeviceFilterCriteriaModel[],
-        completeServices: boolean,
-        protocolBlocklist?: string[] | null | undefined,
-        interactionFilter?: string | null | undefined,
-        includeDevices?: boolean,
-        includeGroups?: boolean,
-        includeImports?: boolean,
+        includeGroups: boolean,
+        includeImports: boolean,
     ): Observable<DeviceSelectablesFullModel[] | DeviceSelectablesModel[]> {
-        let path = '/v2/selectables';
-        if (completeServices) {
-            path += '?complete_services=true&';
-        } else {
-            path += '?';
+        let params = new HttpParams().set('include_devices', 'true');
+        if (includeGroups) {
+            params = params.set('include_groups', 'true');
         }
-        path += 'json=' + encodeURIComponent(JSON.stringify(criteria));
-        if (protocolBlocklist) {
-            path = path + '&filter_protocols=' + encodeURIComponent(protocolBlocklist.join(','));
+        if (includeImports) {
+            params = params.set('include_imports', 'true');
         }
-        if (interactionFilter) {
-            path = path + '&filter_interaction=' + encodeURIComponent(interactionFilter);
-        }
-        if (includeDevices === true) {
-            path += '&include_devices=true';
-        }
-        if (includeGroups === true) {
-            path += '&include_groups=true';
-        }
-        if (includeImports === true) {
-            path += '&include_imports=true';
-        }
-        return this.http.get<DeviceSelectablesModel[]>(environment.deviceSelectionUrl + path).pipe(
+        return this.http.post<DeviceSelectablesModel[]>(environment.deviceSelectionUrl + '/v2/query/selectables', criteria, { params }).pipe(
             map((resp) => resp || []),
             catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'getDeviceSelections', [])),
         );
