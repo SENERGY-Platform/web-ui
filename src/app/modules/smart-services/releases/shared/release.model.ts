@@ -20,6 +20,8 @@ export interface SmartServiceReleaseCreateModel {
     design_id: string;
     name: string;
     description: string;
+    /** on creation only: the current release the new one continues, from another design (SNRGY-4535) */
+    update_of?: string;
 }
 
 export interface SmartServiceReleaseModel extends SmartServiceReleaseCreateModel {

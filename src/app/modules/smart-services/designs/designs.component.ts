@@ -26,6 +26,8 @@ import { DialogsService } from '../../../core/services/dialogs.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { UtilService } from '../../../core/services/util.service';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
+import { openReleaseDesignDialog } from '../releases/dialog/release-design-dialog/release-design-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -61,6 +63,7 @@ export class SmartServiceDesignsComponent implements OnInit {
     private releaseService = inject(SmartServiceReleasesService);
     private snackBar = inject(MatSnackBar);
     private dialogsService = inject(DialogsService);
+    private dialog = inject(MatDialog);
     private sanitizer = inject(DomSanitizer);
     private utilService = inject(UtilService);
     private metadataExistenceService = inject(MetadataExistenceService);
@@ -162,13 +165,12 @@ export class SmartServiceDesignsComponent implements OnInit {
     }
 
     releaseDesign(design: SmartServiceDesignModel): void {
-        this.dialogsService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
-            .afterClosed()
-            .subscribe((result: {[key: string]: string} | null | undefined) => {
+        openReleaseDesignDialog(this.dialog, design)
+            .subscribe((result) => {
                 if (!result) {
                     return;
                 }
-                this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
+                this.releaseService.createRelease(result).subscribe(value => {
                     if(value) {
                         snackSuccess(this.snackBar, 'Release created.');
                     } else {

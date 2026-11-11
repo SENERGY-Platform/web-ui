@@ -28,6 +28,7 @@ import { MetadataExistenceService } from '../../metadata/shared/metadata-existen
 import { SmartServiceDesignsService } from '../designs/shared/designs.service';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { SmartServiceDesignerComponent } from './designer.component';
+import { ReleaseDesignDialogComponent } from '../releases/dialog/release-design-dialog/release-design-dialog.component';
 import { createSmartServiceModeler } from './smart-service-modeler';
 import { fetchText, mountModeler, MountedModeler, until } from '../../../../testing/bpmn-modeler';
 
@@ -39,6 +40,7 @@ describe('SmartServiceDesignerComponent load and save', () => {
     let createRelease: jasmine.Spy;
     let navigate: jasmine.Spy;
     let openInputDialog: jasmine.Spy;
+    let openDialog: jasmine.Spy;
     let snackBar: jasmine.SpyObj<any>;
     let xml: string;
 
@@ -49,15 +51,16 @@ describe('SmartServiceDesignerComponent load and save', () => {
         snackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
         createRelease = jasmine.createSpy('createRelease').and.returnValue(of({}));
         navigate = jasmine.createSpy('navigate');
-        openInputDialog = jasmine.createSpy('openInputDialog').and.callFake((title: string) => ({
-            afterClosed: () => of(title.startsWith('Release') ? { name: 'Release 1', description: 'released' } : { name: 'Params 2', description: 'saved' }),
-        }));
+        openInputDialog = jasmine.createSpy('openInputDialog').and.returnValue({ afterClosed: () => of({ name: 'Params 2', description: 'saved' }) });
         const designsService = { saveDesign, getDesign: () => of({ bpmn_xml: xml, name: 'Params', description: 'all parameters' }) };
         const releaseService = {
             createRelease,
             getExtendedRelease: () => of({ bpmn_xml: xml, name: 'Released', description: 'a release' }),
         };
         const dialogService = { openInputDialog };
+        openDialog = jasmine.createSpy('open').and.returnValue({
+            afterClosed: () => of({ design_id: 'design-1', name: 'Release 1', description: 'released', update_of: 'release-0' }),
+        });
         TestBed.configureTestingModule({
             providers: [
                 { provide: HttpClient, useValue: {} },
@@ -68,7 +71,7 @@ describe('SmartServiceDesignerComponent load and save', () => {
                 { provide: MatSnackBar, useValue: snackBar },
                 { provide: DialogsService, useValue: dialogService },
                 { provide: Router, useValue: { navigate } },
-                { provide: MatDialog, useValue: {} },
+                { provide: MatDialog, useValue: { open: openDialog } },
                 { provide: DesignerHelperService, useValue: {} },
                 { provide: DesignerDialogService, useValue: {} },
                 { provide: MetadataExistenceService, useValue: {} },
@@ -142,15 +145,15 @@ describe('SmartServiceDesignerComponent load and save', () => {
         await until(() => createRelease.calls.count() > 0);
 
         expect(saveDesign.calls.count()).toBe(1);
-        expect(openInputDialog.calls.argsFor(1)).toEqual(['Release Name and Description', { name: undefined, description: undefined }, ['name']]);
-        expect(createRelease).toHaveBeenCalledOnceWith({ design_id: 'design-1', name: 'Release 1', description: 'released' });
+        expect(openDialog).toHaveBeenCalledOnceWith(ReleaseDesignDialogComponent, jasmine.objectContaining({ data: { design: { id: 'design-1' } } }));
+        expect(createRelease).toHaveBeenCalledOnceWith({ design_id: 'design-1', name: 'Release 1', description: 'released', update_of: 'release-0' });
         expect(navigate).not.toHaveBeenCalled();
     });
 
     it('opens a newly saved design after the release dialog, also when no release is created', async () => {
         component.id = '';
         saveDesign.and.returnValue(of({ id: 'new-1', name: 'Params 2', description: 'saved' }));
-        openInputDialog.and.callFake((title: string) => ({ afterClosed: () => of(title.startsWith('Release') ? null : { name: 'Params 2', description: 'saved' }) }));
+        openDialog.and.returnValue({ afterClosed: () => of(null) });
         component.loadDesignDiagram('design-1');
         await until(() => !!element('StartEvent_1'));
 

@@ -39,6 +39,7 @@ import {
 } from './dialog/edit-smart-service-json-extraction-dialog/edit-smart-service-json-extraction-dialog.component';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
 import { SmartServiceExtendedReleaseModel } from '../releases/shared/release.model';
+import { openReleaseDesignDialog } from '../releases/dialog/release-design-dialog/release-design-dialog.component';
 import { ScriptEditModel } from '../../processes/designer/shared/designer-dialog.model';
 import { DesignerDialogService } from '../../processes/designer/shared/designer-dialog.service';
 import { DesignerHelperService } from '../../processes/designer/shared/designer-helper.service';
@@ -270,11 +271,10 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
     }
 
     releaseDesign(design: SmartServiceDesignModel, then: () => void): void {
-        this.dialogService.openInputDialog('Release Name and Description', {name: design.name, description: design.description}, ['name'])
-            .afterClosed()
-            .subscribe((result: {[key: string]: string} | null | undefined) => {
+        openReleaseDesignDialog(this.dialog, design)
+            .subscribe((result) => {
                 if (result) {
-                    this.releaseService.createRelease({design_id: design.id, name: result.name, description: result.description}).subscribe(value => {
+                    this.releaseService.createRelease(result).subscribe(value => {
                         if(value) {
                             snackSuccess(this.snackBar, 'Release created.');
                         } else {
