@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isTimerExpression } from './timer-expression';
 import { Injectable, inject } from '@angular/core';
 import {
     AbstractControl, FormArray, FormBuilder, FormControl,
@@ -509,7 +510,7 @@ export class DeploymentsConfigInitializerService {
 
     private getTimeEventValidator(): ValidatorFn {
         return (control: AbstractControl): ValidationErrors | null => {
-            if (control.value.type === 'timeDuration'){
+            if (control.value.type === 'timeDuration' && !isTimerExpression(control.value.type, control.value.time)){
                 const dur = duration(control.value.durationUnits);
                 if (durationAs(dur, 'seconds') < 5) {
                     return {durationLessThan5Seconds: {value: control.value}};

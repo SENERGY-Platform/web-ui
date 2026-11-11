@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isTimerExpression } from '../../shared/timer-expression';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { duration, durationToIsoString } from '../../../../../../core/time/iso-duration';
@@ -32,6 +33,11 @@ export class DeploymentsConfigTimeEventComponent {
     @Input() time_event: FormGroup = new FormGroup({});
 
     constructor() {}
+
+    /** the time is an expression the process evaluates, not one the dialog asks for (SNRGY-3350) */
+    get expression(): boolean {
+        return isTimerExpression(this.time_event.value?.type, this.time_event.value?.time);
+    }
 
     changeDuration(): void {
         const durationUnits = this.time_event.get('durationUnits') as FormGroup;

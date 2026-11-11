@@ -13,7 +13,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-@if (time_event.value.type === 'timeCycle') {
+@if (expression) {
+  <div class="deployments-config-time-event-container">
+    The time is the expression <code>{{time_event.value.time}}</code>, which the process evaluates when it reaches the timer.
+  </div>
+} @else if (time_event.value.type === 'timeCycle') {
   <div class="deployments-config-time-event-container" [formGroup]="time_event">
     <mat-form-field appearance="outline" class="full-width" color="accent">
       <mat-label>Cron</mat-label>
@@ -21,8 +25,7 @@
       <mat-error senergyError label="Cron"></mat-error>
     </mat-form-field>
   </div>
-}
-@if (time_event.value.type === 'timeDate') {
+} @else if (time_event.value.type === 'timeDate') {
   <div class="deployments-config-time-event-container" [formGroup]="time_event">
     <mat-form-field appearance="outline" class="full-width" color="accent">
       <mat-label>Date-Timestamp</mat-label>
@@ -30,8 +33,7 @@
       <mat-error senergyError label="Date-Timestamp"></mat-error>
     </mat-form-field>
   </div>
-}
-@if (time_event.value.type === 'timeDuration') {
+} @else if (time_event.value.type === 'timeDuration') {
   <div class="deployments-config-time-event-container" [formGroup]="time_event">
     @if (time_event.hasError('durationLessThan5Seconds')) {
       <mat-error>

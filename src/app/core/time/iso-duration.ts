@@ -121,6 +121,11 @@ function fromUnits(input: Record<string, any>): Duration {
     };
 }
 
+/** Whether text is a duration that duration() parses, ISO 8601 ("PT5S") or "d.hh:mm:ss", rather than other text it takes as zero. */
+export function isDurationText(text: string): boolean {
+    return aspNetRegex.test(text) || isoRegex.test(text);
+}
+
 /**
  * A duration from an ISO 8601 string ("P1DT2H"), a "d.hh:mm:ss" string, a number of milliseconds (or of the given
  * unit), or an object of units like { hours: 2 }. Text that is none of these is a zero duration, as with moment.
