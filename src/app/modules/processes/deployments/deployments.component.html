@@ -151,7 +151,7 @@
               }
               <button mat-menu-item (click)="navigateToMonitorSection(row, 0)"><mat-icon>play_circle_outline</mat-icon> Show running</button>
               <button mat-menu-item (click)="navigateToMonitorSection(row, 1)"><mat-icon>history</mat-icon> Show history</button>
-              <button mat-menu-item (click)="copyDeployment(row.id)"><mat-icon>content_copy</mat-icon> Copy deployment</button>
+              <button mat-menu-item (click)="copyDeployment(row.id, row.network_id)"><mat-icon>content_copy</mat-icon> Copy deployment</button>
               <button mat-menu-item (click)="copyEndpoint(row.id)"><mat-icon>link</mat-icon> Copy endpoint</button>
               @if (!row.network_id) {
                 <button mat-menu-item (click)="toggleDeploymentEnabled(row)">

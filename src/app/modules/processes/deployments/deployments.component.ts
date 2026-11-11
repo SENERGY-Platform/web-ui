@@ -389,8 +389,13 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.dialog.open(DeploymentsMissingDependenciesDialogComponent, dialogConfig);
     }
 
-    copyDeployment(deploymentId: string): void {
-        this.router.navigateByUrl('/processes/deployments/config?deploymentId=' + deploymentId);
+    /** opens the copy of a deployment, on the gateway of the deployment if it has one (SNRGY-3346) */
+    copyDeployment(deploymentId: string, networkId?: string): void {
+        const queryParams: { deploymentId: string; hubId?: string } = { deploymentId };
+        if (networkId) {
+            queryParams.hubId = networkId;
+        }
+        this.router.navigate(['/processes/deployments/config'], { queryParams });
     }
 
     removeDeploymentIdFilter(): void {

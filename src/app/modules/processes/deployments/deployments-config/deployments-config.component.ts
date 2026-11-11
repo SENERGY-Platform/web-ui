@@ -87,6 +87,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     processId: string | undefined;
     deploymentId: string | undefined;
+    /** the gateway a copied deployment runs on, preselected for the copy */
+    private requestedHubId: string | undefined;
     deployment: V2DeploymentsPreparedModel | null = null;
     deploymentFormGroup = this.deploymentsConfigInitializerService.initFormGroup({} as V2DeploymentsPreparedModel);
     flowList: FlowModel[] = [];
@@ -108,13 +110,6 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
 
     ngOnInit() {
         this.handlerList = this.flowList;
-        this.hubsService.listSyncNetworks().subscribe((result) => {
-            if (result && result.length > 0) {
-                this.hubList.push({ id: '', name: 'Platform', device_local_ids: null } as HubModel);
-                this.hubList.push(...result);
-            }
-        });
-        this.setDeployment();
         this.selectedHubForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value: HubModel) => {
             if (value && value.id && value.id !== '') {
                 this.handlerList = this.operatorImageList;
@@ -125,6 +120,24 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             }
             this.setDeployment();
         });
+        this.hubsService.listSyncNetworks().subscribe((result) => {
+            if (result && result.length > 0) {
+                this.hubList.push({ id: '', name: 'Platform', device_local_ids: null } as HubModel);
+                this.hubList.push(...result);
+            }
+            // a copy of a deployment of a gateway goes to the same gateway unless the user picks
+            // another one (SNRGY-3346)
+            const requested = this.hubList.find((hub) => this.requestedHubId && hub.id === this.requestedHubId);
+            if (requested) {
+                this.selectedHubForm.setValue(requested);
+            } else if (this.requestedHubId) {
+                // the gateway is gone or not shared any more: the copy starts out in the cloud
+                this.setDeployment();
+            }
+        });
+        if (!this.requestedHubId) {
+            this.setDeployment();
+        }
     }
 
     setDeployment() {
@@ -468,6 +481,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private getRouterParams(): void {
         this.processId = this.route.snapshot.queryParams.processId;
         this.deploymentId = this.route.snapshot.queryParams.deploymentId;
+        this.requestedHubId = this.route.snapshot.queryParams.hubId;
     }
 
     private static getOption(
