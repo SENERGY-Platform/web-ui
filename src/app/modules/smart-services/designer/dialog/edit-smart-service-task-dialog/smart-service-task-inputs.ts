@@ -68,6 +68,8 @@ export interface WatcherWorkerInfo {
         criteria: SmartServiceCriteria[];
     };
     request: GenericWatcherRequest;
+    /** id or IoT option of the watched device group, usually a placeholder of a start parameter */
+    device_group: string;
 }
 
 export const DEVICE_REPOSITORY_CREATE_DEVICE_GROUP_KEY = 'device_repository.create_device_group';
@@ -80,6 +82,7 @@ export const WATCHER_WATCH_INTERVAL_KEY = 'watcher.watch_interval';
 export const WATCHER_HASH_TYPE_KEY = 'watcher.hash_type';
 export const WATCHER_DEVICES_BY_CRITERIA_KEY = 'watcher.watch_devices_by_criteria';
 export const WATCHER_REQUEST_KEY = 'watcher.watch_request';
+export const WATCHER_DEVICE_GROUP_KEY = 'watcher.watch_device_group';
 export const WATCHER_MAINTENANCE_PRODUCER_INPUTS_PREFIX = 'watcher.maintenance_procedure_inputs.';
 
 export function newDeviceRepositoryWorkerInfo(): DeviceRepositoryWorkerInfo {
@@ -109,7 +112,8 @@ export function newWatcherWorkerInfo(): WatcherWorkerInfo {
             body: '',
             add_auth_token: false,
             header: { 'Accept-Charset': ['utf-8'] }
-        }
+        },
+        device_group: '',
     };
 }
 
@@ -273,6 +277,10 @@ export function applyWatcherInputs(info: WatcherWorkerInfo, inputs: SmartService
             }
             info.operation = 'watch_request';
         }
+        if (input.name === WATCHER_DEVICE_GROUP_KEY) {
+            info.device_group = input.value;
+            info.operation = 'device_group';
+        }
     });
 }
 
@@ -303,6 +311,10 @@ export function watcherWorkerInfoToInputs(info: WatcherWorkerInfo): SmartService
                 req.body = undefined;
             }
             result.push({ name: WATCHER_REQUEST_KEY, type: 'text', value: JSON.stringify(req) });
+            break;
+        }
+        case 'device_group': {
+            result.push({ name: WATCHER_DEVICE_GROUP_KEY, type: 'text', value: info.device_group });
             break;
         }
     }

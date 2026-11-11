@@ -743,6 +743,7 @@
               <mat-label>Watch Operation</mat-label>
               <mtx-select [(ngModel)]="watcherWorkerInfo.operation" appendTo=".ng-select-anchor">
                 <mtx-option value="devices_by_criteria">Watch Devices by Criteria</mtx-option>
+                <mtx-option value="device_group">Watch Device Group</mtx-option>
                 <mtx-option value="watch_request">Watch Generic Request</mtx-option>
               </mtx-select>
               <mat-error senergyError label="Watch Operation"></mat-error>
@@ -810,6 +811,37 @@
               <button mat-raised-button color="accent"
                 (click)="watcherWorkerInfo.devices_by_criteria.criteria = addCriteria(watcherWorkerInfo.devices_by_criteria.criteria)">Add
                 Criteria</button>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="watcherWorkerInfo.operation === 'device_group'">
+            <div>
+              <mat-form-field appearance="outline" color="accent" class="full-width">
+                <mat-label>Device Group</mat-label>
+                <input matInput [(ngModel)]="watcherWorkerInfo.device_group" #watcherDeviceGroupInput
+                  placeholder="urn:infai:ses:device-group:..."
+                  matTooltip="id of a device group or an IoT parameter that selects one; the engine reads the group with the token of the owner and starts the maintenance procedure when its devices change, as device-repository announces it, and checks it once a day in case an announcement was missed">
+                <button mat-icon-button matSuffix [matMenuTriggerFor]="menuWatcherDeviceGroup">
+                  <mat-icon>data_object</mat-icon>
+                </button>
+                <mat-menu #menuWatcherDeviceGroup="matMenu">
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('iot_form_fields')"
+                    (click)="watcherWorkerInfo.device_group = appendParam(watcherWorkerInfo.device_group, param, watcherDeviceGroupInput)"
+                    [matTooltip]="param.name">
+                    IoT: {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('value_form_fields')"
+                    (click)="watcherWorkerInfo.device_group = appendParam(watcherWorkerInfo.device_group, param, watcherDeviceGroupInput)"
+                    [matTooltip]="param.name">
+                    Value: {{param.label || param.name}}
+                  </button>
+                  <button mat-menu-item *ngFor="let param of availableProcessVariables.get('uncategorized')"
+                    (click)="watcherWorkerInfo.device_group = appendParam(watcherWorkerInfo.device_group, param, watcherDeviceGroupInput)"
+                    [matTooltip]="param.name">
+                    {{param.label || param.name}}
+                  </button>
+                </mat-menu>
+                <mat-error senergyError label="Device Group"></mat-error>
+              </mat-form-field>
             </div>
           </ng-container>
           <ng-container *ngIf="watcherWorkerInfo.operation === 'watch_request'">

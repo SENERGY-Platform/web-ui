@@ -150,6 +150,28 @@ describe('smart-service-task-inputs', () => {
             expect(info.request.body).toBeUndefined();
         });
 
+        // the automation-engine reads the group itself and checks it on announcements of
+        // device-repository instead of a generic request (SNRGY-5132)
+        it('switches to the device group operation', () => {
+            const info = newWatcherWorkerInfo();
+            applyWatcherInputs(info, [text('watcher.watch_device_group', '${groups}')]);
+            expect(info.operation).toBe('device_group');
+            expect(info.device_group).toBe('${groups}');
+        });
+
+        it('writes the device group and no criteria for the device group operation', () => {
+            const info = newWatcherWorkerInfo();
+            info.operation = 'device_group';
+            info.device_group = '${groups}';
+            const inputs = watcherWorkerInfoToInputs(info);
+            expect(inputs.map((i) => [i.name, i.value])).toEqual([
+                ['watcher.maintenance_procedure', ''],
+                ['watcher.watch_interval', '1h'],
+                ['watcher.hash_type', 'deviceids'],
+                ['watcher.watch_device_group', '${groups}'],
+            ]);
+        });
+
         it('writes the criteria list for devices by criteria', () => {
             const info = newWatcherWorkerInfo();
             const inputs = watcherWorkerInfoToInputs(info);
