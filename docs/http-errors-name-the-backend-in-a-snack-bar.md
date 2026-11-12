@@ -65,3 +65,35 @@ Default to `handleError`. Switch a call to `handleErrorQuietly` when the user
 cannot act on the failure because nothing is wrong, and say why in the review.
 A failure that hides rights or data the user expected (permissions, history)
 keeps the snack bar, so the user learns why a button or chart is missing.
+
+## A denied endpoint reports as a broken backend
+
+The same snack bar appears when nothing is broken and the account simply may not
+call that endpoint. The text then reads `device-repo: request failed (403)` and
+sends the reader looking for an outage. It is the most common way a read-only
+account meets this handler, because the caller has a fallback and the view
+renders — the snack bar is the only visible effect.
+
+Two shapes produced it on the dashboard of an account that may read devices but
+write nothing:
+
+- A **query route**. The device repository answers both
+  `POST /query/functions` and `GET /functions?ids=…`; the floorplan asked over
+  the first, which an account without write rights is denied. Prefer the listing
+  route wherever one exists, and pass the ids rather than fetching the first
+  page of everything (`DeviceGroupsService.getFunctionListByIds`).
+- A **second service the account has no rights on**. The aspect nodes of a
+  device dialog are collected from the devices *and* from the import types, so a
+  method about device metadata reached the import repository
+  (`DeviceTypeService.listImportTypeCriteria`).
+
+For the second shape, gate the call on the right instead of reporting its
+failure: `importTypesService.userHasReadAuthorization()` answers from the
+authorizations Ladon prefetched at startup, which is the same source the sidenav
+uses to decide whether to show the section at all. A call that is skipped costs
+nothing and says nothing; a 403 that is caught and reported says the wrong
+thing.
+
+`handleErrorQuietly` is not the fix here. It hides the failure from the user but
+still spends the request, and for a whole class of accounts the request can
+never succeed.
