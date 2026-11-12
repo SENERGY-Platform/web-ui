@@ -227,6 +227,32 @@ export function nextSwitch(plan: HeatingPlan, nowUtcMs: number): HeatingSwitch |
     return null;
 }
 
+/**
+ * The latest instant up to `nowUtcMs` at which the target changed, within the past 8 days, or null for a constant plan.
+ * Candidates are built like in nextSwitch; one counts when the target a millisecond earlier was different.
+ */
+export function lastSwitch(plan: HeatingPlan, nowUtcMs: number): HeatingSwitch | null {
+    const candidates: number[] = [];
+    const first = Math.floor((nowUtcMs + berlinOffset(nowUtcMs)) / DAY) * DAY;
+    for (let day = -8; day <= 0; day++) {
+        for (const window of plan.windows) {
+            for (const bound of [minutesOf(window.from) as number, minutesOf(window.to) as number]) {
+                const local = first + day * DAY + bound * MINUTE;
+                candidates.push(local - HOUR, local - 2 * HOUR);
+            }
+        }
+    }
+    const year = new Date(nowUtcMs).getUTCFullYear();
+    candidates.push(lastSunday(year - 1, 2), lastSunday(year - 1, 9), lastSunday(year, 2), lastSunday(year, 9));
+    candidates.sort((a, b) => b - a);
+    for (const candidate of candidates) {
+        if (candidate <= nowUtcMs && target(plan, candidate) !== target(plan, candidate - 1)) {
+            return { at: candidate, temperature: target(plan, candidate) };
+        }
+    }
+    return null;
+}
+
 /** Segments of one local weekday from 00:00 to 24:00; neighbours with the same temperature are merged. */
 export function daySegments(plan: HeatingPlan, weekday: number): HeatingSegment[] {
     const bounds = new Set<number>([0, 1440]);
@@ -257,14 +283,57 @@ export function temperatureText(value: number): string {
     return value + ' °C';
 }
 
-/** "17 °C from 20:00"; with the weekday when the switch is on another local day, and with the date from 7 days on. */
-export function nextSwitchText(next: HeatingSwitch, nowUtcMs: number): string {
-    const parts = berlinParts(next.at);
+/** "in 3 h 10 min", "in 25 min", "in under a minute"; null when the switch is more than 24 hours ahead or not ahead. */
+export function countdownText(deltaMs: number): string | null {
+    if (deltaMs < 0 || deltaMs > DAY) {
+        return null;
+    }
+    const minutes = Math.floor(deltaMs / MINUTE);
+    if (minutes < 1) {
+        return 'in under a minute';
+    }
+    if (minutes < 60) {
+        return 'in ' + minutes + ' min';
+    }
+    const rest = minutes % 60;
+    return 'in ' + Math.floor(minutes / 60) + ' h' + (rest === 0 ? '' : ' ' + rest + ' min');
+}
+
+/** "22:00", with the weekday when the instant is on another local day than now, and with the date from 7 days on. */
+export function switchTimeText(atUtcMs: number, nowUtcMs: number): string {
+    const parts = berlinParts(atUtcMs);
     const ahead = parts.day - berlinParts(nowUtcMs).day;
     let day = ahead === 0 ? '' : WEEKDAY_NAMES[parts.weekday] + ' ';
     if (ahead >= 7) {
         const date = new Date(parts.day * DAY);
         day = WEEKDAY_NAMES[parts.weekday] + ' ' + date.getUTCDate() + ' ' + MONTH_NAMES[date.getUTCMonth()] + ' ';
     }
-    return temperatureText(next.temperature) + ' from ' + day + timeText(parts.minute);
+    return day + timeText(parts.minute);
+}
+
+/** "17 °C from 22:00, in 3 h 10 min"; the countdown is left out for a switch more than 24 hours ahead. */
+export function nextSwitchText(next: HeatingSwitch, nowUtcMs: number): string {
+    const countdown = countdownText(next.at - nowUtcMs);
+    return temperatureText(next.temperature) + ' from ' + switchTimeText(next.at, nowUtcMs) + (countdown === null ? '' : ', ' + countdown);
+}
+
+/** The ends of the one colour scale of both clients: blue at COLD_TEMPERATURE and below, orange at WARM_TEMPERATURE and above. */
+export const COLD_TEMPERATURE = 16;
+export const WARM_TEMPERATURE = 22;
+export const COLD_COLOR = '#64B5F6';
+export const WARM_COLOR = '#FF8A3D';
+
+/** Text colour that stays readable on every colour of the scale. */
+export const SEGMENT_TEXT_COLOR = '#1B1B1B';
+
+function channels(color: string): number[] {
+    return [1, 3, 5].map((start) => parseInt(color.slice(start, start + 2), 16));
+}
+
+/** Linear blend of the scale ends, clamped; "#rrggbb". */
+export function temperatureColor(temperature: number): string {
+    const fraction = Math.min(1, Math.max(0, (temperature - COLD_TEMPERATURE) / (WARM_TEMPERATURE - COLD_TEMPERATURE)));
+    const cold = channels(COLD_COLOR);
+    const warm = channels(WARM_COLOR);
+    return '#' + cold.map((value, i) => Math.round(value + (warm[i] - value) * fraction).toString(16).padStart(2, '0')).join('').toUpperCase();
 }

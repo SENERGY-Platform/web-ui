@@ -16,12 +16,15 @@
 
 import {
     HeatingPlanError,
+    countdownText,
     daySegments,
+    lastSwitch,
     nextSwitch,
     nextSwitchText,
     parseHeatingPlan,
     serialiseSchedule,
     target,
+    temperatureColor,
 } from './heating-schedule.plan';
 import { INVALID_VECTORS, VALID_VECTORS } from './heating-schedule.vectors.fixtures';
 
@@ -86,6 +89,48 @@ describe('heating schedule plan', () => {
         const monday = Date.parse('2026-11-09T05:00:00Z');
 
         expect(nextSwitchText(nextSwitch(plan, friday)!, friday)).toBe('20 °C from Mon 06:00');
-        expect(nextSwitchText(nextSwitch(plan, monday)!, monday)).toBe('17 °C from 20:00');
+        expect(nextSwitchText(nextSwitch(plan, monday)!, monday)).toBe('17 °C from 20:00, in 14 h');
+    });
+
+    it('adds the time left to the next switch within a day', () => {
+        const plan = parseHeatingPlan('{"windows":[{"weekdays":[0,1,2,3,4],"from":"06:00","to":"22:00","temperature":20}]}', 17);
+        const monday = Date.parse('2026-11-09T17:50:00Z');
+
+        expect(nextSwitchText(nextSwitch(plan, monday)!, monday)).toBe('17 °C from 22:00, in 3 h 10 min');
+    });
+
+    it('words the countdown by size and drops it beyond 24 hours', () => {
+        const minute = 60000;
+
+        expect(countdownText(59999)).toBe('in under a minute');
+        expect(countdownText(minute)).toBe('in 1 min');
+        expect(countdownText(25 * minute)).toBe('in 25 min');
+        expect(countdownText(190 * minute)).toBe('in 3 h 10 min');
+        expect(countdownText(180 * minute)).toBe('in 3 h');
+        expect(countdownText(24 * 60 * minute)).toBe('in 24 h');
+        expect(countdownText(24 * 60 * minute + 1)).toBeNull();
+        expect(countdownText(-1)).toBeNull();
+    });
+
+    it('finds the last switch, also exactly at the switch, and none for a constant plan', () => {
+        const plan = parseHeatingPlan('{"windows":[{"weekdays":[0,1,2,3,4],"from":"06:00","to":"20:00","temperature":20}]}', 17);
+        const tuesday = Date.parse('2026-11-10T09:00:00Z');
+        const exactly = Date.parse('2026-11-10T05:00:00Z');
+        const saturday = Date.parse('2026-11-14T12:00:00Z');
+
+        expect(new Date(lastSwitch(plan, tuesday)!.at).toISOString()).toBe('2026-11-10T05:00:00.000Z');
+        expect(lastSwitch(plan, tuesday)!.temperature).toBe(20);
+        expect(lastSwitch(plan, exactly)!.at).toBe(exactly);
+        expect(new Date(lastSwitch(plan, saturday)!.at).toISOString()).toBe('2026-11-13T19:00:00.000Z');
+        expect(lastSwitch(plan, saturday)!.temperature).toBe(17);
+        expect(lastSwitch(parseHeatingPlan('{"windows":[]}', 17), tuesday)).toBeNull();
+    });
+
+    it('colours linearly between blue at 16 and orange at 22 and clamps outside', () => {
+        expect(temperatureColor(16)).toBe('#64B5F6');
+        expect(temperatureColor(10)).toBe('#64B5F6');
+        expect(temperatureColor(22)).toBe('#FF8A3D');
+        expect(temperatureColor(30)).toBe('#FF8A3D');
+        expect(temperatureColor(19)).toBe('#B2A09A');
     });
 });

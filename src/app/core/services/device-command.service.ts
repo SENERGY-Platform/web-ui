@@ -46,6 +46,7 @@ export interface DeviceCommandModel {
     service_id?: string;
     aspect_id?: string; // deprecated: device-command folds it into aspect_ids
     aspect_ids?: string[]; // every aspect has to be served by the content variable
+    characteristic_id?: string; // the value is converted to this characteristic
     input?: any;
 }
 

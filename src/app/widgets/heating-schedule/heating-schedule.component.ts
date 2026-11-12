@@ -18,8 +18,13 @@ import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, inject } 
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { Subscription, interval } from 'rxjs';
+import { MatIcon } from '@angular/material/icon';
+import { Observable, Subscription, forkJoin, interval, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { DeviceCommandService } from 'src/app/core/services/device-command.service';
 import { dialogSize } from 'src/app/core/dialog-size';
+import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { SmartServiceInstanceModel } from 'src/app/modules/smart-services/instances/shared/instances.model';
@@ -33,15 +38,33 @@ import {
     HeatingPlan,
     HeatingPlanError,
     HeatingSegment,
+    SEGMENT_TEXT_COLOR,
     WEEKDAY_NAMES,
+    berlinParts,
+    daySegments,
+    lastSwitch,
     nextSwitch,
     nextSwitchText,
     parseSetback,
     target,
+    temperatureColor,
     temperatureText,
     timeText,
     weekSegments,
 } from './shared/heating-schedule.plan';
+import {
+    HeatingDeviceValues,
+    HeatingValueSource,
+    InstanceStatus,
+    instanceStatus,
+    lowBatteries,
+    manualOverride,
+    manualOverrideText,
+    matchValueSources,
+    meanRoom,
+    readCommands,
+    valuesFromResponses,
+} from './shared/heating-schedule.details';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
 import { HeatingThermostat, HeatingZoneDocument, ResolvedZone, parseThermostats, parseZoneDocument, resolveZones, zoneLabel } from './shared/heating-schedule.zones';
 
@@ -51,6 +74,8 @@ export interface BarSegment {
     width: number;
     color: string;
     title: string;
+    /** the temperature written into the segment, only when it is wide enough */
+    label: string | null;
 }
 
 export interface WeekRow {
@@ -65,10 +90,27 @@ export interface ZoneView {
     devices: string;
     devicesTitle: string;
     plan: HeatingPlan;
+    /** the thermostats of the zone */
+    members: HeatingThermostat[];
+    /** the measured mean when there is one, else the planned target */
     currentText: string;
+    /** "target 21 °C", only next to a measured value */
+    targetText: string | null;
     nextText: string | null;
+    todayRow: BarSegment[];
+    /** position of the current minute in percent of the day */
+    nowPercent: number;
+    /** index into `rows` of the current local weekday */
+    todayIndex: number;
+    expanded: boolean;
+    batteries: string[];
+    manualText: string | null;
     rows: WeekRow[];
 }
+
+/** From this width on a segment of the today row carries its temperature. */
+const LABEL_MIN_PERCENT = 8;
+const DEVICE_REFRESH_MS = 300000;
 
 const MAX_SHOWN_DEVICES = 3;
 
@@ -79,7 +121,7 @@ const LOAD_ERROR = 'The heating schedule could not be loaded.';
     templateUrl: './heating-schedule.component.html',
     styleUrls: ['./heating-schedule.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatCard, MatCardContent, MatButton, WidgetHeaderComponent, WidgetSpinnerComponent, WidgetFooterComponent]
+    imports: [MatCard, MatCardContent, MatButton, MatIcon, WidgetHeaderComponent, WidgetSpinnerComponent, WidgetFooterComponent]
 })
 export class HeatingScheduleComponent implements OnInit, OnDestroy {
     @Input() dashboardId = '';
@@ -96,6 +138,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     /** the stored schedule text when it cannot be read, shown next to the error */
     rawSchedule: string | null = null;
     instance: SmartServiceInstanceModel | null = null;
+    status: InstanceStatus | null = null;
     /** the stored schedule and the thermostats the editor starts from */
     document: HeatingZoneDocument | null = null;
     setback = 0;
@@ -104,14 +147,24 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     /** why the editor cannot take over the stored plan, if it cannot */
     editorNote: string | null = null;
     readonly hours = [0, 6, 12, 18, 24];
+    readonly segmentTextColor = SEGMENT_TEXT_COLOR;
 
     private initSubscription = new Subscription();
     private loadSubscription = new Subscription();
     private tickSubscription = new Subscription();
+    private deviceSubscription = new Subscription();
+    private deviceTickSubscription = new Subscription();
+    /** the sources are looked up once per load; the 5 minute refresh only reads */
+    private sources: HeatingValueSource[] | null = null;
+    private values = new Map<string, HeatingDeviceValues>();
+    private expandedByZone = new Map<number, boolean>();
     private dashboardService = inject(DashboardService);
     private instanceService = inject(SmartServiceInstanceService);
     private service = inject(HeatingScheduleService);
     private dialog = inject(MatDialog);
+    private deviceInstancesService = inject(DeviceInstancesService);
+    private deviceTypeService = inject(DeviceTypeService);
+    private deviceCommandService = inject(DeviceCommandService);
 
     ngOnInit(): void {
         this.initSubscription = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
@@ -121,12 +174,21 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         });
         // the current target and the next switch move with the clock, the stored plan does not
         this.tickSubscription = interval(60000).subscribe(() => this.updateNow());
+        this.deviceTickSubscription = interval(DEVICE_REFRESH_MS).subscribe(() => this.loadDeviceValues());
     }
 
     ngOnDestroy(): void {
         this.initSubscription.unsubscribe();
         this.loadSubscription.unsubscribe();
         this.tickSubscription.unsubscribe();
+        this.deviceSubscription.unsubscribe();
+        this.deviceTickSubscription.unsubscribe();
+    }
+
+    toggleWeek(index: number): void {
+        const zone = this.zones[index];
+        zone.expanded = !zone.expanded;
+        this.expandedByZone.set(index, zone.expanded);
     }
 
     get canEditSchedule(): boolean {
@@ -156,6 +218,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
 
     private fail(message: string): void {
         this.instance = null;
+        this.status = null;
         this.rawSchedule = null;
         this.document = null;
         this.zones = [];
@@ -165,6 +228,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
 
     private show(instance: SmartServiceInstanceModel): void {
         this.instance = instance;
+        this.status = instanceStatus(instance);
         const schedule = parameterValue(instance, HEATING_SCHEDULE_PARAMETER);
         const scheduleText = typeof schedule === 'string' ? schedule : '';
         this.rawSchedule = null;
@@ -184,13 +248,15 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         try {
             const setback = parseSetback(parameterValue(instance, HEATING_SETBACK_PARAMETER));
             const thermostats = parseThermostats(parameterValue(instance, HEATING_THERMOSTATS_PARAMETER));
-            this.zones = resolveZones(document.zones, setback, thermostats, document.legacy).map((zone) => zoneView(zone));
+            this.zones = resolveZones(document.zones, setback, thermostats, document.legacy).map((zone, index, all) => zoneView(zone, this.expandedByZone.get(index) ?? all.length === 1));
             this.document = document;
             this.setback = setback;
             this.thermostats = thermostats;
             this.loadError = null;
             this.editorNote = editorNote(document);
             this.updateNow();
+            this.sources = null;
+            this.loadDeviceValues();
         } catch (error) {
             this.rawSchedule = typeof schedule === 'string' ? schedule : JSON.stringify(schedule ?? null);
             this.loadError = 'The stored heating schedule cannot be read: ' + errorText(error);
@@ -203,12 +269,65 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         this.refreshing = false;
     }
 
+    /** Looks the value sources up once per load and reads them; a failure leaves the values as they were and the widget as it is. */
+    private loadDeviceValues(): void {
+        this.deviceSubscription.unsubscribe();
+        const ids = this.thermostats.map((thermostat) => thermostat.deviceId);
+        if (ids.length === 0) {
+            return;
+        }
+        const sources$: Observable<HeatingValueSource[]> = this.sources !== null ? of(this.sources) : this.lookupSources(ids);
+        this.deviceSubscription = sources$.pipe(
+            switchMap((sources) => {
+                this.sources = sources;
+                const commands = readCommands(sources);
+                if (commands.length === 0) {
+                    return of(new Map<string, HeatingDeviceValues>());
+                }
+                // runCommands answers [] when the request failed
+                return this.deviceCommandService.runCommands(commands, true).pipe(
+                    map((responses) => responses.length === commands.length ? valuesFromResponses(sources, responses) : this.values),
+                );
+            }),
+        ).subscribe({
+            next: (values) => {
+                this.values = values;
+                this.updateNow();
+            },
+            error: (error) => console.error('The heating device values could not be read', error),
+        });
+    }
+
+    private lookupSources(ids: string[]): Observable<HeatingValueSource[]> {
+        return this.deviceInstancesService.getDeviceListByIds(ids).pipe(
+            switchMap((devices) => {
+                const typeIds = [...new Set(devices.map((device) => device.device_type_id))];
+                return forkJoin([of(devices), typeIds.length === 0 ? of([]) : this.deviceTypeService.getDeviceTypeListByIds(typeIds)]);
+            }),
+            map(([devices, types]) => devices.flatMap((device) => {
+                const type = types.find((candidate) => candidate.id === device.device_type_id);
+                return type === undefined ? [] : matchValueSources(device.id, type);
+            })),
+        );
+    }
+
     private updateNow(): void {
         const now = Date.now();
+        const parts = berlinParts(now);
         for (const zone of this.zones) {
-            zone.currentText = temperatureText(target(zone.plan, now));
+            const planned = target(zone.plan, now);
+            const ids = zone.members.map((member) => member.deviceId);
+            const room = meanRoom(ids, this.values);
+            zone.currentText = temperatureText(room ?? planned);
+            zone.targetText = room === null ? null : 'target ' + temperatureText(planned);
             const next = nextSwitch(zone.plan, now);
             zone.nextText = next === null ? null : nextSwitchText(next, now);
+            zone.todayIndex = parts.weekday;
+            zone.nowPercent = (parts.minute / 1440) * 100;
+            zone.todayRow = daySegmentsBars(zone.plan, parts.weekday);
+            zone.batteries = lowBatteries(zone.members, this.values).map((low) => low.label + ' ' + low.percent + ' %');
+            const manual = manualOverride(planned, ids, this.values, now, lastSwitch(zone.plan, now));
+            zone.manualText = manual === null ? null : manualOverrideText(manual, next, now);
         }
     }
 
@@ -265,36 +384,45 @@ function deviceSummary(labels: string[]): string {
     return labels.slice(0, MAX_SHOWN_DEVICES).join(', ') + ' and ' + (labels.length - MAX_SHOWN_DEVICES) + ' more';
 }
 
-function zoneView(zone: ResolvedZone): ZoneView {
+function zoneView(zone: ResolvedZone, expanded: boolean): ZoneView {
     return {
         name: zone.name,
         devices: deviceSummary(zone.labels),
         devicesTitle: zone.labels.join(', '),
         plan: zone.plan,
+        members: zone.devices.map((deviceId, i) => ({ deviceId, label: zone.labels[i] })),
         currentText: '',
+        targetText: null,
         nextText: null,
+        todayRow: [],
+        nowPercent: 0,
+        todayIndex: 0,
+        expanded,
+        batteries: [],
+        manualText: null,
         rows: buildRows(zone.plan),
     };
 }
 
 function buildRows(plan: HeatingPlan): WeekRow[] {
-    const week = weekSegments(plan);
-    const temperatures = week.flat().map((segment) => segment.temperature);
-    const low = Math.min(...temperatures);
-    const high = Math.max(...temperatures);
-    return week.map((segments, day) => ({
+    return weekSegments(plan).map((segments, day) => ({
         name: WEEKDAY_NAMES[day],
-        segments: segments.map((segment) => barSegment(segment, low, high)),
+        segments: segments.map((segment) => barSegment(segment, false)),
     }));
 }
 
-/** Warmer segments get a stronger tint; a plan with one temperature only gets the middle tint. */
-function barSegment(segment: HeatingSegment, low: number, high: number): BarSegment {
-    const strength = high === low ? 50 : 15 + (85 * (segment.temperature - low)) / (high - low);
+function daySegmentsBars(plan: HeatingPlan, weekday: number): BarSegment[] {
+    return daySegments(plan, weekday).map((segment) => barSegment(segment, true));
+}
+
+/** Colour by temperature on the scale shared with the app. */
+function barSegment(segment: HeatingSegment, labelled: boolean): BarSegment {
+    const width = ((segment.to - segment.from) / 1440) * 100;
     return {
         left: (segment.from / 1440) * 100,
-        width: ((segment.to - segment.from) / 1440) * 100,
-        color: 'color-mix(in srgb, var(--mat-sys-primary) ' + Math.round(strength) + '%, transparent)',
+        width,
+        color: temperatureColor(segment.temperature),
         title: timeText(segment.from) + '–' + timeText(segment.to) + ' ' + temperatureText(segment.temperature),
+        label: labelled && width >= LABEL_MIN_PERCENT ? segment.temperature + '°' : null,
     };
 }

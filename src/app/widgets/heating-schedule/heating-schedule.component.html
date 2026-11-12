@@ -34,40 +34,82 @@
           }
         }
 
-        @for (zone of zones; track $index) {
+        @if (status) {
+          <div class="status-row">
+            <span class="pill" [class]="'pill status-' + status.kind" [title]="status.title ?? ''">{{ status.text }}</span>
+          </div>
+        }
+
+        @for (zone of zones; track $index; let zoneIndex = $index) {
           <div class="zone">
             @if (document && !document.legacy) {
               <div class="zone-name">{{ zone.name }}</div>
               <div class="zone-devices" [title]="zone.devicesTitle">{{ zone.devices }}</div>
             }
+            @if (zone.batteries.length > 0) {
+              <div class="batteries">
+                @for (battery of zone.batteries; track battery) {
+                  <span class="battery"><mat-icon class="battery-icon" aria-hidden="true">battery_alert</mat-icon>{{ battery }}</span>
+                }
+              </div>
+            }
             <div class="now">
-              <div class="current">{{ zone.currentText }}</div>
+              <div class="current-row">
+                <div class="current">{{ zone.currentText }}</div>
+                @if (zone.targetText) {
+                  <div class="target">{{ zone.targetText }}</div>
+                }
+              </div>
               @if (zone.nextText) {
                 <div class="next">{{ zone.nextText }}</div>
               }
+              @if (zone.manualText) {
+                <span class="pill status-warning manual">{{ zone.manualText }}</span>
+              }
             </div>
 
-            <div class="week">
-              @for (row of zone.rows; track row.name) {
-                <div class="day">
-                  <span class="day-name">{{ row.name }}</span>
-                  <div class="bar">
-                    @for (segment of row.segments; track segment) {
-                      <div class="segment" [style.left.%]="segment.left" [style.width.%]="segment.width"
-                        [style.background-color]="segment.color" [title]="segment.title"></div>
+            <div class="day today">
+              <span class="day-name emphasized">Today</span>
+              <div class="bar bar-today">
+                @for (segment of zone.todayRow; track $index) {
+                  <div class="segment" [style.left.%]="segment.left" [style.width.%]="segment.width"
+                    [style.background-color]="segment.color" [style.color]="segmentTextColor" [title]="segment.title">{{ segment.label }}</div>
+                }
+                <div class="now-marker" [style.left.%]="zone.nowPercent"></div>
+              </div>
+            </div>
+
+            <button type="button" class="week-toggle" (click)="toggleWeek(zoneIndex)"
+              [attr.aria-expanded]="zone.expanded" [attr.aria-label]="zone.expanded ? 'Hide week' : 'Show week'">
+              <mat-icon aria-hidden="true">{{ zone.expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+
+            @if (zone.expanded) {
+              <div class="week">
+                @for (row of zone.rows; track row.name; let dayIndex = $index) {
+                  <div class="day">
+                    <span class="day-name" [class.emphasized]="dayIndex === zone.todayIndex">{{ row.name }}</span>
+                    <div class="bar">
+                      @for (segment of row.segments; track $index) {
+                        <div class="segment" [style.left.%]="segment.left" [style.width.%]="segment.width"
+                          [style.background-color]="segment.color" [title]="segment.title"></div>
+                      }
+                      @if (dayIndex === zone.todayIndex) {
+                        <div class="now-marker" [style.left.%]="zone.nowPercent"></div>
+                      }
+                    </div>
+                  </div>
+                }
+                <div class="day axis">
+                  <span class="day-name"></span>
+                  <div class="bar-axis">
+                    @for (hour of hours; track hour) {
+                      <span [style.left.%]="hour / 24 * 100">{{ hour }}</span>
                     }
                   </div>
                 </div>
-              }
-              <div class="day axis">
-                <span class="day-name"></span>
-                <div class="bar-axis">
-                  @for (hour of hours; track hour) {
-                    <span [style.left.%]="hour / 24 * 100">{{ hour }}</span>
-                  }
-                </div>
               </div>
-            </div>
+            }
           </div>
         }
 
@@ -75,9 +117,18 @@
           <div class="message">{{ editorNote }}</div>
         }
 
-        @if (canEditSchedule) {
+        @if (zones.length > 0 || canEditSchedule) {
           <div class="edit-row">
-            <button mat-stroked-button class="edit-schedule" (click)="editSchedule()">Edit schedule</button>
+            @if (canEditSchedule) {
+              <button mat-stroked-button class="edit-schedule" (click)="editSchedule()">Edit schedule</button>
+            }
+            @if (zones.length > 0) {
+              <div class="legend" aria-label="Colour scale from 16 to 22 °C">
+                <span>16 °C</span>
+                <span class="legend-strip"></span>
+                <span>22 °C</span>
+              </div>
+            }
           </div>
         }
       }

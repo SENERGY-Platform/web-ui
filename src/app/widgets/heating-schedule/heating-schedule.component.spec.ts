@@ -18,11 +18,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, of, throwError } from 'rxjs';
+import { DeviceCommandService } from 'src/app/core/services/device-command.service';
+import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
+import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
+import { DeviceInstanceModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
+import { DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
 import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.service';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { SmartServiceInstanceModel } from 'src/app/modules/smart-services/instances/shared/instances.model';
 import { SmartServiceInstanceService } from 'src/app/modules/smart-services/instances/shared/instances.service';
 import { HeatingScheduleComponent } from './heating-schedule.component';
+import { AIR_ASPECT, BATTERY_FUNCTION, TARGET_ASPECT, TEMPERATURE_FUNCTION } from './shared/heating-schedule.details';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
 
 describe('HeatingScheduleComponent', () => {
@@ -31,6 +37,9 @@ describe('HeatingScheduleComponent', () => {
     let instances: jasmine.SpyObj<SmartServiceInstanceService>;
     let dialog: jasmine.SpyObj<MatDialog>;
     let init: Subject<string>;
+    let devices: jasmine.SpyObj<DeviceInstancesService>;
+    let deviceTypes: jasmine.SpyObj<DeviceTypeService>;
+    let commands: jasmine.SpyObj<DeviceCommandService>;
 
     const configuredWidget = { id: 'w1', name: 'Heating', type: 'heating_schedule', properties: { heatingSchedule: { instanceId: 'inst-1' } } } as unknown as WidgetModel;
     const schedule = '{"windows":[{"weekdays":[0,1,2,3,4,5,6],"from":"00:00","to":"00:00","temperature":21}]}';
@@ -54,12 +63,21 @@ describe('HeatingScheduleComponent', () => {
         init = new Subject<string>();
         instances = jasmine.createSpyObj<SmartServiceInstanceService>('SmartServiceInstanceService', ['getInstance']);
         dialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+        devices = jasmine.createSpyObj<DeviceInstancesService>('DeviceInstancesService', ['getDeviceListByIds']);
+        deviceTypes = jasmine.createSpyObj<DeviceTypeService>('DeviceTypeService', ['getDeviceTypeListByIds']);
+        commands = jasmine.createSpyObj<DeviceCommandService>('DeviceCommandService', ['runCommands']);
+        devices.getDeviceListByIds.and.returnValue(of([]));
+        deviceTypes.getDeviceTypeListByIds.and.returnValue(of([]));
+        commands.runCommands.and.returnValue(of([]));
         await TestBed.configureTestingModule({
             imports: [HeatingScheduleComponent],
             providers: [
                 { provide: SmartServiceInstanceService, useValue: instances },
                 { provide: HeatingScheduleService, useValue: jasmine.createSpyObj('HeatingScheduleService', ['openEditDialog']) },
                 { provide: MatDialog, useValue: dialog },
+                { provide: DeviceInstancesService, useValue: devices },
+                { provide: DeviceTypeService, useValue: deviceTypes },
+                { provide: DeviceCommandService, useValue: commands },
                 { provide: DashboardService, useValue: { initWidgetObservable: init.asObservable() } },
             ],
         })
@@ -90,7 +108,7 @@ describe('HeatingScheduleComponent', () => {
         expect(instances.getInstance).toHaveBeenCalledWith('inst-1');
         expect(fixture.nativeElement.querySelector('.current').textContent).toContain('21 °C');
         expect(fixture.nativeElement.querySelector('.next')).toBeNull();
-        expect(fixture.nativeElement.querySelectorAll('.bar').length).toBe(7);
+        expect(fixture.nativeElement.querySelectorAll('.week .bar').length).toBe(7);
         expect(fixture.nativeElement.querySelector('.edit-schedule')).not.toBeNull();
     });
 
@@ -109,7 +127,10 @@ describe('HeatingScheduleComponent', () => {
         expect(zones[1].querySelector('.zone-name')!.textContent).toBe('Rest');
         expect(zones[1].querySelector('.zone-devices')!.textContent).toBe('Hall, Kitchen');
         expect(zones[1].querySelector('.current')!.textContent).toContain('17 °C');
-        expect(fixture.nativeElement.querySelectorAll('.bar').length).toBe(14);
+        expect(fixture.nativeElement.querySelectorAll('.week .bar').length).toBe(0);
+        zones.forEach((zone) => (zone.querySelector('.week-toggle') as HTMLElement).click());
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelectorAll('.week .bar').length).toBe(14);
     });
 
     it('leaves a zone without a selected thermostat out and shows a legacy plan without a zone name', () => {
@@ -136,9 +157,9 @@ describe('HeatingScheduleComponent', () => {
         init.next('w1');
         fixture.detectChanges();
 
-        const devices: HTMLElement = fixture.nativeElement.querySelectorAll('.zone-devices')[1];
-        expect(devices.textContent).toBe('Ta, Tc, Td and 1 more');
-        expect(devices.title).toBe('Ta, Tc, Td, Te');
+        const shown: HTMLElement = fixture.nativeElement.querySelectorAll('.zone-devices')[1];
+        expect(shown.textContent).toBe('Ta, Tc, Td and 1 more');
+        expect(shown.title).toBe('Ta, Tc, Td, Te');
     });
 
     it('shows a resolution error of the smart service and offers no editor', () => {
@@ -267,5 +288,112 @@ describe('HeatingScheduleComponent', () => {
 
         expect(dialog.open).toHaveBeenCalled();
         expect(instances.getInstance).toHaveBeenCalledWith('inst-1');
+    });
+
+    describe('details', () => {
+        const type = (id: string, ...variables: unknown[]) => ({
+            id,
+            services: [{ id: 's-' + id, outputs: variables.map((content_variable) => ({ content_variable })) }],
+        });
+        const variable = (function_id: string, aspect_ids: string[]) => ({ function_id, aspect_ids, is_void: false, serialization_options: [] });
+        const constant = (temperature: number) => '{"windows":[{"weekdays":[0,1,2,3,4,5,6],"from":"00:00","to":"00:00","temperature":' + temperature + '}]}';
+
+        /** Hall has room, set point and battery; the commands are answered in this order. */
+        function deviceValues(room: number, setPoint: number, battery: number): void {
+            devices.getDeviceListByIds.and.returnValue(of([{ id: 'urn:a', device_type_id: 'dt' }] as unknown as DeviceInstanceModel[]));
+            deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt',
+                variable(TEMPERATURE_FUNCTION, [AIR_ASPECT]), variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT]), variable(BATTERY_FUNCTION, ['urn:aspect:device'])) as unknown as DeviceTypeModel]));
+            commands.runCommands.and.returnValue(of([room, setPoint, battery].map((message) => ({ status_code: 200, message }))));
+        }
+
+        function load(scheduleText: string, instanceOverrides: Partial<SmartServiceInstanceModel> = {}): void {
+            instances.getInstance.and.returnValue(of({ ...instanceWith(scheduleText, 17, JSON.stringify([option('urn:a', 'Hall')])), ready: true, ...instanceOverrides } as SmartServiceInstanceModel));
+            component.widget = configuredWidget;
+            fixture.detectChanges();
+            init.next('w1');
+            fixture.detectChanges();
+        }
+
+        const text = (selector: string) => fixture.nativeElement.querySelector(selector)?.textContent?.trim() ?? null;
+
+        it('shows the instance status as error, starting or running', () => {
+            load(constant(21), { error: 'The service failed' });
+            expect(text('.status-error')).toBe('The service failed');
+
+            load(constant(21), { ready: false });
+            expect(text('.status-starting')).toBe('Starting');
+            expect(fixture.nativeElement.querySelector('.status-error')).toBeNull();
+
+            load(constant(21));
+            expect(text('.status-running')).toBe('Running');
+        });
+
+        it('shows the measured value big with the planned target beside it', () => {
+            deviceValues(21.3, 24, 80);
+            load(constant(24));
+
+            expect(text('.current')).toBe('21.3 °C');
+            expect(text('.target')).toBe('target 24 °C');
+            expect(fixture.nativeElement.querySelector('.batteries')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.manual')).toBeNull();
+        });
+
+        it('keeps the planned target big without a room value and shows no error for missing values', () => {
+            devices.getDeviceListByIds.and.returnValue(of([{ id: 'urn:a', device_type_id: 'dt' }] as unknown as DeviceInstanceModel[]));
+            deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt', variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT])) as unknown as DeviceTypeModel]));
+            commands.runCommands.and.returnValue(of([{ status_code: 200, message: 24 }]));
+            load(constant(24));
+
+            expect(text('.current')).toBe('24 °C');
+            expect(fixture.nativeElement.querySelector('.target')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.message.error')).toBeNull();
+        });
+
+        it('shows the widget as before when the device lookup or the batch fails', () => {
+            devices.getDeviceListByIds.and.returnValue(throwError(() => new Error('lookup')));
+            load(constant(24));
+            expect(text('.current')).toBe('24 °C');
+
+            devices.getDeviceListByIds.and.returnValue(of([{ id: 'urn:a', device_type_id: 'dt' }] as unknown as DeviceInstanceModel[]));
+            deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt', variable(TEMPERATURE_FUNCTION, [AIR_ASPECT])) as unknown as DeviceTypeModel]));
+            commands.runCommands.and.returnValue(of([]));
+            init.next('w1');
+            fixture.detectChanges();
+            expect(text('.current')).toBe('24 °C');
+        });
+
+        it('names a thermostat with a low battery', () => {
+            deviceValues(21, 24, 12);
+            load(constant(24));
+
+            expect(text('.battery')).toContain('Hall 12 %');
+        });
+
+        it('warns about a manual override without a next switch', () => {
+            deviceValues(21, 23, 80);
+            load(constant(24));
+
+            expect(text('.manual')).toBe('Manual 23 °C');
+        });
+
+        it('expands the week of a single zone and collapses it with several, and the toggle switches it', () => {
+            load(constant(21));
+            expect(fixture.nativeElement.querySelectorAll('.week .bar').length).toBe(7);
+            expect(fixture.nativeElement.querySelector('.week-toggle').getAttribute('aria-label')).toBe('Hide week');
+            expect(fixture.nativeElement.querySelectorAll('.week .now-marker').length).toBe(1);
+            expect(fixture.nativeElement.querySelectorAll('.bar-today .now-marker').length).toBe(1);
+
+            (fixture.nativeElement.querySelector('.week-toggle') as HTMLElement).click();
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('.week')).toBeNull();
+            expect(fixture.nativeElement.querySelector('.week-toggle').getAttribute('aria-label')).toBe('Show week');
+        });
+
+        it('shows the legend of the colour scale', () => {
+            load(constant(21));
+
+            expect(text('.legend')).toContain('16 °C');
+            expect(text('.legend')).toContain('22 °C');
+        });
     });
 });

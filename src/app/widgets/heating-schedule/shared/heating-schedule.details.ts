@@ -1,0 +1,206 @@
+/*
+ * Copyright 2026 InfAI (CC SES)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { DeviceCommandModel, DeviceCommandResponseModel } from 'src/app/core/services/device-command.service';
+import {
+    DeviceTypeContentVariableModel,
+    DeviceTypeModel,
+    contentVariableAspectIds,
+} from 'src/app/modules/metadata/device-types-overview/shared/device-type.model';
+import { SmartServiceInstanceModel } from 'src/app/modules/smart-services/instances/shared/instances.model';
+import { HeatingSwitch, switchTimeText, temperatureText } from './heating-schedule.plan';
+
+export type HeatingValueKind = 'room' | 'target' | 'battery';
+
+/** The service and variable that deliver one value of one device. */
+export interface HeatingValueSource {
+    deviceId: string;
+    kind: HeatingValueKind;
+    serviceId: string;
+    /** the aspect the command names; absent for the battery when the variable carries none */
+    aspectId?: string;
+}
+
+/** What a thermostat reports; a missing field is unavailable. */
+export interface HeatingDeviceValues {
+    room?: number;
+    target?: number;
+    battery?: number;
+}
+
+export const TEMPERATURE_FUNCTION = 'urn:infai:ses:measuring-function:d19ffeb0-877c-4611-951c-b3fc37d9b9ba';
+export const BATTERY_FUNCTION = 'urn:infai:ses:measuring-function:68dae5ce-a9ee-4487-8872-7943a94e2595';
+export const AIR_ASPECT = 'urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6';
+export const TARGET_ASPECT = 'urn:infai:ses:aspect:4f4188b6-f944-45fa-9429-15655f691397';
+export const CELSIUS_CHARACTERISTIC = 'urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a';
+export const PERCENT_CHARACTERISTIC = 'urn:infai:ses:characteristic:46f808f4-bb9e-4cc2-bd50-dc33ca74f273';
+
+export const LOW_BATTERY_PERCENT = 20;
+/** Tenths of a degree from which a device set point counts as deviating. */
+const OVERRIDE_TENTHS = 5;
+/** The device needs time to report the new set point after a planned switch. */
+const OVERRIDE_GRACE_MS = 10 * 60000;
+
+const KINDS: Array<{ kind: HeatingValueKind; functionId: string; aspectId?: string }> = [
+    { kind: 'room', functionId: TEMPERATURE_FUNCTION, aspectId: AIR_ASPECT },
+    { kind: 'target', functionId: TEMPERATURE_FUNCTION, aspectId: TARGET_ASPECT },
+    { kind: 'battery', functionId: BATTERY_FUNCTION },
+];
+
+/** The first variable, searched depth first through the sub variables, with the function and, when given, the aspect. */
+function findVariable(variable: DeviceTypeContentVariableModel | undefined, functionId: string, aspectId?: string): DeviceTypeContentVariableModel | null {
+    if (!variable) {
+        return null;
+    }
+    if (variable.function_id === functionId && (aspectId === undefined || contentVariableAspectIds(variable).includes(aspectId))) {
+        return variable;
+    }
+    for (const sub of variable.sub_content_variables ?? []) {
+        const found = findVariable(sub, functionId, aspectId);
+        if (found !== null) {
+            return found;
+        }
+    }
+    return null;
+}
+
+/** The sources of the values the device type can deliver; room and target differ only by aspect, so the aspect is matched. */
+export function matchValueSources(deviceId: string, deviceType: DeviceTypeModel): HeatingValueSource[] {
+    const sources: HeatingValueSource[] = [];
+    for (const wanted of KINDS) {
+        for (const service of deviceType.services ?? []) {
+            const variable = (service.outputs ?? []).map((output) => findVariable(output.content_variable, wanted.functionId, wanted.aspectId)).find((v) => v !== null);
+            if (variable) {
+                const aspectId = wanted.aspectId ?? contentVariableAspectIds(variable)[0];
+                sources.push({ deviceId, kind: wanted.kind, serviceId: service.id, ...(aspectId === undefined ? {} : { aspectId }) });
+                break;
+            }
+        }
+    }
+    return sources;
+}
+
+/** One read command per source; the characteristic makes device-command convert, for example Kelvin to Celsius. */
+export function readCommands(sources: HeatingValueSource[]): DeviceCommandModel[] {
+    return sources.map((source) => ({
+        function_id: source.kind === 'battery' ? BATTERY_FUNCTION : TEMPERATURE_FUNCTION,
+        device_id: source.deviceId,
+        service_id: source.serviceId,
+        ...(source.aspectId === undefined ? {} : { aspect_id: source.aspectId }),
+        characteristic_id: source.kind === 'battery' ? PERCENT_CHARACTERISTIC : CELSIUS_CHARACTERISTIC,
+    }));
+}
+
+function numeric(value: unknown): number | undefined {
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : undefined;
+    }
+    if (typeof value === 'string' && value.trim() !== '') {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+}
+
+/** Device id to values; an entry that is not 200 or not numeric leaves its value out. The responses are in the order of the commands. */
+export function valuesFromResponses(sources: HeatingValueSource[], responses: DeviceCommandResponseModel[]): Map<string, HeatingDeviceValues> {
+    const values = new Map<string, HeatingDeviceValues>();
+    sources.forEach((source, i) => {
+        const response = responses[i];
+        const value = response?.status_code === 200 ? numeric(response.message) : undefined;
+        if (value !== undefined) {
+            values.set(source.deviceId, { ...values.get(source.deviceId), [source.kind]: value });
+        }
+    });
+    return values;
+}
+
+/** Mean room temperature of the devices that report one, or null; rounded to one decimal. */
+export function meanRoom(deviceIds: string[], values: Map<string, HeatingDeviceValues>): number | null {
+    const rooms = deviceIds.map((id) => values.get(id)?.room).filter((room): room is number => room !== undefined);
+    if (rooms.length === 0) {
+        return null;
+    }
+    return Math.round((rooms.reduce((sum, room) => sum + room, 0) / rooms.length) * 10) / 10;
+}
+
+export interface LowBattery {
+    label: string;
+    percent: number;
+}
+
+/** The devices at or below the threshold, in the given order. */
+export function lowBatteries(devices: Array<{ deviceId: string; label: string }>, values: Map<string, HeatingDeviceValues>): LowBattery[] {
+    const low: LowBattery[] = [];
+    for (const device of devices) {
+        const battery = values.get(device.deviceId)?.battery;
+        if (battery !== undefined && battery <= LOW_BATTERY_PERCENT) {
+            low.push({ label: device.label, percent: Math.round(battery) });
+        }
+    }
+    return low;
+}
+
+export interface ManualOverride {
+    /** the deviating set point, or null when the devices deviate to different values */
+    temperature: number | null;
+}
+
+/**
+ * Set points of at least 0.5 degrees from the planned target mark a manual override, unless the last planned switch
+ * is less than 10 minutes ago. Compared in tenths so that 0.5 does not depend on float rounding.
+ */
+export function manualOverride(planned: number, deviceIds: string[], values: Map<string, HeatingDeviceValues>, nowUtcMs: number, lastSwitch: HeatingSwitch | null): ManualOverride | null {
+    if (lastSwitch !== null && nowUtcMs - lastSwitch.at <= OVERRIDE_GRACE_MS) {
+        return null;
+    }
+    const deviating = new Set<number>();
+    for (const id of deviceIds) {
+        const setPoint = values.get(id)?.target;
+        if (setPoint !== undefined && Math.abs(Math.round(setPoint * 10) - Math.round(planned * 10)) >= OVERRIDE_TENTHS) {
+            deviating.add(Math.round(setPoint * 10));
+        }
+    }
+    if (deviating.size === 0) {
+        return null;
+    }
+    return { temperature: deviating.size === 1 ? [...deviating][0] / 10 : null };
+}
+
+/** "Manual 23 °C until 22:00"; without the value when the devices differ, without the time when there is no next switch. */
+export function manualOverrideText(override: ManualOverride, next: HeatingSwitch | null, nowUtcMs: number): string {
+    return 'Manual' + (override.temperature === null ? '' : ' ' + temperatureText(override.temperature)) + (next === null ? '' : ' until ' + switchTimeText(next.at, nowUtcMs));
+}
+
+export type InstanceStatusKind = 'error' | 'starting' | 'running';
+
+export interface InstanceStatus {
+    kind: InstanceStatusKind;
+    text: string;
+    /** the full text when `text` is shortened */
+    title: string | null;
+}
+
+const MAX_ERROR_LENGTH = 60;
+
+/** An error wins over `ready`; a long error text is shortened and kept in full as the title. */
+export function instanceStatus(instance: Pick<SmartServiceInstanceModel, 'ready' | 'error'>): InstanceStatus {
+    if (instance.error) {
+        const long = instance.error.length > MAX_ERROR_LENGTH;
+        return { kind: 'error', text: long ? instance.error.slice(0, MAX_ERROR_LENGTH - 1).trimEnd() + '…' : instance.error, title: long ? instance.error : null };
+    }
+    return instance.ready === false ? { kind: 'starting', text: 'Starting', title: null } : { kind: 'running', text: 'Running', title: null };
+}

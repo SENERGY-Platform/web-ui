@@ -81,6 +81,11 @@ mat-card-content {
     position: absolute;
     top: 0;
     bottom: 0;
+    font-size: 0.75em;
+    line-height: 24px;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .bar-axis {
@@ -97,4 +102,122 @@ mat-card-content {
 
 .edit-row {
     margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.status-row {
+    margin-bottom: 8px;
+}
+
+.pill {
+    display: inline-block;
+    max-width: 100%;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.status-running {
+    background-color: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+}
+
+.status-starting {
+    background-color: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.status-error {
+    background-color: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+}
+
+.status-warning {
+    background-color: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+}
+
+.manual {
+    margin-top: 4px;
+}
+
+.batteries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 0.85em;
+    color: var(--mat-sys-tertiary);
+}
+
+.battery {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.battery-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+}
+
+.current-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.target {
+    opacity: 0.75;
+}
+
+.day-name.emphasized {
+    font-weight: 600;
+}
+
+.today .day-name {
+    width: 40px;
+}
+
+.bar-today {
+    height: 24px;
+}
+
+.now-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    margin-left: -1px;
+    background-color: var(--mat-sys-on-surface);
+}
+
+.week-toggle {
+    display: flex;
+    margin: 0 auto;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75em;
+}
+
+.legend-strip {
+    width: 64px;
+    height: 8px;
+    border-radius: 2px;
+    background: linear-gradient(to right, #64B5F6, #FF8A3D);
 }
