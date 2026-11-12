@@ -1,0 +1,91 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev server",
+      "detail": "ng serve on http://localhost:4200, after build-env.sh wrote src/assets/env.js. Leaves a server that already holds the port alone. Runs on node 22.23.3 from nvm when it is installed, because the Angular CLI refuses some newer versions; where that path does not exist the default node is used.",
+      "options": {
+        "env": {
+          "PATH": "${userHome}/.nvm/versions/node/v22.23.3/bin:${env:PATH}"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "group": "web-ui",
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ng",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(?:\u2718 \\[ERROR\\] )?(.*?)[\\(:](\\d+)[,:](\\d+)\\)?\\s*-?\\s*(error|warning)?\\s*(TS\\d+)?:?\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "code": 5,
+          "message": 6
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*(Changes detected|Building|Rebuilding).*",
+          "endsPattern": ".*(Local:\\s+http|Application bundle generation complete|Compiled successfully).*"
+        }
+      },
+      "type": "shell",
+      "command": "if curl -sfo /dev/null --max-time 2 http://localhost:4200/; then echo 'Local: http://localhost:4200/ is already served, nothing started'; else npm run start_dev; fi"
+    },
+    {
+      "label": "specs (watch)",
+      "detail": "Karma in a visible Chrome, kept running so a spec can be debugged. Runs on node 22.23.3 from nvm when it is installed, because the Angular CLI refuses some newer versions; where that path does not exist the default node is used.",
+      "type": "npm",
+      "script": "test:watch",
+      "options": {
+        "env": {
+          "PATH": "${userHome}/.nvm/versions/node/v22.23.3/bin:${env:PATH}"
+        }
+      },
+      "isBackground": true,
+      "presentation": {
+        "group": "web-ui",
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "karma",
+        "pattern": {
+          "regexp": "^\\s*(.*)\\s+FAILED$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*(Karma|Starting|Executed).*",
+          "endsPattern": ".*(Executed \\d+ of \\d+|Connected on socket).*"
+        }
+      }
+    },
+    {
+      "label": "typecheck",
+      "detail": "tsc and ngc without a build; ngc is the one that reads the templates. Runs on node 22.23.3 from nvm when it is installed, because the Angular CLI refuses some newer versions; where that path does not exist the default node is used.",
+      "type": "shell",
+      "command": "./node_modules/.bin/tsc --noEmit -p tsconfig.app.json && ./node_modules/.bin/ngc --noEmit -p tsconfig.app.json",
+      "options": {
+        "env": {
+          "PATH": "${userHome}/.nvm/versions/node/v22.23.3/bin:${env:PATH}"
+        }
+      },
+      "group": "build",
+      "presentation": {
+        "group": "web-ui",
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": "$tsc"
+    }
+  ]
+}

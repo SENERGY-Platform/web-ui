@@ -18,7 +18,8 @@
 *.sublime-workspace
 
 # IDE - VSCode
-.vscode
+# no bare `.vscode` here: git does not descend into an ignored directory, so the
+# exceptions below would never be reached and the shared configuration stay local
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
