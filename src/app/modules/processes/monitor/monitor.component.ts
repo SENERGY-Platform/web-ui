@@ -25,12 +25,13 @@ import { MonitorProcessModel } from './shared/monitor-process.model';
 import { ListSelection } from 'src/app/core/classes/list-selection';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
-import { ActivatedRoute, Navigation, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Navigation, ParamMap, Router, RouterLink } from '@angular/router';
 import { DeploymentsModel } from '../deployments/shared/deployments.model';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort, MatSortHeader, Sort, SortDirection } from '@angular/material/sort';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
+import { ProcessNetworkSelectionService } from '../shared/process-network-selection.service';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { LIST_DATE_FORMAT } from 'src/app/core/classes/list-date-format';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
@@ -74,6 +75,7 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     private router = inject(Router);
     private route = inject(ActivatedRoute);
     private hubsService = inject(NetworksService);
+    private networkSelection = inject(ProcessNetworkSelectionService);
     readonly dateFormat = LIST_DATE_FORMAT;
     preferencesService = inject(PreferencesService);
     private destroyRef = inject(DestroyRef);
@@ -112,6 +114,8 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
     private viewInitialized = false;
     private hubSelectionResolved = false;
     private tablesInitialized = false;
+    /** opened from a deployment or a smart service instance, whose instances the network of the session could hide */
+    private openedForTarget = false;
 
     hubList: HubModel[] = [];
     /** null lists the instances of the platform and of all hubs, ENGINE_CLOUD_NETWORK those of the platform, a hub id those of that hub */
@@ -135,10 +139,10 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         view.sortDirection = sort.direction;
         view.pageIndex = this.urlState.getPage();
 
-        this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
         this.businessKeyFilter = this.route.snapshot.queryParamMap.get('businessKey') || this.route.snapshot.queryParamMap.get('businesskey');
+        this.requestedHubId = this.requestedNetwork(this.route.snapshot.queryParamMap);
         this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-            const hubId = params.get('hubId');
+            const hubId = this.requestedNetwork(params);
             const businessKey = params.get('businessKey') || params.get('businesskey');
             const hubChanged = hubId !== this.requestedHubId;
             const businessKeyChanged = businessKey !== this.businessKeyFilter;
@@ -183,6 +187,8 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         this.networkFilter = networkFilter;
 
         if (updateQueryParam) {
+            // before the navigation, whose URL without hubId stands for this choice
+            this.networkSelection.network = networkFilter;
             this.requestedHubId = networkFilter;
             this.businessKeyFilter = null;
             this.router.navigate([], {
@@ -506,6 +512,7 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
                     businesskey?: string;
                 };
                 this.selectedDeployment = params.deployment;
+                this.openedForTarget = !!params.deployment || !!params.businesskey;
                 this.activeIndex = params.activeTab;
                 this.navigationTab = params.activeTab;
                 if (params.businesskey) {
@@ -529,6 +536,19 @@ export class ProcessMonitorComponent implements OnInit, AfterViewInit {
         this.tablesInitialized = true;
         this.initRunning();
         this.initFinished();
+    }
+
+    /**
+     * hubId of the URL; without one the network of the session, unless the view was opened for a target of its own:
+     * an instance by business key or the instances of a deployment, which another network would hide (SNRGY-3353)
+     */
+    private requestedNetwork(params: ParamMap): string | null {
+        const hubId = params.get('hubId');
+        if (hubId !== null) {
+            return hubId;
+        }
+        const target = params.get('businessKey') || params.get('businesskey') || this.openedForTarget;
+        return target ? null : this.networkSelection.network;
     }
 
     private applyNetworkSelectionFromQueryParam(): void {

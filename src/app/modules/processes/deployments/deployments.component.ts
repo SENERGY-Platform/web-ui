@@ -25,7 +25,7 @@ import { DeploymentsModel, DeploymentsOfflineReasonsModel } from './shared/deplo
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { ClipboardService } from 'ngx-clipboard';
 import { environment } from '../../../../environments/environment';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { DialogsService } from '../../../core/services/dialogs.service';
 import { DeploymentsMissingDependenciesDialogComponent } from './dialogs/deployments-missing-dependencies-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -33,6 +33,7 @@ import { CamundaVariable } from './shared/deployments-definition.model';
 import { DeploymentsStartParameterDialogComponent } from './dialogs/deployments-start-parameter-dialog.component';
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { NetworksService } from '../../devices/networks/shared/networks.service';
+import { ProcessNetworkSelectionService } from '../shared/process-network-selection.service';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -84,6 +85,7 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
     private dialogsService = inject(DialogsService);
     private dialog = inject(MatDialog);
     private hubsService = inject(NetworksService);
+    private networkSelection = inject(ProcessNetworkSelectionService);
     private metadataExistenceService = inject(MetadataExistenceService);
     private urlState = inject(UrlStateService);
     private destroyRef = inject(DestroyRef);
@@ -144,10 +146,10 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         }
         this.openingPage = this.urlState.getPage();
 
-        this.requestedHubId = this.route.snapshot.queryParamMap.get('hubId');
+        this.requestedHubId = this.requestedNetwork(this.route.snapshot.queryParamMap);
         this.deploymentIdFilter = this.route.snapshot.queryParamMap.get('deploymentId');
         this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-            const hubId = params.get('hubId');
+            const hubId = this.requestedNetwork(params);
             const deploymentId = params.get('deploymentId');
             const hubChanged = hubId !== this.requestedHubId;
             const deploymentChanged = deploymentId !== this.deploymentIdFilter;
@@ -260,6 +262,8 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
         this.networkFilter = networkFilter;
 
         if (updateQueryParam) {
+            // before the navigation, whose URL without hubId stands for this choice
+            this.networkSelection.network = networkFilter;
             this.requestedHubId = networkFilter;
             this.deploymentIdFilter = null;
             this.router.navigate([], {
@@ -461,6 +465,15 @@ export class ProcessDeploymentsComponent implements OnInit, AfterViewInit, OnDes
 
         this.searchInitialized = true;
         this.initSearchAndGetDevices();
+    }
+
+    /** hubId of the URL; without one the network of the session, unless the URL names a deployment (SNRGY-3353) */
+    private requestedNetwork(params: ParamMap): string | null {
+        const hubId = params.get('hubId');
+        if (hubId !== null) {
+            return hubId;
+        }
+        return params.get('deploymentId') ? null : this.networkSelection.network;
     }
 
     private applyNetworkSelectionFromQueryParam(): void {

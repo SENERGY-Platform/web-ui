@@ -28,6 +28,8 @@ import { NetworksService } from '../../devices/networks/shared/networks.service'
 import { PreferencesService } from '../../../core/services/preferences.service';
 import { MonitorProcessModel } from './shared/monitor-process.model';
 import { MonitorProcessTotalModel } from './shared/monitor-process-total.model';
+import { HubModel } from '../../devices/networks/shared/networks.model';
+import { ProcessNetworkSelectionService } from '../shared/process-network-selection.service';
 
 interface Request {
     filter: string;
@@ -44,6 +46,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
     let router: Router;
     let requests: Request[];
     let totals: { running: number; finished: number };
+    let hubs: HubModel[];
 
     const row = { id: 'p1', processDefinitionName: 'Washer', startTime: '2026-01-02T10:00:00Z', state: 'ACTIVE' } as MonitorProcessModel;
 
@@ -62,7 +65,7 @@ describe('ProcessMonitorComponent view state in the URL', () => {
                 provideRouter([]),
                 { provide: MonitorService, useValue: monitorService },
                 { provide: DialogsService, useValue: {} },
-                { provide: NetworksService, useValue: { listSyncNetworks: () => of([]) } },
+                { provide: NetworksService, useValue: { listSyncNetworks: () => of(hubs) } },
                 { provide: PreferencesService, useValue: { pageSize: 20 } },
                 { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
             ],
@@ -95,6 +98,43 @@ describe('ProcessMonitorComponent view state in the URL', () => {
 
     beforeEach(() => {
         totals = { running: 5, finished: 100 };
+        hubs = [];
+    });
+
+    // SNRGY-3353: the network chosen in another process view
+    describe('network of the session', () => {
+        const key = 'senergy.processes.network';
+        beforeEach(() => (hubs = [{ id: 'hub-1', name: 'MGW' } as HubModel]));
+        afterEach(() => sessionStorage.removeItem(key));
+
+        it('shows the network of the session when the URL names none', fakeAsync(() => {
+            sessionStorage.setItem(key, 'hub-1');
+            open('/');
+            expect(component.networkFilter).toBe('hub-1');
+        }));
+
+        it('opens a smart service instance on all networks', fakeAsync(() => {
+            sessionStorage.setItem(key, 'hub-1');
+            open('/?businessKey=b1');
+            expect(component.networkFilter).toBeNull();
+        }));
+
+        it('keeps a network chosen here for the next view', fakeAsync(() => {
+            open('/');
+            component.selectNetworkWithReload('hub-1');
+            settle();
+            expect(TestBed.inject(ProcessNetworkSelectionService).network).toBe('hub-1');
+            expect(component.networkFilter).toBe('hub-1');
+        }));
+
+        it('stays on all networks when they are chosen again', fakeAsync(() => {
+            sessionStorage.setItem(key, 'hub-1');
+            open('/');
+            component.selectNetworkWithReload(null);
+            settle();
+            expect(component.networkFilter).toBeNull();
+            expect(TestBed.inject(ProcessNetworkSelectionService).network).toBeNull();
+        }));
     });
 
     describe('page and sort of the tabs', () => {

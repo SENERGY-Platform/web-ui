@@ -36,6 +36,7 @@ import { NetworksService } from '../../devices/networks/shared/networks.service'
 import { HubModel } from '../../devices/networks/shared/networks.model';
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { UrlStateService } from '../../../core/services/url-state.service';
+import { ProcessNetworkSelectionService } from '../shared/process-network-selection.service';
 
 const deployment = (id: string, disabled?: boolean, networkId?: string): DeploymentsModel =>
     ({ id, name: 'name-' + id, definition_id: 'def-' + id, diagram: '<svg></svg>', online: true, disabled, network_id: networkId, deploymentTime: new Date(Date.UTC(2026, 0, 2, 10, 0)) }) as DeploymentsModel;
@@ -598,6 +599,42 @@ describe('ProcessDeploymentsComponent', () => {
             render();
             expect(firstChunks().map((args) => args[6])).toEqual(['cloud']);
             expect(navigate).not.toHaveBeenCalled();
+        });
+
+        // SNRGY-3353: the network chosen in another process view
+        describe('network of the session', () => {
+            const key = 'senergy.processes.network';
+            afterEach(() => sessionStorage.removeItem(key));
+            const remember = (network: string) => (TestBed.inject(ProcessNetworkSelectionService).network = network);
+
+            it('lists the network of the session when the URL names none', () => {
+                remember(hub.id);
+                render();
+                expect(component.networkFilter).toBe(hub.id);
+                expect(firstChunks().map((args) => args[6])).toEqual([hub.id]);
+            });
+
+            it('takes hubId of the URL over the network of the session', () => {
+                remember(hub.id);
+                routeParams['hubId'] = 'cloud';
+                render();
+                expect(firstChunks().map((args) => args[6])).toEqual(['cloud']);
+            });
+
+            it('opens a named deployment on all networks, wherever it runs', () => {
+                remember(hub.id);
+                routeParams['deploymentId'] = 'd1';
+                render();
+                expect(component.networkFilter).toBeNull();
+            });
+
+            it('remembers a chosen network for the other views, and all networks as well', () => {
+                render();
+                component.selectNetwork(hub.id);
+                expect(TestBed.inject(ProcessNetworkSelectionService).network).toBe(hub.id);
+                component.selectNetwork(null);
+                expect(TestBed.inject(ProcessNetworkSelectionService).network).toBeNull();
+            });
         });
 
         it('lists all networks when hubId names a hub that is gone', () => {
