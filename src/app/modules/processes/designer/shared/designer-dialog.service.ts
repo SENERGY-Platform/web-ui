@@ -161,6 +161,8 @@ export class DesignerDialogService {
 
     openProcessIoDialog(info: ProcessIoDesignerInfo): Observable<ProcessIoDesignerInfo | null> {
         const dialogConfig = new MatDialogConfig();
+        // without a size Material caps a dialog at 560px, narrower than its rows of fields
+        Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.data = { info };
         return this.dialog.open(ProcessIoDesignerDialogComponent, dialogConfig).afterClosed();
@@ -168,6 +170,8 @@ export class DesignerDialogService {
 
     openScriptEditorDialog(script: ScriptEditModel, variables: string[]): Observable<ScriptEditModel | undefined> {
         const dialogConfig = new MatDialogConfig();
+        // without a size Material caps a dialog at 560px, narrower than the editor needs
+        Object.assign(dialogConfig, dialogSize('xl'));
         dialogConfig.disableClose = false;
         dialogConfig.data = { script, variables };
         return this.dialog.open(ScriptEditorDialogComponent, dialogConfig).afterClosed();

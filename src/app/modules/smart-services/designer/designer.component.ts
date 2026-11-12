@@ -50,6 +50,19 @@ import { MatIcon } from '@angular/material/icon';
 import { PageHeaderComponent } from '../../../core/components/page-header/page-header.component';
 import { SpinnerComponent } from '../../../core/components/spinner/spinner.component';
 import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messages';
+import { DialogSize, dialogSize } from '../../../core/dialog-size';
+
+/**
+ * Config of the designer's own dialogs. Without a size Material caps a dialog at 560px, narrower than their fields;
+ * the task dialog holds forms and code editors side by side and gets the widest size.
+ */
+export function designerDialogConfig(size: DialogSize, data: unknown): MatDialogConfig {
+    const dialogConfig = new MatDialogConfig();
+    Object.assign(dialogConfig, dialogSize(size));
+    dialogConfig.disableClose = false;
+    dialogConfig.data = data;
+    return dialogConfig;
+}
 
 @Component({
     selector: 'senergy-smart-service-designer',
@@ -102,9 +115,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
 
             this.modeler.designerCallbacks = {
                 openTaskEditDialog(initInfo: SmartServiceTaskDescription, element: BpmnElement, callback: (info: SmartServiceTaskDescription) => void ) {
-                    const dialogConfig = new MatDialogConfig();
-                    dialogConfig.disableClose = false;
-                    dialogConfig.data = { info: initInfo, element };
+                    const dialogConfig = designerDialogConfig('xl', { info: initInfo, element });
                     const editDialogRef = dialog.open(EditSmartServiceTaskDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskDescription) => {
                         if (value) {
@@ -114,9 +125,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                 },
 
                 openExtractJsonFieldsDialog(initInfo: SmartServiceTaskInputOutputDescription, element: BpmnElement, callback: (info: SmartServiceTaskInputOutputDescription) => void ) {
-                    const dialogConfig = new MatDialogConfig();
-                    dialogConfig.disableClose = false;
-                    dialogConfig.data = { info: initInfo, element };
+                    const dialogConfig = designerDialogConfig('l', { info: initInfo, element });
                     const editDialogRef = dialog.open(EditSmartServiceJsonExtractionDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceTaskInputOutputDescription) => {
                         if (value) {
@@ -142,9 +151,7 @@ export class SmartServiceDesignerComponent implements OnInit, OnDestroy {
                 },
 
                 openSmartServiceInputsEditDialog(info: SmartServiceInputsDescription, element: BpmnElement, callback: (info2: SmartServiceInputsDescription) => void ) {
-                    const dialogConfig = new MatDialogConfig();
-                    dialogConfig.disableClose = false;
-                    dialogConfig.data = { info, element };
+                    const dialogConfig = designerDialogConfig('l', { info, element });
                     const editDialogRef = dialog.open(EditSmartServiceInputDialogComponent, dialogConfig);
                     editDialogRef.afterClosed().subscribe((value: SmartServiceInputsDescription) => {
                         if (value) {

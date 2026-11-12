@@ -27,10 +27,11 @@ import { DesignerHelperService } from '../../processes/designer/shared/designer-
 import { MetadataExistenceService } from '../../metadata/shared/metadata-existence.service';
 import { SmartServiceDesignsService } from '../designs/shared/designs.service';
 import { SmartServiceReleasesService } from '../releases/shared/release.service';
-import { SmartServiceDesignerComponent } from './designer.component';
+import { SmartServiceDesignerComponent, designerDialogConfig } from './designer.component';
 import { ReleaseDesignDialogComponent } from '../releases/dialog/release-design-dialog/release-design-dialog.component';
 import { createSmartServiceModeler } from './smart-service-modeler';
 import { fetchText, mountModeler, MountedModeler, until } from '../../../../testing/bpmn-modeler';
+import { DIALOG_WIDTHS } from '../../../core/dialog-size';
 
 /* Runs the component's own load and save code against the real modeler, see the process designer spec. */
 describe('SmartServiceDesignerComponent load and save', () => {
@@ -222,5 +223,16 @@ describe('SmartServiceDesignerComponent load and save', () => {
 
         expect(snackBar.open).toHaveBeenCalledWith('Error SVG! Error: broken', 'close', { panelClass: 'snack-bar-error' });
         expect(saveDesign).not.toHaveBeenCalled();
+    });
+});
+
+// Without a size Material caps a dialog at 560px, which left the task dialog small and let the fields of the
+// json extraction and input dialogs stick out of it
+describe('SmartServiceDesignerComponent dialogs', () => {
+    it('open with the given width, within narrow screens', () => {
+        const config = designerDialogConfig('xl', { info: 'x' });
+        expect(config.width).toBe(DIALOG_WIDTHS.xl);
+        expect(config.maxWidth).toBe('95vw');
+        expect(config.data).toEqual({ info: 'x' });
     });
 });

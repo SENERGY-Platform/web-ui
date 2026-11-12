@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-/* the panel field this replaces is tiny; give the editor real room */
-mat-dialog-content {
-    width: 70vw;
-    max-width: 1100px;
-}
-
 .script-hint {
     margin-bottom: 8px;
     opacity: 0.7;
