@@ -31,6 +31,13 @@ npm test
 None replaces the build for a release; all three are cheap enough to run on every
 change, which is the point.
 
+Add `npx eslint <changed paths>` before a commit. `tsconfig.json` sets
+`noUnusedLocals: false`, so an unused local — typically a spec helper left behind
+when its callers were removed — passes `tsc`, `ngc` and Karma, while
+`@typescript-eslint/no-unused-vars` reports it as an error. The `Lint` step in
+`.github/workflows/test.yml` runs first and stops the build and the tests with it,
+and the release on master runs the same workflow, so the error blocks the release.
+
 ## `ngc` is what catches a template error
 
 A property binding whose value type is wrong — `[step]` given a number where the
