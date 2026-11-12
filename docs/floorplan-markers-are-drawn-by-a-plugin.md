@@ -74,6 +74,10 @@ placed even without a position.
   the middle of its widest stretch at that height. The chart point goes there too, so hovering the label opens the
   tooltip.
 - The label's box (`zoneLabelBox`) is handed to `stackMarkers` as an obstacle; labels of areas never move.
+- `zonePoints` and `placementPosition` return axis units: `drawShift` is stored relative to the chart area's corner,
+  because the datasets are placed through the scales. Whatever draws on `chart.ctx` itself works in canvas pixels and
+  adds `chartArea.left` and `chartArea.top` first, as the `floorplanMarkers` plugin does for the corners; without it
+  the area sits up and to the left of its room by the chart's padding.
 
 ## Tooltip
 
@@ -88,5 +92,5 @@ pointer back to the canvas and make it flicker.
 Specs next to the code, in `src/app/widgets/floorplan/`: `shared/floorplan-marker-draw.spec.ts` (colour and pill
 geometry), `shared/floorplan-marker-layout.spec.ts` (`stackMarkers`, `coversPosition`), `shared/floorplan-zone.spec.ts`
 (corners, centre, label box), `shared/floorplan-markers.spec.ts` (value text, `On`/`Off`, `Online`/`Offline`) and
-`floorplan.component.spec.ts` (transparent point, tooltip close timing); `floorplan.component.zoneless.spec.ts` runs
+`floorplan.component.spec.ts` (transparent point, tooltip close timing, an area drawn at the image's pixels); `floorplan.component.zoneless.spec.ts` runs
 the tooltip without zone.js.
