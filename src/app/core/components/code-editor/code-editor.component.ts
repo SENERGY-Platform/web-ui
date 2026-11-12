@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import type { editor, IDisposable } from 'monaco-editor/editor/editor.api.js';
 import {
     CodeEditorCompletionIcon,
@@ -25,6 +26,9 @@ import {
 import { CodeEditorScriptEnvironment } from './code-editor-environment';
 import type { LanguageServiceDefaults, Monaco, ScriptTarget } from './monaco-loader';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 /**
  * 'plaintext' needs no language contribution and is the honest fallback for script
@@ -46,10 +50,11 @@ export type CodeEditorLanguage = 'javascript' | 'json' | 'plaintext';
     templateUrl: './code-editor.component.html',
     styleUrls: ['./code-editor.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatProgressSpinner]
+    imports: [MatProgressSpinner, MatIconButton, MatIcon, MatTooltip]
 })
 export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy {
     private zone = inject(NgZone);
+    private document = inject(DOCUMENT);
 
     @Input() value = '';
     @Input() language: CodeEditorLanguage = 'javascript';
@@ -81,7 +86,15 @@ export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
 
     loading = true;
 
+    /**
+     * The editor fills the screen (SNRGY-2766). Uses the fullscreen api of the browser rather than
+     * css, since an ancestor such as a dialog can confine a fixed position; Esc leaves it as well.
+     */
+    maximized = false;
+    readonly canMaximize = !!this.document.fullscreenEnabled;
+
     @ViewChild('host', { static: true }) private host!: ElementRef<HTMLElement>;
+    @ViewChild('frame', { static: true }) private frame!: ElementRef<HTMLElement>;
 
     private static instanceCounter = 0;
 
@@ -266,8 +279,25 @@ export class CodeEditorComponent implements AfterViewInit, OnChanges, OnDestroy 
         }
     }
 
+    toggleMaximized(): void {
+        if (this.maximized) {
+            void this.document.exitFullscreen().catch(() => undefined);
+        } else {
+            // refused e.g. without a user gesture; the editor then keeps its size
+            void this.frame.nativeElement.requestFullscreen().catch(() => undefined);
+        }
+    }
+
+    @HostListener('document:fullscreenchange')
+    onFullscreenChange(): void {
+        this.maximized = this.document.fullscreenElement === this.frame.nativeElement;
+    }
+
     ngOnDestroy(): void {
         this.destroyed = true;
+        if (this.document.fullscreenElement === this.frame.nativeElement) {
+            void this.document.exitFullscreen().catch(() => undefined);
+        }
         this.completionProvider?.dispose();
         this.contentSubscription?.dispose();
         this.editor?.dispose();

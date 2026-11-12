@@ -30,6 +30,27 @@
     height: 100%;
 }
 
+/* above the editor, clear of its vertical scrollbar; faded so that it does not cover code */
+.code-editor-maximize {
+    position: absolute;
+    top: 0;
+    right: 16px;
+    z-index: 10;
+    opacity: 0.6;
+}
+
+.code-editor-maximize:hover,
+.code-editor-maximize:focus-visible {
+    opacity: 1;
+}
+
+/* the browser sizes a fullscreen element to the screen; the backdrop would be black without a background */
+.code-editor:fullscreen {
+    resize: none;
+    border: none;
+    background: var(--mat-sys-surface);
+}
+
 /*
  * The suggest widget's status line, e.g. "No suggestions." when a script format has no
  * completions to offer.

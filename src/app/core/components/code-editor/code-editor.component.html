@@ -17,8 +17,15 @@
 <!-- monaco's own stylesheet: the production build does not carry the CSS its ESM modules import; export defined in angular.json -->
 <link rel="stylesheet" href="/monaco.css" />
 
-<div class="code-editor" [style.height]="height">
+<div class="code-editor" [style.height]="height" #frame>
   <div class="code-editor-host" #host></div>
+  @if (canMaximize) {
+    <button mat-icon-button class="code-editor-maximize" type="button" (click)="toggleMaximized()"
+            [matTooltip]="maximized ? 'Restore size (Esc)' : 'Maximize editor'"
+            [attr.aria-label]="maximized ? 'Restore size' : 'Maximize editor'">
+      <mat-icon>{{ maximized ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+    </button>
+  }
   @if (loading) {
     <div class="code-editor-loading">
       <mat-progress-spinner diameter="32" mode="indeterminate" color="accent"></mat-progress-spinner>
