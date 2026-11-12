@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { hasZone, zoneCenter } from './floorplan-zone';
 import { DeviceCommandModel, DeviceCommandResponseModel } from 'src/app/core/services/device-command.service';
 import { environment } from 'src/environments/environment';
 import { DeviceGroupCriteriaModel, DeviceGroupModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
@@ -37,8 +38,11 @@ export interface FloorplanWidgetPropertiesModel {
     }
 }
 
-/** A placement without a position is not drawn on the map, but may be listed in the table */
+/** A placement without a position and without an area is not drawn on the map, but may be listed in the table */
 export function isPlaced(p: FloorplanWidgetCapabilityModel): boolean {
+    if ((p.zone || []).length >= 3) {
+        return true;
+    }
     return p.position?.x !== null && p.position?.x !== undefined && p.position?.y !== null && p.position?.y !== undefined;
 }
 
@@ -53,6 +57,11 @@ export interface FloorplanWidgetCapabilityModel {
         x: number | null;
         y: number | null;
     },
+    /**
+     * Corners of the area this placement colours instead of showing a pill, as fractions of the image
+     * like a position. Fewer than three corners is no area and draws the pill as before.
+     */
+    zone?: { x: number; y: number }[] | null,
     coloring: {
         value: number | string;
         icon: string;
@@ -695,7 +704,7 @@ export function image(properties: FloorplanWidgetPropertiesModel): HTMLImageElem
     return img;
 }
 
-export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPropertiesModel, options?: { color?: string, text?: string }[]): { centerShiftX: number; centerShiftY: number, ratio: number } {
+export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPropertiesModel, options?: { color?: string, text?: string }[], draft?: { x: number; y: number }[]): { centerShiftX: number; centerShiftY: number, ratio: number } {
     canvas.width = canvas.parentElement?.offsetWidth || 0;
     canvas.height = canvas.parentElement?.offsetHeight || 0;
 
@@ -719,13 +728,40 @@ export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPrope
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
 
+    const onCanvas = (corner: { x: number; y: number }) => ({
+        x: corner.x * img.width * ratio + centerShiftX,
+        y: corner.y * img.height * ratio + centerShiftY,
+    });
+    const outline = (corners: { x: number; y: number }[], color: string, closed: boolean) => {
+        if (corners.length === 0) {
+            return;
+        }
+        const points = corners.map(onCanvas);
+        ctx.beginPath();
+        points.forEach((point, index) => (index === 0 ? ctx.moveTo(point.x, point.y) : ctx.lineTo(point.x, point.y)));
+        if (closed) {
+            ctx.closePath();
+        }
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = color;
+        ctx.stroke();
+        points.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+        });
+    };
+
     properties.floorplan?.placements.forEach((p, i) => {
         if (!isPlaced(p)) {
             return;
         }
+        outline(p.zone || [], (options || [])[i]?.color || 'darkgrey', true);
         ctx.beginPath();
-        const x = (p.position.x || 0) * img.width * ratio + centerShiftX;
-        const y = (p.position.y || 0) * img.height * ratio + centerShiftY;
+        const center = hasZone(p) ? zoneCenter((p.zone || []).map(onCanvas)) : undefined;
+        const x = center?.x ?? ((p.position.x || 0) * img.width * ratio + centerShiftX);
+        const y = center?.y ?? ((p.position.y || 0) * img.height * ratio + centerShiftY);
         ctx.arc(x, y, dotSize, 0, 2 * Math.PI);
         ctx.fillStyle = (options || [])[i]?.color || 'darkgrey';
         ctx.fill();
@@ -737,6 +773,9 @@ export function draw(canvas: HTMLCanvasElement, properties: FloorplanWidgetPrope
             ctx.fillText((options || [])[i].text || '', x, y);
         }
     });
+
+    // the area being drawn right now stays open, so its last corner is visible as the end of the line
+    outline(draft || [], '#d32f2f', false);
 
     return { centerShiftX, centerShiftY, ratio };
 }

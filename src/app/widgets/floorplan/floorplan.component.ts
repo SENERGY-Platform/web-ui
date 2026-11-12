@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef, input, signal, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy, inject, DestroyRef, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { dialogSize } from '../../core/dialog-size';
@@ -56,6 +56,7 @@ import { ConnectionHistoryDialogComponent } from '../shared/connection-history-d
 import { FloorplanControlDialogComponent, FloorplanControlDialogData } from './floorplan-control-dialog/floorplan-control-dialog.component';
 import { CapabilityCommandModel, CapabilityControlComponent } from './shared/capability-control/capability-control.component';
 import { placementMarker, placementPosition } from './shared/floorplan-markers';
+import { hasZone, zoneCenter, zonePoints } from './shared/floorplan-zone';
 import { FloorplanControlResolver } from './floorplan-control-resolver';
 import { buildFloorplanChartOptions, buildFloorplanChartPlugins, FloorplanChartState } from './floorplan-chart-options';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -86,6 +87,9 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   private deviceInstancesService = inject(DeviceInstancesService);
   private el = inject(ElementRef);
   private destroyRef = inject(DestroyRef);
+  private cd = inject(ChangeDetectorRef);
+  /** Window timer id of the pending tooltip close, 0 while none is pending. */
+  private tooltipCloseTimer = 0;
 
   readonly dashboardId = input('');
   readonly widget = input<WidgetModel>({} as WidgetModel);
@@ -193,6 +197,9 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       this.chartjs.options.elements.point.hoverRadius = this.dotSize;
     }
     const datasets: ChartDataset[] = new Array(Math.max((this.widget().properties.floorplan?.placements || []).length - 1, 0)).fill({});
+    // the marker is drawn by the floorplanMarkers plugin; the point itself only carries the hit area,
+    // while backgroundColor stays the marker colour, which the legend and the plugin read
+    const transparentPoint = { pointBackgroundColor: 'transparent', pointBorderColor: 'transparent' };
     const showValue: boolean[] = [];
     const showValueWhenZoomed: boolean[] = [];
     const icons: string[] = [];
@@ -203,7 +210,11 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       if (floorplan === undefined || floorplan.placements === null || this.img === undefined) {
         return;
       }
-      const { x, y } = placementPosition(p, this.img, this.drawShift);
+      // an area carries its value in the middle, and the point goes there too, so hovering the label
+      // is what opens the tooltip - the position itself is no longer drawn
+      const { x, y } = hasZone(p)
+        ? zoneCenter(zonePoints(p, this.img, this.drawShift))
+        : placementPosition(p, this.img, this.drawShift);
       const { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label } = placementMarker(p, this.unitOf(p.criteria.function_id));
       icons[i] = icon;
       showValueWhenZoomed[i] = zoom;
@@ -211,13 +222,13 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       controls[i] = this.resolveControls(p);
       if (!isPlaced(p)) {
         // keep the dataset to preserve index alignment with the placements, but draw nothing
-        datasets[i] = { data: [], label, backgroundColor: color };
+        datasets[i] = { data: [], label, backgroundColor: color, ...transparentPoint };
         if (floorplan.showUnplacedTable) {
           unplacedRows.push({ index: i, alias: p.alias, icon, color, value: label });
         }
         return;
       }
-      datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color };
+      datasets[i] = { data: [{ 'x': x, 'y': y }], label, backgroundColor: color, ...transparentPoint };
     });
     this.unplacedRows.set(unplacedRows);
     this.controls.set(controls);
@@ -453,6 +464,14 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
     return this.resolver.compareCriteriaWithoutInteraction(a, b);
   }
 
+  /**
+   * The colour of a marker. Taken from the dataset, not from what chart.js reports for the point:
+   * the point is drawn transparent, because the marker itself comes from the floorplanMarkers plugin.
+   */
+  markerColor(datasetIndex: number): string {
+    return String(this.chartjs.data?.datasets[datasetIndex]?.backgroundColor || '');
+  }
+
   describeCriteria(criteria: DeviceGroupCriteriaModel | null): string {
     return this.resolver.describeCriteria(criteria);
   }
@@ -664,8 +683,32 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   }
 
   closeChartjsTooltip() {
+    this.cancelTooltipClose();
     this.chartjs.tooltipDisplay = 'none';
   }
+
+  /**
+   * Closes the tooltip once the pointer has left both the chart and the tooltip itself. The short delay
+   * is what lets the pointer travel from a marker onto the tooltip: closing on the chart's mouseleave
+   * alone would take the tooltip away mid-move, and its values and controls could never be reached.
+   */
+  scheduleTooltipClose() {
+    this.cancelTooltipClose();
+    this.tooltipCloseTimer = window.setTimeout(() => {
+      this.chartjs.tooltipDisplay = 'none';
+      this.tooltipCloseTimer = 0;
+      // the timer is no template event, so the view has to be told itself
+      this.cd.markForCheck();
+    }, 200);
+  }
+
+  cancelTooltipClose() {
+    window.clearTimeout(this.tooltipCloseTimer);
+    this.tooltipCloseTimer = 0;
+  }
+
+  /** A close still pending when the widget goes away would run against a view that no longer exists. */
+  private dropPendingTooltipClose = this.destroyRef.onDestroy(() => this.cancelTooltipClose());
 
   forbidChartjsTooltip() {
     this.chartjs.tooltipAllowed = false;

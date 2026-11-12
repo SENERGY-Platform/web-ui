@@ -58,17 +58,18 @@ mat-card-content {
 
 .unplaced-table {
     position: absolute;
-    top: 0;
-    right: 0;
-    max-height: 100%;
+    top: 0.5rem;
+    right: 0.5rem;
+    max-height: calc(100% - 1rem);
     max-width: 60%;
     overflow-y: auto;
     display: block;
     background: var(--mat-sys-surface);
-    border-radius: 3px;
-    padding: 3px;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 8px;
+    padding: 0.35rem 0.5rem;
     font-size: small;
-    line-height: 1rem;
+    line-height: 1.35rem;
     z-index: 998;
     /* below #chartjs-tooltip */
     border-collapse: collapse;
@@ -77,6 +78,10 @@ mat-card-content {
 .unplaced-table td {
     padding: 0 0.25rem;
     vertical-align: middle;
+}
+
+.unplaced-table tr+tr td {
+    border-top: 1px solid var(--mat-sys-surface-container-highest);
 }
 
 .unplaced-table td.unplaced-action {
@@ -91,6 +96,8 @@ mat-card-content {
 .unplaced-value {
     white-space: nowrap;
     text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
 }
 
 .unplaced-icon {
@@ -103,12 +110,54 @@ mat-card-content {
 #chartjs-tooltip {
     text-align: left;
     background: var(--mat-sys-surface);
+    border: 1px solid var(--mat-sys-outline-variant);
     position: absolute;
-    padding: 3px;
-    border-radius: 3px;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
     font-size: small;
-    line-height: 1rem;
+    line-height: 1.35rem;
+    max-width: 70%;
     z-index: 999;
+}
+
+#chartjs-tooltip table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* the name of the placement, set off from the values below it */
+#chartjs-tooltip thead td {
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+#chartjs-tooltip thead td:first-child {
+    white-space: nowrap;
+    padding-right: 0.5rem;
+}
+
+#chartjs-tooltip tbody td {
+    padding: 0.1rem 0;
+    vertical-align: middle;
+}
+
+/* the description of a value, which carries less than the value itself */
+#chartjs-tooltip tbody td:first-child {
+    color: var(--mat-sys-on-surface-variant);
+    padding-right: 0.75rem;
+    white-space: nowrap;
+}
+
+/* every value sits in the last column, so the numbers line up under each other */
+#chartjs-tooltip tbody td:last-child {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* the measurement the marker itself shows, which the rows below it add to */
+#chartjs-tooltip tbody tr:first-child td:last-child {
+    font-weight: 500;
 }
 
 .tooltip-actions {
@@ -126,10 +175,12 @@ mat-card-content {
     text-decoration: none;
 }
 
+/* round like the marker it stands for */
 .tooltip-colorbox {
     margin-right: 0.25rem;
     height: 10px;
     width: 10px;
+    border-radius: 50%;
     display: inline-block;
 }
 

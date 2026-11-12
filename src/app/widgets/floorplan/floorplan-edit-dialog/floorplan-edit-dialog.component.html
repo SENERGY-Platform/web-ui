@@ -157,6 +157,32 @@
                         <mat-icon>location_off</mat-icon>
                       </button>
                     }
+                    <!-- an area colours a whole room and carries its value in the middle, instead of a pill at a point -->
+                    @if (drawingZone === i) {
+                      <button mat-icon-button color="accent" (click)="finishZone(); false"
+                        [disabled]="zoneDraft.length < zoneCorners" [disabledInteractive]="true"
+                        [matTooltip]="zoneDraft.length < zoneCorners ? 'Click at least ' + zoneCorners + ' corners on the map' : 'Keep area'">
+                        <mat-icon>check</mat-icon>
+                      </button>
+                      <button mat-icon-button color="accent" (click)="undoZoneCorner(); false" [disabled]="zoneDraft.length === 0"
+                        [disabledInteractive]="true" matTooltip="Undo last corner">
+                        <mat-icon>undo</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="cancelZone(); false" matTooltip="Discard area">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    } @else {
+                      <button mat-icon-button color="accent" [disabled]="cropping || selectingSection" [disabledInteractive]="true"
+                        (click)="drawZone(i); false"
+                        [matTooltip]="selectingSection ? 'Confirm or discard the map section first' : 'Colour an area on the map'">
+                        <mat-icon>polyline</mat-icon>
+                      </button>
+                      @if (zoneOf(i).length >= zoneCorners) {
+                        <button mat-icon-button color="accent" (click)="removeZone(i); false" matTooltip="Remove area">
+                          <mat-icon>layers_clear</mat-icon>
+                        </button>
+                      }
+                    }
                     <button mat-icon-button color="accent" (click)="copyPlacement(i); false">
                       <mat-icon>content_copy</mat-icon>
                     </button>

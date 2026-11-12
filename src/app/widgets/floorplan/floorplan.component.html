@@ -27,9 +27,11 @@
     <div [hidden]="!ready() || !widget().properties.floorplan === undefined" class="content">
       <div class="image-wrapper" #imageWrapper>
         <canvas #canvas baseChart [data]="chartjs.data" [options]="chartjs.options" type="scatter"
-        id="chartjs-{{widget().id}}" [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws() < 2}"></canvas>
+          id="chartjs-{{widget().id}}" [plugins]="chartjs.plugins" [ngClass]="{'hidden': draws() < 2}"
+        (mouseenter)="cancelTooltipClose()" (mouseleave)="scheduleTooltipClose()"></canvas>
         @if (chartjs.tooltipAllowed && chartjs.tooltipContext !== undefined) {
           <div id="chartjs-tooltip" #chartjsTooltip class="mat-elevation-z4"
+            (mouseenter)="cancelTooltipClose()" (mouseleave)="scheduleTooltipClose()"
             [ngStyle]="chartjsTooltipStyle">
             <table>
               @for (title of chartjs.tooltipContext.tooltip.title; track title; let i = $index) {
@@ -44,7 +46,8 @@
                     <tr>
                       <td>
                         <span class="tooltip-colorbox"
-                        [ngStyle]="{'background': chartjs.tooltipContext.tooltip.labelColors[i].backgroundColor}"></span>
+                          [ngStyle]="{'background': markerColor(chartjs.tooltipDatasets[i].datasetIndex)}"></span>
+                        {{describeCriteria(widget().properties.floorplan!.placements[chartjs.tooltipDatasets[i].datasetIndex].criteria)}}
                       </td>
                       <!-- a measurement that operates a control shows its value as the button doing so -->
                       <td colspan="2"

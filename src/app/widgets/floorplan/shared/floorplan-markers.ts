@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { FloorplanWidgetCapabilityModel } from './floorplan.model';
+import { FloorplanWidgetCapabilityModel, fpCriteriaConnectionStatus } from './floorplan.model';
 
 export interface PlacementMarker {
     icon: string;
@@ -76,6 +76,14 @@ export function placementMarker(placement: FloorplanWidgetCapabilityModel, unit:
             }
         }
     }
+    if (placement.criteria.function_id === fpCriteriaConnectionStatus) {
+        return { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label: connectionLabel(value) };
+    }
+    // read from the message, which a colouring above may have joined into a string by now
+    const state = stateLabel(placement.criteria.value?.message);
+    if (state !== undefined) {
+        return { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label: state };
+    }
     let label = value === undefined || value === null ? '' : '' + value;
     if (label.length > 0 && unit !== undefined) {
         label += ' ' + unit;
@@ -115,8 +123,36 @@ export function markerText(placement: FloorplanWidgetCapabilityModel, valueLabel
     return texts.join(': ');
 }
 
-/** A tooltip value: list values joined by ', ', the unit appended when known. */
+/** A connection status is a state of the device, not a measurement, so it reads as one instead of as a boolean. */
+export function connectionLabel(message: any): string {
+    return message === true || message === 'true' ? 'Online' : 'Offline';
+}
+
+/**
+ * How a boolean reads, or undefined for anything that is not one. The platform models its binary states
+ * as something that is switched, which is also what their control is, so they read as on and off rather
+ * than as the words that came off the wire. A list keeps one reading per device.
+ */
+export function stateLabel(message: any): string | undefined {
+    const read = (one: any): string | undefined => {
+        if (one === true || one === 'true') {
+            return 'On';
+        }
+        return one === false || one === 'false' ? 'Off' : undefined;
+    };
+    if (Array.isArray(message)) {
+        const states = message.map(read);
+        return message.length > 0 && states.every(state => state !== undefined) ? states.join(', ') : undefined;
+    }
+    return read(message);
+}
+
+/** A tooltip value: a boolean as its state, list values joined by ', ', the unit appended when known. */
 export function tooltipValueLabel(message: any, unit: string | undefined): string {
+    const state = stateLabel(message);
+    if (state !== undefined) {
+        return state;
+    }
     let label = '' + message;
     if (Array.isArray(message)) {
         if (message.length > 1) {

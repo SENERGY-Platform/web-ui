@@ -64,6 +64,10 @@ export class FloorplanControlResolver {
 
   /** Names a function by its display name, falling back to its name before showing the raw id */
   describeFunction(functionId: string): string {
+    if (functionId === fpCriteriaConnectionStatus) {
+      // no real function, so the repository has no name for it and the raw id would be shown
+      return 'Connection';
+    }
     const f = this.host.functions.find(f2 => f2.id === functionId);
     return f?.display_name || f?.name || functionId;
   }

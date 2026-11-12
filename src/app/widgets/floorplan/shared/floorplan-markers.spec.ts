@@ -15,7 +15,7 @@
  */
 
 import { FloorplanWidgetCapabilityModel } from './floorplan.model';
-import { markerText, placementMarker, placementPosition, tooltipValueLabel } from './floorplan-markers';
+import { connectionLabel, markerText, placementMarker, placementPosition, stateLabel, tooltipValueLabel } from './floorplan-markers';
 
 type Coloring = FloorplanWidgetCapabilityModel['coloring'][number];
 
@@ -112,7 +112,41 @@ describe('tooltipValueLabel', () => {
     it('joins lists, unwraps single values and appends the unit', () => {
         expect(tooltipValueLabel(['a', 'b'], undefined)).toBe('a, b');
         expect(tooltipValueLabel([5], 'W')).toBe('5 W');
-        expect(tooltipValueLabel(true, undefined)).toBe('true');
         expect(tooltipValueLabel(0, '%')).toBe('0 %');
+    });
+
+    it('reads a boolean as a state, without a unit behind it', () => {
+        expect(tooltipValueLabel(true, undefined)).toBe('On');
+        expect(tooltipValueLabel(false, 'W')).toBe('Off');
+    });
+});
+
+describe('stateLabel', () => {
+    it('reads the two booleans, written either way', () => {
+        expect(stateLabel(true)).toBe('On');
+        expect(stateLabel('true')).toBe('On');
+        expect(stateLabel(false)).toBe('Off');
+        expect(stateLabel('false')).toBe('Off');
+    });
+
+    it('keeps one reading per device of a group', () => {
+        expect(stateLabel([true, false])).toBe('On, Off');
+    });
+
+    it('answers nothing for what is no boolean, so the value is shown as it is', () => {
+        expect(stateLabel(21.5)).toBeUndefined();
+        expect(stateLabel('warm')).toBeUndefined();
+        expect(stateLabel([])).toBeUndefined();
+        expect(stateLabel([true, 3])).toBeUndefined();
+        expect(stateLabel(undefined)).toBeUndefined();
+    });
+});
+
+describe('connectionLabel', () => {
+    it('reads a connection as online or offline, not as a boolean', () => {
+        expect(connectionLabel(true)).toBe('Online');
+        expect(connectionLabel('true')).toBe('Online');
+        expect(connectionLabel(false)).toBe('Offline');
+        expect(connectionLabel(undefined)).toBe('Offline');
     });
 });

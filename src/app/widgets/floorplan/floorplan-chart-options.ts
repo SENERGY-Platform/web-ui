@@ -21,8 +21,11 @@ import { BubbleDataPoint, Chart, ChartConfiguration, ChartData, ChartTypeRegistr
 import { AnyObject } from 'node_modules/chart.js/dist/types/basic';
 import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.model';
 import { DeviceGroupCriteriaModel } from 'src/app/modules/devices/device-groups/shared/device-groups.model';
-import { isControllingFunction, TooltipCriteria } from './shared/floorplan.model';
-import { markerText, tooltipValueLabel } from './shared/floorplan-markers';
+import { fpCriteriaConnectionStatus, isControllingFunction, TooltipCriteria } from './shared/floorplan.model';
+import { connectionLabel, markerText, tooltipValueLabel } from './shared/floorplan-markers';
+import { drawMarker, drawMarkerLeader, MarkerDraw, measureMarker } from './shared/floorplan-marker-draw';
+import { coversPosition, MarkerBox, stackMarkers } from './shared/floorplan-marker-layout';
+import { drawZone, hasZone, ZoneDraw, zoneLabelBox, zonePoints } from './shared/floorplan-zone';
 
 export interface FloorplanChartState {
   options: ChartConfiguration['options'];
@@ -93,7 +96,9 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost): ChartConfi
                 if (c.value === undefined || c.value === null || c.value.status_code !== 200) {
                   return;
                 }
-                const label = tooltipValueLabel(c.value.message, host.unitOf(c.function_id));
+                const label = c.function_id === fpCriteriaConnectionStatus
+                  ? connectionLabel(c.value.message)
+                  : tooltipValueLabel(c.value.message, host.unitOf(c.function_id));
                 tc.values.push({ label, description: host.describeCriteria(c), criteria: c });
               });
               host.chartjs.tooltipCriteria.push(tc);
@@ -146,84 +151,8 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost): ChartConfi
       point: {
         radius: host.dotSize,
         hoverRadius: host.dotSize,
-        pointStyle: (ctx) => {
-          const def = 'circle';
-          if (ctx.parsed === undefined) {
-            // chart.js resolves the options of datasets without data points against a dataset context, which has no parsed values
-            return def;
-          }
-          const dsIndex = host.chartjs.data?.datasets.findIndex(d => {
-            const data = d.data[0] as { x: number, y: number } | undefined; // unplaced placements have no data
-            return data?.x === ctx.parsed.x && data?.y === ctx.parsed.y;
-          });
-          if (dsIndex === undefined) {
-            return def;
-          }
-          const ds = host.chartjs.data?.datasets[dsIndex];
-          if (ds === undefined) {
-            return def;
-          }
-          const placement = host.widget().properties.floorplan?.placements[dsIndex];
-          if (placement === undefined) {
-            return def;
-          }
-          const icon = host.chartjs.icons[dsIndex];
-          if (icon === undefined) {
-            return def;
-          }
-          const canvas = document.createElement('canvas');
-          const size = host.dotSize;
-          canvas.width = size;
-          canvas.height = canvas.width;
-          const canvasCtx = canvas.getContext('2d');
-          if (canvasCtx == null) {
-            return def;
-          }
-          const fontSize = canvas.width * .75 + 'px';
-          canvasCtx.font = fontSize + ' Material Symbols Outlined';
-          canvasCtx.textBaseline = 'middle';
-          canvasCtx.textAlign = 'center';
-          canvasCtx.fillStyle = ds.backgroundColor as string;
-
-
-          const text = markerText(placement, ds.label || '', host.zoom(), host.chartjs.showValue[dsIndex], host.chartjs.showValueWhenZoomed[dsIndex]);
-
-          if (text.length > 0) {
-            const originWidth = canvas.width;
-            const iconWidth = canvasCtx.measureText(icon).width;
-            canvasCtx.font = fontSize + ' Arial';
-            const right = iconWidth + canvasCtx.measureText(text).width;
-            canvas.width += right;
-
-            canvasCtx.beginPath();
-            canvasCtx.arc(originWidth / 2, originWidth / 2, originWidth / 2, Math.PI * .5, Math.PI * 1.5);
-            canvasCtx.lineTo(originWidth + right, 0);
-            canvasCtx.arc(originWidth / 2 + right, originWidth / 2, originWidth / 2, Math.PI * 1.5, Math.PI * .5);
-            canvasCtx.lineTo(0, originWidth);
-            canvasCtx.fillStyle = ds.backgroundColor as string;
-            canvasCtx.fill();
-
-            canvasCtx.fillStyle = 'white';
-            canvasCtx.textBaseline = 'middle';
-            canvasCtx.textAlign = 'center';
-            canvasCtx.font = fontSize + ' Material Symbols Outlined';
-            canvasCtx.fillText(icon, originWidth / 2, originWidth / 2 + originWidth / size);
-
-            canvasCtx.font = fontSize + ' Roboto, sans-serif';
-            canvasCtx.textAlign = 'left';
-            canvasCtx.fillText(text, originWidth / 2 + iconWidth, originWidth / 2 + originWidth / size);
-
-          } else {
-            canvasCtx.beginPath();
-            canvasCtx.arc(canvas.width / 2, canvas.width / 2, canvas.width / 2, 0, 2 * Math.PI);
-            canvasCtx.fill();
-
-            canvasCtx.fillStyle = 'white';
-
-            canvasCtx.fillText(icon, canvas.width / 2, canvas.width / 2 + canvas.width / size);
-          }
-          return canvas;
-        },
+        // the radius stays, it is the hit area of the marker; what is drawn comes from the
+        // floorplanMarkers plugin, and the datasets keep the point itself transparent
       },
     },
     events: ['click', 'mousemove'],
@@ -252,7 +181,7 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost): ChartConfi
 
 /** Draws the floorplan image behind the dots and keeps the host's scale and shift in step with it. */
 export function buildFloorplanChartPlugins(host: FloorplanChartHost): Plugin<keyof ChartTypeRegistry, AnyObject>[] {
-  return [{
+  return [markerPlugin(host), {
     id: 'customCanvasBackgroundImage',
     beforeDraw: (chart: Chart) => {
 
@@ -285,4 +214,59 @@ export function buildFloorplanChartPlugins(host: FloorplanChartHost): Plugin<key
       return true;
     }
   }];
+}
+
+/**
+ * Draws the markers after the datasets, on the chart's own context. Drawing them here rather than as a
+ * pointStyle bitmap keeps icon and text at the display's resolution, and lets the marker carry a ring
+ * and a shadow that lift it off the map.
+ */
+function markerPlugin(host: FloorplanChartHost): Plugin<keyof ChartTypeRegistry, AnyObject> {
+  return {
+    id: 'floorplanMarkers',
+    afterDatasetsDraw: (chart: Chart) => {
+      const family = String(Chart.defaults.font.family || 'sans-serif');
+      const size = host.dotSize;
+      const markers: MarkerDraw[] = [];
+      const zones: ZoneDraw[] = [];
+      chart.data.datasets.forEach((dataset, index) => {
+        if (!chart.isDatasetVisible(index)) {
+          return;
+        }
+        // an unplaced placement keeps its dataset to hold the index, but has no point to draw at
+        const element = chart.getDatasetMeta(index).data[0];
+        const placement = host.widget().properties.floorplan?.placements[index];
+        const icon = host.chartjs.icons[index];
+        if (element === undefined || placement === undefined || icon === undefined) {
+          return;
+        }
+        const text = markerText(placement, dataset.label || '', host.zoom(), host.chartjs.showValue[index], host.chartjs.showValueWhenZoomed[index]);
+        const background = String(dataset.backgroundColor || 'grey');
+        if (hasZone(placement) && host.img !== undefined) {
+          zones.push({ points: zonePoints(placement, host.img, host.drawShift), background, text, size, family });
+          return;
+        }
+        markers.push({ x: element.x, y: element.y, size, background, icon, text, family });
+      });
+      // the areas go under the markers, and the pills of the other placements keep clear of their labels
+      const occupied: MarkerBox[] = [];
+      zones.forEach(zone => {
+        drawZone(chart.ctx, zone);
+        const box = zoneLabelBox(chart.ctx, zone);
+        if (box !== undefined) {
+          occupied.push(box);
+        }
+      });
+      const boxes = markers.map(marker => ({ x: marker.x, y: marker.y, width: measureMarker(chart.ctx, marker).width, height: size }));
+      const area = { top: chart.chartArea.top, bottom: chart.chartArea.bottom, left: chart.chartArea.left, right: chart.chartArea.right };
+      const offsets = stackMarkers(boxes, area, occupied);
+      // every leader first, so none of them is drawn over the text of a neighbouring pill
+      markers.forEach((marker, index) => {
+        if (!coversPosition(boxes[index], offsets[index])) {
+          drawMarkerLeader(chart.ctx, marker, offsets[index]);
+        }
+      });
+      markers.forEach((marker, index) => drawMarker(chart.ctx, marker, offsets[index]));
+    },
+  };
 }

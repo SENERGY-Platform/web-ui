@@ -15,7 +15,7 @@
  */
 
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
@@ -100,11 +100,6 @@ describe('FloorplanComponent', () => {
         component.draw();
     };
 
-    const pointStyle = (ctx: any): any => {
-        const style = component.chartjs.options?.elements?.point?.pointStyle as unknown as (c: any) => any;
-        return style(ctx);
-    };
-
     it('should create', () => {
         expect(component).toBeTruthy();
     });
@@ -177,37 +172,57 @@ describe('FloorplanComponent', () => {
         });
     });
 
-    describe('pointStyle', () => {
-        it('falls back to the default style when resolved without a data point', () => {
-            // chart.js resolves the options of a dataset without data against a dataset context,
-            // which has no parsed values - throwing here aborts the whole chart update
-            drawPlacements([placement({ alias: 'unplaced', position: { x: null, y: null } })]);
+    describe('the tooltip', () => {
+        it('closes a little after the pointer left both the chart and the tooltip', fakeAsync(() => {
+            component.chartjs.tooltipDisplay = 'initial';
+            component.scheduleTooltipClose();
+            expect(component.chartjs.tooltipDisplay).toBe('initial');
 
-            expect(pointStyle({ parsed: undefined })).toBe('circle');
-        });
+            tick(500);
+            expect(component.chartjs.tooltipDisplay).toBe('none');
+        }));
 
-        it('draws the plain dot when nothing should be displayed next to it', () => {
-            drawPlacements([placement({ showAlias: false })]);
+        it('stays while the pointer travels onto it, which is what the delay is for', fakeAsync(() => {
+            component.chartjs.tooltipDisplay = 'initial';
+            component.scheduleTooltipClose();
+            component.cancelTooltipClose();
 
-            const style = pointStyle({ parsed: { x: 50, y: 50 } }) as HTMLCanvasElement;
-            expect(style instanceof HTMLCanvasElement).toBeTrue();
-            expect(style.width).toBe(DOT_SIZE);
-        });
+            tick(500);
+            expect(component.chartjs.tooltipDisplay).toBe('initial');
+        }));
 
-        it('widens the dot to fit the alias when enabled', () => {
+        it('drops a pending close when it is closed by hand', fakeAsync(() => {
+            component.chartjs.tooltipDisplay = 'initial';
+            component.scheduleTooltipClose();
+            component.closeChartjsTooltip();
+            component.chartjs.tooltipDisplay = 'initial';
+
+            tick(500);
+            expect(component.chartjs.tooltipDisplay).toBe('initial');
+        }));
+    });
+
+    describe('the point behind a marker', () => {
+        it('is drawn by nothing, the marker comes from the floorplanMarkers plugin', () => {
             drawPlacements([placement({ alias: 'Kitchen', showAlias: true })]);
 
-            const style = pointStyle({ parsed: { x: 50, y: 50 } }) as HTMLCanvasElement;
-            expect(style.width).toBeGreaterThan(DOT_SIZE);
+            const dataset = component.chartjs.data?.datasets[0] as any;
+            expect(dataset.pointBackgroundColor).toBe('transparent');
+            expect(dataset.pointBorderColor).toBe('transparent');
         });
 
-        it('shows the alias of a maximized widget only when configured for it', () => {
-            fixture.componentRef.setInput('zoom', true);
-            drawPlacements([placement({ alias: 'Kitchen', showAlias: true, showAliasWhenZoomed: false })]);
-            expect((pointStyle({ parsed: { x: 50, y: 50 } }) as HTMLCanvasElement).width).toBe(DOT_SIZE);
+        it('keeps its radius, which is the hit area the tooltip and the drill open from', () => {
+            drawPlacements([placement({})]);
 
-            drawPlacements([placement({ alias: 'Kitchen', showAlias: false, showAliasWhenZoomed: true })]);
-            expect((pointStyle({ parsed: { x: 50, y: 50 } }) as HTMLCanvasElement).width).toBeGreaterThan(DOT_SIZE);
+            expect(component.chartjs.options?.elements?.point?.radius).toBe(DOT_SIZE);
+            expect(component.chartjs.options?.elements?.point?.hoverRadius).toBe(DOT_SIZE);
+        });
+
+        it('keeps the marker colour on the dataset, which the legend and the plugin read', () => {
+            drawPlacements([placement({ coloring: [{ value: 100, color: '#ff0000', icon: 'thermostat', showValue: true, showValueWhenZoomed: true }] })]);
+
+            expect(component.chartjs.data?.datasets[0].backgroundColor).toBe('#ff0000');
+            expect(component.markerColor(0)).toBe('#ff0000');
         });
     });
 

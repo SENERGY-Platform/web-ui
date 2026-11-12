@@ -44,6 +44,7 @@ import {
   migrateColoring,
   StateSourceContextModel,
 } from '../shared/floorplan.model';
+import { ZONE_CORNERS } from '../shared/floorplan-zone';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
@@ -103,6 +104,10 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   functions: DeviceTypeFunctionModel[] = [];
   deviceClasses: DeviceTypeDeviceClassModel[] = [];
   placing: number | undefined;
+  /** The placement whose area is being drawn, and the corners clicked so far. */
+  drawingZone: number | undefined;
+  zoneDraft: { x: number; y: number }[] = [];
+  readonly zoneCorners = ZONE_CORNERS;
   drawShift = { centerShiftX: NaN, centerShiftY: NaN, ratio: NaN };
   step: number | undefined;
   materialIconNames = materialIconNames;
@@ -247,7 +252,7 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     if (this.canvas !== undefined) {
       this.drawShift = draw(this.canvas.nativeElement, { floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel, this.form.value.placements?.map((_2, i) => {
         return { text: '' + i };
-      }));
+      }), this.zoneDraft);
       this.cd.markForCheck();
     } else {
       setTimeout(() => this.draw(), 100);
@@ -353,6 +358,8 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
         x: new FormControl<number | null>(null),
         y: new FormControl<number | null>(null),
       }),
+      // corners of the coloured area, empty until one is drawn on the map
+      zone: new FormControl<{ x: number; y: number }[]>([]),
       coloring: new FormArray([].map(this.newColoring)),
       valueLow: new FormControl<number | null>(null),
       valueHigh: new FormControl<number | null>(null),
@@ -450,18 +457,66 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
   }
 
   placeSelected($event: MouseEvent) {
+    if (this.drawingZone !== undefined) {
+      this.zoneDraft.push(this.relativePoint($event));
+      this.draw();
+      return;
+    }
     if (this.placing === undefined) {
       return;
     }
-    const img = image({ floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel);
-    this.form.controls.placements.at(this.placing).patchValue({
-      position: {
-        x: ($event.offsetX - this.drawShift.centerShiftX) / (img.naturalWidth * this.drawShift.ratio),
-        y: ($event.offsetY - this.drawShift.centerShiftY) / (img.naturalHeight * this.drawShift.ratio),
-      }
-    });
+    this.form.controls.placements.at(this.placing).patchValue({ position: this.relativePoint($event) });
     this.placing = undefined;
     this.draw();
+  }
+
+  /** Where a click landed on the image, as the fractions the model stores. */
+  private relativePoint($event: MouseEvent): { x: number; y: number } {
+    const img = image({ floorplan: this.form.getRawValue() } as FloorplanWidgetPropertiesModel);
+    return {
+      x: ($event.offsetX - this.drawShift.centerShiftX) / (img.naturalWidth * this.drawShift.ratio),
+      y: ($event.offsetY - this.drawShift.centerShiftY) / (img.naturalHeight * this.drawShift.ratio),
+    };
+  }
+
+  /** Starts collecting the corners of the area a placement colours; every click on the image adds one. */
+  drawZone(i: number) {
+    if (this.cropping || this.selectingSection) {
+      return;
+    }
+    this.placing = undefined;
+    this.drawingZone = i;
+    this.zoneDraft = [];
+    this.draw();
+  }
+
+  /** Keeps the drawn area, or leaves the placement as it was when too few corners were set. */
+  finishZone() {
+    if (this.drawingZone !== undefined && this.zoneDraft.length >= ZONE_CORNERS) {
+      this.form.controls.placements.at(this.drawingZone).patchValue({ zone: this.zoneDraft });
+    }
+    this.cancelZone();
+  }
+
+  cancelZone() {
+    this.drawingZone = undefined;
+    this.zoneDraft = [];
+    this.draw();
+  }
+
+  undoZoneCorner() {
+    this.zoneDraft.pop();
+    this.draw();
+  }
+
+  /** Drops the area, so the placement shows its pill at its position again. */
+  removeZone(i: number) {
+    this.form.controls.placements.at(i).patchValue({ zone: [] });
+    this.draw();
+  }
+
+  zoneOf(i: number): { x: number; y: number }[] {
+    return this.form.controls.placements.at(i).getRawValue().zone || [];
   }
 
   onSelectScroll(scroll: { end: number }) {

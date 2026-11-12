@@ -101,6 +101,86 @@ describe('FloorplanEditDialogComponent', () => {
         expect(component.placing).toBeUndefined();
     });
 
+    describe('the coloured area of a placement', () => {
+        /** A click on the image, whose offsets placeSelected reads; the shift puts the image at 1:1. */
+        const clickAt = (x: number, y: number) => {
+            component.drawShift = { centerShiftX: 0, centerShiftY: 0, ratio: 1 };
+            component.placeSelected({ offsetX: x, offsetY: y } as MouseEvent);
+        };
+
+        beforeEach(() => {
+            component.addNewPlacement();
+        });
+
+        it('starts empty, so the placement shows its pill', () => {
+            expect(component.zoneOf(0)).toEqual([]);
+        });
+
+        it('collects a corner per click while it is being drawn', () => {
+            component.drawZone(0);
+            clickAt(10, 20);
+            clickAt(30, 40);
+
+            expect(component.zoneDraft.length).toBe(2);
+            // the position stays untouched; a click is a corner now, not a placement
+            expect(component.form.controls.placements.at(0).value.position).toEqual({ x: null, y: null });
+        });
+
+        it('takes the last corner back', () => {
+            component.drawZone(0);
+            clickAt(10, 20);
+            clickAt(30, 40);
+            component.undoZoneCorner();
+
+            expect(component.zoneDraft.length).toBe(1);
+        });
+
+        it('keeps the area once three corners are set', () => {
+            component.drawZone(0);
+            clickAt(10, 20);
+            clickAt(30, 20);
+            clickAt(30, 40);
+            component.finishZone();
+
+            expect(component.zoneOf(0).length).toBe(3);
+            expect(component.drawingZone).toBeUndefined();
+            expect(component.zoneDraft).toEqual([]);
+        });
+
+        it('leaves the placement alone when too few corners were set', () => {
+            component.drawZone(0);
+            clickAt(10, 20);
+            component.finishZone();
+
+            expect(component.zoneOf(0)).toEqual([]);
+        });
+
+        it('throws the draft away when it is discarded', () => {
+            component.drawZone(0);
+            clickAt(10, 20);
+            component.cancelZone();
+
+            expect(component.zoneOf(0)).toEqual([]);
+            expect(component.drawingZone).toBeUndefined();
+        });
+
+        it('removes an area, so the placement shows its pill again', () => {
+            component.form.controls.placements.at(0).patchValue({ zone: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }] });
+
+            component.removeZone(0);
+
+            expect(component.zoneOf(0)).toEqual([]);
+        });
+
+        it('does not start drawing while a map section is chosen', () => {
+            component.selectingSection = true;
+
+            component.drawZone(0);
+
+            expect(component.drawingZone).toBeUndefined();
+        });
+    });
+
     describe('map section', () => {
         const sectionMap = () => {
             useGeographic();
