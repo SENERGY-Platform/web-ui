@@ -56,6 +56,8 @@ import { DeviceGroupsComponent } from './device-groups/device-groups.component';
 import { DeviceGroupsEditComponent } from './device-groups/edit/device-groups-edit.component';
 import { LocationsComponent } from './locations/locations.component';
 import { LocationsEditComponent } from './locations/edit/locations-edit.component';
+import { ThingsComponent } from './things/things.component';
+import { ThingsEditComponent } from './things/edit/things-edit.component';
 import { DeviceGroupsPipelineHelperDialogComponent } from './device-groups/edit/device-groups-pipeline-helper-dialog/device-groups-pipeline-helper-dialog.component';
 import { DeviceGroupsSelectDialogComponent } from './device-groups/dialog/device-groups-select-dialog.component';
 import { NetworksDeleteDialogComponent } from './networks/dialogs/networks-delete-dialog.component';
@@ -127,6 +129,25 @@ const locationsEdit: Route = {
     data: { header: 'Locations' },
 };
 
+const things: Route = {
+    path: 'devices/things',
+    pathMatch: 'full',
+    component: ThingsComponent,
+    data: { header: 'Things' },
+};
+const thingsCreate: Route = {
+    path: 'devices/things/edit',
+    pathMatch: 'full',
+    component: ThingsEditComponent,
+    data: { header: 'Things' },
+};
+const thingsEdit: Route = {
+    path: 'devices/things/edit/:id',
+    pathMatch: 'full',
+    component: ThingsEditComponent,
+    data: { header: 'Things' },
+};
+
 @NgModule({
     imports: [
         MatGridListModule,
@@ -167,6 +188,9 @@ const locationsEdit: Route = {
             deviceGroups,
             deviceGroupsCreate,
             deviceGroupsEdit,
+            things,
+            thingsCreate,
+            thingsEdit,
         ]),
         MatTreeModule,
         MatDatepickerModule,
@@ -188,6 +212,8 @@ const locationsEdit: Route = {
         DeviceGroupsSelectDialogComponent,
         LocationsComponent,
         LocationsEditComponent,
+        ThingsComponent,
+        ThingsEditComponent,
         DeviceGroupsPipelineHelperDialogComponent,
         WaitingRoomComponent,
         WaitingRoomDeviceEditDialogComponent,

@@ -43,6 +43,7 @@ import { CharacteristicsService } from 'src/app/modules/metadata/characteristics
 import { DeviceTypeService } from 'src/app/modules/metadata/device-types-overview/shared/device-type.service';
 import { DeviceClassesService } from 'src/app/modules/metadata/device-classes/shared/device-classes.service';
 import { LocationsService } from 'src/app/modules/devices/locations/shared/locations.service';
+import { ThingsService } from 'src/app/modules/devices/things/shared/things.service';
 import { DeviceGroupsService } from 'src/app/modules/devices/device-groups/shared/device-groups.service';
 import { DeviceInstancesService } from 'src/app/modules/devices/device-instances/shared/device-instances.service';
 import { NetworksService } from 'src/app/modules/devices/networks/shared/networks.service';
@@ -79,6 +80,7 @@ export class SidenavService implements OnDestroy {
     private deviceTypeService = inject(DeviceTypeService);
     private deviceClassService = inject(DeviceClassesService);
     private locationService = inject(LocationsService);
+    private thingsService = inject(ThingsService);
     private deviceGroupService = inject(DeviceGroupsService);
     private deviceInstanceService = inject(DeviceInstancesService);
     private networkService = inject(NetworksService);
@@ -243,7 +245,8 @@ export class SidenavService implements OnDestroy {
             [this.networkService.userHasReadAuthorization, new SidenavPageModel('Networks', 'link', 'device_hub', '/devices/networks'), this.networkService],
             [this.deviceInstanceService.userHasReadAuthorization, new SidenavPageModel('Devices', 'link', 'sensors', '/devices/deviceinstances'), this.deviceInstanceService],
             [this.deviceGroupService.userHasReadAuthorization, new SidenavPageModel('Groups', 'link', 'group_work', '/devices/devicegroups'), this.deviceGroupService],
-            [this.locationService.userHasReadAuthorization, new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'), this.locationService]
+            [this.locationService.userHasReadAuthorization, new SidenavPageModel('Locations', 'link', 'place', '/devices/locations'), this.locationService],
+            [this.thingsService.userHasReadAuthorization, new SidenavPageModel('Things', 'link', 'category', '/devices/things'), this.thingsService]
         ]);
 
         if (this.waitingRoomService.userHasReadAuthorization()) {

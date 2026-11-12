@@ -39,6 +39,8 @@ import { DeviceInstancesDialogService } from './devices/device-instances/shared/
 import { DeviceInstancesService } from './devices/device-instances/shared/device-instances.service';
 import { LocationsComponent } from './devices/locations/locations.component';
 import { LocationsService } from './devices/locations/shared/locations.service';
+import { ThingsComponent } from './devices/things/things.component';
+import { ThingsService } from './devices/things/shared/things.service';
 import { NetworksComponent } from './devices/networks/networks.component';
 import { NetworksService } from './devices/networks/shared/networks.service';
 import { ImportInstancesComponent } from './imports/import-instances/import-instances.component';
@@ -89,6 +91,7 @@ const LISTS: ListCase[] = [
         services: [DeviceInstancesService, DeviceInstancesDialogService, PermissionsDialogService, DialogsService, DeviceTypeService, ExportDataService, PermissionsService],
     },
     { component: LocationsComponent, services: [LocationsService, DialogsService, PermissionsDialogService] },
+    { component: ThingsComponent, services: [ThingsService, PermissionsDialogService, PermissionsService, DialogsService] },
     {
         component: NetworksComponent,
         services: [NetworksService, DeviceInstancesService, DialogsService, PermissionsDialogService, PermissionsService, AuthorizationService],

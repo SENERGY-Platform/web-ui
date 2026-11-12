@@ -1,0 +1,30 @@
+<senergy-dialog-header title="Link device" (closed)="close()"></senergy-dialog-header>
+
+<mat-dialog-content class="dialog-body">
+  <div [formGroup]="form">
+    <mat-form-field class="full-width">
+      <mat-label>Device</mat-label>
+      <mtx-select formControlName="device_id" [items]="devices" bindLabel="label" bindValue="id" [searchable]="true"
+        appendTo=".ng-select-anchor" required></mtx-select>
+      <mat-error senergyError label="Device"></mat-error>
+    </mat-form-field>
+    <mat-form-field class="full-width">
+      <mat-label>From</mat-label>
+      <input matInput type="datetime-local" step="1" formControlName="from">
+      <mat-hint>Empty: now</mat-hint>
+    </mat-form-field>
+    <mat-form-field class="full-width">
+      <mat-label>Until</mat-label>
+      <input matInput type="datetime-local" step="1" formControlName="until">
+      <mat-hint>Empty: open</mat-hint>
+      @if (form.controls.until.hasError('untilBeforeFrom')) {
+        <mat-error>Until must be after From.</mat-error>
+      }
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" (click)="close()">Cancel</button>
+  <button matButton="filled" type="button" (click)="save()">Link</button>
+</mat-dialog-actions>
