@@ -63,7 +63,7 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
     let fixture: ComponentFixture<EditSmartServiceTaskDialogComponent>;
 
     function init(inputs: SmartServiceTaskInputDescription[], listing: DeviceTypeAspectNodeModel[] = [air, water], topic = 'watcher', render = false,
-        incoming: { source: BpmnElement }[] = [], operators: ParseModel[] = []) {
+        incoming: { source: BpmnElement }[] = [], operators: ParseModel[] = [], prepared?: V2DeploymentsPreparedModel) {
         dialogRef = createSpyFromClass<MatDialogRef<EditSmartServiceTaskDialogComponent>>(MatDialogRef);
         const deviceTypeService = createSpyFromClass(DeviceTypeService);
         deviceTypeService.getAspectNodesWithFunctionOfDevicesOnly.and.returnValue(of(listing));
@@ -80,6 +80,11 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         processRepoService.getProcessModels.and.returnValue(of({ result: [], total: 0 }));
         const parserService = createSpyFromClass(ParserService);
         parserService.getInputs.and.returnValue(of(operators));
+        // the dialog prepares the deployment of a stored process model when it opens
+        const deploymentsService = createSpyFromClass(DeploymentsService);
+        if (prepared) {
+            deploymentsService.getPreparedDeployments.and.returnValue(of(prepared));
+        }
 
         const info: SmartServiceTaskDescription = { name: 'task', topic, inputs, outputs: [], smartServiceInputs: { inputs: [] } };
         TestBed.configureTestingModule({
@@ -89,7 +94,7 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
                 { provide: MatDialogRef, useValue: dialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { info, element: { id: 'task', incoming } as unknown as BpmnElement } },
                 { provide: ProcessRepoService, useValue: processRepoService },
-                { provide: DeploymentsService, useValue: createSpyFromClass(DeploymentsService) },
+                { provide: DeploymentsService, useValue: deploymentsService },
                 { provide: FlowRepoService, useValue: flowRepoService },
                 { provide: ParserService, useValue: parserService },
                 { provide: ImportTypesService, useValue: importTypesService },
@@ -371,6 +376,40 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
             deployments.getPreparedDeployments.and.returnValue(of({ id: 'other-model', name: 'other', elements: [] } as unknown as V2DeploymentsPreparedModel));
             component.ensureProcessTaskParameter('other-model');
             expect(component.processDevices).toBe('["urn:infai:ses:device:1"]');
+        });
+    });
+
+    // SNRGY-3951: a placeholder in the deployment name was replaced by the name of the model on reopening
+    describe('deployment name of a process deployment', () => {
+        const modelKey = 'process_deployment.process_model_id';
+        const nameKey = 'process_deployment.name';
+        const prepared = (id: string, name: string) => ({ id, name, elements: [] } as unknown as V2DeploymentsPreparedModel);
+        const reopen = (name: string) => init([{ name: modelKey, type: 'text', value: 'm1' }, { name: nameKey, type: 'text', value: name }],
+            [air, water], 'process_deployment', false, [], [], prepared('m1', 'Model One'));
+
+        it('keeps a stored name with a placeholder when the dialog opens again', () => {
+            reopen('${name} heating');
+            expect(component.processProcessName).toBe('${name} heating');
+        });
+
+        it('saves the stored name unchanged', () => {
+            reopen('${name} heating');
+            component.ok();
+            const result = dialogRef.close.calls.mostRecent().args[0] as SmartServiceTaskDescription;
+            expect(result.inputs.find(input => input.name === nameKey)?.value).toBe('${name} heating');
+        });
+
+        it('takes the name of another process model when one is chosen', () => {
+            reopen('${name} heating');
+            const deployments = TestBed.inject(DeploymentsService) as unknown as Spy<DeploymentsService>;
+            deployments.getPreparedDeployments.and.returnValue(of(prepared('m2', 'Model Two')));
+            component.ensureProcessTaskParameter('m2');
+            expect(component.processProcessName).toBe('Model Two');
+        });
+
+        it('takes the name of the model when the task had none', () => {
+            init([{ name: modelKey, type: 'text', value: 'm1' }], [air, water], 'process_deployment', false, [], [], prepared('m1', 'Model One'));
+            expect(component.processProcessName).toBe('Model One');
         });
     });
 });

@@ -230,6 +230,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         });
         const processModelId = this.result.inputs.find(value => value.name === 'process_deployment.process_model_id')?.value || '';
         if (processModelId !== '') {
+            this.processNameModelId = processModelId;
             this.ensureProcessTaskParameter(processModelId);
         }
     }
@@ -406,6 +407,19 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         return result;
     }
 
+    /**
+     * The model the deployment name belongs to: the stored model when the dialog opens, then the one last chosen. Its
+     * name stays, also one with a placeholder such as ${name}; another model brings its own (SNRGY-3951).
+     */
+    private processNameModelId = '';
+
+    private processNameFor(modelId: string, modelName: string): SmartServiceTaskInputDescription {
+        const known = this.knownInputValues.get(this.processProcessNameFieldName);
+        const keep = known !== undefined && this.processNameModelId === modelId;
+        this.processNameModelId = modelId;
+        return keep ? known : { name: this.processProcessNameFieldName, value: modelName, type: 'text' };
+    }
+
     ensureProcessTaskParameter(id: string) {
         this.result.inputs.forEach(e => this.knownInputValues.set(e.name, e));
         if (!this.selectedProcessModelPreparation || this.selectedProcessModelPreparation.id !== id) {
@@ -414,7 +428,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     this.selectedProcessModelPreparation = value;
                     this.result.inputs = [
                         this.knownInputValues.get('process_deployment.process_model_id') || { name: 'process_deployment.process_model_id', value: id, type: 'text' },
-                        { name: 'process_deployment.name', value: this.selectedProcessModelPreparation.name, type: 'text' },
+                        this.processNameFor(id, this.selectedProcessModelPreparation.name),
                         this.knownInputValues.get('process_deployment.module_data') || { name: 'process_deployment.module_data', value: '{}', type: 'text' },
                         this.knownInputValues.get(this.processFogFieldName) || { name: this.processFogFieldName, value: 'false', type: 'text' },
                         this.knownInputValues.get(this.processDevicesFieldName) || { name: this.processDevicesFieldName, value: '', type: 'text' },
