@@ -134,8 +134,8 @@ export function senergyGroups(element, bpmnjs) {
     add('iot-helper', 'IoT-Helper', task, callbacks().configNotification ? [
         buttonEntry('send-notification-helper', 'Notification', function (el) {
             var current = readNotification(el);
-            callbacks().configNotification(current.subject, current.content, function (subject, content) {
-                writeNotification(services(), el, subject, content);
+            callbacks().configNotification(current.subject, current.content, current.duplicateWindow, function (subject, content, duplicateWindow) {
+                writeNotification(services(), el, subject, content, duplicateWindow);
             }, function () {
             });
         }),

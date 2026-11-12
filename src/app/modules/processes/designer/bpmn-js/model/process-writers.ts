@@ -67,28 +67,62 @@ export function writeIncident(services: TaskServices, element: any, config: { me
 
 // ---- notification ----
 
-/** Prefills from subject/text parameters of a connector; the notification connector itself carries a payload. */
-export function readNotification(element: any): { subject: string; content: string } {
-    const first = firstExtension(element);
-    let subject = '';
-    let content = '';
-    const inputs = first && first.inputOutput && first.inputOutput.inputParameters;
-    (inputs || []).forEach((input: any) => {
-        if (input.name === 'subject') {
-            subject = input.value;
-        }
-        if (input.name === 'text') {
-            content = input.value;
-        }
-    });
-    return { subject, content };
+/**
+ * Seconds within which the notifier drops a notification the owner already has with the same title and message
+ * (SNRGY-3911); without it every notification is sent. The automation-engine takes it from the payload.
+ */
+export const notificationDuplicateWindowKey = 'ignore_duplicates_within_seconds';
+
+export interface NotificationConfig {
+    subject: string;
+    content: string;
+    /** null for none */
+    duplicateWindow: number | null;
 }
 
-export function writeNotification(services: TaskServices, element: any, subject: string, content: string): void {
+/**
+ * Prefills from the payload of the notification connector, so that editing a notification keeps its values, or from
+ * subject/text parameters of another connector.
+ */
+export function readNotification(element: any): NotificationConfig {
+    const first = firstExtension(element);
+    const result: NotificationConfig = { subject: '', content: '', duplicateWindow: null };
+    const inputs: any[] = (first && first.inputOutput && first.inputOutput.inputParameters) || [];
+    const notification = inputs.some((input: any) => input.name === 'deploymentIdentifier' && input.value === 'notification');
+    inputs.forEach((input: any) => {
+        if (input.name === 'subject') {
+            result.subject = input.value;
+        }
+        if (input.name === 'text') {
+            result.content = input.value;
+        }
+        if (input.name === 'payload' && notification) {
+            let payload: any;
+            try {
+                payload = JSON.parse(input.value);
+            } catch {
+                return;
+            }
+            if (payload && typeof payload === 'object') {
+                result.subject = typeof payload.title === 'string' ? payload.title : result.subject;
+                result.content = typeof payload.message === 'string' ? payload.message : result.content;
+                const window = Number(payload[notificationDuplicateWindowKey]);
+                result.duplicateWindow = Number.isInteger(window) && window > 0 ? window : null;
+            }
+        }
+    });
+    return result;
+}
+
+export function writeNotification(services: TaskServices, element: any, subject: string, content: string, duplicateWindow: number | null = null): void {
     replaceTask(services, element, 'bpmn:ServiceTask', false, (task) => {
         task.name = 'send notification';
+        const payload: Record<string, unknown> = { message: content, title: subject };
+        if (duplicateWindow !== null && duplicateWindow > 0) {
+            payload[notificationDuplicateWindowKey] = duplicateWindow;
+        }
         const inputs = [
-            inputParameter(services.moddle, 'payload', JSON.stringify({ message: content, title: subject })),
+            inputParameter(services.moddle, 'payload', JSON.stringify(payload)),
             inputParameter(services.moddle, 'deploymentIdentifier', 'notification'),
         ];
         setExtension(services.moddle, task, connector(services.moddle, 'http-connector', inputs, []));

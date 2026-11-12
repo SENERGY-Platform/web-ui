@@ -195,8 +195,13 @@ export class ProcessDesignerComponent implements OnInit, OnDestroy {
                 configEmail: (to: string, subj: string, content: string, callback: (to_: string, subj_: string, content_: string) => void) => {
                     that.designerDialogService.openEmailConfigDialog(to, subj, content, callback);
                 },
-                configNotification: (subj: string, content: string, callback: (subj_: string, content_: string) => void) => {
-                    that.designerDialogService.openNotificationConfigDialog(subj, content, callback);
+                configNotification: (
+                    subj: string,
+                    content: string,
+                    duplicateWindow: number | null,
+                    callback: (subj_: string, content_: string, duplicateWindow_: number | null) => void,
+                ) => {
+                    that.designerDialogService.openNotificationConfigDialog(subj, content, duplicateWindow, callback);
                 },
                 processIncident: (config: ProcessIncidentsConfig, callback: (result_: any) => void) => {
                     that.designerDialogService.openIncidentConfigDialog(config).subscribe((result: DeviceTypeSelectionResultModel) => {

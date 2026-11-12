@@ -221,7 +221,21 @@ describe('process writers on the process designer modeler', () => {
         });
 
         it('prefills from the subject and text parameters of a connector', () => {
-            expect(readNotification(element('Task_connector'))).toEqual({ subject: 'Hello', content: 'World' });
+            expect(readNotification(element('Task_connector'))).toEqual({ subject: 'Hello', content: 'World', duplicateWindow: null });
+        });
+
+        // SNRGY-3911
+        it('writes the duplicate window into the payload only when given and reads it back', async () => {
+            writeNotification(services, element('Task_1'), 'Alarm', 'too hot', 600);
+            const written = selected();
+            const task = byId(await saved(), written.id);
+            expect(JSON.parse(parameters(task, 'camunda:inputParameter')['payload'])).toEqual({ message: 'too hot', title: 'Alarm', ignore_duplicates_within_seconds: 600 });
+            expect(readNotification(written)).toEqual({ subject: 'Alarm', content: 'too hot', duplicateWindow: 600 });
+
+            writeNotification(services, written, 'Alarm', 'too hot', null);
+            const without = selected();
+            expect(JSON.parse(parameters(byId(await saved(), without.id), 'camunda:inputParameter')['payload'])).toEqual({ message: 'too hot', title: 'Alarm' });
+            expect(readNotification(without)).toEqual({ subject: 'Alarm', content: 'too hot', duplicateWindow: null });
         });
     });
 

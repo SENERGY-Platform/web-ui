@@ -42,6 +42,19 @@
         }
       </mat-form-field>
     </div>
+
+    <div class="form-group">
+      <mat-form-field appearance="outline" class="form-field" color="accent">
+        <mat-label>Ignore repeats within (seconds)</mat-label>
+        <input matInput type="number" min="1" step="1" [formControl]="duplicateWindow">
+        <mat-hint>Drops a notification with the same subject and message sent within this time. Empty: every notification is sent.</mat-hint>
+        @if (duplicateWindow.invalid) {
+          <mat-error>
+            Whole seconds from 1, or empty
+          </mat-error>
+        }
+      </mat-form-field>
+    </div>
   </form>
 </mat-dialog-content>
 

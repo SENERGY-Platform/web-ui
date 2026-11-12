@@ -124,16 +124,21 @@ export class DesignerDialogService {
         });
     }
 
-    openNotificationConfigDialog(subj: string, content: string, callback: (subj_: string, content_: string) => void) {
+    openNotificationConfigDialog(
+        subj: string,
+        content: string,
+        duplicateWindow: number | null,
+        callback: (subj_: string, content_: string, duplicateWindow_: number | null) => void,
+    ) {
         const dialogConfig = new MatDialogConfig();
         Object.assign(dialogConfig, dialogSize('l'));
         dialogConfig.disableClose = false;
         dialogConfig.autoFocus = false;
-        dialogConfig.data = { subj, content };
+        dialogConfig.data = { subj, content, duplicateWindow };
         const editDialogRef = this.dialog.open(NotificationConfigDialogComponent, dialogConfig);
-        editDialogRef.afterClosed().subscribe((value: { subj: string; content: string }) => {
+        editDialogRef.afterClosed().subscribe((value: { subj: string; content: string; duplicateWindow: number | null }) => {
             if (value) {
-                callback(value.subj, value.content);
+                callback(value.subj, value.content, value.duplicateWindow);
             }
         });
     }

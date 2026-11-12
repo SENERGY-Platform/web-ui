@@ -16,11 +16,11 @@
 
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { FormControl, FormGroup, ValidatorFn, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ParentErrorStateMatcher } from '../../../../../core/classes/parent-error-state-matcher';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
-import { MatFormField, MatLabel, MatError } from '@angular/material/form-field';
+import { MatFormField, MatLabel, MatError, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatButton } from '@angular/material/button';
 
@@ -28,7 +28,7 @@ import { MatButton } from '@angular/material/button';
     templateUrl: './notification-config-dialog.component.html',
     styleUrls: ['./notification-config-dialog.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatDialogActions, MatButton]
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, CloseMtxSelectOnScrollDirective, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatDialogActions, MatButton]
 })
 export class NotificationConfigDialogComponent {
     private dialogRef = inject<MatDialogRef<NotificationConfigDialogComponent>>(MatDialogRef);
@@ -36,10 +36,13 @@ export class NotificationConfigDialogComponent {
         to: string;
         subj: string;
         content: string;
+        duplicateWindow?: number | null;
     }>(MAT_DIALOG_DATA);
 
     subjectFormGroup: FormGroup;
     contentFormGroup: FormGroup;
+    /** seconds within which the notifier drops a repeated notification (SNRGY-3911); empty for none */
+    duplicateWindow = new FormControl<number | null>(null, [Validators.min(1), Validators.pattern(/^\d+$/)]);
     parentErrorStateMatcher = new ParentErrorStateMatcher();
 
     constructor() {
@@ -62,6 +65,7 @@ export class NotificationConfigDialogComponent {
             this.getValidator(),
         );
         this.contentFormGroup.setValue(this.interpretStringAsPlaceholder(this.dialogParams.content));
+        this.duplicateWindow.setValue(this.dialogParams.duplicateWindow ?? null);
     }
 
     close(): void {
@@ -73,7 +77,7 @@ export class NotificationConfigDialogComponent {
     }
 
     isInvalid(): boolean {
-        return this.subjectFormGroup.invalid || this.contentFormGroup.invalid;
+        return this.subjectFormGroup.invalid || this.contentFormGroup.invalid || this.duplicateWindow.invalid;
     }
 
     private getValidator(): ValidatorFn {
@@ -93,8 +97,9 @@ export class NotificationConfigDialogComponent {
         };
     }
 
-    private getResult(): { subj: string; content: string } {
-        const result = { subj: '', content: '' };
+    private getResult(): { subj: string; content: string; duplicateWindow: number | null } {
+        const window = this.duplicateWindow.value;
+        const result = { subj: '', content: '', duplicateWindow: window !== null && `${window}` !== '' && Number(window) > 0 ? Number(window) : null };
 
         const subjPlaceholder = this.subjectFormGroup.value as { key: string; defaultValue: string; fixed: boolean };
         result.subj = this.placeholderToString(subjPlaceholder.fixed, subjPlaceholder.key || 'subject', subjPlaceholder.defaultValue);

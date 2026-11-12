@@ -150,12 +150,16 @@ describe('process designer buttons', () => {
     });
 
     it('Notification opens the notification dialog and writes the connector', async () => {
-        d.callbacks['configNotification'] = answering('configNotification', 2, 'Alarm', 'too hot');
+        d.callbacks['configNotification'] = answering('configNotification', 3, 'Alarm', 'too hot', 600);
         await d.select('Task_1');
         await d.click('Notification');
 
-        expect(d.callbacks['configNotification']).toHaveBeenCalledWith('', '', jasmine.any(Function), jasmine.any(Function));
+        expect(d.callbacks['configNotification']).toHaveBeenCalledWith('', '', null, jasmine.any(Function), jasmine.any(Function));
         expect(d.selected().businessObject.name).toBe('send notification');
+
+        // SNRGY-3911: opened again, the dialog shows what was saved, so that saving keeps the window
+        await d.click('Notification');
+        expect(d.callbacks['configNotification']).toHaveBeenCalledWith('Alarm', 'too hot', 600, jasmine.any(Function), jasmine.any(Function));
     });
 
     it('Add data analysis opens the historic data dialog and writes an export task', async () => {
