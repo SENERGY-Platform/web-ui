@@ -239,20 +239,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
             console.error('Cant move dashboard to position ' + newIndex);
             return;
         }
-        const observables: Observable<DashboardModel | null>[] = [];
         const moved = this.dashboards[this.activeTabIndex];
         const movedIndex = moved.index;
-        moved.index = newIndex;
-        observables.push(this.dashboardService.updateDashboard(moved));
         const neighbour = this.dashboards[newIndex];
         const neighbourIndex = neighbour.index;
+        moved.index = newIndex;
         neighbour.index = this.activeTabIndex;
-        observables.push(this.dashboardService.updateDashboard(neighbour));
+        const swapped = [moved, neighbour];
+        const observables: Observable<DashboardModel | null>[] = swapped.map((dashboard) => this.dashboardService.updateDashboard(dashboard));
         forkJoin(observables).subscribe((responses) => {
+            // the service versions a dashboard by updatedAt and refuses a write carrying a stale one, so
+            // every answered stamp is taken over - without this only the first move of a session is accepted
+            responses.forEach((response, position) => {
+                if (response?.updatedAt !== undefined) {
+                    swapped[position].updatedAt = response.updatedAt;
+                }
+            });
             if (responses.some((response) => response === null)) {
                 moved.index = movedIndex;
                 neighbour.index = neighbourIndex;
+                // half a swap may have been written, and the tabs go back to the old order either way, so
+                // the written half is put back - otherwise the stored order differs from the one on screen
+                const written = swapped.filter((_dashboard, position) => responses[position] !== null);
                 snackError(this.snackBar, 'Dashboard could not be moved');
+                if (written.length > 0) {
+                    forkJoin(written.map((dashboard) => this.dashboardService.updateDashboard(dashboard))).subscribe((reverted) => {
+                        reverted.forEach((response, position) => {
+                            if (response?.updatedAt !== undefined) {
+                                written[position].updatedAt = response.updatedAt;
+                            }
+                        });
+                        if (reverted.some((response) => response === null)) {
+                            // both dashboards now claim the same index; saying nothing would read as if the
+                            // failed move had left the stored order alone
+                            snackError(this.snackBar, 'The stored order of the dashboards is wrong, please reload');
+                        }
+                    });
+                }
                 return;
             }
             moveItemInArray(this.dashboards, this.activeTabIndex, newIndex);

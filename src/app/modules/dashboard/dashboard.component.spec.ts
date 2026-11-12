@@ -368,12 +368,40 @@ describe('DashboardComponent', () => {
         it('keeps the order of the tabs and their indices when one dashboard update fails', () => {
             component.dashboards[0].index = 0;
             component.dashboards[1].index = 1;
-            dashboardServiceSpy.updateDashboard.and.returnValues(of({} as DashboardModel), of(null));
+            dashboardServiceSpy.updateDashboard.and.returnValues(of({} as DashboardModel), of(null), of({} as DashboardModel));
             component.moveDashboard(false);
             expect(component.dashboards.map((d) => d.id)).toEqual(['dashboard-1', 'dashboard-2']);
             expect(component.activeTabIndex).toBe(0);
             expect(component.dashboards.map((d) => d.index)).toEqual([0, 1]);
             expect(lastSnack()).toContain('Dashboard could not be moved');
+        });
+
+        it('puts the written half of a failed swap back, so the stored order matches the tabs', () => {
+            component.dashboards[0].index = 0;
+            component.dashboards[1].index = 1;
+            dashboardServiceSpy.updateDashboard.and.returnValues(of({} as DashboardModel), of(null), of({} as DashboardModel));
+            component.moveDashboard(false);
+            const written = dashboardServiceSpy.updateDashboard.calls.allArgs().map((args: DashboardModel[]) => [args[0].id, args[0].index]);
+            expect(written.length).toBe(3);
+            expect(written[2]).toEqual(['dashboard-1', 0]);
+        });
+
+        it('says the stored order is wrong when the revert of a half-written swap fails too', () => {
+            dashboardServiceSpy.updateDashboard.and.returnValues(of({} as DashboardModel), of(null), of(null));
+            component.moveDashboard(false);
+            expect(lastSnack()).toContain('stored order of the dashboards is wrong');
+        });
+
+        it('says nothing beyond the failed move when the revert goes through', () => {
+            dashboardServiceSpy.updateDashboard.and.returnValues(of({} as DashboardModel), of(null), of({} as DashboardModel));
+            component.moveDashboard(false);
+            expect(lastSnack()).toContain('Dashboard could not be moved');
+        });
+
+        it('asks for no revert when neither half of the swap was written', () => {
+            dashboardServiceSpy.updateDashboard.and.returnValue(of(null));
+            component.moveDashboard(false);
+            expect(dashboardServiceSpy.updateDashboard).toHaveBeenCalledTimes(2);
         });
 
         it('swaps the tabs when both dashboard updates succeed', () => {
@@ -383,6 +411,18 @@ describe('DashboardComponent', () => {
             component.moveDashboard(false);
             expect(component.dashboards.map((d) => d.id)).toEqual(['dashboard-2', 'dashboard-1']);
             expect(snackOpen).not.toHaveBeenCalled();
+        });
+
+        it('takes the fresh updatedAt of both moved dashboards, so a second move is accepted', () => {
+            component.dashboards[0].updatedAt = 'before';
+            component.dashboards[1].updatedAt = 'before';
+            dashboardServiceSpy.updateDashboard.and.returnValues(
+                of({ updatedAt: 'moved' } as DashboardModel),
+                of({ updatedAt: 'neighbour' } as DashboardModel),
+            );
+            component.moveDashboard(false);
+            const stamps = component.dashboards.map((d) => [d.id, d.updatedAt]);
+            expect(stamps).toEqual([['dashboard-2', 'neighbour'], ['dashboard-1', 'moved']]);
         });
 
         it('puts a widget back on its dashboard when the move failed', () => {
