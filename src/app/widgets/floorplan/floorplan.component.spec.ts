@@ -104,6 +104,30 @@ describe('FloorplanComponent', () => {
         expect(component).toBeTruthy();
     });
 
+    describe('a zone on the map', () => {
+        it('is drawn where the image is, not shifted by the chart area', () => {
+            drawPlacements([placement({ zone: [{ x: 0.1, y: 0.1 }, { x: 0.5, y: 0.1 }, { x: 0.5, y: 0.5 }] })]);
+            const ctx = document.createElement('canvas').getContext('2d') as CanvasRenderingContext2D;
+            const moveTo = spyOn(ctx, 'moveTo').and.callThrough();
+            const lineTo = spyOn(ctx, 'lineTo').and.callThrough();
+            const chart = {
+                ctx,
+                data: component.chartjs.data,
+                chartArea: { left: 30, top: 20, right: 130, bottom: 120, width: 100, height: 100 },
+                isDatasetVisible: () => true,
+                getDatasetMeta: () => ({ data: [{ x: 0, y: 0 }] }),
+            };
+
+            const plugin = component.chartjs.plugins.find(p => p.id === 'floorplanMarkers') as any;
+            plugin.afterDatasetsDraw(chart);
+
+            // the image is drawn at canvas pixels, the corners are fractions of it plus the chart area's offset
+            expect(moveTo).toHaveBeenCalledWith(40, 30);
+            expect(lineTo).toHaveBeenCalledWith(80, 30);
+            expect(lineTo).toHaveBeenCalledWith(80, 70);
+        });
+    });
+
     describe('placements without a position', () => {
         it('are not drawn on the map', () => {
             drawPlacements([placement({ alias: 'placed' }), placement({ alias: 'unplaced', position: { x: null, y: null } })]);

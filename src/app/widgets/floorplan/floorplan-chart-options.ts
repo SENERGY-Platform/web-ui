@@ -243,7 +243,10 @@ function markerPlugin(host: FloorplanChartHost): Plugin<keyof ChartTypeRegistry,
         const text = markerText(placement, dataset.label || '', host.zoom(), host.chartjs.showValue[index], host.chartjs.showValueWhenZoomed[index]);
         const background = String(dataset.backgroundColor || 'grey');
         if (hasZone(placement) && host.img !== undefined) {
-          zones.push({ points: zonePoints(placement, host.img, host.drawShift), background, text, size, family });
+          // drawShift is in axis units, which start at the chart area's corner; the context draws in canvas pixels
+          const points = zonePoints(placement, host.img, host.drawShift)
+            .map(point => ({ x: point.x + chart.chartArea.left, y: point.y + chart.chartArea.top }));
+          zones.push({ points, background, text, size, family });
           return;
         }
         markers.push({ x: element.x, y: element.y, size, background, icon, text, family });
