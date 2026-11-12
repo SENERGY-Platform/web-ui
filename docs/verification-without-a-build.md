@@ -48,6 +48,12 @@ src/app/.../some.component.html:17:29 - error TS2339: Property 'titleTypo'
 does not exist on type 'SomeDialogData'.
 ```
 
+`tsconfig.app.json` includes `./src/**/*`, not just what `main.ts` reaches, so `ngc`
+and `tsc` with it also check a component no route or module imports yet. A new page
+can therefore be type-checked before it is wired into a module. A narrower tsconfig
+outside the repository that `extends` this one does not work for that: the compiler
+stops with `TS6059 ... is not under 'rootDir'`.
+
 ## A spec can render, but it cannot measure
 
 `npm test` renders real DOM, so `getBoundingClientRect()` returns numbers and an
