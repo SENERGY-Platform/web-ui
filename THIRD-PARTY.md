@@ -1,39 +1,29 @@
-# Third-party notices
+# Third-party components under their own terms
 
-The app bundles third-party packages. Name, license and full license text of every
-bundled package are generated at build time by the Angular CLI (`extractLicenses`
-in `angular.json`) and shipped with the app as `/3rdpartylicenses.txt`.
+Dependencies whose licence asks for more than the permissive default this
+project builds on. Everything not listed here is MIT, Apache-2.0, BSD, ISC or
+equivalent and needs no notice beyond the usual attribution.
 
-This file covers what does not follow from those license texts alone. No
-third-party source code is vendored into this repository.
+## @joint/core
 
-## @joint/core (JointJS) — MPL-2.0
+| | |
+|---|---|
+| Version | 4.3.3 |
+| Licence | MPL-2.0 (Mozilla Public License 2.0) |
+| Source | https://jointjs.com, https://github.com/clientIO/joint |
+| Used by | the diagram editor and the flow designer under `src/app/modules/data/` |
+| Recorded | 2026-11-12 |
 
-Used by the diagram editor (`src/app/modules/data/diagram-editor`). The Mozilla
-Public License 2.0 requires recipients to be informed how to obtain the source
-code of the covered software:
+The MPL covers the files of the package itself, not the code that is bundled
+beside them. Two things follow for a release:
 
-    https://github.com/clientIO/joint
+- The source of the covered files stays available. It is published by the
+  project at the address above; nothing is vendored or patched here, so the
+  published release of the version named above is that source.
+- The notice stays with the distribution. This file is it.
 
-The bundled version is pinned in `package-lock.json`. None of its files are
-modified here; if that changes, the modified files have to be made available under
-the MPL as well. @joint/core ships no CSS; the editor's stylesheet
-(`diagram-editor/joint.css`) is written for this app and contains no JointJS code.
+Modifying the package in place would add the obligation to publish those
+changes under the MPL as well. Do not patch it inside `node_modules` or vendor
+a changed copy without recording it here.
 
-## dompurify — MPL-2.0 OR Apache-2.0
-
-Pulled in transitively by `swagger-ui`, `monaco-editor`, `posthog-js` and
-`@asyncapi/react-component`. It is dual licensed and used here under the
-**Apache-2.0** option, so no MPL obligation applies.
-
-## Fonts
-
-Roboto and Material Symbols are self-hosted under `src/assets/fonts/` and are
-Google LLC, Apache-2.0. Inter (The Inter Project Authors) and Figtree (The
-Figtree Project Authors) are self-hosted there too, under the SIL Open Font
-License 1.1. See `src/assets/fonts/LICENSE`.
-
-## Map data
-
-The network dialog shows an OpenStreetMap based map. Map data is ODbL-1.0 and
-requires the attribution that the dialog renders (`© OpenStreetMap contributors`).
+The allowance is configured in `.claude/license-policy.env`, which says why.
