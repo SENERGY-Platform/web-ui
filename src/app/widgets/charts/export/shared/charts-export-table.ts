@@ -18,7 +18,7 @@ import Color from 'color';
 import { ChartDataTableModel } from '../../../../core/model/chart/chart-data-table.model';
 import { WidgetModel, WidgetPropertiesModels } from '../../../../modules/dashboard/shared/dashboard-widget.model';
 import { DeviceInstanceWithDeviceTypeModel } from 'src/app/modules/devices/device-instances/shared/device-instances.model';
-import { ChartsExportVAxesModel } from './charts-export-properties.model';
+import { ChartsExportDeviceGroupMergingStrategy, ChartsExportVAxesModel } from './charts-export-properties.model';
 import { axisLabel } from './charts-export-axis-group';
 
 export const chartsExportDefaultColor = '#4484ce';
@@ -383,6 +383,18 @@ export function chartsExportChart(widget: WidgetModel, dataTable: ChartDataTable
         sliceThreshold: chartType !== 'PieChart' || dataTable.data.length > 5 ? undefined : 0,
         columnAxes,
     };
+}
+
+/**
+ * Whether the colours are picked per column title rather than per axis: one device group or location
+ * axis, drawn device by device. A generated remainder does not count towards the one axis - it is drawn
+ * beside its parent's sub axes, not as a second configured axis.
+ */
+export function picksColorsPerTitle(vAxes?: ChartsExportVAxesModel[]): boolean {
+    const axes = (vAxes || []).filter((axis) => axis.isRemainder !== true);
+    return axes.length === 1
+        && (axes[0].deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Separate || axes[0].deviceGroupMergingStrategy === undefined)
+        && (axes[0].deviceGroupId !== undefined || axes[0].locationId !== undefined);
 }
 
 export function getColorArray(vAxes?: ChartsExportVAxesModel[]): string[] {

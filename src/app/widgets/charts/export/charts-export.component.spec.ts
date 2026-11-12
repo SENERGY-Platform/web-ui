@@ -548,6 +548,60 @@ function monthlyWidget(): WidgetModel {
             expect((component.chartjs.data?.datasets || []).map(d => (d as any).yAxisID)).toEqual(['y2', 'y2']);
         });
 
+        /** Drills into the dataset and answers with one row per request, rows as [ISO time, value]. */
+        function drillAnswering(label: string, rows: [string, number][][]): { body: any; drawn: [string, number][] } {
+            component.drillDown(datasetIndex(label));
+            const req = httpMock.expectOne(isQuery);
+            const body = req.request.body;
+            req.flush(rows.map((r, i) => ({ requestIndex: i, deviceId: 'dev-' + i, serviceId: 'svc', columnNames: ['value'], data: [r] })));
+            fixture.detectChanges();
+            return { body, drawn: (component.chartjs.data?.datasets || []).map(d => ['' + d.label, (d.data[0] as { y: number }).y]) };
+        }
+
+        it('asks for the parent value as well when the axis wants its remainder drawn', () => {
+            render([axis('A', { subAxes, showRemainder: true })], [[0, 'dev-A', [[t(2026), 10]]]]);
+            const { body } = drillAnswering('A', [[[t(2026), 4]], [[t(2026), 10]]]);
+            expect(body.map((e: any) => e.deviceId)).toEqual(['dev-Sub', 'dev-A']);
+        });
+
+        it('draws what the sub axes leave of the parent value, under the label the axis names', () => {
+            render([axis('A', { subAxes, showRemainder: true, remainderAlias: 'Unbekannt' })], [[0, 'dev-A', [[t(2026), 10]]]]);
+            const { drawn } = drillAnswering('A', [[[t(2026), 4]], [[t(2026), 10]]]);
+            expect(drawn).toEqual([['Sub', 4], ['Unbekannt', 6]]);
+        });
+
+        it('offers no drill on the remainder itself', () => {
+            render([axis('A', { subAxes, showRemainder: true })], [[0, 'dev-A', [[t(2026), 10]]]]);
+            drillAnswering('A', [[[t(2026), 4]], [[t(2026), 10]]]);
+            expect(component.drillable(datasetIndex('Unclear'))).toBeFalse();
+        });
+
+        it('draws the sub axes alone without a grouping, where no bucket holds parent and part together', () => {
+            render([axis('A', { subAxes, showRemainder: true })], [[0, 'dev-A', [[t(2026), 10]]]], { group: { type: '', time: '' } });
+            const { body, drawn } = drillAnswering('A', [[[t(2026), 4]]]);
+            expect(body.map((e: any) => e.deviceId)).toEqual(['dev-Sub']);
+            expect(drawn).toEqual([['Sub', 4]]);
+        });
+
+        it('drops a stored remainder once the aggregation is taken off the widget', () => {
+            render([axis('A', { subAxes, showRemainder: true })], [[0, 'dev-A', [[t(2026), 10]]]]);
+            drillAnswering('A', [[[t(2026), 4]], [[t(2026), 10]]]);
+            widget.properties.group = { type: '', time: '' };
+            initWidget.next(widget.id);
+            const req = httpMock.expectOne(isQuery);
+            expect(req.request.body.map((e: any) => e.deviceId)).toEqual(['dev-Sub']);
+            req.flush([{ requestIndex: 0, deviceId: 'dev-Sub', serviceId: 'svc', columnNames: ['value'], data: [[[t(2026), 4]]] }]);
+            fixture.detectChanges();
+            expect((component.chartjs.data?.datasets || []).map(d => '' + d.label)).toEqual(['Sub']);
+        });
+
+        it('draws the sub axes alone when the axis does not want a remainder', () => {
+            render([axis('A', { subAxes })], [[0, 'dev-A', [[t(2026), 10]]]]);
+            const { body, drawn } = drillAnswering('A', [[[t(2026), 4]]]);
+            expect(body.map((e: any) => e.deviceId)).toEqual(['dev-Sub']);
+            expect(drawn).toEqual([['Sub', 4]]);
+        });
+
         it('puts each column on the y axis of the axis it comes from', () => {
             render([separate('G'), axis('B', { displayOnSecondVAxis: true })], [[0, 'd1', [[t(2026), 1]]], [0, 'd2', [[t(2026), 2]]], [1, 'dev-B', [[t(2026), 3]]]]);
             const yAxes = (component.chartjs.data?.datasets || []).map(d => [d.label, (d as any).yAxisID]);

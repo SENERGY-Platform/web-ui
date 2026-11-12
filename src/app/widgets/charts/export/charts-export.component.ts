@@ -18,13 +18,14 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ChangeDetectio
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { WidgetModel } from '../../../modules/dashboard/shared/dashboard-widget.model';
 import { ElementSizeService } from '../../../core/services/element-size.service';
-import { ChartsExportChart } from './shared/charts-export-table';
+import { ChartsExportChart, picksColorsPerTitle } from './shared/charts-export-table';
 import { ChartsExportService } from './shared/charts-export.service';
 import { DashboardService } from '../../../modules/dashboard/shared/dashboard.service';
 import { ErrorModel } from '../../../core/model/error.model';
 import { ErrorHandlerService } from '../../../core/services/error-handler.service';
 import { buildColumnChartOptions } from './charts-export-column-options';
 import { ChartsExportDrillEntry, ChartsExportViewState } from './charts-export-view-state';
+import { applyRemainder, remainderAxis } from './shared/charts-export-remainder';
 import { removeWidgetStorage } from '../shared/widget-storage';
 import { googleFrame, googlePlugins } from '../../../core/charts/google-chartjs';
 import { googlePiePlugin } from '../../../core/charts/google-pie';
@@ -388,6 +389,11 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         Chart.getChart(canvas)?.resetZoom();
     }
 
+    /** Whether the widget aggregates into buckets; without that, parent and sub axes share no bucket to net against. */
+    grouped(): boolean {
+        return (this.widget().properties.group?.type || '') !== '';
+    }
+
     /** Whether every axis reads from the internal Influx database. */
     private influxOnly(): boolean {
         const axes = this.modifiedVaxes || this.widget().properties.vAxes || [];
@@ -453,12 +459,14 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
             const widget = JSON.parse(JSON.stringify(this.widget())) as WidgetModel;
 
             if (this.modifiedVaxes !== null) {
-                widget.properties.vAxes = this.modifiedVaxes;
+                // a stored drill can still hold a remainder from before the aggregation was taken off the
+                // widget, and without buckets there is nothing to net it against
+                widget.properties.vAxes = this.grouped() ? this.modifiedVaxes : this.modifiedVaxes.filter(vAxis => vAxis.isRemainder !== true);
             }
 
             widget.properties.stacked = this.stacked;
 
-            const chooseColors = this.chooseColors || (widget.properties.vAxes?.length === 1 && (widget.properties.vAxes[0].deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Separate || widget.properties.vAxes[0].deviceGroupMergingStrategy === undefined) && (widget.properties.vAxes[0].deviceGroupId !== undefined || widget.properties.vAxes[0].locationId !== undefined));
+            const chooseColors = this.chooseColors || picksColorsPerTitle(widget.properties.vAxes);
 
             this.chartsExportService.getChartData(widget, this.from?.toISOString(), this.to?.toISOString(), this.groupTime || undefined, this.hAxisFormat || undefined, lastOverride, chooseColors, this.disableBreaking).subscribe((resp: ChartsExportChart | ErrorModel) => {
                 if (this.errorHandlerService.checkIfErrorExists(resp)) {
@@ -472,6 +480,10 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
                         const [header, ...rows] = resp.dataTable;
                         rows.sort((a, b) => (a[0] as Date).valueOf() - (b[0] as Date).valueOf());
                         resp.dataTable = [header, ...rows];
+                    }
+                    if (resp.chartType === 'ColumnChart') {
+                        // the axes the request was built from, not what the view state holds by now
+                        applyRemainder(resp.dataTable, resp.columnAxes, widget.properties.vAxes || []);
                     }
                     this.chartExportData.set(resp);
 
@@ -567,7 +579,8 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
 
     drillable(datasetIndex: number): boolean {
         const axis = this.axisOfDataset(datasetIndex);
-        if (axis === undefined) {
+        if (axis === undefined || axis.isRemainder === true) {
+            // the remainder is already the drilled view of its parent, so it has nothing left to open
             return false;
         }
         if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
@@ -588,6 +601,11 @@ export class ChartsExportComponent implements OnInit, OnDestroy, AfterViewInit {
         if (axis.subAxes !== undefined && axis.subAxes.length > 0) {
             const cpy = JSON.parse(JSON.stringify(axis.subAxes)) as ChartsExportVAxesModel[];
             cpy.forEach(sub => sub.displayOnSecondVAxis = axis.displayOnSecondVAxis);
+            const rest = this.grouped() ? remainderAxis(axis) : undefined;
+            if (rest !== undefined) {
+                // last, so what the sub-axes leave of the parent sits on top of the stack
+                cpy.push(rest);
+            }
             newAxes = cpy;
 
         } else if (axis.deviceGroupMergingStrategy === ChartsExportDeviceGroupMergingStrategy.Sum && (axis.deviceGroupId !== undefined || axis.locationId !== undefined)) {

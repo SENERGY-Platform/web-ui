@@ -23,6 +23,7 @@ import {
     chartsExportTable,
     createThemeColorVariation,
     getStableStringHash,
+    picksColorsPerTitle,
     themeColorsForTitles,
 } from './charts-export-table';
 
@@ -321,5 +322,26 @@ describe('theme colours', () => {
 
     it('keeps the base colour when the variation would come out near white or black', () => {
         expect(createThemeColorVariation('#eeeeee', 1)).toBe('#eeeeee');
+    });
+});
+
+describe('picksColorsPerTitle', () => {
+    const group = (extra: Partial<ChartsExportVAxesModel> = {}) => axis('v', { deviceGroupId: 'group-1', ...extra });
+
+    it('holds for the one group axis drawn device by device', () => {
+        expect(picksColorsPerTitle([group()])).toBeTrue();
+        expect(picksColorsPerTitle([group({ deviceGroupMergingStrategy: ChartsExportDeviceGroupMergingStrategy.Separate })])).toBeTrue();
+        expect(picksColorsPerTitle([axis('v', { locationId: 'loc-1' })])).toBeTrue();
+    });
+
+    it('does not hold for a summed group, a plain axis or two axes', () => {
+        expect(picksColorsPerTitle([group({ deviceGroupMergingStrategy: ChartsExportDeviceGroupMergingStrategy.Sum })])).toBeFalse();
+        expect(picksColorsPerTitle([axis('v', { deviceId: 'dev-1' })])).toBeFalse();
+        expect(picksColorsPerTitle([group(), group()])).toBeFalse();
+        expect(picksColorsPerTitle(undefined)).toBeFalse();
+    });
+
+    it('ignores a generated remainder, so a drill keeps its colour per device', () => {
+        expect(picksColorsPerTitle([group(), axis('rest', { isRemainder: true })])).toBeTrue();
     });
 });

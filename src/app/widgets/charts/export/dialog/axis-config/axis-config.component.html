@@ -180,6 +180,21 @@
                         </button>
                     </div>
                 </div>
+                @if (remainderAllowed && (element.subAxes || []).length > 0) {
+                    <div class="row w-100">
+                        <div>
+                            <mat-checkbox [(ngModel)]="element.showRemainder"> Show remainder of this value
+                            </mat-checkbox>
+                        </div>
+                        <div>
+                            <mat-form-field>
+                                <mat-label>Remainder label</mat-label>
+                                <input type="text" matInput [placeholder]="defaultRemainderLabel"
+                                    [disabled]="element.showRemainder !== true" [(ngModel)]="element.remainderAlias">
+                            </mat-form-field>
+                        </div>
+                    </div>
+                }
                 <div class="column w-100 drop-zone" [ngClass]="{'drop-zone-active': dragging}" cdkDropList
                     (cdkDropListDropped)="dropped.emit({$event, target: element})" [id]="getId()"
                     [cdkDropListConnectedTo]="connectedNodes(element)">
@@ -188,7 +203,7 @@
                         [treeControl]="treeControl" [groupTypeIsDifference]="groupTypeIsDifference"
                         [userHasUpdatePropertiesAuthorization]="userHasUpdatePropertiesAuthorization"
                         [subElement]="true" [exportTags]="exportTags" [groupType]="groupType"
-                        [axisGroupAllowed]="false"
+                        [axisGroupAllowed]="false" [remainderAllowed]="remainderAllowed"
                         (dragStart)="dragStart.emit(null)" (dragEnd)="dragEnd.emit(null)"
                         [enableDragDrop]="enableDragDrop" (dropped)="dropped.emit($event)"
                         [connectedNodes]="connectedNodes" [dragging]="dragging">

@@ -18,6 +18,7 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, inject
 import { MatDialog } from '@angular/material/dialog';
 import { dialogSize } from '../../../../../core/dialog-size';
 import { ChartsExportVAxesModel, ChartsExportDeviceGroupMergingStrategy, ChartsExportConversion } from '../../shared/charts-export-properties.model';
+import { DEFAULT_REMAINDER_LABEL } from '../../shared/charts-export-remainder';
 import { GroupOption, groupTimeLevels, isAxisGroupInterval, splitGroupTime } from '../../../shared/data-source-selector/group-options';
 import { ListRulesComponent } from '../list-rules/list-rules.component';
 import { NestedTreeControl } from '@angular/cdk/tree';
@@ -51,6 +52,8 @@ export class AxisConfigComponent {
     @Input() groupType?: string | null;
     /** Whether the chart type takes a grouping per axis (line charts); the field is hidden otherwise. */
     @Input() axisGroupAllowed = false;
+    /** Whether the chart type draws a drilled remainder (column charts); the fields are hidden otherwise. */
+    @Input() remainderAllowed = false;
     @Input() groupTypes: GroupOption[] = [];
     @Input() element: ChartsExportVAxesModel = {} as ChartsExportVAxesModel;
     @Input() treeControl: NestedTreeControl<ChartsExportVAxesModel> = new NestedTreeControl<ChartsExportVAxesModel>((node) => node.subAxes);
@@ -58,6 +61,7 @@ export class AxisConfigComponent {
     @Input() subElement = false;
     @Input() connectedNodes: (not?: ChartsExportVAxesModel) => string[] = (_) => [];
     @Input() dragging = false;
+    readonly defaultRemainderLabel = DEFAULT_REMAINDER_LABEL;
 
     @Output() copyClicked = new EventEmitter<null>();
     @Output() deleteClicked = new EventEmitter<null>();

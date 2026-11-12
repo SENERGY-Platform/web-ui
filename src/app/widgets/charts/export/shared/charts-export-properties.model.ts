@@ -92,4 +92,10 @@ export interface ChartsExportVAxesModel {
     /** Absent: like the widget; type '' draws raw values; line charts only. Not `group`, which holds the picker's option label. */
     ownGroup?: { type: string; time: string };
     subAxes?: ChartsExportVAxesModel[];
+    /** Column chart only: while drilled into the sub-axes, draw what they leave of this axis' value as its own series. */
+    showRemainder?: boolean;
+    /** Label of that series; empty reads as DEFAULT_REMAINDER_LABEL. */
+    remainderAlias?: string;
+    /** Marks the generated remainder series. Only ever set on a drilled axis, never stored with the widget. */
+    isRemainder?: boolean;
 }
