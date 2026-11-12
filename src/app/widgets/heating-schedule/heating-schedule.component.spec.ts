@@ -28,7 +28,7 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { SmartServiceInstanceModel } from 'src/app/modules/smart-services/instances/shared/instances.model';
 import { SmartServiceInstanceService } from 'src/app/modules/smart-services/instances/shared/instances.service';
 import { HeatingScheduleComponent } from './heating-schedule.component';
-import { AIR_ASPECT, BATTERY_FUNCTION, TARGET_ASPECT, TEMPERATURE_FUNCTION } from './shared/heating-schedule.details';
+import { AIR_ASPECT, BATTERY_FUNCTION, READING_ASPECT, TARGET_ASPECT, TEMPERATURE_FUNCTION } from './shared/heating-schedule.details';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
 
 describe('HeatingScheduleComponent', () => {
@@ -302,7 +302,7 @@ describe('HeatingScheduleComponent', () => {
         function deviceValues(room: number, setPoint: number, battery: number): void {
             devices.getDeviceListByIds.and.returnValue(of([{ id: 'urn:a', device_type_id: 'dt' }] as unknown as DeviceInstanceModel[]));
             deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt',
-                variable(TEMPERATURE_FUNCTION, [AIR_ASPECT]), variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT]), variable(BATTERY_FUNCTION, ['urn:aspect:device'])) as unknown as DeviceTypeModel]));
+                variable(TEMPERATURE_FUNCTION, [AIR_ASPECT, READING_ASPECT]), variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT]), variable(BATTERY_FUNCTION, ['urn:aspect:device'])) as unknown as DeviceTypeModel]));
             commands.runCommands.and.returnValue(of([room, setPoint, battery].map((message) => ({ status_code: 200, message }))));
         }
 
@@ -355,7 +355,7 @@ describe('HeatingScheduleComponent', () => {
             expect(text('.current')).toBe('24 °C');
 
             devices.getDeviceListByIds.and.returnValue(of([{ id: 'urn:a', device_type_id: 'dt' }] as unknown as DeviceInstanceModel[]));
-            deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt', variable(TEMPERATURE_FUNCTION, [AIR_ASPECT])) as unknown as DeviceTypeModel]));
+            deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt', variable(TEMPERATURE_FUNCTION, [AIR_ASPECT, READING_ASPECT])) as unknown as DeviceTypeModel]));
             commands.runCommands.and.returnValue(of([]));
             init.next('w1');
             fixture.detectChanges();

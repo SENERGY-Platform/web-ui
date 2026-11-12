@@ -21,6 +21,7 @@ import {
     CELSIUS_CHARACTERISTIC,
     HeatingDeviceValues,
     PERCENT_CHARACTERISTIC,
+    READING_ASPECT,
     TARGET_ASPECT,
     TEMPERATURE_FUNCTION,
     instanceStatus,
@@ -44,16 +45,16 @@ describe('heating schedule device details', () => {
                 service('s-other', variable('urn:other', [])),
                 service('s-target', variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT])),
                 service('s-temp',
-                    variable('', [], [variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT]), variable('', [], [variable(TEMPERATURE_FUNCTION, [AIR_ASPECT])])]),
-                    variable(TEMPERATURE_FUNCTION, [AIR_ASPECT])),
-                service('s-temp2', variable(TEMPERATURE_FUNCTION, [AIR_ASPECT])),
+                    variable('', [], [variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT]), variable('', [], [variable(TEMPERATURE_FUNCTION, [AIR_ASPECT, READING_ASPECT])])]),
+                    variable(TEMPERATURE_FUNCTION, [AIR_ASPECT, READING_ASPECT])),
+                service('s-temp2', variable(TEMPERATURE_FUNCTION, [AIR_ASPECT, READING_ASPECT])),
                 service('s-battery', variable(BATTERY_FUNCTION, ['urn:aspect:device'])),
             );
 
             expect(matchValueSources('d1', type)).toEqual([
-                { deviceId: 'd1', kind: 'room', serviceId: 's-temp', aspectId: AIR_ASPECT },
-                { deviceId: 'd1', kind: 'target', serviceId: 's-target', aspectId: TARGET_ASPECT },
-                { deviceId: 'd1', kind: 'battery', serviceId: 's-battery', aspectId: 'urn:aspect:device' },
+                { deviceId: 'd1', kind: 'room', serviceId: 's-temp', aspectIds: [AIR_ASPECT, READING_ASPECT] },
+                { deviceId: 'd1', kind: 'target', serviceId: 's-target', aspectIds: [TARGET_ASPECT] },
+                { deviceId: 'd1', kind: 'battery', serviceId: 's-battery', aspectIds: ['urn:aspect:device'] },
             ]);
         });
 
@@ -61,19 +62,34 @@ describe('heating schedule device details', () => {
             const type = deviceType(service('s1', variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT])), service('s2', variable(BATTERY_FUNCTION, [])));
 
             expect(matchValueSources('d1', type)).toEqual([
-                { deviceId: 'd1', kind: 'target', serviceId: 's1', aspectId: TARGET_ASPECT },
+                { deviceId: 'd1', kind: 'target', serviceId: 's1', aspectIds: [TARGET_ASPECT] },
                 { deviceId: 'd1', kind: 'battery', serviceId: 's2' },
             ]);
         });
 
+        it('picks the room variable by Air and Reading even when the set point variable comes first', () => {
+            const setPoint = variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT, AIR_ASPECT, 'urn:aspect:indoor']);
+            const room = variable(TEMPERATURE_FUNCTION, [AIR_ASPECT, 'urn:aspect:indoor', READING_ASPECT]);
+            const sources = matchValueSources('d1', deviceType(service('get', setPoint, room)));
+
+            expect(sources).toEqual([
+                { deviceId: 'd1', kind: 'room', serviceId: 'get', aspectIds: [AIR_ASPECT, READING_ASPECT] },
+                { deviceId: 'd1', kind: 'target', serviceId: 'get', aspectIds: [TARGET_ASPECT] },
+            ]);
+            expect(readCommands(sources).map((c) => c.aspect_ids)).toEqual([[AIR_ASPECT, READING_ASPECT], [TARGET_ASPECT]]);
+
+            const split = matchValueSources('d1', deviceType(service('set', setPoint), service('get', setPoint, room)));
+            expect(split.map((s) => [s.kind, s.serviceId])).toEqual([['room', 'get'], ['target', 'set']]);
+        });
+
         it('builds one read command per source with the characteristic', () => {
             const commands = readCommands([
-                { deviceId: 'd1', kind: 'room', serviceId: 's1', aspectId: AIR_ASPECT },
+                { deviceId: 'd1', kind: 'room', serviceId: 's1', aspectIds: [AIR_ASPECT, READING_ASPECT] },
                 { deviceId: 'd1', kind: 'battery', serviceId: 's2' },
             ]);
 
             expect(commands).toEqual([
-                { function_id: TEMPERATURE_FUNCTION, device_id: 'd1', service_id: 's1', aspect_id: AIR_ASPECT, characteristic_id: CELSIUS_CHARACTERISTIC },
+                { function_id: TEMPERATURE_FUNCTION, device_id: 'd1', service_id: 's1', aspect_ids: [AIR_ASPECT, READING_ASPECT], characteristic_id: CELSIUS_CHARACTERISTIC },
                 { function_id: BATTERY_FUNCTION, device_id: 'd1', service_id: 's2', characteristic_id: PERCENT_CHARACTERISTIC },
             ]);
         });

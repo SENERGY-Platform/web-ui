@@ -30,8 +30,8 @@ export interface HeatingValueSource {
     deviceId: string;
     kind: HeatingValueKind;
     serviceId: string;
-    /** the aspect the command names; absent for the battery when the variable carries none */
-    aspectId?: string;
+    /** the aspects the command names; absent for the battery when the variable carries none */
+    aspectIds?: string[];
 }
 
 /** What a thermostat reports; a missing field is unavailable. */
@@ -44,6 +44,7 @@ export interface HeatingDeviceValues {
 export const TEMPERATURE_FUNCTION = 'urn:infai:ses:measuring-function:d19ffeb0-877c-4611-951c-b3fc37d9b9ba';
 export const BATTERY_FUNCTION = 'urn:infai:ses:measuring-function:68dae5ce-a9ee-4487-8872-7943a94e2595';
 export const AIR_ASPECT = 'urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6';
+export const READING_ASPECT = 'urn:infai:ses:aspect:ffcdc0a6-0957-49d7-be9a-af912ecbd3cf';
 export const TARGET_ASPECT = 'urn:infai:ses:aspect:4f4188b6-f944-45fa-9429-15655f691397';
 export const CELSIUS_CHARACTERISTIC = 'urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a';
 export const PERCENT_CHARACTERISTIC = 'urn:infai:ses:characteristic:46f808f4-bb9e-4cc2-bd50-dc33ca74f273';
@@ -54,22 +55,22 @@ const OVERRIDE_TENTHS = 5;
 /** The device needs time to report the new set point after a planned switch. */
 const OVERRIDE_GRACE_MS = 10 * 60000;
 
-const KINDS: Array<{ kind: HeatingValueKind; functionId: string; aspectId?: string }> = [
-    { kind: 'room', functionId: TEMPERATURE_FUNCTION, aspectId: AIR_ASPECT },
-    { kind: 'target', functionId: TEMPERATURE_FUNCTION, aspectId: TARGET_ASPECT },
+const KINDS: Array<{ kind: HeatingValueKind; functionId: string; aspectIds?: string[] }> = [
+    { kind: 'room', functionId: TEMPERATURE_FUNCTION, aspectIds: [AIR_ASPECT, READING_ASPECT] },
+    { kind: 'target', functionId: TEMPERATURE_FUNCTION, aspectIds: [TARGET_ASPECT] },
     { kind: 'battery', functionId: BATTERY_FUNCTION },
 ];
 
-/** The first variable, searched depth first through the sub variables, with the function and, when given, the aspect. */
-function findVariable(variable: DeviceTypeContentVariableModel | undefined, functionId: string, aspectId?: string): DeviceTypeContentVariableModel | null {
+/** The first variable, searched depth first through the sub variables, with the function and, when given, all of the aspects. */
+function findVariable(variable: DeviceTypeContentVariableModel | undefined, functionId: string, aspectIds?: string[]): DeviceTypeContentVariableModel | null {
     if (!variable) {
         return null;
     }
-    if (variable.function_id === functionId && (aspectId === undefined || contentVariableAspectIds(variable).includes(aspectId))) {
+    if (variable.function_id === functionId && (aspectIds === undefined || aspectIds.every((id) => contentVariableAspectIds(variable).includes(id)))) {
         return variable;
     }
     for (const sub of variable.sub_content_variables ?? []) {
-        const found = findVariable(sub, functionId, aspectId);
+        const found = findVariable(sub, functionId, aspectIds);
         if (found !== null) {
             return found;
         }
@@ -77,15 +78,15 @@ function findVariable(variable: DeviceTypeContentVariableModel | undefined, func
     return null;
 }
 
-/** The sources of the values the device type can deliver; room and target differ only by aspect, so the aspect is matched. */
+/** The sources of the values the device type can deliver; room and target differ only by aspects, so the aspects are matched. */
 export function matchValueSources(deviceId: string, deviceType: DeviceTypeModel): HeatingValueSource[] {
     const sources: HeatingValueSource[] = [];
     for (const wanted of KINDS) {
         for (const service of deviceType.services ?? []) {
-            const variable = (service.outputs ?? []).map((output) => findVariable(output.content_variable, wanted.functionId, wanted.aspectId)).find((v) => v !== null);
+            const variable = (service.outputs ?? []).map((output) => findVariable(output.content_variable, wanted.functionId, wanted.aspectIds)).find((v) => v !== null);
             if (variable) {
-                const aspectId = wanted.aspectId ?? contentVariableAspectIds(variable)[0];
-                sources.push({ deviceId, kind: wanted.kind, serviceId: service.id, ...(aspectId === undefined ? {} : { aspectId }) });
+                const aspectIds = wanted.aspectIds ?? contentVariableAspectIds(variable).slice(0, 1);
+                sources.push({ deviceId, kind: wanted.kind, serviceId: service.id, ...(aspectIds.length === 0 ? {} : { aspectIds }) });
                 break;
             }
         }
@@ -99,7 +100,7 @@ export function readCommands(sources: HeatingValueSource[]): DeviceCommandModel[
         function_id: source.kind === 'battery' ? BATTERY_FUNCTION : TEMPERATURE_FUNCTION,
         device_id: source.deviceId,
         service_id: source.serviceId,
-        ...(source.aspectId === undefined ? {} : { aspect_id: source.aspectId }),
+        ...(source.aspectIds === undefined ? {} : { aspect_ids: source.aspectIds }),
         characteristic_id: source.kind === 'battery' ? PERCENT_CHARACTERISTIC : CELSIUS_CHARACTERISTIC,
     }));
 }
