@@ -15,15 +15,19 @@
  */
 
 /*
- * Writes the gitignored src/environments/environment.prod.ts from the tracked
- * environment.ts, the same way build/Dockerfile does, so a local production
- * build never compiles against a stale copy that lacks newer keys.
+ * Writes the two gitignored environment files from the tracked environment.ts,
+ * the production one the same way build/Dockerfile does. Both builds swap one of
+ * them in through fileReplacements, so a copy that lacks newer keys fails the
+ * build with one error per use of every key added since - and never names the
+ * file it is missing them from. Both are written on either run, because both are
+ * generated and a stale one is the whole problem.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const tracked = readFileSync('src/environments/environment.ts', 'utf8');
 if (!tracked.includes('production: false')) {
-    throw new Error('src/environments/environment.ts no longer contains "production: false"; update scripts/environment-prod.mjs and build/Dockerfile together');
+    throw new Error('src/environments/environment.ts no longer contains "production: false"; update scripts/environment-generated.mjs and build/Dockerfile together');
 }
+writeFileSync('src/environments/environment.dev.ts', tracked);
 writeFileSync('src/environments/environment.prod.ts', tracked.replace('production: false', 'production: true'));

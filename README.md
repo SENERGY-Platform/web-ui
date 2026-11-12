@@ -32,22 +32,14 @@ npm run start_dev
 `start_dev` renders the runtime environment first (`build-env.sh`) and then
 serves. On Windows use `npm run start_dev_win`.
 
-If it fails with
-
-```
-Error: The .../src/environments/environment.dev.ts path in file replacements does not exist.
-```
-
-create the missing file from the tracked one:
-
-```bash
-cp src/environments/environment.ts src/environments/environment.dev.ts
-```
-
-That file is generated and gitignored, which is why a fresh clone does not have
-it. Its production counterpart `environment.prod.ts` is written from the
-tracked `environment.ts` before every `npm run build`, as `build/Dockerfile` does,
-so call `npm run build` rather than `ng build` directly. The three files a service URL actually lives in are tracked — see `docs/`.
+`environment.dev.ts` and `environment.prod.ts` are generated and gitignored, so a
+fresh clone has neither. Both are written from the tracked `environment.ts` before
+every `npm run start_dev` and `npm run build`, the production one the way
+`build/Dockerfile` does it. Call those scripts rather than `ng serve` or
+`ng build` directly: a copy that lacks a key added since it was last written
+fails the build with one error per use of that key, naming every use and never
+the file it is missing from. The three files a service URL actually lives in are
+tracked — see `docs/`.
 
 ## Verify a change
 

@@ -23,9 +23,10 @@ rather than a missing edit:
 
 `environment.ts` is also where the **production** build gets the key from:
 `build/Dockerfile` generates `environment.prod.ts` from it with a single `sed`
-that flips `production: false`. So a key added to `environment.ts` is
-automatically in the file `fileReplacements` swaps in, and there is nothing else
-to keep in sync for the build.
+that flips `production: false`, and `scripts/environment-generated.mjs` writes
+both generated files before a local build or dev server. So a key added to
+`environment.ts` is automatically in the file `fileReplacements` swaps in, and
+there is nothing else to keep in sync for the build.
 
 ## Function and aspect ids take the same route
 
@@ -71,9 +72,13 @@ Who generates which:
 - `src/assets/env.json` — `build-env.sh`, from `env.template.json` via `envsubst`.
   In the container this runs at **start**, not at build time (see the `CMD` in
   `build/Dockerfile`), which is why a new key needs a redeploy and not a rebuild.
-- `src/environments/environment.prod.ts` — the `sed` in `build/Dockerfile`.
-- `src/environments/environment.dev.ts` — locally, by hand or by an older
-  workflow; nothing in the repository writes it today.
+- `src/environments/environment.prod.ts` — the `sed` in `build/Dockerfile`, and
+  locally `scripts/environment-generated.mjs` as `prebuild`.
+- `src/environments/environment.dev.ts` — the same script as `prestart_dev`, an
+  unchanged copy of the tracked file. Until 2026-11-12 nothing wrote it, and it
+  drifted: the dev build swaps it in through `fileReplacements`, so a copy
+  lacking keys added since fails with one error per use of each of them, naming
+  every use and never the file they are missing from.
 
 ## The hardcoded permission list
 
