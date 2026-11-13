@@ -15,6 +15,7 @@
  */
 
 import { NgModule } from '@angular/core';
+import { adminGuard } from './core/guards/admin.guard';
 import { Observable, of } from 'rxjs';
 import {
   PreloadingStrategy,
@@ -91,6 +92,7 @@ const importsModule: Route = {
 };
 const adminModule: Route = {
   matcher: startsWithMatcher('admin'),
+  canMatch: [adminGuard],
   loadChildren: () => import('./modules/admin/admin.module').then((m) => m.AdminModule),
   data: { preload: false },
 };
