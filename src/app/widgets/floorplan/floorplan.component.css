@@ -214,3 +214,16 @@ td {
         }
     }
 }
+
+/* the bar lies over the map like the table of unplaced elements, so the drawing keeps its full size */
+.timeline-bar {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100% - 1rem);
+    background-color: var(--mat-sys-surface-container);
+    border-radius: 1.5rem;
+    line-height: normal;
+    display: block;
+}

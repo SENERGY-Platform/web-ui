@@ -51,6 +51,8 @@ export interface FloorplanChartHost {
   drawShift: { centerShiftX: number; centerShiftY: number; ratio: number };
   readonly dotSize: number;
   hasAction(datasetIndex: number): boolean;
+  /** whether the map shows a moment of the replay, where no further value of the present may be mixed in */
+  replaying(): boolean;
   performRowAction(datasetIndex: number): void;
   unitOf(functionId: string): string | undefined;
   describeCriteria(criteria: DeviceGroupCriteriaModel | null): string;
@@ -84,12 +86,13 @@ export function buildFloorplanChartOptions(host: FloorplanChartHost): ChartConfi
             host.chartjs.tooltipDatasets.forEach(x => {
               const tc: TooltipCriteria = { matchDsIndex: x.datasetIndex, values: [] };
               const placement = host.widget().properties.floorplan?.placements[x.datasetIndex];
-              placement?.tooltipCriteria?.forEach(c => {
+              // the further criteria carry the value of the present, which next to a replayed one reads as that moment's
+              (host.replaying() || placement === undefined ? [] : placement.tooltipCriteria || []).forEach(c => {
                 if (isControllingFunction(c.function_id)) {
                   // controlling criteria have no value to display, they are rendered as controls
                   return;
                 }
-                if (host.compareCriteriaWithoutInteraction(placement.criteria, c)) {
+                if (host.compareCriteriaWithoutInteraction(placement!.criteria, c)) {
                   // This criteria is selected for the placement, do not show again in tooltip
                   return;
                 }

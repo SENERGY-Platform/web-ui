@@ -41,6 +41,35 @@
     }
 
     @if (userHasUpdatePropertiesAuthorization) {
+      <div [formGroup]="form" class="unplaced-checkbox">
+        <mat-checkbox formControlName="timeline">Offer replaying the last hours</mat-checkbox>
+      </div>
+      @if (form.value.timeline) {
+        <div [formGroup]="form" class="ly-row timeline-row">
+          <mat-form-field class="full-width">
+            <mat-label>Replay reaches back</mat-label>
+            <mtx-select formControlName="timelineWindow" [hideSelected]="false" closeOnSelect
+              [clearable]="false" appendTo=".ng-select-anchor">
+              @for (window of timelineWindows; track window.value) {
+                <mtx-option [value]="window.value">{{window.label}}</mtx-option>
+              }
+            </mtx-select>
+          </mat-form-field>
+          <mat-form-field class="full-width">
+            <mat-label>One moment every</mat-label>
+            <mtx-select formControlName="timelineStep" [hideSelected]="false" closeOnSelect
+              [clearable]="false" appendTo=".ng-select-anchor">
+              @for (step of timelineStepsFor(form.value.timelineWindow || ''); track step.value) {
+                <mtx-option [value]="step.value">{{step.label}}</mtx-option>
+              }
+            </mtx-select>
+            <mat-hint>A value only changes when a device sends; between two readings it is carried on</mat-hint>
+          </mat-form-field>
+        </div>
+      }
+    }
+
+    @if (userHasUpdatePropertiesAuthorization) {
       <div class="file-upload-wrapper" (drop)="onFileDrop($event)"
         (dragover)="onDragOver($event)">
         <input type="file" accept="image/*" (change)="onFileChange($event)" hidden #fileInput />

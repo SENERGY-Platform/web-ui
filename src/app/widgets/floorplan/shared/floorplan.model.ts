@@ -35,8 +35,44 @@ export interface FloorplanWidgetPropertiesModel {
         placements: FloorplanWidgetCapabilityModel[];
         dotSize: number;
         showUnplacedTable?: boolean;
+        /** whether the widget offers a replay of the last hours; absent in widgets saved before it existed */
+        timeline?: boolean;
+        /** how far back the replay reaches, a timescale-wrapper duration such as '6h' */
+        timelineWindow?: string;
+        /** how far apart two moments of the replay are, such as '5m' */
+        timelineStep?: string;
     }
 }
+
+/** What a replay covers and how finely, where the widget names nothing. */
+export const defaultTimelineWindow = '6h';
+export const defaultTimelineStep = '5m';
+
+/** How far back a replay may reach. */
+export const timelineWindows: { value: string; label: string }[] = [
+    { value: '1h', label: '1 hour' },
+    { value: '3h', label: '3 hours' },
+    { value: '6h', label: '6 hours' },
+    { value: '12h', label: '12 hours' },
+    { value: '24h', label: '24 hours' },
+    { value: '48h', label: '2 days' },
+    { value: '7d', label: '7 days' },
+];
+
+/** How far apart two moments of a replay may be. */
+export const timelineSteps: { value: string; label: string }[] = [
+    { value: '1m', label: '1 minute' },
+    { value: '5m', label: '5 minutes' },
+    { value: '15m', label: '15 minutes' },
+    { value: '30m', label: '30 minutes' },
+    { value: '1h', label: '1 hour' },
+];
+
+/**
+ * The most moments one replay may hold. It caps what a long window with a short step asks of the
+ * timescale wrapper - a week in minutes would be ten thousand buckets per placement.
+ */
+export const timelineFrameLimit = 500;
 
 /** A placement without a position and without an area is not drawn on the map, but may be listed in the table */
 export function isPlaced(p: FloorplanWidgetCapabilityModel): boolean {

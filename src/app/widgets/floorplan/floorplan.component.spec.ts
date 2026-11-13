@@ -29,6 +29,7 @@ import { DeviceGroupsService } from '../../modules/devices/device-groups/shared/
 import { DeviceInstancesService } from '../../modules/devices/device-instances/shared/device-instances.service';
 import { DeviceClassesService } from '../../modules/metadata/device-classes/shared/device-classes.service';
 import { ConceptsService } from '../../modules/metadata/concepts/shared/concepts.service';
+import { ExportDataService } from '../shared/export-data.service';
 import { FloorplanComponent } from './floorplan.component';
 import { provideAppCharts } from '../../core/charts/provide-app-charts';
 import {
@@ -76,6 +77,7 @@ describe('FloorplanComponent', () => {
                 { provide: ConceptsService, useValue: conceptsSpy },
                 { provide: DeviceClassesService, useValue: createSpyFromClass<DeviceClassesService>(DeviceClassesService) },
                 { provide: DeviceInstancesService, useValue: createSpyFromClass<DeviceInstancesService>(DeviceInstancesService) },
+                { provide: ExportDataService, useValue: createSpyFromClass<ExportDataService>(ExportDataService) },
             ],
         }).compileComponents();
     }));
@@ -125,6 +127,49 @@ describe('FloorplanComponent', () => {
             expect(moveTo).toHaveBeenCalledWith(40, 30);
             expect(lineTo).toHaveBeenCalledWith(80, 30);
             expect(lineTo).toHaveBeenCalledWith(80, 70);
+        });
+    });
+
+    describe('a moment of the replay', () => {
+        const measured = (message: unknown) => placement({
+            criteria: { function_id: 'function', aspect_id: '', device_class_id: '', interaction: '', value: { status_code: 200, message } },
+            coloring: [{ value: 100, icon: 'thermostat', color: '#ff0000', showValue: true, showValueWhenZoomed: true }],
+        });
+
+        it('is drawn with the value of that moment instead of the current one', () => {
+            const p = measured(21);
+            drawPlacements([p]);
+            expect(component.chartjs.data?.datasets[0].label).toBe('21');
+
+            component.frames.set([{ time: new Date(), values: [18.5] }]);
+            component.frameIndex.set(0);
+            component.draw();
+
+            expect(component.chartjs.data?.datasets[0].label).toBe('18.5');
+            // the widget's own model keeps the present, which is what makes leaving the replay a redraw
+            expect(p.criteria.value?.message).toBe(21);
+        });
+
+        it('shows no value for a placement the replay knows nothing about', () => {
+            drawPlacements([measured(21)]);
+
+            component.frames.set([{ time: new Date(), values: [undefined] }]);
+            component.frameIndex.set(0);
+            component.draw();
+
+            expect(component.chartjs.data?.datasets[0].label).toBe('');
+        });
+
+        it('offers no controls, since nothing can be switched in the past', () => {
+            drawPlacements([measured(true)]);
+            component.controls.set([[{ label: 'On', input: FloorplanControlInput.Action } as any]]);
+            expect(component.compactControls(0).length).toBe(1);
+
+            component.frames.set([{ time: new Date(), values: [false] }]);
+            component.frameIndex.set(0);
+
+            expect(component.compactControls(0)).toEqual([]);
+            expect(component.needsControlDialog(0)).toBeFalse();
         });
     });
 

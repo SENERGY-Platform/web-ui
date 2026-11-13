@@ -15,7 +15,9 @@
   -->
 
 <mat-card appearance="outlined" (mouseleave)="forbidChartjsTooltip()" (mouseenter)="allowChartjsTooltip()">
-  <senergy-widget-header [widget]="widget()" [zoom]="zoom()" [refreshing]="refreshing()"></senergy-widget-header>
+  <senergy-widget-header [widget]="widget()" [zoom]="zoom()" [refreshing]="refreshing()"
+    [optionCustomIcon]="headerIcons" [optionCustomTooltip]="headerTooltips"
+  (customEvent)="toggleTimeline()"></senergy-widget-header>
   <mat-card-content>
     @if (ready() && widget().properties.floorplan === undefined) {
       <div class="content">
@@ -92,6 +94,11 @@
                 }
               </table>
             </div>
+          }
+          @if (timelineOpen()) {
+            <senergy-floorplan-timeline class="timeline-bar mat-elevation-z4" [frames]="frames()"
+              [loading]="timelineLoading()" [index]="frameIndex()" (moment)="showMoment($event)"
+            (leave)="leaveTimeline()"></senergy-floorplan-timeline>
           }
           @if (unplacedRows().length > 0) {
             <table class="unplaced-table mat-elevation-z4">

@@ -72,6 +72,31 @@ describe('FloorplanEditDialogComponent', () => {
         expect(component.form.controls.showUnplacedTable.value).toBeFalse();
     });
 
+    describe('the replay settings', () => {
+        it('offers no step that would ask for more moments than the limit allows', () => {
+            expect(component.timelineStepsFor('1h').map(s => s.value)).toContain('1m');
+            expect(component.timelineStepsFor('7d').map(s => s.value)).not.toContain('1m');
+            expect(component.timelineStepsFor('7d').map(s => s.value)).toContain('1h');
+        });
+
+        it('moves a step the chosen window no longer allows', () => {
+            component.form.patchValue({ timelineWindow: '1h', timelineStep: '1m' });
+
+            component.form.controls.timelineWindow.setValue('7d');
+            component.syncTimelineStep();
+
+            expect(component.form.value.timelineStep).not.toBe('1m');
+        });
+
+        it('leaves a step the window still allows', () => {
+            component.form.patchValue({ timelineWindow: '1h', timelineStep: '5m' });
+
+            component.syncTimelineStep();
+
+            expect(component.form.value.timelineStep).toBe('5m');
+        });
+    });
+
     it('creates new placements without a position', () => {
         component.addNewPlacement();
 

@@ -137,3 +137,6 @@
   margin-right: 0.5em;
   font-style: italic;
 }
+.timeline-row {
+  gap: 16px;
+}

@@ -26,6 +26,8 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { DashboardManipulationEnum } from 'src/app/modules/dashboard/shared/dashboard-manipulation.enum';
 import { map, Observable, of, forkJoin, concatMap, delay } from 'rxjs';
 import {
+  defaultTimelineStep,
+  defaultTimelineWindow,
   defaultVoidTogglePairs,
   DeviceGroupCriteriaWithValueModel,
   DeviceGroupWithValueModel,
@@ -56,6 +58,9 @@ import { ConnectionHistoryDialogComponent } from '../shared/connection-history-d
 import { FloorplanControlDialogComponent, FloorplanControlDialogData } from './floorplan-control-dialog/floorplan-control-dialog.component';
 import { CapabilityCommandModel, CapabilityControlComponent } from './shared/capability-control/capability-control.component';
 import { placementMarker, placementPosition } from './shared/floorplan-markers';
+import { historyFrames, historyRequest, HistoryFrame, frameTimes } from './shared/floorplan-history';
+import { FloorplanTimelineComponent } from './floorplan-timeline/floorplan-timeline.component';
+import { ExportDataService } from '../shared/export-data.service';
 import { hasZone, zoneCenter, zonePoints } from './shared/floorplan-zone';
 import { FloorplanControlResolver } from './floorplan-control-resolver';
 import { buildFloorplanChartOptions, buildFloorplanChartPlugins, FloorplanChartState } from './floorplan-chart-options';
@@ -74,7 +79,7 @@ import { WidgetFooterComponent } from '../components/widget-footer/widget-footer
     templateUrl: './floorplan.component.html',
     styleUrl: './floorplan.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, NgClass, NgStyle, MatIconButton, MatIcon, MatTooltip, CapabilityControlComponent, WidgetFooterComponent]
+    imports: [MatCard, WidgetHeaderComponent, MatCardContent, WidgetSpinnerComponent, BaseChartDirective, NgClass, NgStyle, MatIconButton, MatIcon, MatTooltip, CapabilityControlComponent, WidgetFooterComponent, FloorplanTimelineComponent]
 })
 export class FloorplanComponent implements OnInit, AfterViewInit {
   private dialog = inject(MatDialog);
@@ -85,6 +90,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   private conceptsService = inject(ConceptsService);
   private deviceClassService = inject(DeviceClassesService);
   private deviceInstancesService = inject(DeviceInstancesService);
+  private exportDataService = inject(ExportDataService);
   private el = inject(ElementRef);
   private destroyRef = inject(DestroyRef);
   private cd = inject(ChangeDetectorRef);
@@ -119,6 +125,13 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   deviceGroupServiceGroups = new Map<string, ServiceGroupFunctionModel[][]>();
   /** controls are resolved on every redraw, so an ambiguity is only reported the first time */
   reportedAmbiguities = new Set<string>();
+
+  /** the moments of the replay, empty while the widget shows the present */
+  readonly frames = signal<HistoryFrame[]>([]);
+  readonly timelineOpen = signal(false);
+  readonly timelineLoading = signal(false);
+  /** which moment is drawn, -1 for the present */
+  readonly frameIndex = signal(-1);
 
   /** function triples that read and switch a state without ever taking an input */
   voidTogglePairs: VoidTogglePair[] = defaultVoidTogglePairs();
@@ -215,7 +228,7 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
       const { x, y } = hasZone(p)
         ? zoneCenter(zonePoints(p, this.img, this.drawShift))
         : placementPosition(p, this.img, this.drawShift);
-      const { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label } = placementMarker(p, this.unitOf(p.criteria.function_id));
+      const { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label } = placementMarker(this.shown(p, i), this.unitOf(p.criteria.function_id));
       icons[i] = icon;
       showValueWhenZoomed[i] = zoom;
       showValue[i] = notZoom;
@@ -246,8 +259,101 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
   }
 
 
+  /** Whether the map shows a moment of the replay rather than the present. */
+  replaying(): boolean {
+    return this.frameIndex() >= 0 && this.frameIndex() < this.frames().length;
+  }
+
+  /** Whether the widget offers the replay: only configured widgets, and only maximised, where the bar fits. */
+  timelineAvailable(): boolean {
+    return this.zoom() && this.widget().properties.floorplan?.timeline === true;
+  }
+
+  get headerIcons(): string[] {
+    return this.timelineAvailable() ? [this.timelineOpen() ? 'close_fullscreen' : 'history'] : [];
+  }
+
+  get headerTooltips(): string[] {
+    return this.timelineAvailable() ? [this.timelineOpen() ? 'Hide the replay' : 'Replay the last hours'] : [];
+  }
+
+  /**
+   * The placement as it is to be drawn: during the replay with the value of the moment, which leaves the
+   * widget's own model untouched, so leaving the replay needs nothing but a redraw.
+   */
+  private shown(placement: FloorplanWidgetCapabilityModel, index: number): FloorplanWidgetCapabilityModel {
+    if (!this.replaying()) {
+      return placement;
+    }
+    const value = this.frames()[this.frameIndex()].values[index];
+    return {
+      ...placement,
+      criteria: { ...placement.criteria, value: value === undefined ? undefined : { status_code: 200, message: value } },
+    } as FloorplanWidgetCapabilityModel;
+  }
+
+  toggleTimeline(): void {
+    if (this.timelineOpen()) {
+      this.leaveTimeline();
+      return;
+    }
+    this.timelineOpen.set(true);
+    this.loadHistory();
+  }
+
+  /** Back to the present: the values are still in the model, so the map only has to be drawn again. */
+  leaveTimeline(): void {
+    this.timelineOpen.set(false);
+    this.frameIndex.set(-1);
+    this.frames.set([]);
+    // the values stand as they were when the replay began; reading them again is what makes it the present
+    this.refresh().subscribe();
+  }
+
+  showMoment(index: number): void {
+    this.frameIndex.set(index);
+    this.draw();
+  }
+
+  private loadHistory(): void {
+    const floorplan = this.widget().properties.floorplan;
+    if (floorplan === undefined) {
+      return;
+    }
+    const windowText = floorplan.timelineWindow || defaultTimelineWindow;
+    const stepText = floorplan.timelineStep || defaultTimelineStep;
+    // one clock for both, so the moments and the elements asking for them cannot straddle a step boundary
+    const now = new Date();
+    const times = frameTimes(windowText, stepText, now);
+    const request = historyRequest(floorplan.placements, windowText, stepText, now);
+    if (request.elements.length === 0 || times.length === 0) {
+      this.frames.set([]);
+      return;
+    }
+    this.timelineLoading.set(true);
+    this.exportDataService.queryTimescaleV2(request.elements).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: response => {
+        this.frames.set(historyFrames(response, request, times, floorplan.placements.length));
+        // the replay opens on its newest moment, so the map does not jump back when the bar appears
+        this.frameIndex.set(times.length - 1);
+        this.timelineLoading.set(false);
+        this.draw();
+        this.cd.markForCheck();
+      },
+      error: () => {
+        snackError(this.snackBar, 'The history of the floorplan could not be read');
+        this.timelineLoading.set(false);
+        this.leaveTimeline();
+      },
+    });
+  }
+
   private refresh(): Observable<unknown> {
     if (this.widget().properties.floorplan === undefined) {
+      return of(null);
+    }
+    if (this.replaying()) {
+      // a refresh during the replay would redraw the map with the present values under the old moment
       return of(null);
     }
     this.refreshing.set(true);
@@ -569,7 +675,8 @@ export class FloorplanComponent implements OnInit, AfterViewInit {
 
   /** The controls that are not reachable through a displayed value and need a row of their own */
   standaloneControls(datasetIndex: number): FloorplanControlModel[] {
-    return (this.controls()[datasetIndex] || []).filter(c => c.via === undefined);
+    // nothing can be switched in the past, so the replay offers no controls at all
+    return this.replaying() ? [] : (this.controls()[datasetIndex] || []).filter(c => c.via === undefined);
   }
 
   /** The standalone controls that fit into a tooltip or table row */

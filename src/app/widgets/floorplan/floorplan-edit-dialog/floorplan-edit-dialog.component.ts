@@ -43,7 +43,13 @@ import {
   isPlaced,
   migrateColoring,
   StateSourceContextModel,
+  defaultTimelineStep,
+  defaultTimelineWindow,
+  timelineFrameLimit,
+  timelineSteps,
+  timelineWindows,
 } from '../shared/floorplan.model';
+import { durationMillis } from '../shared/floorplan-history';
 import { ZONE_CORNERS } from '../shared/floorplan-zone';
 import { materialIconNames } from 'src/app/core/model/icon.model';
 import { ConceptsService } from 'src/app/modules/metadata/concepts/shared/concepts.service';
@@ -121,7 +127,12 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     placements: new FormArray([].map(this.newPlacement)),
     dotSize: new FormControl<number>(25, { validators: [Validators.required, Validators.min(1)] }),
     showUnplacedTable: new FormControl<boolean>(false),
+    timeline: new FormControl<boolean>(false),
+    timelineWindow: new FormControl<string>(defaultTimelineWindow),
+    timelineStep: new FormControl<string>(defaultTimelineStep),
   });
+
+  readonly timelineWindows = timelineWindows;
   name = new FormControl<string>('', Validators.required);
 
   defaultCriteria: DeviceGroupCriteriaModel[] = [
@@ -176,7 +187,33 @@ export class FloorplanEditDialogComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /**
+   * The steps that fit the window: one short enough to exceed the frame limit would ask the timescale
+   * wrapper for a bucket per minute over days. The longest step is always offered, however short the
+   * window, so the select is never empty.
+   */
+  timelineStepsFor(windowText: string): { value: string; label: string }[] {
+    const span = durationMillis(windowText);
+    const fitting = timelineSteps.filter(step => {
+      const length = durationMillis(step.value);
+      return length > 0 && span / length <= timelineFrameLimit;
+    });
+    return fitting.length > 0 ? fitting : [timelineSteps[timelineSteps.length - 1]];
+  }
+
+  /**
+   * Moves the step to the shortest one the window still allows. A longer window can rule the chosen step
+   * out, and a form holding a step that is no longer offered would save a replay nobody can ask for.
+   */
+  syncTimelineStep(): void {
+    const allowed = this.timelineStepsFor(this.form.value.timelineWindow || '');
+    if (!allowed.some(step => step.value === this.form.value.timelineStep)) {
+      this.form.controls.timelineStep.setValue(allowed[0].value);
+    }
+  }
+
   ngOnInit(): void {
+    this.form.controls.timelineWindow.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.syncTimelineStep());
     const obs: Observable<unknown>[] = [];
     obs.push(
       this.dashboardService.getWidget(this.dashboardId, this.widgetId).pipe(concatMap(w => {
