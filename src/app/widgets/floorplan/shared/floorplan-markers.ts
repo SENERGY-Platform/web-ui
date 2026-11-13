@@ -84,11 +84,33 @@ export function placementMarker(placement: FloorplanWidgetCapabilityModel, unit:
     if (state !== undefined) {
         return { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label: state };
     }
-    let label = value === undefined || value === null ? '' : '' + value;
+    const message = placement.criteria.value?.message;
+    let label = message === undefined || message === null ? '' : valueText(message);
     if (label.length > 0 && unit !== undefined) {
         label += ' ' + unit;
     }
     return { icon, color, showValue: notZoom, showValueWhenZoomed: zoom, label };
+}
+
+/**
+ * A measured number as it reads on the map. Sensors report more digits than the value of a reading
+ * carries, and side by side on a floorplan they are read against each other - two readings of the same
+ * quantity have to show the same number of digits to be comparable at a glance. A value below one keeps
+ * three significant digits instead of two decimals, so a small reading does not round away to zero.
+ */
+export function numberLabel(value: number): string {
+    if (Number.isInteger(value)) {
+        return '' + value;
+    }
+    return '' + Number(Math.abs(value) >= 1 ? value.toFixed(2) : value.toPrecision(3));
+}
+
+/** A read message as text: a number rounded, a list of them one per device, anything else as it came. */
+export function valueText(message: any): string {
+    if (Array.isArray(message)) {
+        return message.map(valueText).join(', ');
+    }
+    return typeof message === 'number' ? numberLabel(message) : '' + message;
 }
 
 function matchesPattern(value: string, pattern: string): boolean {
@@ -153,14 +175,7 @@ export function tooltipValueLabel(message: any, unit: string | undefined): strin
     if (state !== undefined) {
         return state;
     }
-    let label = '' + message;
-    if (Array.isArray(message)) {
-        if (message.length > 1) {
-            label = message.join(', ');
-        } else {
-            label = message[0];
-        }
-    }
+    let label = valueText(message);
     if (unit !== undefined) {
         label += ' ' + unit;
     }

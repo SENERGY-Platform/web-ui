@@ -15,7 +15,7 @@
  */
 
 import { FloorplanWidgetCapabilityModel } from './floorplan.model';
-import { connectionLabel, markerText, placementMarker, placementPosition, stateLabel, tooltipValueLabel } from './floorplan-markers';
+import { connectionLabel, markerText, numberLabel, placementMarker, placementPosition, stateLabel, tooltipValueLabel } from './floorplan-markers';
 
 type Coloring = FloorplanWidgetCapabilityModel['coloring'][number];
 
@@ -66,10 +66,16 @@ describe('placementMarker', () => {
         expect(placementMarker(placement([7], thresholds), undefined).color).toBe('blue');
     });
 
-    it('is a grey circle without colouring, listing values joined by a bare comma', () => {
+    it('is a grey circle without colouring, listing values the same way as with one', () => {
         expect(placementMarker(placement(['a', 'b'], []), undefined)).toEqual({
-            icon: 'circle', color: 'grey', showValue: false, showValueWhenZoomed: false, label: 'a,b',
+            icon: 'circle', color: 'grey', showValue: false, showValueWhenZoomed: false, label: 'a, b',
         });
+    });
+
+    it('rounds a measured number, so two readings side by side carry the same digits', () => {
+        expect(placementMarker(placement(17.896, thresholds), '°C').label).toBe('17.9 °C');
+        expect(placementMarker(placement(18.906, thresholds), '°C').label).toBe('18.91 °C');
+        expect(placementMarker(placement([17.896, 19], thresholds), '°C').label).toBe('17.9, 19 °C');
     });
 
     it('appends the unit to a value, never to a missing one', () => {
@@ -118,6 +124,31 @@ describe('tooltipValueLabel', () => {
     it('reads a boolean as a state, without a unit behind it', () => {
         expect(tooltipValueLabel(true, undefined)).toBe('On');
         expect(tooltipValueLabel(false, 'W')).toBe('Off');
+    });
+
+    it('rounds a number the same way the marker does', () => {
+        expect(tooltipValueLabel(17.896, '°C')).toBe('17.9 °C');
+        expect(tooltipValueLabel([17.896, 19.004], '°C')).toBe('17.9, 19 °C');
+    });
+});
+
+describe('numberLabel', () => {
+    it('keeps two decimals of a reading and drops what the sensor adds beyond them', () => {
+        expect(numberLabel(17.896)).toBe('17.9');
+        expect(numberLabel(18.906)).toBe('18.91');
+        expect(numberLabel(1234.5678)).toBe('1234.57');
+    });
+
+    it('leaves a whole number whole', () => {
+        expect(numberLabel(19)).toBe('19');
+        expect(numberLabel(0)).toBe('0');
+        expect(numberLabel(-7)).toBe('-7');
+    });
+
+    it('keeps three significant digits below one, so a small reading does not become zero', () => {
+        expect(numberLabel(0.00123456)).toBe('0.00123');
+        expect(numberLabel(0.5)).toBe('0.5');
+        expect(numberLabel(-0.004)).toBe('-0.004');
     });
 });
 
