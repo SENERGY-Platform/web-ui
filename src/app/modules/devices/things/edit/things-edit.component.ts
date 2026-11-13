@@ -17,12 +17,14 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
-import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatError, MatFormField, MatHint, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import { ErrorStateMatcher, MatOption } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -55,7 +57,16 @@ import { ConceptsService } from '../../../metadata/concepts/shared/concepts.serv
 import { ConceptsCharacteristicsModel } from '../../../metadata/concepts/shared/concepts-characteristics.model';
 import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
 import { ThingsDeviceLinkDialogComponent } from '../dialogs/things-device-link-dialog.component';
-import { THING_TOPIC, ThingDeviceLinkCreateModel, ThingDeviceLinkModel, ThingModel } from '../shared/things.model';
+import {
+    THING_ATTRIBUTE_KEYS,
+    THING_TOPIC,
+    ThingAttributeKey,
+    ThingDeviceLinkCreateModel,
+    ThingDeviceLinkModel,
+    ThingModel,
+    thingAttributeError,
+    thingAttributeKey,
+} from '../shared/things.model';
 import { ThingsService } from '../shared/things.service';
 
 const LIST_ROUTE = '/devices/things';
@@ -79,6 +90,11 @@ function withoutIndices(contentVariable: DeviceTypeContentVariableModel): Device
         MatFormField,
         MatLabel,
         MatError,
+        MatHint,
+        MatSuffix,
+        MatAutocomplete,
+        MatAutocompleteTrigger,
+        MatOption,
         MatInput,
         MatButton,
         MatIconButton,
@@ -113,6 +129,8 @@ export class ThingsEditComponent implements OnInit {
 
     readonly dateFormat = LIST_DATE_FORMAT;
     readonly listLink = LIST_ROUTE;
+    readonly attributeKey = thingAttributeKey;
+    readonly valueError = thingAttributeError;
 
     id = '';
     /** The thing as loaded or last saved; fields the form does not know stay in it and are sent back unchanged. */
@@ -139,6 +157,7 @@ export class ThingsEditComponent implements OnInit {
     /** Editable state as loaded or last saved, serialized; the save bar shows while the current state differs. */
     private savedState = '';
     private cancelReload$ = new Subject<void>();
+    private errorMatcherCache = new WeakMap<Attribute, { key: ErrorStateMatcher; value: ErrorStateMatcher }>();
 
     hasChild = (_: number, node: DeviceTypeContentVariableModel) => !!node.sub_content_variables;
 
@@ -225,7 +244,7 @@ export class ThingsEditComponent implements OnInit {
 
     /** A save and a link change exclude each other: the later answer would show the links of the earlier state. */
     saveDisabled(): boolean {
-        return this.isSaving || this.isReloading || this.isLinking || this.nameControl.invalid;
+        return this.isSaving || this.isReloading || this.isLinking || this.nameControl.invalid || this.hasInvalidAttributes();
     }
 
     saveStatus(): string {
@@ -234,6 +253,9 @@ export class ThingsEditComponent implements OnInit {
         }
         if (this.nameControl.invalid) {
             return 'Name is required to save.';
+        }
+        if (this.hasInvalidAttributes()) {
+            return 'Fix the invalid attribute values to save.';
         }
         return this.id === '' ? '' : 'Unsaved changes';
     }
@@ -252,11 +274,12 @@ export class ThingsEditComponent implements OnInit {
         if (!this.thing || !this.editable || this.saveDisabled()) {
             return;
         }
-        // every field the form does not know stays in the loaded thing and goes back unchanged
+        // every field the form does not know stays in the loaded thing and goes back unchanged; one writer per
+        // harmonized key (SNRGY-5133): an entry written here names this page, the form keeps it until the answer
         const toSave: ThingModel = {
             ...this.thing,
             name: this.nameControl.getRawValue(),
-            attributes: this.attributes.map((a) => ({ ...a })),
+            attributes: this.attributes.map((a) => (this.changedAttribute(a) ? { ...a, origin: 'web-ui' } : { ...a })),
             content_variables: this.dataSource.data.map(withoutIndices),
         };
         const sentState = this.currentState();
@@ -348,6 +371,50 @@ export class ThingsEditComponent implements OnInit {
 
     foreignAttributesLockLabel(): string {
         return (this.foreignAttributesUnlocked ? 'Lock' : 'Unlock') + ' attributes of other origins';
+    }
+
+    /** Harmonized keys whose key or label contains what the key field holds. */
+    keyOptions(attr: Attribute): ThingAttributeKey[] {
+        const term = (attr.key || '').toLowerCase();
+        return THING_ATTRIBUTE_KEYS.filter((k) => k.key.toLowerCase().includes(term) || k.label.toLowerCase().includes(term));
+    }
+
+    /** A harmonized key appears once per thing: true when another attribute already has it. */
+    keyTaken(key: string, attr: Attribute): boolean {
+        return !!thingAttributeKey(key) && this.attributes.some((a) => a !== attr && a.key === key);
+    }
+
+    /** A harmonized value is stored with a dot, whichever decimal separator was typed; the field shows what is stored. */
+    setValue(attr: Attribute, value: string, field?: NgModel): void {
+        const stored = thingAttributeKey(attr.key) ? value.replace(/,/g, '.') : value;
+        attr.value = stored;
+        if (stored !== value) {
+            // the binding writes nothing back when the stored value stays the same, as for a dot replaced by a comma
+            field?.control.setValue(stored, { emitViewToModelChange: false });
+        }
+    }
+
+    /** The fields show their error at once, also for a value stored by another writer, not only after a touch. */
+    errorMatchers(attr: Attribute): { key: ErrorStateMatcher; value: ErrorStateMatcher } {
+        let matchers = this.errorMatcherCache.get(attr);
+        if (!matchers) {
+            matchers = {
+                key: { isErrorState: () => this.keyTaken(attr.key, attr) },
+                value: { isErrorState: () => thingAttributeError(attr) !== null },
+            };
+            this.errorMatcherCache.set(attr, matchers);
+        }
+        return matchers;
+    }
+
+    /** New, or its key or value differs from every entry of the loaded or last saved thing. */
+    private changedAttribute(attr: Attribute): boolean {
+        return !(this.thing?.attributes || []).some((s) => s.key === attr.key && s.value === attr.value && s.origin === attr.origin);
+    }
+
+    /** Only entries written here block saving; an invalid one stored by another writer just shows its error. */
+    private hasInvalidAttributes(): boolean {
+        return this.attributes.some((a) => this.changedAttribute(a) && (thingAttributeError(a) !== null || this.keyTaken(a.key, a)));
     }
 
     // ---- content variables -----------------------------------------------------------------------

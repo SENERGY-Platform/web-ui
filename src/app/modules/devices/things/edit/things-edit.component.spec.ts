@@ -80,8 +80,10 @@ describe('ThingsEditComponent', () => {
     let dialogs: jasmine.SpyObj<DialogsService>;
     let router: Router;
 
-    async function setup(options: { id?: string; update?: boolean; create?: boolean; write?: boolean; deviceLink?: boolean; permissionsFail?: boolean } = {}) {
-        const { id = THING_ID, update = true, create = true, write = true, deviceLink = true, permissionsFail = false } = options;
+    async function setup(
+        options: { id?: string; update?: boolean; create?: boolean; write?: boolean; deviceLink?: boolean; permissionsFail?: boolean; thing?: ThingModel } = {},
+    ) {
+        const { id = THING_ID, update = true, create = true, write = true, deviceLink = true, permissionsFail = false, thing = storedThing() } = options;
         things = jasmine.createSpyObj('ThingsService', [
             'getThing',
             'createThing',
@@ -95,7 +97,7 @@ describe('ThingsEditComponent', () => {
         things.userHasCreateAuthorization.and.returnValue(create);
         things.userHasUpdateAuthorization.and.returnValue(update);
         things.userHasDeviceLinkAuthorization.and.returnValue(deviceLink);
-        things.getThing.and.returnValue(of(storedThing()));
+        things.getThing.and.returnValue(of(thing));
         permissions = jasmine.createSpyObj('PermissionsService', ['getComputedResourcePermissionsV2']);
         permissions.getComputedResourcePermissionsV2.and.returnValue(
             permissionsFail ? throwError(() => new Error('down')) : of([{ id: THING_ID, write } as never]),
@@ -321,6 +323,153 @@ describe('ThingsEditComponent', () => {
             component.discard();
             expect(component.nameControl.value).toBe('unsaved name');
             expect(component.isReloading).toBeFalse();
+        });
+    });
+
+    describe('harmonized attributes', () => {
+        beforeEach(() =>
+            setup({
+                thing: {
+                    ...storedThing(),
+                    attributes: [
+                        // stored by another writer with a comma, which the contract does not allow
+                        { key: 'energy/rated-power', value: '2,5', origin: 'meter-extractor' },
+                        { key: 'energy/quantity', value: '3', origin: 'meter-extractor' },
+                        { key: 'free', value: 'x,y', origin: 'web-ui' },
+                    ],
+                },
+            }),
+        );
+
+        const rows = (): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('.attribute'));
+        const sentAttributes = () => things.updateThing.calls.mostRecent().args[0].attributes;
+
+        it('labels the value with the label and unit of its key', () => {
+            expect(rows()[0].textContent).toContain('Rated power');
+            expect(rows()[0].textContent).toContain('kW');
+            expect(rows()[2].textContent).toContain('Value');
+        });
+
+        it('offers the keys by key or label and disables one already used', async () => {
+            component.addAttr();
+            fixture.detectChanges();
+            const keyInput = rows()[3].querySelector('input') as HTMLInputElement;
+            keyInput.dispatchEvent(new Event('focusin'));
+            fixture.detectChanges();
+            await fixture.whenStable();
+            const options = Array.from(document.querySelectorAll('mat-option')) as HTMLElement[];
+            expect(options.length).toBe(7);
+            const quantity = options.find((o) => (o.textContent || '').includes('energy/quantity'));
+            expect(quantity?.textContent).toContain('Quantity');
+            expect(quantity?.getAttribute('aria-disabled')).toBe('true');
+            expect(component.keyOptions({ key: 'Power', value: '', origin: 'web-ui' }).map((k) => k.key)).toEqual([
+                'energy/rated-power',
+                'energy/standby-power',
+            ]);
+        });
+
+        it('shows the error of a value stored by another writer and still saves', () => {
+            expect(rows()[0].querySelector('mat-error')?.textContent).toContain('Enter a number with a dot, e.g. 1.5');
+            things.updateThing.and.callFake((t) => of(t));
+            component.nameControl.setValue('oven 2');
+            expect(component.saveDisabled()).toBeFalse();
+            component.save();
+            expect(sentAttributes()[0]).toEqual({ key: 'energy/rated-power', value: '2,5', origin: 'meter-extractor' });
+        });
+
+        it('stores a typed comma as a dot for a harmonized key only', () => {
+            component.setValue(component.attributes[0], '3,5');
+            component.setValue(component.attributes[2], '1,5');
+            expect(component.attributes[0].value).toBe('3.5');
+            expect(component.attributes[2].value).toBe('1,5');
+        });
+
+        it('shows a typed comma as the dot it stores, also where the stored value stays the same', async () => {
+            component.addAttr();
+            component.attributes[3].key = 'energy/capacity';
+            fixture.detectChanges();
+            await fixture.whenStable();
+            const valueInput = rows()[3].querySelectorAll('input')[1] as HTMLInputElement;
+            for (const typed of ['4.5', '4,5']) {
+                valueInput.value = typed;
+                valueInput.dispatchEvent(new Event('input'));
+                fixture.detectChanges();
+                await fixture.whenStable();
+            }
+            expect(component.attributes[3].value).toBe('4.5');
+            expect(valueInput.value).toBe('4.5');
+        });
+
+        it('keeps the origin of an entry when saving fails and the value is changed back', () => {
+            things.updateThing.and.returnValue(of(null));
+            component.foreignAttributesUnlocked = true;
+            component.setValue(component.attributes[1], '4');
+            component.save();
+            expect(sentAttributes()[1]).toEqual({ key: 'energy/quantity', value: '4', origin: 'web-ui' });
+            expect(component.attributes[1].origin).toBe('meter-extractor');
+            component.setValue(component.attributes[1], '3');
+            expect(component.hasChanges()).toBeFalse();
+        });
+
+        it('saves an entry of another writer with the origin web-ui when only its key changed', () => {
+            things.updateThing.and.callFake((t) => of(t));
+            component.foreignAttributesUnlocked = true;
+            component.attributes[1].key = 'units';
+            component.save();
+            expect(sentAttributes()[1]).toEqual({ key: 'units', value: '3', origin: 'web-ui' });
+        });
+
+        it('blocks saving a new invalid value and names the reason', () => {
+            component.addAttr();
+            component.attributes[3].key = 'energy/build-year';
+            component.setValue(component.attributes[3], '1899');
+            expect(component.saveDisabled()).toBeTrue();
+            expect(component.saveStatus()).toBe('Fix the invalid attribute values to save.');
+            component.setValue(component.attributes[3], '1990');
+            expect(component.saveDisabled()).toBeFalse();
+        });
+
+        it('blocks a second entry of the same harmonized key', () => {
+            component.addAttr();
+            component.attributes[3].key = 'energy/quantity';
+            component.setValue(component.attributes[3], '2');
+            expect(component.keyTaken('energy/quantity', component.attributes[3])).toBeTrue();
+            expect(component.saveDisabled()).toBeTrue();
+            fixture.detectChanges();
+            expect(rows()[3].querySelector('mat-error')?.textContent).toContain('This key is already used.');
+        });
+
+        it('saves an edited entry of another writer with the origin web-ui and leaves untouched ones as they are', () => {
+            things.updateThing.and.callFake((t) => of(t));
+            component.foreignAttributesUnlocked = true;
+            component.setValue(component.attributes[1], '4');
+            component.save();
+            expect(sentAttributes()).toEqual([
+                { key: 'energy/rated-power', value: '2,5', origin: 'meter-extractor' },
+                { key: 'energy/quantity', value: '4', origin: 'web-ui' },
+                { key: 'free', value: 'x,y', origin: 'web-ui' },
+            ]);
+            expect(component.hasChanges()).toBeFalse();
+        });
+    });
+
+    describe('harmonized key stored twice by another writer', () => {
+        beforeEach(() =>
+            setup({
+                thing: {
+                    ...storedThing(),
+                    attributes: [
+                        { key: 'energy/quantity', value: '3', origin: 'meter-extractor' },
+                        { key: 'energy/quantity', value: '4', origin: 'meter-extractor' },
+                    ],
+                },
+            }),
+        );
+
+        it('shows the duplicate but does not block saving', () => {
+            expect(fixture.nativeElement.querySelector('.attribute mat-error')?.textContent).toContain('This key is already used.');
+            component.nameControl.setValue('oven 2');
+            expect(component.saveDisabled()).toBeFalse();
         });
     });
 

@@ -41,16 +41,37 @@
           </button>
         }
         @for (attr of attributes; track attr; let i = $index) {
+          @let known = attributeKey(attr.key);
           <div class="attribute ly-row ly-gap-8">
             <mat-form-field class="ly-flex">
               <mat-label>Key</mat-label>
               <input matInput [(ngModel)]="attr.key" [ngModelOptions]="{standalone: true}"
-                [disabled]="!editableAttribute(attr)">
+                [disabled]="!editableAttribute(attr)" [matAutocomplete]="keys"
+                [errorStateMatcher]="errorMatchers(attr).key">
+              <mat-autocomplete #keys="matAutocomplete">
+                @for (option of keyOptions(attr); track option.key) {
+                  <mat-option [value]="option.key" [disabled]="keyTaken(option.key, attr)">
+                    <span class="key-option">
+                      <span>{{option.label}}</span>
+                      <span class="key-option-key">{{option.key}}</span>
+                    </span>
+                  </mat-option>
+                }
+              </mat-autocomplete>
+              <mat-error>This key is already used.</mat-error>
             </mat-form-field>
             <mat-form-field class="ly-flex">
-              <mat-label>Value</mat-label>
-              <input matInput [(ngModel)]="attr.value" [ngModelOptions]="{standalone: true}"
-                [disabled]="!editableAttribute(attr)">
+              <mat-label>{{known?.label ?? 'Value'}}</mat-label>
+              <input matInput #valueModel="ngModel" [ngModel]="attr.value" (ngModelChange)="setValue(attr, $event, valueModel)"
+                [ngModelOptions]="{standalone: true}" [disabled]="!editableAttribute(attr)"
+                [attr.inputmode]="known ? 'decimal' : null" [errorStateMatcher]="errorMatchers(attr).value">
+              @if (known?.unit) {
+                <span matTextSuffix>{{known?.unit}}</span>
+              }
+              @if (known?.hint) {
+                <mat-hint>{{known?.hint}}</mat-hint>
+              }
+              <mat-error>{{valueError(attr)}}</mat-error>
             </mat-form-field>
             @if (editable) {
               <div [matTooltip]="ownAttribute(attr) ? '' : attr.origin">

@@ -33,6 +33,16 @@
     width: 100%;
 }
 
+.key-option {
+    display: flex;
+    flex-direction: column;
+}
+
+.key-option-key {
+    font-size: var(--app-text-sm);
+    color: var(--mat-sys-on-surface-variant);
+}
+
 .section-empty {
     margin: 0;
     color: var(--mat-sys-on-surface-variant);
