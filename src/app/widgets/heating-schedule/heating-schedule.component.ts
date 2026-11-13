@@ -66,6 +66,18 @@ import {
     valuesFromResponses,
 } from './shared/heating-schedule.details';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
+import {
+    HatchSpan,
+    WarmupConfig,
+    ZoneWarmup,
+    hatchSpans,
+    learningText,
+    nextWindowText,
+    rowDay,
+    stationLine,
+    warmingText,
+} from './shared/heating-schedule.warmup';
+import { HeatingWarmupService } from './shared/heating-schedule.warmup.service';
 import { HeatingThermostat, HeatingZoneDocument, ResolvedZone, parseThermostats, parseZoneDocument, resolveZones, zoneLabel } from './shared/heating-schedule.zones';
 
 /** A bar segment of the week overview; position and size in percent of the day. */
@@ -81,6 +93,8 @@ export interface BarSegment {
 export interface WeekRow {
     name: string;
     segments: BarSegment[];
+    /** warm-up phases within the next 24 hours, drawn over the segments */
+    hatches: HatchSpan[];
 }
 
 /** A zone as the widget shows it. */
@@ -90,6 +104,8 @@ export interface ZoneView {
     devices: string;
     devicesTitle: string;
     plan: HeatingPlan;
+    /** position in the stored zones list, which the warm-up export keys its rows by */
+    planIndex: number;
     /** the thermostats of the zone */
     members: HeatingThermostat[];
     /** the measured mean when there is one, else the planned target */
@@ -105,6 +121,11 @@ export interface ZoneView {
     expanded: boolean;
     batteries: string[];
     manualText: string | null;
+    /** the warm-up information; all of it is null for an instance without a warm-up export */
+    warmingText: string | null;
+    windowText: string | null;
+    learningText: string | null;
+    todayHatches: HatchSpan[];
     rows: WeekRow[];
 }
 
@@ -144,6 +165,8 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     setback = 0;
     thermostats: HeatingThermostat[] = [];
     zones: ZoneView[] = [];
+    /** the outdoor and forecast stations of the warm-up model, one line for the instance */
+    stationText: string | null = null;
     /** why the editor cannot take over the stored plan, if it cannot */
     editorNote: string | null = null;
     readonly hours = [0, 6, 12, 18, 24];
@@ -157,6 +180,11 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     /** the sources are looked up once per load; the 5 minute refresh only reads */
     private sources: HeatingValueSource[] | null = null;
     private values = new Map<string, HeatingDeviceValues>();
+    private warmupConfigSubscription = new Subscription();
+    private warmupSubscription = new Subscription();
+    /** null for an instance without a warm-up export */
+    private warmupExport: WarmupConfig | null = null;
+    private warmups: Array<ZoneWarmup | null> = [];
     private expandedByZone = new Map<number, boolean>();
     private dashboardService = inject(DashboardService);
     private instanceService = inject(SmartServiceInstanceService);
@@ -165,6 +193,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     private deviceInstancesService = inject(DeviceInstancesService);
     private deviceTypeService = inject(DeviceTypeService);
     private deviceCommandService = inject(DeviceCommandService);
+    private warmupService = inject(HeatingWarmupService);
 
     ngOnInit(): void {
         this.initSubscription = this.dashboardService.initWidgetObservable.subscribe((event: string) => {
@@ -174,7 +203,10 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         });
         // the current target and the next switch move with the clock, the stored plan does not
         this.tickSubscription = interval(60000).subscribe(() => this.updateNow());
-        this.deviceTickSubscription = interval(DEVICE_REFRESH_MS).subscribe(() => this.loadDeviceValues());
+        this.deviceTickSubscription = interval(DEVICE_REFRESH_MS).subscribe(() => {
+            this.loadDeviceValues();
+            this.loadWarmups();
+        });
     }
 
     ngOnDestroy(): void {
@@ -183,6 +215,8 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         this.tickSubscription.unsubscribe();
         this.deviceSubscription.unsubscribe();
         this.deviceTickSubscription.unsubscribe();
+        this.warmupConfigSubscription.unsubscribe();
+        this.warmupSubscription.unsubscribe();
     }
 
     toggleWeek(index: number): void {
@@ -222,6 +256,8 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         this.rawSchedule = null;
         this.document = null;
         this.zones = [];
+        this.warmupConfigSubscription.unsubscribe();
+        this.warmupSubscription.unsubscribe();
         this.loadError = message;
         this.finishLoad();
     }
@@ -257,6 +293,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
             this.updateNow();
             this.sources = null;
             this.loadDeviceValues();
+            this.loadWarmupConfig(instance.id);
         } catch (error) {
             this.rawSchedule = typeof schedule === 'string' ? schedule : JSON.stringify(schedule ?? null);
             this.loadError = 'The stored heating schedule cannot be read: ' + errorText(error);
@@ -298,6 +335,30 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         });
     }
 
+    /** Looks the warm-up export up once per load; an instance without one looks as it did before. */
+    private loadWarmupConfig(instanceId: string): void {
+        this.warmupConfigSubscription.unsubscribe();
+        this.warmupSubscription.unsubscribe();
+        this.warmupExport = null;
+        this.warmups = [];
+        this.stationText = null;
+        this.warmupConfigSubscription = this.warmupService.config(instanceId).subscribe((config) => {
+            this.warmupExport = config;
+            this.loadWarmups();
+        });
+    }
+
+    private loadWarmups(): void {
+        if (this.warmupExport === null || this.zones.length === 0) {
+            return;
+        }
+        this.warmupSubscription.unsubscribe();
+        this.warmupSubscription = this.warmupService.newestRows(this.warmupExport.exportId, this.zones.map((zone) => zone.planIndex)).subscribe((rows) => {
+            this.warmups = rows;
+            this.updateNow();
+        });
+    }
+
     private lookupSources(ids: string[]): Observable<HeatingValueSource[]> {
         return this.deviceInstancesService.getDeviceListByIds(ids).pipe(
             switchMap((devices) => {
@@ -314,7 +375,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     private updateNow(): void {
         const now = Date.now();
         const parts = berlinParts(now);
-        for (const zone of this.zones) {
+        for (const [index, zone] of this.zones.entries()) {
             const planned = target(zone.plan, now);
             const ids = zone.members.map((member) => member.deviceId);
             const room = meanRoom(ids, this.values);
@@ -328,7 +389,21 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
             zone.batteries = lowBatteries(zone.members, this.values).map((low) => low.label + ' ' + low.percent + ' %');
             const manual = manualOverride(planned, ids, this.values, now, lastSwitch(zone.plan, now));
             zone.manualText = manual === null ? null : manualOverrideText(manual, next, now);
+            this.updateWarmup(zone, index, planned, now, parts.day);
         }
+        this.stationText = this.warmupExport === null ? null : stationLine(this.warmups);
+    }
+
+    private updateWarmup(zone: ZoneView, index: number, planned: number, now: number, today: number): void {
+        const config = this.warmupExport;
+        const warmup = this.warmups[index] ?? null;
+        zone.warmingText = config === null ? null : warmingText(warmup, planned);
+        zone.windowText = config === null ? null : nextWindowText(warmup, config.mode, now);
+        zone.learningText = config === null ? null : learningText(warmup);
+        zone.todayHatches = config === null ? [] : hatchSpans(warmup, config.mode, now, today);
+        zone.rows.forEach((row, weekday) => {
+            row.hatches = config === null ? [] : hatchSpans(warmup, config.mode, now, rowDay(now, weekday));
+        });
     }
 
     editSchedule(): void {
@@ -390,6 +465,7 @@ function zoneView(zone: ResolvedZone, expanded: boolean): ZoneView {
         devices: deviceSummary(zone.labels),
         devicesTitle: zone.labels.join(', '),
         plan: zone.plan,
+        planIndex: zone.index,
         members: zone.devices.map((deviceId, i) => ({ deviceId, label: zone.labels[i] })),
         currentText: '',
         targetText: null,
@@ -400,6 +476,10 @@ function zoneView(zone: ResolvedZone, expanded: boolean): ZoneView {
         expanded,
         batteries: [],
         manualText: null,
+        warmingText: null,
+        windowText: null,
+        learningText: null,
+        todayHatches: [],
         rows: buildRows(zone.plan),
     };
 }
@@ -408,6 +488,7 @@ function buildRows(plan: HeatingPlan): WeekRow[] {
     return weekSegments(plan).map((segments, day) => ({
         name: WEEKDAY_NAMES[day],
         segments: segments.map((segment) => barSegment(segment, false)),
+        hatches: [],
     }));
 }
 

@@ -63,8 +63,21 @@
               @if (zone.nextText) {
                 <div class="next">{{ zone.nextText }}</div>
               }
-              @if (zone.manualText) {
-                <span class="pill status-warning manual">{{ zone.manualText }}</span>
+              @if (zone.windowText) {
+                <div class="next window-text">{{ zone.windowText }}</div>
+              }
+              @if (zone.warmingText || zone.manualText) {
+                <div class="pills">
+                  @if (zone.warmingText) {
+                    <span class="pill warming">{{ zone.warmingText }}</span>
+                  }
+                  @if (zone.manualText) {
+                    <span class="pill status-warning manual">{{ zone.manualText }}</span>
+                  }
+                </div>
+              }
+              @if (zone.learningText) {
+                <div class="learning">{{ zone.learningText }}</div>
               }
             </div>
 
@@ -74,6 +87,10 @@
                 @for (segment of zone.todayRow; track $index) {
                   <div class="segment" [style.left.%]="segment.left" [style.width.%]="segment.width"
                     [style.background-color]="segment.color" [style.color]="segmentTextColor" [title]="segment.title">{{ segment.label }}</div>
+                }
+                @for (hatch of zone.todayHatches; track $index) {
+                  <div class="hatch" [style.left.%]="hatch.left" [style.width.%]="hatch.width"
+                    [style.--hatch-color]="hatch.color" [style.opacity]="hatch.opacity" [title]="hatch.title"></div>
                 }
                 <div class="now-marker" [style.left.%]="zone.nowPercent"></div>
               </div>
@@ -94,6 +111,10 @@
                         <div class="segment" [style.left.%]="segment.left" [style.width.%]="segment.width"
                           [style.background-color]="segment.color" [title]="segment.title"></div>
                       }
+                      @for (hatch of row.hatches; track $index) {
+                        <div class="hatch" [style.left.%]="hatch.left" [style.width.%]="hatch.width"
+                          [style.--hatch-color]="hatch.color" [style.opacity]="hatch.opacity" [title]="hatch.title"></div>
+                      }
                       @if (dayIndex === zone.todayIndex) {
                         <div class="now-marker" [style.left.%]="zone.nowPercent"></div>
                       }
@@ -111,6 +132,10 @@
               </div>
             }
           </div>
+        }
+
+        @if (stationText) {
+          <div class="stations">{{ stationText }}</div>
         }
 
         @if (editorNote) {

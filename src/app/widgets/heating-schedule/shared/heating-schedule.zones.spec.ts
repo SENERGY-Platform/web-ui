@@ -55,6 +55,13 @@ describe('zone resolution of the smart service', () => {
         expect(resolveSchedule('{"windows":[]}', 17, '[]').map((zone) => zone.devices)).toEqual([[]]);
         expect(() => resolveSchedule('{"zones":[{"windows":[]}]}', 17, '[]')).toThrow();
     });
+
+    it('keeps the position in the stored list when an earlier zone has no thermostat left', () => {
+        const schedule = '{"zones":[{"name":"Gone","devices":["urn:x"],"windows":[]},{"name":"Bath","devices":["urn:a"],"windows":[]},{"name":"Rest","windows":[]}]}';
+        const zones = resolveSchedule(schedule, 17, thermostatsText('urn:a', 'urn:b'));
+        expect(zones.map((zone) => [zone.name, zone.index])).toEqual([['Bath', 1], ['Rest', 2]]);
+        expect(resolveSchedule('{"windows":[]}', 17, '[]')[0].index).toBe(0);
+    });
 });
 
 describe('thermostat options', () => {

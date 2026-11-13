@@ -143,8 +143,36 @@ mat-card-content {
     color: var(--mat-sys-on-tertiary-container);
 }
 
-.manual {
+.pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
     margin-top: 4px;
+}
+
+.warming {
+    background-color: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+}
+
+.learning,
+.stations {
+    opacity: 0.6;
+    font-size: 0.85em;
+}
+
+.stations {
+    margin-bottom: 8px;
+}
+
+/* diagonal stripes in the colour of the window's temperature; the bar shows through between them */
+.hatch {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-image: repeating-linear-gradient(45deg, var(--hatch-color) 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1px var(--hatch-color);
+    pointer-events: auto;
 }
 
 .batteries {

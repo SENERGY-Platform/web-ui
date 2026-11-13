@@ -30,6 +30,8 @@ import { SmartServiceInstanceService } from 'src/app/modules/smart-services/inst
 import { HeatingScheduleComponent } from './heating-schedule.component';
 import { AIR_ASPECT, BATTERY_FUNCTION, READING_ASPECT, TARGET_ASPECT, TEMPERATURE_FUNCTION } from './shared/heating-schedule.details';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
+import { WARMUP_COLUMNS, WarmupConfig, ZoneWarmup, parseWarmupRow } from './shared/heating-schedule.warmup';
+import { HeatingWarmupService } from './shared/heating-schedule.warmup.service';
 
 describe('HeatingScheduleComponent', () => {
     let component: HeatingScheduleComponent;
@@ -40,6 +42,7 @@ describe('HeatingScheduleComponent', () => {
     let devices: jasmine.SpyObj<DeviceInstancesService>;
     let deviceTypes: jasmine.SpyObj<DeviceTypeService>;
     let commands: jasmine.SpyObj<DeviceCommandService>;
+    let warmup: jasmine.SpyObj<HeatingWarmupService>;
 
     const configuredWidget = { id: 'w1', name: 'Heating', type: 'heating_schedule', properties: { heatingSchedule: { instanceId: 'inst-1' } } } as unknown as WidgetModel;
     const schedule = '{"windows":[{"weekdays":[0,1,2,3,4,5,6],"from":"00:00","to":"00:00","temperature":21}]}';
@@ -69,6 +72,9 @@ describe('HeatingScheduleComponent', () => {
         devices.getDeviceListByIds.and.returnValue(of([]));
         deviceTypes.getDeviceTypeListByIds.and.returnValue(of([]));
         commands.runCommands.and.returnValue(of([]));
+        warmup = jasmine.createSpyObj<HeatingWarmupService>('HeatingWarmupService', ['config', 'newestRows']);
+        warmup.config.and.returnValue(of(null));
+        warmup.newestRows.and.returnValue(of([]));
         await TestBed.configureTestingModule({
             imports: [HeatingScheduleComponent],
             providers: [
@@ -78,6 +84,7 @@ describe('HeatingScheduleComponent', () => {
                 { provide: DeviceInstancesService, useValue: devices },
                 { provide: DeviceTypeService, useValue: deviceTypes },
                 { provide: DeviceCommandService, useValue: commands },
+                { provide: HeatingWarmupService, useValue: warmup },
                 { provide: DashboardService, useValue: { initWidgetObservable: init.asObservable() } },
             ],
         })
@@ -394,6 +401,73 @@ describe('HeatingScheduleComponent', () => {
 
             expect(text('.legend')).toContain('16 °C');
             expect(text('.legend')).toContain('22 °C');
+        });
+
+        describe('warm-up', () => {
+            const config: WarmupConfig = { exportId: 'exp-1', mode: 'plan' };
+            const WARMUP_NOW = Date.UTC(2026, 10, 10, 3, 0);
+
+            const row = (values: Partial<Record<typeof WARMUP_COLUMNS[number], unknown>>): ZoneWarmup =>
+                parseWarmupRow(['2026-11-10T02:30:00Z', ...WARMUP_COLUMNS.map((name) => values[name] ?? null)]);
+
+            const modelRow = row({
+                warmup_minutes: 35, next_start: '2026-11-10T05:00:00Z', next_target: 21, next_lead_minutes: 35,
+                windows: JSON.stringify([{ start: '2026-11-10T05:00:00Z', target: 21, outdoor: 3, lead_minutes: 35 }]),
+                measure_station: '{"id":"4","name":"Leipzig","distance_km":12.3}', forecast_station: null, a: 1.5, b: 0.1, episodes: 5,
+            });
+
+            beforeEach(() => {
+                jasmine.clock().install();
+                jasmine.clock().mockDate(new Date(WARMUP_NOW));
+            });
+
+            afterEach(() => jasmine.clock().uninstall());
+
+            it('shows the warm-up lines, the hatch and the stations when the instance has a warm-up export', () => {
+                warmup.config.and.returnValue(of(config));
+                warmup.newestRows.and.returnValue(of([modelRow]));
+                load(constant(21));
+
+                expect(warmup.newestRows).toHaveBeenCalledWith('exp-1', [0]);
+                expect(text('.warming')).toBe('Warming up to 21 °C, about 35 min left');
+                expect(text('.window-text')).toBe('Heats from 05:25 for 21 °C at 06:00');
+                expect(fixture.nativeElement.querySelector('.learning')).toBeNull();
+                expect(fixture.nativeElement.querySelectorAll('.bar-today .hatch').length).toBe(1);
+                expect(fixture.nativeElement.querySelectorAll('.week .hatch').length).toBe(1);
+                expect(text('.stations')).toBe('Outdoor: Leipzig (12.3 km)');
+            });
+
+            it('reads the row of the plan position when an earlier zone has no thermostat left', () => {
+                const gone = '{"name":"Gone","devices":["urn:x"],"windows":[]}';
+                const bath = '{"name":"Bath","devices":["urn:a"],"windows":[{"weekdays":[0,1,2,3,4,5,6],"from":"00:00","to":"00:00","temperature":21}]}';
+                warmup.config.and.returnValue(of(config));
+                warmup.newestRows.and.returnValue(of([modelRow]));
+                load('{"zones":[' + gone + ',' + bath + ']}');
+
+                expect(warmup.newestRows).toHaveBeenCalledWith('exp-1', [1]);
+                expect(fixture.nativeElement.querySelectorAll('.zone').length).toBe(1);
+                expect(text('.warming')).toBe('Warming up to 21 °C, about 35 min left');
+            });
+
+            it('shows the learning line for a zone without a row and keeps the rest as it was', () => {
+                warmup.config.and.returnValue(of(config));
+                warmup.newestRows.and.returnValue(of([null]));
+                load(constant(21));
+
+                expect(text('.learning')).toBe('Learning the warm-up time');
+                expect(fixture.nativeElement.querySelector('.warming')).toBeNull();
+                expect(fixture.nativeElement.querySelector('.hatch')).toBeNull();
+                expect(fixture.nativeElement.querySelector('.stations')).toBeNull();
+            });
+
+            it('shows nothing of it for an instance without a warm-up export', () => {
+                load(constant(21));
+
+                expect(warmup.newestRows).not.toHaveBeenCalled();
+                for (const selector of ['.warming', '.window-text', '.learning', '.hatch', '.stations']) {
+                    expect(fixture.nativeElement.querySelector(selector)).withContext(selector).toBeNull();
+                }
+            });
         });
     });
 });

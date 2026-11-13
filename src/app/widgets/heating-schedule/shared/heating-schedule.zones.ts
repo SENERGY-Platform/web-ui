@@ -41,6 +41,8 @@ export interface HeatingZoneDocument {
 
 /** A zone that gets a process: its thermostats are resolved and its setback is final. */
 export interface ResolvedZone {
+    /** position in the stored zones list; the smart service keys its zone `zone:<index>`, also when earlier zones are left out */
+    index: number;
     name: string;
     devices: string[];
     labels: string[];
@@ -140,7 +142,7 @@ export function resolveZones(zones: HeatingZone[], setback: unknown, thermostats
                 }
             }
         }
-        return { name: label, devices, plan: { windows: zone.windows, setback: zone.setback ?? low } };
+        return { index, name: label, devices, plan: { windows: zone.windows, setback: zone.setback ?? low } };
     });
     if (restIndex >= 0) {
         resolved[restIndex].devices = thermostats.map((thermostat) => thermostat.deviceId).filter((id) => !named.has(id));
