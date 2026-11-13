@@ -42,6 +42,11 @@ switched per zoom state (`showAlias`/`showAliasWhenZoomed`, and the matching col
   tooltip.
 - Anything else is the value with its unit appended when known.
 
+A number is rounded first (`numberLabel`, used by `valueText` for the marker and the tooltip alike): two decimals, or
+three significant digits below one so a small reading does not become `0`. Sensors report more digits than the reading
+carries, and on a floorplan the values are read against each other - `17.896 °C` next to `18.91 °C` cannot be compared
+at a glance. A whole number stays whole.
+
 ## Labels avoid each other
 
 `stackMarkers` in `shared/floorplan-marker-layout.ts` computes, per marker, how far its pill moves so no pill covers
@@ -74,6 +79,12 @@ placed even without a position.
   the middle of its widest stretch at that height. The chart point goes there too, so hovering the label opens the
   tooltip.
 - The label's box (`zoneLabelBox`) is handed to `stackMarkers` as an obstacle; labels of areas never move.
+- Instead of moving, the label is fitted into its room (`zoneLabel`): it is broken at its spaces and, where that is
+  not enough, written in one of the smaller sizes of `LABEL_FONTS`, measured against `labelRoom` - how wide the room
+  is at the height the label sits at, counting only the stretch the label is in rather than the other leg of an
+  L-shaped room. That is what keeps two labels apart: a label that stays in its own room cannot reach into the next
+  one, where it would read as that room's value. Below the smallest size it stays as it is rather than being cut,
+  since half a value reads as another one - a room too narrow for its text keeps overlapping.
 - `zonePoints` and `placementPosition` return axis units: `drawShift` is stored relative to the chart area's corner,
   because the datasets are placed through the scales. Whatever draws on `chart.ctx` itself works in canvas pixels and
   adds `chartArea.left` and `chartArea.top` first, as the `floorplanMarkers` plugin does for the corners; without it

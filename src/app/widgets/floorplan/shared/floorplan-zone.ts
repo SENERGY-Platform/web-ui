@@ -27,8 +27,12 @@ export interface ZonePoint {
 const FILL_ALPHA = 0.3;
 /** Outline width, as a share of the marker size. */
 const OUTLINE = 0.12;
-/** Label size, as a share of the marker size. */
-const LABEL_FONT = 0.7;
+/** Label sizes, as shares of the marker size: the plain one first, then what a narrow room falls back to. */
+const LABEL_FONTS = [0.7, 0.58, 0.48];
+/** How much of the room's width at the label the label itself may take. */
+const LABEL_FIT = 0.92;
+/** Distance between two lines of a wrapped label, as a share of its font size. */
+const LINE_HEIGHT = 1.15;
 /** The halo that keeps the label readable over the floorplan, as a share of the label size. */
 const HALO = 0.22;
 
@@ -57,11 +61,11 @@ export function zonePoints(
 }
 
 /**
- * The middle of the longest stretch of the room along the given height, or undefined where that height
- * crosses no part of it. Edges are counted as they cross the line, so the stretches between the first
- * and second crossing, the third and fourth and so on are the ones inside the room.
+ * The stretches of the room along the given height. Edges are counted as they cross the line, so the
+ * stretches between the first and second crossing, the third and fourth and so on are the ones inside
+ * the room.
  */
-function widestChord(points: ZonePoint[], y: number): ZonePoint | undefined {
+function chords(points: ZonePoint[], y: number): { from: number; to: number }[] {
     const crossings: number[] = [];
     points.forEach((corner, index) => {
         const next = points[(index + 1) % points.length];
@@ -71,14 +75,23 @@ function widestChord(points: ZonePoint[], y: number): ZonePoint | undefined {
         crossings.push(corner.x + (y - corner.y) * (next.x - corner.x) / (next.y - corner.y));
     });
     crossings.sort((a, b) => a - b);
+    const inside: { from: number; to: number }[] = [];
+    for (let i = 0; i + 1 < crossings.length; i += 2) {
+        inside.push({ from: crossings[i], to: crossings[i + 1] });
+    }
+    return inside;
+}
+
+/** The middle of the longest stretch of the room along the given height, or undefined where that height crosses no part of it. */
+function widestChord(points: ZonePoint[], y: number): ZonePoint | undefined {
     let widest: ZonePoint | undefined;
     let width = 0;
-    for (let i = 0; i + 1 < crossings.length; i += 2) {
-        if (crossings[i + 1] - crossings[i] > width) {
-            width = crossings[i + 1] - crossings[i];
-            widest = { x: (crossings[i] + crossings[i + 1]) / 2, y };
+    chords(points, y).forEach(chord => {
+        if (chord.to - chord.from > width) {
+            width = chord.to - chord.from;
+            widest = { x: (chord.from + chord.to) / 2, y };
         }
-    }
+    });
     return widest;
 }
 
@@ -111,6 +124,16 @@ export function zoneCenter(points: ZonePoint[]): ZonePoint {
     return widestChord(points, centroid.y) || widestChord(points, middle) || average;
 }
 
+/**
+ * How wide the room is where its label is written: the stretch the label sits in rather than the room's
+ * full extent, so a label in one leg of an L-shaped room is not measured against the other leg as well.
+ */
+export function labelRoom(points: ZonePoint[], center: ZonePoint): number {
+    const stretches = chords(points, center.y);
+    const here = stretches.find(chord => center.x >= chord.from && center.x <= chord.to);
+    return here !== undefined ? here.to - here.from : Math.max(0, ...stretches.map(chord => chord.to - chord.from));
+}
+
 /** Whether a point lies inside the polygon, by the even-odd rule. */
 export function containsPoint(points: ZonePoint[], point: ZonePoint): boolean {
     let inside = false;
@@ -136,13 +159,69 @@ export interface ZoneDraw {
     family: string;
 }
 
+/** The label of an area as it is written: broken into lines and sized to the room it belongs to. */
+export interface ZoneLabel {
+    lines: string[];
+    /** the middle of the area, which the block of lines is centred on */
+    center: ZonePoint;
+    /** font size in canvas pixels */
+    font: number;
+    /** distance between two lines in canvas pixels */
+    lineHeight: number;
+    /** the widest of the lines */
+    width: number;
+}
+
+/** Breaks the text at its spaces so every line fits the width, keeping a word whole even where it does not. */
+function wrapText(ctx: CanvasRenderingContext2D, text: string, room: number): string[] {
+    const lines: string[] = [];
+    text.split(' ').filter(word => word.length > 0).forEach(word => {
+        const last = lines.length - 1;
+        const joined = last < 0 ? word : lines[last] + ' ' + word;
+        if (last < 0 || ctx.measureText(joined).width > room) {
+            lines.push(word);
+        } else {
+            lines[last] = joined;
+        }
+    });
+    return lines.length > 0 ? lines : [text];
+}
+
+/**
+ * How the label of an area is written. It is broken into lines and, where that is not enough, written
+ * smaller, until it fits the room at the height it sits at: a label drawn at its plain size runs over
+ * the walls of a small room into the neighbouring one, where it reads as that room's value. Below the
+ * smallest size it stays as it is rather than being cut, since half a value reads as another one.
+ */
+export function zoneLabel(ctx: CanvasRenderingContext2D, zone: ZoneDraw): ZoneLabel | undefined {
+    if (zone.points.length < ZONE_CORNERS || zone.text.length === 0) {
+        return undefined;
+    }
+    const center = zoneCenter(zone.points);
+    const room = labelRoom(zone.points, center) * LABEL_FIT;
+    ctx.save();
+    let label: ZoneLabel | undefined;
+    LABEL_FONTS.forEach(share => {
+        if (label !== undefined && label.width <= room) {
+            return;
+        }
+        const font = zone.size * share;
+        ctx.font = font + 'px ' + zone.family;
+        const lines = wrapText(ctx, zone.text, room);
+        const width = Math.max(...lines.map(line => ctx.measureText(line).width));
+        label = { lines, center, font, lineHeight: font * LINE_HEIGHT, width };
+    });
+    ctx.restore();
+    return label;
+}
+
 /**
  * Fills the area in the colour of its value and writes the value into it. The fill stays translucent so
  * the floorplan underneath keeps showing through, and the label carries a halo rather than a box: a box
  * large enough for a room name would cover what the area is meant to show.
  */
 export function drawZone(ctx: CanvasRenderingContext2D, zone: ZoneDraw): void {
-    const { points, background, text, size, family } = zone;
+    const { points, background, size, family } = zone;
     if (points.length < ZONE_CORNERS) {
         return;
     }
@@ -161,35 +240,34 @@ export function drawZone(ctx: CanvasRenderingContext2D, zone: ZoneDraw): void {
     ctx.strokeStyle = background;
     ctx.stroke();
 
-    if (text.length > 0) {
-        const center = zoneCenter(points);
-        ctx.font = size * LABEL_FONT + 'px ' + family;
+    const label = zoneLabel(ctx, zone);
+    if (label !== undefined) {
+        const top = label.center.y - (label.lines.length - 1) * label.lineHeight / 2;
+        ctx.font = label.font + 'px ' + family;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.lineWidth = size * LABEL_FONT * HALO;
+        ctx.lineWidth = label.font * HALO;
         ctx.lineJoin = 'round';
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.strokeText(text, center.x, center.y);
+        // every halo first, so none of them is laid over the line above it
+        label.lines.forEach((line, index) => ctx.strokeText(line, label.center.x, top + index * label.lineHeight));
         try {
             ctx.fillStyle = Color(background).darken(0.25).hex();
         } catch (_) {
             ctx.fillStyle = background;
         }
-        ctx.fillText(text, center.x, center.y);
+        label.lines.forEach((line, index) => ctx.fillText(line, label.center.x, top + index * label.lineHeight));
     }
     ctx.restore();
 }
 
 /** What the label of an area takes up, so the pills of other placements can keep clear of it. */
 export function zoneLabelBox(ctx: CanvasRenderingContext2D, zone: ZoneDraw): { x: number; y: number; width: number; height: number } | undefined {
-    if (zone.points.length < ZONE_CORNERS || zone.text.length === 0) {
+    const label = zoneLabel(ctx, zone);
+    if (label === undefined) {
         return undefined;
     }
-    ctx.save();
-    ctx.font = zone.size * LABEL_FONT + 'px ' + zone.family;
-    const width = ctx.measureText(zone.text).width;
-    ctx.restore();
-    const center = zoneCenter(zone.points);
+    const height = Math.max(zone.size, label.lines.length * label.lineHeight);
     // the box of a pill starts half its height left of its x, and the label is centred on the area
-    return { x: center.x - width / 2 + zone.size / 2, y: center.y, width, height: zone.size };
+    return { x: label.center.x - label.width / 2 + height / 2, y: label.center.y, width: label.width, height };
 }
