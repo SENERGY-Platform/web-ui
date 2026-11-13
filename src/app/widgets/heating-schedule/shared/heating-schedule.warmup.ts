@@ -221,7 +221,8 @@ export function stationLine(warmups: Array<ZoneWarmup | null>): string | null {
     }
     const describe = (label: string, station: WarmupStation): string | null => {
         const distance = station.distanceKm === null ? null : '(' + Math.round(station.distanceKm * 10) / 10 + ' km)';
-        const text = [station.name, distance].filter((part) => part !== null).join(' ');
+        const name = station.name?.trim() || (station.id?.trim() ? 'station ' + station.id.trim() : null);
+        const text = [name, distance].filter((part) => part !== null).join(' ');
         return text === '' ? null : label + ': ' + text;
     };
     const parts = [
@@ -229,6 +230,15 @@ export function stationLine(warmups: Array<ZoneWarmup | null>): string | null {
         first.forecastStation === null ? null : describe('Forecast', first.forecastStation),
     ].filter((part): part is string => part !== null);
     return parts.length === 0 ? null : parts.join(' · ');
+}
+
+/** One line per zone still learning, then the station line; null when there is nothing to say. A null zone name leaves the text as it is. */
+export function infoText(learning: Array<{ zone: string | null; text: string | null }>, stations: string | null): string | null {
+    const lines = learning.flatMap(({ zone, text }) => text === null ? [] : [zone === null ? text : zone + ': ' + text.charAt(0).toLowerCase() + text.slice(1)]);
+    if (stations !== null) {
+        lines.push(stations);
+    }
+    return lines.length === 0 ? null : lines.join('\n');
 }
 
 interface WarmupInterval {

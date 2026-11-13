@@ -155,14 +155,19 @@ mat-card-content {
     color: var(--mat-sys-on-primary-container);
 }
 
-.learning,
-.stations {
-    opacity: 0.6;
-    font-size: 0.85em;
+/* the info icon sits at the right end of the edit row; its tooltip lists one fact per line */
+.info-icon {
+    margin-left: auto;
+    flex: none;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    opacity: 0.55;
+    cursor: help;
 }
 
-.stations {
-    margin-bottom: 8px;
+::ng-deep .heating-info-tooltip {
+    white-space: pre-line;
 }
 
 /* diagonal stripes in the colour of the window's temperature; the bar shows through between them */

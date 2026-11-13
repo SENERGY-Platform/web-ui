@@ -321,6 +321,7 @@ describe('HeatingScheduleComponent', () => {
             fixture.detectChanges();
         }
 
+        const infoIcon = () => fixture.nativeElement.querySelector('.info-icon') as (HTMLElement & { matTooltip?: string }) | null;
         const text = (selector: string) => fixture.nativeElement.querySelector(selector)?.textContent?.trim() ?? null;
 
         it('shows the instance status as error, starting or running', () => {
@@ -403,6 +404,88 @@ describe('HeatingScheduleComponent', () => {
             expect(text('.legend')).toContain('22 °C');
         });
 
+        describe('fitting the tile', () => {
+            const CLIENT_HEIGHT = 300;
+            let observers: Array<{ callback: () => void; disconnect: jasmine.Spy }>;
+            let originalObserver: typeof ResizeObserver;
+
+            beforeEach(() => {
+                observers = [];
+                originalObserver = window.ResizeObserver;
+                window.ResizeObserver = class {
+                    disconnect = jasmine.createSpy('disconnect');
+                    constructor(callback: () => void) {
+                        observers.push({ callback, disconnect: this.disconnect });
+                    }
+                    observe(): void { /* the test fires the callback itself */ }
+                    unobserve(): void { /* unused */ }
+                } as unknown as typeof ResizeObserver;
+            });
+
+            afterEach(() => {
+                window.ResizeObserver = originalObserver;
+            });
+
+            /** The container is as tall as the tile (300) and its content as tall as the visible parts (week 200, rest 150). */
+            function mockSizes(weekHeight: number): void {
+                const container: HTMLElement = fixture.nativeElement.querySelector('mat-card-content');
+                Object.defineProperty(container, 'clientHeight', { configurable: true, get: () => CLIENT_HEIGHT });
+                Object.defineProperty(container, 'scrollHeight', { configurable: true, get: () => 150 + (fixture.nativeElement.querySelector('.week') ? weekHeight : 0) });
+            }
+
+            function loadWithSizes(weekHeight: number): void {
+                instances.getInstance.and.returnValue(of({ ...instanceWith(constant(21), 17, JSON.stringify([option('urn:a', 'Hall')])), ready: true } as SmartServiceInstanceModel));
+                component.widget = configuredWidget;
+                fixture.detectChanges();
+                mockSizes(weekHeight);
+                init.next('w1');
+                fixture.detectChanges();
+                fixture.detectChanges();
+            }
+
+            it('collapses the week of a single zone when it does not fit', () => {
+                loadWithSizes(200);
+
+                expect(fixture.nativeElement.querySelector('.week')).toBeNull();
+                expect(fixture.nativeElement.querySelector('.week-toggle').getAttribute('aria-label')).toBe('Show week');
+            });
+
+            it('keeps the week when it fits', () => {
+                loadWithSizes(100);
+
+                expect(fixture.nativeElement.querySelectorAll('.week .bar').length).toBe(7);
+            });
+
+            it('lets a toggle of the user win over the automatic collapse, also on resize', () => {
+                loadWithSizes(100);
+                (fixture.nativeElement.querySelector('.week-toggle') as HTMLElement).click();
+                fixture.detectChanges();
+                (fixture.nativeElement.querySelector('.week-toggle') as HTMLElement).click();
+                fixture.detectChanges();
+                expect(fixture.nativeElement.querySelector('.week')).not.toBeNull();
+
+                mockSizes(400);
+                observers.forEach((observer) => observer.callback());
+                fixture.detectChanges();
+
+                expect(fixture.nativeElement.querySelector('.week')).not.toBeNull();
+            });
+
+            it('collapses on resize of the container and stops observing on destroy', () => {
+                loadWithSizes(100);
+                expect(fixture.nativeElement.querySelector('.week')).not.toBeNull();
+
+                mockSizes(400);
+                observers.forEach((observer) => observer.callback());
+                fixture.detectChanges();
+                expect(fixture.nativeElement.querySelector('.week')).toBeNull();
+
+                fixture.destroy();
+                expect(observers.length).toBe(1);
+                expect(observers[0].disconnect).toHaveBeenCalled();
+            });
+        });
+
         describe('warm-up', () => {
             const config: WarmupConfig = { exportId: 'exp-1', mode: 'plan' };
             const WARMUP_NOW = Date.UTC(2026, 10, 10, 3, 0);
@@ -434,7 +517,23 @@ describe('HeatingScheduleComponent', () => {
                 expect(fixture.nativeElement.querySelector('.learning')).toBeNull();
                 expect(fixture.nativeElement.querySelectorAll('.bar-today .hatch').length).toBe(1);
                 expect(fixture.nativeElement.querySelectorAll('.week .hatch').length).toBe(1);
-                expect(text('.stations')).toBe('Outdoor: Leipzig (12.3 km)');
+                expect(fixture.nativeElement.querySelector('.stations')).toBeNull();
+                expect(infoIcon()?.matTooltip).toBe('Outdoor: Leipzig (12.3 km)');
+                expect(infoIcon()?.getAttribute('aria-label')).toBe('Warm-up and weather station details');
+            });
+
+            it('lists the learning state per zone and the stations in the tooltip of the info icon', () => {
+                const learning = row({ episodes: 2, measure_station: '{"id":"10471","name":null,"distance_km":5}' });
+                warmup.config.and.returnValue(of(config));
+                warmup.newestRows.and.returnValue(of([learning, null]));
+                instances.getInstance.and.returnValue(of({ ...instanceWith(zonesSchedule, 17, thermostats), ready: true } as SmartServiceInstanceModel));
+                component.widget = configuredWidget;
+                fixture.detectChanges();
+                init.next('w1');
+                fixture.detectChanges();
+
+                expect(infoIcon()?.matTooltip).toBe('Bath: learning the warm-up time (2 of 3 warm-ups seen)\nRest: learning the warm-up time\nOutdoor: station 10471 (5 km)');
+                expect(fixture.nativeElement.querySelector('.learning')).toBeNull();
             });
 
             it('reads the row of the plan position when an earlier zone has no thermostat left', () => {
@@ -454,17 +553,17 @@ describe('HeatingScheduleComponent', () => {
                 warmup.newestRows.and.returnValue(of([null]));
                 load(constant(21));
 
-                expect(text('.learning')).toBe('Learning the warm-up time');
+                expect(fixture.nativeElement.querySelector('.learning')).toBeNull();
+                expect(infoIcon()?.matTooltip).toBe('Learning the warm-up time');
                 expect(fixture.nativeElement.querySelector('.warming')).toBeNull();
                 expect(fixture.nativeElement.querySelector('.hatch')).toBeNull();
-                expect(fixture.nativeElement.querySelector('.stations')).toBeNull();
             });
 
             it('shows nothing of it for an instance without a warm-up export', () => {
                 load(constant(21));
 
                 expect(warmup.newestRows).not.toHaveBeenCalled();
-                for (const selector of ['.warming', '.window-text', '.learning', '.hatch', '.stations']) {
+                for (const selector of ['.warming', '.window-text', '.learning', '.hatch', '.stations', '.info-icon']) {
                     expect(fixture.nativeElement.querySelector(selector)).withContext(selector).toBeNull();
                 }
             });

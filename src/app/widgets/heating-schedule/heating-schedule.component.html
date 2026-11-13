@@ -16,7 +16,7 @@
 
 <mat-card appearance="outlined">
   <senergy-widget-header [widget]="widget" [refreshing]="refreshing"></senergy-widget-header>
-  <mat-card-content id="{{widget.id}}">
+  <mat-card-content id="{{widget.id}}" #scroll>
     @if (!configured) {
       <div class="ly-column ly-align-center-center">
         <div>Please configure widget!</div>
@@ -76,9 +76,6 @@
                   }
                 </div>
               }
-              @if (zone.learningText) {
-                <div class="learning">{{ zone.learningText }}</div>
-              }
             </div>
 
             <div class="day today">
@@ -134,10 +131,6 @@
           </div>
         }
 
-        @if (stationText) {
-          <div class="stations">{{ stationText }}</div>
-        }
-
         @if (editorNote) {
           <div class="message">{{ editorNote }}</div>
         }
@@ -153,6 +146,10 @@
                 <span class="legend-strip"></span>
                 <span>22 °C</span>
               </div>
+            }
+            @if (infoText) {
+              <mat-icon class="info-icon" [matTooltip]="infoText" matTooltipClass="heating-info-tooltip"
+                aria-label="Warm-up and weather station details" role="img" tabindex="0">info_outline</mat-icon>
             }
           </div>
         }

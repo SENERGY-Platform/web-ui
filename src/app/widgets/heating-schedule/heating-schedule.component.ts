@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, Input, OnDestroy, OnInit, ViewChild, afterNextRender, inject } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 import { Observable, Subscription, forkJoin, interval, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { DeviceCommandService } from 'src/app/core/services/device-command.service';
@@ -71,6 +72,7 @@ import {
     WarmupConfig,
     ZoneWarmup,
     hatchSpans,
+    infoText,
     learningText,
     nextWindowText,
     rowDay,
@@ -142,9 +144,9 @@ const LOAD_ERROR = 'The heating schedule could not be loaded.';
     templateUrl: './heating-schedule.component.html',
     styleUrls: ['./heating-schedule.component.css'],
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [MatCard, MatCardContent, MatButton, MatIcon, WidgetHeaderComponent, WidgetSpinnerComponent, WidgetFooterComponent]
+    imports: [MatCard, MatCardContent, MatButton, MatIcon, MatTooltip, WidgetHeaderComponent, WidgetSpinnerComponent, WidgetFooterComponent]
 })
-export class HeatingScheduleComponent implements OnInit, OnDestroy {
+export class HeatingScheduleComponent implements OnInit, AfterViewInit, OnDestroy {
     @Input() dashboardId = '';
     @Input() widget: WidgetModel = {} as WidgetModel;
     @Input() zoom = false;
@@ -167,6 +169,8 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     zones: ZoneView[] = [];
     /** the outdoor and forecast stations of the warm-up model, one line for the instance */
     stationText: string | null = null;
+    /** the tooltip of the info icon: zones still learning and the stations, one per line */
+    infoText: string | null = null;
     /** why the editor cannot take over the stored plan, if it cannot */
     editorNote: string | null = null;
     readonly hours = [0, 6, 12, 18, 24];
@@ -186,6 +190,14 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     private warmupExport: WarmupConfig | null = null;
     private warmups: Array<ZoneWarmup | null> = [];
     private expandedByZone = new Map<number, boolean>();
+    /** a toggle by the user wins over the automatic collapse for the rest of the instance */
+    private weekToggled = false;
+    /** set once the content overflowed, so later loads start collapsed instead of flickering */
+    private autoCollapsed = false;
+    private resizeObserver: ResizeObserver | null = null;
+    @ViewChild('scroll') private scrollContainer?: ElementRef<HTMLElement>;
+    private cdr = inject(ChangeDetectorRef);
+    private injector = inject(Injector);
     private dashboardService = inject(DashboardService);
     private instanceService = inject(SmartServiceInstanceService);
     private service = inject(HeatingScheduleService);
@@ -209,7 +221,16 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         });
     }
 
+    ngAfterViewInit(): void {
+        const container = this.scrollContainer?.nativeElement;
+        if (container !== undefined && typeof ResizeObserver !== 'undefined') {
+            this.resizeObserver = new ResizeObserver(() => this.fitWeeks());
+            this.resizeObserver.observe(container);
+        }
+    }
+
     ngOnDestroy(): void {
+        this.resizeObserver?.disconnect();
         this.initSubscription.unsubscribe();
         this.loadSubscription.unsubscribe();
         this.tickSubscription.unsubscribe();
@@ -220,6 +241,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
     }
 
     toggleWeek(index: number): void {
+        this.weekToggled = true;
         const zone = this.zones[index];
         zone.expanded = !zone.expanded;
         this.expandedByZone.set(index, zone.expanded);
@@ -284,7 +306,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         try {
             const setback = parseSetback(parameterValue(instance, HEATING_SETBACK_PARAMETER));
             const thermostats = parseThermostats(parameterValue(instance, HEATING_THERMOSTATS_PARAMETER));
-            this.zones = resolveZones(document.zones, setback, thermostats, document.legacy).map((zone, index, all) => zoneView(zone, this.expandedByZone.get(index) ?? all.length === 1));
+            this.zones = resolveZones(document.zones, setback, thermostats, document.legacy).map((zone, index, all) => zoneView(zone, this.expandedByZone.get(index) ?? (!this.autoCollapsed && all.length === 1)));
             this.document = document;
             this.setback = setback;
             this.thermostats = thermostats;
@@ -294,6 +316,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
             this.sources = null;
             this.loadDeviceValues();
             this.loadWarmupConfig(instance.id);
+            this.fitAfterRender();
         } catch (error) {
             this.rawSchedule = typeof schedule === 'string' ? schedule : JSON.stringify(schedule ?? null);
             this.loadError = 'The stored heating schedule cannot be read: ' + errorText(error);
@@ -356,6 +379,7 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
         this.warmupSubscription = this.warmupService.newestRows(this.warmupExport.exportId, this.zones.map((zone) => zone.planIndex)).subscribe((rows) => {
             this.warmups = rows;
             this.updateNow();
+            this.fitAfterRender();
         });
     }
 
@@ -392,6 +416,29 @@ export class HeatingScheduleComponent implements OnInit, OnDestroy {
             this.updateWarmup(zone, index, planned, now, parts.day);
         }
         this.stationText = this.warmupExport === null ? null : stationLine(this.warmups);
+        this.infoText = infoText(
+            this.zones.map((zone) => ({ zone: this.document?.legacy ? null : zone.name, text: zone.learningText })),
+            this.stationText,
+        );
+    }
+
+    private fitAfterRender(): void {
+        afterNextRender(() => this.fitWeeks(), { injector: this.injector });
+    }
+
+    /** Collapses the weeks when the content overflows the tile, unless the user has chosen. */
+    private fitWeeks(): void {
+        const container = this.scrollContainer?.nativeElement;
+        if (this.weekToggled || container === undefined || container.scrollHeight <= container.clientHeight) {
+            return;
+        }
+        const expanded = this.zones.filter((zone) => zone.expanded);
+        if (expanded.length === 0) {
+            return;
+        }
+        expanded.forEach((zone) => zone.expanded = false);
+        this.autoCollapsed = true;
+        this.cdr.markForCheck();
     }
 
     private updateWarmup(zone: ZoneView, index: number, planned: number, now: number, today: number): void {

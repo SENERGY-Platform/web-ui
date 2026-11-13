@@ -18,6 +18,7 @@ import {
     WARMUP_COLUMNS,
     ZoneWarmup,
     hatchSpans,
+    infoText,
     learningText,
     nextWindowText,
     parseWarmupRow,
@@ -213,12 +214,30 @@ describe('stationLine', () => {
     });
 
     it('leaves out an unknown name or distance, and shows nothing when both are unknown', () => {
-        expect(stationLine(rows({ measure_station: '{"id":"4","name":null,"distance_km":2}', forecast_station: '{"id":null,"name":"Halle","distance_km":null}' }))).toBe('Outdoor: (2 km) · Forecast: Halle');
+        expect(stationLine(rows({ measure_station: '{"id":"4","name":null,"distance_km":2}', forecast_station: '{"id":null,"name":"Halle","distance_km":null}' }))).toBe('Outdoor: station 4 (2 km) · Forecast: Halle');
         expect(stationLine(rows({ measure_station: '{"id":null,"name":null,"distance_km":null}', forecast_station: '{"id":null,"name":null,"distance_km":null}' }))).toBeNull();
+    });
+
+    it('shows the id of a station without a name, never empty parentheses or a dangling separator', () => {
+        expect(stationLine(rows({ measure_station: '{"id":"10471","name":null,"distance_km":5}', forecast_station: '{"id":"7","name":"","distance_km":null}' }))).toBe('Outdoor: station 10471 (5 km) · Forecast: station 7');
+        expect(stationLine(rows({ measure_station: '{"id":null,"name":null,"distance_km":3}' }))).toBe('Outdoor: (3 km)');
     });
 
     it('takes the stations of the first zone that has a row, and nothing without rows', () => {
         expect(stationLine([null, parseWarmupRow(row({ measure_station: stationA }))])).toBe('Outdoor: Leipzig (12.3 km)');
         expect(stationLine([null, null])).toBeNull();
+    });
+});
+
+describe('infoText', () => {
+    it('lists the zones still learning, one per line, and the stations last', () => {
+        expect(infoText([{ zone: 'Salon', text: 'Learning the warm-up time (2 of 3 warm-ups seen)' }, { zone: 'Bath', text: null }, { zone: 'Hall', text: 'Learning the warm-up time' }], 'Outdoor: own sensor'))
+            .toBe('Salon: learning the warm-up time (2 of 3 warm-ups seen)\nHall: learning the warm-up time\nOutdoor: own sensor');
+    });
+
+    it('keeps the text as it is without a zone name and is null when there is nothing to say', () => {
+        expect(infoText([{ zone: null, text: 'Learning the warm-up time' }], null)).toBe('Learning the warm-up time');
+        expect(infoText([{ zone: 'Bath', text: null }], null)).toBeNull();
+        expect(infoText([], null)).toBeNull();
     });
 });
