@@ -59,6 +59,9 @@
                 @if (zone.targetText) {
                   <div class="target">{{ zone.targetText }}</div>
                 }
+                @if (zone.heating) {
+                  <span class="pill heating"><mat-icon class="heating-icon" aria-hidden="true">local_fire_department</mat-icon>Heating</span>
+                }
               </div>
               @if (zone.nextText) {
                 <div class="next">{{ zone.nextText }}</div>

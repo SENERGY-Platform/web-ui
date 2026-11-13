@@ -23,7 +23,7 @@ import {
 import { SmartServiceInstanceModel } from 'src/app/modules/smart-services/instances/shared/instances.model';
 import { HeatingSwitch, switchTimeText, temperatureText } from './heating-schedule.plan';
 
-export type HeatingValueKind = 'room' | 'target' | 'battery';
+export type HeatingValueKind = 'room' | 'target' | 'battery' | 'heating';
 
 /** The service and variable that deliver one value of one device. */
 export interface HeatingValueSource {
@@ -39,6 +39,7 @@ export interface HeatingDeviceValues {
     room?: number;
     target?: number;
     battery?: number;
+    heating?: boolean;
 }
 
 export const TEMPERATURE_FUNCTION = 'urn:infai:ses:measuring-function:d19ffeb0-877c-4611-951c-b3fc37d9b9ba';
@@ -46,8 +47,11 @@ export const BATTERY_FUNCTION = 'urn:infai:ses:measuring-function:68dae5ce-a9ee-
 export const AIR_ASPECT = 'urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6';
 export const READING_ASPECT = 'urn:infai:ses:aspect:ffcdc0a6-0957-49d7-be9a-af912ecbd3cf';
 export const TARGET_ASPECT = 'urn:infai:ses:aspect:4f4188b6-f944-45fa-9429-15655f691397';
+export const BINARY_STATE_FUNCTION = 'urn:infai:ses:measuring-function:2c284729-9bcd-4cde-b00c-1edbdaaab724';
+export const HEATING_ASPECT = 'urn:infai:ses:aspect:1d69d3b6-d16f-430c-bf58-f23b26cd84c4';
 export const CELSIUS_CHARACTERISTIC = 'urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a';
 export const PERCENT_CHARACTERISTIC = 'urn:infai:ses:characteristic:46f808f4-bb9e-4cc2-bd50-dc33ca74f273';
+export const BOOLEAN_CHARACTERISTIC = 'urn:infai:ses:characteristic:7dc1bb7e-b256-408a-a6f9-044dc60fdcf5';
 
 export const LOW_BATTERY_PERCENT = 20;
 /** Tenths of a degree from which a device set point counts as deviating. */
@@ -55,10 +59,11 @@ const OVERRIDE_TENTHS = 5;
 /** The device needs time to report the new set point after a planned switch. */
 const OVERRIDE_GRACE_MS = 10 * 60000;
 
-const KINDS: Array<{ kind: HeatingValueKind; functionId: string; aspectIds?: string[] }> = [
-    { kind: 'room', functionId: TEMPERATURE_FUNCTION, aspectIds: [AIR_ASPECT, READING_ASPECT] },
-    { kind: 'target', functionId: TEMPERATURE_FUNCTION, aspectIds: [TARGET_ASPECT] },
-    { kind: 'battery', functionId: BATTERY_FUNCTION },
+const KINDS: Array<{ kind: HeatingValueKind; functionId: string; characteristicId: string; aspectIds?: string[] }> = [
+    { kind: 'room', functionId: TEMPERATURE_FUNCTION, characteristicId: CELSIUS_CHARACTERISTIC, aspectIds: [AIR_ASPECT, READING_ASPECT] },
+    { kind: 'target', functionId: TEMPERATURE_FUNCTION, characteristicId: CELSIUS_CHARACTERISTIC, aspectIds: [TARGET_ASPECT] },
+    { kind: 'battery', functionId: BATTERY_FUNCTION, characteristicId: PERCENT_CHARACTERISTIC },
+    { kind: 'heating', functionId: BINARY_STATE_FUNCTION, characteristicId: BOOLEAN_CHARACTERISTIC, aspectIds: [HEATING_ASPECT] },
 ];
 
 /** The first variable, searched depth first through the sub variables, with the function and, when given, all of the aspects. */
@@ -96,16 +101,25 @@ export function matchValueSources(deviceId: string, deviceType: DeviceTypeModel)
 
 /** One read command per source; the characteristic makes device-command convert, for example Kelvin to Celsius. */
 export function readCommands(sources: HeatingValueSource[]): DeviceCommandModel[] {
-    return sources.map((source) => ({
-        function_id: source.kind === 'battery' ? BATTERY_FUNCTION : TEMPERATURE_FUNCTION,
-        device_id: source.deviceId,
-        service_id: source.serviceId,
-        ...(source.aspectIds === undefined ? {} : { aspect_ids: source.aspectIds }),
-        characteristic_id: source.kind === 'battery' ? PERCENT_CHARACTERISTIC : CELSIUS_CHARACTERISTIC,
-    }));
+    return sources.map((source) => {
+        const kind = KINDS.find((k) => k.kind === source.kind);
+        return {
+            function_id: kind?.functionId ?? TEMPERATURE_FUNCTION,
+            device_id: source.deviceId,
+            service_id: source.serviceId,
+            ...(source.aspectIds === undefined ? {} : { aspect_ids: source.aspectIds }),
+            characteristic_id: kind?.characteristicId ?? CELSIUS_CHARACTERISTIC,
+        };
+    });
 }
 
-function numeric(value: unknown): number | undefined {
+/** device-command answers a command with the list of its output values; a list of exactly one is that value, any other list is unavailable. */
+function single(value: unknown): unknown {
+    return Array.isArray(value) ? (value.length === 1 ? value[0] : undefined) : value;
+}
+
+function numeric(raw: unknown): number | undefined {
+    const value = single(raw);
     if (typeof value === 'number') {
         return Number.isFinite(value) ? value : undefined;
     }
@@ -116,12 +130,17 @@ function numeric(value: unknown): number | undefined {
     return undefined;
 }
 
-/** Device id to values; an entry that is not 200 or not numeric leaves its value out. The responses are in the order of the commands. */
+function boolean(raw: unknown): boolean | undefined {
+    const value = single(raw);
+    return typeof value === 'boolean' ? value : undefined;
+}
+
+/** Device id to values; an entry that is not 200 or not numeric (not boolean for the heating state) leaves its value out. The responses are in the order of the commands. */
 export function valuesFromResponses(sources: HeatingValueSource[], responses: DeviceCommandResponseModel[]): Map<string, HeatingDeviceValues> {
     const values = new Map<string, HeatingDeviceValues>();
     sources.forEach((source, i) => {
         const response = responses[i];
-        const value = response?.status_code === 200 ? numeric(response.message) : undefined;
+        const value = response?.status_code === 200 ? (source.kind === 'heating' ? boolean(response.message) : numeric(response.message)) : undefined;
         if (value !== undefined) {
             values.set(source.deviceId, { ...values.get(source.deviceId), [source.kind]: value });
         }
@@ -136,6 +155,11 @@ export function meanRoom(deviceIds: string[], values: Map<string, HeatingDeviceV
         return null;
     }
     return Math.round((rooms.reduce((sum, room) => sum + room, 0) / rooms.length) * 10) / 10;
+}
+
+/** True when at least one of the devices reports that its valve is heating. */
+export function zoneHeating(deviceIds: string[], values: Map<string, HeatingDeviceValues>): boolean {
+    return deviceIds.some((id) => values.get(id)?.heating === true);
 }
 
 export interface LowBattery {

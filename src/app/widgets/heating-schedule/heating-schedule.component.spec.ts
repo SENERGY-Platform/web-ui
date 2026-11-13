@@ -28,7 +28,7 @@ import { WidgetModel } from 'src/app/modules/dashboard/shared/dashboard-widget.m
 import { SmartServiceInstanceModel } from 'src/app/modules/smart-services/instances/shared/instances.model';
 import { SmartServiceInstanceService } from 'src/app/modules/smart-services/instances/shared/instances.service';
 import { HeatingScheduleComponent } from './heating-schedule.component';
-import { AIR_ASPECT, BATTERY_FUNCTION, READING_ASPECT, TARGET_ASPECT, TEMPERATURE_FUNCTION } from './shared/heating-schedule.details';
+import { AIR_ASPECT, BATTERY_FUNCTION, BINARY_STATE_FUNCTION, HEATING_ASPECT, READING_ASPECT, TARGET_ASPECT, TEMPERATURE_FUNCTION } from './shared/heating-schedule.details';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
 import { WARMUP_COLUMNS, WarmupConfig, ZoneWarmup, parseWarmupRow } from './shared/heating-schedule.warmup';
 import { HeatingWarmupService } from './shared/heating-schedule.warmup.service';
@@ -368,6 +368,26 @@ describe('HeatingScheduleComponent', () => {
             init.next('w1');
             fixture.detectChanges();
             expect(text('.current')).toBe('24 °C');
+        });
+
+        it('reads the list form device-command answers with and shows the heating pill', () => {
+            devices.getDeviceListByIds.and.returnValue(of([{ id: 'urn:a', device_type_id: 'dt' }] as unknown as DeviceInstanceModel[]));
+            deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt',
+                variable(TEMPERATURE_FUNCTION, [AIR_ASPECT, READING_ASPECT]), variable(BINARY_STATE_FUNCTION, [HEATING_ASPECT])) as unknown as DeviceTypeModel]));
+            commands.runCommands.and.returnValue(of([{ status_code: 200, message: [18.2] }, { status_code: 200, message: [true] }]));
+            load(constant(21));
+
+            expect(text('.current')).toBe('18.2 °C');
+            expect(text('.heating')).toContain('Heating');
+        });
+
+        it('shows no heating pill when the thermostat is not heating', () => {
+            devices.getDeviceListByIds.and.returnValue(of([{ id: 'urn:a', device_type_id: 'dt' }] as unknown as DeviceInstanceModel[]));
+            deviceTypes.getDeviceTypeListByIds.and.returnValue(of([type('dt', variable(BINARY_STATE_FUNCTION, [HEATING_ASPECT])) as unknown as DeviceTypeModel]));
+            commands.runCommands.and.returnValue(of([{ status_code: 200, message: [false] }]));
+            load(constant(21));
+
+            expect(fixture.nativeElement.querySelector('.heating')).toBeNull();
         });
 
         it('names a thermostat with a low battery', () => {

@@ -155,6 +155,22 @@ mat-card-content {
     color: var(--mat-sys-on-primary-container);
 }
 
+.heating {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex: none;
+    padding: 2px 8px 2px 4px;
+    background-color: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+}
+
+.heating-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+}
+
 /* the info icon sits at the right end of the edit row; its tooltip lists one fact per line */
 .info-icon {
     margin-left: auto;
@@ -202,8 +218,9 @@ mat-card-content {
 
 .current-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
-    gap: 12px;
+    gap: 0 12px;
 }
 
 .target {

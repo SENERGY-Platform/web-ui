@@ -65,6 +65,7 @@ import {
     meanRoom,
     readCommands,
     valuesFromResponses,
+    zoneHeating,
 } from './shared/heating-schedule.details';
 import { HeatingScheduleService } from './shared/heating-schedule.service';
 import {
@@ -114,6 +115,8 @@ export interface ZoneView {
     currentText: string;
     /** "target 21 °C", only next to a measured value */
     targetText: string | null;
+    /** at least one thermostat reports that it is heating */
+    heating: boolean;
     nextText: string | null;
     todayRow: BarSegment[];
     /** position of the current minute in percent of the day */
@@ -405,6 +408,7 @@ export class HeatingScheduleComponent implements OnInit, AfterViewInit, OnDestro
             const room = meanRoom(ids, this.values);
             zone.currentText = temperatureText(room ?? planned);
             zone.targetText = room === null ? null : 'target ' + temperatureText(planned);
+            zone.heating = zoneHeating(ids, this.values);
             const next = nextSwitch(zone.plan, now);
             zone.nextText = next === null ? null : nextSwitchText(next, now);
             zone.todayIndex = parts.weekday;
@@ -516,6 +520,7 @@ function zoneView(zone: ResolvedZone, expanded: boolean): ZoneView {
         members: zone.devices.map((deviceId, i) => ({ deviceId, label: zone.labels[i] })),
         currentText: '',
         targetText: null,
+        heating: false,
         nextText: null,
         todayRow: [],
         nowPercent: 0,

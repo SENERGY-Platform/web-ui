@@ -18,7 +18,10 @@ import { DeviceTypeModel } from 'src/app/modules/metadata/device-types-overview/
 import {
     AIR_ASPECT,
     BATTERY_FUNCTION,
+    BINARY_STATE_FUNCTION,
+    BOOLEAN_CHARACTERISTIC,
     CELSIUS_CHARACTERISTIC,
+    HEATING_ASPECT,
     HeatingDeviceValues,
     PERCENT_CHARACTERISTIC,
     READING_ASPECT,
@@ -32,6 +35,7 @@ import {
     meanRoom,
     readCommands,
     valuesFromResponses,
+    zoneHeating,
 } from './heating-schedule.details';
 
 const variable = (functionId: string, aspectIds: string[], sub: unknown[] = []) => ({ function_id: functionId, aspect_ids: aspectIds, sub_content_variables: sub, is_void: false, serialization_options: [] });
@@ -113,6 +117,63 @@ describe('heating schedule device details', () => {
             expect(values.get('d1')).toEqual({ room: 21.5, battery: 80 });
             expect(values.has('d2')).toBeFalse();
             expect(values.has('d3')).toBeFalse();
+        });
+
+        it('reads a list of exactly one element as that element and any other list as unavailable', () => {
+            const sources = ['d1', 'd2', 'd3', 'd4', 'd5'].map((deviceId) => ({ deviceId, kind: 'room' as const, serviceId: 's' }));
+            const values = valuesFromResponses(sources, [
+                { status_code: 200, message: [18.2] },
+                { status_code: 200, message: ['19'] },
+                { status_code: 200, message: [] },
+                { status_code: 200, message: [18, 19] },
+                { status_code: 200, message: [['x']] },
+            ]);
+
+            expect(values.get('d1')).toEqual({ room: 18.2 });
+            expect(values.get('d2')).toEqual({ room: 19 });
+            expect(values.has('d3')).toBeFalse();
+            expect(values.has('d4')).toBeFalse();
+            expect(values.has('d5')).toBeFalse();
+        });
+    });
+
+    describe('heating state', () => {
+        it('matches the heating state by function and aspect and reads it as Boolean', () => {
+            const type = deviceType(service('s1', variable(BINARY_STATE_FUNCTION, ['urn:aspect:other']), variable(BINARY_STATE_FUNCTION, [HEATING_ASPECT])));
+            const sources = matchValueSources('d1', type);
+
+            expect(sources).toEqual([{ deviceId: 'd1', kind: 'heating', serviceId: 's1', aspectIds: [HEATING_ASPECT] }]);
+            expect(readCommands(sources)).toEqual([
+                { function_id: BINARY_STATE_FUNCTION, device_id: 'd1', service_id: 's1', aspect_ids: [HEATING_ASPECT], characteristic_id: BOOLEAN_CHARACTERISTIC },
+            ]);
+            expect(matchValueSources('d1', deviceType(service('s1', variable(TEMPERATURE_FUNCTION, [TARGET_ASPECT]))))).toEqual([
+                { deviceId: 'd1', kind: 'target', serviceId: 's1', aspectIds: [TARGET_ASPECT] },
+            ]);
+        });
+
+        it('reads true and false, also as the single element of a list, and nothing else', () => {
+            const sources = ['d1', 'd2', 'd3', 'd4', 'd5'].map((deviceId) => ({ deviceId, kind: 'heating' as const, serviceId: 's' }));
+            const values = valuesFromResponses(sources, [
+                { status_code: 200, message: [true] },
+                { status_code: 200, message: [false] },
+                { status_code: 200, message: true },
+                { status_code: 200, message: [1] },
+                { status_code: 200, message: 'true' },
+            ]);
+
+            expect(values.get('d1')).toEqual({ heating: true });
+            expect(values.get('d2')).toEqual({ heating: false });
+            expect(values.get('d3')).toEqual({ heating: true });
+            expect(values.has('d4')).toBeFalse();
+            expect(values.has('d5')).toBeFalse();
+        });
+
+        it('heats a zone when at least one thermostat reports true', () => {
+            const values = new Map<string, HeatingDeviceValues>([['a', { heating: false }], ['b', { heating: true }], ['c', { room: 20 }]]);
+
+            expect(zoneHeating(['a', 'b'], values)).toBeTrue();
+            expect(zoneHeating(['a', 'c', 'x'], values)).toBeFalse();
+            expect(zoneHeating([], values)).toBeFalse();
         });
     });
 
