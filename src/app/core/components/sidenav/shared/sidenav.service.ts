@@ -161,6 +161,7 @@ export class SidenavService implements OnDestroy {
                 new SidenavPageModel('Authorization', 'link', 'security', '/admin/authorization'),
                 new SidenavPageModel('Timescale Rules', 'link', 'rule', '/admin/timescale-rules'),
                 new SidenavPageModel('Budgets', 'link', 'savings', '/admin/budgets'),
+                new SidenavPageModel('Analytics cleanup', 'link', 'cleaning_services', '/admin/analytics-cleanup'),
             ];
         }
 

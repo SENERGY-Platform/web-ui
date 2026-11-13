@@ -45,6 +45,7 @@ import {
     TimescaleRulesCreateEditComponent
 } from './timescale-rules/timescale-rules-create-edit/timescale-rules-create-edit.component';
 import {MatPaginatorModule} from '@angular/material/paginator';
+import { AnalyticsCleanupComponent } from './analytics-cleanup/analytics-cleanup.component';
 import { BudgetComponent } from './budget/budget.component';
 import { BudgetCreateEditComponent } from './budget/budget-create-edit/budget-create-edit.component';
 import {
@@ -72,6 +73,12 @@ const listRules: Route[] = [
         pathMatch: 'full',
         component: BudgetComponent,
         data: {header: 'Budgets'},
+    },
+    {
+        path: 'admin/analytics-cleanup',
+        pathMatch: 'full',
+        component: AnalyticsCleanupComponent,
+        data: {header: 'Analytics cleanup'},
     }];
 
 @NgModule({
@@ -109,6 +116,7 @@ const listRules: Route[] = [
         TimescaleRulesCreateEditTemplateComponent,
         BudgetComponent,
         BudgetCreateEditComponent,
+        AnalyticsCleanupComponent,
     ]
 })
 export class AdminModule {
