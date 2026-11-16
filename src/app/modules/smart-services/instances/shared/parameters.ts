@@ -116,7 +116,7 @@ export function initParameterValues(
  */
 export function initialValue(param: SmartServiceExtendedParameterModel): any {
     if (param.value !== undefined && param.value !== null) {
-        return asNumberIfNumeric(param, param.value);
+        return asNumberIfNumeric(param, asListIfMultiple(param, param.value));
     }
     if (param.default_value !== undefined && param.default_value !== null) {
         return asNumberIfNumeric(param, param.default_value);
@@ -246,6 +246,22 @@ function asNumberIfNumeric(param: SmartServiceExtendedParameterModel, value: any
     }
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : value;
+}
+
+/**
+ * The automation-engine returns the value of a multiple parameter as the json text of its list, where
+ * smart-service-repository returned the list itself. Taken as one entry, that text matches no option.
+ */
+function asListIfMultiple(param: SmartServiceExtendedParameterModel, value: any): any {
+    if (!param.multiple || typeof value !== 'string' || !value.trim().startsWith('[')) {
+        return value;
+    }
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : value;
+    } catch {
+        return value;
+    }
 }
 
 /** false and 0 are values a parameter is allowed to have, an empty text is not */

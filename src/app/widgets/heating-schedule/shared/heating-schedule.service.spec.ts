@@ -83,14 +83,15 @@ describe('HeatingScheduleService.saveSchedule', () => {
         service.saveSchedule('inst-1', schedule, 16).subscribe((saved) => (result = saved));
 
         expect(result).toBeTrue();
+        // the json text of the list the automation-engine returns goes back as the list it stands for
         expect(instances.updateInstanceParameters).toHaveBeenCalledOnceWith('inst-1', [
-            { id: 'thermostats', value: thermostats, label: 'Thermostats' },
+            { id: 'thermostats', value: JSON.parse(thermostats), label: 'Thermostats', value_label: 'CT Thermostat' },
             { id: 'schedule', value: schedule, label: 'Schedule' },
             { id: 'setback', value: 16, label: 'Setback' },
         ]);
     });
 
-    it('sends the thermostats of several devices byte for byte next to a zones schedule', () => {
+    it('sends the thermostats of several devices as their list next to a zones schedule', () => {
         const several = '["{\\"device_selection\\":{\\"device_id\\":\\"urn:infai:ses:device:a\\",\\"service_id\\":null,\\"path\\":null},\\"label\\":\\"A\\"}","{\\"device_selection\\":{\\"device_id\\":\\"urn:infai:ses:device:b\\",\\"service_id\\":null,\\"path\\":null},\\"label\\":\\"B\\"}"]';
         instances.getInstance.and.returnValue(of(instanceOf(several)));
         releases.getReleaseParameters.and.returnValue(of(releaseParameters()));
@@ -100,7 +101,7 @@ describe('HeatingScheduleService.saveSchedule', () => {
         service.saveSchedule('inst-1', schedule, 16).subscribe();
 
         expect(instances.updateInstanceParameters.calls.mostRecent().args[1]).toEqual([
-            { id: 'thermostats', value: several, label: 'Thermostats' },
+            { id: 'thermostats', value: JSON.parse(several), label: 'Thermostats' },
             { id: 'schedule', value: schedule, label: 'Schedule' },
             { id: 'setback', value: 16, label: 'Setback' },
         ]);
@@ -115,7 +116,7 @@ describe('HeatingScheduleService.saveSchedule', () => {
 
         expect(instances.getInstance).toHaveBeenCalledWith('inst-1');
         const sent = instances.updateInstanceParameters.calls.mostRecent().args[1];
-        expect(sent.find((parameter) => parameter.id === 'thermostats')?.value).toBe(otherThermostats);
+        expect(sent.find((parameter) => parameter.id === 'thermostats')?.value).toEqual(JSON.parse(otherThermostats));
     });
 
     it('writes nothing when the thermostats of the fresh instance leave no zone with a thermostat', () => {

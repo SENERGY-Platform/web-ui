@@ -197,6 +197,31 @@ describe('initParameterValues', () => {
         expect(result.parameters[0].value).toBe(7);
         expect(result.unfilled).toEqual(['a']);
     });
+
+    it('reads a multi select that the automation-engine returns as the json text of its list', () => {
+        const d1 = '{"device_selection":{"device_id":"d1","service_id":null,"path":null},"label":"One"}';
+        const d2 = '{"device_selection":{"device_id":"d2","service_id":null,"path":null},"label":"Two"}';
+        const thermostats = param({
+            id: 'thermostats',
+            multiple: true,
+            options: [option({ value: d1, entity_id: 'd1' }), option({ value: d2, entity_id: 'd2' })],
+        });
+        const result = initParameterValues([thermostats], [{ id: 'thermostats', value: JSON.stringify([d1, d2]), label: 'thermostats' }]);
+        pruneInvalidValues(result.parameters);
+        expect(result.parameters[0].value).toEqual([d1, d2]);
+    });
+
+    it('leaves a text that is no list alone, also on a multi select', () => {
+        const result = initParameterValues(
+            [param({ id: 'a', multiple: true }), param({ id: 'b' })],
+            [
+                { id: 'a', value: '[not json', label: 'A' },
+                { id: 'b', value: '["x"]', label: 'B' },
+            ],
+        );
+        expect(result.parameters[0].value).toBe('[not json');
+        expect(result.parameters[1].value).toBe('["x"]');
+    });
 });
 
 describe('visibleOptions', () => {
