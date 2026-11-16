@@ -131,6 +131,15 @@ export function analyticsOperatorSelection(pipelineVariable: string, operatorId:
     return JSON.stringify({ pipeline_id: '${' + pipelineVariable + '}', operator_id: operatorId });
 }
 
+/**
+ * the value of a process_deployment IoT input that waits for the connection state of a device: the
+ * form field holds the device the user picked, and the automation-engine wraps that selection into
+ * device_connection, so the process reads the state of this device.
+ */
+export function deviceConnectionSelection(fieldVariable: string): string {
+    return '{"device_connection": ${' + fieldVariable + '}}';
+}
+
 export function chunkString(str: string, length: number): string[] {
     return str.match(new RegExp('[^]{1,' + length + '}', 'g')) || [];
 }

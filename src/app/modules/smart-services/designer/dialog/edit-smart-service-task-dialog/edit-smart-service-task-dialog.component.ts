@@ -97,6 +97,7 @@ import {
     analyticsOperatorSelection,
     applyDeviceRepositoryInputs,
     applyWatcherInputs,
+    deviceConnectionSelection,
     DeviceRepositoryWorkerInfo,
     deviceRepositoryWorkerInfoToInputs,
     getChunkedDataFromInputs,
@@ -395,6 +396,10 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
 
     getAvailableProcessIotSelections(): { name: string; value: string }[] {
         const result: { name: string; value: string }[] = [];
+        // the connection states come first: the last entry is the default of a field that was just generated
+        this.availableProcessVariables.get('iot_form_fields')?.forEach(field => {
+            result.push({ name: 'connection state of ' + (field.label || field.name), value: deviceConnectionSelection(field.name) });
+        });
         this.availableProcessVariables.get('iot_form_fields')?.forEach(field => {
             result.push({ name: field.label || field.name, value: '${' + field.name + '}' });
         });

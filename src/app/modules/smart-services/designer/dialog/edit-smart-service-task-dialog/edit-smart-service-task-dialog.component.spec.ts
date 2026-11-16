@@ -339,6 +339,24 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
         });
     });
 
+    describe('connection state of a device in a process deployment', () => {
+        it('offers the connection state of a generated device field before the field, which stays the default', () => {
+            init([]);
+            component.selectedProcessModelPreparation = {
+                elements: [{ bpmn_id: 'bpmn-task', name: 'Measure', task: { selection: { filter_criteria: { function_id: 'f' } } } }],
+            } as unknown as V2DeploymentsPreparedModel;
+            const input: SmartServiceTaskInputDescription = { name: 'process_deployment.bpmn-task.selection', type: 'text', value: '' };
+            component.generateInputForProcessElement(input, 'bpmn-task');
+
+            const fieldId = component.smartServiceInputs[component.smartServiceInputs.length - 1].id;
+            expect(component.availableProcessIotSelections).toEqual([
+                { name: 'connection state of generated for Measure', value: '{"device_connection": ${' + fieldId + '}}' },
+                { name: 'generated for Measure', value: '${' + fieldId + '}' },
+            ]);
+            expect(input.value).toBe('${' + fieldId + '}');
+        });
+    });
+
     describe('runtime devices of a process deployment', () => {
         const devicesKey = 'process_deployment.devices';
         const withDevices = (value: string) => init([{ name: devicesKey, type: 'text', value }], [air, water], 'process_deployment');

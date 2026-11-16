@@ -22,6 +22,7 @@ import {
     applyDeviceRepositoryInputs,
     applyWatcherInputs,
     chunkString,
+    deviceConnectionSelection,
     deviceRepositoryWorkerInfoToInputs,
     getChunkedDataFromInputs,
     getChunkedInputs,
@@ -211,6 +212,15 @@ describe('smart-service-task-inputs', () => {
         const value = analyticsOperatorSelection('Task_1_pipeline_id', 'o1');
         expect(value).toBe('{"pipeline_id":"${Task_1_pipeline_id}","operator_id":"o1"}');
         expect(JSON.parse(value.replace('${Task_1_pipeline_id}', 'p1'))).toEqual({ pipeline_id: 'p1', operator_id: 'o1' });
+    });
+
+    // the automation-engine wraps the device selection of the form field into device_connection (SNRGY-5151)
+    it('selects the connection state of the device in a form field', () => {
+        const value = deviceConnectionSelection('Task_1_selection');
+        expect(value).toBe('{"device_connection": ${Task_1_selection}}');
+        expect(JSON.parse(value.replace('${Task_1_selection}', '{"device_selection":{"device_id":"d1"}}'))).toEqual({
+            device_connection: { device_selection: { device_id: 'd1' } },
+        });
     });
 
     describe('incoming outputs', () => {
