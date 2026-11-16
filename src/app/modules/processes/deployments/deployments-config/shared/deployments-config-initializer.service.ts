@@ -359,9 +359,9 @@ export class DeploymentsConfigInitializerService {
                     // the output of an analytics operator and the connection state of a device are taken as a whole, without a path
                     const selectedAnalytics = control.get('selected_generic_event_source')?.value;
                     // a device without services offers no path option, so the device alone is the selection
-                    const selectedOptionIndex = control.get('selection_options_index')?.value;
+                    const optionIndex = control.get('selection_options_index')?.value;
                     const selectedOption: V2DeploymentsPreparedSelectionOptionModel | undefined =
-                        (control.get('selection_options')?.value ?? [])[selectedOptionIndex ?? -1];
+                        (control.get('selection_options')?.value ?? [])[optionIndex ?? -1];
                     const selectedOptionWithoutPath = !!selectedOption && !selectedOption.services?.length &&
                         Object.keys(selectedOption.path_options ?? {}).length === 0;
                     if(!selectedPath || selectedPath === '') {
