@@ -27,7 +27,10 @@ import { DeploymentsConfigInitializerService } from './shared/deployments-config
 import {
     AnalyticsOperatorOptionModel,
     analyticsEventSource,
+    ConnectionDeviceOptionModel,
+    connectionEventSource,
     DeploymentsSelectionPathOptionModel,
+    GenericEventSourceModel,
     V2DeploymentsPreparedElementModel, V2DeploymentsPreparedModel, V2DeploymentsPreparedSelectionModel,
     V2DeploymentsPreparedSelectionOptionModel, V2DeploymentsPreparedStartParameterModel
 } from '../shared/deployments-prepared-v2.model';
@@ -52,7 +55,8 @@ import { snackError, snackSuccess } from 'src/app/core/services/snack-bar-messag
 import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/pipeline-registry.service';
 import { PipelineModel } from '../../../data/pipeline-registry/shared/pipeline.model';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
-import { forkJoin, map, Observable, of } from 'rxjs';
+import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
+import { catchError, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 
 interface V2DeploymentsPreparedSelectionOptionModelWithGroup extends V2DeploymentsPreparedSelectionOptionModel {
     group?: string;
@@ -80,6 +84,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     private characteristicsService = inject(CharacteristicsService);
     private pipelineRegistryService = inject(PipelineRegistryService);
     private authorizationService = inject(AuthorizationService);
+    private deviceInstancesService = inject(DeviceInstancesService);
     private cd = inject(ChangeDetectorRef);
     private destroyRef = inject(DestroyRef);
 
@@ -98,6 +103,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     optionGroups: Map<number, V2DeploymentsPreparedSelectionOptionModelWithGroup[]> = new Map();
     /** the hub to deploy to; undefined is the platform */
     private networkId: string | undefined;
+    /** the devices offered as connection events, per hub; '' is the platform */
+    private connectionDevices: Map<string, ConnectionDeviceOptionModel[]> = new Map();
     selectedHubForm: FormControl = new FormControl(null);
     hubList: HubModel[] = [];
     characteristicNames: Map<string, string> = new Map();
@@ -143,8 +150,11 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
     setDeployment() {
         this.ready = false;
         if (this.processId !== undefined) {
-            forkJoin([this.deploymentsService.getPreparedDeployments(this.processId, this.networkId), this.analyticsOptions()]).subscribe(([deployment, analytics]) => {
+            this.deploymentsService.getPreparedDeployments(this.processId, this.networkId).pipe(
+                switchMap((deployment) => forkJoin([of(deployment), this.analyticsOptions(), this.connectionOptions(deployment)])),
+            ).subscribe(([deployment, analytics, devices]) => {
                 ProcessDeploymentsConfigComponent.addAnalyticsOptions(deployment, analytics);
+                ProcessDeploymentsConfigComponent.addConnectionOptions(deployment, devices);
                 this.deployment = deployment;
                 this.initOptionGroups(deployment);
                 this.initFormGroup(deployment);
@@ -153,10 +163,13 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 this.cd.detectChanges();
             });
         } else if (this.deploymentId !== undefined) {
-            forkJoin([this.deploymentsService.v2getDeployments(this.deploymentId), this.analyticsOptions()]).subscribe(([deployment, analytics]) => {
+            this.deploymentsService.v2getDeployments(this.deploymentId).pipe(
+                switchMap((deployment) => forkJoin([of(deployment), this.analyticsOptions(), this.connectionOptions(deployment)])),
+            ).subscribe(([deployment, analytics, devices]) => {
                 if (deployment) {
                     deployment.id = '';
                     ProcessDeploymentsConfigComponent.addAnalyticsOptions(deployment, analytics);
+                    ProcessDeploymentsConfigComponent.addConnectionOptions(deployment, devices);
                     this.initOptionGroups(deployment);
                     this.initFormGroup(deployment);
                     this.deployment = deployment;
@@ -213,6 +226,54 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             analytics.forEach((option) => {
                 selection.selection_options.push({
                     device: null, services: [], device_group: null, import: null, importType: null, path_options: null, analytics: option,
+                });
+            });
+        });
+    }
+
+    /**
+     * the devices of the chosen hub, or of the user on the platform, whose connection state a conditional event can
+     * wait for; loaded once per target and kept for the dialog. Only a deployment with a conditional event needs them,
+     * and a failed load leaves the dialog without connection options.
+     */
+    private connectionOptions(deployment: V2DeploymentsPreparedModel | null): Observable<ConnectionDeviceOptionModel[]> {
+        if (!deployment?.elements?.some((element) => !!element.conditional_event)) {
+            return of([]);
+        }
+        const key = this.networkId ?? '';
+        const loaded = this.connectionDevices.get(key);
+        if (loaded) {
+            return of(loaded);
+        }
+        return this.deviceInstancesService.getDeviceInstances({ limit: 9999, offset: 0, hubId: this.networkId }).pipe(
+            map((devices) => {
+                const result = devices.result.map((device) => ({ id: device.id, name: device.name }));
+                this.connectionDevices.set(key, result);
+                return result;
+            }),
+            catchError(() => of([] as ConnectionDeviceOptionModel[])),
+        );
+    }
+
+    /**
+     * adds the devices to the options of every conditional event; unlike the analytics operators they are offered for a
+     * deployment to a hub too
+     */
+    static addConnectionOptions(deployment: V2DeploymentsPreparedModel | null, devices: ConnectionDeviceOptionModel[]): void {
+        if (!deployment || devices.length === 0) {
+            return;
+        }
+        deployment.elements?.forEach((element) => {
+            const selection = element.conditional_event?.selection;
+            if (!selection) {
+                return;
+            }
+            if (!selection.selection_options) {
+                selection.selection_options = [];
+            }
+            devices.forEach((device) => {
+                selection.selection_options.push({
+                    device: null, services: [], device_group: null, import: null, importType: null, path_options: null, connection: device,
                 });
             });
         });
@@ -305,7 +366,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             const selectedGenericEventSource = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_generic_event_source');
             const selectedPathOption = that.elementsFormArray.at(elementIndex).get(elementType + '.selection.selected_path');
             if (option) {
-                selectedGenericEventSource?.patchValue(option.analytics ? analyticsEventSource(option.analytics) : null);
+                selectedGenericEventSource?.patchValue(ProcessDeploymentsConfigComponent.genericEventSourceOf(option));
             }
             if (option && option.device_group) {
                 selectedDeviceGroupId?.patchValue(option.device_group.id);
@@ -322,7 +383,7 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 selectedDeviceId?.patchValue(null);
                 selectedImportId?.patchValue(option.import.id);
             }
-            if (option && option.analytics) {
+            if (option && (option.analytics || option.connection)) {
                 selectedDeviceGroupId?.patchValue(null);
                 selectedDeviceId?.patchValue(null);
                 selectedImportId?.patchValue(null);
@@ -351,6 +412,17 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                 }
             });
         }
+    }
+
+    /** the generic event source of an analytics operator or a device connection; null for the other options */
+    private static genericEventSourceOf(option: V2DeploymentsPreparedSelectionOptionModel): GenericEventSourceModel | null {
+        if (option.analytics) {
+            return analyticsEventSource(option.analytics);
+        }
+        if (option.connection) {
+            return connectionEventSource(option.connection);
+        }
+        return null;
     }
 
     setSelectedPathOption(selectedPathOptionFormCtrl: FormGroup | null, pathOption: DeploymentsSelectionPathOptionModel | null) {
@@ -443,7 +515,8 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
                     (o.device && o.device.id === option.device?.id) ||
                     (o.device_group && o.device_group.id === option.device_group?.id) ||
                     (o.import && o.import.id === option.import?.id) ||
-                    (o.analytics && o.analytics.pipeline_id === option.analytics?.pipeline_id && o.analytics.operator_id === option.analytics?.operator_id),
+                    (o.analytics && o.analytics.pipeline_id === option.analytics?.pipeline_id && o.analytics.operator_id === option.analytics?.operator_id) ||
+                    (o.connection && o.connection.id === option.connection?.id),
             );
         };
     }
@@ -474,6 +547,9 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
         }
         if (option.analytics) {
             return option.analytics.pipeline_name + ' / ' + option.analytics.operator_name;
+        }
+        if (option.connection) {
+            return option.connection.name + ' / connection state';
         }
         return '';
     }
@@ -564,6 +640,10 @@ export class ProcessDeploymentsConfigComponent implements OnInit {
             }
             if (option.analytics) {
                 (option as V2DeploymentsPreparedSelectionOptionModelWithGroup).group = 'Analytics';
+                result.push(option);
+            }
+            if (option.connection) {
+                (option as V2DeploymentsPreparedSelectionOptionModelWithGroup).group = 'Device connection';
                 result.push(option);
             }
         }

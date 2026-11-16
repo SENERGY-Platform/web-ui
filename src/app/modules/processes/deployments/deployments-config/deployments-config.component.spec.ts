@@ -27,7 +27,7 @@ import { ProcessDeploymentsConfigComponent } from './deployments-config.componen
 import { createSpyFromClass, Spy } from 'jasmine-auto-spies';
 import { V2DeploymentsPreparedModel } from '../shared/deployments-prepared-v2.model';
 import { DeploymentsService } from '../shared/deployments.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -43,6 +43,8 @@ import { PipelineRegistryService } from '../../../data/pipeline-registry/shared/
 import { PipelineModel } from '../../../data/pipeline-registry/shared/pipeline.model';
 import { AuthorizationService } from '../../../../core/services/authorization.service';
 import { AuthorizationServiceMock } from '../../../../core/services/authorization.service.mock';
+import { DeviceInstancesService } from '../../../devices/device-instances/shared/device-instances.service';
+import { DeviceInstanceModel, DeviceInstancesTotalModel } from '../../../devices/device-instances/shared/device-instances.model';
 
 const nullPath = { path: '', characteristicId: '', aspectNode: Object({}), aspectNodes: undefined, functionId: '', isVoid: false, value: null, type: '', configurables: [] };
 // setSelectedPathOption(ctrl, null) writes aspectNodes as [] rather than leaving it undefined, unlike the pristine form init above.
@@ -56,6 +58,8 @@ describe('ProcessDeploymentsConfigComponent', () => {
     const deploymentsServiceSpy: Spy<DeploymentsService> = createSpyFromClass<DeploymentsService>(DeploymentsService);
     const pipelineRegistryServiceSpy: Spy<PipelineRegistryService> = createSpyFromClass<PipelineRegistryService>(PipelineRegistryService);
     pipelineRegistryServiceSpy.getPipelines.and.returnValue(of([]));
+    const deviceInstancesServiceSpy: Spy<DeviceInstancesService> = createSpyFromClass<DeviceInstancesService>(DeviceInstancesService);
+    deviceInstancesServiceSpy.getDeviceInstances.and.returnValue(of({ result: [], total: 0 }));
 
     function initSpies(): void {
         TestBed.configureTestingModule({
@@ -75,6 +79,7 @@ describe('ProcessDeploymentsConfigComponent', () => {
                 { provide: Router, useValue: routerSpy },
                 { provide: DeploymentsService, useValue: deploymentsServiceSpy },
                 { provide: PipelineRegistryService, useValue: pipelineRegistryServiceSpy },
+                { provide: DeviceInstancesService, useValue: deviceInstancesServiceSpy },
                 { provide: AuthorizationService, useClass: AuthorizationServiceMock },
                 {
                     provide: ActivatedRoute,
@@ -1709,6 +1714,158 @@ describe('ProcessDeploymentsConfigComponent', () => {
             // choosing a hub loads the deployment again, for the hub
             component.selectedHubForm.setValue({ id: 'hub-1', name: 'Hub', device_local_ids: null } as HubModel);
             expect(component.optionGroups.get(0)).toEqual([]);
+        });
+    });
+
+    describe('device connection state as event source', () => {
+        // a catch event without device criteria, as the automation-engine prepares it
+        function eventDeployment(selectedGenericEventSource: GenericEventSourceModel | null): V2DeploymentsPreparedModel {
+            return {
+                id: '', name: 'Thermostat', description: '', version: 3, executable: true,
+                diagram: { svg: '', xml_raw: '', xml_deployed: '' },
+                elements: [{
+                    bpmn_id: 'IntermediateCatchEvent_19vzrj3', group: null, name: 'Get New Timer', order: 0,
+                    time_event: null, notification: null, message_event: null, task: null,
+                    conditional_event: {
+                        event_id: '', script: '', value_variable: 'value', variables: {}, qos: 0,
+                        selection: {
+                            filter_criteria: {} as V2DeploymentsPreparedFilterCriteriaModel,
+                            selected_device_id: null, selected_service_id: null, selected_device_group_id: null, selected_import_id: null,
+                            selected_generic_event_source: selectedGenericEventSource,
+                            selected_path: null,
+                            selection_options: [],
+                        },
+                    },
+                }],
+            };
+        }
+
+        const devices = [{ id: 'd1', name: 'Philips FTV' }, { id: 'd2', name: 'Lamp' }] as DeviceInstanceModel[];
+        const instances = (list: DeviceInstanceModel[]) => of({ result: list, total: list.length } as DeviceInstancesTotalModel);
+
+        afterEach(() => {
+            deviceInstancesServiceSpy.getDeviceInstances.and.returnValue(of({ result: [], total: 0 }));
+        });
+
+        it('offers the devices as group Device connection and selects one as generic event source', () => {
+            deviceInstancesServiceSpy.getDeviceInstances.and.returnValue(instances(devices));
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(eventDeployment(null)));
+            initSpies();
+
+            const options = component.optionGroups.get(0) || [];
+            expect(options.map((o) => component.getViewValue(o))).toEqual(['Philips FTV / connection state', 'Lamp / connection state']);
+            expect(options.map((o) => o.group)).toEqual(['Device connection', 'Device connection']);
+
+            component.changeConditionalEventSelectionOption(0, 0);
+            const selection = component.deploymentFormGroup.getRawValue().elements[0].conditional_event.selection;
+            expect(selection.selected_generic_event_source).toEqual({ filter_type: 'connectionState', filter_ids: 'd1', topic: '' });
+            expect(selection.selected_device_id).toBeNull();
+            expect(selection.selected_device_group_id).toBeNull();
+            expect(selection.selected_import_id).toBeNull();
+            expect(selection.selected_path.path).toBe('');
+            expect(component.elementsFormArray.at(0).get('conditional_event.selection.selected_path.path')?.errors).toBeNull();
+        });
+
+        it('shows the device of a stored deployment as selected', () => {
+            deviceInstancesServiceSpy.getDeviceInstances.and.returnValue(instances(devices));
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(eventDeployment({ filter_type: 'connectionState', filter_ids: 'd2', topic: '' })));
+            initSpies();
+
+            const selection = component.deploymentFormGroup.getRawValue().elements[0].conditional_event.selection;
+            expect(selection.selection_options_index).toBe(1);
+        });
+
+        it('offers the devices of the chosen hub, and loads each target once', () => {
+            deviceInstancesServiceSpy.getDeviceInstances.and.returnValue(instances(devices));
+            // a fresh deployment per request, as over HTTP
+            deploymentsServiceSpy.getPreparedDeployments.and.callFake(() => of(eventDeployment(null)));
+            initSpies();
+            expect(component.optionGroups.get(0)?.length).toBe(2);
+
+            deviceInstancesServiceSpy.getDeviceInstances.calls.reset();
+            deviceInstancesServiceSpy.getDeviceInstances.and.returnValue(instances([{ id: 'h1', name: 'Hub device' } as DeviceInstanceModel]));
+            component.selectedHubForm.setValue({ id: 'hub-1', name: 'Hub', device_local_ids: null } as HubModel);
+            expect(deviceInstancesServiceSpy.getDeviceInstances).toHaveBeenCalledOnceWith(jasmine.objectContaining({ hubId: 'hub-1' }));
+            expect((component.optionGroups.get(0) || []).map((o) => component.getViewValue(o))).toEqual(['Hub device / connection state']);
+
+            // back on the platform the devices are not loaded again
+            component.selectedHubForm.setValue({ id: '', name: 'Platform', device_local_ids: null } as HubModel);
+            expect(deviceInstancesServiceSpy.getDeviceInstances).toHaveBeenCalledTimes(1);
+            expect(component.optionGroups.get(0)?.length).toBe(2);
+        });
+
+        it('offers nothing when the devices come back empty', () => {
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(eventDeployment(null)));
+            initSpies();
+            expect(component.optionGroups.get(0)).toEqual([]);
+        });
+
+        it('does not request the devices for a deployment without conditional events', () => {
+            const withoutConditionalEvent = eventDeployment(null);
+            withoutConditionalEvent.elements[0].conditional_event = null;
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(withoutConditionalEvent));
+            deviceInstancesServiceSpy.getDeviceInstances.calls.reset();
+            initSpies();
+            expect(deviceInstancesServiceSpy.getDeviceInstances).not.toHaveBeenCalled();
+            expect(component.ready).toBeTrue();
+        });
+
+        it('opens the dialog without connection options when the devices fail to load', () => {
+            deviceInstancesServiceSpy.getDeviceInstances.and.returnValue(throwError(() => new Error('devices unavailable')));
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(eventDeployment(null)));
+            initSpies();
+            expect(component.ready).toBeTrue();
+            expect(component.deployment).not.toBeNull();
+            expect(component.optionGroups.get(0)).toEqual([]);
+        });
+    });
+
+    describe('task option with only a device', () => {
+        const deployment = {
+            id: '', name: 'Lamp', description: '', version: 3, executable: true,
+            diagram: { svg: '', xml_raw: '', xml_deployed: '' },
+            elements: [{
+                bpmn_id: 'Task_1', group: null, name: 'Measure', order: 0,
+                time_event: null, notification: null, message_event: null, conditional_event: null,
+                task: {
+                    parameter: {}, retries: 0,
+                    selection: {
+                        filter_criteria: {} as V2DeploymentsPreparedFilterCriteriaModel,
+                        selected_device_id: null, selected_service_id: null, selected_device_group_id: null, selected_import_id: null,
+                        selected_generic_event_source: null, selected_path: null,
+                        selection_options: [{
+                            device: { id: 'd1', name: 'Lamp' }, services: [], device_group: null, import: null, importType: null, path_options: null,
+                        }],
+                    },
+                },
+            }],
+        } as unknown as V2DeploymentsPreparedModel;
+
+        it('saves the device without a service and finds the option again', () => {
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(deployment));
+            initSpies();
+
+            component.changeTaskSelectionOption(0, 0);
+            const selection = component.deploymentFormGroup.getRawValue().elements[0].task.selection;
+            expect(selection.selected_device_id).toBe('d1');
+            expect(selection.selected_service_id).toBeNull();
+            expect(selection.selection_options_index).toBe(0);
+
+            const option = (component.optionGroups.get(0) || [])[0];
+            expect(component.getTaskIndex(component.getElement(0))(option)).toBe(0);
+        });
+
+        it('is valid without a path once the device without services is chosen', () => {
+            deploymentsServiceSpy.getPreparedDeployments.and.returnValue(of(deployment));
+            initSpies();
+            const selectionGroup = component.elementsFormArray.at(0).get('task.selection');
+            expect(selectionGroup?.valid).toBeFalse();
+
+            component.changeTaskSelectionOption(0, 0);
+            expect(selectionGroup?.valid).toBeTrue();
+            expect(selectionGroup?.get('selected_device_id')?.value).toBe('d1');
+            expect(selectionGroup?.get('selected_service_id')?.value).toBeNull();
+            expect(component.elementsFormArray.at(0).get('task.selection.selected_path.path')?.errors).toBeNull();
         });
     });
 });

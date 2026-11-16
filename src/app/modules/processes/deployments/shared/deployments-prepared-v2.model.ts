@@ -122,8 +122,9 @@ export interface V2DeploymentsPreparedSelectionModel {
     selected_service_id: string | null;
     selected_device_group_id: string | null;
     selected_import_id: string | null;
-    // the output of an analytics operator; the automation-engine reads it with filter_type
-    // 'operatorId' and filter_ids '<pipeline id>:<operator id>' and ignores the topic
+    // the output of an analytics operator (filter_type 'operatorId', filter_ids '<pipeline id>:<operator id>')
+    // or the connection state of a device (filter_type 'connectionState', filter_ids '<device id>'); the
+    // automation-engine ignores the topic of both
     selected_generic_event_source?: GenericEventSourceModel | null;
     selected_path: DeploymentsSelectionPathOptionModel | null;
     show?: boolean;
@@ -155,6 +156,23 @@ export function analyticsEventSource(option: AnalyticsOperatorOptionModel): Gene
     };
 }
 
+// a device whose connection state a conditional event can wait for; the web-ui adds these
+// options itself, the prepared deployment does not carry them
+export interface ConnectionDeviceOptionModel {
+    id: string;
+    name: string;
+}
+
+export const connectionFilterType = 'connectionState';
+
+export function connectionEventSource(option: ConnectionDeviceOptionModel): GenericEventSourceModel {
+    return {
+        filter_type: connectionFilterType,
+        filter_ids: option.id,
+        topic: '',
+    };
+}
+
 export interface V2DeploymentsPreparedSelectionOptionModel {
     device: V2DeploymentsPreparedDeviceModel | null;
     services: V2DeploymentsPreparedServiceModel[] | null;
@@ -163,6 +181,7 @@ export interface V2DeploymentsPreparedSelectionOptionModel {
     importType: ImportTypeModel | null;
     path_options: {[key: string]: DeploymentsSelectionPathOptionModel[]} | null;
     analytics?: AnalyticsOperatorOptionModel | null;
+    connection?: ConnectionDeviceOptionModel | null;
 }
 
 export interface DeploymentsSelectionPathOptionModel {

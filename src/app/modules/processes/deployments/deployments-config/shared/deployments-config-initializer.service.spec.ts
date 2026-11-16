@@ -851,4 +851,54 @@ describe('DeploymentsConfigInitializerService', () => {
             expect(rawSelection.selected_path).toEqual(selectedPath);
         },
     ));
+
+    it('restores a stored device connection by its option and needs no path for it', inject(
+        [DeploymentsConfigInitializerService],
+        (service: DeploymentsConfigInitializerService) => {
+            const option = (id: string, name: string) => ({
+                device: null, services: [], device_group: null, import: null, importType: null, path_options: null, connection: { id, name },
+            });
+            const deployment: any = {
+                version: 3,
+                id: '',
+                name: 'device_connection',
+                description: '',
+                diagram: { svg: '', xml_deployed: '', xml_raw: '' },
+                elements: [
+                    {
+                        bpmn_id: 'IntermediateCatchEvent_1',
+                        group: null,
+                        name: '',
+                        order: 0,
+                        time_event: null,
+                        notification: null,
+                        message_event: null,
+                        task: null,
+                        conditional_event: {
+                            event_id: '',
+                            script: '',
+                            value_variable: 'value',
+                            variables: {},
+                            qos: 0,
+                            selection: {
+                                filter_criteria: {},
+                                selection_options: [option('d1', 'Lamp'), option('d2', 'Fan')],
+                                selected_device_id: null,
+                                selected_service_id: null,
+                                selected_device_group_id: null,
+                                selected_import_id: null,
+                                selected_generic_event_source: { filter_type: 'connectionState', filter_ids: 'd2', topic: '' },
+                                selected_path: null,
+                            },
+                        },
+                    },
+                ],
+                executable: true,
+            };
+            const formGroup = service.initFormGroup(deployment);
+            const selection = formGroup.getRawValue().elements[0].conditional_event.selection;
+            expect(selection.selection_options_index).toBe(1);
+            expect(formGroup.get('elements.0.conditional_event.selection.selected_path.path')?.errors).toBeNull();
+        },
+    ));
 });

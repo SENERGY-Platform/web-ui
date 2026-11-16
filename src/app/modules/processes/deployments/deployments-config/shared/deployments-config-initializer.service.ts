@@ -26,6 +26,8 @@ import { duration, durationAs, durationParts } from '../../../../../core/time/is
 import {
     analyticsEventSource,
     analyticsFilterType,
+    connectionEventSource,
+    connectionFilterType,
     ConditionalEventModel,
     DeploymentsSelectionConfigurableModel,
     DeploymentsSelectionPathOptionModel,
@@ -354,10 +356,16 @@ export class DeploymentsConfigInitializerService {
                 control => {
                     const selectedGroupId = control.get('selected_device_group_id')?.value;
                     const selectedPath = control.get('selected_path.path')?.value;
-                    // the output of an analytics operator is taken as a whole, without a path
+                    // the output of an analytics operator and the connection state of a device are taken as a whole, without a path
                     const selectedAnalytics = control.get('selected_generic_event_source')?.value;
+                    // a device without services offers no path option, so the device alone is the selection
+                    const selectedOptionIndex = control.get('selection_options_index')?.value;
+                    const selectedOption: V2DeploymentsPreparedSelectionOptionModel | undefined =
+                        (control.get('selection_options')?.value ?? [])[selectedOptionIndex ?? -1];
+                    const selectedOptionWithoutPath = !!selectedOption && !selectedOption.services?.length &&
+                        Object.keys(selectedOption.path_options ?? {}).length === 0;
                     if(!selectedPath || selectedPath === '') {
-                        if( (selectedGroupId &&  selectedGroupId !== '') || selectedAnalytics) {
+                        if( (selectedGroupId &&  selectedGroupId !== '') || selectedAnalytics || selectedOptionWithoutPath) {
                             control.get('selected_path.path')?.setErrors(null);
                             return;
                         } else {
@@ -451,8 +459,9 @@ export class DeploymentsConfigInitializerService {
             import: selectionOption.import,
             importType: selectionOption.importType,
             path_options: this._formBuilder.control(selectionOption.path_options),
-            // only options the dialog adds for analytics operators carry it
+            // only options the dialog adds for analytics operators and device connections carry them
             ...(selectionOption.analytics ? { analytics: this._formBuilder.control(selectionOption.analytics) } : {}),
+            ...(selectionOption.connection ? { connection: this._formBuilder.control(selectionOption.connection) } : {}),
         });
     }
 
@@ -502,6 +511,10 @@ export class DeploymentsConfigInitializerService {
             }
             if (option.analytics && selection.selected_generic_event_source?.filter_type === analyticsFilterType &&
                 selection.selected_generic_event_source.filter_ids === analyticsEventSource(option.analytics).filter_ids) {
+                result = index;
+            }
+            if (option.connection && selection.selected_generic_event_source?.filter_type === connectionFilterType &&
+                selection.selected_generic_event_source.filter_ids === connectionEventSource(option.connection).filter_ids) {
                 result = index;
             }
         });
