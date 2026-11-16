@@ -112,7 +112,7 @@ export class LeakageDetectionComponent implements OnInit {
     setupChartData(data: LeakageDetectionResponse) {
         this.checkForInit(data);
         this.message = 'Normaler Wasserverbrauch im Zeitfenster';
-        if (data.value === 1) {
+        if (data.value === true) {
             this.message = 'In den letzten 5 Minuten wurde übermäßig viel Wasser verbraucht';
         }
         this.timeWindow = data.time_window;

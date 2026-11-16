@@ -21,6 +21,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { openWidgetEditDialog } from 'src/app/modules/dashboard/shared/open-widget-edit-dialog';
 import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleModel } from '../../shared/export-data.model';
 import { ExportDataService } from '../../shared/export-data.service';
+import { isFinding } from '../../shared/finding-flag';
 import { ConsumptionProfileEditComponent } from '../dialog/edit/edit.component';
 import { ConsumptionProfileResponse } from './consumption-profile.model';
 import { dialogSize } from '../../../core/dialog-size';
@@ -85,7 +86,7 @@ export class ConsumptionProfileService {
                 }
 
                 const model: ConsumptionProfileResponse = {
-                    value: pairs[0].value as boolean,
+                    value: isFinding(pairs[0].value),
                     type: pairs[1].value as string,
                     last_consumptions: lastConsumptions,
                     time_window: pairs[3].value as any,

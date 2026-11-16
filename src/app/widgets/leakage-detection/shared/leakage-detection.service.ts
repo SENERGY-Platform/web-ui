@@ -21,6 +21,7 @@ import { DashboardService } from 'src/app/modules/dashboard/shared/dashboard.ser
 import { openWidgetEditDialog } from 'src/app/modules/dashboard/shared/open-widget-edit-dialog';
 import { LastValuesRequestElementInfluxModel, LastValuesRequestElementTimescaleModel } from '../../shared/export-data.model';
 import { ExportDataService } from '../../shared/export-data.service';
+import { isFinding } from '../../shared/finding-flag';
 import { LeakageDetectionEditComponent } from '../dialog/edit/edit.component';
 import { LeakageDetectionResponse } from './leakage-detction.model';
 import { dialogSize } from '../../../core/dialog-size';
@@ -80,12 +81,12 @@ export class LeakageDetectionService {
 
                 const lastConsumptionsStr = pairs[2].value as string;
                 let lastConsumptions: any = [];
-                if(lastConsumptions !== '') {
+                if(lastConsumptionsStr !== '') {
                     lastConsumptions = JSON.parse(lastConsumptionsStr) as any[][];
                 }
 
                 const model: LeakageDetectionResponse = {
-                    value: pairs[0].value as number,
+                    value: isFinding(pairs[0].value),
                     message: pairs[1].value as string,
                     last_consumptions: lastConsumptions,
                     time_window: pairs[3].value as any,
