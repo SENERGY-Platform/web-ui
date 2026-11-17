@@ -21,10 +21,11 @@ import {
     parseAdditionalFunctions,
     serializeAdditionalFunctions,
 } from './additional-functions';
+import { DeviceTypeFunctionModel } from '../../../metadata/device-types-overview/shared/device-type.model';
 
 const air = { id: 'urn:infai:ses:aspect:air', name: 'Air', root_id: 'urn:infai:ses:aspect:air', parent_id: '', child_ids: [], ancestor_ids: [], descendent_ids: [] };
 const water = { id: 'urn:infai:ses:aspect:water', name: 'Water', root_id: 'urn:infai:ses:aspect:water', parent_id: '', child_ids: [], ancestor_ids: [], descendent_ids: [] };
-const transition = { id: 'urn:infai:ses:controlling-function:transition', name: 'Set Transition', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction', concept_id: 'urn:infai:ses:concept:time' };
+const transition = { id: 'urn:infai:ses:controlling-function:transition', name: 'Set Transition', rdf_type: 'https://senergy.infai.org/ontology/ControllingFunction', concept_id: 'urn:infai:ses:concept:time' } as DeviceTypeFunctionModel;
 const rgb = { id: 'urn:infai:ses:characteristic:rgb', name: 'rgb', type: 'https://schema.org/StructuredValue', sub_characteristics: [] };
 
 /** A BPMN XML string with one service task; the payload is written the way the process designer writes it. */

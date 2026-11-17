@@ -364,12 +364,12 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
                     xml_raw: taskXml('other-task', payloadWith([])),
                     xml_deployed: taskXml('bpmn-task', payloadWith([{ name: 'transition', function: { id: dimming }, characteristic_id: 'c', aspects: [air], input: {} }])),
                 });
-                expect(criteria.map((c) => c.function_id)).toEqual(['set-on', dimming]);
+                expect(criteria?.map((c) => c.function_id)).toEqual(['set-on', dimming]);
             });
 
             it('adds no criterion for a task whose payload has no additional function', () => {
                 const criteria = generateFrom({ xml_raw: taskXml('bpmn-task', payloadWith([])) });
-                expect(criteria.length).toBe(1);
+                expect(criteria?.length).toBe(1);
             });
         });
     });

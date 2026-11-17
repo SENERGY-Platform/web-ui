@@ -241,7 +241,7 @@ export class TaskConfigDialogComponent implements OnInit {
                 .map((id) => this.aspectNodes.get(id))
                 .filter((node): node is DeviceTypeAspectNodeModel => node !== undefined)
                 .sort((a, b) => compareAspectIds(a.id, b.id)),
-            characteristic_id: entry.characteristic.id,
+            characteristic_id: entry.characteristic.id ?? '',
         }));
     }
 

@@ -603,7 +603,6 @@ describe('TaskConfigDialogComponent', () => {
         const primarySelection = (additionalFunctions: DeviceTypeSelectionRefModel['additionalFunctions'] = []) =>
             measuringSelection({
                 function: setOn,
-                device_class: null,
                 aspect: air,
                 aspects: [air],
                 completionStrategy: 'optimistic',
@@ -613,7 +612,7 @@ describe('TaskConfigDialogComponent', () => {
         const initControllingPrimary = (selection: DeviceTypeSelectionRefModel | null) =>
             init(selection, {}, [water], [], [setTemperature, setOn], [air], { [air.id]: [setTemperature, setOn] });
 
-        const storedEntry = (func: DeviceTypeFunctionModel, name = 'transition') => ({ name, function: func, characteristic_id: level.id, aspects: [air] });
+        const storedEntry = (func: DeviceTypeFunctionModel, name = 'transition') => ({ name, function: func, characteristic_id: level.id ?? '', aspects: [air] });
 
         it('offers additional functions only once a controlling function is chosen', () => {
             initControllingPrimary(null);

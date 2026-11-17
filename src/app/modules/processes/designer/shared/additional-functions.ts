@@ -76,9 +76,9 @@ export function parseAdditionalFunctions(payload: unknown): StoredAdditionalFunc
         const aspects: unknown = entry['aspects'];
         return [{
             name: entry['name'],
-            function: entry['function'] as DeviceTypeFunctionModel,
+            function: entry['function'] as unknown as DeviceTypeFunctionModel,
             characteristic_id: typeof entry['characteristic_id'] === 'string' ? entry['characteristic_id'] : '',
-            aspects: selectedAspectNodes({ aspects: Array.isArray(aspects) ? aspects : [] }),
+            aspects: selectedAspectNodes({ aspects: Array.isArray(aspects) ? aspects : [] }) as DeviceTypeAspectNodeModel[],
         }];
     });
 }
