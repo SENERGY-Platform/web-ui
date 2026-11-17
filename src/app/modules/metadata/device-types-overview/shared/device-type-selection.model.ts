@@ -21,6 +21,7 @@ import {
     DeviceTypeDeviceClassModel,
     DeviceTypeFunctionModel,
 } from './device-type.model';
+import type { AdditionalFunctionModel, StoredAdditionalFunctionModel } from '../../../processes/designer/shared/additional-functions';
 
 export interface DeviceTypeSelectionRefModel {
     /** @deprecated use aspects; the node with the alphabetically first id of aspects, null without any */
@@ -37,10 +38,13 @@ export interface DeviceTypeSelectionRefModel {
      * the same time. Null or absent leaves it to the engine (GROUP_CONCURRENCY); an engine without the setting ignores it.
      */
     groupConcurrency?: number | null;
+    /** Controlling functions sent beside the function in the same message; absent or empty for a task without any. */
+    additionalFunctions?: StoredAdditionalFunctionModel[];
 }
 
 export interface DeviceTypeSelectionResultModel extends DeviceTypeSelectionRefModel {
     characteristic: DeviceTypeCharacteristicsModel;
+    additionalFunctions?: AdditionalFunctionModel[];
 }
 
 export interface DeviceTypeInfoModel {

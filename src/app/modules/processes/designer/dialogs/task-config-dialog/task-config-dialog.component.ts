@@ -17,7 +17,7 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { forkJoin, Observable, Subscription } from 'rxjs';
 import {
     compareAspectIds,
@@ -44,6 +44,11 @@ import {
     collidingAspectNames,
 } from '../../../../../core/components/aspect-select/aspect-select.model';
 import { selectedAspectNodes } from '../../bpmn-js/properties-provider/aspects';
+import {
+    additionalFunctionNameError,
+    AdditionalFunctionModel,
+    StoredAdditionalFunctionModel,
+} from '../../shared/additional-functions';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
@@ -55,6 +60,46 @@ import { MatInput } from '@angular/material/input';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
+
+/** One additional function of the form: its controls, and what its listings and characteristic are. */
+interface AdditionalFunctionEditor {
+    name: FormControl<string | null>;
+    function: FormControl<DeviceTypeFunctionModel | '' | null>;
+    aspects: FormControl<string[] | null>;
+    functions: DeviceTypeFunctionModel[];
+    /** The stored function while the listing leaves it out; marked as no longer offered, as the primary function is. */
+    unlistedFunction: DeviceTypeFunctionModel | null;
+    /** The function the dialog opened with, until the user changes its aspects or device class. */
+    stored: DeviceTypeFunctionModel | null;
+    characteristic: DeviceTypeCharacteristicsModel;
+    loading: boolean;
+    listing?: Subscription;
+    concept?: Subscription;
+    subscriptions: Subscription;
+}
+
+/** The functions every listing offers, in the order of the first listing. */
+function commonFunctions(lists: DeviceTypeFunctionModel[][]): DeviceTypeFunctionModel[] {
+    const [first, ...rest] = lists;
+    return first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
+}
+
+/** The base characteristic of a concept; undefined, with a console error, when the concept does not hold it. */
+function baseCharacteristicOf(concept: ConceptsCharacteristicsModel | null): DeviceTypeCharacteristicsModel | undefined {
+    if (!concept) {
+        console.error('unknown concept');
+        return undefined;
+    }
+    if (!concept.base_characteristic_id) {
+        console.error('missing concept base characteristic');
+        return undefined;
+    }
+    const found = concept.characteristics.find((char) => char.id === concept.base_characteristic_id);
+    if (!found) {
+        console.error('base characteristic ' + concept.base_characteristic_id + ' is not characteristic of the concept');
+    }
+    return found;
+}
 
 @Component({
     templateUrl: './task-config-dialog.component.html',
@@ -84,7 +129,8 @@ export class TaskConfigDialogComponent implements OnInit {
     groupConcurrencyFormControl = new FormControl<number | string | null>({ value: null, disabled: true },
         [Validators.min(1), Validators.pattern(/^\d+$/)]);
 
-
+    /** The additional functions of a controlling task, sent beside the function in the same message. */
+    additionalFunctions: AdditionalFunctionEditor[] = [];
 
     deviceClasses: DeviceTypeDeviceClassModel[] = [];
     aspects: DeviceTypeAspectModel[] = [];
@@ -126,6 +172,7 @@ export class TaskConfigDialogComponent implements OnInit {
         this.getAspects();
         this.initFunctions();
         this.initCompletionStrategy();
+        this.initAdditionalFunctions();
     }
 
     close(): void {
@@ -133,7 +180,7 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     save(): void {
-        if (this.aspectClassCollision) {
+        if (this.aspectClassCollision || this.additionalFunctionsInvalid) {
             return;
         }
         const aspects = this.selectedAspectIds()
@@ -150,8 +197,156 @@ export class TaskConfigDialogComponent implements OnInit {
             retries: this.retriesFormControl.value as number,
             prefer_events: this.preferEventsFormControl.value as boolean,
             groupConcurrency: this.groupConcurrency(),
+            additionalFunctions: this.additionalFunctionsOffered ? this.additionalFunctionResults() : [],
         };
         this.dialogRef.close(this.result);
+    }
+
+    /**
+     * Additional functions are offered for a controlling function only: the engine takes them beside a controlling
+     * primary function and rejects them with any other.
+     */
+    get additionalFunctionsOffered(): boolean {
+        return this.optionsFormControl.value === 'Controlling' && !!this.functionFormControl.value;
+    }
+
+    /** Save stays disabled while an entry is incomplete: a name, a function with its characteristic, and no aspect clash. */
+    get additionalFunctionsInvalid(): boolean {
+        return this.additionalFunctionsOffered && this.additionalFunctions.some((entry) =>
+            entry.name.invalid || entry.loading || !entry.function.value || !entry.characteristic.id || this.entryAspectCollision(entry));
+    }
+
+    addAdditionalFunction(): void {
+        const entry = this.createAdditionalFunction('', [...this.selectedAspectIds()], null);
+        this.additionalFunctions.push(entry);
+        this.reloadAdditionalFunctions(entry);
+    }
+
+    removeAdditionalFunction(index: number): void {
+        const [removed] = this.additionalFunctions.splice(index, 1);
+        removed.subscriptions.unsubscribe();
+        this.revalidateAdditionalNames();
+    }
+
+    entryAspectCollision(entry: AdditionalFunctionEditor): boolean {
+        return collidingAspectNames(this.classified, entry.aspects.value || []).length > 0;
+    }
+
+    private additionalFunctionResults(): AdditionalFunctionModel[] {
+        return this.additionalFunctions.map((entry) => ({
+            name: (entry.name.value ?? '').trim(),
+            function: entry.function.value as DeviceTypeFunctionModel,
+            characteristic: entry.characteristic,
+            aspects: (entry.aspects.value || [])
+                .map((id) => this.aspectNodes.get(id))
+                .filter((node): node is DeviceTypeAspectNodeModel => node !== undefined)
+                .sort((a, b) => compareAspectIds(a.id, b.id)),
+            characteristic_id: entry.characteristic.id,
+        }));
+    }
+
+    /** Names are judged against the other entries; a changed name re-judges all of them. */
+    private additionalNameValidator = (control: AbstractControl): ValidationErrors | null => {
+        const others = this.additionalFunctions.filter((entry) => entry.name !== control).map((entry) => entry.name.value ?? '');
+        const error = additionalFunctionNameError(control.value ?? '', others);
+        return error ? { [error]: true } : null;
+    };
+
+    private revalidateAdditionalNames(): void {
+        this.additionalFunctions.forEach((entry) => entry.name.updateValueAndValidity({ emitEvent: false }));
+    }
+
+    /** Stored entries open with their function, aspects and characteristic; the form loads their listings. */
+    private initAdditionalFunctions(): void {
+        const stored: StoredAdditionalFunctionModel[] = this.selection?.additionalFunctions ?? [];
+        stored.forEach((entry) => entry.aspects.forEach((node) => this.aspectNodes.set(node.id, node)));
+        this.additionalFunctions = stored.map((entry) =>
+            this.createAdditionalFunction(entry.name, entry.aspects.map((node) => node.id), entry.function));
+        this.additionalFunctions.forEach((entry) => this.reloadAdditionalFunctions(entry));
+        this.setAspects();
+    }
+
+    private createAdditionalFunction(name: string, aspectIds: string[], stored: DeviceTypeFunctionModel | null): AdditionalFunctionEditor {
+        const entry: AdditionalFunctionEditor = {
+            name: new FormControl<string | null>(name, [this.additionalNameValidator]),
+            function: new FormControl<DeviceTypeFunctionModel | '' | null>({ value: stored ?? '', disabled: true }),
+            aspects: new FormControl<string[] | null>(aspectIds),
+            functions: [],
+            unlistedFunction: null,
+            stored,
+            characteristic: {} as DeviceTypeCharacteristicsModel,
+            loading: false,
+            subscriptions: new Subscription(),
+        };
+        entry.subscriptions.add(entry.name.valueChanges.subscribe(() => this.revalidateAdditionalNames()));
+        entry.subscriptions.add(entry.aspects.valueChanges.subscribe(() => this.additionalFunctionChanged(entry)));
+        entry.subscriptions.add(entry.function.valueChanges.subscribe((func) => this.getAdditionalCharacteristic(entry, func)));
+        if (stored) {
+            this.getAdditionalCharacteristic(entry, stored);
+        }
+        return entry;
+    }
+
+    /** A changed aspect or device class drops the stored function, which then keeps only if the new listing offers it. */
+    private additionalFunctionChanged(entry: AdditionalFunctionEditor): void {
+        entry.stored = null;
+        this.reloadAdditionalFunctions(entry);
+    }
+
+    /**
+     * Lists the controlling functions of the device class and the entry's aspects, as the primary function is listed.
+     * The function stays selected while the listing loads, and Save waits for it.
+     */
+    private reloadAdditionalFunctions(entry: AdditionalFunctionEditor): void {
+        entry.listing?.unsubscribe();
+        const requests = this.controllingFunctionRequests(this.deviceClassFormControl.value || null, entry.aspects.value || []);
+        if (requests.length === 0) {
+            entry.functions = [];
+            entry.unlistedFunction = null;
+            entry.loading = false;
+            entry.function.setValue('');
+            entry.function.disable();
+            return;
+        }
+        entry.function.enable({ emitEvent: false });
+        entry.loading = true;
+        entry.listing = forkJoin(requests).subscribe((functionLists: DeviceTypeFunctionModel[][]) => {
+            entry.loading = false;
+            entry.functions = commonFunctions(functionLists);
+            entry.unlistedFunction = null;
+            const current = entry.function.value || null;
+            if (current && entry.functions.some((f) => f.id === current.id)) {
+                entry.function.setValue(entry.functions.find((f) => f.id === current.id) as DeviceTypeFunctionModel, { emitEvent: false });
+            } else if (current && current === entry.stored) {
+                entry.unlistedFunction = current;
+                entry.functions = [...entry.functions, current];
+            } else {
+                entry.function.setValue('');
+            }
+        });
+        entry.subscriptions.add(entry.listing);
+    }
+
+    /** The characteristic of an additional function, from its concept as for the primary function. */
+    private getAdditionalCharacteristic(entry: AdditionalFunctionEditor, func: DeviceTypeFunctionModel | '' | null): void {
+        entry.concept?.unsubscribe();
+        entry.characteristic = {} as DeviceTypeCharacteristicsModel;
+        if (func && func.concept_id !== '') {
+            entry.concept = this.conceptsService.getConceptWithCharacteristics(func.concept_id).subscribe((concept: ConceptsCharacteristicsModel | null) => {
+                entry.characteristic = baseCharacteristicOf(concept) ?? entry.characteristic;
+            });
+            entry.subscriptions.add(entry.concept);
+        }
+    }
+
+    /** The controlling listings a function must match: its device class, and each of the aspects. */
+    private controllingFunctionRequests(deviceClass: DeviceTypeDeviceClassModel | null, aspectIds: string[]): Observable<DeviceTypeFunctionModel[]>[] {
+        const requests: Observable<DeviceTypeFunctionModel[]>[] = [];
+        if (deviceClass) {
+            requests.push(this.deviceTypeService.getDeviceClassesControllingFunctions(deviceClass.id));
+        }
+        aspectIds.forEach((id) => requests.push(this.deviceTypeService.getAspectsControllingFunctions(id)));
+        return requests;
     }
 
     /** Only a pessimistic task waits for answers; an optimistic one sends to every device at once. */
@@ -282,7 +477,11 @@ export class TaskConfigDialogComponent implements OnInit {
     }
 
     private setAspects(): void {
-        const offered = new Set([...(this.listedAspectIds[this.optionsFormControl.value ?? ''] || []), ...this.selectionAspectIds]);
+        const offered = new Set([
+            ...(this.listedAspectIds[this.optionsFormControl.value ?? ''] || []),
+            ...this.selectionAspectIds,
+            ...this.additionalFunctions.flatMap((entry) => entry.aspects.value || []),
+        ]);
         const nodes = [...offered]
             .map((id) => this.aspectNodes.get(id))
             .filter((node): node is DeviceTypeAspectNodeModel => node !== undefined);
@@ -307,6 +506,7 @@ export class TaskConfigDialogComponent implements OnInit {
                 this.unlistedDeviceClass = null;
             }
             this.reloadFunctions();
+            this.additionalFunctions.forEach((entry) => this.additionalFunctionChanged(entry));
         });
 
         this.aspectFormControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.reloadFunctions());
@@ -333,24 +533,17 @@ export class TaskConfigDialogComponent implements OnInit {
     private getFunctions() {
         this.functionsSubscription?.unsubscribe();
         const aspectIds = this.selectedAspectIds();
-        const requests: Observable<DeviceTypeFunctionModel[]>[] = [];
-        if (this.optionsFormControl.value === 'Controlling') {
-            const deviceClass: DeviceTypeDeviceClassModel | null = this.deviceClassFormControl.value || null;
-            if (deviceClass) {
-                requests.push(this.deviceTypeService.getDeviceClassesControllingFunctions(deviceClass.id));
-            }
-            aspectIds.forEach((id) => requests.push(this.deviceTypeService.getAspectsControllingFunctions(id)));
-        } else {
-            aspectIds.forEach((id) => requests.push(this.deviceTypeService.getAspectsMeasuringFunctions(id)));
-        }
+        const requests: Observable<DeviceTypeFunctionModel[]>[] =
+            this.optionsFormControl.value === 'Controlling'
+                ? this.controllingFunctionRequests(this.deviceClassFormControl.value || null, aspectIds)
+                : aspectIds.map((id) => this.deviceTypeService.getAspectsMeasuringFunctions(id));
         if (requests.length === 0) {
             this.functions = [];
             this.functionFormControl.disable();
             return;
         }
         this.functionsSubscription = forkJoin(requests).subscribe((functionLists: DeviceTypeFunctionModel[][]) => {
-            const [first, ...rest] = functionLists;
-            this.functions = first.filter((f) => rest.every((list) => list.some((other) => other.id === f.id)));
+            this.functions = commonFunctions(functionLists);
             this.refreshSelected(this.functionFormControl, this.functions);
             this.offerStoredFunction();
             this.selectKept();
@@ -388,24 +581,9 @@ export class TaskConfigDialogComponent implements OnInit {
             this.conceptsService
                 .getConceptWithCharacteristics(func.concept_id)
                 .subscribe((concept: ConceptsCharacteristicsModel | null) => {
-                    if (concept && concept.base_characteristic_id) {
-                        let index = -1;
-                        concept.characteristics.forEach((char: DeviceTypeCharacteristicsModel, i: number) => {
-                            if (char.id === concept.base_characteristic_id) {
-                                index = i;
-                            }
-                        });
-                        if (index >= 0) {
-                            this.characteristic = concept.characteristics[index];
-                        } else {
-                            console.error('base characteristic ' + concept.base_characteristic_id + ' is not characteristic of the concept');
-                        }
-                    } else {
-                        if (!concept) {
-                            console.error('unknown concept');
-                        } else if (!concept.base_characteristic_id) {
-                            console.error('missing concept base characteristic');
-                        }
+                    const characteristic = baseCharacteristicOf(concept);
+                    if (characteristic) {
+                        this.characteristic = characteristic;
                     }
                 });
         } else {

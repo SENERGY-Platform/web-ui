@@ -70,6 +70,7 @@ import {
     SmartServiceCriteria,
     storableCriteria,
 } from '../../shared/smart-service-criteria';
+import { additionalFunctionsOfElement } from '../../../../processes/designer/shared/additional-functions';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { CloseMtxSelectOnScrollDirective } from '../../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { MatTabGroup, MatTab, MatTabContent } from '@angular/material/tabs';
@@ -646,6 +647,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
         if (criteria) {
             const current = this.availableProcessVariables.get('iot_form_fields') || [];
             const interaction = element?.task ? 'request' : 'event';
+            const additional = element?.task ? this.additionalFunctionCriteria(taskId, criteria.device_class_id) : [];
             const newField: AbstractSmartServiceInput = {
                 id: this.smartServiceBpmnElement.id + '_' + taskId + '_selection',
                 type: 'string',
@@ -661,7 +663,7 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
                     device_class_id: criteria.device_class_id || undefined,
                     function_id: criteria.function_id || undefined,
                     interaction
-                })],
+                }), ...additional],
             };
 
             if (!this.smartServiceInputs.find(v => v.id === newField.id) && !current.find(v => v.name === newField.id)) {
@@ -673,6 +675,23 @@ export class EditSmartServiceTaskDialogComponent implements OnInit {
             }
 
         }
+    }
+
+    /**
+     * One request criterion per additional function of a task, in the device class of the primary criterion. The
+     * draft's diagram is read first; the deployed one serves where the draft has no payload for the task.
+     */
+    private additionalFunctionCriteria(taskId: string, deviceClassId: string | null | undefined): SmartServiceCriteria[] {
+        const diagram = this.selectedProcessModelPreparation?.diagram;
+        const entries = additionalFunctionsOfElement(diagram?.xml_raw ?? '', taskId)
+            ?? additionalFunctionsOfElement(diagram?.xml_deployed ?? '', taskId)
+            ?? [];
+        return entries.map((entry) => storableCriteria({
+            function_id: entry.function.id,
+            aspect_ids: entry.aspects.map((node) => node.id),
+            device_class_id: deviceClassId || undefined,
+            interaction: 'request',
+        }));
     }
 
     taskParameterShouldBeEditable(value: unknown): boolean {

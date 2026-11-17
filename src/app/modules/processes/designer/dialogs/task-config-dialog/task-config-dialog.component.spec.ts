@@ -592,6 +592,142 @@ describe('TaskConfigDialogComponent', () => {
         });
     });
 
+    describe('additional functions of a controlling task', () => {
+        const level = { id: 'urn:infai:ses:characteristic:level', name: 'level', type: 'https://schema.org/Integer' } as DeviceTypeCharacteristicsModel;
+        const levelConcept = { id: 'urn:infai:ses:concept:level', base_characteristic_id: level.id, characteristics: [level] } as unknown as ConceptsCharacteristicsModel;
+        const setTemperature = { ...fn('urn:infai:ses:controlling-function:set-temperature', 'Set-Temperature'), rdf_type: CONTROLLING, concept_id: levelConcept.id };
+        const setOn = { ...fn('urn:infai:ses:controlling-function:set-on', 'Set-On'), rdf_type: CONTROLLING };
+        const gone = { ...fn('urn:infai:ses:controlling-function:gone', 'Gone'), rdf_type: CONTROLLING, concept_id: levelConcept.id };
+
+        /** A controlling primary function on air, with the given stored additional functions. */
+        const primarySelection = (additionalFunctions: DeviceTypeSelectionRefModel['additionalFunctions'] = []) =>
+            measuringSelection({
+                function: setOn,
+                device_class: null,
+                aspect: air,
+                aspects: [air],
+                completionStrategy: 'optimistic',
+                additionalFunctions,
+            });
+
+        const initControllingPrimary = (selection: DeviceTypeSelectionRefModel | null) =>
+            init(selection, {}, [water], [], [setTemperature, setOn], [air], { [air.id]: [setTemperature, setOn] });
+
+        const storedEntry = (func: DeviceTypeFunctionModel, name = 'transition') => ({ name, function: func, characteristic_id: level.id, aspects: [air] });
+
+        it('offers additional functions only once a controlling function is chosen', () => {
+            initControllingPrimary(null);
+            expect(component.additionalFunctionsOffered).toBeFalse();
+            expect(fixture.nativeElement.querySelector('.add-button')).toBeNull();
+
+            component.functionFormControl.setValue(setOn);
+            fixture.detectChanges();
+            expect(component.additionalFunctionsOffered).toBeTrue();
+            expect(fixture.nativeElement.querySelector('.add-button')).not.toBeNull();
+
+            component.optionsFormControl.setValue('Measuring');
+            expect(component.additionalFunctionsOffered).toBeFalse();
+        });
+
+        it('adds an entry on the aspects of the primary function, offering its controlling functions', () => {
+            initControllingPrimary(primarySelection());
+            component.addAdditionalFunction();
+            const entry = component.additionalFunctions[0];
+            expect(entry.aspects.value).toEqual([air.id]);
+            expect(entry.functions.map((f) => f.id)).toEqual([setTemperature.id, setOn.id]);
+            expect(entry.function.enabled).toBeTrue();
+            expect(entry.function.value).toBe('');
+        });
+
+        it('rejects an empty, dotted, colon or duplicate name, and blocks Save until the name is valid', () => {
+            initControllingPrimary(primarySelection());
+            component.addAdditionalFunction();
+            component.addAdditionalFunction();
+            const [first, second] = component.additionalFunctions;
+
+            first.name.setValue('');
+            expect(first.name.hasError('empty')).toBeTrue();
+            first.name.setValue('transition.speed');
+            expect(first.name.hasError('characters')).toBeTrue();
+            first.name.setValue('inputs:transition');
+            expect(first.name.hasError('characters')).toBeTrue();
+
+            first.name.setValue('transition');
+            second.name.setValue('transition');
+            expect(first.name.hasError('duplicate')).toBeTrue();
+            expect(second.name.hasError('duplicate')).toBeTrue();
+            second.name.setValue(' speed ');
+            expect(first.name.hasError('duplicate')).toBeFalse();
+            expect(second.name.valid).toBeTrue();
+
+            first.name.setValue('');
+            expect(component.additionalFunctionsInvalid).toBeTrue();
+            fixture.detectChanges();
+            expect(fixture.nativeElement.querySelector('mat-dialog-actions button[color="accent"]').disabled).toBeTrue();
+        });
+
+        it('saves an entry with its name, function, characteristic and aspects once the characteristic has loaded', () => {
+            initControllingPrimary(primarySelection());
+            conceptsService.getConceptWithCharacteristics.and.returnValue(of(levelConcept));
+            component.addAdditionalFunction();
+            const entry = component.additionalFunctions[0];
+            entry.name.setValue(' transition ');
+            entry.function.setValue(setTemperature);
+            expect(component.additionalFunctionsInvalid).toBeFalse();
+
+            expect(savedResult().additionalFunctions).toEqual([
+                { name: 'transition', function: setTemperature, characteristic: level, characteristic_id: level.id, aspects: [air] },
+            ]);
+        });
+
+        it('blocks Save while the characteristic of an entry is not loaded', () => {
+            initControllingPrimary(primarySelection());
+            component.addAdditionalFunction();
+            const entry = component.additionalFunctions[0];
+            entry.name.setValue('transition');
+            entry.function.setValue(setTemperature);
+            expect(entry.characteristic.id).toBeUndefined();
+            expect(component.additionalFunctionsInvalid).toBeTrue();
+        });
+
+        it('opens a stored entry with its function, its aspects and, once loaded, its characteristic', () => {
+            initControllingPrimary(primarySelection([storedEntry(setTemperature)]));
+            conceptsService.getConceptWithCharacteristics.and.returnValue(of(levelConcept));
+            component.additionalFunctions.forEach((entry) => entry.function.setValue(entry.function.value));
+
+            const [entry] = component.additionalFunctions;
+            expect(entry.name.value).toBe('transition');
+            expect(entry.aspects.value).toEqual([air.id]);
+            expect(entry.functions.map((f) => f.id)).toEqual([setTemperature.id, setOn.id]);
+            expect(entry.unlistedFunction).toBeNull();
+            expect(savedResult().additionalFunctions.map((f: { characteristic: DeviceTypeCharacteristicsModel }) => f.characteristic.id)).toEqual([level.id]);
+        });
+
+        it('keeps a stored function the listing no longer offers, marked as no longer offered', () => {
+            initControllingPrimary(primarySelection([storedEntry(gone)]));
+            const [entry] = component.additionalFunctions;
+            expect(entry.unlistedFunction?.id).toBe(gone.id);
+            expect(entry.functions.map((f) => f.id)).toEqual([setTemperature.id, setOn.id, gone.id]);
+        });
+
+        it('removes an entry and keeps the others', () => {
+            initControllingPrimary(primarySelection());
+            component.addAdditionalFunction();
+            component.addAdditionalFunction();
+            const second = component.additionalFunctions[1];
+            component.removeAdditionalFunction(0);
+            expect(component.additionalFunctions).toEqual([second]);
+        });
+
+        it('saves no additional function once the primary function is a measuring one', () => {
+            initControllingPrimary(primarySelection([storedEntry(setTemperature)]));
+            component.optionsFormControl.setValue('Measuring');
+            fixture.detectChanges();
+            expect(component.additionalFunctionsInvalid).toBeFalse();
+            expect(savedResult().additionalFunctions).toEqual([]);
+        });
+    });
+
     describe('group concurrency', () => {
         it('keeps the stored concurrency of a pessimistic task and saves it as a number', () => {
             init(measuringSelection({ aspect: air, aspects: [air], groupConcurrency: 3 }), { [air.id]: [temperature] });

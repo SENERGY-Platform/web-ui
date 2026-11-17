@@ -402,6 +402,98 @@ describe('process writers on the process designer modeler', () => {
             });
         });
 
+        describe('additional functions', () => {
+            const dimming = { ...controlling, id: 'urn:infai:ses:controlling-function:transition', name: 'Set Transition' };
+            const rgbOther = { ...rgb, id: 'urn:infai:ses:characteristic:rgb-other' };
+            const extra = (characteristic: any, aspects: any[] = [air]) => ({
+                name: 'transition',
+                function: dimming,
+                characteristic,
+                aspects,
+            });
+            const primary = (additionalFunctions?: any[], characteristic: any = integer('brightness')) =>
+                connectorInfo({
+                    function: controlling,
+                    device_class: deviceClass,
+                    aspect: air,
+                    aspects: [air],
+                    characteristic,
+                    completionStrategy: 'optimistic',
+                    ...(additionalFunctions ? { additionalFunctions } : {}),
+                });
+            const io = () => selected().businessObject.extensionElements.values[0];
+
+            it('writes each additional function with its payload entry and an input per field', async () => {
+                writeDeviceTask(services, element('Task_1'), primary([extra(rgb)]));
+
+                const task = byId(await saved(), selected().id);
+                const inputs = parameters(task, 'camunda:inputParameter');
+                expect(Object.keys(inputs)).toEqual(['payload', 'inputs', 'inputs:transition.r', 'inputs:transition.g', 'inputs:transition.b']);
+                expect(inputs['inputs:transition.r']).toBe('0');
+                const payload = JSON.parse(inputs['payload']);
+                expect(payload.additional_functions).toEqual([
+                    {
+                        name: 'transition',
+                        function: dimming,
+                        characteristic_id: rgb.id,
+                        aspects: [air],
+                        input: { r: 0, g: 0, b: 0 },
+                    },
+                ]);
+                expect(Object.keys(payload).slice(-1)).toEqual(['additional_functions']);
+            });
+
+            it('writes no additional_functions key and no parameter for a task without additional functions', async () => {
+                writeDeviceTask(services, element('Task_1'), primary([]));
+
+                const inputs = parameters(byId(await saved(), selected().id), 'camunda:inputParameter');
+                expect(Object.keys(inputs)).toEqual(['payload', 'inputs']);
+                expect(JSON.parse(inputs['payload']).additional_functions).toBeUndefined();
+                expect(JSON.parse(inputs['payload']).prefer_event).toBe(false);
+            });
+
+            it('reads the additional functions back, and none for a task without them', () => {
+                writeDeviceTask(services, element('Task_1'), primary([extra(rgb, [water, air])]));
+                expect(readDeviceTask(selected()).additionalFunctions).toEqual([
+                    { name: 'transition', function: dimming, characteristic_id: rgb.id, aspects: [air, water] },
+                ]);
+
+                writeDeviceTask(services, selected(), primary());
+                expect(readDeviceTask(selected()).additionalFunctions).toEqual([]);
+            });
+
+            it('keeps the edited input values of an additional function when its characteristic stays', () => {
+                writeDeviceTask(services, element('Task_1'), primary([extra(rgb)]));
+                io().inputParameters.find((p: any) => p.name === 'inputs:transition.r').value = '50';
+
+                writeDeviceTask(services, selected(), primary([extra(rgb, [air, water])]));
+
+                expect(io().inputParameters.find((p: any) => p.name === 'inputs:transition.r').value).toBe('50');
+                expect(JSON.parse(io().inputParameters[0].value).additional_functions[0].aspects.map((node: any) => node.id)).toEqual([air.id, water.id]);
+            });
+
+            it('writes the default input of an additional function whose characteristic changed, and keeps the primary edits', () => {
+                writeDeviceTask(services, element('Task_1'), primary([extra(rgb)]));
+                io().inputParameters.find((p: any) => p.name === 'inputs:transition.r').value = '50';
+                io().inputParameters.find((p: any) => p.name === 'inputs').value = '${target}';
+
+                writeDeviceTask(services, selected(), primary([extra(rgbOther)]));
+
+                expect(io().inputParameters.find((p: any) => p.name === 'inputs:transition.r').value).toBe('0');
+                expect(io().inputParameters.find((p: any) => p.name === 'inputs').value).toBe('${target}');
+            });
+
+            it('keeps the edits of each additional function apart', () => {
+                writeDeviceTask(services, element('Task_1'), primary([extra(rgb), { ...extra(rgb), name: 'speed' }]));
+                io().inputParameters.find((p: any) => p.name === 'inputs:speed.g').value = '7';
+
+                writeDeviceTask(services, selected(), primary([extra(rgbOther), { ...extra(rgb), name: 'speed' }]));
+
+                expect(io().inputParameters.find((p: any) => p.name === 'inputs:speed.g').value).toBe('7');
+                expect(io().inputParameters.find((p: any) => p.name === 'inputs:transition.g').value).toBe('0');
+            });
+        });
+
         it('opens the selection empty for a task without a payload', () => {
             expect(readDeviceTask(element('Task_connector'))).toBeUndefined();
             expect(readDeviceTask(element('Task_1'))).toBeUndefined();

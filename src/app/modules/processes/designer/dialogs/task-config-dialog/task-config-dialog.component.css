@@ -34,3 +34,19 @@
     font-style: italic;
     opacity: 0.7;
 }
+
+.section-title {
+    margin: 12px 0 4px;
+    font-weight: 500;
+}
+
+.additional-function {
+    border-left: 2px solid rgba(0, 0, 0, 0.12);
+    margin-bottom: 8px;
+    padding-left: 12px;
+}
+
+.remove-button,
+.add-button {
+    margin-bottom: 8px;
+}

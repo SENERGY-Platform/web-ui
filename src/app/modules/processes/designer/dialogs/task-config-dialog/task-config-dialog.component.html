@@ -80,6 +80,55 @@
     <mat-error senergyError label="Function"></mat-error>
   </mat-form-field>
 }
+
+@if (additionalFunctionsOffered) {
+  <div class="section-title">Additional Functions</div>
+  @for (entry of additionalFunctions; track entry; let i = $index) {
+    <div class="additional-function">
+      <mat-form-field appearance="outline" class="form-field" color="accent">
+        <mat-label>Name</mat-label>
+        <input type="text" matInput [formControl]="entry.name" required>
+        @if (entry.name.hasError('empty')) {
+          <mat-error>Enter a name.</mat-error>
+        }
+        @if (entry.name.hasError('characters')) {
+          <mat-error>The name may not contain a dot or a colon.</mat-error>
+        }
+        @if (entry.name.hasError('duplicate')) {
+          <mat-error>Another function of this task has this name.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field" color="accent">
+        <mat-label>Function</mat-label>
+        <mtx-select [compareWith]="compare" [formControl]="entry.function" required [items]="entry.functions"
+          bindLabel="name" appendTo=".ng-select-anchor">
+          <ng-template ngSelectLabel let-item="item">
+            <span class="ng-select-value-label">{{item.name}}@if (item.id === entry.unlistedFunction?.id) {
+              <span class="not-offered"> (no longer offered)</span>
+            }</span>
+          </ng-template>
+          <ng-template ngSelectOption let-item="item">
+            {{item.name}}@if (item.id === entry.unlistedFunction?.id) {
+              <span class="not-offered"> (no longer offered)</span>
+            }
+          </ng-template>
+        </mtx-select>
+        @if (entry.unlistedFunction) {
+          <mat-hint>A deployment will probably find no devices for this combination.</mat-hint>
+        }
+      </mat-form-field>
+
+      <senergy-aspect-select
+        [formControl]="entry.aspects" [aspects]="aspects" [aspectClasses]="[]" label="Aspects"
+        [showCollisionUntouched]="true">
+      </senergy-aspect-select>
+
+      <button mat-button type="button" class="remove-button" (click)="removeAdditionalFunction(i)">Remove</button>
+    </div>
+  }
+  <button mat-button type="button" class="add-button" (click)="addAdditionalFunction()">Add Function</button>
+}
 </form>
 
 <mat-radio-group [formControl]="completionStrategyFormControl">
@@ -111,6 +160,6 @@
 
 <mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" [disabled]="functionFormControl.value === '' || aspectClassCollision || groupConcurrencyFormControl.invalid" (click)="save()">Save
+  <button mat-raised-button color="accent" [disabled]="functionFormControl.value === '' || aspectClassCollision || groupConcurrencyFormControl.invalid || additionalFunctionsInvalid" (click)="save()">Save
   </button>
 </mat-dialog-actions>

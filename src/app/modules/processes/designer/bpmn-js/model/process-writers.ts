@@ -34,6 +34,13 @@ import {
 } from './bpmn-elements';
 import { ProcessIoDesignerConfig, ProcessIoDesignerInfo } from '../../../process-io/shared/process-io.model';
 import { ConditionalEventEditModel } from '../../shared/designer-dialog.model';
+import {
+    additionalFunctionsKey,
+    additionalInputPrefix,
+    AdditionalFunctionModel,
+    parseAdditionalFunctions,
+    serializeAdditionalFunctions,
+} from '../../shared/additional-functions';
 
 const typeString = 'https://schema.org/Text';
 const typeInteger = 'https://schema.org/Integer';
@@ -220,6 +227,7 @@ export function writeProcessIo(services: TaskServices, element: any, config: Pro
 
 export function getPayload(connectorInfo: any, input: boolean): string {
     const aspectFields = payloadAspectFields(connectorInfo);
+    const additional = input ? serializeAdditionalFunctions(connectorInfo.additionalFunctions || [], (characteristic) => generateStructure(characteristic, true, '')) : [];
     return JSON.stringify(
         {
             version: 2,
@@ -232,6 +240,8 @@ export function getPayload(connectorInfo: any, input: boolean): string {
             characteristic_id: connectorInfo.characteristic.id,
             retries: connectorInfo.retries,
             prefer_event: connectorInfo.prefer_events,
+            // left out without additional functions, so such a task is written as before
+            ...(additional.length > 0 ? { [additionalFunctionsKey]: additional } : {}),
         },
         null,
         4,
@@ -325,6 +335,7 @@ export function readDeviceTask(element: any): any {
         retries: payload.retries,
         prefer_events: payload.prefer_event,
         groupConcurrency: groupConcurrencyOf(bo),
+        additionalFunctions: parseAdditionalFunctions(payload),
     };
 }
 
@@ -367,6 +378,31 @@ function keepParameterEdits(
     });
 }
 
+/**
+ * The same rule per additional function, judged against the characteristic the payload held for that function. The
+ * input parameters of an additional function are named after it, so they are matched by name as well.
+ */
+function keepAdditionalInputEdits(
+    previous: { inputParameters?: TaskParameter[] } | undefined,
+    entry: AdditionalFunctionModel,
+    inputs: (TaskParameter | undefined)[],
+): void {
+    const previousInputs = previous?.inputParameters || [];
+    const previousPayload = previousInputs.find((input) => input.name === 'payload');
+    const previousEntry = previousPayload
+        ? parseAdditionalFunctions(JSON.parse(previousPayload.value ?? '{}')).find((old) => old.name === entry.name)
+        : undefined;
+    if (!previousEntry || !entry.characteristic.id || previousEntry.characteristic_id !== entry.characteristic.id) {
+        return;
+    }
+    inputs.forEach((input) => {
+        const kept = input ? previousInputs.find((old) => old.name === input.name) : undefined;
+        if (input && kept && kept.value !== undefined) {
+            input.value = kept.value;
+        }
+    });
+}
+
 export function writeDeviceTask(services: TaskServices, element: any, connectorInfo: any): void {
     const moddle = services.moddle;
     // read before the replacement, which gives the task a new business object
@@ -378,10 +414,15 @@ export function writeDeviceTask(services: TaskServices, element: any, connectorI
         task.set('senergy:groupConcurrency', connectorInfo.groupConcurrency ? String(connectorInfo.groupConcurrency) : undefined);
         let inputs: any[] | undefined;
         let outputs: any[] | undefined;
+        let additional: { entry: AdditionalFunctionModel; parameters: any[] }[] = [];
         if (connectorInfo.function.rdf_type === controllingFunction) {
             const payload = inputParameter(moddle, 'payload', getPayload(connectorInfo, true));
             inputs = [payload].concat(taskParameters(moddle, generateStructure(connectorInfo.characteristic, true, ''), 'inputs', true));
             outputs = [];
+            additional = (connectorInfo.additionalFunctions || []).map((entry: AdditionalFunctionModel) => ({
+                entry,
+                parameters: taskParameters(moddle, generateStructure(entry.characteristic, true, ''), additionalInputPrefix + entry.name, true),
+            }));
         }
         if (connectorInfo.function.rdf_type === measuringFunction) {
             inputs = [inputParameter(moddle, 'payload', getPayload(connectorInfo, false))];
@@ -392,7 +433,9 @@ export function writeDeviceTask(services: TaskServices, element: any, connectorI
             ]);
         }
         keepParameterEdits(previous, connectorInfo.characteristic?.id, inputs, outputs);
-        setExtension(moddle, task, inputOutput(moddle, inputs, outputs));
+        additional.forEach(({ entry, parameters }) => keepAdditionalInputEdits(previous, entry, parameters));
+        const allInputs = inputs?.concat(...additional.map((item) => item.parameters));
+        setExtension(moddle, task, inputOutput(moddle, allInputs, outputs));
         refresh(services, element);
     });
 }

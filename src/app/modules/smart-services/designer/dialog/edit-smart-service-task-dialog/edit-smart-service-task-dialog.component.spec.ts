@@ -312,6 +312,66 @@ describe('EditSmartServiceTaskDialogComponent criteria', () => {
                 { aspect_id: air.id, aspect_ids: [air.id, water.id], device_class_id: undefined, function_id: 'f', interaction: 'request' },
             ]);
         });
+
+        describe('additional functions of the task', () => {
+            const lamp = 'urn:infai:ses:device-class:lamp';
+            const dimming = 'urn:infai:ses:controlling-function:transition';
+            const taskXml = (taskId: string, payload: object | null) => {
+                const extension = payload
+                    ? `<bpmn:extensionElements><camunda:inputOutput><camunda:inputParameter name="payload">${JSON.stringify(payload)}</camunda:inputParameter></camunda:inputOutput></bpmn:extensionElements>`
+                    : '';
+                return `<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1">
+  <bpmn:process id="Process_1" isExecutable="true"><bpmn:serviceTask id="${taskId}" name="Lamp">${extension}</bpmn:serviceTask></bpmn:process>
+</bpmn:definitions>`;
+            };
+            const payloadWith = (additional: object[]) => ({
+                function: { id: 'set-on' },
+                additional_functions: additional,
+            });
+
+            function generateFrom(diagram: { xml_raw: string; xml_deployed?: string }) {
+                init([]);
+                component.selectedProcessModelPreparation = {
+                    diagram,
+                    elements: [{
+                        bpmn_id: 'bpmn-task',
+                        name: 'Lamp',
+                        task: { selection: { filter_criteria: { function_id: 'set-on', device_class_id: lamp, aspect_id: air.id, aspect_ids: [air.id] } } },
+                    }],
+                } as unknown as V2DeploymentsPreparedModel;
+                const input: SmartServiceTaskInputDescription = { name: 'process_deployment.bpmn-task.selection', type: 'text', value: '' };
+                component.generateInputForProcessElement(input, 'bpmn-task');
+                return component.smartServiceInputs[component.smartServiceInputs.length - 1].criteria_list;
+            }
+
+            it('adds one request criterion per additional function, beside the primary one', () => {
+                const criteria = generateFrom({
+                    xml_raw: taskXml('bpmn-task', payloadWith([
+                        { name: 'transition', function: { id: dimming }, characteristic_id: 'c', aspects: [water, air], input: {} },
+                        { name: 'speed', function: { id: 'urn:infai:ses:controlling-function:speed' }, characteristic_id: 'c', aspects: [air], input: {} },
+                    ])),
+                });
+                expect(criteria).toEqual([
+                    { aspect_id: air.id, aspect_ids: [air.id], device_class_id: lamp, function_id: 'set-on', interaction: 'request' },
+                    { aspect_id: air.id, aspect_ids: [air.id, water.id], device_class_id: lamp, function_id: dimming, interaction: 'request' },
+                    { aspect_id: air.id, aspect_ids: [air.id], device_class_id: lamp, function_id: 'urn:infai:ses:controlling-function:speed', interaction: 'request' },
+                ]);
+            });
+
+            it('reads the deployed diagram where the draft has no payload for the task', () => {
+                const criteria = generateFrom({
+                    xml_raw: taskXml('other-task', payloadWith([])),
+                    xml_deployed: taskXml('bpmn-task', payloadWith([{ name: 'transition', function: { id: dimming }, characteristic_id: 'c', aspects: [air], input: {} }])),
+                });
+                expect(criteria.map((c) => c.function_id)).toEqual(['set-on', dimming]);
+            });
+
+            it('adds no criterion for a task whose payload has no additional function', () => {
+                const criteria = generateFrom({ xml_raw: taskXml('bpmn-task', payloadWith([])) });
+                expect(criteria.length).toBe(1);
+            });
+        });
     });
 
     describe('analytics operators as event source of a process deployment', () => {
