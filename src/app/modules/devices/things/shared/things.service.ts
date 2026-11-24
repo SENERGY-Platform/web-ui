@@ -15,15 +15,20 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ErrorHandlerService } from '../../../../core/services/error-handler.service';
 import { environment } from '../../../../../environments/environment';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { PermissionTestResponse } from 'src/app/modules/admin/permissions/shared/permission.model';
 import { DeviceTypeContentVariableModel } from '../../../metadata/device-types-overview/shared/device-type.model';
-import { ThingDeviceLinkCreateModel, ThingModel, ThingTotalModel } from './things.model';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { snackError } from '../../../../core/services/snack-bar-messages';
+import { ThingDeviceLinkCreateModel, ThingDeviceLinkEndModel, ThingDeviceLinkSwapModel, ThingModel, ThingTotalModel } from './things.model';
+
+/** Shown for a 409: the device-repository gave up after rewriting the thing against concurrent writes. */
+export const THING_CONFLICT_MESSAGE = 'The thing was changed by someone else in the meantime. Reload the page and try again.';
 
 @Injectable({
     providedIn: 'root',
@@ -32,6 +37,7 @@ export class ThingsService {
     private http = inject(HttpClient);
     private errorHandlerService = inject(ErrorHandlerService);
     private ladonService = inject(LadonService);
+    private snackBar = inject(MatSnackBar);
 
     authorizations: PermissionTestResponse;
     authorizationsDeviceLinks: PermissionTestResponse;
@@ -78,13 +84,13 @@ export class ThingsService {
         const { id: _id, ...body } = ThingsService.toBody(thing);
         return this.http
             .post<ThingModel>(environment.deviceRepoUrl + '/things', body)
-            .pipe(catchError(this.errorHandlerService.handleError(ThingsService.name, 'createThing', null)));
+            .pipe(catchError(this.writeError('createThing', null)));
     }
 
     updateThing(thing: ThingModel): Observable<ThingModel | null> {
         return this.http
             .put<ThingModel>(environment.deviceRepoUrl + '/things/' + encodeURIComponent(thing.id), ThingsService.toBody(thing))
-            .pipe(catchError(this.errorHandlerService.handleError(ThingsService.name, 'updateThing', null)));
+            .pipe(catchError(this.writeError('updateThing', null)));
     }
 
     /** True once the device-repository accepted the delete; only the status decides, the body may be empty. */
@@ -99,17 +105,61 @@ export class ThingsService {
     addDeviceLink(thingId: string, link: ThingDeviceLinkCreateModel): Observable<ThingModel | null> {
         return this.http
             .post<ThingModel>(environment.deviceRepoUrl + '/things/' + encodeURIComponent(thingId) + '/device-links', link)
-            .pipe(catchError(this.errorHandlerService.handleError(ThingsService.name, 'addDeviceLink', null)));
+            .pipe(catchError(this.writeError('addDeviceLink', null)));
     }
 
-    /** Ends an open link now; links are ended, never deleted. */
-    endDeviceLink(thingId: string, linkId: string): Observable<ThingModel | null> {
+    /**
+     * Ends an open link, now unless `end.until` says otherwise; links are ended, never deleted. For a meter, `until_values`
+     * are the counter positions at removal and each has to name a reading of the link.
+     */
+    endDeviceLink(thingId: string, linkId: string, end: ThingDeviceLinkEndModel = {}): Observable<ThingModel | null> {
         return this.http
             .post<ThingModel>(
                 environment.deviceRepoUrl + '/things/' + encodeURIComponent(thingId) + '/device-links/' + encodeURIComponent(linkId) + '/end',
-                {},
+                end,
             )
-            .pipe(catchError(this.errorHandlerService.handleError(ThingsService.name, 'endDeviceLink', null)));
+            .pipe(catchError(this.writeError('endDeviceLink', null)));
+    }
+
+    /**
+     * Ends the open link and starts one to `swap.device_id` in one write, so a refusal of either half leaves the thing
+     * as it was. Answers the thing with all its links.
+     */
+    swapDeviceLink(thingId: string, linkId: string, swap: ThingDeviceLinkSwapModel): Observable<ThingModel | null> {
+        return this.http
+            .post<ThingModel>(
+                environment.deviceRepoUrl + '/things/' + encodeURIComponent(thingId) + '/device-links/' + encodeURIComponent(linkId) + '/swap',
+                swap,
+            )
+            .pipe(catchError(this.writeError('swapDeviceLink', null)));
+    }
+
+    /**
+     * The things with a link, open or ended, to one of the devices. `undefined` when the question failed (reported to
+     * the user), because "no thing" and "could not ask" lead to different actions.
+     */
+    getThingsByDevices(deviceIds: string[]): Observable<ThingModel[] | undefined> {
+        const params = new HttpParams().set('device_ids', deviceIds.join(',')).set('limit', '1000');
+        return this.http.get<ThingModel[]>(environment.deviceRepoUrl + '/things', { params }).pipe(
+            map((things) => things ?? []),
+            catchError(this.errorHandlerService.handleError<ThingModel[] | undefined>(ThingsService.name, 'getThingsByDevices', undefined)),
+        );
+    }
+
+    /**
+     * A write answers 400 with the reason as text, which the generic handler shows; a 409 is the compare-and-set of the
+     * device-repository running out of retries and gets the one message that tells the user what to do.
+     */
+    private writeError<T>(method: string, result: T) {
+        const generic = this.errorHandlerService.handleError<T>(ThingsService.name, method, result);
+        return (error?: HttpErrorResponse): Observable<T> => {
+            if (error instanceof HttpErrorResponse && error.status === 409) {
+                this.errorHandlerService.logError(ThingsService.name, method, error);
+                snackError(this.snackBar, THING_CONFLICT_MESSAGE);
+                return of(result);
+            }
+            return generic(error);
+        };
     }
 
     /**

@@ -20,6 +20,13 @@ import { DeviceTypeContentVariableModel } from '../../../metadata/device-types-o
 /** Permissions-v2 topic of things in the device-repository. */
 export const THING_TOPIC = 'things';
 
+/** A consumer is what a thing has always been; a meter is a measuring point, measured by the devices linked to it. */
+export type ThingKind = 'consumer' | 'meter';
+
+export function isMeter(thing: Pick<ThingModel, 'kind'> | null | undefined): boolean {
+    return thing?.kind === 'meter';
+}
+
 /**
  * A consumer without measurements of its own. The device-repository manages `device_links` only through
  * their own endpoints: a create or update ignores them and keeps the stored links.
@@ -27,6 +34,8 @@ export const THING_TOPIC = 'things';
 export interface ThingModel {
     id: string;
     name: string;
+    /** Absent means consumer. A meter stands for a measuring point; only its links carry readings and a factor. */
+    kind?: ThingKind;
     attributes: Attribute[];
     content_variables: DeviceTypeContentVariableModel[];
     owner_id: string;
@@ -39,6 +48,28 @@ export interface ThingDeviceLinkModel {
     device_id: string;
     from: string;
     until: string | null;
+    /** Meters only: the counter positions at installation and removal. */
+    readings?: ThingReadingModel[];
+    /** Meters only: transformer ratio, absent means 1. */
+    factor?: number;
+}
+
+/**
+ * The counter position of one energy column of the device, in kWh or m3 as on the meter's display and before the
+ * factor. `until_value` is set once the link ended with a removal reading.
+ */
+export interface ThingReadingModel {
+    service_id: string;
+    column: string;
+    from_value: number;
+    until_value?: number;
+}
+
+/** A removal reading; it has to name a reading of the link. */
+export interface ThingUntilValueModel {
+    service_id: string;
+    column: string;
+    until_value: number;
 }
 
 /** Body of a new device link: `from` defaults to now, `until` to open. */
@@ -46,6 +77,65 @@ export interface ThingDeviceLinkCreateModel {
     device_id: string;
     from?: string;
     until?: string;
+    /** Meters only; `until_value` is accepted together with `until` only. */
+    readings?: ThingReadingModel[];
+    /** Meters only, greater than 0. */
+    factor?: number;
+}
+
+/** Body of ending a link; `until` defaults to now, a missing reading stays open. */
+export interface ThingDeviceLinkEndModel {
+    until?: string;
+    until_values?: ThingUntilValueModel[];
+}
+
+/**
+ * Ends the open link at `at` and starts one to `device_id` at the same instant, in one write. The same device is
+ * allowed (counter reset, changed factor). `readings` carry no `until_value`.
+ */
+export interface ThingDeviceLinkSwapModel {
+    at?: string;
+    device_id: string;
+    until_values?: ThingUntilValueModel[];
+    readings?: ThingReadingModel[];
+    factor?: number;
+}
+
+/** The open link of a device on a meter thing. */
+export interface OpenMeterLink {
+    thing: ThingModel;
+    link: ThingDeviceLinkModel;
+}
+
+/** The meter things that hold an open link to the device; the server lists things with open and ended ones. */
+export function openMeterLinks(things: ThingModel[], deviceId: string): OpenMeterLink[] {
+    const result: OpenMeterLink[] = [];
+    for (const thing of things) {
+        if (!isMeter(thing)) {
+            continue;
+        }
+        for (const link of thing.device_links ?? []) {
+            if (link.device_id === deviceId && !link.until) {
+                result.push({ thing, link });
+            }
+        }
+    }
+    return result;
+}
+
+/** One typed reading of a form row: the entry has to be a number; an empty entry means no reading. */
+export function parseReadingValue(raw: string | number | null | undefined): number | null | undefined {
+    if (raw === null || raw === undefined || String(raw).trim() === '') {
+        return undefined;
+    }
+    const text = String(raw).trim().replace(',', '.');
+    return /^-?\d+(\.\d+)?$/.test(text) ? Number(text) : null;
+}
+
+/** A factor of a form field: empty is no factor (1 at the server), null is an entry that is not greater than 0. */
+export function parseFactor(raw: string | number | null | undefined): number | null | undefined {
+    const value = parseReadingValue(raw);
+    return value === undefined ? undefined : value !== null && value > 0 ? value : null;
 }
 
 export interface ThingTotalModel {

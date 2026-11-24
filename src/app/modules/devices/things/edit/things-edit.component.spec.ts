@@ -307,6 +307,35 @@ describe('ThingsEditComponent', () => {
             expect(component.nameControl.value).toBe('unsaved name');
         });
 
+        it('opens the end dialog of a meter link and ends it with the removal readings, without the plain confirmation', () => {
+            component.thing = { ...(component.thing as ThingModel), kind: 'meter' };
+            const end = { until_values: [{ service_id: 's1', column: 'energy', until_value: 10 }] };
+            dialog.open.and.returnValue({ afterClosed: () => of(end) } as never);
+            things.endDeviceLink.and.returnValue(of(storedThing()));
+            component.endLink(component.links[0]);
+            expect(dialogs.openConfirmDialog).not.toHaveBeenCalled();
+            expect(things.endDeviceLink).toHaveBeenCalledOnceWith(THING_ID, 'l1', end);
+        });
+
+        it('takes the kind as a change of its own and sends it with the save', () => {
+            expect(component.hasChanges()).toBeFalse();
+            component.kindControl.setValue('meter');
+            expect(component.hasChanges()).toBeTrue();
+            things.updateThing.and.returnValue(of({ ...storedThing(), kind: 'meter' }));
+            component.save();
+            expect(things.updateThing.calls.mostRecent().args[0].kind).toBe('meter');
+            expect(component.hasChanges()).toBeFalse();
+            expect(component.meter).toBeTrue();
+        });
+
+        it('keeps the edit when the server refuses the kind change', () => {
+            component.kindControl.setValue('meter');
+            things.updateThing.and.returnValue(of(null)); // the service has shown the server's text
+            component.save();
+            expect(component.kindControl.value).toBe('meter');
+            expect(component.hasChanges()).toBeTrue();
+        });
+
         it('discard loads the thing again and drops the edits', () => {
             component.nameControl.setValue('unsaved name');
             component.addAttr();

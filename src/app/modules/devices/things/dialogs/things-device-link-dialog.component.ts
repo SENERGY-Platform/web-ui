@@ -16,11 +16,13 @@
 
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { MatDialogActions, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
+import { Subject } from 'rxjs';
+import { AbstractControl, FormControl, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
+import { takeUntil } from 'rxjs/operators';
 import { MtxSelect } from '@ng-matero/extensions/select';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { DialogHeaderComponent } from '../../../../core/components/dialog-header/dialog-header.component';
@@ -28,7 +30,10 @@ import { MatErrorMessagesDirective } from '../../../../core/directives/matError.
 import { CloseMtxSelectOnScrollDirective } from '../../../../core/directives/close-mtx-select-on-scroll.directive';
 import { DeviceInstancesService } from '../../device-instances/shared/device-instances.service';
 import { toRfc3339Seconds } from '../../../environments/shared/environments-datetime';
-import { ThingDeviceLinkCreateModel } from '../shared/things.model';
+import { DeviceTypeService } from '../../../metadata/device-types-overview/shared/device-type.service';
+import { MeterColumn, ReadingRow, meterColumnsOf, readingRowsError, rowsFor, toReadings } from '../shared/meter-columns';
+import { ThingReadingsEditorComponent } from '../shared/thing-readings-editor.component';
+import { ThingDeviceLinkCreateModel, parseFactor, parseReadingValue } from '../shared/things.model';
 
 /** Until has to lie after from; checked only when both are set. */
 function untilAfterFrom(control: AbstractControl): ValidationErrors | null {
@@ -44,7 +49,7 @@ function untilAfterFrom(control: AbstractControl): ValidationErrors | null {
 @Component({
     templateUrl: './things-device-link-dialog.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
-    styles: ['.full-width { width: 100%; }'],
+    styles: ['.full-width { width: 100%; } .error { color: var(--mat-sys-error, #b3261e); }'],
     imports: [
         DialogHeaderComponent,
         CdkScrollable,
@@ -52,6 +57,7 @@ function untilAfterFrom(control: AbstractControl): ValidationErrors | null {
         MatDialogActions,
         CloseMtxSelectOnScrollDirective,
         ReactiveFormsModule,
+        FormsModule,
         MatFormField,
         MatLabel,
         MatHint,
@@ -60,14 +66,26 @@ function untilAfterFrom(control: AbstractControl): ValidationErrors | null {
         MtxSelect,
         MatErrorMessagesDirective,
         MatButton,
+        ThingReadingsEditorComponent,
     ],
 })
 export class ThingsDeviceLinkDialogComponent implements OnInit {
     private dialogRef = inject<MatDialogRef<ThingsDeviceLinkDialogComponent, ThingDeviceLinkCreateModel>>(MatDialogRef);
     private deviceInstancesService = inject(DeviceInstancesService);
+    private deviceTypeService = inject(DeviceTypeService);
     private destroyRef = inject(DestroyRef);
+    /** `meter` when the link goes to a meter thing: then it carries readings and a factor. */
+    private data = inject<{ meter?: boolean } | null>(MAT_DIALOG_DATA, { optional: true });
 
-    devices: { id: string; label: string }[] = [];
+    meter = this.data?.meter === true;
+    devices: { id: string; label: string; deviceTypeId: string }[] = [];
+    columns: MeterColumn[] = [];
+    rows: ReadingRow[] = [];
+    /** The energy columns of the chosen device are known; otherwise service and column are entered by hand. */
+    columnsKnown = false;
+    submitted = false;
+    factor = '';
+    private columnLoad$ = new Subject<void>();
     form = new FormGroup({
         device_id: new FormControl<string | null>(null, Validators.required),
         from: new FormControl<string>('', { nonNullable: true }),
@@ -80,8 +98,44 @@ export class ThingsDeviceLinkDialogComponent implements OnInit {
             .getDeviceInstances({ limit: 9999, offset: 0 })
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((devices) => {
-                this.devices = (devices.result || []).map((d) => ({ id: d.id, label: d.display_name || d.name || d.id }));
+                this.devices = (devices.result || []).map((d) => ({
+                    id: d.id,
+                    label: d.display_name || d.name || d.id,
+                    deviceTypeId: d.device_type_id,
+                }));
             });
+        this.form.controls.device_id.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id) => this.loadColumns(id));
+    }
+
+    /** The energy columns of the chosen device become the rows; none found leaves one row to fill in by hand. */
+    private loadColumns(deviceId: string | null): void {
+        this.columnLoad$.next();
+        this.columns = [];
+        this.rows = [];
+        this.columnsKnown = false;
+        const device = this.devices.find((d) => d.id === deviceId);
+        if (!this.meter || !device) {
+            return;
+        }
+        this.deviceTypeService
+            .getDeviceType(device.deviceTypeId)
+            .pipe(takeUntil(this.columnLoad$), takeUntilDestroyed(this.destroyRef))
+            .subscribe((deviceType) => {
+                this.columns = meterColumnsOf(deviceType, (o) => this.deviceTypeService.getValuePathsAndContentVariables(o.content_variable));
+                this.columnsKnown = this.columns.length > 0;
+                this.rows = this.columnsKnown ? rowsFor(this.columns) : [{ service_id: '', column: '', from: '', until: '' }];
+            });
+    }
+
+    /** Why the meter fields cannot be sent, or null. */
+    meterError(): string | null {
+        if (!this.meter) {
+            return null;
+        }
+        if (parseFactor(this.factor) === null) {
+            return 'The factor has to be a number greater than 0.';
+        }
+        return readingRowsError(this.rows, parseReadingValue);
     }
 
     close(): void {
@@ -90,7 +144,8 @@ export class ThingsDeviceLinkDialogComponent implements OnInit {
 
     save(): void {
         this.form.markAllAsTouched();
-        if (this.form.invalid) {
+        this.submitted = true;
+        if (this.form.invalid || this.meterError() !== null) {
             return;
         }
         const raw = this.form.getRawValue();
@@ -100,6 +155,16 @@ export class ThingsDeviceLinkDialogComponent implements OnInit {
         }
         if (raw.until) {
             link.until = toRfc3339Seconds(raw.until);
+        }
+        if (this.meter) {
+            const readings = toReadings(this.rows, parseReadingValue, !!raw.until);
+            if (readings.length > 0) {
+                link.readings = readings;
+            }
+            const factor = parseFactor(this.factor);
+            if (typeof factor === 'number') {
+                link.factor = factor;
+            }
         }
         this.dialogRef.close(link);
     }

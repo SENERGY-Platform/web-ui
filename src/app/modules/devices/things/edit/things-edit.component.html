@@ -24,6 +24,10 @@
           <input matInput [formControl]="nameControl" required>
           <mat-error senergyError label="Name"></mat-error>
         </mat-form-field>
+        <mat-radio-group class="kind" [formControl]="kindControl" aria-label="Kind">
+          <mat-radio-button value="consumer">Consumer</mat-radio-button>
+          <mat-radio-button value="meter">Meter</mat-radio-button>
+        </mat-radio-group>
       </senergy-form-section>
 
       <senergy-form-section title="Attributes">
@@ -169,6 +173,9 @@
                   <th>Device</th>
                   <th>From</th>
                   <th>Until</th>
+                  @if (meter) {
+                    <th>Readings</th>
+                  }
                   <th></th>
                 </tr>
               </thead>
@@ -184,6 +191,9 @@
                         open
                       }
                     </td>
+                    @if (meter) {
+                      <td>{{linkDetails(link)}}</td>
+                    }
                     <td class="action">
                       @if (canLink && !link.until) {
                         <button matButton="outlined" type="button" [disabled]="isLinking || isSaving" (click)="endLink(link)">

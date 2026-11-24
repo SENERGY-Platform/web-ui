@@ -21,6 +21,20 @@
         <mat-error>Until must be after From.</mat-error>
       }
     </mat-form-field>
+    @if (meter && form.controls.device_id.value) {
+      <h4>Counter readings</h4>
+      <p class="hint">As shown on the meter's display, before the factor. Leave a reading empty if it is not known.</p>
+      <senergy-thing-readings-editor [rows]="rows" [columns]="columns" [fixed]="columnsKnown"
+        [showUntil]="!!form.controls.until.value" untilLabel="Reading at end"></senergy-thing-readings-editor>
+      <mat-form-field class="full-width">
+        <mat-label>Factor</mat-label>
+        <input matInput inputmode="decimal" [(ngModel)]="factor" [ngModelOptions]="{standalone: true}">
+        <mat-hint>Transformer ratio, empty: 1</mat-hint>
+      </mat-form-field>
+      @if (submitted && meterError(); as error) {
+        <p class="error">{{error}}</p>
+      }
+    }
   </div>
 </mat-dialog-content>
 

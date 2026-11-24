@@ -154,6 +154,14 @@ export class DeviceInstancesService {
             .pipe(catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstance', null)));
     }
 
+    /** True once the device-repository accepted the delete; only the status decides, the body may be empty. */
+    deleteDeviceInstanceChecked(id: string): Observable<boolean> {
+        return this.http.delete(environment.deviceRepoUrl + '/devices/' + encodeURIComponent(id), { observe: 'response' }).pipe(
+            map(() => true),
+            catchError(this.errorHandlerService.handleError(DeviceInstancesService.name, 'deleteDeviceInstanceChecked', false)),
+        );
+    }
+
     deleteDeviceInstances(ids: string[]): Observable<DeviceInstanceModel | null> {
         return this.http
             .request<DeviceInstanceModel>('DELETE', environment.deviceRepoUrl + '/devices', { body: ids })

@@ -81,3 +81,4 @@
     text-align: right;
     padding-right: 0;
 }
+.kind { display: flex; gap: 16px; margin-top: 4px; }

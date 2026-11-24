@@ -18,9 +18,9 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { ThingsService } from './things.service';
+import { THING_CONFLICT_MESSAGE, ThingsService } from './things.service';
 import { ThingModel } from './things.model';
 import { LadonService } from 'src/app/modules/admin/permissions/shared/services/ladom.service';
 import { environment } from '../../../../../environments/environment';
@@ -180,6 +180,80 @@ describe('ThingsService', () => {
         expect(req.request.method).toBe('POST');
         expect(req.request.body).toEqual({});
         req.flush(thing());
+    });
+
+    it('should end a link with an instant and the removal readings', () => {
+        const end = { until: '2026-05-01T00:00:00Z', until_values: [{ service_id: 's1', column: 'energy', until_value: 1234.5 }] };
+        service.endDeviceLink(id, 'l1', end).subscribe();
+        const req = httpMock.expectOne(thingUrl + '/device-links/l1/end');
+        expect(req.request.body).toEqual(end);
+        req.flush(thing());
+    });
+
+    it('should link a meter device with readings and factor', () => {
+        const link = { device_id: 'd2', readings: [{ service_id: 's1', column: 'energy', from_value: 10 }], factor: 40 };
+        service.addDeviceLink(id, link).subscribe();
+        const req = httpMock.expectOne(thingUrl + '/device-links');
+        expect(req.request.body).toEqual(link);
+        req.flush(thing());
+    });
+
+    it('should swap a link with one POST to the swap endpoint', (done) => {
+        const swap = {
+            at: '2026-06-16T10:00:00Z',
+            device_id: 'd2',
+            until_values: [{ service_id: 's1', column: 'energy', until_value: 99 }],
+            readings: [{ service_id: 's1', column: 'energy', from_value: 0 }],
+            factor: 1,
+        };
+        service.swapDeviceLink(id, 'l1', swap).subscribe((answer) => {
+            expect(answer?.id).toBe(id);
+            done();
+        });
+        const req = httpMock.expectOne(thingUrl + '/device-links/l1/swap');
+        expect(req.request.method).toBe('POST');
+        expect(req.request.body).toEqual(swap);
+        req.flush(thing());
+    });
+
+    it('should ask for the things of devices with device_ids', (done) => {
+        service.getThingsByDevices(['d1', 'd2']).subscribe((things) => {
+            expect(things?.length).toBe(1);
+            done();
+        });
+        const req = httpMock.expectOne((r) => r.url === environment.deviceRepoUrl + '/things');
+        expect(req.request.params.get('device_ids')).toBe('d1,d2');
+        req.flush([thing()]);
+    });
+
+    it('should answer undefined when the lookup of the things failed', (done) => {
+        service.getThingsByDevices(['d1']).subscribe((things) => {
+            expect(things).toBeUndefined();
+            done();
+        });
+        httpMock.expectOne((r) => r.url === environment.deviceRepoUrl + '/things').flush('boom', { status: 500, statusText: 'Error' });
+    });
+
+    it('should show the server text of a refused swap (400)', (done) => {
+        const snack = spyOn(TestBed.inject(MatSnackBar), 'open');
+        service.swapDeviceLink(id, 'l1', { device_id: 'd2' }).subscribe((answer) => {
+            expect(answer).toBeNull();
+            expect(snack.calls.mostRecent().args[0]).toContain('swap at is before the start of the link');
+            done();
+        });
+        httpMock
+            .expectOne(thingUrl + '/device-links/l1/swap')
+            .flush('swap at is before the start of the link', { status: 400, statusText: 'Bad Request' });
+    });
+
+    it('should tell the user to reload and retry on a 409', (done) => {
+        const snack = spyOn(TestBed.inject(MatSnackBar), 'open');
+        service.swapDeviceLink(id, 'l1', { device_id: 'd2' }).subscribe((answer) => {
+            expect(answer).toBeNull();
+            expect(snack.calls.mostRecent().args[0]).toBe(THING_CONFLICT_MESSAGE);
+            done();
+        });
+        httpMock.expectOne(thingUrl + '/device-links/l1/swap').flush('conflict', { status: 409, statusText: 'Conflict' });
     });
 
     it('should report a delete answered with an empty 200 as success', (done) => {

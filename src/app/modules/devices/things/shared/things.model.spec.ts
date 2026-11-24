@@ -15,7 +15,7 @@
  */
 
 
-import { thingAttributeError } from './things.model';
+import { ThingModel, openMeterLinks, parseFactor, parseReadingValue, thingAttributeError } from './things.model';
 
 describe('thingAttributeError', () => {
     const now = new Date('2026-11-12T12:00:00Z');
@@ -58,5 +58,48 @@ describe('thingAttributeError', () => {
 
     it('takes any value for a key outside the list', () => {
         expect(error('power', 'two kW')).toBeNull();
+    });
+});
+
+describe('openMeterLinks', () => {
+    const thing = (kind: ThingModel['kind'], links: { id: string; device_id: string; until: string | null }[]): ThingModel => ({
+        id: 't-' + kind + links.length,
+        name: 'n',
+        kind,
+        attributes: [],
+        content_variables: [],
+        owner_id: 'u',
+        device_links: links.map((l) => ({ ...l, from: '2026-01-01T00:00:00Z' })),
+    });
+
+    it('finds the open link of the device on a meter and ignores ended links and other devices', () => {
+        const meter = thing('meter', [
+            { id: 'l1', device_id: 'd1', until: '2026-02-01T00:00:00Z' },
+            { id: 'l2', device_id: 'd1', until: null },
+            { id: 'l3', device_id: 'd2', until: null },
+        ]);
+        const found = openMeterLinks([meter], 'd1');
+        expect(found.map((f) => f.link.id)).toEqual(['l2']);
+    });
+
+    it('ignores consumers and things without kind', () => {
+        const open = [{ id: 'l1', device_id: 'd1', until: null }];
+        expect(openMeterLinks([thing('consumer', open), thing(undefined, open)], 'd1')).toEqual([]);
+    });
+});
+
+describe('parseReadingValue and parseFactor', () => {
+    it('reads numbers with a dot or a comma and treats an empty entry as no value', () => {
+        expect(parseReadingValue('12.5')).toBe(12.5);
+        expect(parseReadingValue('12,5')).toBe(12.5);
+        expect(parseReadingValue(' ')).toBeUndefined();
+        expect(parseReadingValue('abc')).toBeNull();
+    });
+
+    it('accepts a factor greater than 0 only', () => {
+        expect(parseFactor('40')).toBe(40);
+        expect(parseFactor('')).toBeUndefined();
+        expect(parseFactor('0')).toBeNull();
+        expect(parseFactor('-2')).toBeNull();
     });
 });

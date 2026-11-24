@@ -1,0 +1,23 @@
+<senergy-dialog-header title="End link" (closed)="close()"></senergy-dialog-header>
+
+<mat-dialog-content class="dialog-body">
+  <p>End the link of device {{data.deviceName}}. A link cannot be reopened.</p>
+  <mat-form-field class="full-width">
+    <mat-label>Until</mat-label>
+    <input matInput type="datetime-local" step="1" [(ngModel)]="until">
+    <mat-hint>Empty: now</mat-hint>
+  </mat-form-field>
+  @if (rows.length > 0) {
+    <h4>Counter readings at removal</h4>
+    <p class="hint">As shown on the meter's display, before the factor. Leave a reading empty if it is not known.</p>
+    <senergy-thing-readings-editor [rows]="rows" [columns]="[]" [showFrom]="false" [showUntil]="true"></senergy-thing-readings-editor>
+  }
+  @if (submitted && error(); as message) {
+    <p class="error">{{message}}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button matButton="outlined" type="button" (click)="close()">Cancel</button>
+  <button matButton="filled" type="button" (click)="save()">End link</button>
+</mat-dialog-actions>

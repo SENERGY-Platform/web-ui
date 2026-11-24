@@ -17,6 +17,17 @@
 
 <mat-dialog-content>
   <form [formGroup]="form">
+    @if (lookup === 'pending') {
+      <p>Looking up the measuring points of this device ...</p>
+    }
+    @if (lookup === 'failed') {
+      <p class="error">The measuring points of this device could not be read. Close the dialog and try again.</p>
+    }
+    <mat-form-field color="accent" appearance="outline" class="ly-fill">
+      <mat-label>Date of the replacement</mat-label>
+      <input matInput type="datetime-local" step="1" formControlName="date" required>
+      <mat-hint>Can lie in the past</mat-hint>
+    </mat-form-field>
     <h4>Choose Replacement</h4>
     <div>
       <mat-radio-group formControlName="mode">
@@ -67,9 +78,31 @@
         <mat-error senergyError label="Device"></mat-error>
       </mat-form-field>
     </div>
+    @if (lookup === 'done' && swapTarget; as target) {
+      <h4>Measuring point: {{target.thing.name}}</h4>
+      @if (removalRows.length > 0) {
+        <p>Counter readings of the replaced device at removal (as on its display, before the factor)</p>
+        <senergy-thing-readings-editor [rows]="removalRows" [showFrom]="false" [showUntil]="true"
+          [columns]="[]"></senergy-thing-readings-editor>
+      }
+      <p>Counter readings of the new device at installation. Leave a reading empty if it is not known.</p>
+      <senergy-thing-readings-editor [rows]="installationRows" [columns]="installationColumns"
+        [fixed]="installationFixed"></senergy-thing-readings-editor>
+      <mat-form-field color="accent" appearance="outline" class="ly-fill">
+        <mat-label>Factor</mat-label>
+        <input matInput inputmode="decimal" [(ngModel)]="factor" [ngModelOptions]="{standalone: true}">
+        <mat-hint>Transformer ratio of the new device, empty: 1</mat-hint>
+      </mat-form-field>
+    }
+    @if (lookup === 'done' && !swapTarget && path.kind === 'legacy') {
+      <p class="note">This device is not linked to a measuring point. The replacement is saved as before; no measuring point is updated.</p>
+    }
+    @if (submitted && (choiceError() || swapError()); as message) {
+      <p class="error">{{message}}</p>
+    }
   </form>
 </mat-dialog-content>
 <mat-dialog-actions class="ly-row ly-align-end-center">
   <button mat-raised-button color="primary" (click)="close()">Cancel</button>
-  <button mat-raised-button color="accent" (click)="save()" [disabled]="form.invalid">Save</button>
+  <button mat-raised-button color="accent" (click)="save()" [disabled]="saveDisabled()">Save</button>
 </mat-dialog-actions>

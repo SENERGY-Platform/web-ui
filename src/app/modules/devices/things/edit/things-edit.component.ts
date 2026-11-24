@@ -27,6 +27,7 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { ErrorStateMatcher, MatOption } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatNestedTreeNode, MatTree, MatTreeNestedDataSource, MatTreeNode, MatTreeNodeDef, MatTreeNodeOutlet, MatTreeNodeToggle } from '@angular/material/tree';
 import { NestedTreeControl } from '@angular/cdk/tree';
@@ -57,13 +58,17 @@ import { ConceptsService } from '../../../metadata/concepts/shared/concepts.serv
 import { ConceptsCharacteristicsModel } from '../../../metadata/concepts/shared/concepts-characteristics.model';
 import { AspectClassesService } from '../../../metadata/aspects/shared/aspect-classes.service';
 import { ThingsDeviceLinkDialogComponent } from '../dialogs/things-device-link-dialog.component';
+import { ThingsDeviceLinkEndDialogComponent, ThingsDeviceLinkEndDialogData } from '../dialogs/things-device-link-end-dialog.component';
 import {
     THING_ATTRIBUTE_KEYS,
     THING_TOPIC,
     ThingAttributeKey,
     ThingDeviceLinkCreateModel,
+    ThingDeviceLinkEndModel,
     ThingDeviceLinkModel,
+    ThingKind,
     ThingModel,
+    isMeter,
     thingAttributeError,
     thingAttributeKey,
 } from '../shared/things.model';
@@ -96,6 +101,8 @@ function withoutIndices(contentVariable: DeviceTypeContentVariableModel): Device
         MatAutocompleteTrigger,
         MatOption,
         MatInput,
+        MatRadioGroup,
+        MatRadioButton,
         MatButton,
         MatIconButton,
         MatIcon,
@@ -132,6 +139,11 @@ export class ThingsEditComponent implements OnInit {
     readonly attributeKey = thingAttributeKey;
     readonly valueError = thingAttributeError;
 
+    /** The stored kind; the table shows readings for a meter. */
+    get meter(): boolean {
+        return isMeter(this.thing);
+    }
+
     id = '';
     /** The thing as loaded or last saved; fields the form does not know stay in it and are sent back unchanged. */
     thing: ThingModel | undefined;
@@ -144,6 +156,7 @@ export class ThingsEditComponent implements OnInit {
     /** Name as loaded or last saved; the page title, so it does not follow the name field while typing. */
     savedName = '';
     nameControl = new FormControl<string>('', { nonNullable: true, validators: [Validators.required] });
+    kindControl = new FormControl<ThingKind>('consumer', { nonNullable: true });
     attributes: Attribute[] = [];
     dataSource = new MatTreeNestedDataSource<DeviceTypeContentVariableModel>();
     tree = new NestedTreeControl<DeviceTypeContentVariableModel>((node) => node.sub_content_variables);
@@ -219,8 +232,10 @@ export class ThingsEditComponent implements OnInit {
     private afterEditableKnown() {
         if (this.editable) {
             this.nameControl.enable({ emitEvent: false });
+            this.kindControl.enable({ emitEvent: false });
         } else {
             this.nameControl.disable({ emitEvent: false });
+            this.kindControl.disable({ emitEvent: false });
         }
     }
 
@@ -229,6 +244,7 @@ export class ThingsEditComponent implements OnInit {
         this.thing = { ...thing, device_links: thing.device_links ?? [] };
         this.savedName = thing.name ?? '';
         this.nameControl.setValue(this.savedName, { emitEvent: false });
+        this.kindControl.setValue(isMeter(thing) ? 'meter' : 'consumer', { emitEvent: false });
         this.attributes = (thing.attributes || []).map((a) => ({ ...a }));
         this.showTree(JSON.parse(JSON.stringify(thing.content_variables || [])));
         this.savedState = this.currentState();
@@ -261,11 +277,16 @@ export class ThingsEditComponent implements OnInit {
     }
 
     private currentState(): string {
-        return this.stateOf(this.nameControl.getRawValue(), this.attributes, this.dataSource.data);
+        return this.stateOf(this.nameControl.getRawValue(), this.attributes, this.dataSource.data, this.kindControl.getRawValue());
     }
 
-    private stateOf(name: string, attributes: Attribute[], contentVariables: DeviceTypeContentVariableModel[]): string {
-        return JSON.stringify([name ?? '', (attributes || []).map((a) => [a.key, a.value, a.origin]), contentVariables.map(withoutIndices)]);
+    private stateOf(name: string, attributes: Attribute[], contentVariables: DeviceTypeContentVariableModel[], kind: ThingKind): string {
+        return JSON.stringify([
+            name ?? '',
+            (attributes || []).map((a) => [a.key, a.value, a.origin]),
+            contentVariables.map(withoutIndices),
+            kind,
+        ]);
     }
 
     // ---- save and discard --------------------------------------------------------------------------
@@ -279,6 +300,7 @@ export class ThingsEditComponent implements OnInit {
         const toSave: ThingModel = {
             ...this.thing,
             name: this.nameControl.getRawValue(),
+            kind: this.kindControl.getRawValue(),
             attributes: this.attributes.map((a) => (this.changedAttribute(a) ? { ...a, origin: 'web-ui' } : { ...a })),
             content_variables: this.dataSource.data.map(withoutIndices),
         };
@@ -317,6 +339,7 @@ export class ThingsEditComponent implements OnInit {
                         answer.name,
                         (answer.attributes || []).map((a) => ({ ...a })),
                         this.withPositions(JSON.parse(JSON.stringify(answer.content_variables || []))),
+                        isMeter(answer) ? 'meter' : 'consumer',
                     );
                     this.setLinks(answer.device_links);
                 }
@@ -610,6 +633,8 @@ export class ThingsEditComponent implements OnInit {
         const dialogConfig = new MatDialogConfig();
         Object.assign(dialogConfig, dialogSize('m'));
         dialogConfig.autoFocus = true;
+        // the kind as stored: a kind changed in the form is not saved yet, and the server decides by the stored one
+        dialogConfig.data = { meter: isMeter(this.thing) };
         this.dialog
             .open(ThingsDeviceLinkDialogComponent, dialogConfig)
             .afterClosed()
@@ -630,6 +655,10 @@ export class ThingsEditComponent implements OnInit {
         if (!this.canLink || this.isLinking || this.isSaving) {
             return;
         }
+        if (isMeter(this.thing)) {
+            this.endMeterLink(link);
+            return;
+        }
         this.dialogsService
             .openConfirmDialog('End link', 'End the link of device ' + this.deviceName(link.device_id) + ' now? A link cannot be reopened.')
             .afterClosed()
@@ -644,5 +673,36 @@ export class ThingsEditComponent implements OnInit {
                     .pipe(takeUntilDestroyed(this.destroyRef))
                     .subscribe((thing) => this.takeLinks(thing));
             });
+    }
+
+    /** A meter's link is ended with the removal readings, and possibly at another instant than now. */
+    private endMeterLink(link: ThingDeviceLinkModel): void {
+        const dialogConfig = new MatDialogConfig();
+        Object.assign(dialogConfig, dialogSize('m'));
+        dialogConfig.autoFocus = true;
+        dialogConfig.data = { deviceName: this.deviceName(link.device_id), link } as ThingsDeviceLinkEndDialogData;
+        this.dialog
+            .open(ThingsDeviceLinkEndDialogComponent, dialogConfig)
+            .afterClosed()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe((end: ThingDeviceLinkEndModel | undefined) => {
+                if (!end) {
+                    return;
+                }
+                this.isLinking = true;
+                this.thingsService
+                    .endDeviceLink(this.id, link.id, end)
+                    .pipe(takeUntilDestroyed(this.destroyRef))
+                    .subscribe((thing) => this.takeLinks(thing));
+            });
+    }
+
+    /** The readings and factor of a meter's link as one line for the table. */
+    linkDetails(link: ThingDeviceLinkModel): string {
+        const parts = (link.readings ?? []).map((r) => r.column + ': ' + r.from_value + (r.until_value !== undefined ? ' to ' + r.until_value : ''));
+        if (link.factor !== undefined && link.factor !== 1) {
+            parts.push('factor ' + link.factor);
+        }
+        return parts.join('; ');
     }
 }
