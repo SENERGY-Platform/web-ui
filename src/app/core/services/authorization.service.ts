@@ -15,7 +15,7 @@
  */
 
 import { Injectable, inject } from '@angular/core';
-import {Observable} from 'rxjs';
+import {Observable, firstValueFrom} from 'rxjs';
 import {environment} from '../../../environments/environment';
 import {catchError} from 'rxjs/operators';
 import {ErrorHandlerService} from './error-handler.service';
@@ -80,7 +80,15 @@ export class AuthorizationService {
         return this.authClient.getToken().then((resp) => 'Bearer ' + resp);
     }
 
-    logout() {
+    /**
+     * Drops the browser's HTTP cache of the platform API before the session ends; the request still carries the token.
+     * The answer's Clear-Site-Data header takes effect only on a request with credentials, hence withCredentials.
+     * A failed request does not keep the user logged in.
+     */
+    async logout(): Promise<void> {
+        await firstValueFrom(this.http.post(environment.deviceRepoUrl + '/clear-cache', null, { withCredentials: true })).catch(
+            () => undefined,
+        );
         localStorage.clear();
         sessionStorage.clear();
         this.authClient.logout();

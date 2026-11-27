@@ -18,6 +18,7 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import Keycloak, { KeycloakLoginOptions } from 'keycloak-js';
+import { of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AUTH_CLIENT, AuthClient, keycloakConfig } from './auth-client';
 import { authInterceptor } from './auth.interceptor';
@@ -106,16 +107,19 @@ describe('AuthorizationService', () => {
 
     describe('over the public client', () => {
         let keycloak: Keycloak;
+        let http: jasmine.SpyObj<HttpClient>;
         let service: AuthorizationService;
 
         beforeEach(() => {
             keycloak = loggedInKeycloak();
+            http = jasmine.createSpyObj<HttpClient>('HttpClient', ['post']);
+            http.post.and.returnValue(of(null));
             TestBed.configureTestingModule({
                 providers: [
                     { provide: Keycloak, useValue: keycloak },
                     { provide: AUTH_CLIENT, useExisting: KeycloakPublicClient },
                     { provide: ErrorHandlerService, useValue: {} },
-                    { provide: HttpClient, useValue: {} },
+                    { provide: HttpClient, useValue: http },
                 ],
             });
             service = TestBed.inject(AuthorizationService);
@@ -173,14 +177,29 @@ describe('AuthorizationService', () => {
             expect(await service.getToken()).toBe('Bearer tok');
         });
 
-        it('clears both storages and logs out through keycloak-js', () => {
+        it('clears the device repository cache, both storages and logs out through keycloak-js', async () => {
             localStorage.setItem('sub', 'stored');
             sessionStorage.setItem(STORAGE_PREFIX + 'probe', 'x');
+            http.post.and.callFake((() => {
+                // the session is still intact while the cache is cleared
+                expect(keycloak.logout).not.toHaveBeenCalled();
+                expect(localStorage.getItem('sub')).toBe('stored');
+                return of(null);
+            }) as unknown as HttpClient['post']);
 
-            service.logout();
+            await service.logout();
 
+            expect(http.post).toHaveBeenCalledOnceWith(environment.deviceRepoUrl + '/clear-cache', null, { withCredentials: true });
             expect(localStorage.getItem('sub')).toBeNull();
             expect(sessionStorage.getItem(STORAGE_PREFIX + 'probe')).toBeNull();
+            expect(keycloak.logout).toHaveBeenCalledTimes(1);
+        });
+
+        it('logs out even when the device repository cache cannot be cleared', async () => {
+            http.post.and.returnValue(throwError(() => new Error('unreachable')));
+
+            await service.logout();
+
             expect(keycloak.logout).toHaveBeenCalledTimes(1);
         });
     });
